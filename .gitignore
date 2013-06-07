@@ -1,0 +1,4 @@
+bin
+*.class
+.DS_Store
+src/clearvolume/test/databig
