@@ -27,7 +27,10 @@ public class ClearVolumeTests
 
 			// Other input files may be obtained from http://www.volvis.org
 			// startSample("mri_ventricles.raw", 256, 256, 124);
-			startSample("./data/Bucky.raw", 32, 32, 32);
+			//startSample("./data/Bucky.raw", 32, 32, 32);
+			//startSample("./data/test1024^3.raw", 1024, 1024, 1024);
+			startSample("./data/test2048^3.raw", 2048, 2048, 2048);
+			
 			// startSample("vertebra8.raw", 512, 512, 512);
 
 			// startSample("foot.raw", 256, 256, 256);
@@ -79,10 +82,10 @@ public class ClearVolumeTests
 			}
 		});
 
-		Thread.sleep(1000);
+		Thread.sleep(100000);
 
 		/**/
-
+/*
 		final byte[] lLoadData = loadData("./data/Bucky.raw",
 																			512,
 																			512,
@@ -101,7 +104,7 @@ public class ClearVolumeTests
 
 			mJCudaClearVolumeRenderer.setVolumeDataBuffer(lWrap);
 			System.out.println("update");
-		}
+		}/**/
 
 	}
 

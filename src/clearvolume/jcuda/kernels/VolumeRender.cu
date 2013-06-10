@@ -101,7 +101,7 @@ __device__ uint rgbaFloatToInt(float4 rgba)
 
 inline __device__ bool algoMaxProjection(float density, float threshold, float4 &acc, float4 &col )
 {
-        //col.w *= density;
+        col.w *= density;
         acc = fmaxf(acc,col);
         
         //float4 diff = acc-col;

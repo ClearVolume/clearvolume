@@ -109,7 +109,7 @@ public class JCudaUtils
 		}
 
 		final String modelString = "-m" + System.getProperty("sun.arch.data.model");
-		final String command = "/Developer/NVIDIA/CUDA-5.0/bin/nvcc -I. -I" + pCUFile.getParentFile()
+		final String command = getNVCCPath()+" -I. -I" + pCUFile.getParentFile()
 																																									.getAbsolutePath()
 														+ " "
 														+ modelString
@@ -145,6 +145,20 @@ public class JCudaUtils
 
 		System.out.println("Finished creating PTX file");
 
+	}
+
+	private static String getNVCCPath()
+	{
+		final String lOsNameString =System.getProperty("os.name");
+		if(lOsNameString.toLowerCase().contains("osx"))
+		{
+			return "/Developer/NVIDIA/CUDA-5.0/bin/nvcc";
+		}
+		else if(lOsNameString.toLowerCase().contains("win"))
+		{
+			return "\"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v5.0/bin/nvcc.exe\"";
+		}
+		return null;
 	}
 
 	/**
