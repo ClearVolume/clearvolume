@@ -51,6 +51,7 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -127,7 +128,6 @@ public class JCudaClearVolumeRenderer implements GLEventListener
 	public JCudaClearVolumeRenderer(final String pWindowName,
 																	final int pWindowWidth,
 																	final int pWindowHeight,
-																	final GLCapabilities capabilities,
 																	final ByteBuffer pVolumeDataBuffer,
 																	final int sizeX,
 																	final int sizeY,
@@ -143,7 +143,9 @@ public class JCudaClearVolumeRenderer implements GLEventListener
 		height = pWindowHeight;
 
 		// Initialize the GL component
-		mGLComponent = new GLCanvas(capabilities);
+		final GLProfile lProfile = GLProfile.getMaxFixedFunc(true);
+		final GLCapabilities lCapabilities = new GLCapabilities(lProfile);
+		mGLComponent = new GLCanvas(lCapabilities);
 		mGLComponent.addGLEventListener(this);
 
 		// Initialize the mouse controls

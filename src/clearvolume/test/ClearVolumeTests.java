@@ -18,6 +18,30 @@ public class ClearVolumeTests
 	private static JCudaClearVolumeRenderer mJCudaClearVolumeRenderer;
 
 	@Test
+	public void testWithGeneratedData() throws InterruptedException
+	{
+		byte[] lVolumeDataArray = new byte[512*512*512];
+		
+		for(int y=0; y<512; y++)
+		for(int z=0; z<512; z++)
+		for(int x=0; x<512; x++)
+				{
+					final int lIndex = x+512*y+512*512*z;
+					lVolumeDataArray[lIndex]=(byte) (x^y|y^z|z^x);
+				}
+		
+		mJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
+																															768,
+																															768,
+																															ByteBuffer.wrap(lVolumeDataArray),
+																															512,
+																															512,
+																															512);
+		
+		Thread.sleep(100000);
+	}
+
+	@Test
 	public void test()
 	{
 
@@ -27,10 +51,10 @@ public class ClearVolumeTests
 
 			// Other input files may be obtained from http://www.volvis.org
 			// startSample("mri_ventricles.raw", 256, 256, 124);
-			//startSample("./data/Bucky.raw", 32, 32, 32);
-			//startSample("./data/test1024^3.raw", 1024, 1024, 1024);
-			startSample("./data/test2048^3.raw", 2048, 2048, 2048);
-			
+			// startSample("./data/Bucky.raw", 32, 32, 32);
+			startSample("./databig/test1024^3.raw", 1024, 1024, 1024);
+			//startSample("./data/test2048^3.raw", 2048, 2048, 2048);
+
 			// startSample("vertebra8.raw", 512, 512, 512);
 
 			// startSample("foot.raw", 256, 256, 256);
@@ -74,7 +98,6 @@ public class ClearVolumeTests
 				mJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																																	768,
 																																	768,
-																																	capabilities,
 																																	lVolumeData,
 																																	sizeX,
 																																	sizeY,
@@ -85,26 +108,26 @@ public class ClearVolumeTests
 		Thread.sleep(100000);
 
 		/**/
-/*
-		final byte[] lLoadData = loadData("./data/Bucky.raw",
-																			512,
-																			512,
-																			512);
-		final ByteBuffer lWrap = ByteBuffer.wrap(lLoadData);
+		/*
+				final byte[] lLoadData = loadData("./data/Bucky.raw",
+																					512,
+																					512,
+																					512);
+				final ByteBuffer lWrap = ByteBuffer.wrap(lLoadData);
 
-		while (true)
-		{
+				while (true)
+				{
 
-			for (int i = 0; i < lLoadData.length - 1; i++)
-			{
-				lLoadData[i] = lLoadData[i + 1];
-			}
+					for (int i = 0; i < lLoadData.length - 1; i++)
+					{
+						lLoadData[i] = lLoadData[i + 1];
+					}
 
-			lLoadData[lLoadData.length - 1] = lLoadData[0];
+					lLoadData[lLoadData.length - 1] = lLoadData[0];
 
-			mJCudaClearVolumeRenderer.setVolumeDataBuffer(lWrap);
-			System.out.println("update");
-		}/**/
+					mJCudaClearVolumeRenderer.setVolumeDataBuffer(lWrap);
+					System.out.println("update");
+				}/**/
 
 	}
 
