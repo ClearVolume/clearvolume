@@ -1,5 +1,6 @@
 package clearvolume.jcuda;
 
+import static jcuda.driver.JCudaDriver.cuCtxDestroy;
 import static jcuda.driver.JCudaDriver.cuDeviceGet;
 import static jcuda.driver.JCudaDriver.cuGLCtxCreate;
 import static jcuda.driver.JCudaDriver.cuInit;
@@ -30,6 +31,8 @@ import org.apache.commons.io.IOUtils;
 
 public class JCudaUtils
 {
+	private static CUcontext sCUcontext;
+
 	public static final CUfunction initCuda(final CUmodule pCUmodule,
 																					final InputStream pInputStream,
 																					final String pFunctionSignature,
@@ -41,8 +44,8 @@ public class JCudaUtils
 		cuInit(0);
 		final CUdevice dev = new CUdevice();
 		cuDeviceGet(dev, 0);
-		final CUcontext glCtx = new CUcontext();
-		cuGLCtxCreate(glCtx, 0, dev);
+		sCUcontext = new CUcontext();
+		cuGLCtxCreate(sCUcontext, 0, dev);
 
 		final File lPTXFile = nvccCompile(pInputStream,
 																			pCompiledParameters);
@@ -58,6 +61,11 @@ public class JCudaUtils
 		cuModuleGetFunction(function, pCUmodule, pFunctionSignature);
 
 		return function;
+	}
+
+	public static final void closeCuda()
+	{
+		cuCtxDestroy(sCUcontext);
 	}
 
 	private static File nvccCompile(final InputStream pInputStreamCUFile,
@@ -109,8 +117,9 @@ public class JCudaUtils
 		}
 
 		final String modelString = "-m" + System.getProperty("sun.arch.data.model");
-		final String command = getNVCCPath()+" -I. -I" + pCUFile.getParentFile()
-																																									.getAbsolutePath()
+		final String command = getNVCCPath() + " -I. -I"
+														+ pCUFile.getParentFile()
+																			.getAbsolutePath()
 														+ " "
 														+ modelString
 														+ " -ptx "
@@ -149,12 +158,14 @@ public class JCudaUtils
 
 	private static String getNVCCPath()
 	{
-		final String lOsNameString =System.getProperty("os.name");
-		if(lOsNameString.toLowerCase().contains("osx"))
+		final String lOsNameString = System.getProperty("os.name");
+		System.out.println("OS: " + lOsNameString);
+		if (lOsNameString.toLowerCase().contains("osx") || lOsNameString.toLowerCase()
+																																		.contains("mac"))
 		{
 			return "/Developer/NVIDIA/CUDA-5.0/bin/nvcc";
 		}
-		else if(lOsNameString.toLowerCase().contains("win"))
+		else if (lOsNameString.toLowerCase().contains("win"))
 		{
 			return "\"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v5.0/bin/nvcc.exe\"";
 		}

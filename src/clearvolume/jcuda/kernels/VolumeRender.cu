@@ -101,12 +101,10 @@ __device__ uint rgbaFloatToInt(float4 rgba)
 
 inline __device__ bool algoMaxProjection(float density, float threshold, float4 &acc, float4 &col )
 {
-        col.w *= density;
-        acc = fmaxf(acc,col);
+       // if(col.w>density)
+        	acc = fmaxf(acc,col);
         
-        //float4 diff = acc-col;
-        
-        return false ;//dot(diff,diff)<0.01;
+        return false ;
 }
 
 inline __device__ bool algoLocalMaxProjection(float density, float threshold, float4 &acc, float4 &col )
@@ -168,16 +166,19 @@ d_render(uint *d_output, uint imageW, uint imageH,
     const int maxSteps = 512;
     const float tstep = 0.01f;
     const float opacityThreshold = 0.95f;
-    const float3 boxMin = make_float3(-1.0f, -1.0f, -1.0f);
-    const float3 boxMax = make_float3(1.0f, 1.0f, 1.0f);
+    const float invscalex = 1/scalex;
+    const float invscaley = 1/scaley;
+    const float invscalez = 1/scalez;
+    const float3 boxMin = make_float3(-scalex, -scaley, -scalez);
+    const float3 boxMax = make_float3(scalex, scaley, scalez);
 
-    uint x = blockIdx.x*blockDim.x + threadIdx.x;
-    uint y = blockIdx.y*blockDim.y + threadIdx.y;
+    const uint x = blockIdx.x*blockDim.x + threadIdx.x;
+    const uint y = blockIdx.y*blockDim.y + threadIdx.y;
 
     if ((x >= imageW) || (y >= imageH)) return;
 
-    float u = (x / (float) imageW)*2.0f-1.0f;
-    float v = (y / (float) imageH)*2.0f-1.0f;
+    const float u = (x / (float) imageW)*2.0f-1.0f;
+    const float v = (y / (float) imageH)*2.0f-1.0f;
 
     // calculate eye ray in world space
     Ray eyeRay;
@@ -203,20 +204,15 @@ d_render(uint *d_output, uint imageW, uint imageH,
     {
         // read from 3D texture
         // remap position to [0, 1] coordinates
-        float sample = tex3D(tex, scalex*pos.x*0.5f+0.5f, scaley*pos.y*0.5f+0.5f, scalez*pos.z*0.5f+0.5f);
-        //sample *= 64.0f;    // scale for 10-bit data
-
+        float sample = tex3D(tex, invscalex*pos.x*0.5f+0.5f, invscaley*pos.y*0.5f+0.5f, invscalez*pos.z*0.5f+0.5f);
+ 
         // lookup in transfer function texture
         float4 col = tex1D(transferTex, (sample-transferOffset)*transferScale);
         
         if(algo/*ProjectionAlgorythm*/(density,opacityThreshold,acc,col)) break;
 
-        
-
         t += tstep;
-
         if (t > tfar) break;
-
         pos += step;
     }
 
