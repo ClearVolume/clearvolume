@@ -10,6 +10,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.concurrent.CountDownLatch;
 
 import javax.media.nativewindow.util.Point;
 import javax.media.opengl.GL;
@@ -81,6 +82,8 @@ public abstract class JoglPBOVolumeRenderer	implements
 	private int mTextureId;
 	private final int mTextureWidth;
 	private final int mTextureHeight;
+
+	protected CountDownLatch mDataBufferCopyFinished;
 
 	public JoglPBOVolumeRenderer(	final String pWindowName,
 																final int pWindowWidth,
@@ -158,6 +161,17 @@ public abstract class JoglPBOVolumeRenderer	implements
 			mAnimator.pause();
 	}
 
+	public void pause(final boolean pRequestPaused)
+	{
+		if (mAnimator.isStarted())
+		{
+			if (pRequestPaused && mAnimator.isAnimating())
+				mAnimator.pause();
+			else if (!mAnimator.isAnimating())
+				mAnimator.resume();
+		}
+	}
+
 	public void resume()
 	{
 		if (mAnimator.isPaused() && mAnimator.isStarted())
@@ -197,7 +211,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 		return mUpdateVolumeRenderingParameters;
 	}
 
-	public void notifyIsUpdateVolumeParameters()
+	public void notifyUpdateOfVolumeParameters()
 	{
 		mUpdateVolumeRenderingParameters = true;
 	}
@@ -614,7 +628,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 								0.0,
 								drawable.getHeight(),
 								0.0,
-								1.0);
+								1);
 	}
 
 	/**
@@ -635,6 +649,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 		if (hasRotationController())
 		{
 			getRotationController().rotateGL(gl);
+			notifyUpdateOfVolumeParameters();
 		}
 		gl.glTranslatef(-mTranslationX, -mTranslationY, -mTranslationZ);
 		gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, mModelViewMatrix, 0);
@@ -805,6 +820,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 	{
 		synchronized (getSetVolumeDataBufferLock())
 		{
+			mDataBufferCopyFinished = new CountDownLatch(1);
 
 			if (mVolumeSizeX != pSizeX || mVolumeSizeY != pSizeY
 					|| mVolumeSizeZ != pSizeZ)
@@ -821,7 +837,20 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 			mVolumeDataByteBuffer = pByteBuffer;
 
-			notifyIsUpdateVolumeParameters();
+			notifyUpdateOfVolumeParameters();
+		}
+	}
+
+	public boolean waitToFinishDataBufferCopy()
+	{
+		try
+		{
+			mDataBufferCopyFinished.await();
+			return true;
+		}
+		catch (final InterruptedException e)
+		{
+			return false;
 		}
 	}
 

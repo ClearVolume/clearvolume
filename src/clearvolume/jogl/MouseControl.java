@@ -38,7 +38,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 		{
 			mRenderer.mTranslationX += dx / 100.0f;
 			mRenderer.mTranslationY -= dy / 100.0f;
-			mRenderer.notifyIsUpdateVolumeParameters();
+			mRenderer.notifyUpdateOfVolumeParameters();
 		}
 
 		// If the right button is held down, rotate the object
@@ -46,7 +46,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 		{
 			mRenderer.mRotationX += dy;
 			mRenderer.mRotationY += dx;
-			mRenderer.notifyIsUpdateVolumeParameters();
+			mRenderer.notifyUpdateOfVolumeParameters();
 		}
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
@@ -69,29 +69,29 @@ class MouseControl extends MouseAdapter implements MouseListener
 		// Translate along the Z-axis
 		if (pMouseEvent.isAltDown())
 		{
-			mRenderer.addTransferOffset(0.01 * lWheelRotation);
+			mRenderer.addTransferOffset(0.001 * lWheelRotation);
 		}
 		else if (pMouseEvent.isShiftDown())
 		{
-			mRenderer.addTransferScale(0.01 * lWheelRotation);
+			mRenderer.addTransferScale(0.001 * lWheelRotation);
 		}
 		else if (pMouseEvent.isMetaDown())
 		{
-			mRenderer.addDensity(0.01 * lWheelRotation);
+			mRenderer.addDensity(0.001 * lWheelRotation);
 		}
 		else if (pMouseEvent.isAltGraphDown())
 		{
-			mRenderer.addBrightness(0.01 * lWheelRotation);
+			mRenderer.addBrightness(0.001 * lWheelRotation);
 		}
 		else
 		{
 
-			mRenderer.mTranslationZ += 0.25f * lWheelRotation;
+			mRenderer.mTranslationZ += 0.125f * lWheelRotation;
 			mPreviousMouseX = pMouseEvent.getX();
 			mPreviousMouseY = pMouseEvent.getY();
 		}
 
-		mRenderer.notifyIsUpdateVolumeParameters();
+		mRenderer.notifyUpdateOfVolumeParameters();
 	}
 
 	@Override

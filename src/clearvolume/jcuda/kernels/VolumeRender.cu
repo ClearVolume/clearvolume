@@ -107,6 +107,14 @@ inline __device__ bool algoMaxProjection(float density, float threshold, float4 
         return false ;
 }
 
+inline __device__ bool algoSumProjection(float density, float threshold, float4 &acc, float4 &col )
+{
+       // if(col.w>density)
+        	acc = fmaxf(acc,col);
+        
+        return false ;
+}
+
 inline __device__ bool algoLocalMaxProjection(float density, float threshold, float4 &acc, float4 &col )
 {
         //col.w *= density;
@@ -183,7 +191,7 @@ d_render(uint *d_output, uint imageW, uint imageH,
     // calculate eye ray in world space
     Ray eyeRay;
     eyeRay.o = make_float3(mul(c_invViewMatrix, make_float4(0.0f, 0.0f, 0.0f, 1.0f)));
-    eyeRay.d = normalize(make_float3(u, v, -2.0f));
+    eyeRay.d = normalize(make_float3(u, v, -4.0f));
     eyeRay.d = mul(c_invViewMatrix, eyeRay.d);
 
     // find intersection with box

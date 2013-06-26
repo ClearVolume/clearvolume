@@ -430,6 +430,8 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 																		lSizeZ);
 
 				}
+
+				mDataBufferCopyFinished.countDown();
 			}
 
 		}
@@ -493,9 +495,17 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 	@Override
 	public void close() throws IOException
 	{
-		freeCudaArray(mVolumeDataCUarray);
-		freeCudaArray(mTransferFunctionCUarray);
-		JCudaUtils.closeCuda();
-		super.close();
+		try
+		{
+			freeCudaArray(mVolumeDataCUarray);
+			freeCudaArray(mTransferFunctionCUarray);
+			JCudaUtils.closeCuda();
+			super.close();
+		}
+		catch (final Throwable e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
