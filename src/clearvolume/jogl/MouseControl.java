@@ -64,24 +64,31 @@ class MouseControl extends MouseAdapter implements MouseListener
 	@Override
 	public void mouseWheelMoved(final MouseEvent pMouseEvent)
 	{
+		final double lBytePerVoxelFactor = mRenderer.getBytesPerVoxel() == 1 ? 1
+																																				: 8;
+
 		final double lWheelRotation = pMouseEvent.getWheelRotation();
 		// System.out.println(lWheelRotation);
 		// Translate along the Z-axis
 		if (pMouseEvent.isAltDown())
 		{
-			mRenderer.addTransferOffset(0.001 * lWheelRotation);
+			mRenderer.addTransferOffset(lBytePerVoxelFactor * 0.001
+																	* lWheelRotation);
 		}
 		else if (pMouseEvent.isShiftDown())
 		{
-			mRenderer.addTransferScale(0.001 * lWheelRotation);
+			mRenderer.addTransferScale(lBytePerVoxelFactor * 0.001
+																	* lWheelRotation);
 		}
 		else if (pMouseEvent.isMetaDown())
 		{
-			mRenderer.addDensity(0.001 * lWheelRotation);
+			mRenderer.addDensity(lBytePerVoxelFactor * 0.001
+														* lWheelRotation);
 		}
 		else if (pMouseEvent.isAltGraphDown())
 		{
-			mRenderer.addBrightness(0.001 * lWheelRotation);
+			mRenderer.addBrightness( 0.001
+															* lWheelRotation);
 		}
 		else
 		{

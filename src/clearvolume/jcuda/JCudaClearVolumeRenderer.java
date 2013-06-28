@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import javax.media.opengl.GL2;
@@ -87,6 +88,14 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		super(pWindowName, pWindowWidth, pWindowHeight);
 	}
 
+	public JCudaClearVolumeRenderer(final String pWindowName,
+																	final int pWindowWidth,
+																	final int pWindowHeight,
+																	final int pBytesPerVoxel)
+	{
+		super(pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel);
+	}
+
 	/**
 	 * Initialize CUDA and the 3D texture with the current volume data.
 	 * 
@@ -99,11 +108,17 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		{
 			final InputStream lInputStreamCUFile = JCudaClearVolumeRenderer.class.getResourceAsStream("./kernels/VolumeRender.cu");
 
+			HashMap<String, String> lSubstitutionMap = new HashMap<String, String>();
+
+			lSubstitutionMap.put(	Pattern.quote("/*ProjectionAlgorythm*/"),
+														getProjectionAlgorythm().name());
+			lSubstitutionMap.put(	Pattern.quote("/*BytesPerVoxel*/"),
+														"" + getBytesPerVoxel());
+
 			mVolumeRenderingFunction = JCudaUtils.initCuda(	mCUmodule,
 																											lInputStreamCUFile,
 																											"_Z8d_renderPjjjfffffff",
-																											Collections.singletonMap(	Pattern.quote("/*ProjectionAlgorythm*/"),
-																																								getProjectionAlgorythm().name()));
+																											lSubstitutionMap);
 
 			// Obtain the global pointer to the inverted view matrix from
 			// the module
@@ -183,7 +198,14 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		lAllocate3DArrayDescriptor.Width = pVolumeSizeX;
 		lAllocate3DArrayDescriptor.Height = pVolumeSizeY;
 		lAllocate3DArrayDescriptor.Depth = pVolumeSizeZ;
-		lAllocate3DArrayDescriptor.Format = CUarray_format.CU_AD_FORMAT_UNSIGNED_INT8;
+		if (getBytesPerVoxel() == 1)
+		{
+			lAllocate3DArrayDescriptor.Format = CUarray_format.CU_AD_FORMAT_UNSIGNED_INT8;
+		}
+		else if (getBytesPerVoxel() == 2)
+		{
+			lAllocate3DArrayDescriptor.Format = CUarray_format.CU_AD_FORMAT_UNSIGNED_INT16;
+		}
 		lAllocate3DArrayDescriptor.NumChannels = 1;
 		/*System.out.format("cuArray3DCreate(%d,%d,%d)\n",
 											mVolumeSizeX,
@@ -233,18 +255,17 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		final CUDA_MEMCPY3D copy = new CUDA_MEMCPY3D();
 		copy.srcMemoryType = CUmemorytype.CU_MEMORYTYPE_HOST;
 		copy.srcHost = Pointer.to(pByteBuffer);
-		copy.srcPitch = pVolumeSizeX;
+		copy.srcPitch = pVolumeSizeX * getBytesPerVoxel();
 		copy.srcHeight = pVolumeSizeY;
 		copy.dstMemoryType = CUmemorytype.CU_MEMORYTYPE_ARRAY;
 		copy.dstArray = pVolumeArrayCUarray;
-		copy.dstPitch = pVolumeSizeX;
+		copy.dstPitch = pVolumeSizeX * getBytesPerVoxel();
 		copy.dstHeight = pVolumeSizeY;
-		copy.WidthInBytes = pVolumeSizeX;
+		copy.WidthInBytes = pVolumeSizeX * getBytesPerVoxel();
 		copy.Height = pVolumeSizeY;
 		copy.Depth = pVolumeSizeZ;
 
-		/*
-		System.out.format("cuMemcpy3D(%d,%d,%d) prod=%d and pByteBuffer.capacity()=%d \n",
+		/*System.out.format("cuMemcpy3D(%d,%d,%d) prod=%d and pByteBuffer.capacity()=%d \n",
 											pVolumeSizeX,
 											pVolumeSizeY,
 											pVolumeSizeZ,
@@ -285,9 +306,20 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		cuTexRefSetAddressMode(	pVolumeDataTexture,
 														1,
 														CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
-		cuTexRefSetFormat(pVolumeDataTexture,
-											CUarray_format.CU_AD_FORMAT_UNSIGNED_INT8,
-											1);
+
+		if (getBytesPerVoxel() == 1)
+		{
+			cuTexRefSetFormat(pVolumeDataTexture,
+												CUarray_format.CU_AD_FORMAT_UNSIGNED_INT8,
+												1);
+		}
+		else if (getBytesPerVoxel() == 2)
+		{
+			cuTexRefSetFormat(pVolumeDataTexture,
+												CUarray_format.CU_AD_FORMAT_UNSIGNED_INT16,
+												1);
+		}
+
 		cuTexRefSetFlags(	pVolumeDataTexture,
 											CU_TRSF_NORMALIZED_COORDINATES);
 		cuTexRefSetArray(	pVolumeDataTexture,

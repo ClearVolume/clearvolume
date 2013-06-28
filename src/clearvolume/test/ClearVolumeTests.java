@@ -75,6 +75,59 @@ public class ClearVolumeTests
 	}
 
 	@Test
+	public void testWith16BitGeneratedDataset()	throws InterruptedException,
+																							IOException
+	{
+		final JCudaClearVolumeRenderer lJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+																																														768,
+																																														768,
+																																														2);
+		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getRainbow());
+		lJCudaClearVolumeRenderer.setVisible(true);
+
+		lJCudaClearVolumeRenderer.start();
+
+		final int lResolutionX = 128;
+		final int lResolutionY = 128;
+		final int lResolutionZ = 128;
+
+		// System.out.println(i);
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																							* lResolutionZ
+																							* 2];
+
+		for (int z = 0; z < lResolutionZ; z++)
+			for (int y = 0; y < lResolutionY; y++)
+				for (int x = 0; x < lResolutionX; x++)
+				{
+					final int lIndex = 2 * (x + lResolutionX * y + lResolutionX * lResolutionY
+																													* z);
+					lVolumeDataArray[lIndex] = (byte) (0);
+					lVolumeDataArray[lIndex + 1] = (byte) ((x + y + z) % 4);// (byte) ((x
+																																		// ^ y ^
+					// z)/16);
+					/*(byte) ((x / 3) ^ (y)
+																					| (y / 3)
+																					^ (z) | (z / 3) ^ (x));/**/
+				}
+
+		lJCudaClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
+																									lResolutionX,
+																									lResolutionY,
+																									lResolutionZ);
+
+		while (lJCudaClearVolumeRenderer.isShowing())
+		{
+			Thread.sleep(100);
+		}
+
+		lJCudaClearVolumeRenderer.close();
+		// Thread.sleep(000);
+
+	}
+
+	@Test
 	public void testWithGeneratedDatasetWithEgg3D()	throws InterruptedException,
 																									IOException,
 																									SerialPortException

@@ -58,6 +58,8 @@ public abstract class JoglPBOVolumeRenderer	implements
 	protected final Animator mAnimator;
 	protected int mPixelBufferObjectId = 0;
 
+	private int mBytesPerVoxel = 1;
+
 	private ProjectionAlgorithm mProjectionAlgorythm = ProjectionAlgorithm.MaxProjection;
 
 	private TransfertFunction mTransferFunction = TransfertFunctions.getDefaultTransfertFunction();
@@ -89,12 +91,21 @@ public abstract class JoglPBOVolumeRenderer	implements
 																final int pWindowWidth,
 																final int pWindowHeight)
 	{
+		this(pWindowName, pWindowWidth, pWindowHeight, 1);
+	}
+
+	public JoglPBOVolumeRenderer(	final String pWindowName,
+																final int pWindowWidth,
+																final int pWindowHeight,
+																final int pBytesPerPixel)
+	{
 		resetDensityBrightnessOffsetScale();
 		resetRotationTranslation();
 
 		mWindowName = pWindowName;
 		mWindowWidth = pWindowWidth;
 		mWindowHeight = pWindowHeight;
+		mBytesPerVoxel = pBytesPerPixel;
 
 		mTextureWidth = Math.min(768, mWindowWidth);
 		mTextureHeight = Math.min(768, mWindowHeight);
@@ -138,7 +149,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 		// setupControlFrame();
 	}
 
-	private void setupControlFrame()
+	public void setupControlFrame()
 	{
 		mControlFrame = new JFrame("ClearVolume Rendering Parameters");
 		mControlFrame.setLayout(new BorderLayout());
@@ -255,48 +266,45 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	public void setBrightness(final double pBrightness)
 	{
-		mBrightness = (float) clamp(pBrightness, 0, 1);
+		mBrightness = (float) clamp(pBrightness,
+																0,
+																getBytesPerVoxel() == 1 ? 16 : 256);
 		mUpdateVolumeRenderingParameters = true;
 	}
 
 	public void setTransferOffset(final double pTransferOffset)
 	{
-		mTransferOffset = (float) clamp(pTransferOffset, 0, 1);
+		mTransferOffset = (float) clamp(pTransferOffset, -1, 1);
 		mUpdateVolumeRenderingParameters = true;
 	}
 
 	public void setTransferScale(final double pTransferScale)
 	{
-		mTransferScale = (float) clamp(pTransferScale, 0, 1);
+		mTransferScale = (float) clamp(	pTransferScale,
+																		0,
+																		getBytesPerVoxel() == 1	? 16
+																														: 256);
 		mUpdateVolumeRenderingParameters = true;
 	}
 
 	public void addDensity(final double pDensityDelta)
 	{
-		mDensity = (float) clamp(mDensity + pDensityDelta, 0, 1);
-		mUpdateVolumeRenderingParameters = true;
+		setDensity(mDensity + pDensityDelta);
 	}
 
 	public void addBrightness(final double pBrightnessDelta)
 	{
-		mBrightness = (float) clamp(mBrightness + pBrightnessDelta, 0, 10);
-		mUpdateVolumeRenderingParameters = true;
+		setBrightness(mBrightness + pBrightnessDelta);
 	}
 
 	public void addTransferOffset(final double pTransferOffsetDelta)
 	{
-		mTransferOffset = (float) clamp(mTransferOffset + pTransferOffsetDelta,
-																		-1,
-																		1);
-		mUpdateVolumeRenderingParameters = true;
+		setTransferOffset(mTransferOffset + pTransferOffsetDelta);
 	}
 
 	public void addTransferScale(final double pTransferScaleDelta)
 	{
-		mTransferScale = (float) clamp(	mTransferScale + pTransferScaleDelta,
-																		0,
-																		10);
-		mUpdateVolumeRenderingParameters = true;
+		setTransferScale(mTransferScale + pTransferScaleDelta);
 	}
 
 	private double clamp(	final double pValue,
@@ -863,7 +871,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 			if (mNewtWindow.isFullscreen())
 			{
 				mNewtWindow.setFullscreen(false);
-				mNewtWindow.setPosition(mWindowX, mWindowY);
+				// mNewtWindow.setPosition(mWindowX, mWindowY);
 			}
 			else
 			{
@@ -900,6 +908,11 @@ public abstract class JoglPBOVolumeRenderer	implements
 	public void setQuaternionController(final RotationControllerInterface quaternionController)
 	{
 		mRotationController = quaternionController;
+	}
+
+	public int getBytesPerVoxel()
+	{
+		return mBytesPerVoxel;
 	}
 
 }

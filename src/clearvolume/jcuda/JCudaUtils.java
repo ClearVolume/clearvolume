@@ -87,6 +87,8 @@ public class JCudaUtils
 				lCUFileString = lCUFileString.replaceAll(	lPattern,
 																									lReplacement);
 			}
+		
+		//System.out.println(lCUFileString);
 
 		FileUtils.write(lCUFile, lCUFileString);
 

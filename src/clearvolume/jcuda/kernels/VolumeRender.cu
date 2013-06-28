@@ -24,9 +24,10 @@ cudaArray *d_volumeArray = 0;
 cudaArray *d_transferFuncArray;
 
 typedef unsigned char VolumeType;
-//typedef unsigned short VolumeType;
+typedef unsigned char VolumeType1;
+typedef unsigned short VolumeType2;
 
-texture<VolumeType, 3, cudaReadModeNormalizedFloat> tex;         // 3D texture
+texture<VolumeType/*BytesPerVoxel*/, 3, cudaReadModeNormalizedFloat> tex;         // 3D texture
 texture<float4, 1, cudaReadModeElementType>         transferTex; // 1D transfer function texture
 
 typedef struct
