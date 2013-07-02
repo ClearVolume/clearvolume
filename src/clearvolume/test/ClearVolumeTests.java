@@ -82,8 +82,9 @@ public class ClearVolumeTests
 																																														768,
 																																														768,
 																																														2);
-		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getRainbow());
+		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
 		lJCudaClearVolumeRenderer.setVisible(true);
+		lJCudaClearVolumeRenderer.setupControlFrame();
 
 		lJCudaClearVolumeRenderer.start();
 
@@ -104,7 +105,7 @@ public class ClearVolumeTests
 					final int lIndex = 2 * (x + lResolutionX * y + lResolutionX * lResolutionY
 																													* z);
 					lVolumeDataArray[lIndex] = (byte) (0);
-					lVolumeDataArray[lIndex + 1] = (byte) ((x + y + z) % 4);// (byte) ((x
+					lVolumeDataArray[lIndex + 1] = (byte) ((x | y | z) );// (byte) ((x
 																																		// ^ y ^
 					// z)/16);
 					/*(byte) ((x / 3) ^ (y)
