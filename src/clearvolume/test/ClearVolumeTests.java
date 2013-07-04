@@ -24,16 +24,14 @@ public class ClearVolumeTests
 	private static JCudaClearVolumeRenderer mJCudaClearVolumeRenderer;
 
 	@Test
-	public void testWithGeneratedDataset() throws InterruptedException,
-																				IOException
+	public void testWith8BitGeneratedDataset() throws InterruptedException,
+																						IOException
 	{
 		final JCudaClearVolumeRenderer lJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																														768,
 																																														768);
 		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGreenGradient());
 		lJCudaClearVolumeRenderer.setVisible(true);
-
-		lJCudaClearVolumeRenderer.start();
 
 		for (int i = 0; lJCudaClearVolumeRenderer.isShowing(); i++)
 		{
@@ -67,6 +65,8 @@ public class ClearVolumeTests
 																										lResolutionY,
 																										lResolutionZ);
 
+			lJCudaClearVolumeRenderer.requestDisplay();
+
 		}
 
 		lJCudaClearVolumeRenderer.close();
@@ -83,14 +83,13 @@ public class ClearVolumeTests
 																																														768,
 																																														2);
 		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
-		lJCudaClearVolumeRenderer.setVisible(true);
 		lJCudaClearVolumeRenderer.setupControlFrame();
+		lJCudaClearVolumeRenderer.setVisible(true);
+		// lJCudaClearVolumeRenderer.start();
 
-		lJCudaClearVolumeRenderer.start();
-
-		final int lResolutionX = 128;
-		final int lResolutionY = 128;
-		final int lResolutionZ = 128;
+		final int lResolutionX = 256;
+		final int lResolutionY = 256;
+		final int lResolutionZ = 256;
 
 		// System.out.println(i);
 
@@ -104,9 +103,9 @@ public class ClearVolumeTests
 				{
 					final int lIndex = 2 * (x + lResolutionX * y + lResolutionX * lResolutionY
 																													* z);
-					lVolumeDataArray[lIndex] = (byte) (0);
-					lVolumeDataArray[lIndex + 1] = (byte) ((x | y | z) );// (byte) ((x
-																																		// ^ y ^
+					// lVolumeDataArray[lIndex] = (byte) (0);
+					lVolumeDataArray[lIndex + 1] = (byte) ((x ^ y ^ z));// (byte) ((x
+																															// ^ y ^
 					// z)/16);
 					/*(byte) ((x / 3) ^ (y)
 																					| (y / 3)
@@ -145,7 +144,6 @@ public class ClearVolumeTests
 		lJCudaClearVolumeRenderer.setQuaternionController(lEgg3DController);
 
 		assertTrue(lEgg3DController.connect());
-		lJCudaClearVolumeRenderer.start();
 
 		final int lResolutionX = 256;
 		final int lResolutionY = lResolutionX;
@@ -194,7 +192,7 @@ public class ClearVolumeTests
 			// startSample("./data/Bucky.raw", 32, 32, 32);
 
 			// Other input files may be obtained from http://www.volvis.org
-			startSample("./databig/vertebra8.raw", 512, 512, 512);
+			startSample("./databig/celegans.raw", 512, 512, 512);
 			// startSample("./data/Bucky.raw", 32, 32, 32);
 			// startSample("./databig/test1024^3.raw", 1024, 1024, 1024);
 			// startSample("./data/test2048^3.raw", 2048, 2048, 2048);
@@ -229,16 +227,14 @@ public class ClearVolumeTests
 
 		// Start the sample with the data that was read from the file
 		final ByteBuffer lVolumeData = ByteBuffer.wrap(data);
-		final GLProfile profile = GLProfile.getMaxFixedFunc(true);
-		final GLCapabilities capabilities = new GLCapabilities(profile);
 
 		mJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																															768,
 																															768);
 
-		final Egg3DController lEgg3DController = new Egg3DController();
+		/*final Egg3DController lEgg3DController = new Egg3DController();
 		mJCudaClearVolumeRenderer.setQuaternionController(lEgg3DController);
-		assertTrue(lEgg3DController.connect());
+		assertTrue(lEgg3DController.connect());/**/
 
 		mJCudaClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(data),
 																									sizeX,
@@ -246,17 +242,14 @@ public class ClearVolumeTests
 																									sizeZ);
 		mJCudaClearVolumeRenderer.setVisible(true);
 
-		mJCudaClearVolumeRenderer.start();
-
 		while (mJCudaClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(100);
 		}
 
-		mJCudaClearVolumeRenderer.stop();
 	}
 
-	//
+	
 	private static byte[] loadData(	final String pRessourceName,
 																	final int sizeX,
 																	final int sizeY,

@@ -72,26 +72,29 @@ public class Egg3DController implements
 	@Override
 	public void putModelViewMatrixIn(final float[] pModelViewMatrix)
 	{
+		float[] lQuaternionMatrix;
 		synchronized (mQuaternionUpdateLock)
 		{
 			mQuaternion.normalize();
-			final float[] lQuaternionMatrix = mQuaternion.toMatrix();
-			System.arraycopy(	lQuaternionMatrix,
-												0,
-												pModelViewMatrix,
-												0,
-												pModelViewMatrix.length);
+			lQuaternionMatrix = mQuaternion.toMatrix();
 		}
+		System.arraycopy(	lQuaternionMatrix,
+											0,
+											pModelViewMatrix,
+											0,
+											pModelViewMatrix.length);
+
 	}
 
 	@Override
 	public void rotateGL(final GL2 gl)
 	{
+		float[] lMatrix;
 		synchronized (mQuaternionUpdateLock)
 		{
-			final float[] lMatrix = mQuaternion.toMatrix();
-			gl.glMultMatrixf(lMatrix, 0);
+			lMatrix = mQuaternion.toMatrix();
 		}
+		gl.glMultMatrixf(lMatrix, 0);
 	}
 
 	@Override

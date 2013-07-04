@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import javax.media.nativewindow.util.Point;
 import javax.media.opengl.GL;
@@ -32,6 +34,8 @@ import clearvolume.transfertf.ProjectionAlgorithm;
 import clearvolume.transfertf.TransfertFunction;
 import clearvolume.transfertf.TransfertFunctions;
 
+import com.jogamp.newt.NewtFactory;
+import com.jogamp.newt.Window;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
@@ -54,8 +58,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 	private volatile int mWindowWidth = 0;
 	private volatile int mWindowHeight = 0;
 	private JFrame mControlFrame;
-	private final GLWindow mNewtWindow;
-	protected final Animator mAnimator;
+	private final GLWindow mGlWindow;
 	protected int mPixelBufferObjectId = 0;
 
 	private int mBytesPerVoxel = 1;
@@ -87,6 +90,8 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	protected CountDownLatch mDataBufferCopyFinished;
 
+	private Executor mRenderingExecutor = Executors.newSingleThreadExecutor();
+
 	public JoglPBOVolumeRenderer(	final String pWindowName,
 																final int pWindowWidth,
 																final int pWindowHeight)
@@ -112,10 +117,13 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 		// Initialize the GL component
 
-		mNewtWindow = GLWindow.create(sCapabilities);
-		mNewtWindow.setTitle(mWindowName);
-		mNewtWindow.addGLEventListener(this);
-		mNewtWindow.setSize(mWindowWidth, mWindowHeight);
+		NewtFactory lNewtFactory = new NewtFactory();
+
+		mWindow = NewtFactory.createWindow(sCapabilities);
+		mGlWindow = GLWindow.create(mWindow);
+		mGlWindow.setTitle(mWindowName);
+		mGlWindow.addGLEventListener(this);
+		mGlWindow.setSize(mWindowWidth, mWindowHeight);
 
 		if (System.getProperty("os.name").toLowerCase().contains("mac"))
 		{
@@ -124,13 +132,13 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 		// Initialize the mouse controls
 		final MouseControl lMouseControl = new MouseControl(this);
-		mNewtWindow.addMouseListener(lMouseControl);
+		mGlWindow.addMouseListener(lMouseControl);
 
 		// Initialize the keyboard controls
 		final KeyboardControl lKeyboardControl = new KeyboardControl(this);
-		mNewtWindow.addKeyListener(lKeyboardControl);
+		mGlWindow.addKeyListener(lKeyboardControl);
 
-		mNewtWindow.addWindowListener(new WindowAdapter()
+		mGlWindow.addWindowListener(new WindowAdapter()
 		{
 			@Override
 			public void windowDestroyNotify(final WindowEvent pE)
@@ -140,13 +148,6 @@ public abstract class JoglPBOVolumeRenderer	implements
 			};
 		});
 
-		// Create and start the animator
-		mAnimator = new Animator(mNewtWindow);
-		mAnimator.setRunAsFastAsPossible(true);
-		mAnimator.start();
-		// mFullScreen.toggleFullScreen();
-
-		// setupControlFrame();
 	}
 
 	public void setupControlFrame()
@@ -160,56 +161,21 @@ public abstract class JoglPBOVolumeRenderer	implements
 		mControlFrame.setVisible(true);
 	}
 
-	public void start()
-	{
-		if (!mAnimator.isStarted() && !mAnimator.isPaused())
-			mAnimator.start();
-	}
-
-	public void pause()
-	{
-		if (mAnimator.isAnimating() && mAnimator.isStarted())
-			mAnimator.pause();
-	}
-
-	public void pause(final boolean pRequestPaused)
-	{
-		if (mAnimator.isStarted())
-		{
-			if (pRequestPaused && mAnimator.isAnimating())
-				mAnimator.pause();
-			else if (!mAnimator.isAnimating())
-				mAnimator.resume();
-		}
-	}
-
-	public void resume()
-	{
-		if (mAnimator.isPaused() && mAnimator.isStarted())
-			mAnimator.resume();
-	}
-
-	public void stop()
-	{
-		if (mAnimator.isAnimating() && mAnimator.isStarted())
-			mAnimator.stop();
-	}
-
 	@Override
 	public void close() throws IOException
 	{
-		if (mNewtWindow.isRealized())
-			mNewtWindow.destroy();
+		if (mGlWindow.isRealized())
+			mGlWindow.destroy();
 	}
 
 	public boolean isShowing()
 	{
-		return mNewtWindow.isVisible();
+		return mGlWindow.isVisible();
 	}
 
 	public void setVisible(final boolean pIsVisible)
 	{
-		mNewtWindow.setVisible(pIsVisible);
+		mGlWindow.setVisible(pIsVisible);
 	}
 
 	public String getWindowName()
@@ -462,6 +428,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 				final JSlider source = (JSlider) e.getSource();
 				final float a = source.getValue() / 100.0f;
 				setDensity(a);
+				requestDisplay();
 			}
 		});
 		slider.setPreferredSize(new Dimension(0, 0));
@@ -480,6 +447,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 				final JSlider source = (JSlider) e.getSource();
 				final float a = source.getValue() / 100.0f;
 				setBrightness(a * 10);
+				requestDisplay();
 			}
 		});
 		slider.setPreferredSize(new Dimension(0, 0));
@@ -498,6 +466,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 				final JSlider source = (JSlider) e.getSource();
 				final float a = source.getValue() / 100.0f;
 				setTransferOffset((-0.5f + a) * 2);
+				requestDisplay();
 			}
 		});
 		slider.setPreferredSize(new Dimension(0, 0));
@@ -516,6 +485,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 				final JSlider source = (JSlider) e.getSource();
 				final float a = source.getValue() / 100.0f;
 				setTransferScale(a * 10);
+				requestDisplay();
 			}
 		});
 		slider.setPreferredSize(new Dimension(0, 0));
@@ -545,15 +515,22 @@ public abstract class JoglPBOVolumeRenderer	implements
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		setupDefaultView(drawable);
 
-		mNewtWindow.runOnEDTIfAvail(true, new Runnable()
+		mGlWindow.runOnEDTIfAvail(true, new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				if (initVolumeRenderer())
+				try
 				{
-					initPixelBufferObject(gl);
-					initTexture(gl);
+					if (initVolumeRenderer())
+					{
+						initPixelBufferObject(gl);
+						initTexture(gl);
+					}
+				}
+				catch (Throwable e)
+				{
+					e.printStackTrace();
 				}
 			}
 		});
@@ -663,12 +640,15 @@ public abstract class JoglPBOVolumeRenderer	implements
 		gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, mModelViewMatrix, 0);
 		gl.glPopMatrix();
 
-		mNewtWindow.runOnEDTIfAvail(true, new Runnable()
+		mGlWindow.runOnEDTIfAvail(true, new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				renderVolume(gl, mModelViewMatrix);
+				if (!Thread.currentThread().getName().contains("AWT"))
+				{
+					renderVolume(gl, mModelViewMatrix);
+				}
 			}
 		});
 
@@ -777,7 +757,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	private void setWindowTitle(final String pTitleString)
 	{
-		mNewtWindow.setTitle(pTitleString);
+		mGlWindow.setTitle(pTitleString);
 	}
 
 	@Override
@@ -790,10 +770,18 @@ public abstract class JoglPBOVolumeRenderer	implements
 		this.mWindowWidth = width;
 		this.mWindowHeight = height;
 
-		initPixelBufferObject(drawable.getGL());
+		mGlWindow.runOnEDTIfAvail(true, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				initPixelBufferObject(drawable.getGL());
+				setupDefaultView(drawable);
+				display(drawable);
+			}
+		});
 
-		setupDefaultView(drawable);
-
+		
 	}
 
 	/**
@@ -846,6 +834,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 			mVolumeDataByteBuffer = pByteBuffer;
 
 			notifyUpdateOfVolumeParameters();
+
 		}
 	}
 
@@ -864,23 +853,25 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	private int mWindowX, mWindowY;
 
+	private Window mWindow;
+
 	public void toggleFullScreen()
 	{
 		try
 		{
-			if (mNewtWindow.isFullscreen())
+			if (mGlWindow.isFullscreen())
 			{
-				mNewtWindow.setFullscreen(false);
+				mGlWindow.setFullscreen(false);
 				// mNewtWindow.setPosition(mWindowX, mWindowY);
 			}
 			else
 			{
 				// mAnimator.stop();
 				final Point lPoint = new Point();
-				mNewtWindow.getLocationOnScreen(lPoint);
+				mGlWindow.getLocationOnScreen(lPoint);
 				mWindowX = lPoint.getX();
 				mWindowY = lPoint.getY();
-				mNewtWindow.setFullscreen(true);
+				mGlWindow.setFullscreen(true);
 				// mAnimator.start();
 			}
 		}
@@ -892,7 +883,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	public boolean isFullScreen()
 	{
-		return mNewtWindow.isFullscreen();
+		return mGlWindow.isFullscreen();
 	}
 
 	public RotationControllerInterface getRotationController()
@@ -913,6 +904,18 @@ public abstract class JoglPBOVolumeRenderer	implements
 	public int getBytesPerVoxel()
 	{
 		return mBytesPerVoxel;
+	}
+
+	public void requestDisplay()
+	{
+		mGlWindow.runOnEDTIfAvail(false, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				mGlWindow.display();
+			}
+		});
 	}
 
 }

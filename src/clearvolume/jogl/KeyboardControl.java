@@ -59,6 +59,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			mRenderer.resetRotationTranslation();
 			break;
 		}
+		
+		mRenderer.requestDisplay();
 	}
 
 }

@@ -51,6 +51,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
 
+		mRenderer.requestDisplay();
+
 	}
 
 	@Override
@@ -87,8 +89,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 		}
 		else if (pMouseEvent.isAltGraphDown())
 		{
-			mRenderer.addBrightness( 0.001
-															* lWheelRotation);
+			mRenderer.addBrightness(0.001 * lWheelRotation);
 		}
 		else
 		{
@@ -99,6 +100,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 		}
 
 		mRenderer.notifyUpdateOfVolumeParameters();
+		mRenderer.requestDisplay();
 	}
 
 	@Override
@@ -107,6 +109,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 		if (pE.getClickCount() == 2)
 		{
 			mRenderer.toggleFullScreen();
+			mRenderer.requestDisplay();
 		}
 	}
 

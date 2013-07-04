@@ -536,8 +536,7 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		}
 		catch (final Throwable e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(e.getLocalizedMessage());
 		}
 	}
 }
