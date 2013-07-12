@@ -83,7 +83,6 @@ public class ClearVolumeTests
 																																														768,
 																																														2);
 		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
-		lJCudaClearVolumeRenderer.setupControlFrame();
 		lJCudaClearVolumeRenderer.setVisible(true);
 		// lJCudaClearVolumeRenderer.start();
 
@@ -132,7 +131,6 @@ public class ClearVolumeTests
 																									IOException,
 																									SerialPortException
 	{
-		final Egg3DController lEgg3DController = new Egg3DController();
 
 		final JCudaClearVolumeRenderer lJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																														768,
@@ -141,9 +139,17 @@ public class ClearVolumeTests
 		lJCudaClearVolumeRenderer.setVisible(true);
 		lJCudaClearVolumeRenderer.setProjectionAlgorythm(ProjectionAlgorithm.MaxProjection);
 
-		lJCudaClearVolumeRenderer.setQuaternionController(lEgg3DController);
-
-		assertTrue(lEgg3DController.connect());
+		Egg3DController lEgg3DController = null;
+		try
+		{
+			lEgg3DController = new Egg3DController();
+			lJCudaClearVolumeRenderer.setQuaternionController(lEgg3DController);
+			// assertTrue(lEgg3DController.connect());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 
 		final int lResolutionX = 256;
 		final int lResolutionY = lResolutionX;
@@ -179,7 +185,8 @@ public class ClearVolumeTests
 
 		lJCudaClearVolumeRenderer.close();
 		// Thread.sleep(000);
-		lEgg3DController.close();
+		if (lEgg3DController != null)
+			lEgg3DController.close();
 
 	}
 
@@ -192,9 +199,10 @@ public class ClearVolumeTests
 			// startSample("./data/Bucky.raw", 32, 32, 32);
 
 			// Other input files may be obtained from http://www.volvis.org
-			startSample("./databig/celegans.raw", 512, 512, 512);
-			// startSample("./data/Bucky.raw", 32, 32, 32);
-			// startSample("./databig/test1024^3.raw", 1024, 1024, 1024);
+			// startSample("./databig/celegans.raw", 512, 512, 512);
+			// startSample("./data/Bucky.raw", 1,32, 32, 32);
+			startSample("./databig/backpack16.raw", 2, 512, 512, 373);
+			//startSample("./databig/test1024^3.raw", 1, 1024, 1024, 1024);
 			// startSample("./data/test2048^3.raw", 2048, 2048, 2048);
 
 		}
@@ -207,39 +215,52 @@ public class ClearVolumeTests
 	}
 
 	private static void startSample(final String pRessourceName,
-																	final int sizeX,
-																	final int sizeY,
-																	final int sizeZ) throws IOException,
-																									InterruptedException
+																	final int pBytesPerVoxel,
+																	final int pSizeX,
+																	final int pSizeY,
+																	final int pSizeZ)	throws IOException,
+																										InterruptedException
 	{
 		final InputStream lResourceAsStream = ClearVolumeTests.class.getResourceAsStream(pRessourceName);
-		startSample(lResourceAsStream, sizeX, sizeY, sizeZ);
+		startSample(lResourceAsStream,
+								pBytesPerVoxel,
+								pSizeX,
+								pSizeY,
+								pSizeZ);
 	}
 
 	private static void startSample(final InputStream pInputStream,
-																	final int sizeX,
-																	final int sizeY,
-																	final int sizeZ) throws IOException,
-																									InterruptedException
+																	final int pBytesPerVoxel,
+																	final int pSizeX,
+																	final int pSizeY,
+																	final int pSizeZ)	throws IOException,
+																										InterruptedException
 	{
 
-		final byte[] data = loadData(pInputStream, sizeX, sizeY, sizeZ);
+		final byte[] data = loadData(	pInputStream,
+																	pBytesPerVoxel,
+																	pSizeX,
+																	pSizeY,
+																	pSizeZ);
 
 		// Start the sample with the data that was read from the file
 		final ByteBuffer lVolumeData = ByteBuffer.wrap(data);
 
 		mJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
-																															768,
-																															768);
+																															512,
+																															512,
+																															pBytesPerVoxel);
+		mJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getRainbow());
+		//mJCudaClearVolumeRenderer.setupControlFrame();
 
 		/*final Egg3DController lEgg3DController = new Egg3DController();
 		mJCudaClearVolumeRenderer.setQuaternionController(lEgg3DController);
 		assertTrue(lEgg3DController.connect());/**/
 
 		mJCudaClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(data),
-																									sizeX,
-																									sizeY,
-																									sizeZ);
+																									pSizeX,
+																									pSizeY,
+																									pSizeZ);
 		mJCudaClearVolumeRenderer.setVisible(true);
 
 		while (mJCudaClearVolumeRenderer.isShowing())
@@ -249,18 +270,23 @@ public class ClearVolumeTests
 
 	}
 
-	
 	private static byte[] loadData(	final String pRessourceName,
+																	final int pBytesPerVoxel,
 																	final int sizeX,
 																	final int sizeY,
 																	final int sizeZ) throws IOException
 	{
 		final InputStream lResourceAsStream = ClearVolumeTests.class.getResourceAsStream(pRessourceName);
 
-		return loadData(lResourceAsStream, sizeX, sizeY, sizeZ);
+		return loadData(lResourceAsStream,
+										pBytesPerVoxel,
+										sizeX,
+										sizeY,
+										sizeZ);
 	}
 
 	private static byte[] loadData(	final InputStream pInputStream,
+																	final int pBytesPerVoxel,
 																	final int sizeX,
 																	final int sizeY,
 																	final int sizeZ) throws IOException
@@ -270,7 +296,7 @@ public class ClearVolumeTests
 		final InputStream fis = pInputStream;
 		try
 		{
-			final int size = sizeX * sizeY * sizeZ;
+			final int size = pBytesPerVoxel * sizeX * sizeY * sizeZ;
 			data = new byte[size];
 			fis.read(data);
 		}

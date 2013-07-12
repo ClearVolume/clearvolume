@@ -1,5 +1,6 @@
 package clearvolume.jogl;
 
+import com.jogamp.newt.event.InputEvent;
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
@@ -34,7 +35,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 		final int dy = pMouseEvent.getY() - mPreviousMouseY;
 
 		// If the left button is held down, move the object
-		if (!pMouseEvent.isShiftDown() && pMouseEvent.isButtonDown(1))
+		if (!pMouseEvent.isShiftDown() && !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
 		{
 			mRenderer.mTranslationX += dx / 100.0f;
 			mRenderer.mTranslationY -= dy / 100.0f;
@@ -42,7 +44,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 		}
 
 		// If the right button is held down, rotate the object
-		else if (pMouseEvent.isShiftDown() && (pMouseEvent.isButtonDown(1)))
+		else if (!pMouseEvent.isControlDown() && (pMouseEvent.isButtonDown(3)))
 		{
 			mRenderer.mRotationX += dy;
 			mRenderer.mRotationY += dx;
@@ -51,8 +53,35 @@ class MouseControl extends MouseAdapter implements MouseListener
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
 
+		setTransfertFunctionRange(pMouseEvent);
+
 		mRenderer.requestDisplay();
 
+	}
+
+	public void setTransfertFunctionRange(final MouseEvent pMouseEvent)
+	{
+		if (!pMouseEvent.isShiftDown() && pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
+
+			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+			final double ny = ((double) mRenderer.getWindowHeight() - (double) pMouseEvent.getY()) / mRenderer.getWindowHeight();
+
+			mRenderer.setTransferRange(	Math.abs(Math.pow(nx, 3)),
+																	Math.abs(Math.pow(ny, 3)));
+
+		}
+
+		if (pMouseEvent.isShiftDown() && !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
+
+			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+
+			mRenderer.setGamma(Math.tan(Math.PI * nx / 2));
+
+		}
 	}
 
 	@Override
@@ -60,57 +89,43 @@ class MouseControl extends MouseAdapter implements MouseListener
 	{
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
-
 	}
 
 	@Override
 	public void mouseWheelMoved(final MouseEvent pMouseEvent)
 	{
 		final double lBytePerVoxelFactor = mRenderer.getBytesPerVoxel() == 1 ? 1
-																																				: 8;
+																																				: 16;
 
-		final double lWheelRotation = pMouseEvent.getWheelRotation();
-		// System.out.println(lWheelRotation);
-		// Translate along the Z-axis
-		if (pMouseEvent.isAltDown())
-		{
-			mRenderer.addTransferOffset(lBytePerVoxelFactor * 0.001
-																	* lWheelRotation);
-		}
-		else if (pMouseEvent.isShiftDown())
-		{
-			mRenderer.addTransferScale(lBytePerVoxelFactor * 0.001
-																	* lWheelRotation);
-		}
-		else if (pMouseEvent.isMetaDown())
-		{
-			mRenderer.addDensity(lBytePerVoxelFactor * 0.001
-														* lWheelRotation);
-		}
-		else if (pMouseEvent.isAltGraphDown())
-		{
-			mRenderer.addBrightness(0.001 * lWheelRotation);
-		}
-		else
-		{
+		double lWheelRotation = pMouseEvent.getWheelRotation();
 
-			mRenderer.mTranslationZ += 0.125f * lWheelRotation;
-			mPreviousMouseX = pMouseEvent.getX();
-			mPreviousMouseY = pMouseEvent.getY();
-		}
+		final double lZoomWheelFactor = 0.125f;
+
+		mRenderer.mTranslationZ += lWheelRotation * lZoomWheelFactor;
+		mPreviousMouseX = pMouseEvent.getX();
+		mPreviousMouseY = pMouseEvent.getY();
 
 		mRenderer.notifyUpdateOfVolumeParameters();
 		mRenderer.requestDisplay();
 	}
 
-	@Override
-	public void mouseClicked(final MouseEvent pE)
+	private boolean isRightMouseButton(MouseEvent pMouseEvent)
 	{
-		if (pE.getClickCount() == 2)
+		return ((pMouseEvent.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK);
+	}
+
+	@Override
+	public void mouseClicked(final MouseEvent pMouseEvent)
+	{
+		if (pMouseEvent.getClickCount() == 1)
+		{
+			setTransfertFunctionRange(pMouseEvent);
+		}
+		else if (pMouseEvent.getClickCount() == 2)
 		{
 			mRenderer.toggleFullScreen();
 			mRenderer.requestDisplay();
 		}
-	}
 
+	}
 }

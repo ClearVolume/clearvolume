@@ -67,14 +67,14 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	private TransfertFunction mTransferFunction = TransfertFunctions.getDefaultTransfertFunction();
 
-	protected volatile float mTranslationX, mTranslationY,
-			mTranslationZ;
+	protected volatile float mTranslationX = 0, mTranslationY = 0,
+			mTranslationZ = 0;
 	protected volatile float mRotationX = 0, mRotationY = 0;
 
 	private volatile double mScaleX = 1.0f, mScaleY = 1.0f,
 			mScaleZ = 1.0f;
-	private volatile float mDensity, mBrightness, mTransferOffset,
-			mTransferScale;
+	private volatile float mDensity, mBrightness = 1,
+			mTransferRangeMin = 0, mTransferRangeMax = 1, mGamma = 1;
 
 	private volatile boolean mUpdateVolumeRenderingParameters = true;
 
@@ -150,7 +150,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	}
 
-	public void setupControlFrame()
+	private void setupControlFrame()
 	{
 		mControlFrame = new JFrame("ClearVolume Rendering Parameters");
 		mControlFrame.setLayout(new BorderLayout());
@@ -220,8 +220,8 @@ public abstract class JoglPBOVolumeRenderer	implements
 	{
 		mDensity = 0.05f;
 		mBrightness = 1.0f;
-		mTransferOffset = 0.0f;
-		mTransferScale = 1.0f;
+		mTransferRangeMin = 0.0f;
+		mTransferRangeMax = 1.0f;
 	}
 
 	public void setDensity(final double pDensity)
@@ -238,18 +238,29 @@ public abstract class JoglPBOVolumeRenderer	implements
 		mUpdateVolumeRenderingParameters = true;
 	}
 
-	public void setTransferOffset(final double pTransferOffset)
+	public void setTransferRange(	final double pTransferRangeMin,
+																final double pTransferRangeMax)
 	{
-		mTransferOffset = (float) clamp(pTransferOffset, -1, 1);
+		mTransferRangeMin = (float) clamp(pTransferRangeMin, 0, 1);
+		mTransferRangeMax = (float) clamp(pTransferRangeMax, 0, 1);
 		mUpdateVolumeRenderingParameters = true;
 	}
 
-	public void setTransferScale(final double pTransferScale)
+	public void setTransferRangeMin(final double pTransferRangeMin)
 	{
-		mTransferScale = (float) clamp(	pTransferScale,
-																		0,
-																		getBytesPerVoxel() == 1	? 16
-																														: 256);
+		mTransferRangeMin = (float) clamp(pTransferRangeMin, 0, 1);
+		mUpdateVolumeRenderingParameters = true;
+	}
+
+	public void setTransferRangeMax(final double pTransferRangeMax)
+	{
+		mTransferRangeMax = (float) clamp(pTransferRangeMax, 0, 1);
+		mUpdateVolumeRenderingParameters = true;
+	}
+
+	public void setGamma(final double pGamma)
+	{
+		mGamma = (float) pGamma;
 		mUpdateVolumeRenderingParameters = true;
 	}
 
@@ -263,14 +274,26 @@ public abstract class JoglPBOVolumeRenderer	implements
 		setBrightness(mBrightness + pBrightnessDelta);
 	}
 
-	public void addTransferOffset(final double pTransferOffsetDelta)
+	public void addTransferRangePosition(final double pTransferRangePositionDelta)
 	{
-		setTransferOffset(mTransferOffset + pTransferOffsetDelta);
+		addTransferRangeMin(pTransferRangePositionDelta);
+		addTransferRangeMax(pTransferRangePositionDelta);
 	}
 
-	public void addTransferScale(final double pTransferScaleDelta)
+	public void addTransferRangeWidth(final double pTransferRangeWidthDelta)
 	{
-		setTransferScale(mTransferScale + pTransferScaleDelta);
+		addTransferRangeMin(-pTransferRangeWidthDelta);
+		addTransferRangeMax(pTransferRangeWidthDelta);
+	}
+
+	public void addTransferRangeMin(final double pDelta)
+	{
+		setTransferRangeMin(mTransferRangeMin + pDelta);
+	}
+
+	public void addTransferRangeMax(final double pDelta)
+	{
+		setTransferRangeMax(mTransferRangeMax + pDelta);
 	}
 
 	private double clamp(	final double pValue,
@@ -305,14 +328,19 @@ public abstract class JoglPBOVolumeRenderer	implements
 		return mBrightness;
 	}
 
-	public double getTransferOffset()
+	public double getTransferRangeMin()
 	{
-		return mTransferOffset;
+		return mTransferRangeMin;
 	}
 
-	public double getTransferScale()
+	public double getTransferRangeMax()
 	{
-		return mTransferScale;
+		return mTransferRangeMax;
+	}
+
+	public double getGamma()
+	{
+		return mGamma;
 	}
 
 	public ByteBuffer getVolumeDataBuffer()
@@ -456,7 +484,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 		// Transfer offset
 		panel = new JPanel(new GridLayout(1, 2));
-		panel.add(new JLabel("Transfer Offset:"));
+		panel.add(new JLabel("Transfer Range Min:"));
 		slider = new JSlider(0, 100, 55);
 		slider.addChangeListener(new ChangeListener()
 		{
@@ -465,7 +493,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 			{
 				final JSlider source = (JSlider) e.getSource();
 				final float a = source.getValue() / 100.0f;
-				setTransferOffset((-0.5f + a) * 2);
+				setTransferRangeMin(a);
 				requestDisplay();
 			}
 		});
@@ -475,7 +503,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 		// Transfer scale
 		panel = new JPanel(new GridLayout(1, 2));
-		panel.add(new JLabel("Transfer Scale:"));
+		panel.add(new JLabel("Transfer Range Max:"));
 		slider = new JSlider(0, 100, 10);
 		slider.addChangeListener(new ChangeListener()
 		{
@@ -484,7 +512,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 			{
 				final JSlider source = (JSlider) e.getSource();
 				final float a = source.getValue() / 100.0f;
-				setTransferScale(a * 10);
+				setTransferRangeMax(a);
 				requestDisplay();
 			}
 		});
@@ -513,6 +541,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 		gl.glEnable(GL2.GL_TEXTURE_2D);
 
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 		setupDefaultView(drawable);
 
 		mGlWindow.runOnEDTIfAvail(true, new Runnable()
@@ -624,6 +653,8 @@ public abstract class JoglPBOVolumeRenderer	implements
 	public void display(final GLAutoDrawable drawable)
 	{
 		final GL2 gl = drawable.getGL().getGL2();
+
+		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
@@ -781,7 +812,6 @@ public abstract class JoglPBOVolumeRenderer	implements
 			}
 		});
 
-		
 	}
 
 	/**
@@ -861,17 +891,21 @@ public abstract class JoglPBOVolumeRenderer	implements
 		{
 			if (mGlWindow.isFullscreen())
 			{
+				mUpdateVolumeRenderingParameters = true;
 				mGlWindow.setFullscreen(false);
+				mGlWindow.display();
 				// mNewtWindow.setPosition(mWindowX, mWindowY);
 			}
 			else
 			{
 				// mAnimator.stop();
+				mUpdateVolumeRenderingParameters = true;
 				final Point lPoint = new Point();
 				mGlWindow.getLocationOnScreen(lPoint);
 				mWindowX = lPoint.getX();
 				mWindowY = lPoint.getY();
 				mGlWindow.setFullscreen(true);
+				mGlWindow.display();
 				// mAnimator.start();
 			}
 		}

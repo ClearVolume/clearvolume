@@ -68,6 +68,7 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 	private CUdeviceptr mCUdeviceptr;
 
 	final CUdeviceptr mInvertedViewMatrix = new CUdeviceptr();
+	final CUdeviceptr mSizeOfTransfertFunction = new CUdeviceptr();
 	final float invViewMatrix[] = new float[12];
 
 	private CUarray mTransferFunctionCUarray, mVolumeDataCUarray;
@@ -126,6 +127,14 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 												new long[1],
 												mCUmodule,
 												"c_invViewMatrix");
+
+			cuModuleGetGlobal(mSizeOfTransfertFunction,
+												new long[1],
+												mCUmodule,
+												"c_sizeOfTransfertFunction");
+
+			cuMemcpyHtoD(mSizeOfTransfertFunction, Pointer.to(new float[]
+			{ getTransfertFunctionArray().length }), 1 * Sizeof.FLOAT);
 
 			mVolumeDataTexture = new CUtexref();
 			mTransferFunctionTexture = new CUtexref();
@@ -406,16 +415,16 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 									invViewMatrix.length * Sizeof.FLOAT);
 
 		// Render and fill the PBO with pixel data
-		updateBufferAndRunKernel();
-
-		// drawPBOToScreen(gl);
-		drawPBOToTextureToScreen(gl);
+		if (updateBufferAndRunKernel())
+			drawPBOToTextureToScreen(gl);
 	}
 
 	/**
 	 * Call the kernel function, rendering the 3D volume data image into the PBO
+	 * 
+	 * @return
 	 */
-	void updateBufferAndRunKernel()
+	boolean updateBufferAndRunKernel()
 	{
 
 		final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer();
@@ -469,7 +478,12 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		}
 
 		if (mVolumeDataCUarray != null)
+		{
 			runKernel();
+			return true;
+		}
+
+		return false;
 	}
 
 	private void runKernel()
@@ -489,13 +503,18 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 																					Pointer.to(new float[]
 																					{ (float) getScaleZ() }),
 																					Pointer.to(new float[]
-																					{ (float) getDensity() }),
-																					Pointer.to(new float[]
 																					{ (float) getBrightness() }),
 																					Pointer.to(new float[]
-																					{ (float) getTransferOffset() }),
+																					{ (float) getTransferRangeMin() }),
 																					Pointer.to(new float[]
-																					{ (float) getTransferScale() }));
+																					{ (float) getTransferRangeMax() }),
+																					Pointer.to(new float[]
+																					{ (float) getGamma() }));
+
+		/*System.out.format("min=%g, max=%g, gamma=%g \n",
+											getTransferRangeMin(),
+											getTransferRangeMax(),
+											getGamma());/**/
 
 		cuGLMapBufferObject(mCUdeviceptr,
 												new long[1],

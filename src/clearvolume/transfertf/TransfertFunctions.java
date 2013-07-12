@@ -57,15 +57,19 @@ public class TransfertFunctions
 		return lTransfertFunction;
 	}
 
+
+	
 	public static final TransfertFunction getRainbow()
 	{
 		final TransfertFunction lTransfertFunction = new TransfertFunction();
-		lTransfertFunction.addPoint(0, 0, 1, 0);
-		lTransfertFunction.addPoint(0, 1, 1, 0.2);
-		lTransfertFunction.addPoint(0, 1, 0, 0.4);
-		lTransfertFunction.addPoint(1, 1, 0, 0.6);
-		lTransfertFunction.addPoint(1, 0, 0, 0.8);
+		lTransfertFunction.addPoint(0, 0, 0, 0);
+		lTransfertFunction.addPoint(0, 0, 1, 1);
+		lTransfertFunction.addPoint(0, 1, 1, 1);
+		lTransfertFunction.addPoint(0, 1, 0, 1);
+		lTransfertFunction.addPoint(1, 1, 0, 1);
+		lTransfertFunction.addPoint(1, 0, 0, 1);
 		lTransfertFunction.addPoint(1, 0, 1, 1);
 		return lTransfertFunction;
 	}
+
 }

@@ -30,6 +30,8 @@ typedef unsigned short VolumeType2;
 texture<VolumeType/*BytesPerVoxel*/, 3, cudaReadModeNormalizedFloat> tex;         // 3D texture
 texture<float4, 1, cudaReadModeElementType>         transferTex; // 1D transfer function texture
 
+__constant__ float c_sizeOfTransfertFunction;
+
 typedef struct
 {
     float4 m[3];
@@ -100,65 +102,41 @@ __device__ uint rgbaFloatToInt(float4 rgba)
     return (uint(rgba.w*255)<<24) | (uint(rgba.z*255)<<16) | (uint(rgba.y*255)<<8) | uint(rgba.x*255);
 }
 
-inline __device__ bool algoMaxProjection(float density, float threshold, float4 &acc, float4 &col )
+inline __device__ bool algoMaxProjection(float4 &acc, float4 &col )
 {
-       // if(col.w>density)
-        	acc = fmaxf(acc,col);
+       	acc = fmaxf(acc,col);
         
         return false ;
 }
 
-inline __device__ bool algoSumProjection(float density, float threshold, float4 &acc, float4 &col )
+inline __device__ bool algoSumProjection(float4 &acc, float4 &col )
 {
-       // if(col.w>density)
-        	acc = fmaxf(acc,col);
+       	acc = fmaxf(acc,col);
         
         return false ;
 }
 
-inline __device__ bool algoLocalMaxProjection(float density, float threshold, float4 &acc, float4 &col )
+
+inline __device__ bool algoBlendFrontToBack( float4 &acc, float4 &col )
 {
-        //col.w *= density;
-        
-        float diff = (col.x-acc.x)/acc.x;
-        if(col.x>density && diff>0)
-        {
-        	acc = col;
-        	return false;
-        }
-        else if(diff<-0.1)
-        {
-        	return true;
-        }
-        else
-        	return false;
-}
-
-
-
-inline __device__ bool algoBlendFrontToBack(float density, float threshold, float4 &acc, float4 &col )
-{
-		col.w *= density;
-
         col *= col.w;
         // "over" operator for front-to-back blending
         acc = acc + col*(1.0f - acc.w);
         
-        return (acc.w > threshold);
+        return false;
 }
 
-inline __device__ bool algoBlendBackToFront(float density, float threshold, float4 &acc, float4 &col )
+inline __device__ bool algoBlendBackToFront(float4 &acc, float4 &col )
 {
-		col.w *= density;
 
         // "under" operator for back-to-front blending
         acc = lerp(acc, col, col.w);
-        return (acc.w > threshold);
+        return false;
 }
 
-inline __device__ bool algo(float density, float threshold, float4 &acc, float4 &col )
+inline __device__ bool algo(float4 &acc, float4 &col )
 {
-		return algoMaxProjection(density,threshold,acc,col);
+		return algoMaxProjection(acc,col);
 }
 
 
@@ -169,12 +147,14 @@ inline __device__ bool algo(float density, float threshold, float4 &acc, float4 
 __global__ void
 d_render(uint *d_output, uint imageW, uint imageH,
 		 float scalex, float scaley, float scalez,
-         float density, float brightness,
-         float transferOffset, float transferScale)
+         float brightness, float trangemin, float trangemax, float gamma)
 {
     const int maxSteps = 512;
     const float tstep = 0.01f;
-    const float opacityThreshold = 0.95f;
+     
+    const float ta = 1.0/(trangemax-trangemin);
+    const float tb = trangemin/(trangemin-trangemax); 
+    
     const float invscalex = 1/scalex;
     const float invscaley = 1/scaley;
     const float invscalez = 1/scalez;
@@ -215,10 +195,13 @@ d_render(uint *d_output, uint imageW, uint imageH,
         // remap position to [0, 1] coordinates
         float sample = tex3D(tex, invscalex*pos.x*0.5f+0.5f, invscaley*pos.y*0.5f+0.5f, invscalez*pos.z*0.5f+0.5f);
  
+ 		// Mapping to transfert function range and gamma correction: 
+ 		float mappedsample = powf(ta*sample+tb,gamma);
+ 
         // lookup in transfer function texture
-        float4 col = tex1D(transferTex, (sample-transferOffset)*transferScale);
+        float4 col = tex1D(transferTex,mappedsample);
         
-        if(algo/*ProjectionAlgorythm*/(density,opacityThreshold,acc,col)) break;
+        if(algo/*ProjectionAlgorythm*/(acc,col)) break;
 
         t += tstep;
         if (t > tfar) break;
@@ -235,10 +218,10 @@ d_render(uint *d_output, uint imageW, uint imageH,
 
 extern "C"
 void render_kernel(dim3 gridSize, dim3 blockSize, uint *d_output, uint imageW, uint imageH,
-                   float scalex, float scaley, float scalez, float density, float brightness, float transferOffset, float transferScale)
+                   float scalex, float scaley, float scalez, float brightness, float trangemin, float trangemax, float gamma)
 {
-    d_render<<<gridSize, blockSize>>>(d_output, imageW, imageH, scalex, scaley, scalez, density,
-                                      brightness, transferOffset, transferScale);
+    d_render<<<gridSize, blockSize>>>(d_output, imageW, imageH, scalex, scaley, scalez, 
+                                      brightness, trangemin, trangemax, gamma);
 }
 
 extern "C"

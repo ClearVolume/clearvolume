@@ -28,6 +28,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 	{
 		final boolean lIsShiftPressed = pE.isShiftDown();
 		final double speed = lIsShiftPressed ? 0.1 : 0.001;
+		
 		switch (pE.getKeyCode())
 		{
 		case KeyEvent.VK_DOWN:
