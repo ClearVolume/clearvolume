@@ -149,8 +149,8 @@ d_render(uint *d_output, uint imageW, uint imageH,
 		 float scalex, float scaley, float scalez,
          float brightness, float trangemin, float trangemax, float gamma)
 {
-    const int maxSteps = 512;
-    const float tstep = 0.01f;
+    const int maxSteps = 4096;
+    const float tstep = 0.005f;
      
     const float ta = 1.0/(trangemax-trangemin);
     const float tb = trangemin/(trangemin-trangemax); 
