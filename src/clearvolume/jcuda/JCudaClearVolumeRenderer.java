@@ -558,4 +558,6 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 			System.err.println(e.getLocalizedMessage());
 		}
 	}
+
+
 }

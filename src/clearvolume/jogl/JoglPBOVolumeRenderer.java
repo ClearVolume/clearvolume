@@ -198,6 +198,19 @@ public abstract class JoglPBOVolumeRenderer	implements
 		mUpdateVolumeRenderingParameters = false;
 	}
 
+	public void setVoxelSize(	double pVoxelSizeX,
+														double pVoxelSizeY,
+														double pVoxelSizeZ)
+	{
+		final double lMaxXYZ = Math.max(Math.max(	pVoxelSizeX,
+																										pVoxelSizeY),
+																					pVoxelSizeZ);
+		
+		setScaleX(pVoxelSizeX/lMaxXYZ);
+		setScaleY(pVoxelSizeY/lMaxXYZ);
+		setScaleZ(pVoxelSizeZ/lMaxXYZ);
+	}
+
 	public void setScaleX(final double pScaleX)
 	{
 		mScaleX = (float) pScaleX;
