@@ -14,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.nativewindow.util.Point;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -198,17 +199,17 @@ public abstract class JoglPBOVolumeRenderer	implements
 		mUpdateVolumeRenderingParameters = false;
 	}
 
-	public void setVoxelSize(	double pVoxelSizeX,
-														double pVoxelSizeY,
-														double pVoxelSizeZ)
+	public void setVolumeSize(double pVolumeSizeX,
+														double pVolumeSizeY,
+														double pVolumeSizeZ)
 	{
-		final double lMaxXYZ = Math.max(Math.max(	pVoxelSizeX,
-																										pVoxelSizeY),
-																					pVoxelSizeZ);
-		
-		setScaleX(pVoxelSizeX/lMaxXYZ);
-		setScaleY(pVoxelSizeY/lMaxXYZ);
-		setScaleZ(pVoxelSizeZ/lMaxXYZ);
+		final double lMaxXYZ = Math.max(Math.max(	pVolumeSizeX,
+																							pVolumeSizeY),
+																		pVolumeSizeZ);
+
+		setScaleX(pVolumeSizeX / lMaxXYZ);
+		setScaleY(pVolumeSizeY / lMaxXYZ);
+		setScaleZ(pVolumeSizeZ / lMaxXYZ);
 	}
 
 	public void setScaleX(final double pScaleX)
@@ -853,9 +854,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 																	final int pSizeX,
 																	final int pSizeY,
 																	final int pSizeZ,
-																	final double pVoxelSizeX,
-																	final double pVoxelSizeY,
-																	final double pVoxelSizeZ)
+																	final double pVolumeSizeX,
+																	final double pVolumeSizeY,
+																	final double pVolumeSizeZ)
 	{
 		synchronized (getSetVolumeDataBufferLock())
 		{
@@ -870,9 +871,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 			mVolumeSizeY = pSizeY;
 			mVolumeSizeZ = pSizeZ;
 
-			mScaleX = pVoxelSizeX;
-			mScaleY = pVoxelSizeY;
-			mScaleZ = pVoxelSizeZ;
+			mScaleX = pVolumeSizeX;
+			mScaleY = pVolumeSizeY;
+			mScaleZ = pVolumeSizeZ;
 
 			mVolumeDataByteBuffer = pByteBuffer;
 
@@ -965,4 +966,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 		});
 	}
 
+	
+	public void disableClose()
+	{
+		mGlWindow.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
+	}
 }
