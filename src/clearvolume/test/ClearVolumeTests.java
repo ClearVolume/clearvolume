@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLProfile;
-
 import jssc.SerialPortException;
 
 import org.junit.Test;
@@ -133,8 +130,8 @@ public class ClearVolumeTests
 	{
 
 		final JCudaClearVolumeRenderer lJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
-																																														768,
-																																														768);
+																																														512,
+																																														512);
 		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
 		lJCudaClearVolumeRenderer.setVisible(true);
 		lJCudaClearVolumeRenderer.setProjectionAlgorythm(ProjectionAlgorithm.MaxProjection);
@@ -144,14 +141,14 @@ public class ClearVolumeTests
 		{
 			lEgg3DController = new Egg3DController();
 			lJCudaClearVolumeRenderer.setQuaternionController(lEgg3DController);
-			// assertTrue(lEgg3DController.connect());
+			assertTrue(lEgg3DController.connect());
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			e.printStackTrace();
 		}
 
-		final int lResolutionX = 256;
+		final int lResolutionX = 128;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
@@ -202,7 +199,7 @@ public class ClearVolumeTests
 			// startSample("./databig/celegans.raw", 512, 512, 512);
 			// startSample("./data/Bucky.raw", 1,32, 32, 32);
 			startSample("./databig/backpack16.raw", 2, 512, 512, 373);
-			//startSample("./databig/test1024^3.raw", 1, 1024, 1024, 1024);
+			// startSample("./databig/test1024^3.raw", 1, 1024, 1024, 1024);
 			// startSample("./data/test2048^3.raw", 2048, 2048, 2048);
 
 		}
@@ -251,7 +248,7 @@ public class ClearVolumeTests
 																															512,
 																															pBytesPerVoxel);
 		mJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getRainbow());
-		//mJCudaClearVolumeRenderer.setupControlFrame();
+		// mJCudaClearVolumeRenderer.setupControlFrame();
 
 		/*final Egg3DController lEgg3DController = new Egg3DController();
 		mJCudaClearVolumeRenderer.setQuaternionController(lEgg3DController);
