@@ -119,13 +119,19 @@ public class JCudaUtils
 		}
 
 		final String modelString = "-m" + System.getProperty("sun.arch.data.model");
+		
+		String lCompilerBinDir = "";
+		if(System.getProperty("os.name").toLowerCase().contains("osx"))
+		{
+			lCompilerBinDir = " --compiler-bindir=/opt/local/bin/gcc-mp-4.6";
+		}
+		
 		final String command = getNVCCPath() + " -I. -I"
 														+ pCUFile.getParentFile()
 																			.getAbsolutePath()
 														+ " "
 														+ modelString
-														+ " --compiler-bindir="
-														+ "/opt/local/bin/gcc-mp-4.6"
+														+ lCompilerBinDir
 														+ " -ptx "
 														+ pCUFile.getAbsolutePath()
 														+ " -o "
