@@ -58,4 +58,9 @@ public class QuaternionRotationController	implements
 		gl.glMultMatrixf(lMatrix, 0);
 	}
 
+	public Quaternion getQuaternion()
+	{
+		return mQuaternion;
+	}
+
 }
