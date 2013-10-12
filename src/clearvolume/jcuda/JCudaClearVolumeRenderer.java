@@ -33,7 +33,6 @@ import static jcuda.driver.JCudaDriver.cuTexRefSetFormat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
@@ -109,7 +108,7 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		{
 			final InputStream lInputStreamCUFile = JCudaClearVolumeRenderer.class.getResourceAsStream("./kernels/VolumeRender.cu");
 
-			HashMap<String, String> lSubstitutionMap = new HashMap<String, String>();
+			final HashMap<String, String> lSubstitutionMap = new HashMap<String, String>();
 
 			lSubstitutionMap.put(	Pattern.quote("/*ProjectionAlgorythm*/"),
 														getProjectionAlgorythm().name());
@@ -419,6 +418,12 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 			drawPBOToTextureToScreen(gl);
 	}
 
+	@Override
+	public void renderedImageHook(final GL2 pGl,
+																final int pPixelBufferObjectId)
+	{
+	}
+
 	/**
 	 * Call the kernel function, rendering the 3D volume data image into the PBO
 	 * 
@@ -558,8 +563,5 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 			System.err.println(e.getLocalizedMessage());
 		}
 	}
-
-
-
 
 }

@@ -40,7 +40,6 @@ import com.jogamp.newt.Window;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
-import com.jogamp.opengl.util.Animator;
 
 public abstract class JoglPBOVolumeRenderer	implements
 																						GLEventListener,
@@ -91,7 +90,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	protected CountDownLatch mDataBufferCopyFinished;
 
-	private Executor mRenderingExecutor = Executors.newSingleThreadExecutor();
+	private final Executor mRenderingExecutor = Executors.newSingleThreadExecutor();
 
 	public JoglPBOVolumeRenderer(	final String pWindowName,
 																final int pWindowWidth,
@@ -118,7 +117,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 		// Initialize the GL component
 
-		NewtFactory lNewtFactory = new NewtFactory();
+		final NewtFactory lNewtFactory = new NewtFactory();
 
 		mWindow = NewtFactory.createWindow(sCapabilities);
 		mGlWindow = GLWindow.create(mWindow);
@@ -199,9 +198,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 		mUpdateVolumeRenderingParameters = false;
 	}
 
-	public void setVolumeSize(double pVolumeSizeX,
-														double pVolumeSizeY,
-														double pVolumeSizeZ)
+	public void setVolumeSize(final double pVolumeSizeX,
+														final double pVolumeSizeY,
+														final double pVolumeSizeZ)
 	{
 		final double lMaxXYZ = Math.max(Math.max(	pVolumeSizeX,
 																							pVolumeSizeY),
@@ -571,7 +570,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 						initTexture(gl);
 					}
 				}
-				catch (Throwable e)
+				catch (final Throwable e)
 				{
 					e.printStackTrace();
 				}
@@ -693,6 +692,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 				if (!Thread.currentThread().getName().contains("AWT"))
 				{
 					renderVolume(gl, mModelViewMatrix);
+					renderedImageHook(gl, mPixelBufferObjectId);
 				}
 			}
 		});
@@ -701,6 +701,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	protected abstract void renderVolume(	final GL2 gl,
 																				final float[] modelView);
+
+	public abstract void renderedImageHook(	final GL2 gl,
+																					int pPixelBufferObjectId);
 
 	public void drawPBOToScreen(final GL2 gl)
 	{
@@ -897,7 +900,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	private int mWindowX, mWindowY;
 
-	private Window mWindow;
+	private final Window mWindow;
 
 	public void toggleFullScreen()
 	{
@@ -966,7 +969,6 @@ public abstract class JoglPBOVolumeRenderer	implements
 		});
 	}
 
-	
 	public void disableClose()
 	{
 		mGlWindow.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
