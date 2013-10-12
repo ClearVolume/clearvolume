@@ -87,8 +87,8 @@ public class JCudaUtils
 				lCUFileString = lCUFileString.replaceAll(	lPattern,
 																									lReplacement);
 			}
-		
-		//System.out.println(lCUFileString);
+
+		// System.out.println(lCUFileString);
 
 		FileUtils.write(lCUFile, lCUFileString);
 
@@ -124,6 +124,8 @@ public class JCudaUtils
 																			.getAbsolutePath()
 														+ " "
 														+ modelString
+														+ " --compiler-bindir="
+														+ "/opt/local/bin/gcc-mp-4.6"
 														+ " -ptx "
 														+ pCUFile.getAbsolutePath()
 														+ " -o "
