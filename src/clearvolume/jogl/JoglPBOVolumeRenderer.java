@@ -544,38 +544,45 @@ public abstract class JoglPBOVolumeRenderer	implements
 	@Override
 	public void init(final GLAutoDrawable drawable)
 	{
-		// Perform the default GL initialization
-		final GL2 gl = drawable.getGL().getGL2();
-		gl.setSwapInterval(0);
-		gl.glDisable(GL2.GL_DEPTH_TEST);
-		gl.glDisable(GL2.GL_DEPTH_BUFFER);
-		gl.glDisable(GL2.GL_STENCIL_TEST);
-		gl.glDisable(GL2.GL_LIGHTING);
-		gl.glEnable(GL2.GL_TEXTURE_2D);
-
-		gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
-		setupDefaultView(drawable);
-
-		mGlWindow.runOnEDTIfAvail(true, new Runnable()
+		synchronized (mGlWindow)
 		{
-			@Override
-			public void run()
+			// Perform the default GL initialization
+			final GL2 gl = drawable.getGL().getGL2();
+			gl.setSwapInterval(0);
+			gl.glDisable(GL2.GL_DEPTH_TEST);
+			gl.glDisable(GL2.GL_DEPTH_BUFFER);
+			gl.glDisable(GL2.GL_STENCIL_TEST);
+			gl.glDisable(GL2.GL_LIGHTING);
+			gl.glEnable(GL2.GL_TEXTURE_2D);
+
+			gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+			setupDefaultView(drawable);
+
+			mGlWindow.runOnEDTIfAvail(true, new Runnable()
 			{
-				try
+				@Override
+				public void run()
 				{
-					if (initVolumeRenderer())
+					try
 					{
-						initPixelBufferObject(gl);
-						initTexture(gl);
+						synchronized (mGlWindow)
+						{
+							if (initVolumeRenderer())
+							{
+
+								initPixelBufferObject(gl);
+								initTexture(gl);
+							}
+						}
+					}
+					catch (final Throwable e)
+					{
+						e.printStackTrace();
 					}
 				}
-				catch (final Throwable e)
-				{
-					e.printStackTrace();
-				}
-			}
-		});
+			});
+		}
 
 	}
 
@@ -667,38 +674,42 @@ public abstract class JoglPBOVolumeRenderer	implements
 	{
 		final GL2 gl = drawable.getGL().getGL2();
 
-		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
-
-		gl.glMatrixMode(GL2.GL_MODELVIEW);
-		gl.glPushMatrix();
-		gl.glLoadIdentity();
-
-		gl.glRotatef(-mRotationX, 1.0f, 0.0f, 0.0f);
-		gl.glRotatef(-mRotationY, 0.0f, 1.0f, 0.0f);
-		if (hasRotationController())
+		synchronized (mGlWindow)
 		{
-			getRotationController().rotateGL(gl);
-			notifyUpdateOfVolumeParameters();
-		}
-		gl.glTranslatef(-mTranslationX, -mTranslationY, -mTranslationZ);
-		gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, mModelViewMatrix, 0);
-		gl.glPopMatrix();
+			gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
-		mGlWindow.runOnEDTIfAvail(true, new Runnable()
-		{
-			@Override
-			public void run()
+			gl.glMatrixMode(GL2.GL_MODELVIEW);
+			gl.glPushMatrix();
+			gl.glLoadIdentity();
+
+			gl.glRotatef(-mRotationX, 1.0f, 0.0f, 0.0f);
+			gl.glRotatef(-mRotationY, 0.0f, 1.0f, 0.0f);
+			if (hasRotationController())
 			{
-				if (!Thread.currentThread().getName().contains("AWT"))
+				getRotationController().rotateGL(gl);
+				notifyUpdateOfVolumeParameters();
+			}
+			gl.glTranslatef(-mTranslationX, -mTranslationY, -mTranslationZ);
+			gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, mModelViewMatrix, 0);
+			gl.glPopMatrix();
+
+			mGlWindow.runOnEDTIfAvail(true, new Runnable()
+			{
+				@Override
+				public void run()
 				{
-					synchronized (mGlWindow)
+					if (!Thread.currentThread().getName().contains("AWT"))
 					{
-						renderVolume(gl, mModelViewMatrix);
-						renderedImageHook(gl, mPixelBufferObjectId);
+						synchronized (mGlWindow)
+						{
+							renderVolume(gl, mModelViewMatrix);
+							renderedImageHook(gl, mPixelBufferObjectId);
+						}
 					}
 				}
-			}
-		});
+			});
+
+		}
 
 	}
 
@@ -818,19 +829,26 @@ public abstract class JoglPBOVolumeRenderer	implements
 											final int width,
 											final int height)
 	{
-		this.mWindowWidth = width;
-		this.mWindowHeight = height;
 
-		mGlWindow.runOnEDTIfAvail(true, new Runnable()
+		synchronized (mGlWindow)
 		{
-			@Override
-			public void run()
+			this.mWindowWidth = width;
+			this.mWindowHeight = height;
+
+			mGlWindow.runOnEDTIfAvail(true, new Runnable()
 			{
-				initPixelBufferObject(drawable.getGL());
-				setupDefaultView(drawable);
-				display(drawable);
-			}
-		});
+				@Override
+				public void run()
+				{
+					synchronized (mGlWindow)
+					{
+						initPixelBufferObject(drawable.getGL());
+						setupDefaultView(drawable);
+						display(drawable);
+					}
+				}
+			});
+		}
 
 	}
 
