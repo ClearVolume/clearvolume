@@ -691,8 +691,11 @@ public abstract class JoglPBOVolumeRenderer	implements
 			{
 				if (!Thread.currentThread().getName().contains("AWT"))
 				{
-					renderVolume(gl, mModelViewMatrix);
-					renderedImageHook(gl, mPixelBufferObjectId);
+					synchronized (mGlWindow)
+					{
+						renderVolume(gl, mModelViewMatrix);
+						renderedImageHook(gl, mPixelBufferObjectId);
+					}
 				}
 			}
 		});
