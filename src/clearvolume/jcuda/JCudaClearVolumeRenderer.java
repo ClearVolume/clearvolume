@@ -107,6 +107,7 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		try
 		{
 			final InputStream lInputStreamCUFile = JCudaClearVolumeRenderer.class.getResourceAsStream("./kernels/VolumeRender.cu");
+			final InputStream lInputStreamBackupPTX = JCudaClearVolumeRenderer.class.getResourceAsStream("./ptx/VolumeRender.ptx");
 
 			final HashMap<String, String> lSubstitutionMap = new HashMap<String, String>();
 
@@ -117,6 +118,7 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 
 			mVolumeRenderingFunction = JCudaUtils.initCuda(	mCUmodule,
 																											lInputStreamCUFile,
+																											lInputStreamBackupPTX,
 																											"_Z8d_renderPjjjfffffff",
 																											lSubstitutionMap);
 

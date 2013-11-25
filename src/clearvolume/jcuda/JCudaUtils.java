@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +35,8 @@ public class JCudaUtils
 	private static CUcontext sCUcontext;
 
 	public static final CUfunction initCuda(final CUmodule pCUmodule,
-																					final InputStream pInputStream,
+																					final InputStream pSourceCodeInputStream,
+																					final InputStream pBackupPTXInputStream,
 																					final String pFunctionSignature,
 																					final Map<String, String> pCompiledParameters) throws IOException
 	{
@@ -47,7 +49,8 @@ public class JCudaUtils
 		sCUcontext = new CUcontext();
 		cuGLCtxCreate(sCUcontext, 0, dev);
 
-		final File lPTXFile = nvccCompile(pInputStream,
+		final File lPTXFile = nvccCompile(pSourceCodeInputStream,
+																			pBackupPTXInputStream,
 																			pCompiledParameters);
 
 		// Load the PTX file containing the kernel
@@ -68,33 +71,78 @@ public class JCudaUtils
 		cuCtxDestroy(sCUcontext);
 	}
 
-	private static File nvccCompile(final InputStream pInputStreamCUFile,
+	private static File nvccCompile(final InputStream pInputStreamCUFileInputStream,
+																	final InputStream pBackupPTXFileInputStream,
 																	final Map<String, String> pCompiledParameters) throws IOException
 	{
-		final File lCUFile = File.createTempFile("jcuda", ".cu");
-		final File lPTXFile = File.createTempFile("jcuda", ".ptx");
+		try
+		{
+			final File lCUFile = File.createTempFile("jcuda", ".cu");
+			final File lPTXFile = File.createTempFile("jcuda", ".ptx");
+			
+			System.out.println(lPTXFile);
 
-		final StringWriter writer = new StringWriter();
-		IOUtils.copy(pInputStreamCUFile, writer, Charset.defaultCharset());
-		String lCUFileString = writer.toString();
+			final StringWriter writer = new StringWriter();
+			IOUtils.copy(	pInputStreamCUFileInputStream,
+										writer,
+										Charset.defaultCharset());
+			String lCUFileString = writer.toString();
 
-		if (pCompiledParameters != null)
-			for (final Entry<String, String> lEntry : pCompiledParameters.entrySet())
+			if (pCompiledParameters != null)
+				for (final Entry<String, String> lEntry : pCompiledParameters.entrySet())
+				{
+					final String lPattern = lEntry.getKey();
+					final String lReplacement = lEntry.getValue();
+
+					lCUFileString = lCUFileString.replaceAll(	lPattern,
+																										lReplacement);
+				}
+
+			// System.out.println(lCUFileString);
+
+			FileUtils.write(lCUFile, lCUFileString);
+
+			nvccCompile(lCUFile, lPTXFile);
+
+			return lPTXFile;
+		}
+		catch (Exception e)
+		{
+			if (pBackupPTXFileInputStream == null)
 			{
-				final String lPattern = lEntry.getKey();
-				final String lReplacement = lEntry.getValue();
-
-				lCUFileString = lCUFileString.replaceAll(	lPattern,
-																									lReplacement);
+				e.printStackTrace();
+				return null;
 			}
 
-		// System.out.println(lCUFileString);
+			final File lPTXFile = File.createTempFile("jcuda", ".ptx");
+			return streamtoFile(pBackupPTXFileInputStream, lPTXFile);
+		}
+	}
 
-		FileUtils.write(lCUFile, lCUFileString);
+	private static File streamtoFile(	InputStream pInputStream,
+																		File pFile)
+	{
+		try
+		{
+			FileOutputStream lFileOutputStream = new FileOutputStream(pFile);
 
-		nvccCompile(lCUFile, lPTXFile);
+			int read = 0;
+			byte[] bytes = new byte[1024];
 
-		return lPTXFile;
+			while ((read = pInputStream.read(bytes)) != -1)
+			{
+				lFileOutputStream.write(bytes, 0, read);
+			}
+
+			lFileOutputStream.close();
+			return pFile;
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 
 	private static void nvccCompile(final File pCUFile,
@@ -119,13 +167,13 @@ public class JCudaUtils
 		}
 
 		final String modelString = "-m" + System.getProperty("sun.arch.data.model");
-		
+
 		String lCompilerBinDir = "";
-		if(System.getProperty("os.name").toLowerCase().contains("osx"))
+		if (System.getProperty("os.name").toLowerCase().contains("osx"))
 		{
 			lCompilerBinDir = " --compiler-bindir=/opt/local/bin/gcc-mp-4.6";
 		}
-		
+
 		final String command = getNVCCPath() + " -I. -I"
 														+ pCUFile.getParentFile()
 																			.getAbsolutePath()
