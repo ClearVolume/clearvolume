@@ -169,7 +169,10 @@ public class JCudaUtils
 		final String modelString = "-m" + System.getProperty("sun.arch.data.model");
 
 		String lCompilerBinDir = "";
-		if (System.getProperty("os.name").toLowerCase().contains("osx"))
+
+		if (System.getProperty("os.name").toLowerCase().contains("osx") || System.getProperty("os.name")
+																																							.toLowerCase()
+																																							.contains("os x"))
 		{
 			lCompilerBinDir = " --compiler-bindir=/opt/local/bin/gcc-mp-4.6";
 		}
@@ -210,7 +213,7 @@ public class JCudaUtils
 			throw new IOException("Could not create .ptx file: " + errorMessage);
 		}
 
-		System.out.println("Finished creating PTX file");
+		// System.out.println("Finished creating PTX file");
 
 	}
 
