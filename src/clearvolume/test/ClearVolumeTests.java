@@ -30,39 +30,39 @@ public class ClearVolumeTests
 		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGreenGradient());
 		lJCudaClearVolumeRenderer.setVisible(true);
 
+		final int lResolutionX = 64;
+		final int lResolutionY = 64;
+		final int lResolutionZ = 64;
+
+		// System.out.println(i);
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																							* lResolutionZ];
+
+		for (int z = 0; z < lResolutionZ; z++)
+			for (int y = 0; y < lResolutionY; y++)
+				for (int x = 0; x < lResolutionX; x++)
+				{
+					final int lIndex = x + lResolutionX
+															* y
+															+ lResolutionX
+															* lResolutionY
+															* z;
+					lVolumeDataArray[lIndex] = (byte) (x ^ y ^ z);
+					/*(byte) ((x / 3) ^ (y)
+																					| (y / 3)
+																					^ (z) | (z / 3) ^ (x));/**/
+				}
+
+		lJCudaClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
+																									lResolutionX,
+																									lResolutionY,
+																									lResolutionZ);
+
 		for (int i = 0; lJCudaClearVolumeRenderer.isShowing(); i++)
 		{
 			Thread.sleep(500);
-			final int lResolutionX = 128 + (i % 256);
-			final int lResolutionY = 256 + (i % 256);
-			final int lResolutionZ = 128 + (i % 256);
-
-			// System.out.println(i);
-
-			final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-																								* lResolutionZ];
-
-			for (int z = 0; z < lResolutionZ; z++)
-				for (int y = 0; y < lResolutionY; y++)
-					for (int x = 0; x < lResolutionX; x++)
-					{
-						final int lIndex = x + lResolutionX
-																* y
-																+ lResolutionX
-																* lResolutionY
-																* z;
-						lVolumeDataArray[lIndex] = (byte) (x ^ y ^ z);
-						/*(byte) ((x / 3) ^ (y)
-																						| (y / 3)
-																						^ (z) | (z / 3) ^ (x));/**/
-					}
-
-			lJCudaClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
-																										lResolutionX,
-																										lResolutionY,
-																										lResolutionZ);
-
-			lJCudaClearVolumeRenderer.requestDisplay();
+			// lJCudaClearVolumeRenderer.requestDisplay();
 
 		}
 
