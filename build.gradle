@@ -1,0 +1,137 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+sourceSets 
+{
+  main 
+  {
+    java 
+    {
+      srcDir 'src'
+    }
+    resources 
+    { 
+      srcDir 'src'
+    }
+  }
+  test
+  {
+    java 
+    {
+      srcDir 'src'
+    }
+    resources 
+    { 
+      srcDir 'src'
+    }
+  }
+}
+
+
+sourceCompatibility = 1.8
+group = 'royer'
+version = '3.0'
+
+test 
+{
+    testLogging.showStandardStreams = true 
+    testLogging 
+    {
+        events "passed", "skipped", "failed"
+    }
+
+    exclude '**/demo/**'
+    exclude '**/run/**'
+
+    maxHeapSize = "4G"
+}
+
+dependencies 
+{
+    compile group: 'commons-collections', name: 'commons-collections', version: '3.+'
+    compile group: 'commons-lang', name: 'commons-lang', version: '2.+'
+    compile group: 'commons-io', name: 'commons-io', version: '2.+'
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.+'
+    compile 'net.sf.trove4j:trove4j:3.0.3'
+    compile group: 'org.scream3r', name: 'jssc', version: '2.8.0'
+
+
+    compile group: 'junit', name: 'junit', version: '4.+'
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+
+    compile fileTree(dir: 'libs/jogl', include: '*.jar')
+    compile fileTree(dir: 'libs/jcuda', include: '*.jar')
+}
+
+repositories 
+{
+    mavenCentral()
+    maven 
+    {
+        url "http://oss.sonatype.org/content/groups/public"
+    } 
+
+}
+
+
+task sourcesJar(type: Jar, dependsOn:classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn:javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+      tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+      }
+    }
+  }
+
+artifacts 
+{
+    archives sourcesJar
+    archives javadocJar
+}
+
+uploadArchives 
+{
+    repositories 
+    {
+        mavenDeployer 
+        {
+            repository(url: "file:../../Repos/")
+        }
+    }
+}
+
+
+/*
+apply plugin: 'executable-jar'
+
+// This is the class that starts your application
+mainClass = 'egg3d.server.Egg3DTCPServer'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.nisgits.gradle:gradle-executable-jar-plugin:1.7.0'
+    }
+}
+/**/
+
+
+
+
+
+
+
+
+

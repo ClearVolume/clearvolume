@@ -1,5 +1,13 @@
-bin
+bin/
+build/
+.project
+.classpath
+.settings/*
+.gradle
 *.class
-hs_err_pid*
 .DS_Store
+hs_err_pid*
+old
 src/clearvolume/test/databig
+
+

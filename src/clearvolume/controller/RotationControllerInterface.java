@@ -9,4 +9,6 @@ public interface RotationControllerInterface
 
 	void rotateGL(GL2 pGl);
 
+	boolean isActive();
+
 }

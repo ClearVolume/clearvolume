@@ -63,4 +63,10 @@ public class QuaternionRotationController	implements
 		return mQuaternion;
 	}
 
+	@Override
+	public boolean isActive()
+	{
+		return true;
+	}
+
 }

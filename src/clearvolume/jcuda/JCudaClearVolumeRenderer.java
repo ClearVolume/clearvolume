@@ -165,9 +165,9 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer();
 
 			mVolumeDataCUarray = new CUarray();
-			final int lSizeX = getVolumeSizeX();
-			final int lSizeY = getVolumeSizeY();
-			final int lSizeZ = getVolumeSizeZ();
+			final long lSizeX = getVolumeSizeX();
+			final long lSizeY = getVolumeSizeY();
+			final long lSizeZ = getVolumeSizeZ();
 
 			allocateVolumeDataTexture(mVolumeDataCUarray,
 																lSizeX,
@@ -200,9 +200,9 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 	}
 
 	private void allocateVolumeDataTexture(	final CUarray pVolumeArrayCUarray,
-																					final int pVolumeSizeX,
-																					final int pVolumeSizeY,
-																					final int pVolumeSizeZ)
+																					final long pVolumeSizeX,
+																					final long pVolumeSizeY,
+																					final long pVolumeSizeZ)
 	{
 		final CUDA_ARRAY3D_DESCRIPTOR lAllocate3DArrayDescriptor = new CUDA_ARRAY3D_DESCRIPTOR();
 		lAllocate3DArrayDescriptor.Width = pVolumeSizeX;
@@ -257,9 +257,9 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 
 	private void copyVolumeDataIntoTexture(	final CUarray pVolumeArrayCUarray,
 																					final ByteBuffer pByteBuffer,
-																					final int pVolumeSizeX,
-																					final int pVolumeSizeY,
-																					final int pVolumeSizeZ)
+																					final long pVolumeSizeX,
+																					final long pVolumeSizeY,
+																					final long pVolumeSizeZ)
 	{
 		// Copy the volume data data to the 3D array
 		final CUDA_MEMCPY3D copy = new CUDA_MEMCPY3D();
@@ -440,9 +440,11 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		{
 			synchronized (getSetVolumeDataBufferLock())
 			{
-				final int lSizeX = getVolumeSizeX();
-				final int lSizeY = getVolumeSizeY();
-				final int lSizeZ = getVolumeSizeZ();
+				clearVolumeDataBufferReference();
+
+				final long lSizeX = getVolumeSizeX();
+				final long lSizeY = getVolumeSizeY();
+				final long lSizeZ = getVolumeSizeZ();
 
 				if (hasVolumeDimensionsChanged())
 				{

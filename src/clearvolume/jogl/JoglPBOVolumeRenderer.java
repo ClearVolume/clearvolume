@@ -30,6 +30,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jcuda.Sizeof;
+import clearvolume.DisplayRequest;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.transfertf.ProjectionAlgorithm;
 import clearvolume.transfertf.TransfertFunction;
@@ -43,7 +44,8 @@ import com.jogamp.newt.opengl.GLWindow;
 
 public abstract class JoglPBOVolumeRenderer	implements
 																						GLEventListener,
-																						Closeable
+																						Closeable,
+																						DisplayRequest
 {
 	private static GLCapabilities sCapabilities;
 	static
@@ -82,7 +84,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	private final Object mSetVolumeDataBufferLock = new Object();
 	private volatile ByteBuffer mVolumeDataByteBuffer;
-	private volatile int mVolumeSizeX, mVolumeSizeY, mVolumeSizeZ;
+	private volatile long mVolumeSizeX, mVolumeSizeY, mVolumeSizeZ;
 	private volatile boolean mVolumeDimensionsChanged;
 	private int mTextureId;
 	private final int mTextureWidth;
@@ -361,22 +363,27 @@ public abstract class JoglPBOVolumeRenderer	implements
 		return mVolumeDataByteBuffer;
 	}
 
+	public void clearVolumeDataBufferReference()
+	{
+		mVolumeDataByteBuffer = null;
+	}
+
 	public boolean isVolumeDataAvailable()
 	{
 		return mVolumeSizeX * mVolumeSizeY * mVolumeSizeZ > 0;
 	}
 
-	public int getVolumeSizeX()
+	public long getVolumeSizeX()
 	{
 		return mVolumeSizeX;
 	}
 
-	public int getVolumeSizeY()
+	public long getVolumeSizeY()
 	{
 		return mVolumeSizeY;
 	}
 
-	public int getVolumeSizeZ()
+	public long getVolumeSizeZ()
 	{
 		return mVolumeSizeZ;
 	}
@@ -861,9 +868,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 	}
 
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
-																	final int pSizeX,
-																	final int pSizeY,
-																	final int pSizeZ)
+																	final long pSizeX,
+																	final long pSizeY,
+																	final long pSizeZ)
 	{
 		setVolumeDataBuffer(pByteBuffer,
 												pSizeX,
@@ -875,9 +882,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 	}
 
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
-																	final int pSizeX,
-																	final int pSizeY,
-																	final int pSizeZ,
+																	final long pSizeX,
+																	final long pSizeY,
+																	final long pSizeZ,
 																	final double pVolumeSizeX,
 																	final double pVolumeSizeY,
 																	final double pVolumeSizeZ)
@@ -942,7 +949,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 				mGlWindow.getLocationOnScreen(lPoint);
 				mWindowX = lPoint.getX();
 				mWindowY = lPoint.getY();
+				mGlWindow.setSize(mWindowWidth, mWindowHeight);
 				mGlWindow.setFullscreen(true);
+
 				mGlWindow.display();
 				// mAnimator.start();
 			}
@@ -965,7 +974,8 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	public boolean hasRotationController()
 	{
-		return mRotationController != null;
+		return mRotationController != null ? mRotationController.isActive()
+																			: false;
 	}
 
 	public void setQuaternionController(final RotationControllerInterface quaternionController)
