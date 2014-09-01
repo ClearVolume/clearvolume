@@ -8,6 +8,6 @@ build/
 .DS_Store
 hs_err_pid*
 old
-src/clearvolume/test/databig
+src/clearvolume/demo/databig/
 
 

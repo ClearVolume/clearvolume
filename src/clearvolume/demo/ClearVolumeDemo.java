@@ -1,4 +1,4 @@
-package clearvolume.test;
+package clearvolume.demo;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,13 +11,13 @@ import clearvolume.jcuda.JCudaClearVolumeRenderer;
 import clearvolume.transfertf.ProjectionAlgorithm;
 import clearvolume.transfertf.TransfertFunctions;
 
-public class ClearVolumeTests
+public class ClearVolumeDemo
 {
 
 	private static JCudaClearVolumeRenderer mJCudaClearVolumeRenderer;
 
 	@Test
-	public void testWith8BitGeneratedDataset() throws InterruptedException,
+	public void demoWith8BitGeneratedDataset() throws InterruptedException,
 																						IOException
 	{
 		final JCudaClearVolumeRenderer lJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
@@ -68,7 +68,7 @@ public class ClearVolumeTests
 	}
 
 	@Test
-	public void testWith16BitGeneratedDataset()	throws InterruptedException,
+	public void demoWith16BitGeneratedDataset()	throws InterruptedException,
 																							IOException
 	{
 		final JCudaClearVolumeRenderer lJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
@@ -120,7 +120,7 @@ public class ClearVolumeTests
 	}
 
 	@Test
-	public void testWithGeneratedDatasetWithEgg3D()	throws InterruptedException,
+	public void demoWithGeneratedDatasetWithEgg3D()	throws InterruptedException,
 																									IOException
 	{
 
@@ -184,7 +184,7 @@ public class ClearVolumeTests
 	}
 
 	@Test
-	public void testWithFileDatasets()
+	public void demoWithFileDatasets()
 	{
 
 		try
@@ -213,7 +213,7 @@ public class ClearVolumeTests
 																	final int pSizeZ)	throws IOException,
 																										InterruptedException
 	{
-		final InputStream lResourceAsStream = ClearVolumeTests.class.getResourceAsStream(pRessourceName);
+		final InputStream lResourceAsStream = ClearVolumeDemo.class.getResourceAsStream(pRessourceName);
 		startSample(lResourceAsStream,
 								pBytesPerVoxel,
 								pSizeX,
@@ -268,7 +268,7 @@ public class ClearVolumeTests
 																	final int sizeY,
 																	final int sizeZ) throws IOException
 	{
-		final InputStream lResourceAsStream = ClearVolumeTests.class.getResourceAsStream(pRessourceName);
+		final InputStream lResourceAsStream = ClearVolumeDemo.class.getResourceAsStream(pRessourceName);
 
 		return loadData(lResourceAsStream,
 										pBytesPerVoxel,
