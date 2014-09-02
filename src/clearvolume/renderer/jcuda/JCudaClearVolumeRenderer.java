@@ -679,7 +679,9 @@ public class JCudaClearVolumeRenderer extends JOGLPBOClearVolumeRenderer	impleme
 		}
 		catch (final Throwable e)
 		{
-			System.err.println(e.getLocalizedMessage());
+			throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																		.getSimpleName(),
+																	e);
 		}
 	}
 
