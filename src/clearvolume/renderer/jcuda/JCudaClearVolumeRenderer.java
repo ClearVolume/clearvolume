@@ -1,4 +1,4 @@
-package clearvolume.jcuda;
+package clearvolume.renderer.jcuda;
 
 /*
  * JCuda - Java bindings for NVIDIA CUDA driver and runtime API
@@ -55,32 +55,80 @@ import jcuda.driver.CUmemorytype;
 import jcuda.driver.CUmodule;
 import jcuda.driver.CUtexref;
 import jcuda.runtime.dim3;
-import clearvolume.jogl.JoglPBOVolumeRenderer;
+import clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer;
 
-public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
+/**
+ * Class JCudaClearVolumeRenderer
+ * 
+ * Implements a JOGLPBOClearVolumeRenderer usin a CUDA kernel for rendering the
+ * 2D projection.
+ *
+ * @author Loic Royer 2014
+ *
+ */
+public class JCudaClearVolumeRenderer extends JOGLPBOClearVolumeRenderer	implements
 																																		GLEventListener
 {
 
+	/**
+	 * CUDA module.
+	 */
 	private final CUmodule mCUmodule = new CUmodule();
+
+	/**
+	 * Volume rendering CUDA function
+	 */
 	private CUfunction mVolumeRenderingFunction;
 
-	private CUdeviceptr mCUdeviceptr;
-
-	final CUdeviceptr mInvertedViewMatrix = new CUdeviceptr();
-	final CUdeviceptr mSizeOfTransfertFunction = new CUdeviceptr();
+	/**
+	 * CUDA Device pointers to the device itself, to the inverted view-matrix and
+	 * to the size of the transfer function.
+	 */
+	final CUdeviceptr mCUdeviceptr = new CUdeviceptr(),
+			mInvertedViewMatrix = new CUdeviceptr(),
+			mSizeOfTransfertFunction = new CUdeviceptr();
+	
+	/**
+	 * inverted view-matrix as float array.
+	 */
 	final float invViewMatrix[] = new float[12];
 
+	/**
+	 * CUDA arrays to the transfer fucntion and volume data.
+	 */
 	private CUarray mTransferFunctionCUarray, mVolumeDataCUarray;
+
+	/**
+	 * CUDA references to the transfer function and volume data textures.
+	 */
 	private CUtexref mVolumeDataTexture, mTransferFunctionTexture;
 
+	/**
+	 * Block dimensions.
+	 */
 	private final dim3 mBlockSize = new dim3(32, 32, 1);
 
+	/**
+	 * GRid dimensions.
+	 */
 	private dim3 mGridSize = new dim3(getTextureWidth() / mBlockSize.x,
 																		getTextureHeight() / mBlockSize.y,
 																		1);
 
+	/**
+	 * Pointer to kernel parameters.
+	 */
 	private Pointer mKernelParametersPointer;
 
+
+	/**
+	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
+	 * name, width and height.
+	 * 
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
 																	final int pWindowWidth,
 																	final int pWindowHeight)
@@ -88,6 +136,15 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		super(pWindowName, pWindowWidth, pWindowHeight);
 	}
 
+	/**
+	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
+	 * name, width, height, and bytes=per-voxel.
+	 * 
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 * @param pBytesPerVoxel
+	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
 																	final int pWindowWidth,
 																	final int pWindowHeight,
@@ -97,7 +154,7 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 	}
 
 	/**
-	 * Initialize CUDA and the 3D texture with the current volume data.
+	 * Initialises CUDA and the 3D texture with the current volume data.
 	 * 
 	 * @throws IOException
 	 */
@@ -156,6 +213,9 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		}
 	}
 
+	/**
+	 * Allocates, configures and copies 3D volume data.
+	 */
 	private void prepareVolumeDataTexture()
 	{
 		if (!isVolumeDataAvailable())
@@ -185,11 +245,15 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		}
 	}
 
+	/**
+	 * Allocates CUDSA array for transfer function, configures texture and copies
+	 * transfer function data.
+	 */
 	private void prepareTransfertFunctionTexture()
 	{
 		final float[] lTransferFunctionArray = getTransfertFunctionArray();
 
-		allocateTransfertFunctionTexture(	mTransferFunctionCUarray,
+		allocateTransfertFunctionCUDAarray(	mTransferFunctionCUarray,
 																			lTransferFunctionArray.length);
 
 		configureCudaTransfertFunctionTextureReference(	mTransferFunctionCUarray,
@@ -199,6 +263,14 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 																	lTransferFunctionArray);
 	}
 
+	/**
+	 * Allocates 3D CUDA array for storing the 3D volume data.
+	 * 
+	 * @param pVolumeArrayCUarray
+	 * @param pVolumeSizeX
+	 * @param pVolumeSizeY
+	 * @param pVolumeSizeZ
+	 */
 	private void allocateVolumeDataTexture(	final CUarray pVolumeArrayCUarray,
 																					final long pVolumeSizeX,
 																					final long pVolumeSizeY,
@@ -225,12 +297,24 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		cuCtxSynchronize();
 	}
 
+	/**
+	 * Destroys/frees the provided CUDA array.
+	 * 
+	 * @param pVolumeArrayCUarray
+	 *          CUDA array to free/destroy.
+	 */
 	private void freeCudaArray(final CUarray pVolumeArrayCUarray)
 	{
 		cuArrayDestroy(pVolumeArrayCUarray);
 	}
 
-	private void allocateTransfertFunctionTexture(final CUarray pTransferFunctionCUarray,
+	/**
+	 * Allocates CUDA array for transfer function.
+	 * 
+	 * @param pTransferFunctionCUarray
+	 * @param pTransferFunctionArrayLength
+	 */
+	private void allocateTransfertFunctionCUDAarray(final CUarray pTransferFunctionCUarray,
 																								final int pTransferFunctionArrayLength)
 	{
 		// Create the 2D (float4) array that will contain the
@@ -244,17 +328,16 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		cuCtxSynchronize();
 	}
 
-	private void freeTransfertFunctionTexture(final CUarray pTransferFunctionCUarray)
-	{
-		cuArrayDestroy(pTransferFunctionCUarray);
-	}
 
-	/*
-	public void copyVolumeDataIntoTexture(final ByteBuffer pByteBuffer)
-	{
-		copyVolumeDataIntoTexture(mVolumeDataCUarray, pByteBuffer);
-	}/**/
-
+	/**
+	 * Copies 3D volume data from ByteBuffer to CUDA array.
+	 * 
+	 * @param pVolumeArrayCUarray
+	 * @param pByteBuffer
+	 * @param pVolumeSizeX
+	 * @param pVolumeSizeY
+	 * @param pVolumeSizeZ
+	 */
 	private void copyVolumeDataIntoTexture(	final CUarray pVolumeArrayCUarray,
 																					final ByteBuffer pByteBuffer,
 																					final long pVolumeSizeX,
@@ -275,16 +358,18 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		copy.Height = pVolumeSizeY;
 		copy.Depth = pVolumeSizeZ;
 
-		/*System.out.format("cuMemcpy3D(%d,%d,%d) prod=%d and pByteBuffer.capacity()=%d \n",
-											pVolumeSizeX,
-											pVolumeSizeY,
-											pVolumeSizeZ,
-											pVolumeSizeX * pVolumeSizeY * pVolumeSizeZ,
-											pByteBuffer.capacity());/**/
 		cuMemcpy3D(copy);
 		cuCtxSynchronize();
 	}
 
+	/**
+	 * Copies transfer function from java array to CUDA array
+	 * 
+	 * @param pTransferFunctionCUarray
+	 *          CUDA array
+	 * @param pTransferFunctionArray
+	 *          Java array
+	 */
 	private void copyTransfertFunctionTexture(final CUarray pTransferFunctionCUarray,
 																						final float[] pTransferFunctionArray)
 	{
@@ -301,6 +386,14 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		cuCtxSynchronize();
 	}
 
+	/**
+	 * Configures CUDA texture reference for transfer function.
+	 * 
+	 * @param pVolumeArrayCUarray
+	 *          CUDA array
+	 * @param pVolumeDataTexture
+	 *          CUDA texture reference
+	 */
 	private void configureCudaTextureReference(	final CUarray pVolumeArrayCUarray,
 																							final CUtexref pVolumeDataTexture)
 	{
@@ -341,12 +434,17 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 											pVolumeDataTexture);
 	}
 
+	/**
+	 * Configures CUDA texture reference for transfer function.
+	 * 
+	 * @param pTransferFunctionCUarray
+	 *          CUDA array
+	 * @param pTransfertFunctionCUtexref
+	 *          CUDA texture reference
+	 */
 	private void configureCudaTransfertFunctionTextureReference(final CUarray pTransferFunctionCUarray,
 																															final CUtexref pTransfertFunctionCUtexref)
 	{
-		// Obtain the transfer texture reference from the module,
-		// set its parameters and assign the transfer function
-		// array as its reference.
 		cuModuleGetTexRef(pTransfertFunctionCUtexref,
 											mCUmodule,
 											"transferTex");
@@ -391,6 +489,12 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		return (a % b != 0) ? (a / b + 1) : (a / b);
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer#renderVolume(javax.media.opengl.GL2,
+	 *      float[])
+	 */
 	@Override
 	protected void renderVolume(final GL2 gl, final float[] modelView)
 	{
@@ -420,6 +524,12 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 			drawPBOToTextureToScreen(gl);
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer#renderedImageHook(javax.media.opengl.GL2,
+	 *      int)
+	 */
 	@Override
 	public void renderedImageHook(final GL2 pGl,
 																final int pPixelBufferObjectId)
@@ -481,7 +591,7 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 
 				}
 
-				mDataBufferCopyFinished.countDown();
+				notifyCompletionOfDataBufferCopy();
 			}
 
 		}
@@ -495,11 +605,11 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		return false;
 	}
 
+	/**
+	 * Runs 3D to 2D rendering kernel.
+	 */
 	private void runKernel()
 	{
-
-		mCUdeviceptr = new CUdeviceptr();
-
 		mKernelParametersPointer = Pointer.to(Pointer.to(mCUdeviceptr),
 																					Pointer.to(new int[]
 																					{ getTextureWidth() }),
@@ -552,8 +662,13 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 		cuGLUnmapBufferObject(mPixelBufferObjectId);
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer#close()
+	 */
 	@Override
-	public void close() throws IOException
+	public void close()
 	{
 		try
 		{
@@ -567,5 +682,6 @@ public class JCudaClearVolumeRenderer extends JoglPBOVolumeRenderer	implements
 			System.err.println(e.getLocalizedMessage());
 		}
 	}
+
 
 }

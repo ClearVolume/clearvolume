@@ -1,4 +1,4 @@
-package clearvolume.jcuda;
+package clearvolume.renderer.jcuda;
 
 import static jcuda.driver.JCudaDriver.cuCtxDestroy;
 import static jcuda.driver.JCudaDriver.cuDeviceGet;
@@ -7,15 +7,9 @@ import static jcuda.driver.JCudaDriver.cuInit;
 import static jcuda.driver.JCudaDriver.cuModuleGetFunction;
 import static jcuda.driver.JCudaDriver.cuModuleLoad;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -29,14 +23,26 @@ import jcuda.driver.JCudaDriver;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
 
 public class JCudaUtils
 {
 	private static CUcontext sCUcontext;
 
+	/**
+	 * Initialises CUDA and returns a given CUDA function
+	 * 
+	 * @param pCUmodule
+	 * @param pSourceCodeInputStream
+	 * @param pPlanBPTXInputStream
+	 * @param pFunctionSignature
+	 * @param pCompiledParameters
+	 * @return
+	 * @throws IOException
+	 */
 	public static final CUfunction initCuda(final CUmodule pCUmodule,
 																					final InputStream pSourceCodeInputStream,
-																					final InputStream pBackupPTXInputStream,
+																					final InputStream pPlanBPTXInputStream,
 																					final String pFunctionSignature,
 																					final Map<String, String> pCompiledParameters) throws IOException
 	{
@@ -50,7 +56,7 @@ public class JCudaUtils
 		cuGLCtxCreate(sCUcontext, 0, dev);
 
 		final File lPTXFile = nvccCompile(pSourceCodeInputStream,
-																			pBackupPTXInputStream,
+																			pPlanBPTXInputStream,
 																			pCompiledParameters);
 
 		// Load the PTX file containing the kernel
@@ -66,11 +72,24 @@ public class JCudaUtils
 		return function;
 	}
 
+	/**
+	 * Closes the CUDA context.
+	 */
 	public static final void closeCuda()
 	{
 		cuCtxDestroy(sCUcontext);
 	}
 
+	/**
+	 * Compiles a .cu or otherwise uses an available .ptx file both accessed as
+	 * resources (InputStream) additional compilation parameters can be provided.
+	 * 
+	 * @param pInputStreamCUFileInputStream
+	 * @param pBackupPTXFileInputStream
+	 * @param pCompiledParameters
+	 * @return
+	 * @throws IOException
+	 */
 	private static File nvccCompile(final InputStream pInputStreamCUFileInputStream,
 																	final InputStream pBackupPTXFileInputStream,
 																	final Map<String, String> pCompiledParameters) throws IOException
@@ -98,7 +117,6 @@ public class JCudaUtils
 																										lReplacement);
 				}
 
-			// System.out.println(lCUFileString);
 
 			FileUtils.write(lCUFile, lCUFileString);
 
@@ -115,50 +133,38 @@ public class JCudaUtils
 			}
 
 			final File lPTXFile = File.createTempFile("jcuda", ".ptx");
-			return streamtoFile(pBackupPTXFileInputStream, lPTXFile);
+			FileUtils.copyInputStreamToFile(pBackupPTXFileInputStream,
+																			lPTXFile);
+			return lPTXFile;
 		}
 	}
 
-	private static File streamtoFile(	InputStream pInputStream,
-																		File pFile)
-	{
-		try
-		{
-			FileOutputStream lFileOutputStream = new FileOutputStream(pFile);
 
-			int read = 0;
-			byte[] bytes = new byte[1024];
 
-			while ((read = pInputStream.read(bytes)) != -1)
-			{
-				lFileOutputStream.write(bytes, 0, read);
-			}
-
-			lFileOutputStream.close();
-			return pFile;
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-
-	}
-
+	/**
+	 * Compiles a .cu file into a .ptx file.
+	 * 
+	 * @param pCUFile
+	 * @param pPTXFile
+	 * @throws IOException
+	 */
 	private static void nvccCompile(final File pCUFile,
 																	final File pPTXFile) throws IOException
 	{
 
 		final InputStream lCudaHelper = JCudaUtils.class.getResourceAsStream("./kernels/helper_cuda.h");
-		streamToFile(lCudaHelper, new File(	pCUFile.getParent(),
+		FileUtils.copyInputStreamToFile(lCudaHelper,
+														new File(	pCUFile.getParent(),
 																				"helper_cuda.h"));
 
 		final InputStream lCudaMathHelper = JCudaUtils.class.getResourceAsStream("./kernels/helper_math.h");
-		streamToFile(lCudaMathHelper, new File(	pCUFile.getParent(),
+		FileUtils.copyInputStreamToFile(lCudaMathHelper,
+														new File(	pCUFile.getParent(),
 																						"helper_math.h"));
 
 		final InputStream lCudaStringHelper = JCudaUtils.class.getResourceAsStream("./kernels/helper_string.h");
-		streamToFile(lCudaStringHelper, new File(	pCUFile.getParent(),
+		FileUtils.copyInputStreamToFile(lCudaStringHelper,
+														new File(	pCUFile.getParent(),
 																							"helper_string.h"));
 
 		if (!pCUFile.exists())
@@ -190,8 +196,8 @@ public class JCudaUtils
 
 		final Process process = Runtime.getRuntime().exec(command);
 
-		final String errorMessage = new String(toByteArray(process.getErrorStream()));
-		final String outputMessage = new String(toByteArray(process.getInputStream()));
+		final String errorMessage = new String(IOUtils.toByteArray(process.getErrorStream()));
+		final String outputMessage = new String(IOUtils.toByteArray(process.getInputStream()));
 
 		int exitValue = 0;
 		try
@@ -213,71 +219,28 @@ public class JCudaUtils
 			throw new IOException("Could not create .ptx file: " + errorMessage);
 		}
 
-		// System.out.println("Finished creating PTX file");
-
 	}
 
+	/**
+	 * Returns the path of he nvcc executable. TODO: be smarter and use the env
+	 * variables on the system.
+	 * 
+	 * @return
+	 */
 	private static String getNVCCPath()
 	{
-		final String lOsNameString = System.getProperty("os.name");
-		System.out.println("OS: " + lOsNameString);
-		if (lOsNameString.toLowerCase().contains("osx") || lOsNameString.toLowerCase()
-																																		.contains("mac"))
+		if (SystemUtils.IS_OS_MAC_OSX)
 		{
-			return "/Developer/NVIDIA/CUDA-5.0/bin/nvcc";
+			return "/Developer/NVIDIA/CUDA-6.0/bin/nvcc";
 		}
-		else if (lOsNameString.toLowerCase().contains("win"))
+		else if (SystemUtils.IS_OS_WINDOWS)
 		{
 			return "\"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v5.0/bin/nvcc.exe\"";
 		}
 		return null;
 	}
 
-	/**
-	 * Fully reads the given InputStream and returns it as a byte array
-	 * 
-	 * @param inputStream
-	 *          The input stream to read
-	 * @return The byte array containing the data from the input stream
-	 * @throws IOException
-	 *           If an I/O error occurs
-	 */
-	private static byte[] toByteArray(final InputStream inputStream) throws IOException
-	{
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final byte buffer[] = new byte[8192];
-		while (true)
-		{
-			final int read = inputStream.read(buffer);
-			if (read == -1)
-			{
-				break;
-			}
-			baos.write(buffer, 0, read);
-		}
-		return baos.toByteArray();
-	}
 
-	public static final void streamToFile(final InputStream pInputStream,
-																				final File pFile) throws IOException
-	{
-		int lBufferSize = Math.min(	10000000,
-																pInputStream.available() / 10);
-		lBufferSize = lBufferSize == 0 ? 1000 : lBufferSize;
-		final InputStreamReader lInputStreamReader = new InputStreamReader(pInputStream);
-		final BufferedReader lBufferedReader = new BufferedReader(lInputStreamReader,
-																															lBufferSize);
 
-		final BufferedWriter lBufferedFileWriter = new BufferedWriter(new FileWriter(pFile),
-																																	lBufferSize);
-
-		int c;
-		while ((c = lBufferedReader.read()) != -1)
-		{
-			lBufferedFileWriter.write(c);
-		}
-		lBufferedReader.close();
-		lBufferedFileWriter.close();
-	}
 
 }

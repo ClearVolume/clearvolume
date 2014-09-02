@@ -6,25 +6,26 @@ import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
-import clearvolume.controller.ExternalController;
-import clearvolume.jcuda.JCudaClearVolumeRenderer;
-import clearvolume.transfertf.ProjectionAlgorithm;
+import clearvolume.ProjectionAlgorithm;
+import clearvolume.controller.ExternalRotationController;
+import clearvolume.renderer.ClearVolumeRenderer;
+import clearvolume.renderer.jcuda.JCudaClearVolumeRenderer;
 import clearvolume.transfertf.TransfertFunctions;
 
 public class ClearVolumeDemo
 {
 
-	private static JCudaClearVolumeRenderer mJCudaClearVolumeRenderer;
+	private static ClearVolumeRenderer mClearVolumeRenderer;
 
 	@Test
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,
 																						IOException
 	{
-		final JCudaClearVolumeRenderer lJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		final ClearVolumeRenderer lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																														768,
 																																														768);
-		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGreenGradient());
-		lJCudaClearVolumeRenderer.setVisible(true);
+		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGreenGradient());
+		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 64;
 		final int lResolutionY = 64;
@@ -50,19 +51,19 @@ public class ClearVolumeDemo
 																					^ (z) | (z / 3) ^ (x));/**/
 				}
 
-		lJCudaClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
 																									lResolutionX,
 																									lResolutionY,
 																									lResolutionZ);
 
-		for (int i = 0; lJCudaClearVolumeRenderer.isShowing(); i++)
+		for (int i = 0; lClearVolumeRenderer.isShowing(); i++)
 		{
 			Thread.sleep(500);
 			// lJCudaClearVolumeRenderer.requestDisplay();
 
 		}
 
-		lJCudaClearVolumeRenderer.close();
+		lClearVolumeRenderer.close();
 		// Thread.sleep(000);
 
 	}
@@ -71,12 +72,12 @@ public class ClearVolumeDemo
 	public void demoWith16BitGeneratedDataset()	throws InterruptedException,
 																							IOException
 	{
-		final JCudaClearVolumeRenderer lJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		final ClearVolumeRenderer lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																														768,
 																																														768,
 																																														2);
-		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
-		lJCudaClearVolumeRenderer.setVisible(true);
+		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
 		// lJCudaClearVolumeRenderer.start();
 
 		final int lResolutionX = 256;
@@ -104,17 +105,17 @@ public class ClearVolumeDemo
 																					^ (z) | (z / 3) ^ (x));/**/
 				}
 
-		lJCudaClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
 																									lResolutionX,
 																									lResolutionY,
 																									lResolutionZ);
 
-		while (lJCudaClearVolumeRenderer.isShowing())
+		while (lClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(100);
 		}
 
-		lJCudaClearVolumeRenderer.close();
+		lClearVolumeRenderer.close();
 		// Thread.sleep(000);
 
 	}
@@ -124,19 +125,19 @@ public class ClearVolumeDemo
 																									IOException
 	{
 
-		final JCudaClearVolumeRenderer lJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		final ClearVolumeRenderer lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																														512,
 																																														512);
-		lJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
-		lJCudaClearVolumeRenderer.setVisible(true);
-		lJCudaClearVolumeRenderer.setProjectionAlgorythm(ProjectionAlgorithm.MaxProjection);
+		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
+		lClearVolumeRenderer.setProjectionAlgorythm(ProjectionAlgorithm.MaxProjection);
 
-		ExternalController lEgg3DController = null;
+		ExternalRotationController lEgg3DController = null;
 		try
 		{
-			lEgg3DController = new ExternalController(ExternalController.Egg3DTCPport,
-																								lJCudaClearVolumeRenderer);
-			lJCudaClearVolumeRenderer.setQuaternionController(lEgg3DController);
+			lEgg3DController = new ExternalRotationController(ExternalRotationController.cDefaultEgg3DTCPport,
+																								lClearVolumeRenderer);
+			lClearVolumeRenderer.setQuaternionController(lEgg3DController);
 			lEgg3DController.connectAsynchronouslyOrWait();
 		}
 		catch (final Exception e)
@@ -166,17 +167,17 @@ public class ClearVolumeDemo
 				}
 
 		final ByteBuffer lWrappedArray = ByteBuffer.wrap(lVolumeDataArray);
-		lJCudaClearVolumeRenderer.setVolumeDataBuffer(lWrappedArray,
+		lClearVolumeRenderer.setVolumeDataBuffer(	lWrappedArray,
 																									lResolutionX,
 																									lResolutionY,
 																									lResolutionZ);
 
-		for (int i = 0; lJCudaClearVolumeRenderer.isShowing(); i++)
+		for (int i = 0; lClearVolumeRenderer.isShowing(); i++)
 		{
 			Thread.sleep(100);
 		}
 
-		lJCudaClearVolumeRenderer.close();
+		lClearVolumeRenderer.close();
 		// Thread.sleep(000);
 		if (lEgg3DController != null)
 			lEgg3DController.close();
@@ -238,24 +239,24 @@ public class ClearVolumeDemo
 		// Start the sample with the data that was read from the file
 		final ByteBuffer lVolumeData = ByteBuffer.wrap(data);
 
-		mJCudaClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
+		mClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																															512,
 																															512,
 																															pBytesPerVoxel);
-		mJCudaClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getRainbow());
+		mClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getRainbow());
 		// mJCudaClearVolumeRenderer.setupControlFrame();
 
 		/*final Egg3DController lEgg3DController = new Egg3DController();
 		mJCudaClearVolumeRenderer.setQuaternionController(lEgg3DController);
 		assertTrue(lEgg3DController.connect());/**/
 
-		mJCudaClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(data),
+		mClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(data),
 																									pSizeX,
 																									pSizeY,
 																									pSizeZ);
-		mJCudaClearVolumeRenderer.setVisible(true);
+		mClearVolumeRenderer.setVisible(true);
 
-		while (mJCudaClearVolumeRenderer.isShowing())
+		while (mClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(100);
 		}

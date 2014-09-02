@@ -9,30 +9,78 @@ import java.net.UnknownHostException;
 
 import javax.media.opengl.GL2;
 
-import clearvolume.DisplayRequest;
+import clearvolume.renderer.DisplayRequest;
 
 import com.jogamp.graph.math.Quaternion;
 
-public class ExternalController	implements
-																RotationControllerInterface,
-																Closeable,
-																Runnable
+/**
+ * Class ExternalRotationController
+ * 
+ * This class provides an implementation of RotationControllerInterface that
+ * uses incoming data from a TCP port in he form:
+ * 
+ * [qw,qx,qy,qz,ax,ay,az,b1,b2,b3]
+ * 
+ * where (qw,qx,qy,qz) is a quaternion with qw,qx,qy,qz are floats. and
+ * (ax,ay,az) is an acceleration vector (if available), and b1,b2, b3 are
+ * variable value buttons.
+ * 
+ * typically, the data arrives from a Egg3D controller or similarly compatible
+ * rotation controller. the default TCP port is 4444.
+ *
+ * @author Loic Royer 2014
+ *
+ */
+/**
+ * Class ExternalRotationController
+ * 
+ * Instances of this class ...
+ *
+ * @author Loic Royer 2014
+ *
+ */
+public class ExternalRotationController	implements
+																				RotationControllerInterface,
+																				Closeable,
+																				Runnable
 {
 
-	public static final int Egg3DTCPport = 4444;
+	/**
+	 * Default Egg3D TCP port
+	 */
+	public static final int cDefaultEgg3DTCPport = 4444;
 
+	// network relatd fields.
+	private Socket mClientSocket;
+	private int mPortNumber;
+	private volatile BufferedReader mBufferedInputStreamFromServer;
+
+	// Quaternion and locking object.
 	private final Quaternion mQuaternion = new Quaternion();
 	private final Object mQuaternionUpdateLock = new Object();
-	private Socket mClientSocket;
-	private volatile BufferedReader mBufferedInputStreamFromServer;
-	private int mPortNumber;
-	private Thread mThread;
 
+	/**
+	 * Thread responsible for receiving the data over TCP.
+	 */
+	private Thread mReceptionThread;
+
+	/**
+	 * DisplayRequest object that has to be called when requesting a display
+	 * update.
+	 */
 	private DisplayRequest mDisplayRequest;
 
-	public ExternalController(final int pPortNumber,
-														DisplayRequest pDisplayRequest)	throws UnknownHostException,
-																									IOException
+	/**
+	 * Constructs an instance of the ExternalRotationController class
+	 * 
+	 * @param pPortNumber
+	 * @param pDisplayRequest
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 */
+	public ExternalRotationController(final int pPortNumber,
+																		DisplayRequest pDisplayRequest)	throws UnknownHostException,
+																																		IOException
 	{
 		super();
 		mPortNumber = pPortNumber;
@@ -43,6 +91,10 @@ public class ExternalController	implements
 
 	}
 
+	/**
+	 * Starts a thread that asynchronously attempts to connect to the TCP server
+	 * using connect().
+	 */
 	public void connectAsynchronouslyOrWait()
 	{
 		Runnable lConnectionRunnable = new Runnable()
@@ -66,6 +118,12 @@ public class ExternalController	implements
 		lConnectionThread.start();
 	}
 
+	/**
+	 * Makes one attempt at connecting to the TCP server and proceeds to start the
+	 * reception thread.
+	 * 
+	 * @return
+	 */
 	public boolean connect()
 	{
 		try
@@ -73,19 +131,24 @@ public class ExternalController	implements
 			mClientSocket = new Socket("localhost", mPortNumber);
 			mBufferedInputStreamFromServer = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()));
 
-			mThread = new Thread(this, "ClearVolume-ExternalController");
-			mThread.setDaemon(true);
-			mThread.start();
+			mReceptionThread = new Thread(this,
+																		"ClearVolume-ExternalController");
+			mReceptionThread.setDaemon(true);
+			mReceptionThread.start();
 
 			return true;
 		}
 		catch (final Throwable e)
 		{
-			// e.printStackTrace();
 			return false;
 		}
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.controller.RotationControllerInterface#putModelViewMatrixIn(float[])
+	 */
 	@Override
 	public void putModelViewMatrixIn(final float[] pModelViewMatrix)
 	{
@@ -103,6 +166,11 @@ public class ExternalController	implements
 
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.controller.RotationControllerInterface#rotateGL(javax.media.opengl.GL2)
+	 */
 	@Override
 	public void rotateGL(final GL2 gl)
 	{
@@ -115,13 +183,24 @@ public class ExternalController	implements
 		gl.glMultMatrixf(lMatrix, 0);
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see java.io.Closeable#close()
+	 */
 	@Override
 	public void close() throws IOException
 	{
-		mClientSocket.close();
+		if (mClientSocket != null)
+			mClientSocket.close();
 		mClientSocket = null;
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run()
 	{
@@ -147,17 +226,24 @@ public class ExternalController	implements
 		connectAsynchronouslyOrWait();
 	}
 
+	/**
+	 * Parses messages from the TCP server.
+	 * 
+	 * @param pReadLine
+	 */
 	private void parseMessage(String pReadLine)
 	{
 		// System.out.println(pReadLine);
 		String lSubString = pReadLine.substring(1, pReadLine.length() - 2);
-		
+
 		String[] lSplittedSubString = lSubString.split(",");
 
 		final float lQuaternionW = Float.parseFloat(lSplittedSubString[0]);
 		final float lQuaternionX = Float.parseFloat(lSplittedSubString[1]);
 		final float lQuaternionY = Float.parseFloat(lSplittedSubString[2]);
 		final float lQuaternionZ = Float.parseFloat(lSplittedSubString[3]);
+
+		// TODO: find some use for these:
 		final float lAccelerationX = Float.parseFloat(lSplittedSubString[4]);
 		final float lAccelerationY = Float.parseFloat(lSplittedSubString[5]);
 		final float lAccelerationZ = Float.parseFloat(lSplittedSubString[6]);
@@ -177,6 +263,11 @@ public class ExternalController	implements
 
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.controller.RotationControllerInterface#isActive()
+	 */
 	@Override
 	public boolean isActive()
 	{

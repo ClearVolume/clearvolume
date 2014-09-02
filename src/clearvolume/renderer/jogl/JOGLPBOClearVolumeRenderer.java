@@ -1,4 +1,4 @@
-package clearvolume.jogl;
+package clearvolume.renderer.jogl;
 
 import static jcuda.driver.JCudaDriver.cuGLRegisterBufferObject;
 import static jcuda.driver.JCudaDriver.cuGLUnregisterBufferObject;
@@ -6,13 +6,8 @@ import static jcuda.driver.JCudaDriver.cuGLUnregisterBufferObject;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.io.Closeable;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.nativewindow.util.Point;
@@ -30,11 +25,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jcuda.Sizeof;
-import clearvolume.DisplayRequest;
-import clearvolume.controller.RotationControllerInterface;
-import clearvolume.transfertf.ProjectionAlgorithm;
-import clearvolume.transfertf.TransfertFunction;
-import clearvolume.transfertf.TransfertFunctions;
+import clearvolume.renderer.ClearVolumeRendererBase;
 
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Window;
@@ -42,11 +33,22 @@ import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.newt.opengl.GLWindow;
 
-public abstract class JoglPBOVolumeRenderer	implements
-																						GLEventListener,
-																						Closeable,
-																						DisplayRequest
+/**
+ * Abstract Class JoglPBOVolumeRenderer
+ * 
+ * Classes that derive from this abstract class are provided with basic
+ * JOGL-based display capability for implementing a ClearVolumeRenderer.
+ *
+ * @author Loic Royer 2014
+ *
+ */
+public abstract class JOGLPBOClearVolumeRenderer	extends
+																						ClearVolumeRendererBase	implements
+																																		GLEventListener
 {
+	/**
+	 * JOGL capabilities object.
+	 */
 	private static GLCapabilities sCapabilities;
 	static
 	{
@@ -54,83 +56,79 @@ public abstract class JoglPBOVolumeRenderer	implements
 		sCapabilities = new GLCapabilities(lProfile);
 	}
 
-	private RotationControllerInterface mRotationController;
-
+	// Window name, dimensions, positions, JFrame and GLWindow.
 	private final String mWindowName;
-	private volatile int mWindowWidth = 0;
-	private volatile int mWindowHeight = 0;
+	private volatile int mWindowWidth = 0, mWindowHeight = 0;
+	private volatile int mWindowX, mWindowY;
 	private JFrame mControlFrame;
 	private final GLWindow mGlWindow;
-	protected int mPixelBufferObjectId = 0;
 
-	private int mBytesPerVoxel = 1;
-
-	private ProjectionAlgorithm mProjectionAlgorythm = ProjectionAlgorithm.MaxProjection;
-
-	private TransfertFunction mTransferFunction = TransfertFunctions.getDefaultTransfertFunction();
-
-	protected volatile float mTranslationX = 0, mTranslationY = 0,
-			mTranslationZ = 0;
-	protected volatile float mRotationX = 0, mRotationY = 0;
-
-	private volatile double mScaleX = 1.0f, mScaleY = 1.0f,
-			mScaleZ = 1.0f;
-	private volatile float mDensity, mBrightness = 1,
-			mTransferRangeMin = 0, mTransferRangeMax = 1, mGamma = 1;
-
-	private volatile boolean mUpdateVolumeRenderingParameters = true;
-
+	// modelview matrix
 	private final float mModelViewMatrix[] = new float[16];
 
-	private final Object mSetVolumeDataBufferLock = new Object();
-	private volatile ByteBuffer mVolumeDataByteBuffer;
-	private volatile long mVolumeSizeX, mVolumeSizeY, mVolumeSizeZ;
-	private volatile boolean mVolumeDimensionsChanged;
+	// pixelbuffer object.
+	protected int mPixelBufferObjectId = 0;
+
+	// texture and its dimensions.
 	private int mTextureId;
-	private final int mTextureWidth;
-	private final int mTextureHeight;
+	private final int mTextureWidth, mTextureHeight;
 
-	protected CountDownLatch mDataBufferCopyFinished;
+	// Internal fields for calculating FPS.
+	private int step = 0;
+	private long prevTimeNS = -1;
 
-	private final Executor mRenderingExecutor = Executors.newSingleThreadExecutor();
 
-	public JoglPBOVolumeRenderer(	final String pWindowName,
+
+	private final Window mWindow;
+
+
+	/**
+	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
+	 * name and its dimensions.
+	 * 
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 */
+	public JOGLPBOClearVolumeRenderer(	final String pWindowName,
 																final int pWindowWidth,
 																final int pWindowHeight)
 	{
 		this(pWindowName, pWindowWidth, pWindowHeight, 1);
 	}
 
-	public JoglPBOVolumeRenderer(	final String pWindowName,
+	/**
+	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
+	 * name, its dimensions, and bytes-per-voxel.
+	 * 
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 * @param pBytesPerPixel
+	 */
+	public JOGLPBOClearVolumeRenderer(	final String pWindowName,
 																final int pWindowWidth,
 																final int pWindowHeight,
-																final int pBytesPerPixel)
+																final int pBytesPerVoxel)
 	{
-		resetDensityBrightnessOffsetScale();
+		resetBrightnessAndGammaAndTransferFunctionRanges();
 		resetRotationTranslation();
 
 		mWindowName = pWindowName;
 		mWindowWidth = pWindowWidth;
 		mWindowHeight = pWindowHeight;
-		mBytesPerVoxel = pBytesPerPixel;
+		setBytesPerVoxel(pBytesPerVoxel);
 
 		mTextureWidth = Math.min(768, mWindowWidth);
 		mTextureHeight = Math.min(768, mWindowHeight);
 
 		// Initialize the GL component
 
-		final NewtFactory lNewtFactory = new NewtFactory();
-
 		mWindow = NewtFactory.createWindow(sCapabilities);
 		mGlWindow = GLWindow.create(mWindow);
 		mGlWindow.setTitle(mWindowName);
 		mGlWindow.addGLEventListener(this);
 		mGlWindow.setSize(mWindowWidth, mWindowHeight);
-
-		if (System.getProperty("os.name").toLowerCase().contains("mac"))
-		{
-
-		}
 
 		// Initialize the mouse controls
 		final MouseControl lMouseControl = new MouseControl(this);
@@ -145,12 +143,13 @@ public abstract class JoglPBOVolumeRenderer	implements
 			@Override
 			public void windowDestroyNotify(final WindowEvent pE)
 			{
-				// mAnimator.stop();
 				super.windowDestroyNotify(pE);
 			};
 		});
 
 	}
+
+
 
 	private void setupControlFrame()
 	{
@@ -164,292 +163,85 @@ public abstract class JoglPBOVolumeRenderer	implements
 	}
 
 	@Override
-	public void close() throws IOException
+	public void close()
 	{
 		if (mGlWindow.isRealized())
 			mGlWindow.destroy();
 	}
 
+	/**
+	 * Interface method implementation
+	 * @see clearvolume.renderer.ClearVolumeRenderer#isShowing()
+	 */
 	public boolean isShowing()
 	{
 		return mGlWindow.isVisible();
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.renderer.ClearVolumeRenderer#setVisible(boolean)
+	 */
 	public void setVisible(final boolean pIsVisible)
 	{
 		mGlWindow.setVisible(pIsVisible);
 	}
 
+
+		/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.renderer.ClearVolumeRenderer#getWindowName()
+	 */
 	public String getWindowName()
 	{
 		return mWindowName;
 	}
 
-	public boolean getIsUpdateVolumeParameters()
-	{
-		return mUpdateVolumeRenderingParameters;
-	}
 
-	public void notifyUpdateOfVolumeParameters()
-	{
-		mUpdateVolumeRenderingParameters = true;
-	}
-
-	public void clearIsUpdateVolumeParameters()
-	{
-		mUpdateVolumeRenderingParameters = false;
-	}
-
-	public void setVolumeSize(final double pVolumeSizeX,
-														final double pVolumeSizeY,
-														final double pVolumeSizeZ)
-	{
-		final double lMaxXYZ = Math.max(Math.max(	pVolumeSizeX,
-																							pVolumeSizeY),
-																		pVolumeSizeZ);
-
-		setScaleX(pVolumeSizeX / lMaxXYZ);
-		setScaleY(pVolumeSizeY / lMaxXYZ);
-		setScaleZ(pVolumeSizeZ / lMaxXYZ);
-	}
-
-	public void setScaleX(final double pScaleX)
-	{
-		mScaleX = (float) pScaleX;
-		mUpdateVolumeRenderingParameters = true;
-	}
-
-	public void setScaleY(final double pScaleY)
-	{
-		mScaleY = (float) pScaleY;
-		mUpdateVolumeRenderingParameters = true;
-	}
-
-	public void setScaleZ(final double pScaleZ)
-	{
-		mScaleZ = (float) pScaleZ;
-		mUpdateVolumeRenderingParameters = true;
-	}
-
-	public void resetDensityBrightnessOffsetScale()
-	{
-		mDensity = 0.05f;
-		mBrightness = 1.0f;
-		mTransferRangeMin = 0.0f;
-		mTransferRangeMax = 1.0f;
-	}
-
-	public void setDensity(final double pDensity)
-	{
-		mDensity = (float) clamp(pDensity, 0, 1);
-		mUpdateVolumeRenderingParameters = true;
-	}
-
-	public void setBrightness(final double pBrightness)
-	{
-		mBrightness = (float) clamp(pBrightness,
-																0,
-																getBytesPerVoxel() == 1 ? 16 : 256);
-		mUpdateVolumeRenderingParameters = true;
-	}
-
-	public void setTransferRange(	final double pTransferRangeMin,
-																final double pTransferRangeMax)
-	{
-		mTransferRangeMin = (float) clamp(pTransferRangeMin, 0, 1);
-		mTransferRangeMax = (float) clamp(pTransferRangeMax, 0, 1);
-		mUpdateVolumeRenderingParameters = true;
-	}
-
-	public void setTransferRangeMin(final double pTransferRangeMin)
-	{
-		mTransferRangeMin = (float) clamp(pTransferRangeMin, 0, 1);
-		mUpdateVolumeRenderingParameters = true;
-	}
-
-	public void setTransferRangeMax(final double pTransferRangeMax)
-	{
-		mTransferRangeMax = (float) clamp(pTransferRangeMax, 0, 1);
-		mUpdateVolumeRenderingParameters = true;
-	}
-
-	public void setGamma(final double pGamma)
-	{
-		mGamma = (float) pGamma;
-		mUpdateVolumeRenderingParameters = true;
-	}
-
-	public void addDensity(final double pDensityDelta)
-	{
-		setDensity(mDensity + pDensityDelta);
-	}
-
-	public void addBrightness(final double pBrightnessDelta)
-	{
-		setBrightness(mBrightness + pBrightnessDelta);
-	}
-
-	public void addTransferRangePosition(final double pTransferRangePositionDelta)
-	{
-		addTransferRangeMin(pTransferRangePositionDelta);
-		addTransferRangeMax(pTransferRangePositionDelta);
-	}
-
-	public void addTransferRangeWidth(final double pTransferRangeWidthDelta)
-	{
-		addTransferRangeMin(-pTransferRangeWidthDelta);
-		addTransferRangeMax(pTransferRangeWidthDelta);
-	}
-
-	public void addTransferRangeMin(final double pDelta)
-	{
-		setTransferRangeMin(mTransferRangeMin + pDelta);
-	}
-
-	public void addTransferRangeMax(final double pDelta)
-	{
-		setTransferRangeMax(mTransferRangeMax + pDelta);
-	}
-
-	private double clamp(	final double pValue,
-												final double pMin,
-												final double pMax)
-	{
-		return Math.min(Math.max(pValue, pMin), pMax);
-	}
-
-	public double getScaleX()
-	{
-		return mScaleX;
-	}
-
-	public double getScaleY()
-	{
-		return mScaleY;
-	}
-
-	public double getScaleZ()
-	{
-		return mScaleZ;
-	}
-
-	public double getDensity()
-	{
-		return mDensity;
-	}
-
-	public double getBrightness()
-	{
-		return mBrightness;
-	}
-
-	public double getTransferRangeMin()
-	{
-		return mTransferRangeMin;
-	}
-
-	public double getTransferRangeMax()
-	{
-		return mTransferRangeMax;
-	}
-
-	public double getGamma()
-	{
-		return mGamma;
-	}
-
-	public ByteBuffer getVolumeDataBuffer()
-	{
-		return mVolumeDataByteBuffer;
-	}
-
-	public void clearVolumeDataBufferReference()
-	{
-		mVolumeDataByteBuffer = null;
-	}
-
-	public boolean isVolumeDataAvailable()
-	{
-		return mVolumeSizeX * mVolumeSizeY * mVolumeSizeZ > 0;
-	}
-
-	public long getVolumeSizeX()
-	{
-		return mVolumeSizeX;
-	}
-
-	public long getVolumeSizeY()
-	{
-		return mVolumeSizeY;
-	}
-
-	public long getVolumeSizeZ()
-	{
-		return mVolumeSizeZ;
-	}
-
-	public Object getSetVolumeDataBufferLock()
-	{
-		return mSetVolumeDataBufferLock;
-	}
-
-	public boolean hasVolumeDimensionsChanged()
-	{
-		return mVolumeDimensionsChanged;
-	}
-
-	public void clearVolumeDimensionsChanged()
-	{
-		mVolumeDimensionsChanged = false;
-	}
-
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.renderer.ClearVolumeRenderer#getWindowWidth()
+	 */
 	public int getWindowWidth()
 	{
 		return mWindowWidth;
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.renderer.ClearVolumeRenderer#getWindowHeight()
+	 */
 	public int getWindowHeight()
 	{
 		return mWindowHeight;
 	}
 
+	/**
+	 * @return
+	 */
 	public int getTextureWidth()
 	{
 		return mTextureWidth;
 	}
 
+	/**
+	 * @return
+	 */
 	public int getTextureHeight()
 	{
 		return mTextureHeight;
 	}
 
+	/**
+	 * @return
+	 */
 	protected float[] getTransfertFunctionArray()
 	{
-		return mTransferFunction.getArray();
-	}
-
-	public void setTransfertFunction(final TransfertFunction pTransfertFunction)
-	{
-		mTransferFunction = pTransfertFunction;
-	}
-
-	public ProjectionAlgorithm getProjectionAlgorythm()
-	{
-		return mProjectionAlgorythm;
-	}
-
-	public void setProjectionAlgorythm(final ProjectionAlgorithm pProjectionAlgorithm)
-	{
-		mProjectionAlgorythm = pProjectionAlgorithm;
-	}
-
-	public void resetRotationTranslation()
-	{
-		mRotationX = 0;
-		mRotationY = 0;
-		mTranslationX = 0;
-		mTranslationY = 0;
-		mTranslationZ = -4;
+		return getTransfertFunction().getArray();
 	}
 
 	/**
@@ -463,25 +255,6 @@ public abstract class JoglPBOVolumeRenderer	implements
 		final JPanel controlPanel = new JPanel(new GridLayout(2, 2));
 		JPanel panel = null;
 		JSlider slider = null;
-
-		// Density
-		panel = new JPanel(new GridLayout(1, 2));
-		panel.add(new JLabel("Density:"));
-		slider = new JSlider(0, 100, 5);
-		slider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(final ChangeEvent e)
-			{
-				final JSlider source = (JSlider) e.getSource();
-				final float a = source.getValue() / 100.0f;
-				setDensity(a);
-				requestDisplay();
-			}
-		});
-		slider.setPreferredSize(new Dimension(0, 0));
-		panel.add(slider);
-		controlPanel.add(panel);
 
 		// Brightness
 		panel = new JPanel(new GridLayout(1, 2));
@@ -513,7 +286,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 			{
 				final JSlider source = (JSlider) e.getSource();
 				final float a = source.getValue() / 100.0f;
-				setTransferRangeMin(a);
+				setTransferFunctionRangeMin(a);
 				requestDisplay();
 			}
 		});
@@ -532,7 +305,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 			{
 				final JSlider source = (JSlider) e.getSource();
 				final float a = source.getValue() / 100.0f;
-				setTransferRangeMax(a);
+				setTransferFunctionRangeMax(a);
 				requestDisplay();
 			}
 		});
@@ -544,8 +317,8 @@ public abstract class JoglPBOVolumeRenderer	implements
 	}
 
 	/**
-	 * Implementation of GLEventListener: Called to initialize the GLAutoDrawable.
-	 * This method will initialize the JCudaDriver and cause the initialization of
+	 * Implementation of GLEventListener: Called to initialise the GLAutoDrawable.
+	 * This method will initialise the JCudaDriver and cause the initialisation of
 	 * CUDA and the OpenGL PBO.
 	 */
 	@Override
@@ -577,7 +350,6 @@ public abstract class JoglPBOVolumeRenderer	implements
 						{
 							if (initVolumeRenderer())
 							{
-
 								initPixelBufferObject(gl);
 								initTexture(gl);
 							}
@@ -593,8 +365,14 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	}
 
+	/**
+	 * @return
+	 */
 	protected abstract boolean initVolumeRenderer();
 
+	/**
+	 * @param gl
+	 */
 	void initPixelBufferObject(final GL gl)
 	{
 		if (mPixelBufferObjectId != 0)
@@ -689,14 +467,16 @@ public abstract class JoglPBOVolumeRenderer	implements
 			gl.glPushMatrix();
 			gl.glLoadIdentity();
 
-			gl.glRotatef(-mRotationX, 1.0f, 0.0f, 0.0f);
-			gl.glRotatef(-mRotationY, 0.0f, 1.0f, 0.0f);
+			gl.glRotatef(-getRotationX(), 1.0f, 0.0f, 0.0f);
+			gl.glRotatef(-getRotationY(), 0.0f, 1.0f, 0.0f);
 			if (hasRotationController())
 			{
 				getRotationController().rotateGL(gl);
-				notifyUpdateOfVolumeParameters();
+				notifyUpdateOfVolumeRenderingParameters();
 			}
-			gl.glTranslatef(-mTranslationX, -mTranslationY, -mTranslationZ);
+			gl.glTranslatef(-getTranslationX(),
+											-getTranslationY(),
+											-getTranslationZ());
 			gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, mModelViewMatrix, 0);
 			gl.glPopMatrix();
 
@@ -720,12 +500,23 @@ public abstract class JoglPBOVolumeRenderer	implements
 
 	}
 
+	/**
+	 * @param gl
+	 * @param modelView
+	 */
 	protected abstract void renderVolume(	final GL2 gl,
 																				final float[] modelView);
 
+	/**
+	 * @param gl
+	 * @param pPixelBufferObjectId
+	 */
 	public abstract void renderedImageHook(	final GL2 gl,
 																					int pPixelBufferObjectId);
 
+	/**
+	 * @param gl
+	 */
 	public void drawPBOToScreen(final GL2 gl)
 	{
 
@@ -744,6 +535,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 		updateFrameRateDisplay();
 	}
 
+	/**
+	 * @param gl
+	 */
 	public void drawPBOToTextureToScreen(final GL2 gl)
 	{
 
@@ -755,6 +549,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 		updateFrameRateDisplay();
 	}
 
+	/**
+	 * @param gl
+	 */
 	public void copyPBOToTexture(final GL2 gl)
 	{
 		gl.glBindTexture(gl.GL_TEXTURE_2D, mTextureId);
@@ -774,6 +571,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 		gl.glBindBuffer(GL2.GL_PIXEL_UNPACK_BUFFER, 0);
 	}
 
+	/**
+	 * @param gl
+	 */
 	public void drawQuad(final GL2 gl)
 	{
 		final double wt = 1;
@@ -801,9 +601,10 @@ public abstract class JoglPBOVolumeRenderer	implements
 		gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
 	}
 
-	private int step = 0;
-	private long prevTimeNS = -1;
 
+	/**
+	 * 
+	 */
 	private void updateFrameRateDisplay()
 	{
 		step++;
@@ -824,11 +625,20 @@ public abstract class JoglPBOVolumeRenderer	implements
 		}
 	}
 
+	/**
+	 * @param pTitleString
+	 */
 	private void setWindowTitle(final String pTitleString)
 	{
 		mGlWindow.setTitle(pTitleString);
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see javax.media.opengl.GLEventListener#reshape(javax.media.opengl.GLAutoDrawable,
+	 *      int, int, int, int)
+	 */
 	@Override
 	public void reshape(final GLAutoDrawable drawable,
 											final int x,
@@ -867,76 +677,20 @@ public abstract class JoglPBOVolumeRenderer	implements
 	{
 	}
 
-	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
-																	final long pSizeX,
-																	final long pSizeY,
-																	final long pSizeZ)
-	{
-		setVolumeDataBuffer(pByteBuffer,
-												pSizeX,
-												pSizeY,
-												pSizeZ,
-												1,
-												((double) pSizeY) / pSizeX,
-												((double) pSizeZ) / pSizeX);
-	}
 
-	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
-																	final long pSizeX,
-																	final long pSizeY,
-																	final long pSizeZ,
-																	final double pVolumeSizeX,
-																	final double pVolumeSizeY,
-																	final double pVolumeSizeZ)
-	{
-		synchronized (getSetVolumeDataBufferLock())
-		{
-			mDataBufferCopyFinished = new CountDownLatch(1);
 
-			if (mVolumeSizeX != pSizeX || mVolumeSizeY != pSizeY
-					|| mVolumeSizeZ != pSizeZ)
-			{
-				mVolumeDimensionsChanged = true;
-			}
-			mVolumeSizeX = pSizeX;
-			mVolumeSizeY = pSizeY;
-			mVolumeSizeZ = pSizeZ;
-
-			mScaleX = pVolumeSizeX;
-			mScaleY = pVolumeSizeY;
-			mScaleZ = pVolumeSizeZ;
-
-			mVolumeDataByteBuffer = pByteBuffer;
-
-			notifyUpdateOfVolumeParameters();
-
-		}
-	}
-
-	public boolean waitToFinishDataBufferCopy()
-	{
-		try
-		{
-			mDataBufferCopyFinished.await();
-			return true;
-		}
-		catch (final InterruptedException e)
-		{
-			return false;
-		}
-	}
-
-	private int mWindowX, mWindowY;
-
-	private final Window mWindow;
-
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.renderer.ClearVolumeRenderer#toggleFullScreen()
+	 */
 	public void toggleFullScreen()
 	{
 		try
 		{
 			if (mGlWindow.isFullscreen())
 			{
-				mUpdateVolumeRenderingParameters = true;
+				notifyUpdateOfVolumeRenderingParameters();
 				mGlWindow.setFullscreen(false);
 				mGlWindow.display();
 				// mNewtWindow.setPosition(mWindowX, mWindowY);
@@ -944,7 +698,7 @@ public abstract class JoglPBOVolumeRenderer	implements
 			else
 			{
 				// mAnimator.stop();
-				mUpdateVolumeRenderingParameters = true;
+				notifyUpdateOfVolumeRenderingParameters();
 				final Point lPoint = new Point();
 				mGlWindow.getLocationOnScreen(lPoint);
 				mWindowX = lPoint.getX();
@@ -962,32 +716,21 @@ public abstract class JoglPBOVolumeRenderer	implements
 		}
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.renderer.ClearVolumeRenderer#isFullScreen()
+	 */
 	public boolean isFullScreen()
 	{
 		return mGlWindow.isFullscreen();
 	}
 
-	public RotationControllerInterface getRotationController()
-	{
-		return mRotationController;
-	}
-
-	public boolean hasRotationController()
-	{
-		return mRotationController != null ? mRotationController.isActive()
-																			: false;
-	}
-
-	public void setQuaternionController(final RotationControllerInterface quaternionController)
-	{
-		mRotationController = quaternionController;
-	}
-
-	public int getBytesPerVoxel()
-	{
-		return mBytesPerVoxel;
-	}
-
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see clearvolume.renderer.DisplayRequest#requestDisplay()
+	 */
 	public void requestDisplay()
 	{
 		mGlWindow.runOnEDTIfAvail(false, new Runnable()
@@ -1000,6 +743,9 @@ public abstract class JoglPBOVolumeRenderer	implements
 		});
 	}
 
+	/**
+	 * 
+	 */
 	public void disableClose()
 	{
 		mGlWindow.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);

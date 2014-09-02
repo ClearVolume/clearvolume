@@ -1,31 +1,46 @@
-package clearvolume.jogl;
+package clearvolume.renderer.jogl;
 
-import com.jogamp.newt.event.InputEvent;
+import clearvolume.renderer.ClearVolumeRenderer;
+
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 
+
 /**
- * Inner class encapsulating the MouseMotionListener and MouseWheelListener for
- * the interaction
+ * Class MouseControl
+ * 
+ * This class implements interface MouseListener and provides mouse controls for
+ * the JoglPBOVolumeRender.
+ *
+ * @author Loic Royer 2014
+ *
  */
 class MouseControl extends MouseAdapter implements MouseListener
 {
 	/**
-	 * 
+	 * Reference of the renderer
 	 */
-	private final JoglPBOVolumeRenderer mRenderer;
+	private final ClearVolumeRenderer mRenderer;
 
 	/**
 	 * @param pJoglVolumeRenderer
 	 */
-	MouseControl(final JoglPBOVolumeRenderer pJoglVolumeRenderer)
+	MouseControl(final ClearVolumeRenderer pClearVolumeRenderer)
 	{
-		mRenderer = pJoglVolumeRenderer;
+		mRenderer = pClearVolumeRenderer;
 	}
 
+	/**
+	 * Previous mouse positions.
+	 */
 	private int mPreviousMouseX, mPreviousMouseY;
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see com.jogamp.newt.event.MouseAdapter#mouseDragged(com.jogamp.newt.event.MouseEvent)
+	 */
 	@Override
 	public void mouseDragged(final MouseEvent pMouseEvent)
 	{
@@ -38,17 +53,17 @@ class MouseControl extends MouseAdapter implements MouseListener
 		if (!pMouseEvent.isShiftDown() && !pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
 		{
-			mRenderer.mTranslationX += dx / 100.0f;
-			mRenderer.mTranslationY -= dy / 100.0f;
-			mRenderer.notifyUpdateOfVolumeParameters();
+			mRenderer.addTranslationX(dx / 100.0f);
+			mRenderer.addTranslationY(-dy / 100.0f);
+			mRenderer.notifyUpdateOfVolumeRenderingParameters();
 		}
 
 		// If the right button is held down, rotate the object
 		else if (!pMouseEvent.isControlDown() && (pMouseEvent.isButtonDown(3)))
 		{
-			mRenderer.mRotationX += dy;
-			mRenderer.mRotationY += dx;
-			mRenderer.notifyUpdateOfVolumeParameters();
+			mRenderer.addRotationX(dy);
+			mRenderer.addRotationY(dx);
+			mRenderer.notifyUpdateOfVolumeRenderingParameters();
 		}
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
@@ -59,6 +74,11 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 	}
 
+	/**
+	 * Sets the transfer function range.
+	 * 
+	 * @param pMouseEvent
+	 */
 	public void setTransfertFunctionRange(final MouseEvent pMouseEvent)
 	{
 		if (!pMouseEvent.isShiftDown() && pMouseEvent.isControlDown()
@@ -68,7 +88,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
 			final double ny = ((double) mRenderer.getWindowHeight() - (double) pMouseEvent.getY()) / mRenderer.getWindowHeight();
 
-			mRenderer.setTransferRange(	Math.abs(Math.pow(nx, 3)),
+			mRenderer.setTransferFunctionRange(	Math.abs(Math.pow(nx, 3)),
 																	Math.abs(Math.pow(ny, 3)));
 
 		}
@@ -84,6 +104,11 @@ class MouseControl extends MouseAdapter implements MouseListener
 		}
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see com.jogamp.newt.event.MouseAdapter#mouseMoved(com.jogamp.newt.event.MouseEvent)
+	 */
 	@Override
 	public void mouseMoved(final MouseEvent pMouseEvent)
 	{
@@ -91,29 +116,33 @@ class MouseControl extends MouseAdapter implements MouseListener
 		mPreviousMouseY = pMouseEvent.getY();
 	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see com.jogamp.newt.event.MouseAdapter#mouseWheelMoved(com.jogamp.newt.event.MouseEvent)
+	 */
 	@Override
 	public void mouseWheelMoved(final MouseEvent pMouseEvent)
 	{
-		final double lBytePerVoxelFactor = mRenderer.getBytesPerVoxel() == 1 ? 1
-																																				: 16;
 
 		double lWheelRotation = pMouseEvent.getWheelRotation();
 
 		final double lZoomWheelFactor = 0.125f;
 
-		mRenderer.mTranslationZ += lWheelRotation * lZoomWheelFactor;
+		mRenderer.addTranslationZ(lWheelRotation * lZoomWheelFactor);
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
 
-		mRenderer.notifyUpdateOfVolumeParameters();
+		mRenderer.notifyUpdateOfVolumeRenderingParameters();
 		mRenderer.requestDisplay();
 	}
 
-	private boolean isRightMouseButton(MouseEvent pMouseEvent)
-	{
-		return ((pMouseEvent.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK);
-	}
 
+	/**
+	 * Interface method implementation
+	 * 
+	 * @see com.jogamp.newt.event.MouseAdapter#mouseClicked(com.jogamp.newt.event.MouseEvent)
+	 */
 	@Override
 	public void mouseClicked(final MouseEvent pMouseEvent)
 	{
