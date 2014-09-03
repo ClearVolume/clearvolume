@@ -61,8 +61,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 		// If the right button is held down, rotate the object
 		else if (!pMouseEvent.isControlDown() && (pMouseEvent.isButtonDown(3)))
 		{
-			mRenderer.addRotationX(dy);
-			mRenderer.addRotationY(dx);
+			mRenderer.addRotationX(dx);
+			mRenderer.addRotationY(dy);
 			mRenderer.notifyUpdateOfVolumeRenderingParameters();
 		}
 		mPreviousMouseX = pMouseEvent.getX();

@@ -66,8 +66,9 @@ import clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer;
  * @author Loic Royer 2014
  *
  */
-public class JCudaClearVolumeRenderer extends JOGLPBOClearVolumeRenderer	implements
-																																		GLEventListener
+public class JCudaClearVolumeRenderer	extends
+																			JOGLPBOClearVolumeRenderer implements
+																																GLEventListener
 {
 
 	/**
@@ -87,7 +88,7 @@ public class JCudaClearVolumeRenderer extends JOGLPBOClearVolumeRenderer	impleme
 	final CUdeviceptr mCUdeviceptr = new CUdeviceptr(),
 			mInvertedViewMatrix = new CUdeviceptr(),
 			mSizeOfTransfertFunction = new CUdeviceptr();
-	
+
 	/**
 	 * inverted view-matrix as float array.
 	 */
@@ -119,7 +120,6 @@ public class JCudaClearVolumeRenderer extends JOGLPBOClearVolumeRenderer	impleme
 	 * Pointer to kernel parameters.
 	 */
 	private Pointer mKernelParametersPointer;
-
 
 	/**
 	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
@@ -254,7 +254,7 @@ public class JCudaClearVolumeRenderer extends JOGLPBOClearVolumeRenderer	impleme
 		final float[] lTransferFunctionArray = getTransfertFunctionArray();
 
 		allocateTransfertFunctionCUDAarray(	mTransferFunctionCUarray,
-																			lTransferFunctionArray.length);
+																				lTransferFunctionArray.length);
 
 		configureCudaTransfertFunctionTextureReference(	mTransferFunctionCUarray,
 																										mTransferFunctionTexture);
@@ -305,7 +305,8 @@ public class JCudaClearVolumeRenderer extends JOGLPBOClearVolumeRenderer	impleme
 	 */
 	private void freeCudaArray(final CUarray pVolumeArrayCUarray)
 	{
-		cuArrayDestroy(pVolumeArrayCUarray);
+		if (pVolumeArrayCUarray != null)
+			cuArrayDestroy(pVolumeArrayCUarray);
 	}
 
 	/**
@@ -315,7 +316,7 @@ public class JCudaClearVolumeRenderer extends JOGLPBOClearVolumeRenderer	impleme
 	 * @param pTransferFunctionArrayLength
 	 */
 	private void allocateTransfertFunctionCUDAarray(final CUarray pTransferFunctionCUarray,
-																								final int pTransferFunctionArrayLength)
+																									final int pTransferFunctionArrayLength)
 	{
 		// Create the 2D (float4) array that will contain the
 		// transfer function data.
@@ -327,7 +328,6 @@ public class JCudaClearVolumeRenderer extends JOGLPBOClearVolumeRenderer	impleme
 		cuArrayCreate(pTransferFunctionCUarray, ad);
 		cuCtxSynchronize();
 	}
-
 
 	/**
 	 * Copies 3D volume data from ByteBuffer to CUDA array.
@@ -684,6 +684,5 @@ public class JCudaClearVolumeRenderer extends JOGLPBOClearVolumeRenderer	impleme
 																	e);
 		}
 	}
-
 
 }
