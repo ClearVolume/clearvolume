@@ -50,7 +50,7 @@ public class ExternalRotationController	implements
 	 */
 	public static final int cDefaultEgg3DTCPport = 4444;
 
-	// network relatd fields.
+	// network related fields.
 	private Socket mClientSocket;
 	private int mPortNumber;
 	private volatile BufferedReader mBufferedInputStreamFromServer;
