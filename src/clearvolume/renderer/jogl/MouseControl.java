@@ -1,6 +1,6 @@
 package clearvolume.renderer.jogl;
 
-import clearvolume.renderer.ClearVolumeRenderer;
+import clearvolume.renderer.ClearVolumeRendererInterface;
 
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
@@ -21,12 +21,12 @@ class MouseControl extends MouseAdapter implements MouseListener
 	/**
 	 * Reference of the renderer
 	 */
-	private final ClearVolumeRenderer mRenderer;
+	private final ClearVolumeRendererInterface mRenderer;
 
 	/**
 	 * @param pJoglVolumeRenderer
 	 */
-	MouseControl(final ClearVolumeRenderer pClearVolumeRenderer)
+	MouseControl(final ClearVolumeRendererInterface pClearVolumeRenderer)
 	{
 		mRenderer = pClearVolumeRenderer;
 	}

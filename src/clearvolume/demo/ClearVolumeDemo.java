@@ -8,20 +8,20 @@ import org.junit.Test;
 
 import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.ExternalRotationController;
-import clearvolume.renderer.ClearVolumeRenderer;
+import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.jcuda.JCudaClearVolumeRenderer;
 import clearvolume.transfertf.TransfertFunctions;
 
 public class ClearVolumeDemo
 {
 
-	private static ClearVolumeRenderer mClearVolumeRenderer;
+	private static ClearVolumeRendererInterface mClearVolumeRenderer;
 
 	@Test
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,
 																						IOException
 	{
-		final ClearVolumeRenderer lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																														768,
 																																														768);
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGreenGradient());
@@ -72,7 +72,7 @@ public class ClearVolumeDemo
 	public void demoWith16BitGeneratedDataset()	throws InterruptedException,
 																							IOException
 	{
-		final ClearVolumeRenderer lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																														768,
 																																														768,
 																																														2);
@@ -125,7 +125,7 @@ public class ClearVolumeDemo
 																									IOException
 	{
 
-		final ClearVolumeRenderer lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																														512,
 																																														512);
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());

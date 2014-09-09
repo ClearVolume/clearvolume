@@ -171,7 +171,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 
 	/**
 	 * Interface method implementation
-	 * @see clearvolume.renderer.ClearVolumeRenderer#isShowing()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#isShowing()
 	 */
 	public boolean isShowing()
 	{
@@ -181,7 +181,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#setVisible(boolean)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVisible(boolean)
 	 */
 	public void setVisible(final boolean pIsVisible)
 	{
@@ -192,7 +192,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 		/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#getWindowName()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowName()
 	 */
 	public String getWindowName()
 	{
@@ -203,7 +203,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#getWindowWidth()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowWidth()
 	 */
 	public int getWindowWidth()
 	{
@@ -213,7 +213,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#getWindowHeight()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowHeight()
 	 */
 	public int getWindowHeight()
 	{
@@ -682,7 +682,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#toggleFullScreen()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#toggleFullScreen()
 	 */
 	public void toggleFullScreen()
 	{
@@ -719,7 +719,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#isFullScreen()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#isFullScreen()
 	 */
 	public boolean isFullScreen()
 	{

@@ -1,6 +1,6 @@
 package clearvolume.renderer.jogl;
 
-import clearvolume.renderer.ClearVolumeRenderer;
+import clearvolume.renderer.ClearVolumeRendererInterface;
 
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
@@ -20,7 +20,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 	/**
 	 * Reference to renderer.
 	 */
-	private final ClearVolumeRenderer mClearVolumeRenderer;
+	private final ClearVolumeRendererInterface mClearVolumeRenderer;
 
 	/**
 	 * Constructs a Keyboard control listener given a renderer.
@@ -28,7 +28,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 	 * @param pJoglVolumeRenderer
 	 *          renderer
 	 */
-	KeyboardControl(final ClearVolumeRenderer pClearVolumeRenderer)
+	KeyboardControl(final ClearVolumeRendererInterface pClearVolumeRenderer)
 	{
 		mClearVolumeRenderer = pClearVolumeRenderer;
 	}

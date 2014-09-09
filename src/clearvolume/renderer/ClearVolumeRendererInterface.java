@@ -16,7 +16,7 @@ import clearvolume.transfertf.TransfertFunction;
  * @author Loic Royer 2014
  *
  */
-public interface ClearVolumeRenderer extends
+public interface ClearVolumeRendererInterface extends
 																		DisplayRequest,
 																		Closeable
 {

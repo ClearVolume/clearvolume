@@ -19,7 +19,7 @@ import clearvolume.transfertf.TransfertFunctions;
  *
  */
 public abstract class ClearVolumeRendererBase	implements
-																							ClearVolumeRenderer
+																							ClearVolumeRendererInterface
 {
 
 	/**
@@ -84,7 +84,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#getBytesPerVoxel()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getBytesPerVoxel()
 	 */
 	public int getBytesPerVoxel()
 	{
@@ -102,7 +102,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#notifyUpdateOfVolumeRenderingParameters()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#notifyUpdateOfVolumeRenderingParameters()
 	 */
 	public void notifyUpdateOfVolumeRenderingParameters()
 	{
@@ -224,7 +224,7 @@ public abstract class ClearVolumeRendererBase	implements
 		/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#resetBrightnessAndGammaAndTransferFunctionRanges()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#resetBrightnessAndGammaAndTransferFunctionRanges()
 	 */
 	public void resetBrightnessAndGammaAndTransferFunctionRanges()
 	{
@@ -280,7 +280,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#setGamma(double)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setGamma(double)
 	 */
 	public void setGamma(final double pGamma)
 	{
@@ -311,7 +311,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#setTransferFunctionRange(double,
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransferFunctionRange(double,
 	 *      double)
 	 */
 	public void setTransferFunctionRange(	final double pTransferRangeMin,
@@ -397,7 +397,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#addTranslationX(float)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationX(float)
 	 */
 	@Override
 	public void addTranslationX(float pDX)
@@ -409,7 +409,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#addTranslationY(float)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationY(float)
 	 */
 	@Override
 	public void addTranslationY(float pDY)
@@ -421,7 +421,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#addTranslationZ(double)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationZ(double)
 	 */
 	@Override
 	public void addTranslationZ(double pDZ)
@@ -433,7 +433,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#addRotationX(int)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addRotationX(int)
 	 */
 	@Override
 	public void addRotationX(int pDRX)
@@ -445,7 +445,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#addRotationY(int)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addRotationY(int)
 	 */
 	@Override
 	public void addRotationY(int pDRY)
@@ -487,7 +487,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#getTranslationX()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationX()
 	 */
 	public float getTranslationX()
 	{
@@ -497,7 +497,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#getTranslationY()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationY()
 	 */
 	public float getTranslationY()
 	{
@@ -507,7 +507,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#getTranslationZ()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationZ()
 	 */
 	public float getTranslationZ()
 	{
@@ -517,7 +517,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#getRotationY()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getRotationY()
 	 */
 	public float getRotationY()
 	{
@@ -527,7 +527,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#getRotationX()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getRotationX()
 	 */
 	public float getRotationX()
 	{
@@ -537,7 +537,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#setTransfertFunction(clearvolume.transfertf.TransfertFunction)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransfertFunction(clearvolume.transfertf.TransfertFunction)
 	 */
 	public void setTransfertFunction(final TransfertFunction pTransfertFunction)
 	{
@@ -567,7 +567,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#setProjectionAlgorythm(clearvolume.ProjectionAlgorithm)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setProjectionAlgorythm(clearvolume.ProjectionAlgorithm)
 	 */
 	public void setProjectionAlgorythm(final ProjectionAlgorithm pProjectionAlgorithm)
 	{
@@ -619,7 +619,7 @@ public abstract class ClearVolumeRendererBase	implements
 		/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#resetRotationTranslation()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#resetRotationTranslation()
 	 */
 	public void resetRotationTranslation()
 	{
@@ -633,7 +633,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#setVolumeDataBuffer(java.nio.ByteBuffer,
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
 	 *      long, long, long)
 	 */
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
@@ -653,7 +653,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#setVolumeDataBuffer(java.nio.ByteBuffer,
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
 	 *      long, long, long, double, double, double)
 	 */
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
@@ -739,7 +739,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRenderer#setQuaternionController(clearvolume.controller.RotationControllerInterface)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setQuaternionController(clearvolume.controller.RotationControllerInterface)
 	 */
 	public void setQuaternionController(final RotationControllerInterface quaternionController)
 	{
