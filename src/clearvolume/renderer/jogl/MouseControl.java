@@ -44,8 +44,14 @@ class MouseControl extends MouseAdapter implements MouseListener
 	@Override
 	public void mouseDragged(final MouseEvent pMouseEvent)
 	{
-		// System.out.println(pMouseEvent);
+		handleRotationAndTranslation(pMouseEvent);
+		handleGammaMinMax(pMouseEvent);
+		mRenderer.requestDisplay();
 
+	}
+
+	private void handleRotationAndTranslation(final MouseEvent pMouseEvent)
+	{
 		final int dx = pMouseEvent.getX() - mPreviousMouseX;
 		final int dy = pMouseEvent.getY() - mPreviousMouseY;
 
@@ -67,11 +73,6 @@ class MouseControl extends MouseAdapter implements MouseListener
 		}
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
-
-		setTransfertFunctionRange(pMouseEvent);
-
-		mRenderer.requestDisplay();
-
 	}
 
 	/**
@@ -79,7 +80,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 	 * 
 	 * @param pMouseEvent
 	 */
-	public void setTransfertFunctionRange(final MouseEvent pMouseEvent)
+	public void handleGammaMinMax(final MouseEvent pMouseEvent)
 	{
 		if (!pMouseEvent.isShiftDown() && pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
@@ -148,7 +149,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 	{
 		if (pMouseEvent.getClickCount() == 1)
 		{
-			setTransfertFunctionRange(pMouseEvent);
+			handleGammaMinMax(pMouseEvent);
 		}
 		else if (pMouseEvent.getClickCount() == 2)
 		{
