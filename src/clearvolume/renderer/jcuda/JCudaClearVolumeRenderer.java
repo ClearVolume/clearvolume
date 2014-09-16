@@ -15,7 +15,9 @@ import static jcuda.driver.JCudaDriver.cuArrayCreate;
 import static jcuda.driver.JCudaDriver.cuArrayDestroy;
 import static jcuda.driver.JCudaDriver.cuCtxSynchronize;
 import static jcuda.driver.JCudaDriver.cuGLMapBufferObject;
+import static jcuda.driver.JCudaDriver.cuGLRegisterBufferObject;
 import static jcuda.driver.JCudaDriver.cuGLUnmapBufferObject;
+import static jcuda.driver.JCudaDriver.cuGLUnregisterBufferObject;
 import static jcuda.driver.JCudaDriver.cuLaunchKernel;
 import static jcuda.driver.JCudaDriver.cuMemcpy2D;
 import static jcuda.driver.JCudaDriver.cuMemcpy3D;
@@ -151,6 +153,20 @@ public class JCudaClearVolumeRenderer	extends
 																	final int pBytesPerVoxel)
 	{
 		super(pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel);
+	}
+
+	@Override
+	protected void registerPBO(int pPixelBufferObjectId)
+	{
+		// Register the PBO for usage with CUDA
+		cuGLRegisterBufferObject(mPixelBufferObjectId);
+	}
+
+	@Override
+	protected void unregisterPBO(int pPixelBufferObjectId)
+	{
+		// Unregisters the PBO for usage with CUDA
+		cuGLUnregisterBufferObject(pPixelBufferObjectId);
 	}
 
 	/**
@@ -684,5 +700,6 @@ public class JCudaClearVolumeRenderer	extends
 																	e);
 		}
 	}
+
 
 }

@@ -88,11 +88,34 @@ public interface ClearVolumeRendererInterface extends
 	void setTransferFunctionRange(double pMin, double pMax);
 
 	/**
+	 * Sets the transfer function range minimum.
+	 * 
+	 * @param pMin
+	 *          transfer function range minimum.
+	 */
+	void setTransferFunctionRangeMin(double pMin);
+
+	/**
+	 * Sets the transfer function range maximum.
+	 * 
+	 * @param pMax
+	 *          transfer function range maximum.
+	 */
+	void setTransferFunctionRangeMax(double pMax);
+
+	/**
 	 * Gamma value used for display.
 	 * 
 	 * @param pGamma
 	 */
 	void setGamma(double pGamma);
+
+	/**
+	 * Sets the brightness for display
+	 * 
+	 * @param pBrightness
+	 */
+	void setBrightness(double pBrightness);
 
 	/**
 	 * Resets gamma, brightness, and transfer function range.
@@ -241,6 +264,7 @@ public interface ClearVolumeRendererInterface extends
 	 * 
 	 * @see java.io.Closeable#close()
 	 */
+	@Override
 	void close();
 
 

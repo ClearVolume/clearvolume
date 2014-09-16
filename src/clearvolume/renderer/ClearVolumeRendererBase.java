@@ -1,8 +1,12 @@
 package clearvolume.renderer;
 
+import java.awt.BorderLayout;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.RotationControllerInterface;
@@ -69,6 +73,10 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile ByteBuffer mVolumeDataByteBuffer;
 	private CountDownLatch mDataBufferCopyFinished;
 
+	// Control frame:
+	private JFrame mControlFrame;
+
+
 	/**
 	 * Sets the number of bytes per voxel for this renderer. This is _usually_ set
 	 * at construction time and should not be modified later
@@ -86,6 +94,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getBytesPerVoxel()
 	 */
+	@Override
 	public int getBytesPerVoxel()
 	{
 		return mBytesPerVoxel;
@@ -104,6 +113,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#notifyUpdateOfVolumeRenderingParameters()
 	 */
+	@Override
 	public void notifyUpdateOfVolumeRenderingParameters()
 	{
 		mUpdateVolumeRenderingParameters = true;
@@ -226,6 +236,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#resetBrightnessAndGammaAndTransferFunctionRanges()
 	 */
+	@Override
 	public void resetBrightnessAndGammaAndTransferFunctionRanges()
 	{
 		mBrightness = 1.0f;
@@ -282,6 +293,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setGamma(double)
 	 */
+	@Override
 	public void setGamma(final double pGamma)
 	{
 		mGamma = (float) pGamma;
@@ -314,6 +326,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransferFunctionRange(double,
 	 *      double)
 	 */
+	@Override
 	public void setTransferFunctionRange(	final double pTransferRangeMin,
 																				final double pTransferRangeMax)
 	{
@@ -489,6 +502,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationX()
 	 */
+	@Override
 	public float getTranslationX()
 	{
 		return mTranslationX;
@@ -499,6 +513,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationY()
 	 */
+	@Override
 	public float getTranslationY()
 	{
 		return mTranslationY;
@@ -509,6 +524,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationZ()
 	 */
+	@Override
 	public float getTranslationZ()
 	{
 		return mTranslationZ;
@@ -519,6 +535,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getRotationY()
 	 */
+	@Override
 	public float getRotationY()
 	{
 		return mRotationX;
@@ -529,6 +546,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getRotationX()
 	 */
+	@Override
 	public float getRotationX()
 	{
 		return mRotationY;
@@ -539,6 +557,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransfertFunction(clearvolume.transfertf.TransfertFunction)
 	 */
+	@Override
 	public void setTransfertFunction(final TransfertFunction pTransfertFunction)
 	{
 		mTransferFunction = pTransfertFunction;
@@ -569,6 +588,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setProjectionAlgorythm(clearvolume.ProjectionAlgorithm)
 	 */
+	@Override
 	public void setProjectionAlgorythm(final ProjectionAlgorithm pProjectionAlgorithm)
 	{
 		mProjectionAlgorythm = pProjectionAlgorithm;
@@ -621,6 +641,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#resetRotationTranslation()
 	 */
+	@Override
 	public void resetRotationTranslation()
 	{
 		mRotationX = 0;
@@ -636,6 +657,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
 	 *      long, long, long)
 	 */
+	@Override
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
 																	final long pSizeX,
 																	final long pSizeY,
@@ -656,6 +678,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
 	 *      long, long, long, double, double, double)
 	 */
+	@Override
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
 																	final long pSizeX,
 																	final long pSizeY,
@@ -741,9 +764,33 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setQuaternionController(clearvolume.controller.RotationControllerInterface)
 	 */
+	@Override
 	public void setQuaternionController(final RotationControllerInterface quaternionController)
 	{
 		mRotationController = quaternionController;
+	}
+
+	public void openControlFrame()
+	{
+		mControlFrame = new JFrame("ClearVolume Rendering Parameters");
+		mControlFrame.setLayout(new BorderLayout());
+		mControlFrame.add(createControlPanel(), BorderLayout.SOUTH);
+		mControlFrame.pack();
+		// mControlFrame.setAlwaysOnTop(true);
+		mControlFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		mControlFrame.setVisible(true);
+	}
+
+	/**
+	 * Create the control panel containing the sliders for setting the
+	 * visualization parameters.
+	 * 
+	 * @return The control panel
+	 */
+	private JPanel createControlPanel()
+	{
+		ControlPanel lControlPanel = new ControlPanel(this);
+		return lControlPanel;
 	}
 
 	/**

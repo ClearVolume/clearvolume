@@ -1,11 +1,5 @@
 package clearvolume.renderer.jogl;
 
-import static jcuda.driver.JCudaDriver.cuGLRegisterBufferObject;
-import static jcuda.driver.JCudaDriver.cuGLUnregisterBufferObject;
-
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -17,14 +11,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-import jcuda.Sizeof;
 import clearvolume.renderer.ClearVolumeRendererBase;
 
 import com.jogamp.newt.NewtFactory;
@@ -42,10 +29,12 @@ import com.jogamp.newt.opengl.GLWindow;
  * @author Loic Royer 2014
  *
  */
-public abstract class JOGLPBOClearVolumeRenderer	extends
-																						ClearVolumeRendererBase	implements
-																																		GLEventListener
+public abstract class JOGLPBOClearVolumeRenderer extends
+																								ClearVolumeRendererBase	implements
+																																				GLEventListener
 {
+	private static final int cSizeOfBYTE = 1;
+
 	/**
 	 * JOGL capabilities object.
 	 */
@@ -60,7 +49,6 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	private final String mWindowName;
 	private volatile int mWindowWidth = 0, mWindowHeight = 0;
 	private volatile int mWindowX, mWindowY;
-	private JFrame mControlFrame;
 	private final GLWindow mGlWindow;
 
 	// modelview matrix
@@ -77,10 +65,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	private int step = 0;
 	private long prevTimeNS = -1;
 
-
-
 	private final Window mWindow;
-
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
@@ -90,9 +75,9 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	 * @param pWindowWidth
 	 * @param pWindowHeight
 	 */
-	public JOGLPBOClearVolumeRenderer(	final String pWindowName,
-																final int pWindowWidth,
-																final int pWindowHeight)
+	public JOGLPBOClearVolumeRenderer(final String pWindowName,
+																		final int pWindowWidth,
+																		final int pWindowHeight)
 	{
 		this(pWindowName, pWindowWidth, pWindowHeight, 1);
 	}
@@ -106,10 +91,10 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	 * @param pWindowHeight
 	 * @param pBytesPerPixel
 	 */
-	public JOGLPBOClearVolumeRenderer(	final String pWindowName,
-																final int pWindowWidth,
-																final int pWindowHeight,
-																final int pBytesPerVoxel)
+	public JOGLPBOClearVolumeRenderer(final String pWindowName,
+																		final int pWindowWidth,
+																		final int pWindowHeight,
+																		final int pBytesPerVoxel)
 	{
 		resetBrightnessAndGammaAndTransferFunctionRanges();
 		resetRotationTranslation();
@@ -149,19 +134,6 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 
 	}
 
-
-
-	private void setupControlFrame()
-	{
-		mControlFrame = new JFrame("ClearVolume Rendering Parameters");
-		mControlFrame.setLayout(new BorderLayout());
-		mControlFrame.add(createControlPanel(), BorderLayout.SOUTH);
-		mControlFrame.pack();
-		// mControlFrame.setAlwaysOnTop(true);
-		mControlFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		mControlFrame.setVisible(true);
-	}
-
 	@Override
 	public void close()
 	{
@@ -171,8 +143,10 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 
 	/**
 	 * Interface method implementation
+	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#isShowing()
 	 */
+	@Override
 	public boolean isShowing()
 	{
 		return mGlWindow.isVisible();
@@ -183,28 +157,29 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(final boolean pIsVisible)
 	{
 		mGlWindow.setVisible(pIsVisible);
 	}
 
-
-		/**
+	/**
 	 * Interface method implementation
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowName()
 	 */
+	@Override
 	public String getWindowName()
 	{
 		return mWindowName;
 	}
-
 
 	/**
 	 * Interface method implementation
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowWidth()
 	 */
+	@Override
 	public int getWindowWidth()
 	{
 		return mWindowWidth;
@@ -215,6 +190,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowHeight()
 	 */
+	@Override
 	public int getWindowHeight()
 	{
 		return mWindowHeight;
@@ -244,77 +220,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 		return getTransfertFunction().getArray();
 	}
 
-	/**
-	 * Create the control panel containing the sliders for setting the
-	 * visualization parameters.
-	 * 
-	 * @return The control panel
-	 */
-	private JPanel createControlPanel()
-	{
-		final JPanel controlPanel = new JPanel(new GridLayout(2, 2));
-		JPanel panel = null;
-		JSlider slider = null;
 
-		// Brightness
-		panel = new JPanel(new GridLayout(1, 2));
-		panel.add(new JLabel("Brightness:"));
-		slider = new JSlider(0, 100, 10);
-		slider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(final ChangeEvent e)
-			{
-				final JSlider source = (JSlider) e.getSource();
-				final float a = source.getValue() / 100.0f;
-				setBrightness(a * 10);
-				requestDisplay();
-			}
-		});
-		slider.setPreferredSize(new Dimension(0, 0));
-		panel.add(slider);
-		controlPanel.add(panel);
-
-		// Transfer offset
-		panel = new JPanel(new GridLayout(1, 2));
-		panel.add(new JLabel("Transfer Range Min:"));
-		slider = new JSlider(0, 100, 55);
-		slider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(final ChangeEvent e)
-			{
-				final JSlider source = (JSlider) e.getSource();
-				final float a = source.getValue() / 100.0f;
-				setTransferFunctionRangeMin(a);
-				requestDisplay();
-			}
-		});
-		slider.setPreferredSize(new Dimension(0, 0));
-		panel.add(slider);
-		controlPanel.add(panel);
-
-		// Transfer scale
-		panel = new JPanel(new GridLayout(1, 2));
-		panel.add(new JLabel("Transfer Range Max:"));
-		slider = new JSlider(0, 100, 10);
-		slider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(final ChangeEvent e)
-			{
-				final JSlider source = (JSlider) e.getSource();
-				final float a = source.getValue() / 100.0f;
-				setTransferFunctionRangeMax(a);
-				requestDisplay();
-			}
-		});
-		slider.setPreferredSize(new Dimension(0, 0));
-		panel.add(slider);
-		controlPanel.add(panel);
-
-		return controlPanel;
-	}
 
 	/**
 	 * Implementation of GLEventListener: Called to initialise the GLAutoDrawable.
@@ -377,7 +283,8 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	{
 		if (mPixelBufferObjectId != 0)
 		{
-			cuGLUnregisterBufferObject(mPixelBufferObjectId);
+			unregisterPBO(mPixelBufferObjectId);
+
 			gl.glDeleteBuffers(1, new int[]
 			{ mPixelBufferObjectId }, 0);
 			mPixelBufferObjectId = 0;
@@ -390,15 +297,28 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 		mPixelBufferObjectId = pboArray[0];
 		gl.glBindBuffer(GL2.GL_PIXEL_UNPACK_BUFFER, mPixelBufferObjectId);
 		gl.glBufferData(GL2.GL_PIXEL_UNPACK_BUFFER,
-										mTextureWidth * mTextureHeight * Sizeof.BYTE * 4,
+										mTextureWidth * mTextureHeight * cSizeOfBYTE * 4,
 										null,
 										GL.GL_DYNAMIC_DRAW);
 		gl.glBindBuffer(GL2.GL_PIXEL_UNPACK_BUFFER, 0);
 
-		// Register the PBO for usage with CUDA
-		cuGLRegisterBufferObject(mPixelBufferObjectId);
+		registerPBO(mPixelBufferObjectId);
 
 	}
+
+	/**
+	 * Register PBO object with any descendant of this abstract class.
+	 * 
+	 * @param pPixelBufferObjectId
+	 */
+	protected abstract void registerPBO(int pPixelBufferObjectId);
+
+	/**
+	 * Unregisters PBO object with any descendant of this abstract class.
+	 * 
+	 * @param pPixelBufferObjectId
+	 */
+	protected abstract void unregisterPBO(int pPixelBufferObjectId);
 
 	private void initTexture(final GL gl)
 	{
@@ -601,7 +521,6 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 		gl.glBindTexture(gl.GL_TEXTURE_2D, 0);
 	}
 
-
 	/**
 	 * 
 	 */
@@ -677,13 +596,12 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	{
 	}
 
-
-
 	/**
 	 * Interface method implementation
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#toggleFullScreen()
 	 */
+	@Override
 	public void toggleFullScreen()
 	{
 		try
@@ -721,6 +639,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#isFullScreen()
 	 */
+	@Override
 	public boolean isFullScreen()
 	{
 		return mGlWindow.isFullscreen();
@@ -731,6 +650,7 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	 * 
 	 * @see clearvolume.renderer.DisplayRequest#requestDisplay()
 	 */
+	@Override
 	public void requestDisplay()
 	{
 		mGlWindow.runOnEDTIfAvail(false, new Runnable()
@@ -750,4 +670,5 @@ public abstract class JOGLPBOClearVolumeRenderer	extends
 	{
 		mGlWindow.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
 	}
+
 }
