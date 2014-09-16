@@ -272,6 +272,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @param pBrightness
 	 *          brightness
 	 */
+	@Override
 	public void setBrightness(final double pBrightness)
 	{
 		mBrightness = (float) clamp(pBrightness,
@@ -341,6 +342,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @param pTransferRangeMin
 	 *          minimum
 	 */
+	@Override
 	public void setTransferFunctionRangeMin(final double pTransferRangeMin)
 	{
 		mTransferFunctionRangeMin = (float) clamp(pTransferRangeMin, 0, 1);
@@ -353,11 +355,11 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @param pTransferRangeMax
 	 *          maximum
 	 */
+	@Override
 	public void setTransferFunctionRangeMax(final double pTransferRangeMax)
 	{
 		mTransferFunctionRangeMax = (float) clamp(pTransferRangeMax, 0, 1);
 		notifyUpdateOfVolumeRenderingParameters();
-		;
 	}
 
 	/**
