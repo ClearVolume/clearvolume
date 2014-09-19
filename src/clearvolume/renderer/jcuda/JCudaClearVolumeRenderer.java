@@ -179,8 +179,14 @@ public class JCudaClearVolumeRenderer	extends
 	{
 		try
 		{
-			final InputStream lInputStreamCUFile = JCudaClearVolumeRenderer.class.getResourceAsStream("./kernels/VolumeRender.cu");
-			final InputStream lInputStreamBackupPTX = JCudaClearVolumeRenderer.class.getResourceAsStream("./ptx/VolumeRender.ptx");
+			InputStream lInputStreamCUFile = JCudaClearVolumeRenderer.class.getResourceAsStream("kernels/VolumeRender.cu");
+			InputStream lInputStreamBackupPTX = JCudaClearVolumeRenderer.class.getResourceAsStream("ptx/VolumeRender.ptx");
+
+			if (lInputStreamCUFile == null)
+				lInputStreamCUFile = JCudaClearVolumeRenderer.class.getResourceAsStream("./kernels/VolumeRender.cu");
+
+			if (lInputStreamBackupPTX == null)
+				lInputStreamBackupPTX = JCudaClearVolumeRenderer.class.getResourceAsStream("./ptx/VolumeRender.ptx");
 
 			final HashMap<String, String> lSubstitutionMap = new HashMap<String, String>();
 
@@ -700,6 +706,5 @@ public class JCudaClearVolumeRenderer	extends
 																	e);
 		}
 	}
-
 
 }
