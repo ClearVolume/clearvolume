@@ -35,8 +35,8 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 			{
 				// ByteBuffer lProtocolHeader =
 				// ByteBuffer.allocateDirect(ClearVolumeProtocol.cProtocolHeaderLengthInBytes);
-				mSocketChannel.r
-				mSocketChannel.read(lProtocolHeader);
+				// mSocketChannel.r
+				// mSocketChannel.read(lProtocolHeader);
 				// TODO: rest of
 
 				Volume lVolume = null;
