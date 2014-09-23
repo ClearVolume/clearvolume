@@ -648,7 +648,7 @@ public abstract class JOGLPBOClearVolumeRenderer extends
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.DisplayRequest#requestDisplay()
+	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
 	 */
 	@Override
 	public void requestDisplay()

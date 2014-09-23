@@ -111,22 +111,6 @@ uploadArchives
 }
 
 
-/*
-apply plugin: 'executable-jar'
-
-// This is the class that starts your application
-mainClass = 'egg3d.server.Egg3DTCPServer'
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'net.nisgits.gradle:gradle-executable-jar-plugin:1.7.0'
-    }
-}
-/**/
-
 
 
 

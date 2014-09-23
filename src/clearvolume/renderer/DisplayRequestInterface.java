@@ -9,7 +9,7 @@ package clearvolume.renderer;
  * @author Loic Royer 2014
  *
  */
-public interface DisplayRequest
+public interface DisplayRequestInterface
 {
 	/**
 	 * Requests the update of the display.

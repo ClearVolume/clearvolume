@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 
 import javax.media.opengl.GL2;
 
-import clearvolume.renderer.DisplayRequest;
+import clearvolume.renderer.DisplayRequestInterface;
 
 import com.jogamp.graph.math.Quaternion;
 
@@ -68,7 +68,7 @@ public class ExternalRotationController	implements
 	 * DisplayRequest object that has to be called when requesting a display
 	 * update.
 	 */
-	private DisplayRequest mDisplayRequest;
+	private DisplayRequestInterface mDisplayRequest;
 
 	/**
 	 * Constructs an instance of the ExternalRotationController class
@@ -79,7 +79,7 @@ public class ExternalRotationController	implements
 	 * @throws IOException
 	 */
 	public ExternalRotationController(final int pPortNumber,
-																		DisplayRequest pDisplayRequest)	throws UnknownHostException,
+																		DisplayRequestInterface pDisplayRequest)	throws UnknownHostException,
 																																		IOException
 	{
 		super();
