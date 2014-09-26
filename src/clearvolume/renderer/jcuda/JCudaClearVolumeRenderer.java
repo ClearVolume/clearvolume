@@ -35,6 +35,7 @@ import static jcuda.driver.JCudaDriver.cuTexRefSetFormat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
@@ -159,7 +160,7 @@ public class JCudaClearVolumeRenderer	extends
 	protected void registerPBO(int pPixelBufferObjectId)
 	{
 		// Register the PBO for usage with CUDA
-		cuGLRegisterBufferObject(mPixelBufferObjectId);
+		cuGLRegisterBufferObject(pPixelBufferObjectId);
 	}
 
 	@Override
@@ -198,7 +199,7 @@ public class JCudaClearVolumeRenderer	extends
 			mVolumeRenderingFunction = JCudaUtils.initCuda(	mCUmodule,
 																											lInputStreamCUFile,
 																											lInputStreamBackupPTX,
-																											"_Z8d_renderPjjjfffffff",
+																											"volumerender",
 																											lSubstitutionMap);
 
 			// Obtain the global pointer to the inverted view matrix from
@@ -278,11 +279,13 @@ public class JCudaClearVolumeRenderer	extends
 		allocateTransfertFunctionCUDAarray(	mTransferFunctionCUarray,
 																				lTransferFunctionArray.length);
 
+		copyTransfertFunctionTexture(	mTransferFunctionCUarray,
+																	lTransferFunctionArray);
+
 		configureCudaTransfertFunctionTextureReference(	mTransferFunctionCUarray,
 																										mTransferFunctionTexture);
 
-		copyTransfertFunctionTexture(	mTransferFunctionCUarray,
-																	lTransferFunctionArray);
+
 	}
 
 	/**
@@ -520,6 +523,7 @@ public class JCudaClearVolumeRenderer	extends
 	@Override
 	protected void renderVolume(final GL2 gl, final float[] modelView)
 	{
+		System.out.println(Arrays.toString(modelView));
 		// Build the inverted view matrix
 		invViewMatrix[0] = modelView[0];
 		invViewMatrix[1] = modelView[4];
@@ -578,7 +582,7 @@ public class JCudaClearVolumeRenderer	extends
 				final long lSizeY = getVolumeSizeY();
 				final long lSizeZ = getVolumeSizeZ();
 
-				if (hasVolumeDimensionsChanged())
+				if (haveVolumeDimensionsChanged())
 				{
 
 					if (mVolumeDataCUarray == null)
@@ -657,12 +661,13 @@ public class JCudaClearVolumeRenderer	extends
 											getTransferRangeMax(),
 											getGamma());/**/
 
-		cuGLMapBufferObject(mCUdeviceptr,
-												new long[1],
-												mPixelBufferObjectId);
 
 		if (getIsUpdateVolumeParameters())
 		{
+			long[] lSizeInBytes = new long[1];
+			cuGLMapBufferObject(mCUdeviceptr,
+													lSizeInBytes,
+													mPixelBufferObjectId);
 			cuMemsetD32(mCUdeviceptr,
 									0,
 									getTextureWidth() * getTextureHeight());
@@ -679,9 +684,10 @@ public class JCudaClearVolumeRenderer	extends
 											null);
 			cuCtxSynchronize();
 			clearIsUpdateVolumeParameters();
+			cuGLUnmapBufferObject(mPixelBufferObjectId);
 		}
 
-		cuGLUnmapBufferObject(mPixelBufferObjectId);
+
 	}
 
 	/**

@@ -11,7 +11,7 @@ import javax.media.opengl.GL2;
 
 import clearvolume.renderer.DisplayRequestInterface;
 
-import com.jogamp.graph.math.Quaternion;
+import com.jogamp.opengl.math.Quaternion;
 
 /**
  * Class ExternalRotationController
@@ -156,7 +156,7 @@ public class ExternalRotationController	implements
 		synchronized (mQuaternionUpdateLock)
 		{
 			mQuaternion.normalize();
-			lQuaternionMatrix = mQuaternion.toMatrix();
+			lQuaternionMatrix = mQuaternion.toMatrix(new float[16], 0);
 		}
 		System.arraycopy(	lQuaternionMatrix,
 											0,
@@ -177,7 +177,7 @@ public class ExternalRotationController	implements
 		float[] lMatrix;
 		synchronized (mQuaternionUpdateLock)
 		{
-			lMatrix = mQuaternion.toMatrix();
+			lMatrix = mQuaternion.toMatrix(new float[16], 0);
 			// System.out.println(lMatrix);
 		}
 		gl.glMultMatrixf(lMatrix, 0);
@@ -258,7 +258,7 @@ public class ExternalRotationController	implements
 			mQuaternion.setY(lQuaternionY);
 			mQuaternion.setZ(lQuaternionZ);
 			mQuaternion.normalize();
-			mQuaternion.inverse();
+			mQuaternion.set(mQuaternion.invert());
 		}/**/
 
 	}

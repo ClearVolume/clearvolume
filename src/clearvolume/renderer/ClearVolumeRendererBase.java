@@ -181,7 +181,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * @return
 	 */
-	public boolean hasVolumeDimensionsChanged()
+	public boolean haveVolumeDimensionsChanged()
 	{
 		return mVolumeDimensionsChanged;
 	}
@@ -415,7 +415,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationX(float)
 	 */
 	@Override
-	public void addTranslationX(float pDX)
+	public void addTranslationX(double pDX)
 	{
 		mTranslationX += pDX;
 		notifyUpdateOfVolumeRenderingParameters();
@@ -427,7 +427,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationY(float)
 	 */
 	@Override
-	public void addTranslationY(float pDY)
+	public void addTranslationY(double pDY)
 	{
 		mTranslationY += pDY;
 		notifyUpdateOfVolumeRenderingParameters();

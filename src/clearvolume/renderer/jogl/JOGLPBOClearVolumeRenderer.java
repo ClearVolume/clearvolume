@@ -220,8 +220,6 @@ public abstract class JOGLPBOClearVolumeRenderer extends
 		return getTransfertFunction().getArray();
 	}
 
-
-
 	/**
 	 * Implementation of GLEventListener: Called to initialise the GLAutoDrawable.
 	 * This method will initialise the JCudaDriver and cause the initialisation of
@@ -236,7 +234,7 @@ public abstract class JOGLPBOClearVolumeRenderer extends
 			final GL2 gl = drawable.getGL().getGL2();
 			gl.setSwapInterval(0);
 			gl.glDisable(GL2.GL_DEPTH_TEST);
-			gl.glDisable(GL2.GL_DEPTH_BUFFER);
+			// gl.glDisable(GL2.GL_DEPTH_BUFFER);
 			gl.glDisable(GL2.GL_STENCIL_TEST);
 			gl.glDisable(GL2.GL_LIGHTING);
 			gl.glEnable(GL2.GL_TEXTURE_2D);
@@ -245,28 +243,15 @@ public abstract class JOGLPBOClearVolumeRenderer extends
 			gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 			setupDefaultView(drawable);
 
-			mGlWindow.runOnEDTIfAvail(true, new Runnable()
+			synchronized (mGlWindow)
 			{
-				@Override
-				public void run()
+				if (initVolumeRenderer())
 				{
-					try
-					{
-						synchronized (mGlWindow)
-						{
-							if (initVolumeRenderer())
-							{
-								initPixelBufferObject(gl);
-								initTexture(gl);
-							}
-						}
-					}
-					catch (final Throwable e)
-					{
-						e.printStackTrace();
-					}
+					initPixelBufferObject(gl);
+					initTexture(gl);
 				}
-			});
+			}
+
 		}
 
 	}
@@ -355,7 +340,10 @@ public abstract class JOGLPBOClearVolumeRenderer extends
 	{
 		final GL2 gl = drawable.getGL().getGL2();
 
-		gl.glViewport(0, 0, drawable.getWidth(), drawable.getHeight());
+		gl.glViewport(0,
+									0,
+									drawable.getSurfaceWidth(),
+									drawable.getSurfaceHeight());
 
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
@@ -363,9 +351,9 @@ public abstract class JOGLPBOClearVolumeRenderer extends
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glLoadIdentity();
 		gl.glOrtho(	0.0,
-								drawable.getWidth(),
+								drawable.getSurfaceWidth(),
 								0.0,
-								drawable.getHeight(),
+								drawable.getSurfaceHeight(),
 								0.0,
 								1);
 	}
@@ -400,21 +388,11 @@ public abstract class JOGLPBOClearVolumeRenderer extends
 			gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, mModelViewMatrix, 0);
 			gl.glPopMatrix();
 
-			mGlWindow.runOnEDTIfAvail(true, new Runnable()
+			synchronized (mGlWindow)
 			{
-				@Override
-				public void run()
-				{
-					if (!Thread.currentThread().getName().contains("AWT"))
-					{
-						synchronized (mGlWindow)
-						{
-							renderVolume(gl, mModelViewMatrix);
-							renderedImageHook(gl, mPixelBufferObjectId);
-						}
-					}
-				}
-			});
+				renderVolume(gl, mModelViewMatrix);
+				renderedImageHook(gl, mPixelBufferObjectId);
+			}
 
 		}
 
@@ -571,19 +549,9 @@ public abstract class JOGLPBOClearVolumeRenderer extends
 			this.mWindowWidth = width;
 			this.mWindowHeight = height;
 
-			mGlWindow.runOnEDTIfAvail(true, new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					synchronized (mGlWindow)
-					{
-						initPixelBufferObject(drawable.getGL());
-						setupDefaultView(drawable);
-						display(drawable);
-					}
-				}
-			});
+			setupDefaultView(drawable);
+			display(drawable);
+
 		}
 
 	}

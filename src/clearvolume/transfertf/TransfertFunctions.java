@@ -89,4 +89,21 @@ public class TransfertFunctions
 		return lTransfertFunction;
 	}
 
+	/**
+	 * Returns rainbow variant transfer function.
+	 * 
+	 * @return rainbow variant transfer function
+	 */
+	public static final TransfertFunction1D getRainbowSolid()
+	{
+		final TransfertFunction1D lTransfertFunction = new TransfertFunction1D();
+		lTransfertFunction.addPoint(0, 0, 1, 1);
+		lTransfertFunction.addPoint(0, 1, 1, 1);
+		lTransfertFunction.addPoint(0, 1, 0, 1);
+		lTransfertFunction.addPoint(1, 1, 0, 1);
+		lTransfertFunction.addPoint(1, 0, 0, 1);
+		lTransfertFunction.addPoint(1, 0, 1, 1);
+		return lTransfertFunction;
+	}
+
 }

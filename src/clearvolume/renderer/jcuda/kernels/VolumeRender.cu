@@ -67,6 +67,7 @@ int intersectBox(Ray r, float3 boxmin, float3 boxmax, float *tnear, float *tfar)
     *tnear = largest_tmin;
     *tfar = smallest_tmax;
 
+
     return smallest_tmax > largest_tmin;
 }
 
@@ -144,13 +145,14 @@ inline __device__ bool algo(float4 &acc, float4 &col )
          
 
 
-__global__ void
-d_render(uint *d_output, uint imageW, uint imageH,
+extern "C" __global__ void
+volumerender(uint *d_output, uint imageW, uint imageH,
 		 float scalex, float scaley, float scalez,
          float brightness, float trangemin, float trangemax, float gamma)
 {
-    const int maxSteps = 4096;
-    const float tstep = 0.005f;
+		
+    const int maxSteps = 512;
+    const float tstep = 0.02f;
      
     const float ta = 1.0/(trangemax-trangemin);
     const float tb = trangemin/(trangemin-trangemax); 
@@ -189,6 +191,8 @@ d_render(uint *d_output, uint imageW, uint imageH,
     float3 pos = eyeRay.o + eyeRay.d*tnear;
     float3 step = eyeRay.d*tstep;
 
+
+
     for (int i=0; i<maxSteps; i++)
     {
         // read from 3D texture
@@ -204,18 +208,19 @@ d_render(uint *d_output, uint imageW, uint imageH,
         if(algo/*ProjectionAlgorythm*/(acc,col)) break;
 
         t += tstep;
+
         if (t > tfar) break;
         pos += step;
     }
-
+    
     acc *= brightness;
-
+    
     // write output color
     d_output[y*imageW + x] = rgbaFloatToInt(acc);
 }
 
 
-
+/*
 extern "C"
 void render_kernel(dim3 gridSize, dim3 blockSize, uint *d_output, uint imageW, uint imageH,
                    float scalex, float scaley, float scalez, float brightness, float trangemin, float trangemax, float gamma)
@@ -229,6 +234,7 @@ void copyInvViewMatrix(float *invViewMatrix, size_t sizeofMatrix)
 {
     checkCudaErrors(cudaMemcpyToSymbol(c_invViewMatrix, invViewMatrix, sizeofMatrix));
 }
+/**/
 
 
 #endif // #ifndef _VOLUMERENDER_KERNEL_CU_

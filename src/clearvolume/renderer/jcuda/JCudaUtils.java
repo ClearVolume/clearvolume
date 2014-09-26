@@ -176,12 +176,13 @@ public class JCudaUtils
 
 		String lCompilerBinDir = "";
 
+		/*
 		if (System.getProperty("os.name").toLowerCase().contains("osx") || System.getProperty("os.name")
 																																							.toLowerCase()
 																																							.contains("os x"))
 		{
 			lCompilerBinDir = " --compiler-bindir=/opt/local/bin/gcc-mp-4.6";
-		}
+		}/**/
 
 		final String command = getNVCCPath() + " -I. -I"
 														+ pCUFile.getParentFile()
@@ -189,7 +190,7 @@ public class JCudaUtils
 														+ " "
 														+ modelString
 														+ lCompilerBinDir
-														+ " -ptx "
+														+ " -arch=sm_30 -use_fast_math --optimize 3 -ptx "
 														+ pCUFile.getAbsolutePath()
 														+ " -o "
 														+ pPTXFile.getAbsolutePath();

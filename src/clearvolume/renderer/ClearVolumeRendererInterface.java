@@ -177,7 +177,7 @@ public interface ClearVolumeRendererInterface extends
 	 * @param pDX
 	 *          amount of translation
 	 */
-	void addTranslationX(float pDX);
+	void addTranslationX(double pDX);
 
 	/**
 	 * Translates along y axis by pDY.
@@ -185,7 +185,7 @@ public interface ClearVolumeRendererInterface extends
 	 * @param pDY
 	 *          amount of translation
 	 */
-	void addTranslationY(float pDY);
+	void addTranslationY(double pDY);
 
 	/**
 	 * Translates along z axis by pDZ.

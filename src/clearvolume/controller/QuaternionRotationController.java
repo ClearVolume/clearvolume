@@ -2,7 +2,7 @@ package clearvolume.controller;
 
 import javax.media.opengl.GL2;
 
-import com.jogamp.graph.math.Quaternion;
+import com.jogamp.opengl.math.Quaternion;
 
 /**
  * Class QuaternionRotationController
@@ -72,7 +72,7 @@ public class QuaternionRotationController	implements
 		synchronized (mQuaternionUpdateLock)
 		{
 			mQuaternion.normalize();
-			lQuaternionMatrix = mQuaternion.toMatrix();
+			lQuaternionMatrix = mQuaternion.toMatrix(new float[16], 0);
 		}
 		System.arraycopy(	lQuaternionMatrix,
 											0,
@@ -93,7 +93,7 @@ public class QuaternionRotationController	implements
 		float[] lMatrix;
 		synchronized (mQuaternionUpdateLock)
 		{
-			lMatrix = mQuaternion.toMatrix();
+			lMatrix = mQuaternion.toMatrix(new float[16], 0);
 		}
 		gl.glMultMatrixf(lMatrix, 0);
 	}

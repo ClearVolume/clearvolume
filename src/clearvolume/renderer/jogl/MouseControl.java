@@ -126,11 +126,13 @@ class MouseControl extends MouseAdapter implements MouseListener
 	public void mouseWheelMoved(final MouseEvent pMouseEvent)
 	{
 
-		double lWheelRotation = pMouseEvent.getWheelRotation();
+		float[] lWheelRotation = pMouseEvent.getRotation();
 
 		final double lZoomWheelFactor = 0.125f;
 
-		mRenderer.addTranslationZ(lWheelRotation * lZoomWheelFactor);
+		// mRenderer.addTranslationX(lWheelRotation[2] * lZoomWheelFactor);
+		// mRenderer.addTranslationY(lWheelRotation[0] * lZoomWheelFactor);
+		mRenderer.addTranslationZ(lWheelRotation[1] * lZoomWheelFactor);
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
 

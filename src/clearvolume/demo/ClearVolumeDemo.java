@@ -10,6 +10,7 @@ import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.ExternalRotationController;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.jcuda.JCudaClearVolumeRenderer;
+import clearvolume.renderer.jcuda.JCudaClearVolumeRendererNew;
 import clearvolume.transfertf.TransfertFunctions;
 
 public class ClearVolumeDemo
@@ -21,15 +22,15 @@ public class ClearVolumeDemo
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,
 																						IOException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
-																																														768,
-																																														768);
-		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGreenGradient());
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRendererNew("ClearVolumeTest",
+																																															768,
+																																															768);
+		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 64;
-		final int lResolutionY = 64;
-		final int lResolutionZ = 64;
+		final int lResolutionX = 256;
+		final int lResolutionY = 256;
+		final int lResolutionZ = 256;
 
 		// System.out.println(i);
 
@@ -72,7 +73,7 @@ public class ClearVolumeDemo
 	public void demoWith16BitGeneratedDataset()	throws InterruptedException,
 																							IOException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																																														768,
 																																														768,
 																																														2);
@@ -125,7 +126,7 @@ public class ClearVolumeDemo
 																									IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRendererNew("ClearVolumeTest",
 																																														512,
 																																														512);
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
@@ -239,7 +240,7 @@ public class ClearVolumeDemo
 		// Start the sample with the data that was read from the file
 		final ByteBuffer lVolumeData = ByteBuffer.wrap(data);
 
-		mClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		mClearVolumeRenderer = new JCudaClearVolumeRendererNew("ClearVolumeTest",
 																															512,
 																															512,
 																															pBytesPerVoxel);
