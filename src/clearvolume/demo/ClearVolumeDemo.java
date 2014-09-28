@@ -9,8 +9,7 @@ import org.junit.Test;
 import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.ExternalRotationController;
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.jcuda.JCudaClearVolumeRenderer;
-import clearvolume.renderer.jcuda.JCudaClearVolumeRendererNew;
+import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transfertf.TransfertFunctions;
 
 public class ClearVolumeDemo
@@ -22,7 +21,7 @@ public class ClearVolumeDemo
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,
 																						IOException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRendererNew("ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																															768,
 																																															768);
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
@@ -126,7 +125,7 @@ public class ClearVolumeDemo
 																									IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRendererNew("ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																														512,
 																																														512);
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
@@ -195,8 +194,7 @@ public class ClearVolumeDemo
 
 			// Other input files may be obtained from http://www.volvis.org
 			// startSample("./databig/celegans.raw", 512, 512, 512);
-			// startSample("./data/Bucky.raw", 1,32, 32, 32);
-			startSample("./databig/backpack16.raw", 2, 512, 512, 373);
+			startSample("./data/Bucky.raw", 1, 32, 32, 32);
 			// startSample("./databig/test1024^3.raw", 1, 1024, 1024, 1024);
 			// startSample("./data/test2048^3.raw", 2048, 2048, 2048);
 
@@ -240,7 +238,7 @@ public class ClearVolumeDemo
 		// Start the sample with the data that was read from the file
 		final ByteBuffer lVolumeData = ByteBuffer.wrap(data);
 
-		mClearVolumeRenderer = new JCudaClearVolumeRendererNew("ClearVolumeTest",
+		mClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																															512,
 																															512,
 																															pBytesPerVoxel);

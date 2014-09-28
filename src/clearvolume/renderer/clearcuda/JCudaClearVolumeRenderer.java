@@ -1,4 +1,4 @@
-package clearvolume.renderer.jcuda;
+package clearvolume.renderer.clearcuda;
 
 /*
  * JCuda - Java bindings for NVIDIA CUDA driver and runtime API
@@ -21,15 +21,15 @@ import jcuda.Pointer;
 import jcuda.driver.CUaddress_mode;
 import jcuda.driver.CUfilter_mode;
 import jcuda.runtime.dim3;
-import clearcudaj.CudaArray;
-import clearcudaj.CudaCompiler;
-import clearcudaj.CudaContext;
-import clearcudaj.CudaDevice;
-import clearcudaj.CudaDevicePointer;
-import clearcudaj.CudaFunction;
-import clearcudaj.CudaModule;
-import clearcudaj.CudaOpenGLBufferObject;
-import clearcudaj.CudaTextureReference;
+import clearcuda.CudaArray;
+import clearcuda.CudaCompiler;
+import clearcuda.CudaContext;
+import clearcuda.CudaDevice;
+import clearcuda.CudaDevicePointer;
+import clearcuda.CudaFunction;
+import clearcuda.CudaModule;
+import clearcuda.CudaOpenGLBufferObject;
+import clearcuda.CudaTextureReference;
 import clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer;
 
 /**
@@ -41,7 +41,7 @@ import clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer;
  * @author Loic Royer 2014
  *
  */
-public class JCudaClearVolumeRendererNew extends
+public class JCudaClearVolumeRenderer extends
 																				JOGLPBOClearVolumeRenderer implements
 																																	GLEventListener
 {
@@ -116,7 +116,7 @@ public class JCudaClearVolumeRendererNew extends
 	 * @param pWindowWidth
 	 * @param pWindowHeight
 	 */
-	public JCudaClearVolumeRendererNew(	final String pWindowName,
+	public JCudaClearVolumeRenderer(	final String pWindowName,
 																			final int pWindowWidth,
 																			final int pWindowHeight)
 	{
@@ -132,7 +132,7 @@ public class JCudaClearVolumeRendererNew extends
 	 * @param pWindowHeight
 	 * @param pBytesPerVoxel
 	 */
-	public JCudaClearVolumeRendererNew(	final String pWindowName,
+	public JCudaClearVolumeRenderer(	final String pWindowName,
 																			final int pWindowWidth,
 																			final int pWindowHeight,
 																			final int pBytesPerVoxel)
@@ -167,7 +167,7 @@ public class JCudaClearVolumeRendererNew extends
 
 			mCudaContext = new CudaContext(mCudaDevice);
 
-			Class<?> lRootClass = JCudaClearVolumeRendererNew.class;
+			Class<?> lRootClass = JCudaClearVolumeRenderer.class;
 			CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
 																										lRootClass.getSimpleName());
 
@@ -196,10 +196,6 @@ public class JCudaClearVolumeRendererNew extends
 
 			prepareVolumeDataTexture(null);
 			prepareTransfertFunctionTexture();
-
-
-
-
 
 			calculateGridSize();
 
@@ -235,6 +231,7 @@ public class JCudaClearVolumeRendererNew extends
 																						lDepth,
 																						getBytesPerVoxel(),
 																						false,
+																						false,
 																						false);
 			mVolumeDataCudaArray.copyFrom(lVolumeDataBuffer, true);
 
@@ -247,7 +244,6 @@ public class JCudaClearVolumeRendererNew extends
 			mVolumeDataCudaTexture.setFlags(CU_TRSF_NORMALIZED_COORDINATES);
 			mVolumeDataCudaTexture.setTo(mVolumeDataCudaArray);
 			mVolumeRenderingFunction.setTexture(mVolumeDataCudaTexture);
-
 
 		}
 	}
@@ -267,8 +263,9 @@ public class JCudaClearVolumeRendererNew extends
 																								1,
 																								4,
 																								true,
+																								false,
 																								false);
-		mTransferFunctionCudaArray.copyFloatsFrom(lTransferFunctionArray,
+		mTransferFunctionCudaArray.copyFrom(lTransferFunctionArray,
 																							true);
 
 		mTransferFunctionTexture = mCudaModule.getTexture("transferTex");
@@ -331,7 +328,7 @@ public class JCudaClearVolumeRendererNew extends
 		invViewMatrix[10] = modelView[10];
 		invViewMatrix[11] = modelView[14];
 
-		mInvertedViewMatrix.copyFloatsFrom(invViewMatrix, true);
+		mInvertedViewMatrix.copyFrom(invViewMatrix, true);
 
 		if (updateBufferAndRunKernel())
 		{

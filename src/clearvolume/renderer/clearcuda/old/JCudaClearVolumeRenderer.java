@@ -1,4 +1,4 @@
-package clearvolume.renderer.jcuda;
+package clearvolume.renderer.clearcuda.old;
 
 /*
  * JCuda - Java bindings for NVIDIA CUDA driver and runtime API
