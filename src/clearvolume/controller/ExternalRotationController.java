@@ -7,8 +7,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import javax.media.opengl.GL2;
-
+import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 
 import com.jogamp.opengl.math.Quaternion;
@@ -144,43 +143,19 @@ public class ExternalRotationController	implements
 		}
 	}
 
-	/**
-	 * Interface method implementation
-	 * 
-	 * @see clearvolume.controller.RotationControllerInterface#putModelViewMatrixIn(float[])
-	 */
-	@Override
-	public void putModelViewMatrixIn(final float[] pModelViewMatrix)
-	{
-		float[] lQuaternionMatrix;
-		synchronized (mQuaternionUpdateLock)
-		{
-			mQuaternion.normalize();
-			lQuaternionMatrix = mQuaternion.toMatrix(new float[16], 0);
-		}
-		System.arraycopy(	lQuaternionMatrix,
-											0,
-											pModelViewMatrix,
-											0,
-											pModelViewMatrix.length);
-
-	}
 
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.controller.RotationControllerInterface#rotateGL(javax.media.opengl.GL2)
+	 * @see clearvolume.controller.RotationControllerInterface#rotate(javax.media.opengl.GL2)
 	 */
 	@Override
-	public void rotateGL(final GL2 gl)
+	public void rotate(final GLMatrix pGLMatrix)
 	{
-		float[] lMatrix;
 		synchronized (mQuaternionUpdateLock)
 		{
-			lMatrix = mQuaternion.toMatrix(new float[16], 0);
-			// System.out.println(lMatrix);
+			pGLMatrix.mult(mQuaternion);
 		}
-		gl.glMultMatrixf(lMatrix, 0);
 	}
 
 	/**

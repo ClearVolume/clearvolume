@@ -147,8 +147,8 @@ inline __device__ bool algo(float4 &acc, float4 &col )
 
 extern "C" __global__ void
 volumerender(uint *d_output, uint imageW, uint imageH,
-		 float scalex, float scaley, float scalez,
-         float brightness, float trangemin, float trangemax, float gamma)
+		 			float scalex, float scaley, float scalez,
+         	float brightness, float trangemin, float trangemax, float gamma)
 {
 		
     const int maxSteps = 512;

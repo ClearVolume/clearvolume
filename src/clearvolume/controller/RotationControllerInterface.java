@@ -1,6 +1,6 @@
 package clearvolume.controller;
 
-import javax.media.opengl.GL2;
+import cleargl.GLMatrix;
 
 /**
  * Class RotationControllerInterface
@@ -11,21 +11,11 @@ public interface RotationControllerInterface
 {
 
 	/**
-	 * Sets the values of the model-view matrix corresponding to this rotation
-	 * controller state to the float array pModelViewMatrix.
+	 * Performs the model-view transform.
 	 * 
-	 * @param pModelViewMatrix
-	 *          float array into which the model-view matrix is written.
+	 * @param pVolumeViewMatrix
 	 */
-	void putModelViewMatrixIn(float[] pModelViewMatrix);
-
-	/**
-	 * Performs the model-view transform. TODO: do we need to have a reference to
-	 * JOGL here? can we be mmore general?
-	 * 
-	 * @param pGl
-	 */
-	void rotateGL(GL2 pGl);
+	void rotate(GLMatrix pVolumeViewMatrix);
 
 	/**
 	 * Is controller active?

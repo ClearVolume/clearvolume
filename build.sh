@@ -1,0 +1,1 @@
+gradle clean cleanEclipse eclipse build uploadArchives

@@ -14,13 +14,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.regex.Pattern;
 
-import javax.media.opengl.GL2;
 import javax.media.opengl.GLEventListener;
 
 import jcuda.Pointer;
 import jcuda.driver.CUaddress_mode;
 import jcuda.driver.CUfilter_mode;
-import jcuda.runtime.dim3;
 import clearcuda.CudaArray;
 import clearcuda.CudaCompiler;
 import clearcuda.CudaContext;
@@ -30,7 +28,7 @@ import clearcuda.CudaFunction;
 import clearcuda.CudaModule;
 import clearcuda.CudaOpenGLBufferObject;
 import clearcuda.CudaTextureReference;
-import clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer;
+import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
 
 /**
  * Class JCudaClearVolumeRenderer
@@ -41,10 +39,12 @@ import clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer;
  * @author Loic Royer 2014
  *
  */
-public class JCudaClearVolumeRenderer extends
-																				JOGLPBOClearVolumeRenderer implements
-																																	GLEventListener
+public class JCudaClearVolumeRenderer	extends
+																			JOGLClearVolumeRenderer implements
+																																GLEventListener
 {
+
+	private static final int cBlockSize = 32;
 
 	/**
 	 * CUDA context.
@@ -86,17 +86,7 @@ public class JCudaClearVolumeRenderer extends
 	private CudaTextureReference mVolumeDataCudaTexture,
 			mTransferFunctionTexture;
 
-	/**
-	 * Block dimensions.
-	 */
-	private final dim3 mBlockSize = new dim3(32, 32, 1);
 
-	/**
-	 * GRid dimensions.
-	 */
-	private dim3 mGridSize = new dim3(getTextureWidth() / mBlockSize.x,
-																		getTextureHeight() / mBlockSize.y,
-																		1);
 
 	/**
 	 * Pointer to kernel parameters.
@@ -116,9 +106,9 @@ public class JCudaClearVolumeRenderer extends
 	 * @param pWindowWidth
 	 * @param pWindowHeight
 	 */
-	public JCudaClearVolumeRenderer(	final String pWindowName,
-																			final int pWindowWidth,
-																			final int pWindowHeight)
+	public JCudaClearVolumeRenderer(final String pWindowName,
+																	final int pWindowWidth,
+																	final int pWindowHeight)
 	{
 		super(pWindowName, pWindowWidth, pWindowHeight);
 	}
@@ -132,10 +122,10 @@ public class JCudaClearVolumeRenderer extends
 	 * @param pWindowHeight
 	 * @param pBytesPerVoxel
 	 */
-	public JCudaClearVolumeRenderer(	final String pWindowName,
-																			final int pWindowWidth,
-																			final int pWindowHeight,
-																			final int pBytesPerVoxel)
+	public JCudaClearVolumeRenderer(final String pWindowName,
+																	final int pWindowWidth,
+																	final int pWindowHeight,
+																	final int pBytesPerVoxel)
 	{
 		super(pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel);
 	}
@@ -196,8 +186,6 @@ public class JCudaClearVolumeRenderer extends
 
 			prepareVolumeDataTexture(null);
 			prepareTransfertFunctionTexture();
-
-			calculateGridSize();
 
 			return true;
 		}
@@ -265,8 +253,7 @@ public class JCudaClearVolumeRenderer extends
 																								true,
 																								false,
 																								false);
-		mTransferFunctionCudaArray.copyFrom(lTransferFunctionArray,
-																							true);
+		mTransferFunctionCudaArray.copyFrom(lTransferFunctionArray, true);
 
 		mTransferFunctionTexture = mCudaModule.getTexture("transferTex");
 
@@ -279,14 +266,6 @@ public class JCudaClearVolumeRenderer extends
 		mTransferFunctionTexture.setTo(mTransferFunctionCudaArray);
 		mVolumeRenderingFunction.setTexture(mTransferFunctionTexture);
 
-	}
-
-	private void calculateGridSize()
-	{
-		// Calculate new grid size
-		mGridSize = new dim3(	iDivUp(getTextureWidth(), mBlockSize.x),
-													iDivUp(getTextureHeight(), mBlockSize.y),
-													1);
 	}
 
 	/**
@@ -306,11 +285,11 @@ public class JCudaClearVolumeRenderer extends
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer#renderVolume(javax.media.opengl.GL2,
+	 * @see clearvolume.renderer.jogl.JOGLClearVolumeRenderer#renderVolume(javax.media.opengl.GL2,
 	 *      float[])
 	 */
 	@Override
-	protected void renderVolume(final GL2 gl, float[] modelView)
+	protected boolean renderVolume(float[] modelView)
 	{
 		mCudaContext.setCurrent();
 
@@ -330,23 +309,7 @@ public class JCudaClearVolumeRenderer extends
 
 		mInvertedViewMatrix.copyFrom(invViewMatrix, true);
 
-		if (updateBufferAndRunKernel())
-		{
-			drawPBOToTextureToScreen(gl);
-		}
-
-	}
-
-	/**
-	 * Interface method implementation
-	 * 
-	 * @see clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer#renderedImageHook(javax.media.opengl.GL2,
-	 *      int)
-	 */
-	@Override
-	public void renderedImageHook(final GL2 pGl,
-																final int pPixelBufferObjectId)
-	{
+		return updateBufferAndRunKernel();
 	}
 
 	/**
@@ -405,10 +368,14 @@ public class JCudaClearVolumeRenderer extends
 			mOpenGLBufferDevicePointer.map();
 			mOpenGLBufferDevicePointer.set(0, true);
 
-			mVolumeRenderingFunction.setGridDim(mGridSize.x, mGridSize.y, 1);
+			mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
+																									cBlockSize),
+																					iDivUp(	getTextureHeight(),
+																									cBlockSize),
+																					1);
 
-			mVolumeRenderingFunction.setBlockDim(	mBlockSize.x,
-																						mBlockSize.y,
+
+			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize,
 																						1);
 
 			mVolumeRenderingFunction.launch(mOpenGLBufferDevicePointer,
@@ -431,7 +398,7 @@ public class JCudaClearVolumeRenderer extends
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.jogl.JOGLPBOClearVolumeRenderer#close()
+	 * @see clearvolume.renderer.jogl.JOGLClearVolumeRenderer#close()
 	 */
 	@Override
 	public void close()

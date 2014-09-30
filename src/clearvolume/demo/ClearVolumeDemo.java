@@ -45,7 +45,7 @@ public class ClearVolumeDemo
 															+ lResolutionX
 															* lResolutionY
 															* z;
-					lVolumeDataArray[lIndex] = (byte) (x ^ y ^ z);
+					lVolumeDataArray[lIndex] = (byte) ((x ^ y ^ z));
 					/*(byte) ((x / 3) ^ (y)
 																					| (y / 3)
 																					^ (z) | (z / 3) ^ (x));/**/
