@@ -1,1 +1,1 @@
-gradle clean cleanEclipse eclipse build uploadArchives FatCapsule
+gradle clean cleanEclipse eclipse build FatCapsule
