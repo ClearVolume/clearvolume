@@ -1,3 +1,7 @@
+plugins {
+  id "us.kirchmeier.capsule" version "0.9.0"
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
@@ -120,6 +124,11 @@ uploadArchives
             repository(url: "file:../../Repos/")
         }
     }
+}
+
+task fatCapsule(type: FatCapsule) {
+  applicationClass 'clearvolume.main.ClearVolumeMain'
+  reallyExecutable
 }
 
 
