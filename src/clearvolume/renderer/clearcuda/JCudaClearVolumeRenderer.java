@@ -155,7 +155,7 @@ public class JCudaClearVolumeRenderer	extends
 		{
 			mCudaDevice = new CudaDevice(0);
 
-			mCudaContext = new CudaContext(mCudaDevice);
+			mCudaContext = new CudaContext(mCudaDevice, true);
 
 			Class<?> lRootClass = JCudaClearVolumeRenderer.class;
 			CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
