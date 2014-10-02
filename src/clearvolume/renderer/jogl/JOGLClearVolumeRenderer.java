@@ -1,6 +1,7 @@
 package clearvolume.renderer.jogl;
 
 import java.io.IOException;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GL;
@@ -42,6 +43,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	// ClearGL Window.
 	private ClearGLWindow mClearGLWindow;
 	private volatile int mLastWindowWidth, mLastWindowHeight;
+	private ReentrantLock mDisplayReentrantLock = new ReentrantLock();
 
 	// pixelbuffer object.
 	protected GLPixelBufferObject mPixelBufferObject;
@@ -459,19 +461,19 @@ public abstract class JOGLClearVolumeRenderer	extends
 		{
 			if (mClearGLWindow.getGLWindow().isFullscreen())
 			{
-				mLastWindowWidth = getWindowWidth();
-				mLastWindowHeight = getWindowHeight();
-				notifyUpdateOfVolumeRenderingParameters();
+				if (mLastWindowWidth > 0 && mLastWindowHeight > 0)
+					mClearGLWindow.getGLWindow().setSize(	mLastWindowWidth,
+																								mLastWindowHeight);
 				mClearGLWindow.getGLWindow().setFullscreen(false);
 			}
 			else
 			{
-				notifyUpdateOfVolumeRenderingParameters();
-				mClearGLWindow.getGLWindow().setSize(	mLastWindowWidth,
-																							mLastWindowHeight);
+				mLastWindowWidth = getWindowWidth();
+				mLastWindowHeight = getWindowHeight();
 				mClearGLWindow.getGLWindow().setFullscreen(true);
 			}
-			mClearGLWindow.getGLWindow().display();
+			// notifyUpdateOfVolumeRenderingParameters();
+			requestDisplay();
 		}
 		catch (final Exception e)
 		{
@@ -498,8 +500,12 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void requestDisplay()
 	{
-		mClearGLWindow.getGLWindow().display();
-
+		boolean lLocked = mDisplayReentrantLock.tryLock();
+		if (lLocked)
+		{
+			mClearGLWindow.getGLWindow().display();
+			mDisplayReentrantLock.unlock();
+		}
 	}
 
 	/**

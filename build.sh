@@ -1,1 +1,1 @@
-gradle clean cleanEclipse eclipse build FatCapsule
+gradle clean cleanEclipse eclipse build FatCapsule publishToMavenLocal

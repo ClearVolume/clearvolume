@@ -414,6 +414,7 @@ public class JCudaClearVolumeRenderer	extends
 		}
 		catch (final Throwable e)
 		{
+			e.printStackTrace();
 			throw new RuntimeException(	"Exception while closing " + this.getClass()
 																																		.getSimpleName(),
 																	e);
