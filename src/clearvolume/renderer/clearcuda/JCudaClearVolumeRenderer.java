@@ -39,9 +39,8 @@ import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
  * @author Loic Royer 2014
  *
  */
-public class JCudaClearVolumeRenderer	extends
-																			JOGLClearVolumeRenderer implements
-																																GLEventListener
+public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
+																																			GLEventListener
 {
 
 	private static final int cBlockSize = 32;
@@ -86,8 +85,6 @@ public class JCudaClearVolumeRenderer	extends
 	private CudaTextureReference mVolumeDataCudaTexture,
 			mTransferFunctionTexture;
 
-
-
 	/**
 	 * Pointer to kernel parameters.
 	 */
@@ -128,6 +125,30 @@ public class JCudaClearVolumeRenderer	extends
 																	final int pBytesPerVoxel)
 	{
 		super(pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel);
+	}
+
+	/**
+	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
+	 * name, width, height, and bytes=per-voxel.
+	 * 
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 * @param pBytesPerVoxel
+	 */
+	public JCudaClearVolumeRenderer(final String pWindowName,
+																	final int pWindowWidth,
+																	final int pWindowHeight,
+																	final int pBytesPerVoxel,
+																	final int pMaxTextureWidth,
+																	final int pMaxTextureHeight)
+	{
+		super(pWindowName,
+					pWindowWidth,
+					pWindowHeight,
+					pBytesPerVoxel,
+					pMaxTextureWidth,
+					pMaxTextureHeight);
 	}
 
 	@Override
@@ -374,9 +395,7 @@ public class JCudaClearVolumeRenderer	extends
 																									cBlockSize),
 																					1);
 
-
-			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize,
-																						1);
+			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
 
 			mVolumeRenderingFunction.launch(mOpenGLBufferDevicePointer,
 																			getTextureWidth(),

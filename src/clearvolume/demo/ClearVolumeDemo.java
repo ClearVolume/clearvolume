@@ -23,13 +23,13 @@ public class ClearVolumeDemo
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																																															768,
-																																															768);
+																																														768);
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
-		final int lResolutionY = 256;
-		final int lResolutionZ = 256;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
 
 		// System.out.println(i);
 

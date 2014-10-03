@@ -65,6 +65,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLAttribute mTexCoordAttribute;
 	private GLUniform mTexUnit;
 	private GLVertexAttributeArray mTexCoordAttributeArray;
+	private int mMaxTextureWidth = 768, mMaxTextureHeight = 768;
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
@@ -95,7 +96,35 @@ public abstract class JOGLClearVolumeRenderer	extends
 																	final int pWindowHeight,
 																	final int pBytesPerVoxel)
 	{
+		this(	pWindowName,
+					pWindowWidth,
+					pWindowHeight,
+					pBytesPerVoxel,
+					768,
+					768);
+	}
+
+	/**
+	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
+	 * name, its dimensions, and bytes-per-voxel.
+	 * 
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 * @param pBytesPerVoxel
+	 * @param pMaxTextureWidth
+	 * @param pMaxTextureHeight
+	 */
+	public JOGLClearVolumeRenderer(	final String pWindowName,
+																	final int pWindowWidth,
+																	final int pWindowHeight,
+																	final int pBytesPerVoxel,
+																	final int pMaxTextureWidth,
+																	final int pMaxTextureHeight)
+	{
 		mWindowName = pWindowName;
+		mLastWindowWidth = pMaxTextureWidth;
+		mLastWindowHeight = pMaxTextureHeight;
 		resetBrightnessAndGammaAndTransferFunctionRanges();
 		resetRotationTranslation();
 		setBytesPerVoxel(pBytesPerVoxel);
@@ -307,8 +336,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 				mQuadVertexArray.addVertexAttributeArray(	mTexCoordAttributeArray,
 																									lTexCoordFloatArray.getFloatBuffer());
 
-				int lTextureWidth = Math.min(768, getWindowWidth());
-				int lTextureHeight = Math.min(768, getWindowHeight());
+				int lTextureWidth = Math.min(	mMaxTextureWidth,
+																			getWindowWidth());
+				int lTextureHeight = Math.min(mMaxTextureHeight,
+																			getWindowHeight());
 				mTexture = new GLTexture(	mGLProgram,
 																	lTextureWidth,
 																	lTextureHeight);
