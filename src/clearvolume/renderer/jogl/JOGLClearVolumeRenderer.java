@@ -5,7 +5,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GL;
-import javax.media.opengl.GL3;
+import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
@@ -49,7 +49,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	protected GLPixelBufferObject mPixelBufferObject;
 
 	// texture and its dimensions.
-	private GLTexture mTexture;
+	private GLTexture<Byte> mTexture;
 
 	// Internal fields for calculating FPS.
 	private volatile int step = 0;
@@ -263,14 +263,14 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void init(final GLAutoDrawable drawable)
 	{
-		final GL3 lGL3 = drawable.getGL().getGL3();
-		lGL3.setSwapInterval(0);
-		lGL3.glDisable(GL3.GL_DEPTH_TEST);
-		lGL3.glDisable(GL3.GL_STENCIL_TEST);
-		lGL3.glEnable(GL3.GL_TEXTURE_2D);
+		final GL4 lGL4 = drawable.getGL().getGL4();
+		lGL4.setSwapInterval(0);
+		lGL4.glDisable(GL4.GL_DEPTH_TEST);
+		lGL4.glDisable(GL4.GL_STENCIL_TEST);
+		lGL4.glEnable(GL4.GL_TEXTURE_2D);
 
-		lGL3.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		lGL3.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+		lGL4.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
 		getClearGLWindow().setOrthoProjectionMatrix(0,
 																								drawable.getSurfaceWidth(),
@@ -296,7 +296,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 			try
 			{
-				mGLProgram = GLProgram.buildProgram(lGL3,
+				mGLProgram = GLProgram.buildProgram(lGL4,
 																						JOGLClearVolumeRenderer.class,
 																						"shaders/vertex.glsl",
 																						"shaders/fragment.glsl");
@@ -340,9 +340,14 @@ public abstract class JOGLClearVolumeRenderer	extends
 																			getWindowWidth());
 				int lTextureHeight = Math.min(mMaxTextureHeight,
 																			getWindowHeight());
-				mTexture = new GLTexture(	mGLProgram,
-																	lTextureWidth,
-																	lTextureHeight);
+				mTexture = new GLTexture<Byte>(	mGLProgram,
+																				Byte.class,
+																				4,
+																				lTextureWidth,
+																				lTextureHeight,
+																				1,
+																				true,
+																				3);
 
 				mPixelBufferObject = new GLPixelBufferObject(	mGLProgram,
 																											mTexture.getWidth(),
@@ -387,9 +392,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void display(final GLAutoDrawable drawable)
 	{
-		final GL3 lGL3 = drawable.getGL().getGL3();
+		final GL4 lGL4 = drawable.getGL().getGL4();
 
-		lGL3.glClear(GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
 		mVolumeViewMatrix.euler(-getRotationX() * 0.01,
 														-getRotationY() * 0.01,
@@ -407,7 +412,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		{
 			mTexture.copyFrom(mPixelBufferObject);
 
-			mGLProgram.use(lGL3);
+			mGLProgram.use(lGL4);
 
 			mTexture.bind(mGLProgram);
 

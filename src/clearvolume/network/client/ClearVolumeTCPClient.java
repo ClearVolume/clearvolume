@@ -1,13 +1,12 @@
 package clearvolume.network.client;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 
 import clearvolume.volume.sink.VolumeSinkInterface;
 
-public class ClearVolumeTCPClient implements Closeable
+public class ClearVolumeTCPClient implements AutoCloseable
 {
 
 	private VolumeSinkInterface mVolumeSink;

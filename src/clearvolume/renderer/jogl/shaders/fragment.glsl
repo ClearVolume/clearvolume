@@ -8,5 +8,5 @@ out vec4 outColor;
  
 void main()
 {
-    outColor = texture(texUnit, ftexcoord);
+    outColor = abs(texture(texUnit, ftexcoord));
 }

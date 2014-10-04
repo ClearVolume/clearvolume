@@ -199,13 +199,13 @@ volumerender(uint *d_output, uint imageW, uint imageH,
         // remap position to [0, 1] coordinates
         float sample = tex3D(tex, invscalex*pos.x*0.5f+0.5f, invscaley*pos.y*0.5f+0.5f, invscalez*pos.z*0.5f+0.5f);
  
- 		// Mapping to transfert function range and gamma correction: 
- 		float mappedsample = powf(ta*sample+tb,gamma);
+ 				// Mapping to transfert function range and gamma correction: 
+ 				float mappedsample = powf(ta*sample+tb,gamma);
  
         // lookup in transfer function texture
         float4 col = tex1D(transferTex,mappedsample);
         
-        if(algo/*ProjectionAlgorythm*/(acc,col)) break;
+        algo/*ProjectionAlgorythm*/(acc,col);
 
         t += tstep;
 

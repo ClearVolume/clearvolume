@@ -21,9 +21,9 @@ public class ClearVolumeDemo
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,
 																						IOException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
-																																															768,
-																																														768);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
+																																														1024,
+																																														1024);
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -45,16 +45,20 @@ public class ClearVolumeDemo
 															+ lResolutionX
 															* lResolutionY
 															* z;
-					lVolumeDataArray[lIndex] = (byte) ((x ^ y ^ z));
+					char lCharValue = (char) (((byte) x ^ (byte) y ^ (byte) z));
+					if (lCharValue < 12)
+						lCharValue = 0;
+					// float lFloatValue = (float) log1p(lByteValue);
+					lVolumeDataArray[lIndex] = (byte) lCharValue;
 					/*(byte) ((x / 3) ^ (y)
 																					| (y / 3)
 																					^ (z) | (z / 3) ^ (x));/**/
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
-																									lResolutionX,
-																									lResolutionY,
-																									lResolutionZ);
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
 
 		for (int i = 0; lClearVolumeRenderer.isShowing(); i++)
 		{
@@ -106,9 +110,9 @@ public class ClearVolumeDemo
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
-																									lResolutionX,
-																									lResolutionY,
-																									lResolutionZ);
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
 
 		while (lClearVolumeRenderer.isShowing())
 		{
@@ -125,7 +129,7 @@ public class ClearVolumeDemo
 																									IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																																														512,
 																																														512);
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
@@ -136,7 +140,7 @@ public class ClearVolumeDemo
 		try
 		{
 			lEgg3DController = new ExternalRotationController(ExternalRotationController.cDefaultEgg3DTCPport,
-																								lClearVolumeRenderer);
+																												lClearVolumeRenderer);
 			lClearVolumeRenderer.setQuaternionController(lEgg3DController);
 			lEgg3DController.connectAsynchronouslyOrWait();
 		}
@@ -168,9 +172,9 @@ public class ClearVolumeDemo
 
 		final ByteBuffer lWrappedArray = ByteBuffer.wrap(lVolumeDataArray);
 		lClearVolumeRenderer.setVolumeDataBuffer(	lWrappedArray,
-																									lResolutionX,
-																									lResolutionY,
-																									lResolutionZ);
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
 
 		for (int i = 0; lClearVolumeRenderer.isShowing(); i++)
 		{
@@ -239,9 +243,9 @@ public class ClearVolumeDemo
 		final ByteBuffer lVolumeData = ByteBuffer.wrap(data);
 
 		mClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
-																															512,
-																															512,
-																															pBytesPerVoxel);
+																												512,
+																												512,
+																												pBytesPerVoxel);
 		mClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getRainbow());
 		// mJCudaClearVolumeRenderer.setupControlFrame();
 
@@ -250,9 +254,9 @@ public class ClearVolumeDemo
 		assertTrue(lEgg3DController.connect());/**/
 
 		mClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(data),
-																									pSizeX,
-																									pSizeY,
-																									pSizeZ);
+																							pSizeX,
+																							pSizeY,
+																							pSizeZ);
 		mClearVolumeRenderer.setVisible(true);
 
 		while (mClearVolumeRenderer.isShowing())
