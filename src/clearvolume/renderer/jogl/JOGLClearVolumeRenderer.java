@@ -304,7 +304,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 				mPositionAttribute = mGLProgram.getAtribute("position");
 				mTexCoordAttribute = mGLProgram.getAtribute("texcoord");
 				mTexUnit = mGLProgram.getUniform("texUnit");
-				mTexUnit.setInt(0);
+				mTexUnit.set(0);
 
 				mQuadVertexArray = new GLVertexArray(mGLProgram);
 				mQuadVertexArray.bind();
