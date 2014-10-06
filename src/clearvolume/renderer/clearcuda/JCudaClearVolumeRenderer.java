@@ -11,7 +11,10 @@ import static jcuda.driver.JCudaDriver.CU_TRSF_NORMALIZED_COORDINATES;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
 import javax.media.opengl.GLEventListener;
@@ -19,6 +22,10 @@ import javax.media.opengl.GLEventListener;
 import jcuda.Pointer;
 import jcuda.driver.CUaddress_mode;
 import jcuda.driver.CUfilter_mode;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+
 import clearcuda.CudaArray;
 import clearcuda.CudaCompiler;
 import clearcuda.CudaContext;
@@ -179,23 +186,9 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			mCudaContext = new CudaContext(mCudaDevice, true);
 
 			Class<?> lRootClass = JCudaClearVolumeRenderer.class;
-			CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
-																										lRootClass.getSimpleName());
 
-			lCudaCompiler.setParameter(	Pattern.quote("/*ProjectionAlgorythm*/"),
-																	getProjectionAlgorythm().name());
-			lCudaCompiler.setParameter(	Pattern.quote("/*BytesPerVoxel*/"),
-																	"" + getBytesPerVoxel());
+			File lPTXFile = compileCUDA(lRootClass);
 
-			File lCUFile = lCudaCompiler.addFile(	lRootClass,
-																						"kernels/VolumeRender.cu");
-
-			lCudaCompiler.addFiles(	lRootClass,
-															"kernels/helper_cuda.h",
-															"kernels/helper_math.h",
-															"kernels/helper_string.h");
-
-			File lPTXFile = lCudaCompiler.compile(lCUFile);
 
 			mCudaModule = CudaModule.moduleFromPTX(lPTXFile);
 
@@ -215,6 +208,47 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	private File compileCUDA(Class<?> lRootClass) throws IOException
+	{
+		File lPTXFile;
+		
+		try
+		{
+			CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
+																										lRootClass.getSimpleName());
+
+			lCudaCompiler.setParameter(	Pattern.quote("/*ProjectionAlgorythm*/"),
+																	getProjectionAlgorythm().name());
+			lCudaCompiler.setParameter(	Pattern.quote("/*BytesPerVoxel*/"),
+																	"" + getBytesPerVoxel());
+
+			File lCUFile = lCudaCompiler.addFile(	lRootClass,
+																						"kernels/VolumeRender.cu");
+
+			lCudaCompiler.addFiles(	lRootClass,
+															"kernels/helper_cuda.h",
+															"kernels/helper_math.h",
+															"kernels/helper_string.h");
+
+			lPTXFile = lCudaCompiler.compile(lCUFile);
+		}
+		catch (Exception e)
+		{
+			InputStream lInputStreamPTXFile = lRootClass.getResourceAsStream("kernels/VolumeRender.backup.ptx");
+			final StringWriter lStringWriter = new StringWriter();
+			IOUtils.copy(	lInputStreamPTXFile,
+										lStringWriter,
+										Charset.defaultCharset());
+
+			lPTXFile = File.createTempFile(	this.getClass().getSimpleName(),
+																			".ptx");
+			FileUtils.write(lPTXFile, lStringWriter.toString());
+
+		}
+
+		return lPTXFile;
 	}
 
 	/**
