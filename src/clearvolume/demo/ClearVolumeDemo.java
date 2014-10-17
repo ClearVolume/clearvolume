@@ -31,8 +31,6 @@ public class ClearVolumeDemo
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
-		// System.out.println(i);
-
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ];
 
@@ -48,28 +46,21 @@ public class ClearVolumeDemo
 					char lCharValue = (char) (((byte) x ^ (byte) y ^ (byte) z));
 					if (lCharValue < 12)
 						lCharValue = 0;
-					// float lFloatValue = (float) log1p(lByteValue);
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
-					/*(byte) ((x / 3) ^ (y)
-																					| (y / 3)
-																					^ (z) | (z / 3) ^ (x));/**/
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
+		lClearVolumeRenderer.requestDisplay();
 
-		for (int i = 0; lClearVolumeRenderer.isShowing(); i++)
+		while (lClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(500);
-			// lJCudaClearVolumeRenderer.requestDisplay();
-
 		}
 
 		lClearVolumeRenderer.close();
-		// Thread.sleep(000);
-
 	}
 
 	@Test
@@ -82,13 +73,10 @@ public class ClearVolumeDemo
 																																														2);
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
-		// lJCudaClearVolumeRenderer.start();
 
 		final int lResolutionX = 256;
 		final int lResolutionY = 256;
 		final int lResolutionZ = 256;
-
-		// System.out.println(i);
 
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ
@@ -100,19 +88,14 @@ public class ClearVolumeDemo
 				{
 					final int lIndex = 2 * (x + lResolutionX * y + lResolutionX * lResolutionY
 																													* z);
-					// lVolumeDataArray[lIndex] = (byte) (0);
-					lVolumeDataArray[lIndex + 1] = (byte) ((x ^ y ^ z));// (byte) ((x
-																															// ^ y ^
-					// z)/16);
-					/*(byte) ((x / 3) ^ (y)
-																					| (y / 3)
-																					^ (z) | (z / 3) ^ (x));/**/
+					lVolumeDataArray[lIndex + 1] = (byte) ((x ^ y ^ z));
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
+		lClearVolumeRenderer.requestDisplay();
 
 		while (lClearVolumeRenderer.isShowing())
 		{
@@ -120,7 +103,6 @@ public class ClearVolumeDemo
 		}
 
 		lClearVolumeRenderer.close();
-		// Thread.sleep(000);
 
 	}
 
@@ -153,8 +135,6 @@ public class ClearVolumeDemo
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
-		// System.out.println(i);
-
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ];
 
@@ -176,13 +156,15 @@ public class ClearVolumeDemo
 																							lResolutionY,
 																							lResolutionZ);
 
-		for (int i = 0; lClearVolumeRenderer.isShowing(); i++)
+		lClearVolumeRenderer.requestDisplay();
+
+		while (lClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(100);
 		}
 
 		lClearVolumeRenderer.close();
-		// Thread.sleep(000);
+
 		if (lEgg3DController != null)
 			lEgg3DController.close();
 
@@ -194,14 +176,7 @@ public class ClearVolumeDemo
 
 		try
 		{
-			// startSample("./data/Bucky.raw", 32, 32, 32);
-
-			// Other input files may be obtained from http://www.volvis.org
-			// startSample("./databig/celegans.raw", 512, 512, 512);
 			startSample("./data/Bucky.raw", 1, 32, 32, 32);
-			// startSample("./databig/test1024^3.raw", 1, 1024, 1024, 1024);
-			// startSample("./data/test2048^3.raw", 2048, 2048, 2048);
-
 		}
 		catch (final Throwable e)
 		{
@@ -239,25 +214,22 @@ public class ClearVolumeDemo
 																	pSizeY,
 																	pSizeZ);
 
-		// Start the sample with the data that was read from the file
-		final ByteBuffer lVolumeData = ByteBuffer.wrap(data);
 
 		mClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
 																												512,
 																												512,
 																												pBytesPerVoxel);
-		mClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getRainbow());
-		// mJCudaClearVolumeRenderer.setupControlFrame();
 
-		/*final Egg3DController lEgg3DController = new Egg3DController();
-		mJCudaClearVolumeRenderer.setQuaternionController(lEgg3DController);
-		assertTrue(lEgg3DController.connect());/**/
+		mClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getRainbow());
+		mClearVolumeRenderer.setVisible(true);
 
 		mClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(data),
 																							pSizeX,
 																							pSizeY,
 																							pSizeZ);
-		mClearVolumeRenderer.setVisible(true);
+
+		mClearVolumeRenderer.requestDisplay();
+
 
 		while (mClearVolumeRenderer.isShowing())
 		{

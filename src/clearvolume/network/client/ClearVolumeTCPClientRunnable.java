@@ -1,7 +1,9 @@
 package clearvolume.network.client;
 
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.volume.Volume;
 import clearvolume.volume.sink.VolumeSinkInterface;
 
@@ -31,15 +33,15 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 	{
 		try
 		{
+			ByteBuffer lScratchBuffer = null;
+
 			while (!mStopSignal)
 			{
-				// ByteBuffer lProtocolHeader =
-				// ByteBuffer.allocateDirect(ClearVolumeProtocol.cProtocolHeaderLengthInBytes);
-				// mSocketChannel.r
-				// mSocketChannel.read(lProtocolHeader);
-				// TODO: rest of
-
-				Volume lVolume = null;
+				@SuppressWarnings("rawtypes")
+				Volume<?> lVolume = new Volume();
+				lVolume = ClearVolumeSerialization.deserialize(	mSocketChannel,
+																												lScratchBuffer,
+																												lVolume);
 				mVolumeSink.sendVolume(lVolume);
 			}
 
@@ -56,8 +58,10 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 
 	private void handleError(Throwable pE)
 	{
-		// TODO Auto-generated method stub
+		if (pE instanceof java.nio.channels.AsynchronousCloseException)
+			return;
 
+		pE.printStackTrace();
 	}
 
 	public void waitForStop()
@@ -70,7 +74,6 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 			}
 			catch (InterruptedException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

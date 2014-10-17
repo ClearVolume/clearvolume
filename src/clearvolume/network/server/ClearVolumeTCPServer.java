@@ -55,7 +55,7 @@ public class ClearVolumeTCPServer	implements
 		lRunnable = new ClearVolumeTCPServerRunnable(	mServerSocketChannel,
 																									mSourceToSinkBufferedAdapter);
 		mRunnableThread = new Thread(	lRunnable,
-																	"ClearVolumeClientRunnableThread");
+																	ClearVolumeTCPServerRunnable.class.getSimpleName() + "Thread");
 		mRunnableThread.setDaemon(true);
 		mRunnableThread.start();
 		return true;
@@ -64,7 +64,6 @@ public class ClearVolumeTCPServer	implements
 	public boolean stop()
 	{
 		lRunnable.requestStop();
-		lRunnable.waitForStop();
 		return true;
 	}
 

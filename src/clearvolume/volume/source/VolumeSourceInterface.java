@@ -4,5 +4,5 @@ import clearvolume.volume.Volume;
 
 public interface VolumeSourceInterface
 {
-	public Volume requestVolume();
+	public Volume<?> requestVolume();
 }

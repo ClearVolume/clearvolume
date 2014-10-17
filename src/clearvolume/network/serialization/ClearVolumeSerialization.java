@@ -1,4 +1,4 @@
-package clearvolume.network;
+package clearvolume.network.serialization;
 
 import static java.lang.Math.toIntExact;
 
@@ -9,17 +9,17 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import clearvolume.network.keyvalue.KeyValueMaps;
+import clearvolume.network.serialization.keyvalue.KeyValueMaps;
 import clearvolume.volume.Volume;
 
 public class ClearVolumeSerialization
 {
 	// first 4 digits of the CRC32 of 'ClearVolume' string :-)
 	public static final int cStandardTCPPort = 9140;
-	private static final int cLongSizeInBytes = 8;
+	private static final int cLongSizeInBytes = Long.BYTES;
 
-	public static final void serialize(	Volume pVolume,
-																			ByteBuffer pByteBuffer)
+	public static final ByteBuffer serialize(	Volume<?> pVolume,
+																						ByteBuffer pByteBuffer)
 	{
 		StringBuilder lStringBuilder = new StringBuilder();
 		writeVolumeHeader(pVolume, lStringBuilder);
@@ -27,7 +27,7 @@ public class ClearVolumeSerialization
 		final int lHeaderLength = lStringBuilder.length();
 
 		final long lDataLength = pVolume.getVolumeDataSizeInBytes();
-		int lNeededBufferLength = toIntExact(2 * cLongSizeInBytes
+		int lNeededBufferLength = toIntExact(3 * cLongSizeInBytes
 																					+ lHeaderLength
 																					+ lDataLength);
 		if (pByteBuffer == null || pByteBuffer.capacity() != lNeededBufferLength)
@@ -43,17 +43,19 @@ public class ClearVolumeSerialization
 		pByteBuffer.putLong(lDataLength);
 		pVolume.writeToByteBuffer(pByteBuffer);
 
+		return pByteBuffer;
 	};
 
-	private static void writeVolumeHeader(Volume pVolume,
+	private static void writeVolumeHeader(Volume<?> pVolume,
 																				StringBuilder pStringBuilder)
 	{
 		LinkedHashMap<String, String> lHeaderMap = new LinkedHashMap<String, String>();
 		lHeaderMap.put("index", "" + pVolume.getIndex());
 		lHeaderMap.put("time", "" + pVolume.getTime());
-		lHeaderMap.put("channel", "" + pVolume.getChannel());
+		lHeaderMap.put("channels", "" + pVolume.getChannels());
 		lHeaderMap.put("dim", "" + pVolume.getDimension());
-		lHeaderMap.put("bytespervoxel", "" + pVolume.getBytesPerVoxels());
+		lHeaderMap.put("type", "" + pVolume.getTypeName());
+		lHeaderMap.put("nbchannels", "" + pVolume.getBytesPerChannel());
 		lHeaderMap.put("widthvoxels", "" + pVolume.getWidthInVoxels());
 		lHeaderMap.put("heightvoxels", "" + pVolume.getHeightInVoxels());
 		lHeaderMap.put("depthvoxels", "" + pVolume.getDepthInVoxels());
@@ -67,7 +69,7 @@ public class ClearVolumeSerialization
 
 	static void readVolumeHeader(	ByteBuffer pByteBuffer,
 																int pHeaderLength,
-																Volume pVolume)
+																Volume<?> pVolume)
 	{
 
 		Map<String, String> lHeaderMap = KeyValueMaps.readMapFromBuffer(pByteBuffer,
@@ -75,23 +77,25 @@ public class ClearVolumeSerialization
 																																		null);
 		final long lIndex = Long.parseLong(lHeaderMap.get("index"));
 		final double lTime = Double.parseDouble(lHeaderMap.get("time"));
-		final int lChannel = Integer.parseInt(lHeaderMap.get("channel"));
+		final int lChannels = Integer.parseInt(lHeaderMap.get("channels"));
 		final int lDim = Integer.parseInt(lHeaderMap.get("dim"));
-		final long lBytesPerVoxel = Long.parseLong(lHeaderMap.get("bytespervoxel"));
+		final String lType = lHeaderMap.get("type");
+		final long lNumberOfChannels = Long.parseLong(lHeaderMap.get("nbchannels"));
 		final long lWidthVoxels = Long.parseLong(lHeaderMap.get("widthvoxels"));
 		final long lHeightVoxels = Long.parseLong(lHeaderMap.get("heightvoxels"));
 		final long lDepthVoxels = Long.parseLong(lHeaderMap.get("depthvoxels"));
 
 		final String lRealUnitName = lHeaderMap.get("realunit");
-		final long lWidthReal = Long.parseLong(lHeaderMap.get("widthreal"));
-		final long lHeightReal = Long.parseLong(lHeaderMap.get("heightreal"));
-		final long lDepthReal = Long.parseLong(lHeaderMap.get("depthreal"));
+		final double lWidthReal = Double.parseDouble(lHeaderMap.get("widthreal"));
+		final double lHeightReal = Double.parseDouble(lHeaderMap.get("heightreal"));
+		final double lDepthReal = Double.parseDouble(lHeaderMap.get("depthreal"));
 
 		pVolume.setIndex(lIndex);
 		pVolume.setTime(lTime);
-		pVolume.setChannel(lChannel);
+		pVolume.setType(lType);
+		pVolume.setChannels(lChannels);
 		pVolume.setDimension(lDim);
-		pVolume.setVolumeDimensionsInVoxels(lBytesPerVoxel,
+		pVolume.setVolumeDimensionsInVoxels(lNumberOfChannels,
 																				lWidthVoxels,
 																				lHeightVoxels,
 																				lDepthVoxels);
@@ -103,9 +107,9 @@ public class ClearVolumeSerialization
 
 	};
 
-	public static final Volume deserialize(	SocketChannel pSocketChannel,
-																					ByteBuffer pScratchBuffer,
-																					Volume pVolume) throws IOException
+	public static final <T> Volume<T> deserialize(SocketChannel pSocketChannel,
+																								ByteBuffer pScratchBuffer,
+																								Volume<T> pVolume) throws IOException
 	{
 
 		if (pScratchBuffer == null || pScratchBuffer.capacity() == 0)
@@ -115,40 +119,75 @@ public class ClearVolumeSerialization
 		}
 
 		pScratchBuffer.clear();
-		pScratchBuffer.limit(1);
-		pSocketChannel.read(pScratchBuffer);
-		final int lNeededBufferLength = toIntExact(pScratchBuffer.getLong());
+		pScratchBuffer.limit(Long.BYTES);
+		while (pScratchBuffer.hasRemaining())
+			pSocketChannel.read(pScratchBuffer);
+		pScratchBuffer.rewind();
+		final int lWholeLength = toIntExact(pScratchBuffer.getLong());
 
-		if (pScratchBuffer == null || pScratchBuffer.capacity() != lNeededBufferLength)
+		pScratchBuffer.clear();
+		pScratchBuffer.limit(Long.BYTES);
+		while (pScratchBuffer.hasRemaining())
+			pSocketChannel.read(pScratchBuffer);
+		pScratchBuffer.rewind();
+		final int lHeaderLength = toIntExact(pScratchBuffer.getLong());
+
+		if (pScratchBuffer == null || pScratchBuffer.capacity() < lHeaderLength)
 		{
-			pScratchBuffer = ByteBuffer.allocateDirect(lNeededBufferLength);
+			pScratchBuffer = ByteBuffer.allocateDirect(lHeaderLength);
 			pScratchBuffer.order(ByteOrder.nativeOrder());
 		}
 
 		pScratchBuffer.clear();
-		pSocketChannel.read(pScratchBuffer);
+		pScratchBuffer.limit(lHeaderLength);
+		while (pScratchBuffer.hasRemaining())
+			pSocketChannel.read(pScratchBuffer);
+		pScratchBuffer.rewind();
+		readVolumeHeader(pScratchBuffer, lHeaderLength, pVolume);
 
-		return deserialize(pScratchBuffer, pVolume);
+		pScratchBuffer.clear();
+		pScratchBuffer.limit(Long.BYTES);
+		while (pScratchBuffer.hasRemaining())
+			pSocketChannel.read(pScratchBuffer);
+		pScratchBuffer.rewind();
+		final int lDataLength = toIntExact(pScratchBuffer.getLong());
+
+		if (pScratchBuffer.capacity() < lDataLength)
+		{
+			pScratchBuffer = ByteBuffer.allocateDirect(lDataLength);
+			pScratchBuffer.order(ByteOrder.nativeOrder());
+		}
+
+		pScratchBuffer.clear();
+		pScratchBuffer.limit(lDataLength);
+		while (pScratchBuffer.hasRemaining())
+			pSocketChannel.read(pScratchBuffer);
+		pScratchBuffer.rewind();
+		readVolumeData(pScratchBuffer, lDataLength, pVolume);
+
+		return pVolume;
 
 	};
 
-	public static final Volume deserialize(	ByteBuffer pByteBuffer,
-																					Volume pVolume)
+	public static final <T> Volume<T> deserialize(ByteBuffer pByteBuffer,
+																								Volume<T> pVolume)
 	{
+		pByteBuffer.rewind();
+		final int lWholeLength = toIntExact(pByteBuffer.getLong());
 		final int lHeaderLength = toIntExact(pByteBuffer.getLong());
 		readVolumeHeader(pByteBuffer, lHeaderLength, pVolume);
 		final long lDataLength = pByteBuffer.getLong();
 		readVolumeData(pByteBuffer, lDataLength, pVolume);
 		return pVolume;
-
 	}
 
 	static void readVolumeData(	ByteBuffer pByteBuffer,
 															long pDataLength,
-															Volume pVolume)
+															Volume<?> pVolume)
 	{
 
-		if (pVolume.getVolumeData().capacity() != pDataLength)
+		if (pVolume.getVolumeData() == null || pVolume.getVolumeData()
+																									.capacity() != pDataLength)
 		{
 			ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(toIntExact(pDataLength));
 			lByteBuffer.order(ByteOrder.nativeOrder());

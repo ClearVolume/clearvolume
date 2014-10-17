@@ -4,23 +4,30 @@ import static java.lang.Math.toIntExact;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
-public class Volume
+public class Volume<T>
 {
 	private ByteBuffer mVolumeData;
+	private Class<T> mType;
 	private long[] mVolumeDimensionsInVoxels;
 	private double[] mVolumeDimensionsInRealUnits;
 	private String mRealUnitName;
 
-	private int mChannel;
+	private int mChannels;
 	private float[] mViewMatrix;
 
 	private long mVolumeIndex;
 	private double mVolumeTime;
 
-	public Volume(long... pDimensions)
+	public Volume()
+	{
+	}
+
+	public Volume(Class<T> pType, long... pDimensions)
 	{
 		super();
+		mType = pType;
 		mVolumeDimensionsInVoxels = pDimensions;
 		final long lBufferLength = getVolumeDataSizeInBytes();
 		final int lBufferLengthInt = toIntExact(lBufferLength);
@@ -28,9 +35,10 @@ public class Volume
 														.order(ByteOrder.nativeOrder());
 	}
 
+
 	public long getVolumeDataSizeInBytes()
 	{
-		long lVolumeDataSize = 1;
+		long lVolumeDataSize = getBytesPerChannel();
 		for (int i = 0; i < getVolumeDimensionsInVoxels().length; i++)
 			lVolumeDataSize *= getVolumeDimensionsInVoxels()[i];
 		return lVolumeDataSize;
@@ -59,6 +67,44 @@ public class Volume
 		return mVolumeData;
 	}
 
+	public void setType(String pType)
+	{
+		if (pType.equalsIgnoreCase("Byte"))
+			setType(Byte.class);
+		else if (pType.equalsIgnoreCase("Character"))
+			setType(Character.class);
+		else if (pType.equalsIgnoreCase("Char"))
+			setType(Character.class);
+		else if (pType.equalsIgnoreCase("Short"))
+			setType(Short.class);
+		else if (pType.equalsIgnoreCase("Integer"))
+			setType(Integer.class);
+		else if (pType.equalsIgnoreCase("Long"))
+			setType(Long.class);
+		else if (pType.equalsIgnoreCase("Float"))
+			setType(Float.class);
+		else if (pType.equalsIgnoreCase("Double"))
+			setType(Double.class);
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public void setType(Class<?> pType)
+	{
+		mType = (Class<T>) pType;
+	}
+
+	public Class<T> getType()
+	{
+		return mType;
+	}
+
+	public String getTypeName()
+	{
+		return mType.getTypeName()
+								.replaceAll("java.lang.", "");
+	}
+
 	public void setDimension(int pDim)
 	{
 		mVolumeDimensionsInVoxels = new long[pDim + 1];
@@ -75,7 +121,40 @@ public class Volume
 		return mVolumeDimensionsInVoxels;
 	}
 
-	public long getBytesPerVoxels()
+	public long getBytesPerChannel()
+	{
+		if (mType == Byte.class)
+		{
+			return Byte.BYTES;
+		}
+		else if (mType == Short.class)
+		{
+			return Short.BYTES;
+		}
+		else if (mType == Character.class)
+		{
+			return Character.BYTES;
+		}
+		else if (mType == Integer.class)
+		{
+			return Integer.BYTES;
+		}
+		else if (mType == Long.class)
+		{
+			return Long.BYTES;
+		}
+		else if (mType == Float.class)
+		{
+			return Float.BYTES;
+		}
+		else if (mType == Double.class)
+		{
+			return Double.BYTES;
+		}
+		return 0;
+	}
+
+	public long getNumberOfChannels()
 	{
 		return mVolumeDimensionsInVoxels[0];
 	}
@@ -102,21 +181,29 @@ public class Volume
 
 	public double getWidthInRealUnits()
 	{
-		return mVolumeDimensionsInRealUnits[1];
+		if (mVolumeDimensionsInRealUnits == null)
+			return 1;
+		return mVolumeDimensionsInRealUnits[0];
 	}
 
 	public double getHeightInRealUnits()
 	{
-		return mVolumeDimensionsInRealUnits[2];
+		if (mVolumeDimensionsInRealUnits == null)
+			return 1;
+		return mVolumeDimensionsInRealUnits[1];
 	}
 
 	public double getDepthInRealUnits()
 	{
-		return mVolumeDimensionsInRealUnits[3];
+		if (mVolumeDimensionsInRealUnits == null)
+			return 1;
+		return mVolumeDimensionsInRealUnits[2];
 	}
 
 	public String getRealUnitName()
 	{
+		if (mVolumeDimensionsInRealUnits == null)
+			return "none";
 		return mRealUnitName;
 	}
 
@@ -145,14 +232,14 @@ public class Volume
 		mVolumeTime = pVolumeTime;
 	}
 
-	public int getChannel()
+	public int getChannels()
 	{
-		return mChannel;
+		return mChannels;
 	}
 
-	public void setChannel(int pChannel)
+	public void setChannels(int pChannel)
 	{
-		mChannel = pChannel;
+		mChannels = pChannel;
 	}
 
 	public float[] getViewMatrix()
@@ -174,9 +261,28 @@ public class Volume
 	public void readFromByteBuffer(ByteBuffer pByteBuffer)
 	{
 		mVolumeData.clear();
-		pByteBuffer.put(mVolumeData);
+		mVolumeData.put(pByteBuffer);
 	}
 
-
+	@Override
+	public String toString()
+	{
+		return "Volume [mType=" + getTypeName()
+						+ ", mVolumeDimensionsInVoxels="
+						+ Arrays.toString(mVolumeDimensionsInVoxels)
+						+ ", mRealUnitName="
+						+ mRealUnitName
+						+ ", mVolumeDimensionsInRealUnits="
+						+ Arrays.toString(mVolumeDimensionsInRealUnits)
+						+ ", mChannels="
+						+ mChannels
+						+ ", mVolumeIndex="
+						+ mVolumeIndex
+						+ ", mVolumeTime="
+						+ mVolumeTime
+						+ ", mViewMatrix="
+						+ Arrays.toString(mViewMatrix)
+						+ "]";
+	}
 
 }

@@ -1,4 +1,4 @@
-package clearvolume.network.keyvalue;
+package clearvolume.network.serialization.keyvalue;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;

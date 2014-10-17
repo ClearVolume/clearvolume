@@ -189,7 +189,6 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			File lPTXFile = compileCUDA(lRootClass);
 
-
 			mCudaModule = CudaModule.moduleFromPTX(lPTXFile);
 
 			mInvertedViewMatrix = mCudaModule.getGlobal("c_invViewMatrix");
@@ -213,7 +212,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private File compileCUDA(Class<?> lRootClass) throws IOException
 	{
 		File lPTXFile;
-		
+
 		try
 		{
 			CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
@@ -458,7 +457,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	{
 		try
 		{
-			mVolumeDataCudaArray.close();
+			if (mVolumeDataCudaArray != null)
+				mVolumeDataCudaArray.close();
 			mTransferFunctionCudaArray.close();
 			mCudaModule.close();
 			mCudaContext.close();

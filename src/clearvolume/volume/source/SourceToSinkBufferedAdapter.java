@@ -11,27 +11,27 @@ public class SourceToSinkBufferedAdapter implements
 																						VolumeSourceInterface
 {
 
-	private final BlockingQueue<Volume> mVolumeQueue;
+	private final BlockingQueue<Volume<?>> mVolumeQueue;
 
 
 	public SourceToSinkBufferedAdapter(int pMaxCapacity)
 	{
 		super();
-		mVolumeQueue = new ArrayBlockingQueue<Volume>(pMaxCapacity);
+		mVolumeQueue = new ArrayBlockingQueue<Volume<?>>(pMaxCapacity);
 	}
 
 	@Override
-	public void sendVolume(Volume pVolume)
+	public void sendVolume(Volume<?> pVolume)
 	{
 		mVolumeQueue.offer(pVolume);
 	}
 
 	@Override
-	public Volume requestVolume()
+	public Volume<?> requestVolume()
 	{
 		try
 		{
-			Volume lVolume = mVolumeQueue.take();
+			Volume<?> lVolume = mVolumeQueue.take();
 			return lVolume;
 		}
 		catch (InterruptedException e)

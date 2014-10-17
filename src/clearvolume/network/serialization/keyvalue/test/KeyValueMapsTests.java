@@ -1,4 +1,4 @@
-package clearvolume.network.keyvalue.test;
+package clearvolume.network.serialization.keyvalue.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import clearvolume.network.keyvalue.KeyValueMaps;
+import clearvolume.network.serialization.keyvalue.KeyValueMaps;
 
 public class KeyValueMapsTests
 {

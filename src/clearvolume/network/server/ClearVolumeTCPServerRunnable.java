@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-import clearvolume.network.ClearVolumeSerialization;
+import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.volume.Volume;
 import clearvolume.volume.source.VolumeSourceInterface;
 
@@ -46,10 +46,15 @@ public class ClearVolumeTCPServerRunnable implements Runnable
 					{
 						Volume lVolumeToSend = mVolumeSource.requestVolume();
 
-						ClearVolumeSerialization.serialize(lVolumeToSend, mByteBuffer);
-						mByteBuffer.clear();
+						mByteBuffer = ClearVolumeSerialization.serialize(	lVolumeToSend,
+																															mByteBuffer);
+						mByteBuffer.rewind();
 						lSocketChannel.write(mByteBuffer);
 					}
+				}
+				catch (java.io.IOException e1)
+				{
+					continue;
 				}
 				catch (Throwable e)
 				{
@@ -84,7 +89,6 @@ public class ClearVolumeTCPServerRunnable implements Runnable
 			}
 			catch (InterruptedException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
