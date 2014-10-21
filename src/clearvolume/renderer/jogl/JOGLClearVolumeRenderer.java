@@ -8,6 +8,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
 
 import cleargl.ClearGLEventListener;
@@ -173,7 +174,14 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void close()
 	{
-		mClearGLWindow.close();
+		try
+		{
+			mClearGLWindow.close();
+		}
+		catch (GLException e)
+		{
+			System.err.println(e.getLocalizedMessage());
+		}
 	}
 
 	/**
