@@ -43,7 +43,7 @@ public class ClearVolumeDemo
 															+ lResolutionX
 															* lResolutionY
 															* z;
-					char lCharValue = (char) (((byte) x ^ (byte) y ^ (byte) z));
+					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
 					if (lCharValue < 12)
 						lCharValue = 0;
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
@@ -88,7 +88,7 @@ public class ClearVolumeDemo
 				{
 					final int lIndex = 2 * (x + lResolutionX * y + lResolutionX * lResolutionY
 																													* z);
-					lVolumeDataArray[lIndex + 1] = (byte) ((x ^ y ^ z));
+					lVolumeDataArray[lIndex + 1] = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),

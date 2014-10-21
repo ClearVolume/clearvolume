@@ -1,5 +1,6 @@
 package clearvolume.network.demo;
 
+import static java.lang.Math.toIntExact;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ import clearvolume.volume.sink.ClearVolumeRendererSink;
 
 public class ClearVolumeNetworkDemo
 {
-	private static final int cSizeMultFactor = 1;
+	private static final int cSizeMultFactor = 2;
 	private static final int cWidth = 127 * cSizeMultFactor;
 	private static final int cHeight = 128 * cSizeMultFactor;
 	private static final int cDepth = 129 * cSizeMultFactor;
@@ -42,28 +43,40 @@ public class ClearVolumeNetworkDemo
 																							cWidth,
 																							cHeight,
 																							cDepth);
+			ByteBuffer lVolumeData = lVolume.getVolumeData();
+
+			lVolumeData.rewind();
+
+			for (int i = 0; i < cWidth * cHeight * cDepth; i++)
+				lVolumeData.put((byte) 32);
+
+			lVolumeData.rewind();
+			for (int z = 0; z < cDepth / 2; z++)
+				for (int y = 0; y < cHeight / 2; y++)
+					for (int x = 0; x < cWidth / 2; x++)
+					{
+						final int lIndex = x + cWidth * y + cWidth * cHeight * z;
+
+						byte lByteValue = (byte) ((byte) x ^ (byte) y ^ (byte) z);
+						if (lByteValue < 12)
+							lByteValue = 0;
+
+						lVolumeData.put(lIndex, lByteValue);
+					}/**/
+
 			for (long i = 0; i < cNumberOfVolumes; i++)
 			{
 				try
 				{
 					if (i % 10 == 0)
 						System.out.println("i=" + i);
-					ByteBuffer lVolumeData = lVolume.getVolumeData();
-
+					lVolumeData = lVolume.getVolumeData();
 					lVolumeData.rewind();
-					for (int z = 0; z < cWidth; z++)
-						for (int y = 0; y < cHeight; y++)
-							for (int x = 0; x < cDepth; x++)
-							{
-								byte lCharValue = (byte) ((byte) x * i ^ (byte) y ^ (byte) z);
-								if (lCharValue < 12)
-									lCharValue = 0;
-
-								lVolumeData.put(lCharValue);
-							}
+					lVolumeData.put(toIntExact(i % lVolumeData.limit()),
+													(byte) i);
 
 					lClearVolumeTCPServer.sendVolume(lVolume);
-					Thread.sleep(10);
+					Thread.sleep(1);
 				}
 				catch (Throwable e)
 				{

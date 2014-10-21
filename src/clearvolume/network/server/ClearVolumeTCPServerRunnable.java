@@ -1,9 +1,11 @@
 package clearvolume.network.server;
 
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.volume.Volume;
 import clearvolume.volume.source.VolumeSourceInterface;
@@ -38,13 +40,15 @@ public class ClearVolumeTCPServerRunnable implements Runnable
 			while (!mStopSignal)
 			{
 				SocketChannel lSocketChannel = mServerSocketChannel.accept();
+				lSocketChannel.setOption(	StandardSocketOptions.SO_SNDBUF,
+																	ClearVolumeTCPClient.cSocketBufferLength);
 
 				try
 				{
 					while (lSocketChannel.isOpen() && lSocketChannel.isConnected()
 									&& !mStopSignal)
 					{
-						Volume lVolumeToSend = mVolumeSource.requestVolume();
+						Volume<?> lVolumeToSend = mVolumeSource.requestVolume();
 
 						mByteBuffer = ClearVolumeSerialization.serialize(	lVolumeToSend,
 																															mByteBuffer);

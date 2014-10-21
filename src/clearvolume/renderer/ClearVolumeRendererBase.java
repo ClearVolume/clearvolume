@@ -709,7 +709,6 @@ public abstract class ClearVolumeRendererBase	implements
 			mVolumeDataByteBuffer = pByteBuffer;
 
 			notifyUpdateOfVolumeRenderingParameters();
-
 		}
 	}
 

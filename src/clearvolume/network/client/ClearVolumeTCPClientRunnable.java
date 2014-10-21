@@ -1,20 +1,23 @@
 package clearvolume.network.client;
 
-import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import clearvolume.network.ringbuffer.RingBuffer;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.volume.Volume;
 import clearvolume.volume.sink.VolumeSinkInterface;
 
 public class ClearVolumeTCPClientRunnable implements Runnable
 {
+	private static final int cMaxpreAllocatedVolumes = 10;
 
 	private SocketChannel mSocketChannel;
 	private VolumeSinkInterface mVolumeSink;
 
 	private volatile boolean mStopSignal = false;
 	private volatile boolean mStoppedSignal = false;
+
+	private RingBuffer<Volume<?>> mVolumeRingBuffer = new RingBuffer<Volume<?>>(cMaxpreAllocatedVolumes);
 
 	public ClearVolumeTCPClientRunnable(SocketChannel pSocketChannel,
 																			VolumeSinkInterface pVolumeSink)
@@ -33,15 +36,15 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 	{
 		try
 		{
-			ByteBuffer lScratchBuffer = null;
 
 			while (!mStopSignal)
 			{
-				@SuppressWarnings("rawtypes")
-				Volume<?> lVolume = new Volume();
+				Volume<?> lVolume = mVolumeRingBuffer.get();
+
 				lVolume = ClearVolumeSerialization.deserialize(	mSocketChannel,
-																												lScratchBuffer,
 																												lVolume);
+				mVolumeRingBuffer.set(lVolume);
+				mVolumeRingBuffer.advance();
 				mVolumeSink.sendVolume(lVolume);
 			}
 

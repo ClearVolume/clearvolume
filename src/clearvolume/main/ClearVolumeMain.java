@@ -54,14 +54,13 @@ public class ClearVolumeMain
 	{
 		mApplicationJFrame = new JFrame();
 		mApplicationJFrame.getContentPane().setBackground(Color.WHITE);
-		mApplicationJFrame.setBounds(100, 100, 529, 346);
+		mApplicationJFrame.setBounds(100, 100, 529, 372);
 		mApplicationJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JMenuBar lMenuBar = new JMenuBar();
 		mApplicationJFrame.setJMenuBar(lMenuBar);
 
 		JMenuItem lConnectToJMenuItem = new JMenuItem("About");
-
 		lMenuBar.add(lConnectToJMenuItem);
 		mApplicationJFrame.getContentPane().setLayout(null);
 
@@ -75,7 +74,7 @@ public class ClearVolumeMain
 		ConnectionPanel connectionPanel = new ConnectionPanel();
 		connectionPanel.setBackground(Color.WHITE);
 		connectionPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-		connectionPanel.setBounds(8, 174, 512, 140);
+		connectionPanel.setBounds(8, 174, 512, 157);
 		mApplicationJFrame.getContentPane().add(connectionPanel);
 
 	}

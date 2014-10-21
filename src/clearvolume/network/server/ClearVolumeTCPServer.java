@@ -3,8 +3,10 @@ package clearvolume.network.server;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.net.StandardSocketOptions;
 import java.nio.channels.ServerSocketChannel;
 
+import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.volume.Volume;
 import clearvolume.volume.sink.VolumeSinkInterface;
 import clearvolume.volume.source.SourceToSinkBufferedAdapter;
@@ -32,8 +34,12 @@ public class ClearVolumeTCPServer	implements
 		if (mServerSocketChannel != null && mServerSocketChannel.isOpen())
 			return false;
 		mServerSocketChannel = ServerSocketChannel.open();
-		mServerSocketChannel.socket().bind(pSocketAddress);
 		mServerSocketChannel.configureBlocking(true);
+		mServerSocketChannel.setOption(	StandardSocketOptions.SO_RCVBUF,
+																		ClearVolumeTCPClient.cSocketBufferLength);
+		mServerSocketChannel.socket().bind(pSocketAddress);
+
+
 
 		return mServerSocketChannel.isOpen();
 	}

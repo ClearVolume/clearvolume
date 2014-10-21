@@ -65,6 +65,7 @@ dependencies
     compile group: 'commons-io', name: 'commons-io', version: '2.+'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.+'
     compile 'net.sf.trove4j:trove4j:3.0.3'
+    compile 'com.miglayout:miglayout:3.7.4'
 
     compile group: "royer", name: "ClearGL", version: "1.+", changing: true, transitive: true 
     compile group: "royer", name: "ClearCuda", version: "1.+", changing: true, transitive: true 
@@ -127,8 +128,14 @@ uploadArchives
 task fatCapsule(type: FatCapsule) {
   applicationClass 'clearvolume.main.ClearVolumeMain'
   reallyExecutable
+  
 }
 
+task renameCapsule {
+  doLast {
+          file("./build/libs/ClearVolume-${version}-capsule.jar").renameTo(file("ClearVolume.exe.jar"))
+  }
+}
 
 
 

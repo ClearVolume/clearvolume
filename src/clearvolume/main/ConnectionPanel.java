@@ -3,6 +3,7 @@ package clearvolume.main;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.InetSocketAddress;
@@ -14,7 +15,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 
 import net.miginfocom.swing.MigLayout;
 import clearvolume.network.client.ClearVolumeTCPClient;
@@ -30,16 +33,17 @@ public class ConnectionPanel extends JPanel
 	private static final long serialVersionUID = 1L;
 
 	private JTextArea mErrorTextArea;
+	private JTextField mWindowSizeField;
 
 	public ConnectionPanel()
 	{
 		setBackground(Color.WHITE);
 		ConnectionPanel lThis = this;
 		setLayout(new MigLayout("",
-														"[435.00px,grow]",
-														"[16px][16px][29px][grow]"));
+														"[435.00px,grow][435.00px,grow]",
+														"[16px][16px][29px][10px:n,grow][10px:n,grow]"));
 		JLabel lblNewLabel = new JLabel("Enter IP address or hostname of ClearVolume server:");
-		add(lblNewLabel, "cell 0 0,alignx left,aligny top");
+		add(lblNewLabel, "cell 0 0 2 1,alignx left,aligny top");
 
 		JTextField lServerAddressTextField = new JTextField();
 		lServerAddressTextField.addActionListener(new ActionListener()
@@ -53,9 +57,9 @@ public class ConnectionPanel extends JPanel
 		lServerAddressTextField.setBorder(null);
 		lServerAddressTextField.setText("localhost");
 		lServerAddressTextField.setBackground(new Color(220, 220, 220));
-		add(lServerAddressTextField, "cell 0 1,growx,aligny top");
+		add(lServerAddressTextField, "cell 0 1 2 1,growx,aligny top");
 
-		JButton lConnectButton = new JButton("Connect");
+		JButton lConnectButton = new JButton("connect");
 		lConnectButton.setBorder(null);
 		lConnectButton.addActionListener(new ActionListener()
 		{
@@ -65,30 +69,80 @@ public class ConnectionPanel extends JPanel
 				startClientAsync(lServerAddressTextField);
 			}
 		});
-		add(lConnectButton, "cell 0 2,alignx right,aligny top");
+
+		JButton lAdvancedButton = new JButton("advanced...");
+		lAdvancedButton.setFont(new Font("Lucida Grande", Font.ITALIC, 13));
+		lAdvancedButton.setVerticalAlignment(SwingConstants.TOP);
+
+		lAdvancedButton.setBorder(null);
+		add(lAdvancedButton, "cell 0 2,aligny top");
+		add(lConnectButton, "cell 1 2,alignx right,aligny top");
+
+		JPanel lOptionsPanel = new JPanel();
+		lOptionsPanel.setVisible(false);
+		lOptionsPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+		lOptionsPanel.setBackground(Color.WHITE);
+		add(lOptionsPanel, "cell 0 3 2 1,grow");
+		lAdvancedButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				lOptionsPanel.setVisible(!lOptionsPanel.isVisible());
+			}
+		});
+		lOptionsPanel.setLayout(null);
+
+		JLabel lWindowSizeLabel = new JLabel("Window size:");
+		lWindowSizeLabel.setBounds(6, 6, 82, 16);
+		lOptionsPanel.add(lWindowSizeLabel);
+
+		mWindowSizeField = new JTextField();
+		mWindowSizeField.setHorizontalAlignment(SwingConstants.TRAILING);
+		mWindowSizeField.setBounds(96, 6, 45, 16);
+		mWindowSizeField.setText("512");
+		mWindowSizeField.setBackground(new Color(220, 220, 220));
+		mWindowSizeField.setBorder(new EmptyBorder(0, 0, 0, 0));
+		lOptionsPanel.add(mWindowSizeField);
+		mWindowSizeField.setColumns(10);
 
 		mErrorTextArea = new JTextArea();
 		mErrorTextArea.setEditable(false);
 		mErrorTextArea.setForeground(Color.RED);
 		mErrorTextArea.setBackground(Color.WHITE);
-		add(mErrorTextArea, "cell 0 3, grow");
+		add(mErrorTextArea, "cell 0 4 2 1,grow");
+
 	}
 
 	private void startClientAsync(JTextField lServerAddressTextField)
 	{
+		try
+		{
 		mErrorTextArea.setText("");
-		Runnable lStartClientRunnable = () -> startClient(lServerAddressTextField.getText());
+		final int lWindowSize = Integer.parseInt(mWindowSizeField.getText());
+		Runnable lStartClientRunnable = () -> startClient(lServerAddressTextField.getText(),
+		                                                  lWindowSize,
+																											1);
 		Thread lStartClientThread = new Thread(	lStartClientRunnable,
 																						"StartClientThread" + lServerAddressTextField.getText());
 		lStartClientThread.setDaemon(true);
 		lStartClientThread.start();
+		}
+		catch (Throwable e)
+		{
+			reportError(e, e.getLocalizedMessage());
+			e.printStackTrace();
+		}
 	}
 
-	private void startClient(String pServerAddress)
+	private void startClient(	String pServerAddress,
+														int pWindowSize,
+														int pBytesPerVoxel)
 	{
 		try (final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
-																																																256,
-																																																256))
+																																																pWindowSize,
+																																																pWindowSize,
+																																																pBytesPerVoxel))
 		{
 			try
 			{
@@ -123,21 +177,24 @@ public class ConnectionPanel extends JPanel
 			}
 			catch (UnresolvedAddressException uae)
 			{
-				SwingUtilities.invokeLater(() -> {
-					mErrorTextArea.setText("Cannot find host: '" + pServerAddress
-																	+ "'");
-				});
+				reportError(uae, "Cannot find host: '" + pServerAddress + "'");
 			}
 			catch (Throwable e)
 			{
-				SwingUtilities.invokeLater(() -> {
-					String lErrorMessage = e.getLocalizedMessage();
-					mErrorTextArea.setText(e.getClass().getName() + (lErrorMessage == null ? ""
-																																								: ": " + lErrorMessage));
-				});
+				reportError(e, e.getLocalizedMessage());
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void reportError(Throwable e, String pErrorMessage)
+	{
+		SwingUtilities.invokeLater(() -> {
+			mErrorTextArea.setText(e.getClass().getName() + (pErrorMessage == null ? ""
+																																						: ": " + pErrorMessage));
+			this.revalidate();
+			this.repaint();
+		});
 	}
 
 }

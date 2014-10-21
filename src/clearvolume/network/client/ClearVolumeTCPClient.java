@@ -9,6 +9,7 @@ import clearvolume.volume.sink.VolumeSinkInterface;
 public class ClearVolumeTCPClient implements AutoCloseable
 {
 
+	public static final int cSocketBufferLength = 64 * 1024 * 1024;
 	private VolumeSinkInterface mVolumeSink;
 	private SocketChannel mSocketChannel;
 
@@ -27,6 +28,7 @@ public class ClearVolumeTCPClient implements AutoCloseable
 			return false;
 		mSocketChannel = SocketChannel.open();
 		mSocketChannel.configureBlocking(true);
+		mSocketChannel.socket().setReceiveBufferSize(cSocketBufferLength);
 		boolean lConnected = mSocketChannel.connect(pSocketAddress);
 
 		return lConnected;

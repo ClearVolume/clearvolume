@@ -107,50 +107,38 @@ public class ClearVolumeSerialization
 
 	};
 
+	private static ThreadLocal<ByteBuffer> sScratchBufferThreadLocal = new ThreadLocal<ByteBuffer>();
+
 	public static final <T> Volume<T> deserialize(SocketChannel pSocketChannel,
-																								ByteBuffer pScratchBuffer,
 																								Volume<T> pVolume) throws IOException
 	{
+		if (pVolume == null)
+		{
+			pVolume = new Volume<T>();
+		}
 
+		ByteBuffer pScratchBuffer = sScratchBufferThreadLocal.get();
 		if (pScratchBuffer == null || pScratchBuffer.capacity() == 0)
 		{
 			pScratchBuffer = ByteBuffer.allocateDirect(cLongSizeInBytes);
 			pScratchBuffer.order(ByteOrder.nativeOrder());
 		}
 
-		pScratchBuffer.clear();
-		pScratchBuffer.limit(Long.BYTES);
-		while (pScratchBuffer.hasRemaining())
-			pSocketChannel.read(pScratchBuffer);
-		pScratchBuffer.rewind();
-		final int lWholeLength = toIntExact(pScratchBuffer.getLong());
+		readPartLength(pSocketChannel, pScratchBuffer);
 
-		pScratchBuffer.clear();
-		pScratchBuffer.limit(Long.BYTES);
-		while (pScratchBuffer.hasRemaining())
-			pSocketChannel.read(pScratchBuffer);
-		pScratchBuffer.rewind();
-		final int lHeaderLength = toIntExact(pScratchBuffer.getLong());
+		final int lHeaderLength = readPartLength(	pSocketChannel,
+																							pScratchBuffer);
 
-		if (pScratchBuffer == null || pScratchBuffer.capacity() < lHeaderLength)
-		{
-			pScratchBuffer = ByteBuffer.allocateDirect(lHeaderLength);
-			pScratchBuffer.order(ByteOrder.nativeOrder());
-		}
+		pScratchBuffer = ensureScratchBufferLengthIsEnough(	pScratchBuffer,
+																												lHeaderLength);
 
-		pScratchBuffer.clear();
-		pScratchBuffer.limit(lHeaderLength);
-		while (pScratchBuffer.hasRemaining())
-			pSocketChannel.read(pScratchBuffer);
-		pScratchBuffer.rewind();
+		readIntoScratchBuffer(pSocketChannel,
+													pScratchBuffer,
+													lHeaderLength);
 		readVolumeHeader(pScratchBuffer, lHeaderLength, pVolume);
 
-		pScratchBuffer.clear();
-		pScratchBuffer.limit(Long.BYTES);
-		while (pScratchBuffer.hasRemaining())
-			pSocketChannel.read(pScratchBuffer);
-		pScratchBuffer.rewind();
-		final int lDataLength = toIntExact(pScratchBuffer.getLong());
+		final int lDataLength = readPartLength(	pSocketChannel,
+																						pScratchBuffer);
 
 		if (pScratchBuffer.capacity() < lDataLength)
 		{
@@ -158,15 +146,46 @@ public class ClearVolumeSerialization
 			pScratchBuffer.order(ByteOrder.nativeOrder());
 		}
 
+		readIntoScratchBuffer(pSocketChannel, pScratchBuffer, lDataLength);
+		readVolumeData(pScratchBuffer, lDataLength, pVolume);
+
+		sScratchBufferThreadLocal.set(pScratchBuffer);
+
+		return pVolume;
+	}
+
+	private static void readIntoScratchBuffer(SocketChannel pSocketChannel,
+																						ByteBuffer pScratchBuffer,
+																						final int lHeaderLength) throws IOException
+	{
 		pScratchBuffer.clear();
-		pScratchBuffer.limit(lDataLength);
+		pScratchBuffer.limit(lHeaderLength);
 		while (pScratchBuffer.hasRemaining())
 			pSocketChannel.read(pScratchBuffer);
 		pScratchBuffer.rewind();
-		readVolumeData(pScratchBuffer, lDataLength, pVolume);
+	}
 
-		return pVolume;
+	private static ByteBuffer ensureScratchBufferLengthIsEnough(ByteBuffer pScratchBuffer,
+																															final int lHeaderLength)
+	{
+		if (pScratchBuffer == null || pScratchBuffer.capacity() < lHeaderLength)
+		{
+			pScratchBuffer = ByteBuffer.allocateDirect(lHeaderLength);
+			pScratchBuffer.order(ByteOrder.nativeOrder());
+		}
+		return pScratchBuffer;
+	}
 
+	private static int readPartLength(SocketChannel pSocketChannel,
+																		ByteBuffer pScratchBuffer) throws IOException
+	{
+		pScratchBuffer.clear();
+		pScratchBuffer.limit(Long.BYTES);
+		while (pScratchBuffer.hasRemaining())
+			pSocketChannel.read(pScratchBuffer);
+		pScratchBuffer.rewind();
+		final int lHeaderLength = toIntExact(pScratchBuffer.getLong());
+		return lHeaderLength;
 	};
 
 	public static final <T> Volume<T> deserialize(ByteBuffer pByteBuffer,
