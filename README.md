@@ -7,7 +7,7 @@ ClearVolume can easily be integrated into existing Java, C, or LabView based mic
 ### Prerequisites:
 
  1. Java JDK or JRE version 8 (1.8)  
- 2. Gradle 2.1
+ 2. Gradle 2.1 (get it [here](http://www.gradle.org/downloads))
  3. NVidia graphics card (for now)
  4. CUDA SDK 6.5 (get it [here](http://developer.nvidia.com/cuda-downloads))
  
