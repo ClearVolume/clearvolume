@@ -8,17 +8,19 @@ import java.util.Arrays;
 
 public class Volume<T>
 {
+	private volatile VolumeManager mVolumeManager;
+
 	private ByteBuffer mVolumeData;
 	private Class<T> mType;
 	private long[] mVolumeDimensionsInVoxels;
 	private double[] mVolumeDimensionsInRealUnits;
-	private String mRealUnitName;
+	private volatile String mRealUnitName;
 
-	private int mChannels;
+	private volatile int mChannels;
 	private float[] mViewMatrix;
 
-	private long mVolumeIndex;
-	private double mVolumeTime;
+	private volatile long mVolumeIndex;
+	private volatile double mVolumeTime;
 
 	public Volume()
 	{
@@ -35,6 +37,22 @@ public class Volume<T>
 														.order(ByteOrder.nativeOrder());
 	}
 
+	public void setManager(VolumeManager pVolumeManager)
+	{
+		mVolumeManager = pVolumeManager;
+	}
+
+	public void makeAvailableToManager()
+	{
+		mVolumeManager.makeAvailable(this);
+	}
+
+	public <LT> boolean isCompatibleWith(	Class<LT> pType,
+																				long... pDimensions)
+	{
+		return (mType == pType && Arrays.equals(pDimensions,
+																						mVolumeDimensionsInVoxels));
+	}
 
 	public long getVolumeDataSizeInBytes()
 	{
@@ -101,8 +119,7 @@ public class Volume<T>
 
 	public String getTypeName()
 	{
-		return mType.getTypeName()
-								.replaceAll("java.lang.", "");
+		return mType.getTypeName().replaceAll("java.lang.", "");
 	}
 
 	public void setDimension(int pDim)

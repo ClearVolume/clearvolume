@@ -1,20 +1,26 @@
 package clearvolume.volume.sink;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.volume.Volume;
 
-public class ClearVolumeRendererSink implements
-																				VolumeSinkInterface
+public class ClearVolumeRendererSink implements VolumeSinkInterface
 {
 
 	private ClearVolumeRendererInterface mClearVolumeRendererInterface;
+	private long mWaitForCopyTimeout;
+	private TimeUnit mTimeUnit;
 
-	public ClearVolumeRendererSink(ClearVolumeRendererInterface pClearVolumeRendererInterface)
+	public ClearVolumeRendererSink(	ClearVolumeRendererInterface pClearVolumeRendererInterface,
+																	long pWaitForCopyTimeout,
+																	TimeUnit pTimeUnit)
 	{
 		super();
 		mClearVolumeRendererInterface = pClearVolumeRendererInterface;
+		mWaitForCopyTimeout = pWaitForCopyTimeout;
+		mTimeUnit = pTimeUnit;
 
 	}
 
@@ -39,6 +45,9 @@ public class ClearVolumeRendererSink implements
 																											lRealDepth);
 
 		mClearVolumeRendererInterface.requestDisplay();
+		mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	mWaitForCopyTimeout,
+																															mTimeUnit);
+		pVolume.makeAvailableToManager();
 
 	}
 

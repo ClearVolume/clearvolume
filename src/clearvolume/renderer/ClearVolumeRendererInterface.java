@@ -2,6 +2,7 @@ package clearvolume.renderer;
 
 import java.io.Closeable;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.RotationControllerInterface;
@@ -16,9 +17,9 @@ import clearvolume.transfertf.TransfertFunction;
  * @author Loic Royer 2014
  *
  */
-public interface ClearVolumeRendererInterface extends
-																		DisplayRequestInterface,
-																		Closeable
+public interface ClearVolumeRendererInterface	extends
+																							DisplayRequestInterface,
+																							Closeable
 {
 
 	/**
@@ -167,6 +168,14 @@ public interface ClearVolumeRendererInterface extends
 														double pVolumeSizeZ);
 
 	/**
+	 * Waits until volume data copy completes.
+	 * 
+	 * @return true is completed, false if it timed-out.
+	 */
+	public boolean waitToFinishDataBufferCopy(long pTimeOut,
+																						TimeUnit pTimeUnit);
+
+	/**
 	 * Resets rotation and translation parameters.
 	 */
 	void resetRotationTranslation();
@@ -266,21 +275,5 @@ public interface ClearVolumeRendererInterface extends
 	 */
 	@Override
 	void close();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

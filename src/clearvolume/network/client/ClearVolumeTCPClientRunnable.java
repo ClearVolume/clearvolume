@@ -1,10 +1,12 @@
 package clearvolume.network.client;
 
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.TimeUnit;
 
-import clearvolume.network.ringbuffer.RingBuffer;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.volume.Volume;
+import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.VolumeSinkInterface;
 
 public class ClearVolumeTCPClientRunnable implements Runnable
@@ -17,13 +19,15 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 	private volatile boolean mStopSignal = false;
 	private volatile boolean mStoppedSignal = false;
 
-	private RingBuffer<Volume<?>> mVolumeRingBuffer = new RingBuffer<Volume<?>>(cMaxpreAllocatedVolumes);
+	private VolumeManager mVolumeManager;
 
 	public ClearVolumeTCPClientRunnable(SocketChannel pSocketChannel,
-																			VolumeSinkInterface pVolumeSink)
+																			VolumeSinkInterface pVolumeSink,
+																			int pMaxInUseVolumes)
 	{
 		mSocketChannel = pSocketChannel;
 		mVolumeSink = pVolumeSink;
+		mVolumeManager = new VolumeManager(pMaxInUseVolumes);
 	}
 
 	public void requestStop()
@@ -39,12 +43,14 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 
 			while (!mStopSignal)
 			{
-				Volume<?> lVolume = mVolumeRingBuffer.get();
+				Volume<?> lVolume = mVolumeManager.requestAndWaitForNextAvailableVolume(1,
+																																								TimeUnit.MILLISECONDS);
 
 				lVolume = ClearVolumeSerialization.deserialize(	mSocketChannel,
 																												lVolume);
-				mVolumeRingBuffer.set(lVolume);
-				mVolumeRingBuffer.advance();
+
+				lVolume.setManager(mVolumeManager);
+
 				mVolumeSink.sendVolume(lVolume);
 			}
 
@@ -62,6 +68,9 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 	private void handleError(Throwable pE)
 	{
 		if (pE instanceof java.nio.channels.AsynchronousCloseException)
+			return;
+
+		if (pE instanceof ClosedChannelException)
 			return;
 
 		pE.printStackTrace();

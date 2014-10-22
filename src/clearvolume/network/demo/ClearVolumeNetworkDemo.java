@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
@@ -17,6 +18,7 @@ import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transfertf.TransfertFunctions;
 import clearvolume.volume.Volume;
+import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.ClearVolumeRendererSink;
 
 public class ClearVolumeNetworkDemo
@@ -26,6 +28,8 @@ public class ClearVolumeNetworkDemo
 	private static final int cHeight = 128 * cSizeMultFactor;
 	private static final int cDepth = 129 * cSizeMultFactor;
 	private static final int cNumberOfVolumes = 10000000;
+
+	VolumeManager mVolumeManager = new VolumeManager(20);
 
 	@Test
 	public void startServer()
@@ -38,11 +42,13 @@ public class ClearVolumeNetworkDemo
 			assertTrue(lClearVolumeTCPServer.open(lServerSocketAddress));
 			assertTrue(lClearVolumeTCPServer.start());
 
-			Volume<Byte> lVolume = new Volume<Byte>(Byte.class,
-																							1,
-																							cWidth,
-																							cHeight,
-																							cDepth);
+			Volume<Byte> lVolume = mVolumeManager.requestAndWaitForVolume(1,
+																																		TimeUnit.MILLISECONDS,
+																																		Byte.class,
+																																		1,
+																																		cWidth,
+																																		cHeight,
+																																		cDepth);
 			ByteBuffer lVolumeData = lVolume.getVolumeData();
 
 			lVolumeData.rewind();
@@ -105,7 +111,9 @@ public class ClearVolumeNetworkDemo
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(lClearVolumeRenderer);
+		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
+																																										10,
+																																										TimeUnit.MILLISECONDS);
 
 		ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lClearVolumeRendererSink);
 
@@ -125,5 +133,4 @@ public class ClearVolumeNetworkDemo
 		lClearVolumeRenderer.close();
 
 	}
-
 }

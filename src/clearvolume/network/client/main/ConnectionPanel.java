@@ -1,4 +1,4 @@
-package clearvolume.main;
+package clearvolume.network.client.main;
 
 import static org.junit.Assert.assertTrue;
 
@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.UnresolvedAddressException;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -25,12 +26,17 @@ import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transfertf.TransfertFunctions;
+import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.ClearVolumeRendererSink;
 
 public class ConnectionPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final int cMaxQueueLength = 20;
+	private static final long cMaxMillisecondsToWait = 10;
+	private static final long cMaxMillisecondsToWaitForCopy = 10;
 
 	private JTextArea mErrorTextArea;
 	private JTextField mWindowSizeField;
@@ -118,15 +124,15 @@ public class ConnectionPanel extends JPanel
 	{
 		try
 		{
-		mErrorTextArea.setText("");
-		final int lWindowSize = Integer.parseInt(mWindowSizeField.getText());
-		Runnable lStartClientRunnable = () -> startClient(lServerAddressTextField.getText(),
-		                                                  lWindowSize,
-																											1);
-		Thread lStartClientThread = new Thread(	lStartClientRunnable,
-																						"StartClientThread" + lServerAddressTextField.getText());
-		lStartClientThread.setDaemon(true);
-		lStartClientThread.start();
+			mErrorTextArea.setText("");
+			final int lWindowSize = Integer.parseInt(mWindowSizeField.getText());
+			Runnable lStartClientRunnable = () -> startClient(lServerAddressTextField.getText(),
+																												lWindowSize,
+																												1);
+			Thread lStartClientThread = new Thread(	lStartClientRunnable,
+																							"StartClientThread" + lServerAddressTextField.getText());
+			lStartClientThread.setDaemon(true);
+			lStartClientThread.start();
 		}
 		catch (Throwable e)
 		{
@@ -148,15 +154,24 @@ public class ConnectionPanel extends JPanel
 			{
 				lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
 
-				ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(lClearVolumeRenderer);
+				ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
+																																												cMaxMillisecondsToWaitForCopy,
+																																												TimeUnit.MILLISECONDS);
 
-				ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lClearVolumeRendererSink);
+				AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lClearVolumeRendererSink,
+																																																					cMaxQueueLength,
+																																																					cMaxMillisecondsToWait,
+																																																					TimeUnit.MILLISECONDS);
+
+				ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
 
 				SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
 																																		ClearVolumeSerialization.cStandardTCPPort);
 				assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
 
 				assertTrue(lClearVolumeTCPClient.start());
+
+				assertTrue(lAsynchronousVolumeSinkAdapter.start());
 
 				lClearVolumeRenderer.setVisible(true);
 
@@ -172,6 +187,7 @@ public class ConnectionPanel extends JPanel
 					}
 				}
 
+				assertTrue(lAsynchronousVolumeSinkAdapter.stop());
 				assertTrue(lClearVolumeTCPClient.stop());
 				lClearVolumeTCPClient.close();
 			}

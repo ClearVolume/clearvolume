@@ -2,43 +2,58 @@ package clearvolume.volume.sink;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import clearvolume.volume.Volume;
 
-public class AsynchronousVolumeSinkAdapter implements VolumeSinkInterface
+public class AsynchronousVolumeSinkAdapter implements
+																					VolumeSinkInterface
 {
 
 	private final VolumeSinkInterface mDelegatedVolumeSink;
 
-	private final BlockingQueue<Volume> mVolumeQueue;
+	private final BlockingQueue<Volume<?>> mVolumeQueue;
+	private long mTimeOut;
+	private TimeUnit mTimeUnit;
 
 	private volatile boolean mStopSignal;
 	private volatile boolean mStoppedSignal;
 
-
 	public AsynchronousVolumeSinkAdapter(	VolumeSinkInterface pDelegatedVolumeSink,
-																				int pMaxCapacity)
+																				int pMaxCapacity,
+																				long pTimeOut,
+																				TimeUnit pTimeUnit)
 	{
 		super();
 		mDelegatedVolumeSink = pDelegatedVolumeSink;
-		mVolumeQueue = new ArrayBlockingQueue<Volume>(pMaxCapacity);
+		mTimeOut = pTimeOut;
+		mTimeUnit = pTimeUnit;
+		mVolumeQueue = new ArrayBlockingQueue<Volume<?>>(pMaxCapacity);
 	}
 
 	@Override
-	public void sendVolume(Volume pVolume)
+	public void sendVolume(Volume<?> pVolume)
 	{
-		mVolumeQueue.offer(pVolume);
+		try
+		{
+			if (!mVolumeQueue.offer(pVolume, mTimeOut, mTimeUnit))
+				pVolume.makeAvailableToManager();
+		}
+		catch (InterruptedException e)
+		{
+			sendVolume(pVolume);
+		}
 	}
 
 	public boolean start()
 	{
-		Runnable lRunnable = () ->
-		{
-			while(!mStopSignal)
+		Runnable lRunnable = () -> {
+			while (!mStopSignal)
 			{
 				try
 				{
-					Volume lVolume = mVolumeQueue.take();
+					// System.out.println(mVolumeQueue.size());
+					Volume<?> lVolume = mVolumeQueue.take();
 					mDelegatedVolumeSink.sendVolume(lVolume);
 				}
 				catch (Throwable e)
@@ -46,10 +61,11 @@ public class AsynchronousVolumeSinkAdapter implements VolumeSinkInterface
 					e.printStackTrace();
 				}
 			}
-			mStoppedSignal=true;
+			mStoppedSignal = true;
 		};
-		
-		Thread lThread = new Thread(lRunnable, this.getClass().getSimpleName());
+
+		Thread lThread = new Thread(lRunnable, this.getClass()
+																								.getSimpleName());
 		lThread.setDaemon(true);
 		lThread.start();
 		return true;

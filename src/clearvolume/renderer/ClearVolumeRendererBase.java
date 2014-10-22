@@ -2,8 +2,9 @@ package clearvolume.renderer;
 
 import java.awt.BorderLayout;
 import java.nio.ByteBuffer;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -71,7 +72,8 @@ public abstract class ClearVolumeRendererBase	implements
 	// data copy locking and waiting
 	private final Object mSetVolumeDataBufferLock = new Object();
 	private volatile ByteBuffer mVolumeDataByteBuffer;
-	private CountDownLatch mDataBufferCopyFinished;
+	private ReentrantLock mDataBufferCopyFinishedLock = new ReentrantLock();
+	private final Condition mDataBufferCopyFinishedCondition = mDataBufferCopyFinishedLock.newCondition();
 
 	// Control frame:
 	private JFrame mControlFrame;
@@ -691,7 +693,6 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		synchronized (getSetVolumeDataBufferLock())
 		{
-			mDataBufferCopyFinished = new CountDownLatch(1);
 
 			if (mVolumeSizeX != pSizeX || mVolumeSizeY != pSizeY
 					|| mVolumeSizeZ != pSizeZ)
@@ -717,7 +718,15 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	public void notifyCompletionOfDataBufferCopy()
 	{
-		mDataBufferCopyFinished.countDown();
+		mDataBufferCopyFinishedLock.lock();
+		try
+		{
+			mDataBufferCopyFinishedCondition.signal();
+		}
+		finally
+		{
+			mDataBufferCopyFinishedLock.unlock();
+		}
 	}
 
 	/**
@@ -725,16 +734,26 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @return true is completed, false if it timed-out.
 	 */
+	@Override
 	public boolean waitToFinishDataBufferCopy(long pTimeOut,
 																						TimeUnit pTimeUnit)
 	{
+		mDataBufferCopyFinishedLock.lock();
 		try
 		{
-			return mDataBufferCopyFinished.await(pTimeOut, pTimeUnit);
+			try
+			{
+				return mDataBufferCopyFinishedCondition.await(pTimeOut,
+																											pTimeUnit);
+			}
+			catch (InterruptedException e)
+			{
+				return waitToFinishDataBufferCopy(pTimeOut, pTimeUnit);
+			}
 		}
-		catch (final InterruptedException e)
+		finally
 		{
-			return false;
+			mDataBufferCopyFinishedLock.unlock();
 		}
 	}
 

@@ -161,9 +161,13 @@ public class ClearVolumeSerialization
 		pScratchBuffer.clear();
 		pScratchBuffer.limit(lHeaderLength);
 		while (pScratchBuffer.hasRemaining())
+		{
 			pSocketChannel.read(pScratchBuffer);
+			sleep();
+		}
 		pScratchBuffer.rewind();
 	}
+
 
 	private static ByteBuffer ensureScratchBufferLengthIsEnough(ByteBuffer pScratchBuffer,
 																															final int lHeaderLength)
@@ -182,7 +186,10 @@ public class ClearVolumeSerialization
 		pScratchBuffer.clear();
 		pScratchBuffer.limit(Long.BYTES);
 		while (pScratchBuffer.hasRemaining())
+		{
 			pSocketChannel.read(pScratchBuffer);
+			sleep();
+		}
 		pScratchBuffer.rewind();
 		final int lHeaderLength = toIntExact(pScratchBuffer.getLong());
 		return lHeaderLength;
@@ -215,6 +222,18 @@ public class ClearVolumeSerialization
 		}
 
 		pVolume.readFromByteBuffer(pByteBuffer);
+	}
+
+	private static void sleep()
+	{
+		try
+		{
+			Thread.sleep(1);
+		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 }
