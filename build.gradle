@@ -164,7 +164,6 @@ uploadArchives
 task fatCapsule(type: FatCapsule) {
   applicationClass 'clearvolume.main.ClearVolumeMain'
   reallyExecutable
-  
 }
 
 task renameCapsule {
