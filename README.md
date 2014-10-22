@@ -33,9 +33,9 @@ Start the demo server:
 
     ./ClearVolume.exe.jar -demoserver > log.txt &
 
-Start the network client (preferably in another shell)
+Start the network client:
 
-   ./ClearVolume.exe.jar
+    ./ClearVolume.exe.jar
 
 Connect to the server on localhost. Et Voila!
 You should see a high-speed 3D Volume stream
