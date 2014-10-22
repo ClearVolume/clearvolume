@@ -75,11 +75,12 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private volatile CudaOpenGLBufferObject mOpenGLBufferDevicePointer;
 
 	/**
-	 * CUDA Device pointers to the device itself, to the inverted view-matrix and
-	 * to the size of the transfer function.
+	 * CUDA Device pointers to the device itself, whcih are in constant memory:
+	 * inverted view-matrix, projection matrix, transfer function.
 	 */
+
 	private CudaDevicePointer mInvertedViewMatrix,
-			mSizeOfTransfertFunction;
+			mInvertedProjectionMatrix, mSizeOfTransfertFunction;
 
 	/**
 	 * CUDA arrays to the transfer function and volume data.
@@ -189,10 +190,10 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			File lPTXFile = compileCUDA(lRootClass);
 
-
 			mCudaModule = CudaModule.moduleFromPTX(lPTXFile);
 
 			mInvertedViewMatrix = mCudaModule.getGlobal("c_invViewMatrix");
+			mInvertedProjectionMatrix = mCudaModule.getGlobal("c_invProjectionMatrix");
 			mSizeOfTransfertFunction = mCudaModule.getGlobal("c_sizeOfTransfertFunction");
 			mSizeOfTransfertFunction.setFloat(getTransfertFunctionArray().length);
 
@@ -213,7 +214,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private File compileCUDA(Class<?> lRootClass) throws IOException
 	{
 		File lPTXFile;
-		
+
 		try
 		{
 			CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
@@ -225,7 +226,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																	"" + getBytesPerVoxel());
 
 			File lCUFile = lCudaCompiler.addFile(	lRootClass,
-																						"kernels/VolumeRender.cu");
+																						"kernels/VolumeRenderPerspective.cu");
 
 			lCudaCompiler.addFiles(	lRootClass,
 															"kernels/helper_cuda.h",
@@ -236,6 +237,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		}
 		catch (Exception e)
 		{
+
 			InputStream lInputStreamPTXFile = lRootClass.getResourceAsStream("kernels/VolumeRender.backup.ptx");
 			final StringWriter lStringWriter = new StringWriter();
 			IOUtils.copy(	lInputStreamPTXFile,
@@ -344,7 +346,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 *      float[])
 	 */
 	@Override
-	protected boolean renderVolume(float[] modelView)
+	protected boolean renderVolume(	float[] modelView,
+																	float[] invProjection)
 	{
 		mCudaContext.setCurrent();
 
@@ -363,6 +366,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		invViewMatrix[11] = modelView[14];
 
 		mInvertedViewMatrix.copyFrom(invViewMatrix, true);
+
+		mInvertedProjectionMatrix.copyFrom(invProjection, true);
 
 		return updateBufferAndRunKernel();
 	}
