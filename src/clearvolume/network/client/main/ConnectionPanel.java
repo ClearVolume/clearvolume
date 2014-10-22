@@ -77,6 +77,7 @@ public class ConnectionPanel extends JPanel
 		});
 
 		JButton lAdvancedButton = new JButton("advanced...");
+		lAdvancedButton.setForeground(Color.GRAY);
 		lAdvancedButton.setFont(new Font("Lucida Grande", Font.ITALIC, 13));
 		lAdvancedButton.setVerticalAlignment(SwingConstants.TOP);
 

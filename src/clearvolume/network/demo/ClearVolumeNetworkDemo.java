@@ -74,8 +74,8 @@ public class ClearVolumeNetworkDemo
 			{
 				try
 				{
-					if (i % 10 == 0)
-						System.out.println("i=" + i);
+					if (i % 1000 == 0)
+						System.out.println("sending volume with index=" + i);
 					lVolumeData = lVolume.getVolumeData();
 					lVolumeData.rewind();
 					lVolumeData.put(toIntExact(i % lVolumeData.limit()),
