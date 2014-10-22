@@ -6,9 +6,10 @@ ClearVolume can easily be integrated into existing Java, C, or LabView based mic
 
 ### Prerequisites:
 
-1- Java JDK or JRE version 8 (1.8) 
-2- NVidia graphics card 
-3- CUDA SDK 6.5
+ 1. Java JDK or JRE version 8 (1.8)  
+ 2. Gradle 2.1 (get it [here](http://www.gradle.org/downloads))
+ 3. NVidia graphics card (for now)
+ 4. CUDA SDK 6.5 (get it [here](http://developer.nvidia.com/cuda-downloads))
  
 We hope to soon have a shader-based fall-back pipeline for maximal compatibility.
 
@@ -26,17 +27,15 @@ This will generate a jar executable at the root of the project:
 
 (It uses the magic Capsule plugin for Gradle for that)
 
-If the
-
 ### Quick demo:
 
 Start the demo server:
 
     ./ClearVolume.exe.jar -demoserver > log.txt &
 
-Start the network client (preferably in another shell)
+Start the network client:
 
-   ./ClearVolume.exe.jar
+    ./ClearVolume.exe.jar
 
 Connect to the server on localhost. Et Voila!
 You should see a high-speed 3D Volume stream
