@@ -27,8 +27,6 @@ This will generate a jar executable at the root of the project:
 
 (It uses the magic Capsule plugin for Gradle for that)
 
-If the
-
 ### Quick demo:
 
 Start the demo server:
