@@ -63,9 +63,9 @@ together with a test executable. Try it:
 
 ### Contribution guidelines ###
 
-* Writing tests
-* Code review
-* Other guidelines
+* torture of animals with the exception of bugs is prohibited
+* exhibit openness of mind towards idiosyncratic ideas
+* be nice
 
 ### Contributors ###
 
