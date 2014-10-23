@@ -25,9 +25,9 @@ Notes:
 
      ./build.sh
 
-This will generate a jar executable at the root of the project:
+This will generate a jar executable here:
 
-     ClearVolume.exe.jar
+    ./build/executable/ClearVolume.exe.jar
 
 (It uses the magic Capsule plugin for Gradle for that)
 
@@ -35,15 +35,17 @@ This will generate a jar executable at the root of the project:
 
 Start the demo server:
 
-    ./ClearVolume.exe.jar -demoserver > log.txt &
+    ./build/executable/ClearVolume.exe.jar -demoserver > log.txt &
 
 Start the network client:
 
-    ./ClearVolume.exe.jar
+    ./build/executable/ClearVolume.exe.jar
 
 Connect to the server on localhost. Et Voila!
 You should see a high-speed 3D Volume stream
 displayed.
+
+
 
 ### How do I integrate into my control software? ###
 
@@ -52,6 +54,12 @@ displayed.
 * Integration onto LabView-based microscope control software
 
 * Integration onto C-based microscope control software
+
+the cvlib native library for windows is generated in the build folder: .build/cvlib/
+together with a test executable. Try it:
+
+    ./build/cvlib/cvlib_test.exe
+
 
 ### Contribution guidelines ###
 
