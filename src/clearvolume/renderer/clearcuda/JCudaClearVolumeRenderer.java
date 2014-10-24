@@ -193,6 +193,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			mCudaModule = CudaModule.moduleFromPTX(lPTXFile);
 
 			mInvertedViewMatrix = mCudaModule.getGlobal("c_invViewMatrix");
+
 			mInvertedProjectionMatrix = mCudaModule.getGlobal("c_invProjectionMatrix");
 			mSizeOfTransfertFunction = mCudaModule.getGlobal("c_sizeOfTransfertFunction");
 			mSizeOfTransfertFunction.setFloat(getTransfertFunctionArray().length);
@@ -346,26 +347,12 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 *      float[])
 	 */
 	@Override
-	protected boolean renderVolume(	float[] modelView,
+	protected boolean renderVolume(	float[] invModelView,
 																	float[] invProjection)
 	{
 		mCudaContext.setCurrent();
 
-		// Build the inverted view matrix
-		invViewMatrix[0] = modelView[0];
-		invViewMatrix[1] = modelView[4];
-		invViewMatrix[2] = modelView[8];
-		invViewMatrix[3] = modelView[12];
-		invViewMatrix[4] = modelView[1];
-		invViewMatrix[5] = modelView[5];
-		invViewMatrix[6] = modelView[9];
-		invViewMatrix[7] = modelView[13];
-		invViewMatrix[8] = modelView[2];
-		invViewMatrix[9] = modelView[6];
-		invViewMatrix[10] = modelView[10];
-		invViewMatrix[11] = modelView[14];
-
-		mInvertedViewMatrix.copyFrom(invViewMatrix, true);
+		mInvertedViewMatrix.copyFrom(invModelView, true);
 
 		mInvertedProjectionMatrix.copyFrom(invProjection, true);
 

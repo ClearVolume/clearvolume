@@ -76,12 +76,16 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLVertexArray mBoxVertexArray;
 	private GLVertexAttributeArray mBoxPositionAttributeArray;
 	private GLUniform mBoxColorUniform;
-	private GLUniform mBoxProjectionMatrixUniform;
-	private GLUniform mBoxModelViewMatrixUniform;
+
 	private GLMatrix mBoxModelViewMatrix = new GLMatrix();
-	private GLMatrix mProjectionMatrix = new GLMatrix();
+	private GLUniform mBoxModelViewMatrixUniform;
+
+	private GLUniform mBoxProjectionMatrixUniform;
 
 	private GLMatrix mVolumeViewMatrix = new GLMatrix();
+
+	private float cameraZ = 0;
+
 	private GLAttribute mTexCoordAttribute;
 	private GLUniform mTexUnit;
 	private GLVertexAttributeArray mTexCoordAttributeArray;
@@ -299,14 +303,17 @@ public abstract class JOGLClearVolumeRenderer	extends
 		lGL4.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
-		getClearGLWindow().setOrthoProjectionMatrix(0,
-																								drawable.getSurfaceWidth(),
-																								0,
-																								drawable.getSurfaceHeight(),
-																								0,
-																								1);
+		// getClearGLWindow().setOrthoProjectionMatrix(0,
+		// drawable.getSurfaceWidth(),
+		// 0,
+		// drawable.getSurfaceHeight(),
+		// 0,
+		// 1);
 
-		getClearGLWindow().setPerspectiveProjectionMatrix(45, 1, .1f, 20);
+		getClearGLWindow().setPerspectiveProjectionMatrix(.785f,
+																											1,
+																											.1f,
+																											10);
 
 		if (initVolumeRenderer())
 		{
@@ -421,30 +428,32 @@ public abstract class JOGLClearVolumeRenderer	extends
 				// now...
 				GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 4);
 
-				lVerticesFloatArray.add(1, 1, 1, 1);
-				lVerticesFloatArray.add(-1, 1, 1, 1);
-				lVerticesFloatArray.add(-1, 1, 1, 1);
-				lVerticesFloatArray.add(-1, -1, 1, 1);
-				lVerticesFloatArray.add(-1, -1, 1, 1);
-				lVerticesFloatArray.add(1, -1, 1, 1);
-				lVerticesFloatArray.add(1, -1, 1, 1);
-				lVerticesFloatArray.add(1, 1, 1, 1);
-				lVerticesFloatArray.add(1, 1, -1, 1);
-				lVerticesFloatArray.add(-1, 1, -1, 1);
-				lVerticesFloatArray.add(-1, 1, -1, 1);
-				lVerticesFloatArray.add(-1, -1, -1, 1);
-				lVerticesFloatArray.add(-1, -1, -1, 1);
-				lVerticesFloatArray.add(1, -1, -1, 1);
-				lVerticesFloatArray.add(1, -1, -1, 1);
-				lVerticesFloatArray.add(1, 1, -1, 1);
-				lVerticesFloatArray.add(1, 1, 1, 1);
-				lVerticesFloatArray.add(1, 1, -1, 1);
-				lVerticesFloatArray.add(-1, 1, 1, 1);
-				lVerticesFloatArray.add(-1, 1, -1, 1);
-				lVerticesFloatArray.add(-1, -1, 1, 1);
-				lVerticesFloatArray.add(-1, -1, -1, 1);
-				lVerticesFloatArray.add(1, -1, 1, 1);
-				lVerticesFloatArray.add(1, -1, -1, 1);
+				final float w = .5f;
+
+				lVerticesFloatArray.add(w, w, w, w);
+				lVerticesFloatArray.add(-w, w, w, w);
+				lVerticesFloatArray.add(-w, w, w, w);
+				lVerticesFloatArray.add(-w, -w, w, w);
+				lVerticesFloatArray.add(-w, -w, w, w);
+				lVerticesFloatArray.add(w, -w, w, w);
+				lVerticesFloatArray.add(w, -w, w, w);
+				lVerticesFloatArray.add(w, w, w, w);
+				lVerticesFloatArray.add(w, w, -w, w);
+				lVerticesFloatArray.add(-w, w, -w, w);
+				lVerticesFloatArray.add(-w, w, -w, w);
+				lVerticesFloatArray.add(-w, -w, -w, w);
+				lVerticesFloatArray.add(-w, -w, -w, w);
+				lVerticesFloatArray.add(w, -w, -w, w);
+				lVerticesFloatArray.add(w, -w, -w, w);
+				lVerticesFloatArray.add(w, w, -w, w);
+				lVerticesFloatArray.add(w, w, w, w);
+				lVerticesFloatArray.add(w, w, -w, w);
+				lVerticesFloatArray.add(-w, w, w, w);
+				lVerticesFloatArray.add(-w, w, -w, w);
+				lVerticesFloatArray.add(-w, -w, w, w);
+				lVerticesFloatArray.add(-w, -w, -w, w);
+				lVerticesFloatArray.add(w, -w, w, w);
+				lVerticesFloatArray.add(w, -w, -w, w);
 
 				mBoxVertexArray.addVertexAttributeArray(mBoxPositionAttributeArray,
 																								lVerticesFloatArray.getFloatBuffer());
@@ -497,15 +506,22 @@ public abstract class JOGLClearVolumeRenderer	extends
 			getRotationController().rotate(mVolumeViewMatrix);
 			notifyUpdateOfVolumeRenderingParameters();
 		}
+
 		mVolumeViewMatrix.translate(-getTranslationX(),
 																-getTranslationY(),
-																-getTranslationZ());
+																-getTranslationZ() - cameraZ);
 
-		// GLMatrix proj =
+		GLMatrix lInvVolumeMatrix = new GLMatrix();
+		lInvVolumeMatrix.copy(mVolumeViewMatrix);
+		lInvVolumeMatrix.transpose();
 
-		if (true && renderVolume(	mVolumeViewMatrix.getFloatArray(),
-															getClearGLWindow().getProjectionMatrix()
-																								.getFloatArray()))
+		GLMatrix lInvProjection = new GLMatrix();
+		lInvProjection.copy(getClearGLWindow().getProjectionMatrix());
+		lInvProjection.transpose();
+		lInvProjection.invert();
+
+		if (true && renderVolume(	lInvVolumeMatrix.getFloatArray(),
+															lInvProjection.getFloatArray()))
 		{
 			mTexture.copyFrom(mPixelBufferObject);
 
@@ -521,18 +537,12 @@ public abstract class JOGLClearVolumeRenderer	extends
 		if (true && mHasBox)
 		{
 			mBoxGLProgram.use(lGL4);
-			mBoxVertexArray.draw(GL.GL_LINES);
-
-			mBoxModelViewMatrix.euler(-getRotationX() * 0.01,
-																-getRotationY() * 0.01,
-																0.0f);
-			mBoxModelViewMatrix.translate(-getTranslationX(),
-																		-getTranslationY(),
-																		-getTranslationZ());
 
 			// invert Matrix is the modelview used by renderer is actually the
 			// inverted
+			mBoxModelViewMatrix.copy(mVolumeViewMatrix);
 			mBoxModelViewMatrix.invert();
+
 			mBoxModelViewMatrixUniform.setFloatMatrix(mBoxModelViewMatrix.getFloatArray(),
 																								false);
 
@@ -542,7 +552,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 			mBoxColorUniform.setFloatVector4(cBoxColor);
 
-			System.out.println("box display!");
+			mBoxVertexArray.draw(GL.GL_LINES);
+
 		}
 
 		updateFrameRateDisplay();

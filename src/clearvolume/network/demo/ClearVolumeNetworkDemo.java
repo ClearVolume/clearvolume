@@ -23,7 +23,7 @@ import clearvolume.volume.sink.ClearVolumeRendererSink;
 
 public class ClearVolumeNetworkDemo
 {
-	private static final int cSizeMultFactor = 2;
+	private static final int cSizeMultFactor = 4;
 	private static final int cWidth = 127 * cSizeMultFactor;
 	private static final int cHeight = 128 * cSizeMultFactor;
 	private static final int cDepth = 129 * cSizeMultFactor;

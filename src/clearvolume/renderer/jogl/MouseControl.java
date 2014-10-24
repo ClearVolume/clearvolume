@@ -6,7 +6,6 @@ import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 
-
 /**
  * Class MouseControl
  * 
@@ -91,7 +90,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 			final double ny = ((double) mRenderer.getWindowHeight() - (double) pMouseEvent.getY()) / mRenderer.getWindowHeight();
 
 			mRenderer.setTransferFunctionRange(	Math.abs(Math.pow(nx, 3)),
-																	Math.abs(Math.pow(ny, 3)));
+																					Math.abs(Math.pow(ny, 3)));
 
 		}
 
@@ -129,7 +128,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		float[] lWheelRotation = pMouseEvent.getRotation();
 
-		final double lZoomWheelFactor = 0.125f;
+		final double lZoomWheelFactor = 0.0125f;
 
 		// mRenderer.addTranslationX(lWheelRotation[2] * lZoomWheelFactor);
 		// mRenderer.addTranslationY(lWheelRotation[0] * lZoomWheelFactor);
@@ -140,7 +139,6 @@ class MouseControl extends MouseAdapter implements MouseListener
 		mRenderer.notifyUpdateOfVolumeRenderingParameters();
 		mRenderer.requestDisplay();
 	}
-
 
 	/**
 	 * Interface method implementation
