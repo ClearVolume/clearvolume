@@ -6,29 +6,23 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
+apply plugin: 'c'
 apply plugin: 'cpp'
-
-
-libraries {
-   cvlib {}
-}
-
-sources {
-    cvlib {
-        // Configure an existing CppSourceSet
-        cpp {
-            source {
-                srcDirs "cpp"
-                include "**/*.cpp"
-            }
-        }
-    }
-}
 
 model {
     platforms {
         x64 {
             architecture "x86_64"
+        }
+    }
+
+    repositories {
+        libs(PrebuiltLibraries) {
+            jvm {
+                binaries.withType(SharedLibraryBinary) {
+                    sharedLibraryFile = file("./cpp/jvmlib/jvm.lib")
+                }
+            }
         }
     }
 
@@ -39,6 +33,51 @@ model {
         }
     }
 }
+
+libraries {
+   cvlib {}
+}
+
+sources {
+    cvlib {
+        cpp {
+            source {
+                srcDirs "cpp"
+                include "**/*.cpp"
+            }
+            exportedHeaders {
+                srcDirs "cpp","cpp/lib"
+                include "**/*.h"
+            } 
+        }
+    }
+}
+
+executables {
+    cvlib_test {
+        targetPlatforms "x64"
+        binaries.all {
+            lib libraries.cvlib.shared 
+            //cCompiler.args "-ljvm", "-std=gnu99" 
+        }
+    }
+}
+
+sources {
+    cvlib_test {
+        cpp {
+            source {
+                srcDir "cpp"
+                include "cvlib_test.cpp"
+            }
+            lib library: 'jvm'
+        }
+    }
+    
+}
+
+
+
 
 
 
@@ -164,14 +203,58 @@ uploadArchives
 task fatCapsule(type: FatCapsule) {
   applicationClass 'clearvolume.main.ClearVolumeMain'
   reallyExecutable
-  
 }
 
-task renameCapsule {
+
+task copyCapsule{
   doLast {
-          file("./build/libs/ClearVolume-${version}-capsule.jar").renameTo(file("ClearVolume.exe.jar"))
+      copy{
+        from('./build/libs/')
+        into('./build/executable')
+        include('*-capsule.jar')
+        rename('.+-capsule.jar','ClearVolume.exe.jar')
+        }
+    }
+}
+
+
+task packagecvlib {
+  doLast {
+    def os = System.getProperty("os.name").toLowerCase() 
+    if (os.contains("windows"))
+    {
+        copy
+        {
+            from('./build/binaries/cvlibSharedLibrary/')
+            into('./build/cvlib/')
+            include('cvlib.dll')
+        }
+
+        copy
+        {
+            from('./cpp/')
+            into('./build/cvlib/')
+            include('cvlib.h')
+        }
+
+        copy
+        {
+            from('./build/binaries/cvlib_testExecutable/')
+            into('./build/cvlib/')
+            include('cvlib_test.exe')
+        }
+
+        copy
+        {
+            from('./build/libs/')
+            into('./build/cvlib/')
+            include('ClearVolume-???.jar')
+            rename('ClearVolume-.+.jar','ClearVolume.jar')
+        }
+    }
   }
 }
+
 
 
 

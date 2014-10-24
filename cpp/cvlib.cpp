@@ -1,11 +1,10 @@
-// AutoPilot.cpp : Defines the exported functions for the DLL application.
+// cvlib.cpp : Defines the exported functions for the cvlib DLL.
 //
 
-#include <AutoPilot.h>
-#include <jni.h>
+#include "cvlib.h"
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #include <windows.h>
-#include <jni.h>       /* where everything is defined */
+#include "jvmlib/jni.h"       /* where everything is defined */
 #include <iostream>
 #include <string.h>
 
@@ -18,8 +17,8 @@ char* sJavaLastError = cErrorNone;
 
 
 
-jclass sAutoPilotClass;
-jmethodID getLastExceptionMessageID, setLoggingOptionsID, dcts16bitID, tenengrad16bitID, l2solveIDSSP, l2solveID, qpsolveID;
+jclass sClearVolumeClass;
+jmethodID getLastExceptionMessageID;
 
 __declspec(dllexport) unsigned long __cdecl begin(char* JREFolderPath, char* AutoPilotJarPath)
 {
@@ -65,28 +64,17 @@ __declspec(dllexport) unsigned long __cdecl begin(char* JREFolderPath, char* Aut
 			return 3;
 		}
 
-		sAutoPilotClass = lJNIEnv->FindClass("autopilot/interfaces/AutoPilotC");
+		sClearVolumeClass = lJNIEnv->FindClass("clearvolume/interfaces/ClearVolumeC");
 
-		if (sAutoPilotClass == 0)
+		if (sClearVolumeClass == 0)
 		{
 			return 4;
 		}
 
-		getLastExceptionMessageID = lJNIEnv->GetStaticMethodID(sAutoPilotClass, "getLastExceptionMessage", "()Ljava/lang/String;");
-		setLoggingOptionsID = lJNIEnv->GetStaticMethodID(sAutoPilotClass, "setLoggingOptions", "(ZZ)V");
-		dcts16bitID = lJNIEnv->GetStaticMethodID(sAutoPilotClass, "dcts16bit", "(Ljava/nio/ByteBuffer;IID)D");
-		tenengrad16bitID = lJNIEnv->GetStaticMethodID(sAutoPilotClass, "tenengrad16bit", "(Ljava/nio/ByteBuffer;IID)D");
-		l2solveIDSSP = lJNIEnv->GetStaticMethodID(sAutoPilotClass, "l2solve", "(ZZIII[D[D[Z[D)I");
-		l2solveID = lJNIEnv->GetStaticMethodID(sAutoPilotClass, "l2solve", "(ZZII[Z[D[D[Z[D)I");
-		qpsolveID = lJNIEnv->GetStaticMethodID(sAutoPilotClass, "qpsolve", "(ZZII[Z[D[D[Z[D[D)I");
+		getLastExceptionMessageID = lJNIEnv->GetStaticMethodID(sClearVolumeClass, "getLastExceptionMessage", "()Ljava/lang/String;");
+		
 
-		if (getLastExceptionMessageID == 0 
-			|| setLoggingOptionsID == 0 
-			|| dcts16bitID == 0
-			|| tenengrad16bitID == 0
-			|| l2solveIDSSP == 0
-			|| l2solveID == 0
-			|| qpsolveID == 0)
+		if (getLastExceptionMessageID == 0)
 		{
 			return 5;
 		}
@@ -117,14 +105,6 @@ __declspec(dllexport) unsigned long __cdecl end()
 	}
 }
 
-__declspec(dllexport)  void __cdecl setLoggingOptions(bool pStdOut, bool pLogFile)
-{
-	clearError();
-	JNIEnv *lJNIEnv;
-	sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
-	lJNIEnv->CallStaticIntMethod(sAutoPilotClass,setLoggingOptionsID, pStdOut, pLogFile);
-}
-
 __declspec(dllexport)  void __cdecl clearError()
 {
 	sJavaLastError=cErrorNone;
@@ -148,7 +128,7 @@ __declspec(dllexport) char* __cdecl getLastJavaExceptionMessage()
 			lJNIEnv->ReleaseStringUTFChars(sLastJavaExceptionMessageJString, sLastJavaExceptionMessage);
 		}
 
-		sLastJavaExceptionMessageJString = (jstring)lJNIEnv->CallStaticObjectMethod(sAutoPilotClass,getLastExceptionMessageID);
+		sLastJavaExceptionMessageJString = (jstring)lJNIEnv->CallStaticObjectMethod(sClearVolumeClass,getLastExceptionMessageID);
 		sLastJavaExceptionMessage = NULL;
 
 		if(sLastJavaExceptionMessageJString!=NULL)
@@ -170,6 +150,9 @@ __declspec(dllexport) char* __cdecl getLastError()
 	else return sJavaLastError;
 }
 
+
+
+/*
 
 
 __declspec(dllexport) double __cdecl dcts16bit(short* pBuffer, int pWidth, int pHeight, double pPSFSupportDiameter)
@@ -209,21 +192,6 @@ __declspec(dllexport) double __cdecl tenengrad16bit(short* pBuffer, int pWidth, 
 }
 
 
-/*
- * 	public Model2D2IClassic(final boolean pAnchorDetection,
-							final boolean pSymmetricAnchor,
-							final int pNumberOfWavelengths,
-							final int pNumberOfPlanes,
-							final int pSyncPlaneIndex,
-							final double[] pCurrentStateVector,
-							final double[] pObservationsVector,
-							final boolean[] pMissingObservations,
-							final double[] pNewStateVector)
-
-
- "(ZZIII[D[D[Z[D)[D"
-
- */
 __declspec(dllexport) int __cdecl l2solveSSP(
 		bool pAnchorDetection,
 		bool pSymmetricAnchor,
@@ -405,5 +373,5 @@ __declspec(dllexport) void __cdecl freePointer(void* pPointer)
  If return type is void (or constructor) use (argument types)V.
  Observe that the ; is needed after the class name in all situations. 
  This won't work "(Ljava/lang/String)V" but this will "(Ljava/lang/String;)V". 
- */
+ /**/
 
