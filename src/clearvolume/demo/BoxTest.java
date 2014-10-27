@@ -36,7 +36,8 @@ public class BoxTest
 															+ lResolutionX
 															* lResolutionY
 															* z;
-					char lCharValue = (char) (((byte) y));
+					// char lCharValue = (char) (((byte) y));
+					char lCharValue = (char) (((byte) x ^ (byte) y ^ (byte) z));
 					if (lCharValue < 12)
 						lCharValue = 0;
 					// float lFloatValue = (float) log1p(lByteValue);

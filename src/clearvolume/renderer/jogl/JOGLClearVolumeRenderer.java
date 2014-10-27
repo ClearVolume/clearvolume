@@ -41,8 +41,11 @@ public abstract class JOGLClearVolumeRenderer	extends
 																							ClearVolumeRendererBase	implements
 																																			ClearGLEventListener
 {
+	// Box
+	private boolean mRenderBox = true;
+	private static final float cBoxLineWidth = 1.f; // only cBoxLineWidth = 1.f
+																									// seems to be supported
 
-	private static final float cBoxLineWidth = 4.f;
 	private static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
 	{ 1.f, 1.f, 1.f, 1.f });
 
@@ -68,9 +71,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLAttribute mPositionAttribute;
 	private GLVertexArray mQuadVertexArray;
 	private GLVertexAttributeArray mPositionAttributeArray;
-
-	// Box
-	private boolean mHasBox = true;
 
 	private GLAttribute mBoxPositionAttribute;
 	private GLVertexArray mBoxVertexArray;
@@ -410,8 +410,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 				// set the line with of the box
 				lGL4.glLineWidth(cBoxLineWidth);
 
-				System.out.println(mBoxGLProgram.getProgramInfoLog());
-
 				// get all the shaders uniform locations
 				mBoxPositionAttribute = mBoxGLProgram.getAtribute("position");
 				mBoxModelViewMatrixUniform = mBoxGLProgram.getUniform("modelview");
@@ -534,12 +532,12 @@ public abstract class JOGLClearVolumeRenderer	extends
 		}
 
 		// draw the box
-		if (true && mHasBox)
+		if (mRenderBox)
 		{
 			mBoxGLProgram.use(lGL4);
 
-			// invert Matrix is the modelview used by renderer is actually the
-			// inverted
+			// invert Matrix is the modelview used by renderer which is actually the
+			// inverted modelview Matrix
 			mBoxModelViewMatrix.copy(mVolumeViewMatrix);
 			mBoxModelViewMatrix.invert();
 
