@@ -71,4 +71,4 @@ together with a test executable. Try it:
 
 * Loic Royer (royer -at- mpi-cbg -point- de)
 * Martin Weigert (mweigert -at- mpi-cbg -point- de)
-* Ulrik Guenther (guenter -at- mpi-cbg -point- de)
+* Ulrik Guenther (guenther -at- mpi-cbg -point- de)
