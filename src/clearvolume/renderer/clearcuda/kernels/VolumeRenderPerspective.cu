@@ -210,42 +210,31 @@ volumerender(uint *d_output, uint imageW, uint imageH,
     float4 temp;
     float4 back,front;
 
-
+		// Back and front before all transformations.
    	front = make_float4(u,v,-1,1);
-	back = make_float4(u,v,1,1);
+		back = make_float4(u,v,1,1);
   
+  	// Origin point
     orig0 = mul(c_invProjectionMatrix,front);
-	orig0 *= 1.f/orig0.w;
-  
+		orig0 *= 1.f/orig0.w;
     orig = mul(c_invViewMatrix,orig0);
-	orig *= 1.f/orig.w;
+		orig *= 1.f/orig.w;
   
-
+  	// Direction:
     direc0 = mul(c_invProjectionMatrix,back);
-     
-	direc0 *= 1.f/direc0.w;
+		direc0 *= 1.f/direc0.w;
+		direc0 = normalize(direc0-orig0);
+		direc = mul(c_invViewMatrix,direc0);
+		direc.w = 0;
 
-	direc0 = normalize(direc0-orig0);
-
-
-	direc = mul(c_invViewMatrix,direc0);
-	direc.w = 0;
-
-	 
-
-	
     // calculate eye ray in world space
     Ray eyeRay;
-
-	eyeRay.o = make_float3(orig);
-	eyeRay.d = make_float3(direc);	
+		eyeRay.o = make_float3(orig);
+		eyeRay.d = make_float3(direc);	
 	
-
-
     // find intersection with box
     float tnear, tfar;
     int hit = intersectBox(eyeRay, boxMin, boxMax, &tnear, &tfar);
-
 
     if (!hit) return;
 
@@ -254,56 +243,27 @@ volumerender(uint *d_output, uint imageW, uint imageH,
     // march along ray from front to back, accumulating color
     float4 acc = make_float4(0.0f);
 
-	// float t = tnear;
-    // float3 pos = eyeRay.o + eyeRay.d*tnear;
-    // float3 step = eyeRay.d*tstep;
+		float t = tnear;
 
-
-	float t = tnear;
-
-	float4 pos;
-	uint i;
-	for(i=0; i<maxSteps; i++) {		
-	  pos = orig + t*direc;
-
-
-	  pos = pos*0.5f+0.5f;    // map position to [0, 1] coordinates
-
-	  float sample = tex3D(tex, pos.x,pos.y,pos.z);
- 
-	  // Mapping to transfert function range and gamma correction: 
-	  float mappedsample = powf(ta*sample+tb,gamma);
- 
-	  // lookup in transfer function texture
-	  float4 col = tex1D(transferTex,mappedsample);
-        
-	  algo/*ProjectionAlgorythm*/(acc,col);
-
-	  t += tstep;
-	  if (t > tfar) break;
-	}
-
-
-    // for (int i=0; i<maxSteps; i++)
-    // {
-	  
-    //     // read from 3D texture
-    //     // remap position to [0, 1] coordinates
-    //     float sample = tex3D(tex, invscalex*pos.x*0.5f+0.5f, invscaley*pos.y*0.5f+0.5f, invscalez*pos.z*0.5f+0.5f);
- 
- 	// 			// Mapping to transfert function range and gamma correction: 
- 	// 			float mappedsample = powf(ta*sample+tb,gamma);
- 
-    //     // lookup in transfer function texture
-    //     float4 col = tex1D(transferTex,mappedsample);
-        
-    //     algo/*ProjectionAlgorythm*/(acc,col);
-
-    //     t += tstep;
-
-    //     if (t > tfar) break;
-    //     pos += step;
-    // }
+		float4 pos;
+		uint i;
+		for(i=0; i<maxSteps; i++) 
+		{		
+		  pos = orig + t*direc;
+		  pos = pos*0.5f+0.5f;    // map position to [0, 1] coordinates
+		  float sample = tex3D(tex, pos.x,pos.y,pos.z);
+	 
+		  // Mapping to transfert function range and gamma correction: 
+		  float mappedsample = powf(ta*sample+tb,gamma);
+	 
+		  // lookup in transfer function texture
+		  float4 col = tex1D(transferTex,mappedsample);
+	        
+		  algo/*ProjectionAlgorythm*/(acc,col);
+	
+		  t += tstep;
+		  if (t > tfar) break;
+		}
     
     acc *= brightness;
     

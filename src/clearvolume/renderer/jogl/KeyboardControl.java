@@ -74,6 +74,9 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			mClearVolumeRenderer.resetBrightnessAndGammaAndTransferFunctionRanges();
 			mClearVolumeRenderer.resetRotationTranslation();
 			break;
+		case KeyEvent.VK_B:
+			mClearVolumeRenderer.toggleBoxDisplay();
+			break;
 		}
 
 		mClearVolumeRenderer.requestDisplay();

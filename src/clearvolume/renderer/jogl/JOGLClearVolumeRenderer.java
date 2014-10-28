@@ -41,13 +41,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 																							ClearVolumeRendererBase	implements
 																																			ClearGLEventListener
 {
-	// Box
-	private boolean mRenderBox = true;
-	private static final float cBoxLineWidth = 1.f; // only cBoxLineWidth = 1.f
-																									// seems to be supported
-
-	private static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
-	{ 1.f, 1.f, 1.f, 1.f });
 
 	// ClearGL Window.
 	private ClearGLWindow mClearGLWindow;
@@ -64,10 +57,20 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private volatile int step = 0;
 	private volatile long prevTimeNS = -1;
 
+	// Box
+	private volatile boolean mRenderBox = true;
+	private static final float cBoxLineWidth = 1.f; // only cBoxLineWidth = 1.f
+																									// seems to be supported
+
+	private static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
+	{ 1.f, 1.f, 1.f, 1.f });
+
+	// Window:
 	private String mWindowName;
 	private GLProgram mGLProgram;
 	private GLProgram mBoxGLProgram;
 
+	// Shader attributes, uniforms and arrays:
 	private GLAttribute mPositionAttribute;
 	private GLVertexArray mQuadVertexArray;
 	private GLVertexAttributeArray mPositionAttributeArray;
@@ -83,8 +86,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLUniform mBoxProjectionMatrixUniform;
 
 	private GLMatrix mVolumeViewMatrix = new GLMatrix();
-
-	private float cameraZ = 0;
 
 	private GLAttribute mTexCoordAttribute;
 	private GLUniform mTexUnit;
@@ -313,7 +314,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		getClearGLWindow().setPerspectiveProjectionMatrix(.785f,
 																											1,
 																											.1f,
-																											10);
+																											1000);
 
 		if (initVolumeRenderer())
 		{
@@ -507,7 +508,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 		mVolumeViewMatrix.translate(-getTranslationX(),
 																-getTranslationY(),
-																-getTranslationZ() - cameraZ);
+																-getTranslationZ());
 
 		GLMatrix lInvVolumeMatrix = new GLMatrix();
 		lInvVolumeMatrix.copy(mVolumeViewMatrix);
@@ -518,8 +519,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 		lInvProjection.transpose();
 		lInvProjection.invert();
 
-		if (true && renderVolume(	lInvVolumeMatrix.getFloatArray(),
-															lInvProjection.getFloatArray()))
+		if (renderVolume(	lInvVolumeMatrix.getFloatArray(),
+											lInvProjection.getFloatArray()))
 		{
 			mTexture.copyFrom(mPixelBufferObject);
 
@@ -663,6 +664,15 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public boolean isFullScreen()
 	{
 		return mClearGLWindow.getGLWindow().isFullscreen();
+	}
+
+	/**
+	 * Toggles box display.
+	 */
+	@Override
+	public void toggleBoxDisplay()
+	{
+		mRenderBox = !mRenderBox;
 	}
 
 	/**

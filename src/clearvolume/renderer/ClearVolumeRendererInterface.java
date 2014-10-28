@@ -70,6 +70,11 @@ public interface ClearVolumeRendererInterface	extends
 	void toggleFullScreen();
 
 	/**
+	 * Toggles box display.
+	 */
+	void toggleBoxDisplay();
+
+	/**
 	 * Sets the transfer function used for rendering.
 	 * 
 	 * @param pTransfertFunction
@@ -275,5 +280,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
+
 
 }

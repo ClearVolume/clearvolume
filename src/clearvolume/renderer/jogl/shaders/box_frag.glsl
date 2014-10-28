@@ -1,12 +1,10 @@
 #version 150
  
 uniform vec4 color; 
- 
-
 out vec4 outColor;
+in float attenuation; 
  
 void main()
 {
-  outColor = color;
-//outColor = vec4(1.,0,0,1.);
+  outColor = vec4(color.xyz,attenuation);
 }
