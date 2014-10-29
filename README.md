@@ -49,7 +49,52 @@ displayed.
 
 ### How do I integrate into my control software? ###
 
+There are two possibilities for integration:
+1.  Network    : ClearVolume receives data over the network via streaming
+2.  In-Process: ClearVolume lives in the same process and thus data can be transferred at maximal speed.
+It is possible to have both: in-process with ClearVolume server listening for incoming connections, this mode
+offers the possibility to monitor long-term time-lapses remotely.
+
 * Integration onto Java-based microscope control software
+
+The API relies on the metaphor of volume (or stacks) sinks and sources.
+The following code creates a ClearVolume
+
+
+```
+#!java
+
+try (final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolumeTest",
+																																																pWindowSize,
+																																																pWindowSize,
+																																																pBytesPerVoxel))
+ {
+   try
+   {
+      lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
+      ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	
+                                                        lClearVolumeRenderer,
+																																												cMaxMillisecondsToWaitForCopy,
+																																												TimeUnit.MILLISECONDS);
+
+      AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(
+                                                         lClearVolumeRendererSink,
+																																																					cMaxQueueLength,
+																																																					cMaxMillisecondsToWait,
+																																																					TimeUnit.MILLISECONDS);
+
+				ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
+
+				SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
+																																		ClearVolumeSerialization.cStandardTCPPort);
+				assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
+
+				assertTrue(lClearVolumeTCPClient.start());
+
+				assertTrue(lAsynchronousVolumeSinkAdapter.start());
+
+```
+
 
 * Integration onto LabView-based microscope control software
 
