@@ -5,6 +5,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import clearvolume.volume.Volume;
+import clearvolume.volume.VolumeManager;
 
 public class AsynchronousVolumeSinkAdapter implements
 																					VolumeSinkInterface
@@ -91,5 +92,11 @@ public class AsynchronousVolumeSinkAdapter implements
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public VolumeManager getManager()
+	{
+		return mDelegatedVolumeSink.getManager();
 	}
 }

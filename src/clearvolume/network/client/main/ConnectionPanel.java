@@ -25,7 +25,7 @@ import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
-import clearvolume.transfertf.TransfertFunctions;
+import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.ClearVolumeRendererSink;
 
@@ -34,6 +34,7 @@ public class ConnectionPanel extends JPanel
 
 	private static final long serialVersionUID = 1L;
 
+	private static final int cMaxAvailableVolumes = 20;
 	private static final int cMaxQueueLength = 20;
 	private static final long cMaxMillisecondsToWait = 10;
 	private static final long cMaxMillisecondsToWaitForCopy = 10;
@@ -153,9 +154,10 @@ public class ConnectionPanel extends JPanel
 		{
 			try
 			{
-				lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
+				lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 
 				ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
+																																												lClearVolumeRenderer.createCompatibleVolumeManager(cMaxAvailableVolumes),
 																																												cMaxMillisecondsToWaitForCopy,
 																																												TimeUnit.MILLISECONDS);
 

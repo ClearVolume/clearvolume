@@ -5,20 +5,25 @@ import java.util.concurrent.TimeUnit;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.volume.Volume;
+import clearvolume.volume.VolumeManager;
 
 public class ClearVolumeRendererSink implements VolumeSinkInterface
 {
 
 	private ClearVolumeRendererInterface mClearVolumeRendererInterface;
+	private VolumeManager mVolumeManager;
 	private long mWaitForCopyTimeout;
 	private TimeUnit mTimeUnit;
 
+
 	public ClearVolumeRendererSink(	ClearVolumeRendererInterface pClearVolumeRendererInterface,
+																	VolumeManager pVolumeManager,
 																	long pWaitForCopyTimeout,
 																	TimeUnit pTimeUnit)
 	{
 		super();
 		mClearVolumeRendererInterface = pClearVolumeRendererInterface;
+		mVolumeManager = pVolumeManager;
 		mWaitForCopyTimeout = pWaitForCopyTimeout;
 		mTimeUnit = pTimeUnit;
 
@@ -49,6 +54,12 @@ public class ClearVolumeRendererSink implements VolumeSinkInterface
 																															mTimeUnit);
 		pVolume.makeAvailableToManager();
 
+	}
+
+	@Override
+	public VolumeManager getManager()
+	{
+		return mVolumeManager;
 	}
 
 }

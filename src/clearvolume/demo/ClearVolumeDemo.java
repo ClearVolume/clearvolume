@@ -11,13 +11,12 @@ import clearvolume.controller.ExternalRotationController;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
-import clearvolume.transfertf.TransfertFunctions;
+import clearvolume.transferf.TransferFunctions;
 
 public class ClearVolumeDemo
 {
 
 	private static ClearVolumeRendererInterface mClearVolumeRenderer;
-
 
 	@Test
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,
@@ -26,7 +25,7 @@ public class ClearVolumeDemo
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																																														1024,
 																																														1024);
-		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 512;
@@ -73,7 +72,7 @@ public class ClearVolumeDemo
 																																														768,
 																																														768,
 																																														2);
-		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -116,7 +115,7 @@ public class ClearVolumeDemo
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
 																																														512,
 																																														512);
-		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 		lClearVolumeRenderer.setProjectionAlgorythm(ProjectionAlgorithm.MaxProjection);
 
@@ -222,7 +221,7 @@ public class ClearVolumeDemo
 																												512,
 																												pBytesPerVoxel);
 
-		mClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getRainbow());
+		mClearVolumeRenderer.setTransfertFunction(TransferFunctions.getRainbow());
 		mClearVolumeRenderer.setVisible(true);
 
 		mClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(data),

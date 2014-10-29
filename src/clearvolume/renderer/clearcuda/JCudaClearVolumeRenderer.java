@@ -344,8 +344,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.jogl.JOGLClearVolumeRenderer#renderVolume(javax.media.opengl.GL2,
-	 *      float[])
+	 * @see clearvolume.renderer.jogl.JOGLClearVolumeRenderer#renderVolume(final
+	 *      float[] pModelViewMatrix, final float[] pProjectionMatrix)
 	 */
 	@Override
 	protected boolean renderVolume(	float[] invModelView,
@@ -484,5 +484,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																	e);
 		}
 	}
+
+
 
 }

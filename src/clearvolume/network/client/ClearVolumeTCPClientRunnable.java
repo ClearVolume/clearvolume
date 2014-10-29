@@ -27,7 +27,7 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 	{
 		mSocketChannel = pSocketChannel;
 		mVolumeSink = pVolumeSink;
-		mVolumeManager = new VolumeManager(pMaxInUseVolumes);
+		mVolumeManager = mVolumeSink.getManager();
 	}
 
 	public void requestStop()

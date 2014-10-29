@@ -8,6 +8,7 @@ import java.nio.channels.ServerSocketChannel;
 
 import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.volume.Volume;
+import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.VolumeSinkInterface;
 import clearvolume.volume.source.SourceToSinkBufferedAdapter;
 
@@ -15,6 +16,7 @@ public class ClearVolumeTCPServer	implements
 																	Closeable,
 																	VolumeSinkInterface
 {
+	private VolumeManager mVolumeManager;
 
 	private ServerSocketChannel mServerSocketChannel;
 
@@ -23,10 +25,14 @@ public class ClearVolumeTCPServer	implements
 
 	private SourceToSinkBufferedAdapter mSourceToSinkBufferedAdapter;
 
-	public ClearVolumeTCPServer(int pMaxCapacity)
+
+	public ClearVolumeTCPServer(VolumeManager pVolumeManager,
+															int pMaxCapacity)
 	{
 		super();
-		mSourceToSinkBufferedAdapter = new SourceToSinkBufferedAdapter(pMaxCapacity);
+		mVolumeManager = pVolumeManager;
+		mSourceToSinkBufferedAdapter = new SourceToSinkBufferedAdapter(	getManager(),
+																																		pMaxCapacity);
 	}
 
 	public boolean open(SocketAddress pSocketAddress) throws IOException
@@ -38,8 +44,6 @@ public class ClearVolumeTCPServer	implements
 		mServerSocketChannel.setOption(	StandardSocketOptions.SO_RCVBUF,
 																		ClearVolumeTCPClient.cSocketBufferLength);
 		mServerSocketChannel.socket().bind(pSocketAddress);
-
-
 
 		return mServerSocketChannel.isOpen();
 	}
@@ -74,9 +78,15 @@ public class ClearVolumeTCPServer	implements
 	}
 
 	@Override
-	public void sendVolume(Volume pVolume)
+	public void sendVolume(Volume<?> pVolume)
 	{
 		mSourceToSinkBufferedAdapter.sendVolume(pVolume);
+	}
+
+	@Override
+	public VolumeManager getManager()
+	{
+		return mVolumeManager;
 	}
 
 }

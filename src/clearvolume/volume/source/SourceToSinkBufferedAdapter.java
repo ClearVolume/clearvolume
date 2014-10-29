@@ -4,6 +4,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import clearvolume.volume.Volume;
+import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.VolumeSinkInterface;
 
 public class SourceToSinkBufferedAdapter implements
@@ -12,11 +13,14 @@ public class SourceToSinkBufferedAdapter implements
 {
 
 	private final BlockingQueue<Volume<?>> mVolumeQueue;
+	private VolumeManager mVolumeManager;
 
 
-	public SourceToSinkBufferedAdapter(int pMaxCapacity)
+	public SourceToSinkBufferedAdapter(	VolumeManager pVolumeManager,
+																			int pMaxCapacity)
 	{
 		super();
+		mVolumeManager = pVolumeManager;
 		mVolumeQueue = new ArrayBlockingQueue<Volume<?>>(pMaxCapacity);
 	}
 
@@ -38,6 +42,12 @@ public class SourceToSinkBufferedAdapter implements
 		{
 			return requestVolume();
 		}
+	}
+
+	@Override
+	public VolumeManager getManager()
+	{
+		return mVolumeManager;
 	}
 
 }

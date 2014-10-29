@@ -6,7 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.RotationControllerInterface;
-import clearvolume.transfertf.TransfertFunction;
+import clearvolume.transferf.TransferFunction;
+import clearvolume.volume.Volume;
+import clearvolume.volume.VolumeManager;
 
 /**
  * Interface ClearVolumeRenderer
@@ -80,7 +82,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pTransfertFunction
 	 *          transfer function
 	 */
-	void setTransfertFunction(TransfertFunction pTransfertFunction);
+	void setTransfertFunction(TransferFunction pTransfertFunction);
 
 	/**
 	 * Sets the transfer function range. Both min and max values should be within
@@ -143,7 +145,8 @@ public interface ClearVolumeRendererInterface	extends
 	void setQuaternionController(RotationControllerInterface pRotationControllerInterface);
 
 	/**
-	 * 
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ).
 	 * 
 	 * @param pByteBuffer
 	 * @param pSizeX
@@ -156,6 +159,9 @@ public interface ClearVolumeRendererInterface	extends
 														long pSizeZ);
 
 	/**
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are provided.
+	 * 
 	 * @param pByteBuffer
 	 * @param pSizeX
 	 * @param pSizeY
@@ -171,6 +177,26 @@ public interface ClearVolumeRendererInterface	extends
 														double pVolumeSizeX,
 														double pVolumeSizeY,
 														double pVolumeSizeZ);
+
+	/**
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are provided.
+	 * 
+	 * @param pVolume
+	 *          Volume data to use for updating display.
+	 */
+	void setVolumeDataBuffer(Volume<?> pVolume);
+
+	/**
+	 * Creates a compatible VolumeManager - possibly capable of allocating pinned
+	 * memory or memory optimized in other ways. pMaxAvailableVolumes is the
+	 * maximal number of volumes to be kept allocated and available so as to avoid
+	 * memory trashing.
+	 * 
+	 * @param pMaxAvailableVolumes
+	 * @return
+	 */
+	VolumeManager createCompatibleVolumeManager(int pMaxAvailableVolumes);
 
 	/**
 	 * Waits until volume data copy completes.
@@ -280,6 +306,5 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
-
 
 }

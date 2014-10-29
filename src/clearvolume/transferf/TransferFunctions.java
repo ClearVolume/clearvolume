@@ -1,14 +1,14 @@
-package clearvolume.transfertf;
+package clearvolume.transferf;
 
 /**
- * Class TransfertFunctions
+ * Class TransferFunctions
  * 
  * This class provides typical and ready-to-use transfer functions
  *
  * @author Loic Royer 2014
  *
  */
-public class TransfertFunctions
+public class TransferFunctions
 {
 
 	/**
@@ -16,9 +16,9 @@ public class TransfertFunctions
 	 * 
 	 * @return gray level transfer function
 	 */
-	public static final TransfertFunction1D getGrayLevel()
+	public static final TransferFunction1D getGrayLevel()
 	{
-		final TransfertFunction1D lTransfertFunction = new TransfertFunction1D();
+		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
 		lTransfertFunction.addPoint(0, 0, 0, 0);
 		lTransfertFunction.addPoint(1, 1, 1, 1);
 		return lTransfertFunction;
@@ -29,9 +29,9 @@ public class TransfertFunctions
 	 * 
 	 * @return blue gradient transfer function
 	 */
-	public static final TransfertFunction1D getBlueGradient()
+	public static final TransferFunction1D getBlueGradient()
 	{
-		final TransfertFunction1D lTransfertFunction = new TransfertFunction1D();
+		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
 		lTransfertFunction.addPoint(0, 0, 0, 0);
 		lTransfertFunction.addPoint(0, 0, 1, 0.333);
 		lTransfertFunction.addPoint(0, 1, 1, 0.666);
@@ -44,9 +44,9 @@ public class TransfertFunctions
 	 * 
 	 * @return red gradient transfer function
 	 */
-	public static final TransfertFunction1D getRedGradient()
+	public static final TransferFunction1D getRedGradient()
 	{
-		final TransfertFunction1D lTransfertFunction = new TransfertFunction1D();
+		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
 		lTransfertFunction.addPoint(0, 0, 0, 0);
 		lTransfertFunction.addPoint(1, 0, 0, 0.333);
 		lTransfertFunction.addPoint(1, 1, 0, 0.666);
@@ -59,9 +59,9 @@ public class TransfertFunctions
 	 * 
 	 * @return green gradient transfer function
 	 */
-	public static final TransfertFunction1D getGreenGradient()
+	public static final TransferFunction1D getGreenGradient()
 	{
-		final TransfertFunction1D lTransfertFunction = new TransfertFunction1D();
+		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
 		lTransfertFunction.addPoint(0, 0, 0, 0);
 		lTransfertFunction.addPoint(0, 1, 0, 0.333);
 		lTransfertFunction.addPoint(0, 1, 1, 0.666);
@@ -76,9 +76,9 @@ public class TransfertFunctions
 	 * 
 	 * @return rainbow transfer function
 	 */
-	public static final TransfertFunction1D getRainbow()
+	public static final TransferFunction1D getRainbow()
 	{
-		final TransfertFunction1D lTransfertFunction = new TransfertFunction1D();
+		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
 		lTransfertFunction.addPoint(0, 0, 0, 0);
 		lTransfertFunction.addPoint(0, 0, 1, 1);
 		lTransfertFunction.addPoint(0, 1, 1, 1);
@@ -94,9 +94,9 @@ public class TransfertFunctions
 	 * 
 	 * @return rainbow variant transfer function
 	 */
-	public static final TransfertFunction1D getRainbowSolid()
+	public static final TransferFunction1D getRainbowSolid()
 	{
-		final TransfertFunction1D lTransfertFunction = new TransfertFunction1D();
+		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
 		lTransfertFunction.addPoint(0, 0, 1, 1);
 		lTransfertFunction.addPoint(0, 1, 1, 1);
 		lTransfertFunction.addPoint(0, 1, 0, 1);

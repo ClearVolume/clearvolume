@@ -560,15 +560,17 @@ public abstract class JOGLClearVolumeRenderer	extends
 	}
 
 	/**
-	 * @param gl
-	 * @param modelView
-	 * @return
+	 * @param pModelViewMatrix
+	 *          Model-view matrix as float array
+	 * @param pProjectionMatrix
+	 *          Projection matrix as float array
+	 * @return true if volume was updated and rendered.
 	 */
-	protected abstract boolean renderVolume(final float[] modelView,
-																					final float[] projection);
+	protected abstract boolean renderVolume(final float[] pModelViewMatrix,
+																					final float[] pProjectionMatrix);
 
 	/**
-	 * 
+	 * Updates the display of the framerate.
 	 */
 	private void updateFrameRateDisplay()
 	{

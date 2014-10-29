@@ -1,7 +1,7 @@
-package clearvolume.transfertf;
+package clearvolume.transferf;
 
 /**
- * Interface TransfertFunction
+ * Interface TransferFunction
  * 
  * Classes implementing this interface implement transfer functions of a given
  * dimension and provide the underlying data as a float array of row-major
@@ -10,7 +10,7 @@ package clearvolume.transfertf;
  * @author Loic Royer 2014
  *
  */
-public interface TransfertFunction
+public interface TransferFunction
 {
 	/**
 	 * Returns the dimension of the transfer function.
@@ -23,7 +23,7 @@ public interface TransfertFunction
 	 * Returns the data of the transfer function in the form of a float array in
 	 * row major order.
 	 * 
-	 * @return
+	 * @return float array representing transfer function.
 	 */
 	float[] getArray();
 

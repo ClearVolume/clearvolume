@@ -12,8 +12,8 @@ public class ClearVolumeCTests
 	@Test
 	public void test8bitStreaming() throws InterruptedException
 	{
-		String lRendererName = "test1";
-		ClearVolumeC.createRenderer(lRendererName, 256, 256, 1, 512, 512);
+		int lRendererId = 1;
+		ClearVolumeC.createRenderer(lRendererId, 256, 256, 1, 512, 512);
 
 		final int lResolutionX = 128;
 		final int lResolutionY = lResolutionX + 1;
@@ -39,7 +39,7 @@ public class ClearVolumeCTests
 						lVolumeDataArray[lIndex] = (byte) lValue;
 					}
 
-			ClearVolumeC.send8bitUINTVolumeDataToSink(lRendererName,
+			ClearVolumeC.send8bitUINTVolumeDataToSink(lRendererId,
 																								ByteBuffer.wrap(lVolumeDataArray),
 																								1,
 																								lResolutionX,
@@ -47,15 +47,15 @@ public class ClearVolumeCTests
 																								lResolutionZ);
 		}
 
-		ClearVolumeC.destroyRenderer(lRendererName);
+		ClearVolumeC.destroyRenderer(lRendererId);
 
 	}
 
 	@Test
 	public void test16bitStreaming() throws InterruptedException
 	{
-		String lRendererName = "test1";
-		ClearVolumeC.createRenderer(lRendererName, 256, 256, 2, 512, 512);
+		int lRendererId = 1;
+		ClearVolumeC.createRenderer(lRendererId, 256, 256, 2, 512, 512);
 
 		final int lResolutionX = 128;
 		final int lResolutionY = lResolutionX + 1;
@@ -83,7 +83,7 @@ public class ClearVolumeCTests
 						lVolumeDataArray[2 * lIndex + 1] = (byte) lCharValue;
 					}
 
-			ClearVolumeC.send16bitUINTVolumeDataToSink(	lRendererName,
+			ClearVolumeC.send16bitUINTVolumeDataToSink(	lRendererId,
 																									ByteBuffer.wrap(lVolumeDataArray),
 																									1,
 																									lResolutionX,
@@ -91,7 +91,7 @@ public class ClearVolumeCTests
 																									lResolutionZ);
 		}
 
-		ClearVolumeC.destroyRenderer(lRendererName);
+		ClearVolumeC.destroyRenderer(lRendererId);
 
 	}
 }

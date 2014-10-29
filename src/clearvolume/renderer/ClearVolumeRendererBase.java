@@ -11,8 +11,10 @@ import javax.swing.JPanel;
 
 import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.RotationControllerInterface;
-import clearvolume.transfertf.TransfertFunction;
-import clearvolume.transfertf.TransfertFunctions;
+import clearvolume.transferf.TransferFunction;
+import clearvolume.transferf.TransferFunctions;
+import clearvolume.volume.Volume;
+import clearvolume.volume.VolumeManager;
 
 /**
  * Class ClearVolumeRendererBase
@@ -45,7 +47,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Transfer function used
 	 */
-	private TransfertFunction mTransferFunction = TransfertFunctions.getGrayLevel();
+	private TransferFunction mTransferFunction = TransferFunctions.getGrayLevel();
 
 	// geometric, brigthness an contrast settings.
 	private volatile float mTranslationX = 0;
@@ -77,7 +79,6 @@ public abstract class ClearVolumeRendererBase	implements
 
 	// Control frame:
 	private JFrame mControlFrame;
-
 
 	/**
 	 * Sets the number of bytes per voxel for this renderer. This is _usually_ set
@@ -232,8 +233,7 @@ public abstract class ClearVolumeRendererBase	implements
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
-
-		/**
+	/**
 	 * Interface method implementation
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#resetBrightnessAndGammaAndTransferFunctionRanges()
@@ -559,10 +559,10 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransfertFunction(clearvolume.transfertf.TransfertFunction)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransfertFunction(clearvolume.transferf.TransferFunction)
 	 */
 	@Override
-	public void setTransfertFunction(final TransfertFunction pTransfertFunction)
+	public void setTransfertFunction(final TransferFunction pTransfertFunction)
 	{
 		mTransferFunction = pTransfertFunction;
 	}
@@ -572,7 +572,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @return currently used transfer function
 	 */
-	public TransfertFunction getTransfertFunction()
+	public TransferFunction getTransfertFunction()
 	{
 		return mTransferFunction;
 	}
@@ -639,8 +639,7 @@ public abstract class ClearVolumeRendererBase	implements
 		return mSetVolumeDataBufferLock;
 	}
 
-
-		/**
+	/**
 	 * Interface method implementation
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#resetRotationTranslation()
@@ -699,6 +698,7 @@ public abstract class ClearVolumeRendererBase	implements
 			{
 				mVolumeDimensionsChanged = true;
 			}
+
 			mVolumeSizeX = pSizeX;
 			mVolumeSizeY = pSizeY;
 			mVolumeSizeZ = pSizeZ;
@@ -711,6 +711,27 @@ public abstract class ClearVolumeRendererBase	implements
 
 			notifyUpdateOfVolumeRenderingParameters();
 		}
+	}
+
+	@Override
+	public void setVolumeDataBuffer(Volume<?> pVolume)
+	{
+		synchronized (getSetVolumeDataBufferLock())
+		{
+			setVolumeDataBuffer(pVolume.getVolumeData(),
+													pVolume.getWidthInVoxels(),
+													pVolume.getHeightInVoxels(),
+													pVolume.getDepthInVoxels(),
+													pVolume.getWidthInRealUnits(),
+													pVolume.getHeightInRealUnits(),
+													pVolume.getDepthInRealUnits());
+		}
+	}
+
+	@Override
+	public VolumeManager createCompatibleVolumeManager(int pMaxAvailableVolumes)
+	{
+		return new VolumeManager(pMaxAvailableVolumes);
 	}
 
 	/**

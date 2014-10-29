@@ -15,7 +15,7 @@ import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.network.server.ClearVolumeTCPServer;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
-import clearvolume.transfertf.TransfertFunctions;
+import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.ClearVolumeRendererSink;
@@ -28,6 +28,9 @@ public class ClearVolumeNetworkDemo
 	private static final int cDepth = 128 * cSizeMultFactor + 3;
 	private static final int cNumberOfVolumes = 10000000;
 
+	private static final int cNumberOfAvailableVolumes = 10;
+	private static final int cVolumeQueueLength = 11;
+
 	VolumeManager mVolumeManager = new VolumeManager(20);
 
 	@Test
@@ -35,7 +38,10 @@ public class ClearVolumeNetworkDemo
 	{
 		try
 		{
-			ClearVolumeTCPServer lClearVolumeTCPServer = new ClearVolumeTCPServer(10);
+			VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
+
+			ClearVolumeTCPServer lClearVolumeTCPServer = new ClearVolumeTCPServer(lVolumeManager,
+																																						cNumberOfAvailableVolumes);
 
 			SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
 			assertTrue(lClearVolumeTCPServer.open(lServerSocketAddress));
@@ -108,10 +114,11 @@ public class ClearVolumeNetworkDemo
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																																														256,
 																																														256);
-		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
+																																										lClearVolumeRenderer.createCompatibleVolumeManager(cNumberOfAvailableVolumes),
 																																										10,
 																																										TimeUnit.MILLISECONDS);
 

@@ -150,6 +150,20 @@ __declspec(dllexport) char* __cdecl getLastError()
 	else return sJavaLastError;
 }
 
+__declspec(dllexport) void __cdecl createRenderer( int pRendererId,
+													int pWindowWidth,
+													int pWindowHeight,
+													int pBytesPerVoxel,
+													int pMaxTextureWidth,
+													int pMaxTextureHeight)
+{
+
+}
+
+__declspec(dllexport) void __cdecl destroyRenderer( int pRendererId)
+{
+
+}
 
 
 /*
