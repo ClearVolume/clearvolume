@@ -58,19 +58,24 @@ offers the possibility to monitor long-term time-lapses remotely.
 * Integration onto Java-based microscope control software
 
 The API relies on the metaphor of volume (or stacks) sinks and sources.
-The following code creates a ClearVolume
+The following code creates a ClearVolume renderer, wraps it with an asynchronous sink,
+and repeatedly updates the volume data:
 
 
 ```
 #!java
 
-try (final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolumeTest",
+int lMaxInUseVolumes = 20; 
+VolumeManager lVolumeManager = new VolumeManager(lMaxInUseVolumes);
+
+
+try (final ClearVolumeRendererInterface lClearVolumeRenderer =
+       ClearVolumeRendererFactory.newBestRenderer(
+                                                        "ClearVolumeTest",
 																																																pWindowSize,
 																																																pWindowSize,
 																																																pBytesPerVoxel))
  {
-   try
-   {
       lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
       ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	
                                                         lClearVolumeRenderer,
@@ -83,16 +88,25 @@ try (final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRender
 																																																					cMaxMillisecondsToWait,
 																																																					TimeUnit.MILLISECONDS);
 
-				ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
+      lAsynchronousVolumeSinkAdapter.start();
 
-				SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
-																																		ClearVolumeSerialization.cStandardTCPPort);
-				assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
+      for(int i=0; i<1000; i++)
+      {
+        // send volume data:
 
-				assertTrue(lClearVolumeTCPClient.start());
+        Volume<?> lVolume = mVolumeManager.requestAndWaitForNextAvailableVolume(1,
+																																								TimeUnit.MILLISECONDS, Byte.class, 1,128,128,128);
 
-				assertTrue(lAsynchronousVolumeSinkAdapter.start());
+        // Here update the contents of the ByteBuffer provided by lVolume.getVolumeData()
+        // ... bla bla ...
+      
+        // send new volume to ClearVolume
+        mVolumeSink.sendVolume(lVolume);
+      }
 
+      lAsynchronousVolumeSinkAdapter.stop();
+
+}
 ```
 
 
