@@ -24,7 +24,7 @@ import net.miginfocom.swing.MigLayout;
 import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
+import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transfertf.TransfertFunctions;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.ClearVolumeRendererSink;
@@ -146,7 +146,7 @@ public class ConnectionPanel extends JPanel
 														int pWindowSize,
 														int pBytesPerVoxel)
 	{
-		try (final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		try (final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolumeTest",
 																																																pWindowSize,
 																																																pWindowSize,
 																																																pBytesPerVoxel))

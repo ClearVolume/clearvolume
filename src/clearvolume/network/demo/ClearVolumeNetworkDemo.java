@@ -1,6 +1,5 @@
 package clearvolume.network.demo;
 
-import static java.lang.Math.toIntExact;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -23,10 +22,10 @@ import clearvolume.volume.sink.ClearVolumeRendererSink;
 
 public class ClearVolumeNetworkDemo
 {
-	private static final int cSizeMultFactor = 4;
-	private static final int cWidth = 127 * cSizeMultFactor;
-	private static final int cHeight = 128 * cSizeMultFactor;
-	private static final int cDepth = 129 * cSizeMultFactor;
+	private static final int cSizeMultFactor = 1;
+	private static final int cWidth = 128 * cSizeMultFactor;
+	private static final int cHeight = 128 * cSizeMultFactor + 1;
+	private static final int cDepth = 128 * cSizeMultFactor + 3;
 	private static final int cNumberOfVolumes = 10000000;
 
 	VolumeManager mVolumeManager = new VolumeManager(20);
@@ -56,20 +55,6 @@ public class ClearVolumeNetworkDemo
 			for (int i = 0; i < cWidth * cHeight * cDepth; i++)
 				lVolumeData.put((byte) 32);
 
-			lVolumeData.rewind();
-			for (int z = 0; z < cDepth / 2; z++)
-				for (int y = 0; y < cHeight / 2; y++)
-					for (int x = 0; x < cWidth / 2; x++)
-					{
-						final int lIndex = x + cWidth * y + cWidth * cHeight * z;
-
-						byte lByteValue = (byte) ((byte) x ^ (byte) y ^ (byte) z);
-						if (lByteValue < 12)
-							lByteValue = 0;
-
-						lVolumeData.put(lIndex, lByteValue);
-					}/**/
-
 			for (long i = 0; i < cNumberOfVolumes; i++)
 			{
 				try
@@ -78,8 +63,23 @@ public class ClearVolumeNetworkDemo
 						System.out.println("sending volume with index=" + i);
 					lVolumeData = lVolume.getVolumeData();
 					lVolumeData.rewind();
-					lVolumeData.put(toIntExact(i % lVolumeData.limit()),
-													(byte) i);
+					for (int z = 0; z < cDepth; z++)
+						for (int y = 0; y < cHeight; y++)
+							for (int x = 0; x < cWidth; x++)
+							{
+								final int lIndex = x + cWidth
+																		* y
+																		+ cWidth
+																		* cHeight
+																		* z;
+
+								byte lByteValue = (byte) ((byte) i ^ (byte) x
+																					^ (byte) y ^ (byte) z);
+								if (lByteValue < 3)
+									lByteValue = 0;
+
+								lVolumeData.put(lIndex, lByteValue);
+							}/**/
 
 					lClearVolumeTCPServer.sendVolume(lVolume);
 					Thread.sleep(1);

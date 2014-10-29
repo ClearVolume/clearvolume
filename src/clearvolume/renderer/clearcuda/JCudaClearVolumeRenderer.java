@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 import javax.media.opengl.GLEventListener;
 
+import jcuda.CudaException;
 import jcuda.Pointer;
 import jcuda.driver.CUaddress_mode;
 import jcuda.driver.CUfilter_mode;
@@ -350,13 +351,23 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	protected boolean renderVolume(	float[] invModelView,
 																	float[] invProjection)
 	{
+		if (mCudaContext == null)
+			return false;
 		mCudaContext.setCurrent();
 
-		mInvertedViewMatrix.copyFrom(invModelView, true);
+		try
+		{
+			mInvertedViewMatrix.copyFrom(invModelView, true);
 
-		mInvertedProjectionMatrix.copyFrom(invProjection, true);
+			mInvertedProjectionMatrix.copyFrom(invProjection, true);
 
-		return updateBufferAndRunKernel();
+			return updateBufferAndRunKernel();
+		}
+		catch (CudaException e)
+		{
+			System.err.println(e.getLocalizedMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -452,10 +463,17 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		{
 			if (mVolumeDataCudaArray != null)
 				mVolumeDataCudaArray.close();
-			mTransferFunctionCudaArray.close();
-			mCudaModule.close();
-			mCudaContext.close();
-			mCudaDevice.close();
+			if (mTransferFunctionCudaArray != null)
+				mTransferFunctionCudaArray.close();
+			if (mCudaModule != null)
+				mCudaModule.close();
+			if (mCudaContext != null)
+				mCudaContext.close();
+			if (mCudaDevice != null)
+				mCudaDevice.close();
+
+			mCudaContext = null;
+
 			super.close();
 		}
 		catch (final Throwable e)

@@ -10,6 +10,7 @@ import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.ExternalRotationController;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
+import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transfertf.TransfertFunctions;
 
 public class ClearVolumeDemo
@@ -28,7 +29,7 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 1024;
+		final int lResolutionX = 512;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
@@ -68,7 +69,7 @@ public class ClearVolumeDemo
 	public void demoWith16BitGeneratedDataset()	throws InterruptedException,
 																							IOException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
 																																														768,
 																																														768,
 																																														2);
@@ -112,7 +113,7 @@ public class ClearVolumeDemo
 																									IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
 																																														512,
 																																														512);
 		lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
@@ -216,7 +217,7 @@ public class ClearVolumeDemo
 																	pSizeZ);
 
 
-		mClearVolumeRenderer = new JCudaClearVolumeRenderer("ClearVolumeTest",
+		mClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolumeTest",
 																												512,
 																												512,
 																												pBytesPerVoxel);
