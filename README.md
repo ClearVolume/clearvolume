@@ -70,23 +70,20 @@ VolumeManager lVolumeManager = new VolumeManager(lMaxInUseVolumes);
 
 
 try (final ClearVolumeRendererInterface lClearVolumeRenderer =
-       ClearVolumeRendererFactory.newBestRenderer(
-                                                        "ClearVolumeTest",
-																																																pWindowSize,
-																																																pWindowSize,
-																																																pBytesPerVoxel))
+       ClearVolumeRendererFactory.newBestRenderer("ClearVolumeTest",
+                                                  pWindowSize,
+                                                  pWindowSize,
+                                                  pBytesPerVoxel))
  {
       lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
-      ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	
-                                                        lClearVolumeRenderer,
-																																												cMaxMillisecondsToWaitForCopy,
-																																												TimeUnit.MILLISECONDS);
+      ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(lClearVolumeRenderer,
+                                                                                     cMaxMillisecondsToWaitForCopy,
+                                                                                     TimeUnit.MILLISECONDS);
 
-      AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(
-                                                         lClearVolumeRendererSink,
-																																																					cMaxQueueLength,
-																																																					cMaxMillisecondsToWait,
-																																																					TimeUnit.MILLISECONDS);
+      AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(lClearVolumeRendererSink,
+                                                                                                       cMaxQueueLength,
+                                                                                                       cMaxMillisecondsToWait,
+                                                                                                       TimeUnit.MILLISECONDS);
 
       lAsynchronousVolumeSinkAdapter.start();
 
@@ -95,7 +92,12 @@ try (final ClearVolumeRendererInterface lClearVolumeRenderer =
         // send volume data:
 
         Volume<?> lVolume = mVolumeManager.requestAndWaitForNextAvailableVolume(1,
-																																								TimeUnit.MILLISECONDS, Byte.class, 1,128,128,128);
+                                                                                TimeUnit.MILLISECONDS, 
+                                                                                Byte.class, 
+                                                                                1,
+                                                                                128,
+                                                                                128,
+                                                                                128);
 
         // Here update the contents of the ByteBuffer provided by lVolume.getVolumeData()
         // ... bla bla ...
