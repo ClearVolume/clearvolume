@@ -1,4 +1,4 @@
-package testGLJPanel;
+package clearvolume.renderer.jogl.experiments.swinginterop;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
@@ -6,6 +6,8 @@ import javax.media.opengl.glu.GLU;
 
 public class OneTriangle
 {
+	public static volatile float r = 1, g = 1, b = 1;
+
 	protected static void setup(GL2 gl2, int width, int height)
 	{
 		gl2.glMatrixMode(GL2.GL_PROJECTION);
@@ -29,11 +31,11 @@ public class OneTriangle
 		// draw a triangle filling the window
 		gl2.glLoadIdentity();
 		gl2.glBegin(GL.GL_TRIANGLES);
-		gl2.glColor3f(1, 0, 0);
+		gl2.glColor3f(r, 0, 0);
 		gl2.glVertex2f(0, 0);
-		gl2.glColor3f(0, 1, 0);
+		gl2.glColor3f(0, g, 0);
 		gl2.glVertex2f(width, 0);
-		gl2.glColor3f(0, 0, 1);
+		gl2.glColor3f(0, 0, b);
 		gl2.glVertex2f(width / 2, height);
 		gl2.glEnd();
 	}
