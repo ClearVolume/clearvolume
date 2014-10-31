@@ -8,7 +8,23 @@
 #include <iostream>
 #include <string.h>
 
+using namespace std;
+
 #define cErrorNone "No Error"
+
+const char * getEnvWin(const char * name)
+{
+    const DWORD buffSize = 65535;
+    static char buffer[buffSize];
+    if (GetEnvironmentVariableA(name, buffer, buffSize))
+    {
+        return buffer;
+    }
+    else
+    {
+        return 0;
+    }
+}
 
 typedef jint (JNICALL *CreateJavaVM)(JavaVM **pvm, void **penv, void *args);
 JavaVM *sJVM; /* denotes a Java VM */
@@ -18,13 +34,24 @@ char* sJavaLastError = cErrorNone;
 
 
 jclass sClearVolumeClass;
-jmethodID getLastExceptionMessageID;
+jmethodID getLastExceptionMessageID,createRendererID,destroyRendererID,send8bitUINTVolumeDataToSinkID,send16bitUINTVolumeDataToSinkID;
 
-__declspec(dllexport) unsigned long __cdecl begin(char* JREFolderPath, char* AutoPilotJarPath)
+__declspec(dllexport) unsigned long __cdecl begincvlib(char* AutoPilotJarPath)
 {
 	try
 	{
 		clearError();
+
+		const char* JAVAHOME  =getEnvWin("JAVA_HOME");
+		cout << JAVAHOME << "\n";
+
+		char JREFolderPath[1024];
+
+		strcpy(JREFolderPath,JAVAHOME);
+		strcat(JREFolderPath,"\\bin\\server\\jvm.dll");
+
+		cout << JREFolderPath << "\n";
+
 		HINSTANCE lDLLInstance = LoadLibraryA(JREFolderPath);
 		if( lDLLInstance == 0)
 		{
@@ -47,6 +74,10 @@ __declspec(dllexport) unsigned long __cdecl begin(char* JREFolderPath, char* Aut
 
 		strcpy(lClassPathString,lClassPathPrefix);
 		strcat(lClassPathString,AutoPilotJarPath);
+
+		//cout <<  lClassPathString << "\n";
+
+
 
 		JavaVMOption options[3];
 		options[0].optionString = "-Xmx4G";
@@ -71,10 +102,37 @@ __declspec(dllexport) unsigned long __cdecl begin(char* JREFolderPath, char* Aut
 			return 4;
 		}
 
+		/*
+		 B = byte
+		 C = char
+		 D = double
+		 F = float
+		 I = int
+		 J = long
+		 S = short
+		 V = void
+		 Z = boolean
+		 Lfully-qualified-class = fully qualified class
+		 [type = array of type
+		 (argument types)return type = method type. If no arguments, use empty argument types: (). 
+		 If return type is void (or constructor) use (argument types)V.
+		 Observe that the ; is needed after the class name in all situations. 
+		 This won't work "(Ljava/lang/String)V" but this will "(Ljava/lang/String;)V". 
+		 /**/
+
+
 		getLastExceptionMessageID = lJNIEnv->GetStaticMethodID(sClearVolumeClass, "getLastExceptionMessage", "()Ljava/lang/String;");
+		createRendererID = lJNIEnv->GetStaticMethodID(sClearVolumeClass, "createRenderer", "(IIIIII)V");
+		destroyRendererID = lJNIEnv->GetStaticMethodID(sClearVolumeClass, "destroyRenderer", "(I)V");
+		send8bitUINTVolumeDataToSinkID = lJNIEnv->GetStaticMethodID(sClearVolumeClass, "send8bitUINTVolumeDataToSink", "(IJJJJJ)V");
+		send16bitUINTVolumeDataToSinkID = lJNIEnv->GetStaticMethodID(sClearVolumeClass, "send16bitUINTVolumeDataToSink", "(IJJJJJ)V");
 		
 
-		if (getLastExceptionMessageID == 0)
+		if (   getLastExceptionMessageID == 0 
+			|| createRendererID == 0
+			|| destroyRendererID == 0
+			|| send8bitUINTVolumeDataToSinkID == 0
+			|| send16bitUINTVolumeDataToSinkID == 0)
 		{
 			return 5;
 		}
@@ -88,7 +146,7 @@ __declspec(dllexport) unsigned long __cdecl begin(char* JREFolderPath, char* Aut
 	}
 }
 
-__declspec(dllexport) unsigned long __cdecl end()
+__declspec(dllexport) unsigned long __cdecl endcvlib()
 {
 	try
 	{
@@ -150,19 +208,115 @@ __declspec(dllexport) char* __cdecl getLastError()
 	else return sJavaLastError;
 }
 
-__declspec(dllexport) void __cdecl createRenderer( int pRendererId,
+__declspec(dllexport) int __cdecl createRenderer(	int pRendererId,
 													int pWindowWidth,
 													int pWindowHeight,
 													int pBytesPerVoxel,
 													int pMaxTextureWidth,
 													int pMaxTextureHeight)
 {
+	try
+	{
+		clearError();
+		JNIEnv *lJNIEnv;
+		sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
 
+		lJNIEnv->CallStaticDoubleMethod(sClearVolumeClass,
+										createRendererID,
+										pRendererId, 
+										pWindowWidth, 
+										pWindowHeight, 
+										pBytesPerVoxel,
+										pMaxTextureWidth,
+										pMaxTextureHeight);
+
+		return 0;
+	}
+	catch (...)
+	{
+		sJavaLastError = "Error while creating Renderer";
+		return -1;
+	}
 }
 
-__declspec(dllexport) void __cdecl destroyRenderer( int pRendererId)
+__declspec(dllexport) int __cdecl destroyRenderer(int pRendererId)
 {
+	try
+	{
+		clearError();
+		JNIEnv *lJNIEnv;
+		sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
 
+		lJNIEnv->CallStaticDoubleMethod(sClearVolumeClass,
+										destroyRendererID,
+										pRendererId);
+		return 0;
+	}
+	catch (...)
+	{
+		sJavaLastError = "Error while destroying Renderer";
+		return -1;
+	}
+}
+
+__declspec(dllexport) int __cdecl send8bitUINTVolumeDataToSink( int pSinkId,
+																 char *pBufferAddress,
+																 long pBufferLength,
+																 long pWidth,
+																 long pHeight,
+																 long pDepth)
+{
+	try
+	{
+		clearError();
+		JNIEnv *lJNIEnv;
+		sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+
+		lJNIEnv->CallStaticDoubleMethod(sClearVolumeClass,
+										send8bitUINTVolumeDataToSinkID,
+										pSinkId,
+										(long)pBufferAddress,
+										pBufferLength,
+										pWidth,
+										pHeight,
+										pDepth);
+		return 0;
+	}
+	catch (...)
+	{
+		sJavaLastError = "Error while sending 8bit volume data";
+		return -1;
+	}
+}
+
+__declspec(dllexport) int __cdecl send16bitUINTVolumeDataToSink( int pSinkId,
+																 short *pBufferAddress,
+																 long pBufferLength,
+																 long pWidth,
+																 long pHeight,
+																 long pDepth)
+{
+	try
+	{
+		clearError();
+		JNIEnv *lJNIEnv;
+		sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+
+		lJNIEnv->CallStaticDoubleMethod(sClearVolumeClass,
+										send16bitUINTVolumeDataToSinkID,
+										pSinkId,
+										(long)pBufferAddress,
+										pBufferLength,
+										pWidth,
+										pHeight,
+										pDepth);
+		return 0;
+	}
+	catch (...)
+	{
+		sJavaLastError = "Error while sending 16bit volume data";
+		return -1;
+	}
 }
 
 
@@ -371,21 +525,7 @@ __declspec(dllexport) void __cdecl freePointer(void* pPointer)
 }
 
 
-/*
- B = byte
- C = char
- D = double
- F = float
- I = int
- J = long
- S = short
- V = void
- Z = boolean
- Lfully-qualified-class = fully qualified class
- [type = array of type
- (argument types)return type = method type. If no arguments, use empty argument types: (). 
- If return type is void (or constructor) use (argument types)V.
- Observe that the ; is needed after the class name in all situations. 
- This won't work "(Ljava/lang/String)V" but this will "(Ljava/lang/String;)V". 
- /**/
+/**/
+
+
 

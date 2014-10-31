@@ -35,7 +35,9 @@ model {
 }
 
 libraries {
-   cvlib {}
+   cvlib {
+        targetPlatforms "x64"
+   }
 }
 
 sources {
@@ -92,6 +94,7 @@ sourceSets
     resources 
     { 
       srcDir 'src'
+      srcDir 'cpp/jogllibs'
     }
   }
   test
@@ -125,6 +128,8 @@ test
 
     maxHeapSize = "4G"
 }
+
+
 
 configurations.all 
 {
@@ -164,6 +169,23 @@ repositories
         url "http://oss.sonatype.org/content/groups/public"
     } 
 
+}
+
+jar {
+    def classpath  = configurations.compile.collect { it.directory&&{println it; true} ? it : zipTree(it) } 
+    from(classpath)
+    {
+        exclude "gluegen-rt.dll"
+        exclude "jogl_desktop.dll"
+        exclude "jogl_mobile.dll"
+        exclude "nativewindow_awt.dll"
+        exclude "nativewindow_win32.dll"
+        exclude "newt.dll"
+    }
+    
+    manifest {
+        attributes("Class-Path": ".")
+    }
 }
 
 

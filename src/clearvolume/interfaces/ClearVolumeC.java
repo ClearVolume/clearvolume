@@ -62,84 +62,148 @@ public class ClearVolumeC
 																		final int pMaxTextureWidth,
 																		final int pMaxTextureHeight)
 	{
-		ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolume",
-																																																		pWindowWidth,
-																																																		pWindowHeight,
-																																																		pBytesPerVoxel,
-																																																		pMaxTextureWidth,
-																																																		pMaxTextureHeight);
+		try
+		{
+			ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolume",
+																																																			pWindowWidth,
+																																																			pWindowHeight,
+																																																			pBytesPerVoxel,
+																																																			pMaxTextureWidth,
+																																																			pMaxTextureHeight);
 
-		VolumeManager lVolumeManager = lClearVolumeRenderer.createCompatibleVolumeManager(sMaxQueueLength);
-		sNameToVolumeManager.put(pRendererId, lVolumeManager);
+			VolumeManager lVolumeManager = lClearVolumeRenderer.createCompatibleVolumeManager(sMaxQueueLength);
+			sNameToVolumeManager.put(pRendererId, lVolumeManager);
 
-		lClearVolumeRenderer.setVisible(true);
-		sNameToRendererMap.put(pRendererId, lClearVolumeRenderer);
+			lClearVolumeRenderer.setVisible(true);
+			sNameToRendererMap.put(pRendererId, lClearVolumeRenderer);
 
-		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																										lClearVolumeRenderer.createCompatibleVolumeManager(sMaxAvailableVolumes),
-																																										sMaxMillisecondsToWaitForCopy,
-																																										TimeUnit.MILLISECONDS);
+			ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
+																																											lClearVolumeRenderer.createCompatibleVolumeManager(sMaxAvailableVolumes),
+																																											sMaxMillisecondsToWaitForCopy,
+																																											TimeUnit.MILLISECONDS);
 
-		AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lClearVolumeRendererSink,
-																																																			sMaxQueueLength,
-																																																			sMaxMillisecondsToWait,
-																																																			TimeUnit.MILLISECONDS);
-		lAsynchronousVolumeSinkAdapter.start();
+			AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lClearVolumeRendererSink,
+																																																				sMaxQueueLength,
+																																																				sMaxMillisecondsToWait,
+																																																				TimeUnit.MILLISECONDS);
+			lAsynchronousVolumeSinkAdapter.start();
 
-		sNameToVolumeSink.put(pRendererId,
-													lAsynchronousVolumeSinkAdapter);
+			sNameToVolumeSink.put(pRendererId, lAsynchronousVolumeSinkAdapter);
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+			sLastThrowableException = e;
+		}
 
 	}
 
 	public static void send8bitUINTVolumeDataToSink(final int pSinkId,
 																									final long pBufferAddress,
 																									final long pBufferLength,
-																									long... pDimensions)
+																									final long pWidth,
+																									final long pHeight,
+																									final long pDepth)
 	{
-		// getBridJPointer();
+		System.out.println("pSinkId=" + pSinkId);
+		System.out.println("pBufferAddress=" + pBufferAddress);
+		System.out.println("pBufferLength=" + pBufferLength);
+		System.out.println("pWidth=" + pWidth);
+		System.out.println("pHeight=" + pHeight);
+		System.out.println("pDepth=" + pDepth);
+
+		Pointer<Byte> lBridJPointer = getBridJPointer(pBufferAddress,
+																									pBufferLength,
+																									Byte.class);
+
+		ByteBuffer lByteBuffer = lBridJPointer.getByteBuffer();
+
+		send8bitUINTVolumeDataToSink(	pSinkId,
+																	lByteBuffer,
+																	1,
+																	pWidth,
+																	pHeight,
+																	pDepth);
 	}
 
 	public static void send8bitUINTVolumeDataToSink(final int pSinkId,
 																									ByteBuffer pByteBuffer,
 																									long... pDimensions)
 	{
-		VolumeManager lVolumeManager = sNameToVolumeManager.get(pSinkId);
+		try
+		{
+			VolumeManager lVolumeManager = sNameToVolumeManager.get(pSinkId);
 
-		Volume<Byte> lRequestedVolume = lVolumeManager.requestAndWaitForVolume(	sMaxMillisecondsToWait,
-																																						TimeUnit.MILLISECONDS,
-																																						Byte.class,
-																																						pDimensions);
+			Volume<Byte> lRequestedVolume = lVolumeManager.requestAndWaitForVolume(	sMaxMillisecondsToWait,
+																																							TimeUnit.MILLISECONDS,
+																																							Byte.class,
+																																							pDimensions);
 
-		ByteBuffer lVolumeData = lRequestedVolume.getVolumeData();
-		lVolumeData.clear();
-		pByteBuffer.rewind();
-		lVolumeData.put(pByteBuffer);
+			ByteBuffer lVolumeData = lRequestedVolume.getVolumeData();
+			lVolumeData.clear();
+			pByteBuffer.rewind();
+			lVolumeData.put(pByteBuffer);
 
-		VolumeSinkInterface lVolumeSinkInterface = sNameToVolumeSink.get(pSinkId);
-		lVolumeSinkInterface.sendVolume(lRequestedVolume);
+			VolumeSinkInterface lVolumeSinkInterface = sNameToVolumeSink.get(pSinkId);
+			lVolumeSinkInterface.sendVolume(lRequestedVolume);
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+			sLastThrowableException = e;
+		}
 	}
 
-	public static void send16bitUINTVolumeDataToSink(	int pSinkId,
-																										ByteBuffer pByteBuffer,
-																										long... pDimensions)
+	public static void send16bitUINTVolumeDataToSink(	final int pSinkId,
+																										final long pBufferAddress,
+																										final long pBufferLength,
+																										final long pWidth,
+																										final long pHeight,
+																										final long pDepth)
 	{
-		VolumeManager lVolumeManager = sNameToVolumeManager.get(pSinkId);
+		Pointer<Byte> lBridJPointer = getBridJPointer(pBufferAddress,
+																									pBufferLength,
+																									Byte.class);
 
-		Volume<Character> lRequestedVolume = lVolumeManager.requestAndWaitForVolume(sMaxMillisecondsToWait,
-																																								TimeUnit.MILLISECONDS,
-																																								Character.class,
-																																								pDimensions);
+		ByteBuffer lByteBuffer = lBridJPointer.getByteBuffer();
 
-		ByteBuffer lVolumeData = lRequestedVolume.getVolumeData();
-		lVolumeData.clear();
-		pByteBuffer.rewind();
-		lVolumeData.put(pByteBuffer);
-
-		VolumeSinkInterface lVolumeSinkInterface = sNameToVolumeSink.get(pSinkId);
-		lVolumeSinkInterface.sendVolume(lRequestedVolume);
+		send16bitUINTVolumeDataToSink(pSinkId,
+																	lByteBuffer,
+																	1,
+																	pWidth,
+																	pHeight,
+																	pDepth);
 	}
 
-	public static void destroyRenderer(int pRendererId)
+	public static void send16bitUINTVolumeDataToSink(	final int pSinkId,
+																										final ByteBuffer pByteBuffer,
+																										final long... pDimensions)
+	{
+		try
+		{
+			VolumeManager lVolumeManager = sNameToVolumeManager.get(pSinkId);
+
+			Volume<Character> lRequestedVolume = lVolumeManager.requestAndWaitForVolume(sMaxMillisecondsToWait,
+																																									TimeUnit.MILLISECONDS,
+																																									Character.class,
+																																									pDimensions);
+
+			ByteBuffer lVolumeData = lRequestedVolume.getVolumeData();
+			lVolumeData.clear();
+			pByteBuffer.rewind();
+			lVolumeData.put(pByteBuffer);
+
+			VolumeSinkInterface lVolumeSinkInterface = sNameToVolumeSink.get(pSinkId);
+			lVolumeSinkInterface.sendVolume(lRequestedVolume);
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+			sLastThrowableException = e;
+		}
+	}
+
+	public static void destroyRenderer(final int pRendererId)
 	{
 		try
 		{
@@ -190,9 +254,9 @@ public class ClearVolumeC
 	// a jbyte*: bbuf_in = (jbyte*)(env*)->GetDirectBufferAddress(env, buf1); //C
 	// bbuf_in = (jbyte*)env->GetDirectBufferAddress(buf1); //c++ –
 
-	private static final <T> Pointer<T> getBridJPointer(long pBufferAddress,
-																											long pBufferLength,
-																											Class<T> pTargetClass)
+	private static final <T> Pointer<T> getBridJPointer(final long pBufferAddress,
+																											final long pBufferLength,
+																											final Class<T> pTargetClass)
 	{
 
 		PointerIO<?> lPointerIO = PointerIO.getInstance(pTargetClass);
@@ -207,9 +271,9 @@ public class ClearVolumeC
 		};
 
 		Pointer<T> lPointerToAddress = (Pointer<T>) Pointer.pointerToAddress(	pBufferAddress,
-																														pBufferLength,
-																														lPointerIO,
-																														lReleaser);
+																																					pBufferLength,
+																																					lPointerIO,
+																																					lReleaser);
 
 		return lPointerToAddress;
 

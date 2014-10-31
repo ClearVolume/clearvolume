@@ -1,52 +1,29 @@
-
-extern "C" __declspec(dllexport) unsigned long 	__cdecl begin(char* pJREFolderPath, char* AutoPilotJarPath);
-extern "C" __declspec(dllexport) unsigned long 	__cdecl end();
-
-extern "C" __declspec(dllexport) void 			__cdecl setLoggingOptions(bool pStdOut, bool pLogFile);
+extern "C" __declspec(dllexport) unsigned long 	__cdecl begincvlib(char* AutoPilotJarPath);
+extern "C" __declspec(dllexport) unsigned long 	__cdecl endcvlib();
 
 extern "C" __declspec(dllexport) void 			__cdecl clearError();
 extern "C" __declspec(dllexport) char* 			__cdecl getLastJavaExceptionMessage();
 extern "C" __declspec(dllexport) char* 			__cdecl getLastError();
 
-extern "C" __declspec(dllexport) void 			__cdecl freePointer(void* pPointer);
+extern "C" __declspec(dllexport) int __cdecl createRenderer(	int pRendererId,
+																int pWindowWidth,
+																int pWindowHeight,
+																int pBytesPerVoxel,
+																int pMaxTextureWidth,
+																int pMaxTextureHeight);
 
-extern "C" __declspec(dllexport) double 		__cdecl dcts16bit(		short* pBuffer, 
-																		int pWidth, 
-																		int pHeight, 
-																		double pPSFSupportDiameter);
+extern "C" __declspec(dllexport) int __cdecl destroyRenderer(int pRendererId);
 
-extern "C" __declspec(dllexport) double 		__cdecl tenengrad16bit(	short* pBuffer, 
-																		int pWidth, 
-																		int pHeight, 
-																		double pPSFSupportDiameter);
+extern "C" __declspec(dllexport) int __cdecl send8bitUINTVolumeDataToSink(  int pSinkId,
+																			char *pBufferAddress,
+																			long pBufferLength,
+																			long pWidth,
+																			long pHeight,
+																			long pDepth);
 
-extern "C" __declspec(dllexport) int		 	__cdecl l2solveSSP(		bool pAnchorDetection,
-																		bool pSymmetricAnchor,
-																		int pNumberOfWavelengths,
-																		int pNumberOfPlanes,
-																		int pSyncPlaneIndex,
-																		double* pCurrentStateVector,
-																		double* pObservationsVector,
-																		bool* pMissingObservations,
-																		double* pNewStateVector);
-																		
-extern "C" __declspec(dllexport) int		 	__cdecl l2solve(		bool pAnchorDetection,
-																		bool pSymmetricAnchor,
-																		int pNumberOfWavelengths,
-																		int pNumberOfPlanes,
-																		bool* pSyncPlaneIndices,
-																		double* pCurrentStateVector,
-																		double* pObservationsVector,
-																		bool* pMissingObservations,
-																		double* pNewStateVector);
-
-extern "C" __declspec(dllexport) int		 	__cdecl qpsolve(		bool pAnchorDetection,
-																		bool pSymmetricAnchor,
-																		int pNumberOfWavelengths,
-																		int pNumberOfPlanes,
-																		bool* pSyncPlaneIndices,
-																		double* pCurrentStateVector,
-																		double* pObservationsVector,
-																		bool* pMissingObservations,
-																		double* pMaxCorrections,
-																		double* pNewStateVector);
+extern "C"__declspec(dllexport) int __cdecl send16bitUINTVolumeDataToSink( 	int pSinkId,
+																			short *pBufferAddress,
+																			long pBufferLength,
+																			long pWidth,
+																			long pHeight,
+																			long pDepth);
