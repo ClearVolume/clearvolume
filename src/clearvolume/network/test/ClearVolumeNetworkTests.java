@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.network.serialization.ClearVolumeSerialization;
-import clearvolume.network.server.ClearVolumeTCPServer;
+import clearvolume.network.server.ClearVolumeTCPServerSink;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
@@ -75,7 +75,7 @@ public class ClearVolumeNetworkTests
 	{
 		int lPortRandomizer = (int) (Math.random() * 100);
 
-		ClearVolumeTCPServer lClearVolumeTCPServer = new ClearVolumeTCPServer(new VolumeManager(cNumberOfAvailableVolumes),
+		ClearVolumeTCPServerSink lClearVolumeTCPServer = new ClearVolumeTCPServerSink(new VolumeManager(cNumberOfAvailableVolumes),
 																																					cVolumeQueueLength);
 
 		SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort + lPortRandomizer);

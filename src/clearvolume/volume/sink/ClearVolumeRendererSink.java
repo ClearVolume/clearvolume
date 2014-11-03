@@ -7,14 +7,14 @@ import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 
-public class ClearVolumeRendererSink implements VolumeSinkInterface
+public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
+																															RelaySinkInterface
 {
 
 	private ClearVolumeRendererInterface mClearVolumeRendererInterface;
 	private VolumeManager mVolumeManager;
 	private long mWaitForCopyTimeout;
 	private TimeUnit mTimeUnit;
-
 
 	public ClearVolumeRendererSink(	ClearVolumeRendererInterface pClearVolumeRendererInterface,
 																	VolumeManager pVolumeManager,
@@ -52,7 +52,11 @@ public class ClearVolumeRendererSink implements VolumeSinkInterface
 		mClearVolumeRendererInterface.requestDisplay();
 		mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	mWaitForCopyTimeout,
 																															mTimeUnit);
-		pVolume.makeAvailableToManager();
+
+		if (getRelaySink() != null)
+			getRelaySink().sendVolume(pVolume);
+		else
+			pVolume.makeAvailableToManager();
 
 	}
 

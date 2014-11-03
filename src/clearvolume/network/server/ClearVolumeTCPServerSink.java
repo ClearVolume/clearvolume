@@ -9,25 +9,25 @@ import java.nio.channels.ServerSocketChannel;
 import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
-import clearvolume.volume.sink.VolumeSinkInterface;
+import clearvolume.volume.sink.RelaySinkAdapter;
+import clearvolume.volume.sink.RelaySinkInterface;
 import clearvolume.volume.source.SourceToSinkBufferedAdapter;
 
-public class ClearVolumeTCPServer	implements
-																	Closeable,
-																	VolumeSinkInterface
+public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
+																															Closeable,
+																															RelaySinkInterface
 {
 	private VolumeManager mVolumeManager;
 
 	private ServerSocketChannel mServerSocketChannel;
 
-	private ClearVolumeTCPServerRunnable lRunnable;
+	private ClearVolumeTCPServerSinkRunnable lRunnable;
 	private Thread mRunnableThread;
 
 	private SourceToSinkBufferedAdapter mSourceToSinkBufferedAdapter;
 
-
-	public ClearVolumeTCPServer(VolumeManager pVolumeManager,
-															int pMaxCapacity)
+	public ClearVolumeTCPServerSink(VolumeManager pVolumeManager,
+																	int pMaxCapacity)
 	{
 		super();
 		mVolumeManager = pVolumeManager;
@@ -62,10 +62,11 @@ public class ClearVolumeTCPServer	implements
 
 	public boolean start()
 	{
-		lRunnable = new ClearVolumeTCPServerRunnable(	mServerSocketChannel,
-																									mSourceToSinkBufferedAdapter);
+		lRunnable = new ClearVolumeTCPServerSinkRunnable(	this,
+																											mServerSocketChannel,
+																											mSourceToSinkBufferedAdapter);
 		mRunnableThread = new Thread(	lRunnable,
-																	ClearVolumeTCPServerRunnable.class.getSimpleName() + "Thread");
+																	ClearVolumeTCPServerSinkRunnable.class.getSimpleName() + "Thread");
 		mRunnableThread.setDaemon(true);
 		mRunnableThread.start();
 		return true;

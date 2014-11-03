@@ -10,9 +10,9 @@ import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.volume.Volume;
 import clearvolume.volume.source.VolumeSourceInterface;
 
-public class ClearVolumeTCPServerRunnable implements Runnable
+public class ClearVolumeTCPServerSinkRunnable implements Runnable
 {
-
+	private ClearVolumeTCPServerSink mClearVolumeTCPServerSink;
 	private ServerSocketChannel mServerSocketChannel;
 	private VolumeSourceInterface mVolumeSource;
 
@@ -20,9 +20,12 @@ public class ClearVolumeTCPServerRunnable implements Runnable
 	private volatile boolean mStoppedSignal = false;
 	private ByteBuffer mByteBuffer;
 
-	public ClearVolumeTCPServerRunnable(ServerSocketChannel pSocketChannel,
+
+	public ClearVolumeTCPServerSinkRunnable(ClearVolumeTCPServerSink pClearVolumeTCPServerSink,
+																					ServerSocketChannel pSocketChannel,
 																			VolumeSourceInterface pVolumeSource)
 	{
+		mClearVolumeTCPServerSink = pClearVolumeTCPServerSink;
 		mServerSocketChannel = pSocketChannel;
 		mVolumeSource = pVolumeSource;
 	}
@@ -54,6 +57,13 @@ public class ClearVolumeTCPServerRunnable implements Runnable
 																															mByteBuffer);
 						mByteBuffer.rewind();
 						lSocketChannel.write(mByteBuffer);
+
+						if (mClearVolumeTCPServerSink.getRelaySink() == null)
+							lVolumeToSend.makeAvailableToManager();
+						else
+							mClearVolumeTCPServerSink.getRelaySink()
+																				.sendVolume(lVolumeToSend);
+
 					}
 				}
 				catch (java.io.IOException e1)

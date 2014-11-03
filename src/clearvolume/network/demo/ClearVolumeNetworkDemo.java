@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.network.serialization.ClearVolumeSerialization;
-import clearvolume.network.server.ClearVolumeTCPServer;
+import clearvolume.network.server.ClearVolumeTCPServerSink;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
@@ -40,26 +40,12 @@ public class ClearVolumeNetworkDemo
 		{
 			VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
 
-			ClearVolumeTCPServer lClearVolumeTCPServer = new ClearVolumeTCPServer(lVolumeManager,
-																																						cNumberOfAvailableVolumes);
+			ClearVolumeTCPServerSink lClearVolumeTCPServer = new ClearVolumeTCPServerSink(lVolumeManager,
+																																										cNumberOfAvailableVolumes);
 
 			SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
 			assertTrue(lClearVolumeTCPServer.open(lServerSocketAddress));
 			assertTrue(lClearVolumeTCPServer.start());
-
-			Volume<Byte> lVolume = mVolumeManager.requestAndWaitForVolume(1,
-																																		TimeUnit.MILLISECONDS,
-																																		Byte.class,
-																																		1,
-																																		cWidth,
-																																		cHeight,
-																																		cDepth);
-			ByteBuffer lVolumeData = lVolume.getVolumeData();
-
-			lVolumeData.rewind();
-
-			for (int i = 0; i < cWidth * cHeight * cDepth; i++)
-				lVolumeData.put((byte) 32);
 
 			for (long i = 0; i < cNumberOfVolumes; i++)
 			{
@@ -67,8 +53,17 @@ public class ClearVolumeNetworkDemo
 				{
 					if (i % 1000 == 0)
 						System.out.println("sending volume with index=" + i);
-					lVolumeData = lVolume.getVolumeData();
+					Volume<Byte> lVolume = mVolumeManager.requestAndWaitForVolume(1,
+																																				TimeUnit.MILLISECONDS,
+																																				Byte.class,
+																																				1,
+																																				cWidth,
+																																				cHeight,
+																																				cDepth);
+					ByteBuffer lVolumeData = lVolume.getVolumeData();
+
 					lVolumeData.rewind();
+
 					for (int z = 0; z < cDepth; z++)
 						for (int y = 0; y < cHeight; y++)
 							for (int x = 0; x < cWidth; x++)
@@ -81,8 +76,8 @@ public class ClearVolumeNetworkDemo
 
 								byte lByteValue = (byte) ((byte) i ^ (byte) x
 																					^ (byte) y ^ (byte) z);
-								if (lByteValue < 3)
-									lByteValue = 0;
+								// if (lByteValue < 3)
+								// lByteValue = 0;
 
 								lVolumeData.put(lIndex, lByteValue);
 							}/**/
