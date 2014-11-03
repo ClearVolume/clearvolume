@@ -22,7 +22,7 @@ public class ClearVolumeSerializationTests
 																						128);
 		lVolume.setIndex(2);
 		lVolume.setTime(3.3);
-		lVolume.setChannels(4);
+		lVolume.setVolumeChannelID(4);
 		lVolume.setVolumeDimensionsInRealUnits("um", 10, 11, 12);
 		
 		ByteBuffer lSerializedVolumeData = lVolume.getVolumeData();
@@ -38,7 +38,7 @@ public class ClearVolumeSerializationTests
 		
 		assertEquals(2, lDeserializedVolume.getIndex());
 		assertEquals(3.3, lDeserializedVolume.getTime(), 0);
-		assertEquals(4, lDeserializedVolume.getChannels());
+		assertEquals(4, lDeserializedVolume.getVolumeChannelID());
 		assertEquals("um", lDeserializedVolume.getRealUnitName());
 		assertEquals(10, lDeserializedVolume.getWidthInRealUnits(), 0);
 		assertEquals(11, lDeserializedVolume.getHeightInRealUnits(), 0);
