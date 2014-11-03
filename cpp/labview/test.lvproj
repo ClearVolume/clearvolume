@@ -12,9 +12,7 @@
 		<Property Name="specify.custom.address" Type="Bool">false</Property>
 		<Item Name="test.vi" Type="VI" URL="../test.vi"/>
 		<Item Name="Dependencies" Type="Dependencies">
-			<Item Name="user.lib" Type="Folder">
-				<Item Name="cvlib.lvlib" Type="Library" URL="/&lt;userlib&gt;/cvlib/cvlib.lvlib"/>
-			</Item>
+			<Item Name="cvlib.lvlib" Type="Library" URL="../lvcvlib/cvlib.lvlib"/>
 		</Item>
 		<Item Name="Build Specifications" Type="Build"/>
 	</Item>
