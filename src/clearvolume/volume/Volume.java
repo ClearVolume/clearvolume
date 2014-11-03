@@ -16,7 +16,7 @@ public class Volume<T>
 	private double[] mVolumeDimensionsInRealUnits;
 	private volatile String mRealUnitName;
 
-	private volatile int mChannels;
+	private volatile int mVolumeChannelID;
 	private float[] mViewMatrix;
 
 	private volatile long mVolumeIndex;
@@ -56,7 +56,7 @@ public class Volume<T>
 
 	public long getVolumeDataSizeInBytes()
 	{
-		long lVolumeDataSize = getBytesPerChannel();
+		long lVolumeDataSize = getBytesPerVoxel();
 		for (int i = 0; i < getVolumeDimensionsInVoxels().length; i++)
 			lVolumeDataSize *= getVolumeDimensionsInVoxels()[i];
 		return lVolumeDataSize;
@@ -138,7 +138,7 @@ public class Volume<T>
 		return mVolumeDimensionsInVoxels;
 	}
 
-	public long getBytesPerChannel()
+	public long getBytesPerVoxel()
 	{
 		if (mType == Byte.class)
 		{
@@ -171,7 +171,7 @@ public class Volume<T>
 		return 0;
 	}
 
-	public long getNumberOfChannels()
+	public long getElementSize()
 	{
 		return mVolumeDimensionsInVoxels[0];
 	}
@@ -249,14 +249,14 @@ public class Volume<T>
 		mVolumeTime = pVolumeTime;
 	}
 
-	public int getChannels()
+	public int getVolumeChannelID()
 	{
-		return mChannels;
+		return mVolumeChannelID;
 	}
 
-	public void setChannels(int pChannel)
+	public void setVolumeChannelID(int pVolumeChannel)
 	{
-		mChannels = pChannel;
+		mVolumeChannelID = pVolumeChannel;
 	}
 
 	public float[] getViewMatrix()
@@ -292,7 +292,7 @@ public class Volume<T>
 						+ ", mVolumeDimensionsInRealUnits="
 						+ Arrays.toString(mVolumeDimensionsInRealUnits)
 						+ ", mChannels="
-						+ mChannels
+						+ mVolumeChannelID
 						+ ", mVolumeIndex="
 						+ mVolumeIndex
 						+ ", mVolumeTime="

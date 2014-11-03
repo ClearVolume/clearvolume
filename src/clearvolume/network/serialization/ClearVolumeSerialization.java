@@ -52,10 +52,12 @@ public class ClearVolumeSerialization
 		LinkedHashMap<String, String> lHeaderMap = new LinkedHashMap<String, String>();
 		lHeaderMap.put("index", "" + pVolume.getIndex());
 		lHeaderMap.put("time", "" + pVolume.getTime());
-		lHeaderMap.put("channels", "" + pVolume.getChannels());
+		lHeaderMap.put("channel", "" + pVolume.getVolumeChannelID());
 		lHeaderMap.put("dim", "" + pVolume.getDimension());
 		lHeaderMap.put("type", "" + pVolume.getTypeName());
-		lHeaderMap.put("nbchannels", "" + pVolume.getBytesPerChannel());
+		lHeaderMap.put("bytespervoxel",
+										"" + pVolume.getBytesPerVoxel());
+		lHeaderMap.put("elementsize", "" + pVolume.getElementSize());
 		lHeaderMap.put("widthvoxels", "" + pVolume.getWidthInVoxels());
 		lHeaderMap.put("heightvoxels", "" + pVolume.getHeightInVoxels());
 		lHeaderMap.put("depthvoxels", "" + pVolume.getDepthInVoxels());
@@ -77,10 +79,10 @@ public class ClearVolumeSerialization
 																																		null);
 		final long lIndex = Long.parseLong(lHeaderMap.get("index"));
 		final double lTime = Double.parseDouble(lHeaderMap.get("time"));
-		final int lChannels = Integer.parseInt(lHeaderMap.get("channels"));
+		final int lVolumeChannelID = Integer.parseInt(lHeaderMap.get("channel"));
 		final int lDim = Integer.parseInt(lHeaderMap.get("dim"));
 		final String lType = lHeaderMap.get("type");
-		final long lNumberOfChannels = Long.parseLong(lHeaderMap.get("nbchannels"));
+		final long lElementSize = Long.parseLong(lHeaderMap.get("elementsize"));
 		final long lWidthVoxels = Long.parseLong(lHeaderMap.get("widthvoxels"));
 		final long lHeightVoxels = Long.parseLong(lHeaderMap.get("heightvoxels"));
 		final long lDepthVoxels = Long.parseLong(lHeaderMap.get("depthvoxels"));
@@ -93,9 +95,9 @@ public class ClearVolumeSerialization
 		pVolume.setIndex(lIndex);
 		pVolume.setTime(lTime);
 		pVolume.setType(lType);
-		pVolume.setChannels(lChannels);
+		pVolume.setVolumeChannelID(lVolumeChannelID);
 		pVolume.setDimension(lDim);
-		pVolume.setVolumeDimensionsInVoxels(lNumberOfChannels,
+		pVolume.setVolumeDimensionsInVoxels(lElementSize,
 																				lWidthVoxels,
 																				lHeightVoxels,
 																				lDepthVoxels);

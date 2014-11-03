@@ -34,6 +34,12 @@ model {
     }
 }
 
+binaries.all {
+    if (toolChain in VisualCpp) {
+        cppCompiler.args "/EHsc"
+    }
+}
+
 libraries {
    cvlib {
         targetPlatforms "x64"

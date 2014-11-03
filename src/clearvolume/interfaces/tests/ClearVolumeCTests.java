@@ -13,6 +13,7 @@ public class ClearVolumeCTests
 	public void test8bitStreaming() throws InterruptedException
 	{
 		int lRendererId = 1;
+		int lChannelId = 1;
 		ClearVolumeC.createRenderer(lRendererId, 256, 256, 1, 512, 512);
 
 		final int lResolutionX = 128;
@@ -40,8 +41,8 @@ public class ClearVolumeCTests
 					}
 
 			ClearVolumeC.send8bitUINTVolumeDataToSink(lRendererId,
+																								lChannelId,
 																								ByteBuffer.wrap(lVolumeDataArray),
-																								1,
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
@@ -55,6 +56,7 @@ public class ClearVolumeCTests
 	public void test16bitStreaming() throws InterruptedException
 	{
 		int lRendererId = 1;
+		int lChannelId = 1;
 		ClearVolumeC.createRenderer(lRendererId, 256, 256, 2, 512, 512);
 
 		final int lResolutionX = 128;
@@ -84,8 +86,8 @@ public class ClearVolumeCTests
 					}
 
 			ClearVolumeC.send16bitUINTVolumeDataToSink(	lRendererId,
+																									lChannelId,
 																									ByteBuffer.wrap(lVolumeDataArray),
-																									1,
 																									lResolutionX,
 																									lResolutionY,
 																									lResolutionZ);
