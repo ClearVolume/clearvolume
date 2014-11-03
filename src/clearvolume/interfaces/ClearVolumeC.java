@@ -282,7 +282,6 @@ public class ClearVolumeC
 		}
 	}
 
-
 	public static int send8bitUINTVolumeDataToSink(	final int pSinkId,
 																									final int pChannelId,
 																									final long pBufferAddress,
@@ -325,10 +324,17 @@ public class ClearVolumeC
 																																							pDepthInVoxels);
 
 			lRequestedVolume.setVolumeChannelID(pChannelId);
-			lRequestedVolume.setIndex(sIDToVolumeIndex.get(pSinkId));
-			lRequestedVolume.setTime(sIDToVolumeTimeInSeconds.get(pSinkId));
-			lRequestedVolume.setVolumeDimensionsInRealUnits("um",
-																											sIDToVolumeDimensionsInRealUnit.get(pSinkId));
+			final Integer lIndex = sIDToVolumeIndex.get(pSinkId);
+			if (lIndex != null)
+				lRequestedVolume.setIndex(lIndex);
+			final Double lTimeInSeconds = sIDToVolumeTimeInSeconds.get(pSinkId);
+			if (lTimeInSeconds != null)
+				lRequestedVolume.setTime(lTimeInSeconds);
+
+			double[] lDimensionsInRealUnit = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
+			if (lDimensionsInRealUnit != null)
+				lRequestedVolume.setVolumeDimensionsInRealUnits("um",
+																												lDimensionsInRealUnit);
 
 			ByteBuffer lVolumeData = lRequestedVolume.getVolumeData();
 			lVolumeData.clear();
@@ -390,10 +396,17 @@ public class ClearVolumeC
 																																									pDepthInVoxels);
 
 			lRequestedVolume.setVolumeChannelID(pChannelId);
-			lRequestedVolume.setIndex(sIDToVolumeIndex.get(pSinkId));
-			lRequestedVolume.setTime(sIDToVolumeTimeInSeconds.get(pSinkId));
-			lRequestedVolume.setVolumeDimensionsInRealUnits("um",
-																											sIDToVolumeDimensionsInRealUnit.get(pSinkId));
+			final Integer lIndex = sIDToVolumeIndex.get(pSinkId);
+			if (lIndex != null)
+				lRequestedVolume.setIndex(lIndex);
+			final Double lTimeInSeconds = sIDToVolumeTimeInSeconds.get(pSinkId);
+			if (lTimeInSeconds != null)
+				lRequestedVolume.setTime(lTimeInSeconds);
+
+			double[] lDimensionsInRealUnit = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
+			if (lDimensionsInRealUnit != null)
+				lRequestedVolume.setVolumeDimensionsInRealUnits("um",
+																												lDimensionsInRealUnit);
 
 			ByteBuffer lVolumeData = lRequestedVolume.getVolumeData();
 			lVolumeData.clear();
@@ -443,6 +456,51 @@ public class ClearVolumeC
 
 		return lPointerToAddress;
 
+	}
+
+	/**********************************/
+
+	public static int requestVolumeBuffer(final int pSinkId,
+																				final int pChannelId,
+																				ByteBuffer pByteBuffer,
+																				final int pWidthInVoxels,
+																				final int pHeightInVoxels,
+																				final int pDepthInVoxels)
+	{
+		try
+		{
+			VolumeManager lVolumeManager = sIDToVolumeManager.get(pSinkId);
+
+			Volume<Byte> lRequestedVolume = lVolumeManager.requestAndWaitForVolume(	sMaxMillisecondsToWait,
+																																							TimeUnit.MILLISECONDS,
+																																							Byte.class,
+																																							1,
+																																							pWidthInVoxels,
+																																							pHeightInVoxels,
+																																							pDepthInVoxels);
+
+			lRequestedVolume.setVolumeChannelID(pChannelId);
+			lRequestedVolume.setIndex(sIDToVolumeIndex.get(pSinkId));
+			lRequestedVolume.setTime(sIDToVolumeTimeInSeconds.get(pSinkId));
+			lRequestedVolume.setVolumeDimensionsInRealUnits("um",
+																											sIDToVolumeDimensionsInRealUnit.get(pSinkId));
+
+			ByteBuffer lVolumeData = lRequestedVolume.getVolumeData();
+			lVolumeData.clear();
+			pByteBuffer.rewind();
+			lVolumeData.put(pByteBuffer);
+
+			VolumeSinkInterface lVolumeSinkInterface = sIDToVolumeSink.get(pSinkId);
+			lVolumeSinkInterface.sendVolume(lRequestedVolume);
+
+			return 0;
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+			sLastThrowableException = e;
+			return 1;
+		}
 	}
 
 }
