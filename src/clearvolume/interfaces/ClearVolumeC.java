@@ -13,7 +13,7 @@ import org.bridj.Pointer.Releaser;
 import org.bridj.PointerIO;
 
 import clearvolume.network.serialization.ClearVolumeSerialization;
-import clearvolume.network.server.ClearVolumeTCPServer;
+import clearvolume.network.server.ClearVolumeTCPServerSink;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.volume.Volume;
@@ -27,7 +27,7 @@ public class ClearVolumeC
 	private static Throwable sLastThrowableException = null;
 
 	private static ConcurrentHashMap<Integer, ClearVolumeRendererInterface> sIDToRendererMap = new ConcurrentHashMap<>();
-	private static ConcurrentHashMap<Integer, ClearVolumeTCPServer> sIDToServerMap = new ConcurrentHashMap<>();
+	private static ConcurrentHashMap<Integer, ClearVolumeTCPServerSink> sIDToServerMap = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Integer, VolumeSinkInterface> sIDToVolumeSink = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Integer, VolumeManager> sIDToVolumeManager = new ConcurrentHashMap<>();
 
@@ -165,18 +165,18 @@ public class ClearVolumeC
 			VolumeManager lVolumeManager = new VolumeManager(sMaxAvailableVolumes);
 			sIDToVolumeManager.put(pServerId, lVolumeManager);
 
-			try (ClearVolumeTCPServer lClearVolumeTCPServer = new ClearVolumeTCPServer(	lVolumeManager,
+			try (ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(	lVolumeManager,
 																																									sMaxAvailableVolumes))
 			{
 
 				SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
-				if (!lClearVolumeTCPServer.open(lServerSocketAddress))
+				if (!lClearVolumeTCPServerSink.open(lServerSocketAddress))
 					return 3;
-				if (lClearVolumeTCPServer.start())
+				if (lClearVolumeTCPServerSink.start())
 					return 4;
 
-				sIDToServerMap.put(pServerId, lClearVolumeTCPServer);
-				sIDToVolumeSink.put(pServerId, lClearVolumeTCPServer);
+				sIDToServerMap.put(pServerId, lClearVolumeTCPServerSink);
+				sIDToVolumeSink.put(pServerId, lClearVolumeTCPServerSink);
 
 				return 0;
 			}
@@ -200,12 +200,12 @@ public class ClearVolumeC
 	{
 		try
 		{
-			ClearVolumeTCPServer lClearVolumeTCPServer = sIDToServerMap.get(pServerId);
-			if (lClearVolumeTCPServer != null)
+			ClearVolumeTCPServerSink lClearVolumeTCPServerSink = sIDToServerMap.get(pServerId);
+			if (lClearVolumeTCPServerSink != null)
 			{
-				sIDToServerMap.remove(lClearVolumeTCPServer);
-				lClearVolumeTCPServer.stop();
-				lClearVolumeTCPServer.close();
+				sIDToServerMap.remove(lClearVolumeTCPServerSink);
+				lClearVolumeTCPServerSink.stop();
+				lClearVolumeTCPServerSink.close();
 			}
 		}
 		catch (Throwable e)
