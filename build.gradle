@@ -285,6 +285,43 @@ task packagecvlib {
   }
 }
 
+task packagelvcvlib {
+  doLast {
+    def os = System.getProperty("os.name").toLowerCase() 
+    if (os.contains("windows"))
+    {
+        copy
+        {
+            from('./cpp/labview/')
+            into('./build/labview/')
+            include('*')
+        }
+
+        copy
+        {
+            from('./cpp/labview/lvcvlib')
+            into('./build/labview/lvcvlib/')
+            include('*')
+        }
+
+        copy
+        {
+            from('./build/binaries/cvlibSharedLibrary/')
+            into('./build/labview/lvcvlib/')
+            include('cvlib.dll')
+        }
+
+        copy
+        {
+            from('./build/libs/')
+            into('./build/labview/')
+            include('ClearVolume-???.jar')
+            rename('ClearVolume-.+.jar','ClearVolume.jar')
+        }
+    }
+  }
+}
+
 
 
 

@@ -17,7 +17,7 @@
 </TR></TABLE><DIV align=right></I>
 </U>
 <FONT FACE="Arial" SIZE="1">
-<B>03 November 2014  20:38:28</DIV><BR><BR><BR></U>
+<B>04 November 2014  14:17:49</DIV><BR><BR><BR></U>
 <FONT FACE="Arial" SIZE="2">
 <B>Your generated files are installed in the following folder:<BR></I>
 </U>
@@ -33,7 +33,20 @@ No errors/warnings occurred when parsing the header file.<BR><BR></I>
 </U>
 </B>
 <FONT FACE="Arial" SIZE="2">
-No errors/warnings occurred when generating the wrapper VIs for this shared library.<BR><BR></B>
+The following errors/warnings occurred when generating the wrapper VIs for this shared library. <BR><BR><FONT FACE="Arial" SIZE="2">
+<B>Cannot create VI<BR></B>
+<FONT FACE="Arial" SIZE="2">
+The following VI cannot be created. This might indicate that the associated function contains parameters of a data type that cannot be converted directly. To work around this issue, you can create a custom control or typedef control to represent a complex structure or multidimensional array, then re-run the Import Shared Library wizard and select Update VIs from a shared library. Using the same shared library, step through the wizard again. On the Configure VIs and Controls page, assign the custom control or typedef to the associated parameter(s). Complex structures include nested structures, structures containing arrays, arrays of strings, and multidimensional arrays.<BR></B>
+<FONT FACE="Arial" SIZE="2">
+&nbsp;&nbsp;&nbsp;&nbsp;begincvlib.vi<BR></B>
+<FONT FACE="Arial" SIZE="2">
+&nbsp;&nbsp;&nbsp;&nbsp;create Renderer.vi<BR></B>
+<FONT FACE="Arial" SIZE="2">
+&nbsp;&nbsp;&nbsp;&nbsp;destroy Renderer.vi<BR></B>
+<FONT FACE="Arial" SIZE="2">
+&nbsp;&nbsp;&nbsp;&nbsp;endcvlib.vi<BR></B>
+<FONT FACE="Arial" SIZE="2">
+&nbsp;&nbsp;&nbsp;&nbsp;send8bit UINT Volume Data To Sink.vi<BR><BR></B>
 <FONT FACE="Arial" SIZE="2">
 </BODY>
 </HTML>

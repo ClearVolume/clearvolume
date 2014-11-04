@@ -29,6 +29,8 @@ public class ClearVolumeC
 	private static ConcurrentHashMap<Integer, ClearVolumeRendererInterface> sIDToRendererMap = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Integer, ClearVolumeTCPServerSink> sIDToServerMap = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Integer, VolumeSinkInterface> sIDToVolumeSink = new ConcurrentHashMap<>();
+	private static ConcurrentHashMap<Integer, AsynchronousVolumeSinkAdapter> sIDToVolumeAsyncSink = new ConcurrentHashMap<>();
+
 	private static ConcurrentHashMap<Integer, VolumeManager> sIDToVolumeManager = new ConcurrentHashMap<>();
 
 	private static ConcurrentHashMap<Integer, double[]> sIDToVolumeDimensionsInRealUnit = new ConcurrentHashMap<>();
@@ -97,6 +99,9 @@ public class ClearVolumeC
 																																																				sMaxMillisecondsToWait,
 																																																				TimeUnit.MILLISECONDS);
 			lAsynchronousVolumeSinkAdapter.start();
+			
+			sIDToVolumeAsyncSink.put(	pRendererId,
+																lAsynchronousVolumeSinkAdapter);
 
 			sIDToVolumeSink.put(pRendererId, lAsynchronousVolumeSinkAdapter);
 
@@ -115,6 +120,36 @@ public class ClearVolumeC
 	{
 		try
 		{
+			AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = sIDToVolumeAsyncSink.get(pRendererId);
+			if (lAsynchronousVolumeSinkAdapter != null)
+			{
+				lAsynchronousVolumeSinkAdapter.stop();
+				lAsynchronousVolumeSinkAdapter.waitForStop();
+				sIDToVolumeAsyncSink.remove(lAsynchronousVolumeSinkAdapter);
+			}
+		}
+		catch (Throwable e)
+		{
+			System.err.println(e.getLocalizedMessage());
+			return 1;
+		}
+
+		try
+		{
+			VolumeManager lVolumeManager = sIDToVolumeManager.get(pRendererId);
+			if (lVolumeManager != null)
+			{
+				sIDToVolumeManager.remove(lVolumeManager);
+			}
+		}
+		catch (Throwable e)
+		{
+			System.err.println(e.getLocalizedMessage());
+			return 2;
+		}
+
+		try
+		{
 			ClearVolumeRendererInterface lClearVolumeRenderer = sIDToRendererMap.get(pRendererId);
 			if (lClearVolumeRenderer != null)
 			{
@@ -128,38 +163,10 @@ public class ClearVolumeC
 		catch (Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
-			return 1;
-		}
-
-		try
-		{
-			VolumeSinkInterface lVolumeSink = sIDToVolumeSink.get(pRendererId);
-			if (lVolumeSink != null)
-			{
-				sIDToVolumeSink.remove(lVolumeSink);
-			}
-		}
-		catch (Throwable e)
-		{
-			System.err.println(e.getLocalizedMessage());
-			return 2;
-		}
-
-		try
-		{
-			VolumeManager lVolumeManager = sIDToVolumeManager.get(pRendererId);
-			if (lVolumeManager != null)
-			{
-				sIDToVolumeManager.remove(lVolumeManager);
-			}
-			return 0;
-		}
-		catch (Throwable e)
-		{
-			System.err.println(e.getLocalizedMessage());
 			return 3;
 		}
 
+		return 0;
 	}
 
 	public static int createServer(final int pServerId)
