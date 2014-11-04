@@ -1,7 +1,7 @@
 /**
  * ClearVolume native interface example test
  * 
- * This is an example of how to instanciate and use a ClearVolume renderer from C.
+ * This is an example of how to instanciate and use a ClearVolume renderer from C/C++.
  * In addition this example also instanciates a ClearVolume server. You can connect
  * to the server using the ClearVolume client: ClearVolume.exe.jar -c localhost
  *
@@ -32,7 +32,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	cout << "Starting in-process ClearVolume\n";
 
 	int lRendererID = 1;
-	int lServerID = 1;
+	int lServerID = 2;
 
 	if(createRenderer(lRendererID,512, 512, 1, 512, 512)!=0)
 		cout << "ERROR while creating renderer \n";

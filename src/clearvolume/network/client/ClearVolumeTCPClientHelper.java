@@ -7,7 +7,6 @@ import java.net.SocketAddress;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.TimeUnit;
 
-import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
@@ -22,10 +21,14 @@ public abstract class ClearVolumeTCPClientHelper
 	private static final long cMaxMillisecondsToWaitForCopy = 10;
 
 	public void startClient(String pServerAddress,
+													int pPortNumber,
 													int pWindowSize,
 													int pBytesPerVoxel)
 	{
-		try (final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolumeTest",
+		try (final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolume[" + pServerAddress
+																																																									+ ":"
+																																																									+ pPortNumber
+																																																									+ "]",
 																																																							pWindowSize,
 																																																							pWindowSize,
 																																																							pBytesPerVoxel))
@@ -47,7 +50,7 @@ public abstract class ClearVolumeTCPClientHelper
 				ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
 
 				SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
-																																		ClearVolumeSerialization.cStandardTCPPort);
+																																		pPortNumber);
 				assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
 
 				assertTrue(lClearVolumeTCPClient.start());

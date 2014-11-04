@@ -73,7 +73,8 @@ public class ClearVolumeC
 	{
 		try
 		{
-			ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolume",
+			ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolume[ID=" + pRendererId
+																																																					+ "]",
 																																																			pWindowWidth,
 																																																			pWindowHeight,
 																																																			pBytesPerVoxel,
@@ -120,6 +121,7 @@ public class ClearVolumeC
 				sIDToRendererMap.remove(lClearVolumeRenderer);
 				lClearVolumeRenderer.waitToFinishDataBufferCopy(1,
 																												TimeUnit.SECONDS);
+
 				lClearVolumeRenderer.close();
 			}
 		}
@@ -167,27 +169,24 @@ public class ClearVolumeC
 			VolumeManager lVolumeManager = new VolumeManager(sMaxAvailableVolumes);
 			sIDToVolumeManager.put(pServerId, lVolumeManager);
 
-			try (ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(	lVolumeManager,
-																																									sMaxAvailableVolumes))
+			ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(lVolumeManager,
+																																												sMaxAvailableVolumes);
+
+			SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
+			if (!lClearVolumeTCPServerSink.open(lServerSocketAddress))
 			{
-
-				SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
-				if (!lClearVolumeTCPServerSink.open(lServerSocketAddress))
-					return 3;
-				if (lClearVolumeTCPServerSink.start())
-					return 4;
-
-				sIDToServerMap.put(pServerId, lClearVolumeTCPServerSink);
-				sIDToVolumeSink.put(pServerId, lClearVolumeTCPServerSink);
-
-				return 0;
+				return 3;
 			}
-			catch (Throwable e)
+			if (!lClearVolumeTCPServerSink.start())
 			{
-				e.printStackTrace();
-				sLastThrowableException = e;
-				return 2;
+				return 4;
 			}
+
+			sIDToServerMap.put(pServerId, lClearVolumeTCPServerSink);
+			sIDToVolumeSink.put(pServerId, lClearVolumeTCPServerSink);
+
+			return 0;
+
 		}
 		catch (Throwable e)
 		{

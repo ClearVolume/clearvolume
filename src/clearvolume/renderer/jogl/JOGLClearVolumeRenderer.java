@@ -584,8 +584,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 		if (diff > 1e9)
 		{
 			final double fps = (diff / 1e9) * step;
-			String t = getWindowName() + "- ";
-			t += String.format("%.2f", fps) + " FPS";
+			String t = getWindowName() + " (";
+			t += String.format("%.2f", fps) + " fps)";
 			setWindowTitle(t);
 			prevTimeNS = currentTime;
 			step = 0;

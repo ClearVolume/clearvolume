@@ -462,21 +462,65 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	@Override
 	public void close()
 	{
+		CudaContext lCudaContext = mCudaContext;
+		mCudaContext = null;
+
 		try
 		{
 			if (mVolumeDataCudaArray != null)
 				mVolumeDataCudaArray.close();
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																		.getSimpleName(),
+																	e);
+		}
+
+		try
+		{
 			if (mTransferFunctionCudaArray != null)
 				mTransferFunctionCudaArray.close();
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																		.getSimpleName(),
+																	e);
+		}
+
+		try
+		{
 			if (mCudaModule != null)
 				mCudaModule.close();
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																		.getSimpleName(),
+																	e);
+		}
+
+		try
+		{
 			if (mCudaContext != null)
-				mCudaContext.close();
+				lCudaContext.close();
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																		.getSimpleName(),
+																	e);
+		}
+
+		try
+		{
 			if (mCudaDevice != null)
 				mCudaDevice.close();
-
-			mCudaContext = null;
-
 			super.close();
 		}
 		catch (final Throwable e)
@@ -487,7 +531,5 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																	e);
 		}
 	}
-
-
 
 }

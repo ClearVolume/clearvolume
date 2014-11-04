@@ -16,6 +16,7 @@ import javax.swing.border.EmptyBorder;
 
 import net.miginfocom.swing.MigLayout;
 import clearvolume.network.client.ClearVolumeTCPClientHelper;
+import clearvolume.network.serialization.ClearVolumeSerialization;
 
 public class ConnectionPanel extends JPanel
 {
@@ -129,6 +130,7 @@ public class ConnectionPanel extends JPanel
 			mErrorTextArea.setText("");
 			final int lWindowSize = Integer.parseInt(mWindowSizeField.getText());
 			Runnable lStartClientRunnable = () -> mClearVolumeTCPClientHelper.startClient(lServerAddressTextField.getText(),
+																																										ClearVolumeSerialization.cStandardTCPPort,
 																																										lWindowSize,
 																																										1);
 			Thread lStartClientThread = new Thread(	lStartClientRunnable,

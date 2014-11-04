@@ -1,4 +1,13 @@
-// cvlib.cpp : Defines the exported functions for the cvlib DLL.
+/**
+ * cvlib.cpp 
+ * 
+ * Defines the exported functions for the cvlib native binding library to ClearVolume.
+ *
+ * @author Loic Royer 2014
+ *
+ */
+
+// cvlib.cpp : 
 //
 
 #include "cvlib.h"
@@ -50,14 +59,9 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
 		clearError();
 
 		const char* JAVAHOME  =getEnvWin("JAVA_HOME");
-		cout << JAVAHOME << "\n";
-
 		char JREFolderPath[1024];
-
 		strcpy(JREFolderPath,JAVAHOME);
 		strcat(JREFolderPath,"\\bin\\server\\jvm.dll");
-
-		cout << JREFolderPath << "\n";
 
 		HINSTANCE lDLLInstance = LoadLibraryA(JREFolderPath);
 		if( lDLLInstance == 0)
@@ -81,9 +85,6 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
 
 		strcpy(lClassPathString,lClassPathPrefix);
 		strcat(lClassPathString,pClearVolumeJarPath);
-
-		//cout <<  lClassPathString << "\n";
-
 
 
 		JavaVMOption options[3];

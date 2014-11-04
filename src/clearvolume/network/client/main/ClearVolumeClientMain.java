@@ -69,6 +69,7 @@ public class ClearVolumeClientMain
 		};
 
 		lClearVolumeTCPClientHelper.startClient(pHostName,
+																						pPortNumber,
 																						pWindowSize,
 																						pBytesPerVoxel);
 
