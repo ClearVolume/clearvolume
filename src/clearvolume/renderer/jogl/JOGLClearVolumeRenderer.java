@@ -542,7 +542,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 			mTexture.bind(mGLProgram);
 
-			System.out.println("mQuadProjectionMatrix=\n" + mQuadProjectionMatrix);
 			mQuadProjectionMatrixUniform.setFloatMatrix(mQuadProjectionMatrix.getFloatArray(),
 																									false);
 
@@ -564,7 +563,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 																								false);
 
 			GLMatrix lProjectionMatrix = getClearGLWindow().getProjectionMatrix();
-			System.out.println("lProjectionMatrix=\n" + lProjectionMatrix);
 
 			getClearGLWindow().getProjectionMatrix()
 												.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
