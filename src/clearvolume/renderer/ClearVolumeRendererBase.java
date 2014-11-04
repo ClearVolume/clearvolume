@@ -77,8 +77,10 @@ public abstract class ClearVolumeRendererBase	implements
 	private ReentrantLock mDataBufferCopyFinishedLock = new ReentrantLock();
 	private final Condition mDataBufferCopyFinishedCondition = mDataBufferCopyFinishedLock.newCondition();
 
+
 	// Control frame:
 	private JFrame mControlFrame;
+
 
 	/**
 	 * Sets the number of bytes per voxel for this renderer. This is _usually_ set

@@ -14,31 +14,39 @@ public class ClearVolumeMain
 	 */
 	public static void main(String[] args)
 	{
-		// parse the command line arguments and options
-		CommandLine lCommandLineValues = new CommandLine();
-		CmdLineParser lCmdLineParser = new CmdLineParser(lCommandLineValues);
-		lCmdLineParser.getProperties().withUsageWidth(80);
-
 		try
 		{
-			lCmdLineParser.parseArgument(args);
+			CommandLine lCommandLineValues = new CommandLine();
+			CmdLineParser lCmdLineParser = new CmdLineParser(lCommandLineValues);
+			lCmdLineParser.getProperties().withUsageWidth(80);
+
+			System.err.println("[ClearVolume command line utility]");
+			try
+			{
+				lCmdLineParser.parseArgument(args);
+			}
+			catch (CmdLineException e)
+			{
+				System.err.println(e.getMessage());
+				lCmdLineParser.printUsage(System.err);
+				System.err.println();
+				System.exit(1);
+			}
+
+			if (lCommandLineValues.isDemoServer())
+				ClearVolumeDemoServerMain.main(args);
+			else if (lCommandLineValues.isClient())
+				ClearVolumeClientMain.connect(lCommandLineValues.mConnectHostName,
+																			lCommandLineValues.mConnectPort,
+																			lCommandLineValues.mWindowSize,
+																			lCommandLineValues.mBytesPerVoxel);
+			else
+				ClearVolumeClientMain.main(args);
 		}
-		catch (CmdLineException e)
+		catch (Throwable e)
 		{
-			System.err.println(e.getMessage());
-			System.err.println("java DotsMain [options...] arguments...");
-			// print the list of available options
-			lCmdLineParser.printUsage(System.err);
-			System.err.println();
-			System.exit(1);
+			e.printStackTrace();
 		}
-
-		if (lCommandLineValues.isDemoServer())
-			ClearVolumeDemoServerMain.main(args);
-		else
-			ClearVolumeClientMain.main(args);
-
 
 	}
-
 }

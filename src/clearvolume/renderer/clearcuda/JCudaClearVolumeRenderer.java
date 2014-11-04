@@ -280,6 +280,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																						false,
 																						false,
 																						false);
+			lVolumeDataBuffer.rewind();
 			mVolumeDataCudaArray.copyFrom(lVolumeDataBuffer, true);
 
 			mVolumeDataCudaTexture = mCudaModule.getTexture("tex");
@@ -312,6 +313,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																								true,
 																								false,
 																								false);
+
 		mTransferFunctionCudaArray.copyFrom(lTransferFunctionArray, true);
 
 		mTransferFunctionTexture = mCudaModule.getTexture("transferTex");
@@ -396,6 +398,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 				}
 				else
 				{
+					lVolumeDataBuffer.rewind();
 					mVolumeDataCudaArray.copyFrom(lVolumeDataBuffer, true);
 				}
 

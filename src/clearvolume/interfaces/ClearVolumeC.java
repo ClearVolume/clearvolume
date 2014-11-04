@@ -118,6 +118,8 @@ public class ClearVolumeC
 			if (lClearVolumeRenderer != null)
 			{
 				sIDToRendererMap.remove(lClearVolumeRenderer);
+				lClearVolumeRenderer.waitToFinishDataBufferCopy(1,
+																												TimeUnit.SECONDS);
 				lClearVolumeRenderer.close();
 			}
 		}

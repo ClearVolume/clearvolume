@@ -2,6 +2,8 @@ package clearvolume.main;
 
 import org.kohsuke.args4j.Option;
 
+import clearvolume.network.serialization.ClearVolumeSerialization;
+
 public class CommandLine
 {
 
@@ -31,13 +33,34 @@ public class CommandLine
 	/**/
 	// Examples above! REAL STUFF BELOW:
 
-	@Option(name = "-demoserver", aliases =
-	{ "--demo-server" }, usage = "starts a demo ClearVolume network server")
+	@Option(name = "-s", aliases =
+	{ "--demo-server" }, usage = "starts a demo ClearVolume network server.")
 	public boolean mDemoServer = false;
+
+	@Option(name = "-c", aliases =
+	{ "--connect" }, usage = "ClearVolume server address to connect to.")
+	public String mConnectHostName = null;
+
+	@Option(name = "-p", aliases =
+	{ "--port" }, usage = "server port nuber to connect to.")
+	public int mConnectPort = ClearVolumeSerialization.cStandardTCPPort;
+
+	@Option(name = "-w", aliases =
+	{ "--window-size" }, usage = "Renderer window size")
+	public int mWindowSize = 512;
+
+	@Option(name = "-b", aliases =
+	{ "--bytes-per-voxel" }, usage = "Bytes per voxel")
+	public int mBytesPerVoxel = 1;
 
 	public boolean isDemoServer()
 	{
 		return mDemoServer;
+	}
+
+	public boolean isClient()
+	{
+		return mConnectHostName != null;
 	}
 
 }

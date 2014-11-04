@@ -1,15 +1,9 @@
 package clearvolume.network.client.main;
 
-import static org.junit.Assert.assertTrue;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.nio.channels.UnresolvedAddressException;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -21,26 +15,17 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import net.miginfocom.swing.MigLayout;
-import clearvolume.network.client.ClearVolumeTCPClient;
-import clearvolume.network.serialization.ClearVolumeSerialization;
-import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.factory.ClearVolumeRendererFactory;
-import clearvolume.transferf.TransferFunctions;
-import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
-import clearvolume.volume.sink.ClearVolumeRendererSink;
+import clearvolume.network.client.ClearVolumeTCPClientHelper;
 
 public class ConnectionPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final int cMaxAvailableVolumes = 20;
-	private static final int cMaxQueueLength = 20;
-	private static final long cMaxMillisecondsToWait = 10;
-	private static final long cMaxMillisecondsToWaitForCopy = 10;
-
 	private JTextArea mErrorTextArea;
 	private JTextField mWindowSizeField;
+
+	private ClearVolumeTCPClientHelper mClearVolumeTCPClientHelper;
 
 	public ConnectionPanel()
 	{
@@ -120,6 +105,21 @@ public class ConnectionPanel extends JPanel
 		mErrorTextArea.setBackground(Color.WHITE);
 		add(mErrorTextArea, "cell 0 4 2 1,grow");
 
+		mClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper()
+		{
+
+			@Override
+			public void reportError(Throwable pE, String pErrorMessage)
+			{
+				SwingUtilities.invokeLater(() -> {
+					mErrorTextArea.setText(pE.getClass().getName() + (pErrorMessage == null	? ""
+																																									: ": " + pErrorMessage));
+					lThis.revalidate();
+					lThis.repaint();
+				});
+			}
+		};
+
 	}
 
 	private void startClientAsync(JTextField lServerAddressTextField)
@@ -128,9 +128,9 @@ public class ConnectionPanel extends JPanel
 		{
 			mErrorTextArea.setText("");
 			final int lWindowSize = Integer.parseInt(mWindowSizeField.getText());
-			Runnable lStartClientRunnable = () -> startClient(lServerAddressTextField.getText(),
-																												lWindowSize,
-																												1);
+			Runnable lStartClientRunnable = () -> mClearVolumeTCPClientHelper.startClient(lServerAddressTextField.getText(),
+																																										lWindowSize,
+																																										1);
 			Thread lStartClientThread = new Thread(	lStartClientRunnable,
 																							"StartClientThread" + lServerAddressTextField.getText());
 			lStartClientThread.setDaemon(true);
@@ -138,82 +138,10 @@ public class ConnectionPanel extends JPanel
 		}
 		catch (Throwable e)
 		{
-			reportError(e, e.getLocalizedMessage());
+			mClearVolumeTCPClientHelper.reportError(e,
+																							e.getLocalizedMessage());
 			e.printStackTrace();
 		}
-	}
-
-	private void startClient(	String pServerAddress,
-														int pWindowSize,
-														int pBytesPerVoxel)
-	{
-		try (final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolumeTest",
-																																																pWindowSize,
-																																																pWindowSize,
-																																																pBytesPerVoxel))
-		{
-			try
-			{
-				lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
-
-				ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																												lClearVolumeRenderer.createCompatibleVolumeManager(cMaxAvailableVolumes),
-																																												cMaxMillisecondsToWaitForCopy,
-																																												TimeUnit.MILLISECONDS);
-
-				AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lClearVolumeRendererSink,
-																																																					cMaxQueueLength,
-																																																					cMaxMillisecondsToWait,
-																																																					TimeUnit.MILLISECONDS);
-
-				ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
-
-				SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
-																																		ClearVolumeSerialization.cStandardTCPPort);
-				assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
-
-				assertTrue(lClearVolumeTCPClient.start());
-
-				assertTrue(lAsynchronousVolumeSinkAdapter.start());
-
-				lClearVolumeRenderer.setVisible(true);
-
-				while (lClearVolumeRenderer.isShowing())
-				{
-					try
-					{
-						Thread.sleep(10);
-					}
-					catch (InterruptedException e)
-					{
-						e.printStackTrace();
-					}
-				}
-
-				assertTrue(lAsynchronousVolumeSinkAdapter.stop());
-				assertTrue(lClearVolumeTCPClient.stop());
-				lClearVolumeTCPClient.close();
-			}
-			catch (UnresolvedAddressException uae)
-			{
-				reportError(uae, "Cannot find host: '" + pServerAddress + "'");
-			}
-			catch (Throwable e)
-			{
-				reportError(e, e.getLocalizedMessage());
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private void reportError(Throwable e, String pErrorMessage)
-	{
-		SwingUtilities.invokeLater(() -> {
-			mErrorTextArea.setText(e.getClass().getName() + (pErrorMessage == null ? ""
-																																						: ": " + pErrorMessage));
-			this.revalidate();
-			this.repaint();
-		});
 	}
 
 }

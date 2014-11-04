@@ -52,6 +52,7 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 				lVolume.setManager(mVolumeManager);
 
 				mVolumeSink.sendVolume(lVolume);
+
 			}
 
 		}

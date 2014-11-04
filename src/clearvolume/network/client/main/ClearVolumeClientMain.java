@@ -11,6 +11,8 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import clearvolume.network.client.ClearVolumeTCPClientHelper;
+
 public class ClearVolumeClientMain
 {
 
@@ -44,6 +46,31 @@ public class ClearVolumeClientMain
 		{
 			e.printStackTrace();
 		}
+	}
+
+	public static void connect(	String pHostName,
+															int pPortNumber,
+															int pWindowSize,
+															int pBytesPerVoxel)
+	{
+
+		ClearVolumeTCPClientHelper lClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper()
+		{
+			@Override
+			public void reportError(Throwable pE, String pErrorMessage)
+			{
+				System.err.println("Cannot connect to host: '" + pHostName
+														+ ":"
+														+ pPortNumber
+														+ "'");
+				System.err.println("Error: '" + pErrorMessage + "'");
+				pE.printStackTrace();
+			}
+		};
+
+		lClearVolumeTCPClientHelper.startClient(pHostName,
+																						pWindowSize,
+																						pBytesPerVoxel);
 
 	}
 

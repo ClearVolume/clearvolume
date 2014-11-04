@@ -688,8 +688,14 @@ public abstract class JOGLClearVolumeRenderer	extends
 		boolean lLocked = mDisplayReentrantLock.tryLock();
 		if (lLocked)
 		{
-			mClearGLWindow.getGLWindow().display();
-			mDisplayReentrantLock.unlock();
+			try
+			{
+				mClearGLWindow.getGLWindow().display();
+			}
+			finally
+			{
+				mDisplayReentrantLock.unlock();
+			}
 		}
 	}
 
