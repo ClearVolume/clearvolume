@@ -74,22 +74,22 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLAttribute mPositionAttribute;
 	private GLVertexArray mQuadVertexArray;
 	private GLVertexAttributeArray mPositionAttributeArray;
+	private GLUniform mQuadProjectionMatrixUniform;
+	private GLAttribute mTexCoordAttribute;
+	private GLUniform mTexUnit;
+	private GLVertexAttributeArray mTexCoordAttributeArray;
 
 	private GLAttribute mBoxPositionAttribute;
 	private GLVertexArray mBoxVertexArray;
 	private GLVertexAttributeArray mBoxPositionAttributeArray;
 	private GLUniform mBoxColorUniform;
-
-	private GLMatrix mBoxModelViewMatrix = new GLMatrix();
 	private GLUniform mBoxModelViewMatrixUniform;
-
 	private GLUniform mBoxProjectionMatrixUniform;
 
+	private GLMatrix mBoxModelViewMatrix = new GLMatrix();
 	private GLMatrix mVolumeViewMatrix = new GLMatrix();
+	private GLMatrix mQuadProjectionMatrix = new GLMatrix();
 
-	private GLAttribute mTexCoordAttribute;
-	private GLUniform mTexUnit;
-	private GLVertexAttributeArray mTexCoordAttributeArray;
 	private int mMaxTextureWidth = 768, mMaxTextureHeight = 768;
 
 	/**
@@ -311,10 +311,14 @@ public abstract class JOGLClearVolumeRenderer	extends
 		// 0,
 		// 1);
 
-		getClearGLWindow().setPerspectiveProjectionMatrix(.785f,
-																											1,
-																											.1f,
-																											1000);
+		setDefaultProjectionMatrix();
+
+		mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
+																										1,
+																										-1,
+																										1,
+																										0,
+																										1000);
 
 		if (initVolumeRenderer())
 		{
@@ -338,7 +342,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 																						JOGLClearVolumeRenderer.class,
 																						"shaders/tex_vert.glsl",
 																						"shaders/tex_frag.glsl");
-
+				mQuadProjectionMatrixUniform = mGLProgram.getUniform("projection");
 				mPositionAttribute = mGLProgram.getAtribute("position");
 				mTexCoordAttribute = mGLProgram.getAtribute("texcoord");
 				mTexUnit = mGLProgram.getUniform("texUnit");
@@ -467,6 +471,14 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 	}
 
+	private void setDefaultProjectionMatrix()
+	{
+		getClearGLWindow().setPerspectiveProjectionMatrix(.785f,
+																											1,
+																											.1f,
+																											1000);
+	}
+
 	/**
 	 * @return
 	 */
@@ -496,6 +508,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 		final GL4 lGL4 = drawable.getGL().getGL4();
 
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+
+		setDefaultProjectionMatrix();
 
 		mVolumeViewMatrix.euler(-getRotationX() * 0.01,
 														-getRotationY() * 0.01,
@@ -528,6 +542,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 			mTexture.bind(mGLProgram);
 
+			System.out.println("mQuadProjectionMatrix=\n" + mQuadProjectionMatrix);
+			mQuadProjectionMatrixUniform.setFloatMatrix(mQuadProjectionMatrix.getFloatArray(),
+																									false);
+
 			mQuadVertexArray.draw(GL.GL_TRIANGLES);
 
 		}
@@ -544,6 +562,14 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 			mBoxModelViewMatrixUniform.setFloatMatrix(mBoxModelViewMatrix.getFloatArray(),
 																								false);
+
+			GLMatrix lProjectionMatrix = getClearGLWindow().getProjectionMatrix();
+			System.out.println("lProjectionMatrix=\n" + lProjectionMatrix);
+
+			getClearGLWindow().getProjectionMatrix()
+												.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
+			getClearGLWindow().getProjectionMatrix()
+												.mult(1, 1, mQuadProjectionMatrix.get(1, 1));
 
 			mBoxProjectionMatrixUniform.setFloatMatrix(	getClearGLWindow().getProjectionMatrix()
 																																		.getFloatArray(),
@@ -613,6 +639,24 @@ public abstract class JOGLClearVolumeRenderer	extends
 											int pWidth,
 											int pHeight)
 	{
+		if (pHeight == 0)
+			pHeight = 1;
+		float lAspectRatio = (1.0f * pWidth) / pHeight;
+
+		if (lAspectRatio >= 1)
+			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
+																											1,
+																											-1	/ lAspectRatio,
+																											1 / lAspectRatio,
+																											0,
+																											1000);
+		else
+			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
+																											lAspectRatio,
+																											-1,
+																											1,
+																											0,
+																											1000);
 	}
 
 	/**
