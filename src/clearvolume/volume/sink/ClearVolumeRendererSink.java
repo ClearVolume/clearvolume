@@ -53,7 +53,7 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	mWaitForCopyTimeout,
 																															mTimeUnit);
 
-		/*if (getRelaySink() != null)
+		if (getRelaySink() != null)
 			getRelaySink().sendVolume(pVolume);
 		else
 			pVolume.makeAvailableToManager();/**/
