@@ -20,16 +20,24 @@ import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.ClearVolumeRendererSink;
+import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.VolumeSinkInterface;
+import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
+import clearvolume.volume.sink.timeshift.gui.MultiChannelTimeShiftingSinkJFrame;
 
 public class ClearVolumeC
 {
+	private static final long cTimeShiftSoftHoryzon = 50;
+	private static final long cTimeShiftHardHoryzon = 100;
+
 	private static Throwable sLastThrowableException = null;
 
 	private static ConcurrentHashMap<Integer, ClearVolumeRendererInterface> sIDToRendererMap = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Integer, ClearVolumeTCPServerSink> sIDToServerMap = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Integer, VolumeSinkInterface> sIDToVolumeSink = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Integer, AsynchronousVolumeSinkAdapter> sIDToVolumeAsyncSink = new ConcurrentHashMap<>();
+	private static ConcurrentHashMap<Integer, MultiChannelTimeShiftingSink> sIDToMultiChannelTimeShiftingSink = new ConcurrentHashMap<>();
+	private static ConcurrentHashMap<Integer, MultiChannelTimeShiftingSinkJFrame> sIDToMultiChannelTimeShiftingSinkJFrame = new ConcurrentHashMap<>();
 
 	private static ConcurrentHashMap<Integer, VolumeManager> sIDToVolumeManager = new ConcurrentHashMap<>();
 
@@ -73,6 +81,25 @@ public class ClearVolumeC
 																		final int pMaxTextureWidth,
 																		final int pMaxTextureHeight)
 	{
+		return createRenderer(pRendererId,
+													pWindowWidth,
+													pWindowHeight,
+													pBytesPerVoxel,
+													pMaxTextureWidth,
+													pMaxTextureHeight,
+													true,
+													true);
+	}
+
+	public static int createRenderer(	final int pRendererId,
+																		final int pWindowWidth,
+																		final int pWindowHeight,
+																		final int pBytesPerVoxel,
+																		final int pMaxTextureWidth,
+																		final int pMaxTextureHeight,
+																		final boolean pTimeShiftAndMultiChannel,
+																		final boolean pMultiColor)
+	{
 		try
 		{
 			ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolume[ID=" + pRendererId
@@ -93,13 +120,35 @@ public class ClearVolumeC
 																																											lClearVolumeRenderer.createCompatibleVolumeManager(sMaxAvailableVolumes),
 																																											sMaxMillisecondsToWaitForCopy,
 																																											TimeUnit.MILLISECONDS);
+			VolumeSinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
 
-			AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lClearVolumeRendererSink,
+			MultiChannelTimeShiftingSink lMultiChannelTimeShiftingSink = null;
+			MultiChannelTimeShiftingSinkJFrame lMultiChannelTimeShiftingSinkJFrame = null;
+			if (pTimeShiftAndMultiChannel)
+			{
+				lMultiChannelTimeShiftingSink = new MultiChannelTimeShiftingSink(	cTimeShiftSoftHoryzon,
+																																					cTimeShiftHardHoryzon);
+				sIDToMultiChannelTimeShiftingSink.put(pRendererId,
+																							lMultiChannelTimeShiftingSink);
+
+				lMultiChannelTimeShiftingSinkJFrame = new MultiChannelTimeShiftingSinkJFrame(lMultiChannelTimeShiftingSink);
+				lMultiChannelTimeShiftingSinkJFrame.setVisible(true);
+				sIDToMultiChannelTimeShiftingSinkJFrame.put(pRendererId,
+																										lMultiChannelTimeShiftingSinkJFrame);
+
+				lMultiChannelTimeShiftingSink.setRelaySink(lClearVolumeRendererSink);
+
+				lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
+
+				lSinkAfterAsynchronousVolumeSinkAdapter = lMultiChannelTimeShiftingSink;
+			}
+
+			AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
 																																																				sMaxQueueLength,
 																																																				sMaxMillisecondsToWait,
 																																																				TimeUnit.MILLISECONDS);
 			lAsynchronousVolumeSinkAdapter.start();
-			
+
 			sIDToVolumeAsyncSink.put(	pRendererId,
 																lAsynchronousVolumeSinkAdapter);
 
@@ -125,7 +174,7 @@ public class ClearVolumeC
 			{
 				lAsynchronousVolumeSinkAdapter.stop();
 				lAsynchronousVolumeSinkAdapter.waitForStop();
-				sIDToVolumeAsyncSink.remove(lAsynchronousVolumeSinkAdapter);
+				sIDToVolumeAsyncSink.remove(pRendererId);
 			}
 		}
 		catch (Throwable e)
@@ -136,10 +185,15 @@ public class ClearVolumeC
 
 		try
 		{
-			VolumeManager lVolumeManager = sIDToVolumeManager.get(pRendererId);
-			if (lVolumeManager != null)
+			MultiChannelTimeShiftingSink lMultiChannelTimeShiftingSink = sIDToMultiChannelTimeShiftingSink.get(pRendererId);
+			if (lMultiChannelTimeShiftingSink != null)
 			{
-				sIDToVolumeManager.remove(lVolumeManager);
+				MultiChannelTimeShiftingSinkJFrame lMultiChannelTimeShiftingSinkJFrame = sIDToMultiChannelTimeShiftingSinkJFrame.get(pRendererId);
+				lMultiChannelTimeShiftingSinkJFrame.setVisible(false);
+				lMultiChannelTimeShiftingSinkJFrame.dispose();
+				lMultiChannelTimeShiftingSink.close();
+				sIDToMultiChannelTimeShiftingSinkJFrame.remove(pRendererId);
+				sIDToMultiChannelTimeShiftingSink.remove(pRendererId);
 			}
 		}
 		catch (Throwable e)
@@ -150,10 +204,24 @@ public class ClearVolumeC
 
 		try
 		{
+			VolumeManager lVolumeManager = sIDToVolumeManager.get(pRendererId);
+			if (lVolumeManager != null)
+			{
+				sIDToVolumeManager.remove(pRendererId);
+			}
+		}
+		catch (Throwable e)
+		{
+			System.err.println(e.getLocalizedMessage());
+			return 3;
+		}
+
+		try
+		{
 			ClearVolumeRendererInterface lClearVolumeRenderer = sIDToRendererMap.get(pRendererId);
 			if (lClearVolumeRenderer != null)
 			{
-				sIDToRendererMap.remove(lClearVolumeRenderer);
+				sIDToRendererMap.remove(pRendererId);
 				lClearVolumeRenderer.waitToFinishDataBufferCopy(1,
 																												TimeUnit.SECONDS);
 
@@ -163,7 +231,7 @@ public class ClearVolumeC
 		catch (Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
-			return 3;
+			return 4;
 		}
 
 		return 0;
@@ -211,7 +279,7 @@ public class ClearVolumeC
 			ClearVolumeTCPServerSink lClearVolumeTCPServerSink = sIDToServerMap.get(pServerId);
 			if (lClearVolumeTCPServerSink != null)
 			{
-				sIDToServerMap.remove(lClearVolumeTCPServerSink);
+				sIDToServerMap.remove(pServerId);
 				lClearVolumeTCPServerSink.stop();
 				lClearVolumeTCPServerSink.close();
 			}
@@ -227,7 +295,7 @@ public class ClearVolumeC
 			VolumeSinkInterface lVolumeSink = sIDToVolumeSink.get(pServerId);
 			if (lVolumeSink != null)
 			{
-				sIDToVolumeSink.remove(lVolumeSink);
+				sIDToVolumeSink.remove(pServerId);
 			}
 		}
 		catch (Throwable e)
@@ -241,7 +309,7 @@ public class ClearVolumeC
 			VolumeManager lVolumeManager = sIDToVolumeManager.get(pServerId);
 			if (lVolumeManager != null)
 			{
-				sIDToVolumeManager.remove(lVolumeManager);
+				sIDToVolumeManager.remove(pServerId);
 			}
 			return 0;
 		}

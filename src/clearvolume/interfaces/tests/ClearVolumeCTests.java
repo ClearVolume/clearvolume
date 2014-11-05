@@ -40,6 +40,7 @@ public class ClearVolumeCTests
 						lVolumeDataArray[lIndex] = (byte) lValue;
 					}
 
+			ClearVolumeC.setVolumeIndexAndTime(lRendererId, i, 0.1 * i);
 			ClearVolumeC.send8bitUINTVolumeDataToSink(lRendererId,
 																								lChannelId,
 																								ByteBuffer.wrap(lVolumeDataArray),
@@ -85,6 +86,7 @@ public class ClearVolumeCTests
 						lVolumeDataArray[2 * lIndex + 1] = (byte) lCharValue;
 					}
 
+			ClearVolumeC.setVolumeIndexAndTime(lRendererId, i, 0.1 * i);
 			ClearVolumeC.send16bitUINTVolumeDataToSink(	lRendererId,
 																									lChannelId,
 																									ByteBuffer.wrap(lVolumeDataArray),
@@ -130,6 +132,7 @@ public class ClearVolumeCTests
 						lVolumeDataArray[2 * lIndex + 1] = (byte) lCharValue;
 					}
 
+			ClearVolumeC.setVolumeIndexAndTime(lServerId, i, 0.1 * i);
 			ClearVolumeC.send16bitUINTVolumeDataToSink(	lServerId,
 																									lChannelId,
 																									ByteBuffer.wrap(lVolumeDataArray),

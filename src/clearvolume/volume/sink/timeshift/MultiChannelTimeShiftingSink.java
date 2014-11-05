@@ -152,7 +152,14 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 	private Volume<?> getVolumeToSend(int pVolumeChannelID)
 	{
 		if (!mAvailableChannels.contains(mCurrentChannelID))
-			mCurrentChannelID = mAvailableChannels.floor(mCurrentChannelID);
+		{
+			Integer lNewCurrentChannelID = mAvailableChannels.floor(mCurrentChannelID);
+			if (lNewCurrentChannelID == null)
+			{
+				lNewCurrentChannelID = mAvailableChannels.ceiling(mCurrentChannelID);
+			}
+			mCurrentChannelID = lNewCurrentChannelID;
+		}
 
 		if (pVolumeChannelID != mCurrentChannelID)
 			return null;
