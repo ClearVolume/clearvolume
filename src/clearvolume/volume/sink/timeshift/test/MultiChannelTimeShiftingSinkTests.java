@@ -40,7 +40,7 @@ public class MultiChannelTimeShiftingSinkTests
 
 		VolumeManager lManager = lMultiChannelTimeShiftingSink.getManager();
 
-		for (int i = 0; i < 500; i++)
+		for (int i = 0; i < 1000; i++)
 		{
 
 			Volume<Byte> lVolume = lManager.requestAndWaitForVolume(1,

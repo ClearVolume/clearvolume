@@ -64,7 +64,8 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 	public VolumeManager getManager()
 	{
 		if (!(getRelaySink() instanceof NullVolumeSink))
-			return getRelaySink().getManager();
+			if (getRelaySink() != null)
+				return getRelaySink().getManager();
 		return mVolumeManager;
 	}
 
