@@ -58,8 +58,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private volatile int mLastWindowWidth, mLastWindowHeight;
 	private ReentrantLock mDisplayReentrantLock = new ReentrantLock();
 
-	// pixelbuffer object.
-	protected GLPixelBufferObject mPixelBufferObject;
+	// pixelbuffer objects.
+	protected GLPixelBufferObject[] mPixelBufferObjects;
 
 	// texture and its dimensions.
 	private GLTexture<Byte>[] mLayerTextures;
@@ -197,6 +197,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		setNumberOfRenderLayers(pNumberOfRenderLayers);
 
 		mLayerTextures = new GLTexture[getNumberOfRenderLayers()];
+		mPixelBufferObjects = new GLPixelBufferObject[getNumberOfRenderLayers()];
 
 		resetBrightnessAndGammaAndTransferFunctionRanges();
 		resetRotationTranslation();
@@ -328,14 +329,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	}
 
 	/**
-	 * @return
-	 */
-	protected float[] getTransfertFunctionArray()
-	{
-		return getTransfertFunction().getArray();
-	}
-
-	/**
 	 * Implementation of GLEventListener: Called to initialize the GLAutoDrawable.
 	 * This method will initialize the JCudaDriver and cause the initialization of
 	 * CUDA and the OpenGL PBO.
@@ -370,7 +363,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 		if (initVolumeRenderer())
 		{
-			if (mPixelBufferObject != null)
+			/*if (mPixelBufferObject != null)
 			{
 				unregisterPBO(mPixelBufferObject.getId());
 				mPixelBufferObject.close();
@@ -467,15 +460,16 @@ public abstract class JOGLClearVolumeRenderer	extends
 																									1,
 																									true,
 																									3);
+
+					mPixelBufferObjects[i] = new GLPixelBufferObject(	mGLProgram,
+																														lTextureWidth,
+																														lTextureHeight);
+
+					mPixelBufferObjects[i].copyFrom(null);
+
+					registerPBO(i, mPixelBufferObjects[i].getId());
 				}
 
-				mPixelBufferObject = new GLPixelBufferObject(	mGLProgram,
-																											lTextureWidth,
-																											lTextureHeight);
-
-				mPixelBufferObject.copyFrom(null);
-
-				registerPBO(mPixelBufferObject.getId());
 			}
 			catch (IOException e)
 			{
@@ -565,16 +559,20 @@ public abstract class JOGLClearVolumeRenderer	extends
 	/**
 	 * Register PBO object with any descendant of this abstract class.
 	 * 
+	 * @param pRenderLayerIndex
 	 * @param pPixelBufferObjectId
 	 */
-	protected abstract void registerPBO(int pPixelBufferObjectId);
+	protected abstract void registerPBO(int pRenderLayerIndex,
+																			int pPixelBufferObjectId);
 
 	/**
 	 * Unregisters PBO object with any descendant of this abstract class.
 	 * 
+	 * @param pRenderLayerIndex
 	 * @param pPixelBufferObjectId
 	 */
-	protected abstract void unregisterPBO(int pPixelBufferObjectId);
+	protected abstract void unregisterPBO(int pRenderLayerIndex,
+																				int pPixelBufferObjectId);
 
 	/**
 	 * Implementation of GLEventListener: Called when the given GLAutoDrawable is
@@ -585,7 +583,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		final GL4 lGL4 = drawable.getGL().getGL4();
 
-		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
 		setDefaultProjectionMatrix();
 
@@ -611,10 +608,13 @@ public abstract class JOGLClearVolumeRenderer	extends
 		lInvProjection.transpose();
 		lInvProjection.invert();
 
-		if (renderVolume(	lInvVolumeMatrix.getFloatArray(),
-											lInvProjection.getFloatArray()))
+		boolean[] lUpdated;
+		if (anyIsTrue(lUpdated = renderVolume(lInvVolumeMatrix.getFloatArray(),
+																					lInvProjection.getFloatArray())))
 		{
-			mLayerTextures[getCurrentRenderLayer()].copyFrom(mPixelBufferObject);
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				if (lUpdated[i])
+					mLayerTextures[i].copyFrom(mPixelBufferObjects[i]);
 
 			mGLProgram.use(lGL4);
 			mGLProgram.bind();
@@ -625,41 +625,44 @@ public abstract class JOGLClearVolumeRenderer	extends
 			mQuadProjectionMatrixUniform.setFloatMatrix(mQuadProjectionMatrix.getFloatArray(),
 																									false);
 
+			lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 			mQuadVertexArray.draw(GL.GL_TRIANGLES);
 
-		}
+			// draw the box
+			if (mRenderBox)
+			{
+				mBoxGLProgram.use(lGL4);
 
-		// draw the box
-		if (mRenderBox)
-		{
-			mBoxGLProgram.use(lGL4);
+				// invert Matrix is the modelview used by renderer which is actually the
+				// inverted modelview Matrix
+				mBoxModelViewMatrix.copy(mVolumeViewMatrix);
+				mBoxModelViewMatrix.invert();
 
-			// invert Matrix is the modelview used by renderer which is actually the
-			// inverted modelview Matrix
-			mBoxModelViewMatrix.copy(mVolumeViewMatrix);
-			mBoxModelViewMatrix.invert();
-
-			mBoxModelViewMatrixUniform.setFloatMatrix(mBoxModelViewMatrix.getFloatArray(),
-																								false);
-
-			GLMatrix lProjectionMatrix = getClearGLWindow().getProjectionMatrix();
-
-			getClearGLWindow().getProjectionMatrix()
-												.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
-			getClearGLWindow().getProjectionMatrix()
-												.mult(1, 1, mQuadProjectionMatrix.get(1, 1));
-
-			mBoxProjectionMatrixUniform.setFloatMatrix(	getClearGLWindow().getProjectionMatrix()
-																																		.getFloatArray(),
+				mBoxModelViewMatrixUniform.setFloatMatrix(mBoxModelViewMatrix.getFloatArray(),
 																									false);
 
-			mBoxColorUniform.setFloatVector4(cBoxColor);
+				GLMatrix lProjectionMatrix = getClearGLWindow().getProjectionMatrix();
 
-			mBoxVertexArray.draw(GL.GL_LINES);
+				getClearGLWindow().getProjectionMatrix()
+													.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
+				getClearGLWindow().getProjectionMatrix()
+													.mult(1, 1, mQuadProjectionMatrix.get(1, 1));
+
+				mBoxProjectionMatrixUniform.setFloatMatrix(	getClearGLWindow().getProjectionMatrix()
+																																			.getFloatArray(),
+																										false);
+
+				mBoxColorUniform.setFloatVector4(cBoxColor);
+
+				mBoxVertexArray.draw(GL.GL_LINES);
+
+			}
+
+			updateFrameRateDisplay();
 
 		}
 
-		updateFrameRateDisplay();
+
 
 	}
 
@@ -668,10 +671,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 *          Model-view matrix as float array
 	 * @param pProjectionMatrix
 	 *          Projection matrix as float array
-	 * @return true if volume was updated and rendered.
+	 * @return boolean array indicating for each layer if it was updated.
 	 */
-	protected abstract boolean renderVolume(final float[] pModelViewMatrix,
-																					final float[] pProjectionMatrix);
+	protected abstract boolean[] renderVolume(final float[] pModelViewMatrix,
+																						final float[] pProjectionMatrix);
 
 	/**
 	 * Updates the display of the framerate.
@@ -746,8 +749,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
 			mLayerTextures[i].close();
+			mPixelBufferObjects[i].close();
 		}
-		mPixelBufferObject.close();
+
 	}
 
 	/**
@@ -824,7 +828,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 		}
 	}
 
-
 	/**
 	 * 
 	 */
@@ -832,6 +835,14 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		mClearGLWindow.getGLWindow()
 									.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
+	}
+
+	private boolean anyIsTrue(boolean[] pBooleanArray)
+	{
+		for (boolean lBoolean : pBooleanArray)
+			if (lBoolean)
+				return true;
+		return false;
 	}
 
 }

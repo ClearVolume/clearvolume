@@ -196,14 +196,14 @@ public class ClearVolumeDemo
 																						IOException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
-																																														1024,
-																																														1024,
+																																														512,
+																																														512,
 																																														1,
 																																														512,
 																																														512,
 																																														2);
 
-		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getBlueGradient());
+
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -234,14 +234,16 @@ public class ClearVolumeDemo
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
+
 		lClearVolumeRenderer.requestDisplay();
+		Thread.sleep(2000);
 
 		final byte[] lVolumeDataArray1 = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ];
 
-		for (int z = 0; z < lResolutionZ; z++)
-			for (int y = 0; y < lResolutionY; y++)
-				for (int x = 0; x < lResolutionX; x++)
+		for (int z = 0; z < lResolutionZ / 2; z++)
+			for (int y = 0; y < lResolutionY / 2; y++)
+				for (int x = 0; x < lResolutionX / 2; x++)
 				{
 					final int lIndex = x + lResolutionX
 															* y

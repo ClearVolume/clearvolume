@@ -158,7 +158,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	int getCurrentRenderLayer();
 
-
 	/**
 	 * Sets number of render layers.
 	 * 
@@ -228,11 +227,20 @@ public interface ClearVolumeRendererInterface	extends
 	VolumeManager createCompatibleVolumeManager(int pMaxAvailableVolumes);
 
 	/**
-	 * Waits until volume data copy completes.
+	 * Waits until volume data copy completes for all layers.
 	 * 
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishDataBufferCopy(long pTimeOut,
+																						TimeUnit pTimeUnit);
+
+	/**
+	 * Waits until volume data copy completes for a given layer.
+	 * 
+	 * @return true is completed, false if it timed-out.
+	 */
+	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
+																						long pTimeOut,
 																						TimeUnit pTimeUnit);
 
 	/**
@@ -335,7 +343,5 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
-
-
 
 }

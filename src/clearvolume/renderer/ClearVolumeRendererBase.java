@@ -46,14 +46,14 @@ public abstract class ClearVolumeRendererBase	implements
 	private RotationControllerInterface mRotationController;
 
 	/**
-	 * Pojection algorythm used
+	 * Projection algorithm used
 	 */
 	private ProjectionAlgorithm mProjectionAlgorythm = ProjectionAlgorithm.MaxProjection;
 
 	/**
-	 * Transfer function used
+	 * Transfer functions used
 	 */
-	private TransferFunction mTransferFunction = TransferFunctions.getGrayLevel();
+	private TransferFunction[] mTransferFunctions;
 
 	// geometric, brigthness an contrast settings.
 	private volatile float mTranslationX = 0;
@@ -78,10 +78,10 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile boolean mVolumeDimensionsChanged;
 
 	// data copy locking and waiting
-	private final Object mSetVolumeDataBufferLock = new Object();
+	private final Object[] mSetVolumeDataBufferLocks;
 	private volatile ByteBuffer[] mVolumeDataByteBuffers;
-	private ReentrantLock mDataBufferCopyFinishedLock = new ReentrantLock();
-	private final Condition mDataBufferCopyFinishedCondition = mDataBufferCopyFinishedLock.newCondition();
+	private ReentrantLock[] mDataBufferCopyFinishedLocks;
+	private Condition[] mDataBufferCopyFinishedConditions;
 
 	// Control frame:
 	private JFrame mControlFrame;
@@ -90,7 +90,19 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		super();
 		mNumberOfRenderLayers = pNumberOfRenderLayers;
+		mSetVolumeDataBufferLocks = new Object[pNumberOfRenderLayers];
 		mVolumeDataByteBuffers = new ByteBuffer[pNumberOfRenderLayers];
+		mDataBufferCopyFinishedLocks = new ReentrantLock[pNumberOfRenderLayers];
+		mDataBufferCopyFinishedConditions = new Condition[pNumberOfRenderLayers];
+		mTransferFunctions = new TransferFunction[pNumberOfRenderLayers];
+		for (int i = 0; i < pNumberOfRenderLayers; i++)
+		{
+			mSetVolumeDataBufferLocks[i] = new Object();
+			mDataBufferCopyFinishedLocks[i] = new ReentrantLock();
+			mDataBufferCopyFinishedConditions[i] = mDataBufferCopyFinishedLocks[i].newCondition();
+			mTransferFunctions[i] = TransferFunctions.getGradientForColor(i);
+		}
+
 	}
 
 	/**
@@ -119,7 +131,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * @return
 	 */
-	public boolean getIsUpdateVolumeParameters()
+	public boolean getIsUpdateVolumeRenderingParameters()
 	{
 		return mUpdateVolumeRenderingParameters;
 	}
@@ -577,7 +589,17 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setTransfertFunction(final TransferFunction pTransfertFunction)
 	{
-		mTransferFunction = pTransfertFunction;
+		mTransferFunctions[getCurrentRenderLayer()] = pTransfertFunction;
+	}
+
+	/**
+	 * Returns transfer function for a given render layer.
+	 * 
+	 * @return currently used transfer function
+	 */
+	public TransferFunction getTransfertFunction(final int pRenderLayerIndex)
+	{
+		return mTransferFunctions[pRenderLayerIndex];
 	}
 
 	/**
@@ -587,7 +609,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	public TransferFunction getTransfertFunction()
 	{
-		return mTransferFunction;
+		return mTransferFunctions[getCurrentRenderLayer()];
 	}
 
 	/**
@@ -635,31 +657,21 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Clears volume data buffer.
 	 * 
 	 */
-	public void clearVolumeDataBufferReference()
+	public void clearVolumeDataBufferReference(final int pVolumeDataBufferIndex)
 	{
-		mVolumeDataByteBuffers[mCurrentRenderLayerIndex] = null;
+		mVolumeDataByteBuffers[pVolumeDataBufferIndex] = null;
 	}
 
 	/**
-	 * Checks whether volume data buffer is available for display.
+	 * Returns object used for locking volume data copy for a given layer.
 	 * 
-	 * @return true if volume data is available
-	 */
-	public boolean isVolumeDataAvailable()
-	{
-		// convention for implementors: if the volume is non-zero there is data
-		// available!
-		return mVolumeSizeX * mVolumeSizeY * mVolumeSizeZ > 0;
-	}
-
-	/**
-	 * Returns object used for locking volume data copy.
+	 * @param pRenderLayerIndex
 	 * 
 	 * @return locking object
 	 */
-	public Object getSetVolumeDataBufferLock()
+	public Object getSetVolumeDataBufferLock(int pRenderLayerIndex)
 	{
-		return mSetVolumeDataBufferLock;
+		return mSetVolumeDataBufferLocks[pRenderLayerIndex];
 	}
 
 	/**
@@ -737,7 +749,7 @@ public abstract class ClearVolumeRendererBase	implements
 																	final double pVolumeSizeY,
 																	final double pVolumeSizeZ)
 	{
-		synchronized (getSetVolumeDataBufferLock())
+		synchronized (getSetVolumeDataBufferLock(mCurrentRenderLayerIndex))
 		{
 
 			if (mVolumeSizeX != pSizeX || mVolumeSizeY != pSizeY
@@ -763,7 +775,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setVolumeDataBuffer(Volume<?> pVolume)
 	{
-		synchronized (getSetVolumeDataBufferLock())
+		synchronized (getSetVolumeDataBufferLock(mCurrentRenderLayerIndex))
 		{
 			setVolumeDataBuffer(pVolume.getVolumeData(),
 													pVolume.getWidthInVoxels(),
@@ -784,21 +796,21 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Notifies the volume data copy completion.
 	 */
-	public void notifyCompletionOfDataBufferCopy()
+	public void notifyCompletionOfDataBufferCopy(final int pRenderLayerIndex)
 	{
-		mDataBufferCopyFinishedLock.lock();
+		mDataBufferCopyFinishedLocks[pRenderLayerIndex].lock();
 		try
 		{
-			mDataBufferCopyFinishedCondition.signal();
+			mDataBufferCopyFinishedConditions[pRenderLayerIndex].signal();
 		}
 		finally
 		{
-			mDataBufferCopyFinishedLock.unlock();
+			mDataBufferCopyFinishedLocks[pRenderLayerIndex].unlock();
 		}
 	}
 
 	/**
-	 * Waits until volume data copy completes.
+	 * Waits until volume data copy completes for all layers.
 	 * 
 	 * @return true is completed, false if it timed-out.
 	 */
@@ -806,22 +818,40 @@ public abstract class ClearVolumeRendererBase	implements
 	public boolean waitToFinishDataBufferCopy(long pTimeOut,
 																						TimeUnit pTimeUnit)
 	{
-		mDataBufferCopyFinishedLock.lock();
+		boolean lNoTimeOut = true;
+		for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			lNoTimeOut &= waitToFinishDataBufferCopy(i, pTimeOut, pTimeUnit);
+		return lNoTimeOut;
+	}
+
+	/**
+	 * Waits until volume data copy completes for a given layer
+	 * 
+	 * @return true is completed, false if it timed-out.
+	 */
+	@Override
+	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
+																						long pTimeOut,
+																						TimeUnit pTimeUnit)
+	{
+		mDataBufferCopyFinishedLocks[pRenderLayerIndex].lock();
 		try
 		{
 			try
 			{
-				return mDataBufferCopyFinishedCondition.await(pTimeOut,
-																											pTimeUnit);
+				return mDataBufferCopyFinishedConditions[pRenderLayerIndex].await(pTimeOut,
+																																					pTimeUnit);
 			}
 			catch (InterruptedException e)
 			{
-				return waitToFinishDataBufferCopy(pTimeOut, pTimeUnit);
+				return waitToFinishDataBufferCopy(pRenderLayerIndex,
+																					pTimeOut,
+																					pTimeUnit);
 			}
 		}
 		finally
 		{
-			mDataBufferCopyFinishedLock.unlock();
+			mDataBufferCopyFinishedLocks[pRenderLayerIndex].unlock();
 		}
 	}
 

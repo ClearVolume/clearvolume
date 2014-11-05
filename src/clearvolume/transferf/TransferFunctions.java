@@ -1,5 +1,6 @@
 package clearvolume.transferf;
 
+
 /**
  * Class TransferFunctions
  * 
@@ -10,6 +11,35 @@ package clearvolume.transferf;
  */
 public class TransferFunctions
 {
+
+	public static TransferFunction getGradientForColor(int pColorIndex)
+	{
+		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
+		switch (pColorIndex % 4)
+		{
+		case 0:
+			lTransfertFunction.addPoint(0, 0, 0, 0);
+			lTransfertFunction.addPoint(0.541, 0.482, 0.686, 1);
+			break;
+
+		case 1:
+			lTransfertFunction.addPoint(0, 0, 0, 0);
+			lTransfertFunction.addPoint(1, 0.698, 0.667, 1);
+			break;
+
+		case 2:
+			lTransfertFunction.addPoint(0, 0, 0, 0);
+			lTransfertFunction.addPoint(0.502, 0.757, 0.561, 1);
+			break;
+
+		case 3:
+			lTransfertFunction.addPoint(0, 0, 0, 0);
+			lTransfertFunction.addPoint(1, 0.949, 0.667, 1);
+			break;
+
+		}
+		return lTransfertFunction;
+	}
 
 	/**
 	 * Returns gray level transfer function.
@@ -69,8 +99,6 @@ public class TransferFunctions
 		return lTransfertFunction;
 	}
 
-
-	
 	/**
 	 * Returns rainbow transfer function.
 	 * 
