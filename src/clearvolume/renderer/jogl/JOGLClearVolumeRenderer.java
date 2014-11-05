@@ -41,6 +41,15 @@ public abstract class JOGLClearVolumeRenderer	extends
 																							ClearVolumeRendererBase	implements
 																																			ClearGLEventListener
 {
+	static
+	{
+		ClearGLWindow.setWindowIcons(	"clearvolume/icon/ClearVolumeIcon16.png",
+																	"clearvolume/icon/ClearVolumeIcon32.png",
+																	"clearvolume/icon/ClearVolumeIcon64.png",
+																	"clearvolume/icon/ClearVolumeIcon128.png",
+																	"clearvolume/icon/ClearVolumeIcon256.png",
+																	"clearvolume/icon/ClearVolumeIcon512.png");
+	}
 
 	// ClearGL Window.
 	private ClearGLWindow mClearGLWindow;

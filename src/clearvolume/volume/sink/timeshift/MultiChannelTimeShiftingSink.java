@@ -16,6 +16,8 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 {
 	private static final float cCleanUpRatio = 0.25f;
 
+	private SwitchableSoftReferenceManager<Volume<?>> mSwitchableSoftReferenceManager;
+
 	private ReentrantLock lLock = new ReentrantLock();
 	private HashMap<Integer, TreeMap<Long, SwitchableSoftReference<Volume<?>>>> mChannelToVolumeListsMap = new HashMap<>();
 
@@ -32,6 +34,7 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 																			long pHardMemoryHoryzonInTimePointIndices)
 	{
 		super();
+		mSwitchableSoftReferenceManager = new SwitchableSoftReferenceManager<>();
 		mSoftMemoryHoryzonInTimePointIndices = Math.min(pSoftMemoryHoryzonInTimePointIndices,
 																										pHardMemoryHoryzonInTimePointIndices);
 		mHardMemoryHoryzonInTimePointIndices = Math.max(pHardMemoryHoryzonInTimePointIndices,
@@ -136,7 +139,11 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 
 	private SwitchableSoftReference<Volume<?>> wrapWithReference(Volume<?> pVolume)
 	{
-		return new SwitchableSoftReference<Volume<?>>(pVolume);
+		return mSwitchableSoftReferenceManager.wrapReference(	pVolume,
+																													() -> {
+																														System.out.println("CLEANING!");
+																														pVolume.makeAvailableToManager();
+																													});
 	}
 
 	private Volume<?> getVolumeToSend(int pVolumeChannelID)
