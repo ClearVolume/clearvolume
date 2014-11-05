@@ -40,7 +40,7 @@ public class MultiChannelTimeShiftingSinkTests
 
 		VolumeManager lManager = lMultiChannelTimeShiftingSink.getManager();
 
-		for (int i = 0; i < 5000000; i++)
+		for (int i = 0; i < 500; i++)
 		{
 
 			Volume<Byte> lVolume = lManager.requestAndWaitForVolume(1,
@@ -57,7 +57,7 @@ public class MultiChannelTimeShiftingSinkTests
 			lVolume.setIndex(lTimePoint);
 			lVolume.setVolumeChannelID(lChannel);
 
-			System.out.format("Sending timepoint=%d channel=%d \n",
+			/*System.out.format("Sending timepoint=%d channel=%d \n",
 												lTimePoint,
 												lChannel);/**/
 			lMultiChannelTimeShiftingSink.sendVolume(lVolume);
