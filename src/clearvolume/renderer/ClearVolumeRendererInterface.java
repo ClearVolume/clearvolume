@@ -4,8 +4,8 @@ import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
-import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.RotationControllerInterface;
+import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;

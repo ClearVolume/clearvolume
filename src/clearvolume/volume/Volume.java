@@ -6,7 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-public class Volume<T>
+import clearvolume.ClearVolumeCloseable;
+
+public class Volume<T> implements ClearVolumeCloseable
 {
 	private volatile VolumeManager mVolumeManager;
 
@@ -300,6 +302,12 @@ public class Volume<T>
 						+ ", mViewMatrix="
 						+ Arrays.toString(mViewMatrix)
 						+ "]";
+	}
+
+	@Override
+	public void close()
+	{
+		mVolumeData = null;
 	}
 
 }

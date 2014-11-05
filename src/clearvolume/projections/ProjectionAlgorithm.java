@@ -1,4 +1,4 @@
-package clearvolume;
+package clearvolume.projections;
 
 /**
  * Enum ProjectionAlgorithm

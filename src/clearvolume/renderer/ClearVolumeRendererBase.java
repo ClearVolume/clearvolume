@@ -9,8 +9,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.RotationControllerInterface;
+import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
@@ -592,7 +592,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setProjectionAlgorythm(clearvolume.ProjectionAlgorithm)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setProjectionAlgorythm(clearvolume.projections.ProjectionAlgorithm)
 	 */
 	@Override
 	public void setProjectionAlgorythm(final ProjectionAlgorithm pProjectionAlgorithm)

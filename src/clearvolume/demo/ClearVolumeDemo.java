@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
-import clearvolume.ProjectionAlgorithm;
 import clearvolume.controller.ExternalRotationController;
+import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;

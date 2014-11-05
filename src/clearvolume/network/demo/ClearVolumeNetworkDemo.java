@@ -27,9 +27,11 @@ public class ClearVolumeNetworkDemo
 	private static final int cHeight = 128 * cSizeMultFactor + 1;
 	private static final int cDepth = 128 * cSizeMultFactor + 3;
 	private static final int cNumberOfVolumes = 10000000;
+	private static final double cSecondsPerTimePoint = 0.1;
 
 	private static final int cNumberOfAvailableVolumes = 10;
 	private static final int cVolumeQueueLength = 11;
+
 
 	VolumeManager mVolumeManager = new VolumeManager(20);
 
@@ -60,6 +62,10 @@ public class ClearVolumeNetworkDemo
 																																				cWidth,
 																																				cHeight,
 																																				cDepth);
+
+					lVolume.setIndex(i);
+					lVolume.setTime(i * cSecondsPerTimePoint);
+
 					ByteBuffer lVolumeData = lVolume.getVolumeData();
 
 					lVolumeData.rewind();

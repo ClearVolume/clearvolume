@@ -1,11 +1,14 @@
 package clearvolume.network.client.main;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -27,6 +30,11 @@ public class ConnectionPanel extends JPanel
 	private JTextField mWindowSizeField;
 
 	private ClearVolumeTCPClientHelper mClearVolumeTCPClientHelper;
+	private JTextField mBytesPerVoxelTextField;
+
+	private JCheckBox mTimeShiftAndMultiChannelCheckBox;
+
+	private JCheckBox mMultiColorCheckBox;
 
 	public ConnectionPanel()
 	{
@@ -34,7 +42,7 @@ public class ConnectionPanel extends JPanel
 		ConnectionPanel lThis = this;
 		setLayout(new MigLayout("",
 														"[435.00px,grow][435.00px,grow]",
-														"[16px][16px][29px][10px:n,grow][10px:n,grow]"));
+														"[16px][16px][29px][50.00px:n,grow][10px:n,grow]"));
 		JLabel lblNewLabel = new JLabel("Enter IP address or hostname of ClearVolume server:");
 		add(lblNewLabel, "cell 0 0 2 1,alignx left,aligny top");
 
@@ -87,18 +95,58 @@ public class ConnectionPanel extends JPanel
 		});
 		lOptionsPanel.setLayout(null);
 
-		JLabel lWindowSizeLabel = new JLabel("Window size:");
-		lWindowSizeLabel.setBounds(6, 6, 82, 16);
+		JLabel lWindowSizeLabel = new JLabel("Window size");
+		lWindowSizeLabel.setHorizontalAlignment(SwingConstants.TRAILING);
+		lWindowSizeLabel.setBounds(6, 6, 108, 16);
 		lOptionsPanel.add(lWindowSizeLabel);
 
 		mWindowSizeField = new JTextField();
 		mWindowSizeField.setHorizontalAlignment(SwingConstants.TRAILING);
-		mWindowSizeField.setBounds(96, 6, 45, 16);
+		mWindowSizeField.setBounds(126, 6, 45, 16);
 		mWindowSizeField.setText("512");
 		mWindowSizeField.setBackground(new Color(220, 220, 220));
 		mWindowSizeField.setBorder(new EmptyBorder(0, 0, 0, 0));
 		lOptionsPanel.add(mWindowSizeField);
 		mWindowSizeField.setColumns(10);
+
+		JLabel lBytesPerVoxelLabel = new JLabel("Bytes-per-voxel");
+		lBytesPerVoxelLabel.setBounds(6, 32, 108, 16);
+		lOptionsPanel.add(lBytesPerVoxelLabel);
+
+		mBytesPerVoxelTextField = new JTextField();
+		mBytesPerVoxelTextField.setText("2");
+		mBytesPerVoxelTextField.setHorizontalAlignment(SwingConstants.TRAILING);
+		mBytesPerVoxelTextField.setColumns(10);
+		mBytesPerVoxelTextField.setBorder(new EmptyBorder(0, 0, 0, 0));
+		mBytesPerVoxelTextField.setBackground(new Color(220, 220, 220));
+		mBytesPerVoxelTextField.setBounds(126, 32, 45, 16);
+		lOptionsPanel.add(mBytesPerVoxelTextField);
+
+		JLabel lTimeShiftAndMultiChannelLabel = new JLabel("TimeShift & MultiChannel");
+		lTimeShiftAndMultiChannelLabel.setHorizontalAlignment(SwingConstants.TRAILING);
+		lTimeShiftAndMultiChannelLabel.setBounds(205, 6, 171, 16);
+		lOptionsPanel.add(lTimeShiftAndMultiChannelLabel);
+
+		mTimeShiftAndMultiChannelCheckBox = new JCheckBox("");
+		mTimeShiftAndMultiChannelCheckBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+		mTimeShiftAndMultiChannelCheckBox.setMinimumSize(new Dimension(	30,
+																																		30));
+		mTimeShiftAndMultiChannelCheckBox.setMaximumSize(new Dimension(	30,
+																																		30));
+		mTimeShiftAndMultiChannelCheckBox.setBounds(383, 3, 28, 20);
+		lOptionsPanel.add(mTimeShiftAndMultiChannelCheckBox);
+
+		JLabel lMultiColorLabel = new JLabel("MultiColor");
+		lMultiColorLabel.setHorizontalAlignment(SwingConstants.TRAILING);
+		lMultiColorLabel.setBounds(217, 32, 159, 16);
+		lOptionsPanel.add(lMultiColorLabel);
+
+		mMultiColorCheckBox = new JCheckBox("");
+		mMultiColorCheckBox.setMinimumSize(new Dimension(30, 30));
+		mMultiColorCheckBox.setMaximumSize(new Dimension(30, 30));
+		mMultiColorCheckBox.setAlignmentX(0.5f);
+		mMultiColorCheckBox.setBounds(383, 28, 28, 20);
+		lOptionsPanel.add(mMultiColorCheckBox);
 
 		mErrorTextArea = new JTextArea();
 		mErrorTextArea.setEditable(false);
@@ -129,10 +177,15 @@ public class ConnectionPanel extends JPanel
 		{
 			mErrorTextArea.setText("");
 			final int lWindowSize = Integer.parseInt(mWindowSizeField.getText());
+			final int lBytesPerVoxel = Integer.parseInt(mBytesPerVoxelTextField.getText());
+			final boolean lTimeShiftMultiChannel = mTimeShiftAndMultiChannelCheckBox.isSelected();
+			final boolean lMultiColor = mMultiColorCheckBox.isSelected();
 			Runnable lStartClientRunnable = () -> mClearVolumeTCPClientHelper.startClient(lServerAddressTextField.getText(),
 																																										ClearVolumeSerialization.cStandardTCPPort,
 																																										lWindowSize,
-																																										1);
+																																										lBytesPerVoxel,
+																																										lTimeShiftMultiChannel,
+																																										lMultiColor);
 			Thread lStartClientThread = new Thread(	lStartClientRunnable,
 																							"StartClientThread" + lServerAddressTextField.getText());
 			lStartClientThread.setDaemon(true);
@@ -145,5 +198,4 @@ public class ConnectionPanel extends JPanel
 			e.printStackTrace();
 		}
 	}
-
 }

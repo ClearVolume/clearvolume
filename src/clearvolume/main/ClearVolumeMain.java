@@ -39,7 +39,9 @@ public class ClearVolumeMain
 				ClearVolumeClientMain.connect(lCommandLineValues.mConnectHostName,
 																			lCommandLineValues.mConnectPort,
 																			lCommandLineValues.mWindowSize,
-																			lCommandLineValues.mBytesPerVoxel);
+																			lCommandLineValues.mBytesPerVoxel,
+																			lCommandLineValues.mTimeShiftAndMultiChannel,
+																			lCommandLineValues.mMultiColor);
 			else
 				ClearVolumeClientMain.main(args);
 		}

@@ -1,18 +1,21 @@
 package clearvolume.volume.sink.timeshift;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 
+import clearvolume.ClearVolumeCloseable;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.RelaySinkAdapter;
 import clearvolume.volume.sink.RelaySinkInterface;
 
 public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
-																																	RelaySinkInterface
+																																	RelaySinkInterface,
+																																	ClearVolumeCloseable
 {
 	private static final float cCleanUpRatio = 0.25f;
 
@@ -149,7 +152,7 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 	private Volume<?> getVolumeToSend(int pVolumeChannelID)
 	{
 		if (!mAvailableChannels.contains(mCurrentChannelID))
-			mAvailableChannels.lower(mCurrentChannelID);
+			mCurrentChannelID = mAvailableChannels.floor(mCurrentChannelID);
 
 		if (pVolumeChannelID != mCurrentChannelID)
 			return null;
@@ -220,5 +223,29 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 		return getRelaySink().getManager();
 	}
 
+	@Override
+	public void close()
+	{
+		for (Map.Entry<Integer, TreeMap<Long, SwitchableSoftReference<Volume<?>>>> lTimeLineForChannelEntry : mChannelToVolumeListsMap.entrySet())
+		{
+			TreeMap<Long, SwitchableSoftReference<Volume<?>>> lTimeLineTreeMap = lTimeLineForChannelEntry.getValue();
+
+			for (Map.Entry<Long, SwitchableSoftReference<Volume<?>>> lTimePointEntry : lTimeLineTreeMap.entrySet())
+			{
+				SwitchableSoftReference<Volume<?>> lVolumeSoftReference = lTimePointEntry.getValue();
+				Volume<?> lVolume = lVolumeSoftReference.get();
+				if (lVolume != null)
+					lVolume.close();
+				lVolumeSoftReference.soften();
+			}
+
+			lTimeLineTreeMap.clear();
+		}
+		mChannelToVolumeListsMap.clear();
+		mChannelToVolumeListsMap = null;
+
+		mAvailableChannels.clear();
+
+	}
 
 }

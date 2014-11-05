@@ -52,7 +52,9 @@ public class ClearVolumeClientMain
 	public static void connect(	String pHostName,
 															int pPortNumber,
 															int pWindowSize,
-															int pBytesPerVoxel)
+															int pBytesPerVoxel,
+															boolean pTimeShiftMultiChannel,
+															boolean pMultiColor)
 	{
 
 		ClearVolumeTCPClientHelper lClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper()
@@ -72,7 +74,9 @@ public class ClearVolumeClientMain
 		lClearVolumeTCPClientHelper.startClient(pHostName,
 																						pPortNumber,
 																						pWindowSize,
-																						pBytesPerVoxel);
+																						pBytesPerVoxel,
+																						pTimeShiftMultiChannel,
+																						pMultiColor);
 
 	}
 

@@ -11,7 +11,7 @@ public class ClearVolumeMainDemo
 	public void demoServer()
 	{
 		ClearVolumeMain.main(new String[]
-		{ "-demoserver" });
+		{ "--demo-server" });
 	}
 
 	@Test

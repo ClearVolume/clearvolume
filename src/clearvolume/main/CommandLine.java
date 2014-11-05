@@ -46,12 +46,20 @@ public class CommandLine
 	public int mConnectPort = ClearVolumeSerialization.cStandardTCPPort;
 
 	@Option(name = "-w", aliases =
-	{ "--window-size" }, usage = "Renderer window size")
+	{ "--window-size" }, usage = "renderer window size.")
 	public int mWindowSize = 512;
 
 	@Option(name = "-b", aliases =
-	{ "--bytes-per-voxel" }, usage = "Bytes per voxel")
+	{ "--bytes-per-voxel" }, usage = "bytes per voxel.")
 	public int mBytesPerVoxel = 1;
+
+	@Option(name = "-t", aliases =
+	{ "--tsmc" }, usage = "Time-shift & Multi-Channel mode.")
+	public boolean mTimeShiftAndMultiChannel;
+
+	@Option(name = "-mc", aliases =
+	{ "--multi-color" }, usage = "Multi-Color rendering.")
+	public boolean mMultiColor;
 
 	public boolean isDemoServer()
 	{
