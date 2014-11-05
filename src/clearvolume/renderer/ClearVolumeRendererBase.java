@@ -30,6 +30,12 @@ public abstract class ClearVolumeRendererBase	implements
 {
 
 	/**
+	 * Number of render layers.
+	 */
+	private int mNumberOfRenderLayers;
+	private volatile int mCurrentRenderLayerIndex = 0;
+
+	/**
 	 * Number of bytes per voxel used by this renderer
 	 */
 	private volatile int mBytesPerVoxel = 1;
@@ -73,14 +79,19 @@ public abstract class ClearVolumeRendererBase	implements
 
 	// data copy locking and waiting
 	private final Object mSetVolumeDataBufferLock = new Object();
-	private volatile ByteBuffer mVolumeDataByteBuffer;
+	private volatile ByteBuffer[] mVolumeDataByteBuffers;
 	private ReentrantLock mDataBufferCopyFinishedLock = new ReentrantLock();
 	private final Condition mDataBufferCopyFinishedCondition = mDataBufferCopyFinishedLock.newCondition();
-
 
 	// Control frame:
 	private JFrame mControlFrame;
 
+	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
+	{
+		super();
+		mNumberOfRenderLayers = pNumberOfRenderLayers;
+		mVolumeDataByteBuffers = new ByteBuffer[pNumberOfRenderLayers];
+	}
 
 	/**
 	 * Sets the number of bytes per voxel for this renderer. This is _usually_ set
@@ -607,7 +618,17 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	public ByteBuffer getVolumeDataBuffer()
 	{
-		return mVolumeDataByteBuffer;
+		return getVolumeDataBuffer(mCurrentRenderLayerIndex);
+	}
+
+	/**
+	 * Returns for a given index the corresponding volume data buffer.
+	 * 
+	 * @return
+	 */
+	public ByteBuffer getVolumeDataBuffer(final int pVolumeDataBufferIndex)
+	{
+		return mVolumeDataByteBuffers[pVolumeDataBufferIndex];
 	}
 
 	/**
@@ -616,7 +637,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	public void clearVolumeDataBufferReference()
 	{
-		mVolumeDataByteBuffer = null;
+		mVolumeDataByteBuffers[mCurrentRenderLayerIndex] = null;
 	}
 
 	/**
@@ -654,6 +675,30 @@ public abstract class ClearVolumeRendererBase	implements
 		mTranslationX = 0;
 		mTranslationY = 0;
 		mTranslationZ = -4;
+	}
+
+	@Override
+	public void setCurrentRenderLayer(int pLayerIndex)
+	{
+		mCurrentRenderLayerIndex = pLayerIndex;
+	}
+
+	@Override
+	public int getCurrentRenderLayer()
+	{
+		return mCurrentRenderLayerIndex;
+	}
+
+	@Override
+	public void setNumberOfRenderLayers(int pNumberOfRenderLayers)
+	{
+		mNumberOfRenderLayers = pNumberOfRenderLayers;
+	}
+
+	@Override
+	public int getNumberOfRenderLayers()
+	{
+		return mNumberOfRenderLayers;
 	}
 
 	/**
@@ -709,7 +754,7 @@ public abstract class ClearVolumeRendererBase	implements
 			mScaleY = (float) pVolumeSizeY;
 			mScaleZ = (float) pVolumeSizeZ;
 
-			mVolumeDataByteBuffer = pByteBuffer;
+			mVolumeDataByteBuffers[mCurrentRenderLayerIndex] = pByteBuffer;
 
 			notifyUpdateOfVolumeRenderingParameters();
 		}

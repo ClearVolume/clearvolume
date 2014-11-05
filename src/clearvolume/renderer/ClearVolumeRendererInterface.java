@@ -145,6 +145,35 @@ public interface ClearVolumeRendererInterface	extends
 	void setQuaternionController(RotationControllerInterface pRotationControllerInterface);
 
 	/**
+	 * Sets the current render layer.
+	 * 
+	 * @param pLayerIndex
+	 *          Layer to render the volume to.
+	 */
+	void setCurrentRenderLayer(int pLayerIndex);
+
+	/**
+	 * Gets the current render layer.
+	 *
+	 */
+	int getCurrentRenderLayer();
+
+
+	/**
+	 * Sets number of render layers.
+	 * 
+	 * @param pNumberOfRenderLayers
+	 *          Number of render layers
+	 */
+	void setNumberOfRenderLayers(int pNumberOfRenderLayers);
+
+	/**
+	 * Gets number of render layers.
+	 * 
+	 */
+	int getNumberOfRenderLayers();
+
+	/**
 	 * Updates the displayed volume with the provided volume data of voxel
 	 * dimensions (pSizeX,pSizeY,pSizeZ).
 	 * 
@@ -306,5 +335,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
+
+
 
 }

@@ -1,6 +1,7 @@
 package clearvolume.renderer.jogl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -8,9 +9,10 @@ import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
+
+import org.apache.commons.io.IOUtils;
 
 import cleargl.ClearGLEventListener;
 import cleargl.ClearGLWindow;
@@ -60,7 +62,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	protected GLPixelBufferObject mPixelBufferObject;
 
 	// texture and its dimensions.
-	private GLTexture<Byte> mTexture;
+	private GLTexture<Byte>[] mLayerTextures;
 
 	// Internal fields for calculating FPS.
 	private volatile int step = 0;
@@ -85,7 +87,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLVertexAttributeArray mPositionAttributeArray;
 	private GLUniform mQuadProjectionMatrixUniform;
 	private GLAttribute mTexCoordAttribute;
-	private GLUniform mTexUnit;
+	private GLUniform[] mTexUnits;
 	private GLVertexAttributeArray mTexCoordAttributeArray;
 
 	private GLAttribute mBoxPositionAttribute;
@@ -156,16 +158,53 @@ public abstract class JOGLClearVolumeRenderer	extends
 																	final int pMaxTextureWidth,
 																	final int pMaxTextureHeight)
 	{
+		this(	pWindowName,
+					pWindowWidth,
+					pWindowHeight,
+					pBytesPerVoxel,
+					pMaxTextureWidth,
+					pMaxTextureHeight,
+					1);
+	}
+
+	/**
+	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
+	 * name, its dimensions, number of bytes-per-voxel, max texture width, height
+	 * and number of render layers.
+	 * 
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 * @param pBytesPerVoxel
+	 * @param pMaxTextureWidth
+	 * @param pMaxTextureHeight
+	 * @param pNumberOfChannels
+	 */
+
+	@SuppressWarnings("unchecked")
+	public JOGLClearVolumeRenderer(	final String pWindowName,
+																	final int pWindowWidth,
+																	final int pWindowHeight,
+																	final int pBytesPerVoxel,
+																	final int pMaxTextureWidth,
+																	final int pMaxTextureHeight,
+																	final int pNumberOfRenderLayers)
+	{
+		super(pNumberOfRenderLayers);
 		mWindowName = pWindowName;
 		mLastWindowWidth = pMaxTextureWidth;
 		mLastWindowHeight = pMaxTextureHeight;
+		setNumberOfRenderLayers(pNumberOfRenderLayers);
+
+		mLayerTextures = new GLTexture[getNumberOfRenderLayers()];
+
 		resetBrightnessAndGammaAndTransferFunctionRanges();
 		resetRotationTranslation();
 		setBytesPerVoxel(pBytesPerVoxel);
 
 		// Initialize the GL component
 		final GLProfile lProfile = GLProfile.getMaxFixedFunc(true);
-		final GLCapabilities lCapabilities = new GLCapabilities(lProfile);
+		// final GLCapabilities lCapabilities = new GLCapabilities(lProfile);
 
 		mClearGLWindow = new ClearGLWindow(	pWindowName,
 																				pWindowWidth,
@@ -277,7 +316,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 */
 	public int getTextureWidth()
 	{
-		return mTexture.getWidth();
+		return mLayerTextures[getCurrentRenderLayer()].getWidth();
 	}
 
 	/**
@@ -285,7 +324,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 */
 	public int getTextureHeight()
 	{
-		return mTexture.getHeight();
+		return mLayerTextures[getCurrentRenderLayer()].getHeight();
 	}
 
 	/**
@@ -297,8 +336,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	}
 
 	/**
-	 * Implementation of GLEventListener: Called to initialise the GLAutoDrawable.
-	 * This method will initialise the JCudaDriver and cause the initialisation of
+	 * Implementation of GLEventListener: Called to initialize the GLAutoDrawable.
+	 * This method will initialize the JCudaDriver and cause the initialization of
 	 * CUDA and the OpenGL PBO.
 	 */
 	@Override
@@ -338,24 +377,50 @@ public abstract class JOGLClearVolumeRenderer	extends
 				mPixelBufferObject = null;
 			}
 
+			/*
 			if (mTexture != null)
 			{
 				mTexture.close();
 				mTexture = null;
-			}
+			}/**/
 
 			// texture display: construct the program and related objects
 			try
 			{
+				InputStream lVertexShaderResourceAsStream = JOGLClearVolumeRenderer.class.getResourceAsStream("shaders/tex_vert.glsl");
+				InputStream lFragmentShaderResourceAsStream = JOGLClearVolumeRenderer.class.getResourceAsStream("shaders/tex_frag.glsl");
+
+				String lVertexShaderSource = IOUtils.toString(lVertexShaderResourceAsStream,
+																											"UTF-8");
+				String lFragmentShaderSource = IOUtils.toString(lFragmentShaderResourceAsStream,
+																												"UTF-8");
+
+				for (int i = 1; i < getNumberOfRenderLayers(); i++)
+				{
+					String lStringToInsert1 = String.format("uniform sampler2D texUnit%d; \n//insertpoin1t",
+																									i);
+					String lStringToInsert2 = String.format("tempOutColor = max(tempOutColor,texture(texUnit%d, ftexcoord));\n//insertpoint2",
+																									i);
+
+					lFragmentShaderSource = lFragmentShaderSource.replace("//insertpoint1",
+																																lStringToInsert1);
+					lFragmentShaderSource = lFragmentShaderSource.replace("//insertpoint2",
+																																lStringToInsert2);
+				}
+				// System.out.println(lFragmentShaderSource);
+
 				mGLProgram = GLProgram.buildProgram(lGL4,
-																						JOGLClearVolumeRenderer.class,
-																						"shaders/tex_vert.glsl",
-																						"shaders/tex_frag.glsl");
+																						lVertexShaderSource,
+																						lFragmentShaderSource);
 				mQuadProjectionMatrixUniform = mGLProgram.getUniform("projection");
 				mPositionAttribute = mGLProgram.getAtribute("position");
 				mTexCoordAttribute = mGLProgram.getAtribute("texcoord");
-				mTexUnit = mGLProgram.getUniform("texUnit");
-				mTexUnit.set(0);
+				mTexUnits = new GLUniform[getNumberOfRenderLayers()];
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					mTexUnits[i] = mGLProgram.getUniform("texUnit" + i);
+					mTexUnits[i].set(i);
+				}
 
 				mQuadVertexArray = new GLVertexArray(mGLProgram);
 				mQuadVertexArray.bind();
@@ -391,18 +456,22 @@ public abstract class JOGLClearVolumeRenderer	extends
 																			getWindowWidth());
 				int lTextureHeight = Math.min(mMaxTextureHeight,
 																			getWindowHeight());
-				mTexture = new GLTexture<Byte>(	mGLProgram,
-																				Byte.class,
-																				4,
-																				lTextureWidth,
-																				lTextureHeight,
-																				1,
-																				true,
-																				3);
+
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					mLayerTextures[i] = new GLTexture<Byte>(mGLProgram,
+																									Byte.class,
+																									4,
+																									lTextureWidth,
+																									lTextureHeight,
+																									1,
+																									true,
+																									3);
+				}
 
 				mPixelBufferObject = new GLPixelBufferObject(	mGLProgram,
-																											mTexture.getWidth(),
-																											mTexture.getHeight());
+																											lTextureWidth,
+																											lTextureHeight);
 
 				mPixelBufferObject.copyFrom(null);
 
@@ -489,7 +558,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	}
 
 	/**
-	 * @return
+	 * @return true if the implemented renderer initialized successfully.
 	 */
 	protected abstract boolean initVolumeRenderer();
 
@@ -545,11 +614,13 @@ public abstract class JOGLClearVolumeRenderer	extends
 		if (renderVolume(	lInvVolumeMatrix.getFloatArray(),
 											lInvProjection.getFloatArray()))
 		{
-			mTexture.copyFrom(mPixelBufferObject);
+			mLayerTextures[getCurrentRenderLayer()].copyFrom(mPixelBufferObject);
 
 			mGLProgram.use(lGL4);
+			mGLProgram.bind();
 
-			mTexture.bind(mGLProgram);
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				mLayerTextures[i].bind(i);
 
 			mQuadProjectionMatrixUniform.setFloatMatrix(mQuadProjectionMatrix.getFloatArray(),
 																									false);
@@ -672,7 +743,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void dispose(final GLAutoDrawable arg0)
 	{
-		mTexture.close();
+		for (int i = 0; i < getNumberOfRenderLayers(); i++)
+		{
+			mLayerTextures[i].close();
+		}
 		mPixelBufferObject.close();
 	}
 
@@ -749,6 +823,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 			}
 		}
 	}
+
 
 	/**
 	 * 
