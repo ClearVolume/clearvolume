@@ -12,6 +12,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import clearvolume.network.client.ClearVolumeTCPClientHelper;
+import clearvolume.utils.ClearVolumeJFrame;
 
 public class ClearVolumeClientMain
 {
@@ -80,6 +81,7 @@ public class ClearVolumeClientMain
 	 */
 	public ClearVolumeClientMain()
 	{
+		super();
 		initialize();
 	}
 
@@ -88,7 +90,7 @@ public class ClearVolumeClientMain
 	 */
 	private void initialize()
 	{
-		mApplicationJFrame = new JFrame();
+		mApplicationJFrame = new ClearVolumeJFrame();
 		mApplicationJFrame.getContentPane().setBackground(Color.WHITE);
 		mApplicationJFrame.setBounds(100, 100, 529, 372);
 		mApplicationJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

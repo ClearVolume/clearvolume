@@ -8,10 +8,17 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import clearvolume.utils.ClearVolumeJFrame;
 import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
 
-public class MultiChannelTimeShiftingSinkJFrame extends JFrame
+public class MultiChannelTimeShiftingSinkJFrame	extends
+																								ClearVolumeJFrame
 {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private JPanel mContentPane;
 

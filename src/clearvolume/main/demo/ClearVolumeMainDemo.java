@@ -8,14 +8,14 @@ public class ClearVolumeMainDemo
 {
 
 	@Test
-	public void testDemoServer()
+	public void demoServer()
 	{
 		ClearVolumeMain.main(new String[]
 		{ "-demoserver" });
 	}
 
 	@Test
-	public void testClient() throws InterruptedException
+	public void demoClient() throws InterruptedException
 	{
 		ClearVolumeMain.main(new String[] {});
 		Thread.sleep(10000000);
