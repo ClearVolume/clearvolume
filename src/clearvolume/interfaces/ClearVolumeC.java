@@ -507,7 +507,7 @@ public class ClearVolumeC
 	// bbuf_out= (*env)->GetDirectBufferAddress(env, buf2);
 	// The return type of GetDirectBufferAddress is void*, you need to cast it to
 	// a jbyte*: bbuf_in = (jbyte*)(env*)->GetDirectBufferAddress(env, buf1); //C
-	// bbuf_in = (jbyte*)env->GetDirectBufferAddress(buf1); //c++ –
+	// bbuf_in = (jbyte*)env->GetDirectBufferAddress(buf1); //c++
 
 	private static final <T> Pointer<T> getBridJPointer(final long pBufferAddress,
 																											final long pBufferLength,
