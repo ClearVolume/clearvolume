@@ -26,7 +26,7 @@ public class ClearVolumeSerialization
 
 		final int lHeaderLength = lStringBuilder.length();
 
-		final long lDataLength = pVolume.getVolumeDataSizeInBytes();
+		final long lDataLength = pVolume.getDataSizeInBytes();
 		int lNeededBufferLength = toIntExact(3 * cLongSizeInBytes
 																					+ lHeaderLength
 																					+ lDataLength);
@@ -51,8 +51,8 @@ public class ClearVolumeSerialization
 	{
 		LinkedHashMap<String, String> lHeaderMap = new LinkedHashMap<String, String>();
 		lHeaderMap.put("index", "" + pVolume.getIndex());
-		lHeaderMap.put("time", "" + pVolume.getTime());
-		lHeaderMap.put("channel", "" + pVolume.getVolumeChannelID());
+		lHeaderMap.put("time", "" + pVolume.getTimeInSeconds());
+		lHeaderMap.put("channel", "" + pVolume.getChannelID());
 		lHeaderMap.put("dim", "" + pVolume.getDimension());
 		lHeaderMap.put("type", "" + pVolume.getTypeName());
 		lHeaderMap.put("bytespervoxel",
@@ -92,17 +92,17 @@ public class ClearVolumeSerialization
 		final double lHeightReal = Double.parseDouble(lHeaderMap.get("heightreal"));
 		final double lDepthReal = Double.parseDouble(lHeaderMap.get("depthreal"));
 
-		pVolume.setIndex(lIndex);
-		pVolume.setTime(lTime);
+		pVolume.setTimeIndex(lIndex);
+		pVolume.setTimeInSeconds(lTime);
 		pVolume.setType(lType);
-		pVolume.setVolumeChannelID(lVolumeChannelID);
+		pVolume.setChannelID(lVolumeChannelID);
 		pVolume.setDimension(lDim);
-		pVolume.setVolumeDimensionsInVoxels(lElementSize,
+		pVolume.setDimensionsInVoxels(lElementSize,
 																				lWidthVoxels,
 																				lHeightVoxels,
 																				lDepthVoxels);
 
-		pVolume.setVolumeDimensionsInRealUnits(	lRealUnitName,
+		pVolume.setDimensionsInRealUnits(	lRealUnitName,
 																						lWidthReal,
 																						lHeightReal,
 																						lDepthReal);
@@ -214,13 +214,13 @@ public class ClearVolumeSerialization
 															Volume<?> pVolume)
 	{
 
-		if (pVolume.getVolumeData() == null || pVolume.getVolumeData()
+		if (pVolume.getDataBuffer() == null || pVolume.getDataBuffer()
 																									.capacity() != pDataLength)
 		{
 			ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(toIntExact(pDataLength));
 			lByteBuffer.order(ByteOrder.nativeOrder());
 			lByteBuffer.clear();
-			pVolume.setVolumeData(lByteBuffer);
+			pVolume.setDataBuffer(lByteBuffer);
 		}
 
 		pVolume.readFromByteBuffer(pByteBuffer);

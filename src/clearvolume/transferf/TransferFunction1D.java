@@ -59,6 +59,7 @@ public class TransferFunction1D implements TransferFunction
 	 * 
 	 * @see clearvolume.transferf.TransferFunction#getArray()
 	 */
+	@Override
 	public float[] getArray()
 	{
 		return mTransferFunctionList.toArray();
@@ -74,4 +75,12 @@ public class TransferFunction1D implements TransferFunction
 	{
 		return 1;
 	}
+
+	@Override
+	public String toString()
+	{
+		return String.format(	"TransferFunction1D [mTransferFunctionList=%s]",
+													mTransferFunctionList);
+	}
+
 }

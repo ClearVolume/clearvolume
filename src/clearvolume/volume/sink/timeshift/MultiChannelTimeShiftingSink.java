@@ -10,8 +10,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
-import clearvolume.volume.sink.RelaySinkAdapter;
-import clearvolume.volume.sink.RelaySinkInterface;
+import clearvolume.volume.sink.relay.RelaySinkAdapter;
+import clearvolume.volume.sink.relay.RelaySinkInterface;
 
 public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 																																	RelaySinkInterface,
@@ -110,7 +110,7 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 	public void sendVolume(Volume<?> pVolume)
 	{
 
-		int lVolumeChannelID = pVolume.getVolumeChannelID();
+		int lVolumeChannelID = pVolume.getChannelID();
 		mAvailableChannels.add(lVolumeChannelID);
 		TreeMap<Long, SwitchableSoftReference<Volume<?>>> lTimePointIndexToVolumeMapReference = mChannelToVolumeListsMap.get(lVolumeChannelID);
 

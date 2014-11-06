@@ -3,8 +3,7 @@ package clearvolume.renderer;
 import java.awt.BorderLayout;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -80,8 +79,7 @@ public abstract class ClearVolumeRendererBase	implements
 	// data copy locking and waiting
 	private final Object[] mSetVolumeDataBufferLocks;
 	private volatile ByteBuffer[] mVolumeDataByteBuffers;
-	private ReentrantLock[] mDataBufferCopyFinishedLocks;
-	private Condition[] mDataBufferCopyFinishedConditions;
+	private AtomicIntegerArray mDataBufferCopyIsFinished;
 
 	// Control frame:
 	private JFrame mControlFrame;
@@ -92,14 +90,12 @@ public abstract class ClearVolumeRendererBase	implements
 		mNumberOfRenderLayers = pNumberOfRenderLayers;
 		mSetVolumeDataBufferLocks = new Object[pNumberOfRenderLayers];
 		mVolumeDataByteBuffers = new ByteBuffer[pNumberOfRenderLayers];
-		mDataBufferCopyFinishedLocks = new ReentrantLock[pNumberOfRenderLayers];
-		mDataBufferCopyFinishedConditions = new Condition[pNumberOfRenderLayers];
+		mDataBufferCopyIsFinished = new AtomicIntegerArray(pNumberOfRenderLayers);
 		mTransferFunctions = new TransferFunction[pNumberOfRenderLayers];
 		for (int i = 0; i < pNumberOfRenderLayers; i++)
 		{
 			mSetVolumeDataBufferLocks[i] = new Object();
-			mDataBufferCopyFinishedLocks[i] = new ReentrantLock();
-			mDataBufferCopyFinishedConditions[i] = mDataBufferCopyFinishedLocks[i].newCondition();
+			mDataBufferCopyIsFinished.set(i, 0);
 			mTransferFunctions[i] = TransferFunctions.getGradientForColor(i);
 		}
 
@@ -769,6 +765,7 @@ public abstract class ClearVolumeRendererBase	implements
 			mVolumeDataByteBuffers[mCurrentRenderLayerIndex] = pByteBuffer;
 
 			notifyUpdateOfVolumeRenderingParameters();
+			clearCompletionOfDataBufferCopy(mCurrentRenderLayerIndex);
 		}
 	}
 
@@ -777,7 +774,7 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		synchronized (getSetVolumeDataBufferLock(mCurrentRenderLayerIndex))
 		{
-			setVolumeDataBuffer(pVolume.getVolumeData(),
+			setVolumeDataBuffer(pVolume.getDataBuffer(),
 													pVolume.getWidthInVoxels(),
 													pVolume.getHeightInVoxels(),
 													pVolume.getDepthInVoxels(),
@@ -798,15 +795,15 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	public void notifyCompletionOfDataBufferCopy(final int pRenderLayerIndex)
 	{
-		mDataBufferCopyFinishedLocks[pRenderLayerIndex].lock();
-		try
-		{
-			mDataBufferCopyFinishedConditions[pRenderLayerIndex].signal();
-		}
-		finally
-		{
-			mDataBufferCopyFinishedLocks[pRenderLayerIndex].unlock();
-		}
+		mDataBufferCopyIsFinished.set(pRenderLayerIndex, 1);
+	}
+
+	/**
+	 * Clears data copy buffer flag.
+	 */
+	public void clearCompletionOfDataBufferCopy(final int pRenderLayerIndex)
+	{
+		mDataBufferCopyIsFinished.set(pRenderLayerIndex, 0);
 	}
 
 	/**
@@ -818,10 +815,9 @@ public abstract class ClearVolumeRendererBase	implements
 	public boolean waitToFinishDataBufferCopy(long pTimeOut,
 																						TimeUnit pTimeUnit)
 	{
-		boolean lNoTimeOut = true;
-		for (int i = 0; i < getNumberOfRenderLayers(); i++)
-			lNoTimeOut &= waitToFinishDataBufferCopy(i, pTimeOut, pTimeUnit);
-		return lNoTimeOut;
+		return waitToFinishDataBufferCopy(getCurrentRenderLayer(),
+																			pTimeOut,
+																			pTimeUnit);
 	}
 
 	/**
@@ -834,25 +830,21 @@ public abstract class ClearVolumeRendererBase	implements
 																						long pTimeOut,
 																						TimeUnit pTimeUnit)
 	{
-		mDataBufferCopyFinishedLocks[pRenderLayerIndex].lock();
-		try
+		boolean lNoTimeOut = true;
+		long lStartTimeInNanoseconds = System.nanoTime();
+		long lTimeOutTimeInNanoseconds = lStartTimeInNanoseconds+TimeUnit.NANOSECONDS.convert(pTimeOut,pTimeUnit);
+		while ((lNoTimeOut = System.nanoTime() < lTimeOutTimeInNanoseconds) && mDataBufferCopyIsFinished.get(pRenderLayerIndex) == 0)
 		{
 			try
 			{
-				return mDataBufferCopyFinishedConditions[pRenderLayerIndex].await(pTimeOut,
-																																					pTimeUnit);
+				Thread.sleep(1);
 			}
 			catch (InterruptedException e)
 			{
-				return waitToFinishDataBufferCopy(pRenderLayerIndex,
-																					pTimeOut,
-																					pTimeUnit);
+				e.printStackTrace();
 			}
 		}
-		finally
-		{
-			mDataBufferCopyFinishedLocks[pRenderLayerIndex].unlock();
-		}
+		return !lNoTimeOut;
 	}
 
 	/**

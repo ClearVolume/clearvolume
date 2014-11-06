@@ -18,7 +18,7 @@ import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
-import clearvolume.volume.sink.ClearVolumeRendererSink;
+import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 
 public class ClearVolumeNetworkDemo
 {
@@ -63,10 +63,10 @@ public class ClearVolumeNetworkDemo
 																																				cHeight,
 																																				cDepth);
 
-					lVolume.setIndex(i);
-					lVolume.setTime(i * cSecondsPerTimePoint);
+					lVolume.setTimeIndex(i);
+					lVolume.setTimeInSeconds(i * cSecondsPerTimePoint);
 
-					ByteBuffer lVolumeData = lVolume.getVolumeData();
+					ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
 					lVolumeData.rewind();
 

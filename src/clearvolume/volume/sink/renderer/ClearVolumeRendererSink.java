@@ -1,11 +1,16 @@
-package clearvolume.volume.sink;
+package clearvolume.volume.sink.renderer;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
+import clearvolume.transferf.TransferFunction;
+import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
+import clearvolume.volume.sink.NullVolumeSink;
+import clearvolume.volume.sink.relay.RelaySinkAdapter;
+import clearvolume.volume.sink.relay.RelaySinkInterface;
 
 public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 																															RelaySinkInterface
@@ -32,7 +37,8 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 	@Override
 	public void sendVolume(Volume<?> pVolume)
 	{
-		final ByteBuffer lVolumeDataBuffer = pVolume.getVolumeData();
+
+		final ByteBuffer lVolumeDataBuffer = pVolume.getDataBuffer();
 		final long lVoxelWidth = pVolume.getWidthInVoxels();
 		final long lVoxelHeight = pVolume.getHeightInVoxels();
 		final long lVoxelDepth = pVolume.getDepthInVoxels();
@@ -41,6 +47,20 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		final double lRealHeight = pVolume.getHeightInRealUnits();
 		final double lRealDepth = pVolume.getDepthInRealUnits();
 
+		final int lChannelID = pVolume.getChannelID();
+		final int lNumberOfRenderLayers = mClearVolumeRendererInterface.getNumberOfRenderLayers();
+		final int lRenderLayer = lChannelID % lNumberOfRenderLayers;
+
+		mClearVolumeRendererInterface.setCurrentRenderLayer(lRenderLayer);
+
+		TransferFunction lTransferFunction;
+		final float[] lColor = pVolume.getColor();
+		if (lColor != null)
+			lTransferFunction = TransferFunctions.getGradientForColor(lColor);
+		else
+			lTransferFunction = TransferFunctions.getGradientForColor(lRenderLayer);
+
+		mClearVolumeRendererInterface.setTransfertFunction(lTransferFunction);
 		mClearVolumeRendererInterface.setVolumeDataBuffer(lVolumeDataBuffer,
 																											lVoxelWidth,
 																											lVoxelHeight,
@@ -50,7 +70,9 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 																											lRealDepth);
 
 		mClearVolumeRendererInterface.requestDisplay();
-		mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	mWaitForCopyTimeout,
+
+		mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	lRenderLayer,
+																															mWaitForCopyTimeout,
 																															mTimeUnit);
 
 		if (getRelaySink() != null)

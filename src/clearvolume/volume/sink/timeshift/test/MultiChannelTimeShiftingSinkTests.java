@@ -54,8 +54,8 @@ public class MultiChannelTimeShiftingSinkTests
 			final int lTimePoint = i / 2;
 			final int lChannel = i % 2;
 
-			lVolume.setIndex(lTimePoint);
-			lVolume.setVolumeChannelID(lChannel);
+			lVolume.setTimeIndex(lTimePoint);
+			lVolume.setChannelID(lChannel);
 
 			/*System.out.format("Sending timepoint=%d channel=%d \n",
 												lTimePoint,

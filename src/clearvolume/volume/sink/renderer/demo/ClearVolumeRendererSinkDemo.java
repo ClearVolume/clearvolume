@@ -1,4 +1,4 @@
-package clearvolume.volume.sink.timeshift.demo;
+package clearvolume.volume.sink.renderer.demo;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
@@ -9,13 +9,11 @@ import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
-import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
-import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
-import clearvolume.volume.sink.timeshift.gui.MultiChannelTimeShiftingSinkJFrame;
 
-public class MultiChannelTimeShiftingSinkDemo
+public class ClearVolumeRendererSinkDemo
 {
+
 	private static final int cSizeMultFactor = 1;
 	private static final int cWidth = 128 * cSizeMultFactor;
 	private static final int cHeight = 128 * cSizeMultFactor + 1;
@@ -24,26 +22,21 @@ public class MultiChannelTimeShiftingSinkDemo
 	@Test
 	public void demo() throws InterruptedException
 	{
-		ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"TimeShift And MultiChannel Demo",
+		ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeRendererSink Demo",
 																																																		512,
 																																																		512,
-																																																		1);
+																																																		1,
+																																																		512,
+																																																		512,
+																																																		2);
 		lClearVolumeRenderer.setVisible(true);
 
 		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
 																																										lClearVolumeRenderer.createCompatibleVolumeManager(200),
 																																										100,
 																																										TimeUnit.MILLISECONDS);
-		lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
-		MultiChannelTimeShiftingSink lMultiChannelTimeShiftingSink = new MultiChannelTimeShiftingSink(50,
-																																																	100);
-
-		MultiChannelTimeShiftingSinkJFrame.launch(lMultiChannelTimeShiftingSink);
-
-		lMultiChannelTimeShiftingSink.setRelaySink(lClearVolumeRendererSink);
-
-		VolumeManager lManager = lMultiChannelTimeShiftingSink.getManager();
+		VolumeManager lManager = lClearVolumeRendererSink.getManager();
 
 		final int lMaxVolumesSent = 1000;
 		for (int i = 0; i < lMaxVolumesSent; i++)
@@ -62,27 +55,36 @@ public class MultiChannelTimeShiftingSinkDemo
 			ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
 			lVolumeData.rewind();
+			for (int j = 0; j < lVolumeData.limit(); j++)
+				lVolumeData.put((byte) 0);
 
 			final int lDepth = (int) (cDepth * (1.0 * i / lMaxVolumesSent));
 
+			lVolumeData.rewind();
 			for (int z = 0; z < lDepth; z++)
-				for (int y = 0; y < cHeight / (1 + lChannel); y++)
-					for (int x = 0; x < cWidth / (1 + lChannel); x++)
+				for (int y = 0; y < cHeight; y++)
+					for (int x = 0; x < cWidth; x++)
 					{
 						final int lIndex = x + cWidth * y + cWidth * cHeight * z;
 
 						byte lByteValue = (byte) (((byte) lTimePoint ^ (byte) x
 																				^ (byte) y ^ (byte) z));
 
+						if (lChannel == 1)
+							lByteValue = (byte) ((byte) 117 ^ lByteValue);
+
 						lVolumeData.put(lIndex, lByteValue);
 					}/**/
 
 			lVolume.setTimeIndex(lTimePoint);
+			lVolume.setTimeInSeconds(0.1 * lTimePoint);
 			lVolume.setChannelID(lChannel);
 
-			lMultiChannelTimeShiftingSink.sendVolume(lVolume);
+			// if (lChannel == 0)
+			lClearVolumeRendererSink.sendVolume(lVolume);
 
 			Thread.sleep(50);
 		}
 	}
+
 }

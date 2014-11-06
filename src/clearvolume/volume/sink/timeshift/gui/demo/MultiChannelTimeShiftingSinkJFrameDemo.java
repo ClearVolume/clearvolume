@@ -24,7 +24,7 @@ public class MultiChannelTimeShiftingSinkJFrameDemo
 			{
 				System.out.format("---> Received timepoint=%d channel=%d \n",
 													pVolume.getIndex(),
-													pVolume.getVolumeChannelID());
+													pVolume.getChannelID());
 			}
 
 			@Override
@@ -56,8 +56,8 @@ public class MultiChannelTimeShiftingSinkJFrameDemo
 			final int lTimePoint = i / 2;
 			final int lChannel = i % 2;
 
-			lVolume.setIndex(lTimePoint);
-			lVolume.setVolumeChannelID(lChannel);
+			lVolume.setTimeIndex(lTimePoint);
+			lVolume.setChannelID(lChannel);
 
 			System.out.format("Sending timepoint=%d channel=%d \n",
 												lTimePoint,

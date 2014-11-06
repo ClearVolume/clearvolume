@@ -19,9 +19,9 @@ import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
-import clearvolume.volume.sink.ClearVolumeRendererSink;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.VolumeSinkInterface;
+import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.MultiChannelTimeShiftingSinkJFrame;
 
@@ -399,20 +399,20 @@ public class ClearVolumeC
 																																							pHeightInVoxels,
 																																							pDepthInVoxels);
 
-			lRequestedVolume.setVolumeChannelID(pChannelId);
+			lRequestedVolume.setChannelID(pChannelId);
 			final Integer lIndex = sIDToVolumeIndex.get(pSinkId);
 			if (lIndex != null)
-				lRequestedVolume.setIndex(lIndex);
+				lRequestedVolume.setTimeIndex(lIndex);
 			final Double lTimeInSeconds = sIDToVolumeTimeInSeconds.get(pSinkId);
 			if (lTimeInSeconds != null)
-				lRequestedVolume.setTime(lTimeInSeconds);
+				lRequestedVolume.setTimeInSeconds(lTimeInSeconds);
 
 			double[] lDimensionsInRealUnit = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 			if (lDimensionsInRealUnit != null)
-				lRequestedVolume.setVolumeDimensionsInRealUnits("um",
+				lRequestedVolume.setDimensionsInRealUnits("um",
 																												lDimensionsInRealUnit);
 
-			ByteBuffer lVolumeData = lRequestedVolume.getVolumeData();
+			ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
 			lVolumeData.clear();
 			pByteBuffer.rewind();
 			lVolumeData.put(pByteBuffer);
@@ -471,20 +471,20 @@ public class ClearVolumeC
 																																									pHeightInVoxels,
 																																									pDepthInVoxels);
 
-			lRequestedVolume.setVolumeChannelID(pChannelId);
+			lRequestedVolume.setChannelID(pChannelId);
 			final Integer lIndex = sIDToVolumeIndex.get(pSinkId);
 			if (lIndex != null)
-				lRequestedVolume.setIndex(lIndex);
+				lRequestedVolume.setTimeIndex(lIndex);
 			final Double lTimeInSeconds = sIDToVolumeTimeInSeconds.get(pSinkId);
 			if (lTimeInSeconds != null)
-				lRequestedVolume.setTime(lTimeInSeconds);
+				lRequestedVolume.setTimeInSeconds(lTimeInSeconds);
 
 			double[] lDimensionsInRealUnit = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 			if (lDimensionsInRealUnit != null)
-				lRequestedVolume.setVolumeDimensionsInRealUnits("um",
+				lRequestedVolume.setDimensionsInRealUnits("um",
 																												lDimensionsInRealUnit);
 
-			ByteBuffer lVolumeData = lRequestedVolume.getVolumeData();
+			ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
 			lVolumeData.clear();
 			pByteBuffer.rewind();
 			lVolumeData.put(pByteBuffer);
@@ -555,13 +555,13 @@ public class ClearVolumeC
 																																							pHeightInVoxels,
 																																							pDepthInVoxels);
 
-			lRequestedVolume.setVolumeChannelID(pChannelId);
-			lRequestedVolume.setIndex(sIDToVolumeIndex.get(pSinkId));
-			lRequestedVolume.setTime(sIDToVolumeTimeInSeconds.get(pSinkId));
-			lRequestedVolume.setVolumeDimensionsInRealUnits("um",
+			lRequestedVolume.setChannelID(pChannelId);
+			lRequestedVolume.setTimeIndex(sIDToVolumeIndex.get(pSinkId));
+			lRequestedVolume.setTimeInSeconds(sIDToVolumeTimeInSeconds.get(pSinkId));
+			lRequestedVolume.setDimensionsInRealUnits("um",
 																											sIDToVolumeDimensionsInRealUnit.get(pSinkId));
 
-			ByteBuffer lVolumeData = lRequestedVolume.getVolumeData();
+			ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
 			lVolumeData.clear();
 			pByteBuffer.rewind();
 			lVolumeData.put(pByteBuffer);

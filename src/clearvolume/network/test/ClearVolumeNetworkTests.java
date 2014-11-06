@@ -18,9 +18,9 @@ import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
-import clearvolume.volume.sink.ClearVolumeRendererSink;
 import clearvolume.volume.sink.VolumeSinkAdapter;
 import clearvolume.volume.sink.VolumeSinkInterface;
+import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 
 public class ClearVolumeNetworkTests
 {
@@ -101,7 +101,7 @@ public class ClearVolumeNetworkTests
 																																							cDepth);
 		for (int i = 0; i < pNumberOfVolumes; i++)
 		{
-			ByteBuffer lVolumeData = lVolume.getVolumeData();
+			ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
 			lVolumeData.rewind();
 			for (int z = 0; z < cWidth; z++)

@@ -1,4 +1,6 @@
-package clearvolume.volume.sink;
+package clearvolume.volume.sink.relay;
+
+import clearvolume.volume.sink.VolumeSinkInterface;
 
 
 public interface RelaySinkInterface extends VolumeSinkInterface

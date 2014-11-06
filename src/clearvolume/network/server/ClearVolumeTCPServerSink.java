@@ -9,8 +9,8 @@ import java.nio.channels.ServerSocketChannel;
 import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
-import clearvolume.volume.sink.RelaySinkAdapter;
-import clearvolume.volume.sink.RelaySinkInterface;
+import clearvolume.volume.sink.relay.RelaySinkAdapter;
+import clearvolume.volume.sink.relay.RelaySinkInterface;
 import clearvolume.volume.source.SourceToSinkBufferedAdapter;
 
 public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements

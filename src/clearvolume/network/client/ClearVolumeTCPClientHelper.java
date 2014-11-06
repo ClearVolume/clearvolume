@@ -11,9 +11,9 @@ import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
-import clearvolume.volume.sink.ClearVolumeRendererSink;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.VolumeSinkInterface;
+import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.MultiChannelTimeShiftingSinkJFrame;
 

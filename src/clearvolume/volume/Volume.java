@@ -12,17 +12,19 @@ public class Volume<T> implements ClearVolumeCloseable
 {
 	private volatile VolumeManager mVolumeManager;
 
-	private ByteBuffer mVolumeData;
+	private ByteBuffer mDataBuffer;
 	private Class<T> mType;
-	private long[] mVolumeDimensionsInVoxels;
-	private double[] mVolumeDimensionsInRealUnits;
+	private long[] mDimensionsInVoxels;
+	private double[] mDimensionsInRealUnits;
 	private volatile String mRealUnitName;
 
-	private volatile int mVolumeChannelID;
-	private float[] mViewMatrix;
+	private volatile int mChannelID;
+	private float[] mColor = null;
+	private float[] mViewMatrix = null;
 
-	private volatile long mVolumeIndex;
-	private volatile double mVolumeTime;
+	private volatile long mTimeIndex;
+	private volatile double mTimeInSeconds;
+
 
 	public Volume()
 	{
@@ -32,10 +34,10 @@ public class Volume<T> implements ClearVolumeCloseable
 	{
 		super();
 		mType = pType;
-		mVolumeDimensionsInVoxels = pDimensions;
-		final long lBufferLength = getVolumeDataSizeInBytes();
+		mDimensionsInVoxels = pDimensions;
+		final long lBufferLength = getDataSizeInBytes();
 		final int lBufferLengthInt = toIntExact(lBufferLength);
-		mVolumeData = ByteBuffer.allocateDirect(lBufferLengthInt)
+		mDataBuffer = ByteBuffer.allocateDirect(lBufferLengthInt)
 														.order(ByteOrder.nativeOrder());
 	}
 
@@ -53,38 +55,38 @@ public class Volume<T> implements ClearVolumeCloseable
 																				long... pDimensions)
 	{
 		return (mType == pType && Arrays.equals(pDimensions,
-																						mVolumeDimensionsInVoxels));
+																						mDimensionsInVoxels));
 	}
 
-	public long getVolumeDataSizeInBytes()
+	public long getDataSizeInBytes()
 	{
 		long lVolumeDataSize = getBytesPerVoxel();
-		for (int i = 0; i < getVolumeDimensionsInVoxels().length; i++)
-			lVolumeDataSize *= getVolumeDimensionsInVoxels()[i];
+		for (int i = 0; i < getDimensionsInVoxels().length; i++)
+			lVolumeDataSize *= getDimensionsInVoxels()[i];
 		return lVolumeDataSize;
 	}
 
-	public void setVolumeDimensionsInVoxels(long... pDimensionsInVoxels)
+	public void setDimensionsInVoxels(long... pDimensionsInVoxels)
 	{
-		mVolumeDimensionsInVoxels = pDimensionsInVoxels;
+		mDimensionsInVoxels = pDimensionsInVoxels;
 	}
 
-	public void setVolumeDimensionsInRealUnits(	String pRealUnitName,
+	public void setDimensionsInRealUnits(	String pRealUnitName,
 																							double... VolumeDimensionsInRealUnits)
 	{
 		setRealUnitName(pRealUnitName);
-		mVolumeDimensionsInRealUnits = VolumeDimensionsInRealUnits;
+		mDimensionsInRealUnits = VolumeDimensionsInRealUnits;
 
 	}
 
-	public void setVolumeData(ByteBuffer pByteBuffer)
+	public void setDataBuffer(ByteBuffer pByteBuffer)
 	{
-		mVolumeData = pByteBuffer;
+		mDataBuffer = pByteBuffer;
 	}
 
-	public ByteBuffer getVolumeData()
+	public ByteBuffer getDataBuffer()
 	{
-		return mVolumeData;
+		return mDataBuffer;
 	}
 
 	public void setType(String pType)
@@ -126,18 +128,18 @@ public class Volume<T> implements ClearVolumeCloseable
 
 	public void setDimension(int pDim)
 	{
-		mVolumeDimensionsInVoxels = new long[pDim + 1];
-		mVolumeDimensionsInRealUnits = new double[pDim + 1];
+		mDimensionsInVoxels = new long[pDim + 1];
+		mDimensionsInRealUnits = new double[pDim + 1];
 	}
 
 	public int getDimension()
 	{
-		return mVolumeDimensionsInVoxels.length - 1;
+		return mDimensionsInVoxels.length - 1;
 	}
 
-	public long[] getVolumeDimensionsInVoxels()
+	public long[] getDimensionsInVoxels()
 	{
-		return mVolumeDimensionsInVoxels;
+		return mDimensionsInVoxels;
 	}
 
 	public long getBytesPerVoxel()
@@ -175,53 +177,53 @@ public class Volume<T> implements ClearVolumeCloseable
 
 	public long getElementSize()
 	{
-		return mVolumeDimensionsInVoxels[0];
+		return mDimensionsInVoxels[0];
 	}
 
 	public long getWidthInVoxels()
 	{
-		return mVolumeDimensionsInVoxels[1];
+		return mDimensionsInVoxels[1];
 	}
 
 	public long getHeightInVoxels()
 	{
-		return mVolumeDimensionsInVoxels[2];
+		return mDimensionsInVoxels[2];
 	}
 
 	public long getDepthInVoxels()
 	{
-		return mVolumeDimensionsInVoxels[3];
+		return mDimensionsInVoxels[3];
 	}
 
-	public double[] getVolumeDimensionsInRealUnits()
+	public double[] getDimensionsInRealUnits()
 	{
-		return mVolumeDimensionsInRealUnits;
+		return mDimensionsInRealUnits;
 	}
 
 	public double getWidthInRealUnits()
 	{
-		if (mVolumeDimensionsInRealUnits == null)
+		if (mDimensionsInRealUnits == null)
 			return 1;
-		return mVolumeDimensionsInRealUnits[0];
+		return mDimensionsInRealUnits[0];
 	}
 
 	public double getHeightInRealUnits()
 	{
-		if (mVolumeDimensionsInRealUnits == null)
+		if (mDimensionsInRealUnits == null)
 			return 1;
-		return mVolumeDimensionsInRealUnits[1];
+		return mDimensionsInRealUnits[1];
 	}
 
 	public double getDepthInRealUnits()
 	{
-		if (mVolumeDimensionsInRealUnits == null)
+		if (mDimensionsInRealUnits == null)
 			return 1;
-		return mVolumeDimensionsInRealUnits[2];
+		return mDimensionsInRealUnits[2];
 	}
 
 	public String getRealUnitName()
 	{
-		if (mVolumeDimensionsInRealUnits == null)
+		if (mDimensionsInRealUnits == null)
 			return "none";
 		return mRealUnitName;
 	}
@@ -233,32 +235,42 @@ public class Volume<T> implements ClearVolumeCloseable
 
 	public long getIndex()
 	{
-		return mVolumeIndex;
+		return mTimeIndex;
 	}
 
-	public void setIndex(long pVolumeIndex)
+	public void setTimeIndex(long pTimeIndex)
 	{
-		mVolumeIndex = pVolumeIndex;
+		mTimeIndex = pTimeIndex;
 	}
 
-	public double getTime()
+	public double getTimeInSeconds()
 	{
-		return mVolumeTime;
+		return mTimeInSeconds;
 	}
 
-	public void setTime(double pVolumeTime)
+	public void setTimeInSeconds(double pTimeInSeconds)
 	{
-		mVolumeTime = pVolumeTime;
+		mTimeInSeconds = pTimeInSeconds;
 	}
 
-	public int getVolumeChannelID()
+	public int getChannelID()
 	{
-		return mVolumeChannelID;
+		return mChannelID;
 	}
 
-	public void setVolumeChannelID(int pVolumeChannel)
+	public void setChannelID(int pVolumeChannel)
 	{
-		mVolumeChannelID = pVolumeChannel;
+		mChannelID = pVolumeChannel;
+	}
+
+	public float[] getColor()
+	{
+		return mColor;
+	}
+
+	public void setColor(float[] pColor)
+	{
+		mColor = pColor;
 	}
 
 	public float[] getViewMatrix()
@@ -273,41 +285,37 @@ public class Volume<T> implements ClearVolumeCloseable
 
 	public void writeToByteBuffer(ByteBuffer pByteBuffer)
 	{
-		mVolumeData.clear();
-		pByteBuffer.put(mVolumeData);
+		mDataBuffer.clear();
+		pByteBuffer.put(mDataBuffer);
 	}
 
 	public void readFromByteBuffer(ByteBuffer pByteBuffer)
 	{
-		mVolumeData.clear();
-		mVolumeData.put(pByteBuffer);
-	}
-
-	@Override
-	public String toString()
-	{
-		return "Volume [mType=" + getTypeName()
-						+ ", mVolumeDimensionsInVoxels="
-						+ Arrays.toString(mVolumeDimensionsInVoxels)
-						+ ", mRealUnitName="
-						+ mRealUnitName
-						+ ", mVolumeDimensionsInRealUnits="
-						+ Arrays.toString(mVolumeDimensionsInRealUnits)
-						+ ", mChannels="
-						+ mVolumeChannelID
-						+ ", mVolumeIndex="
-						+ mVolumeIndex
-						+ ", mVolumeTime="
-						+ mVolumeTime
-						+ ", mViewMatrix="
-						+ Arrays.toString(mViewMatrix)
-						+ "]";
+		mDataBuffer.clear();
+		mDataBuffer.put(pByteBuffer);
 	}
 
 	@Override
 	public void close()
 	{
-		mVolumeData = null;
+		mDataBuffer = null;
+	}
+
+	@Override
+	public String toString()
+	{
+		return String.format(	"Volume [mTimeIndex=%s, mTimeInSeconds=%s, mChannelID=%s, mViewMatrix=%s, mColor=%s, mType=%s, mDimensionsInVoxels=%s, mDimensionsInRealUnits=%s, mRealUnitName=%s, mVolumeManager=%s, mDataBuffer=%s]",
+													mTimeIndex,
+													mTimeInSeconds,
+													mChannelID,
+													Arrays.toString(mViewMatrix),
+													Arrays.toString(mColor),
+													mType,
+													Arrays.toString(mDimensionsInVoxels),
+													Arrays.toString(mDimensionsInRealUnits),
+													mRealUnitName,
+													mVolumeManager,
+													mDataBuffer);
 	}
 
 }

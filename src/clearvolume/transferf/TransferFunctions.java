@@ -41,6 +41,14 @@ public class TransferFunctions
 		return lTransfertFunction;
 	}
 
+	public static TransferFunction getGradientForColor(float... pColorRGBA)
+	{
+		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
+		lTransfertFunction.addPoint(0, 0, 0, 0);
+		lTransfertFunction.addPoint(pColorRGBA);
+		return lTransfertFunction;
+	}
+
 	/**
 	 * Returns gray level transfer function.
 	 * 
