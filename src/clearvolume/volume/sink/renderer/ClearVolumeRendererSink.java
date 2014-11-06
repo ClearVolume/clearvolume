@@ -21,6 +21,8 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 	private long mWaitForCopyTimeout;
 	private TimeUnit mTimeUnit;
 
+	private volatile long mLastTimePointDisplayed = Long.MIN_VALUE;
+
 	public ClearVolumeRendererSink(	ClearVolumeRendererInterface pClearVolumeRendererInterface,
 																	VolumeManager pVolumeManager,
 																	long pWaitForCopyTimeout,
@@ -47,6 +49,7 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		final double lRealHeight = pVolume.getHeightInRealUnits();
 		final double lRealDepth = pVolume.getDepthInRealUnits();
 
+		final long lTimePointIndex = pVolume.getTimeIndex();
 		final int lChannelID = pVolume.getChannelID();
 		final int lNumberOfRenderLayers = mClearVolumeRendererInterface.getNumberOfRenderLayers();
 		final int lRenderLayer = lChannelID % lNumberOfRenderLayers;
@@ -69,11 +72,14 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 																											lRealHeight,
 																											lRealDepth);
 
-		mClearVolumeRendererInterface.requestDisplay();
+		// if (lTimePointIndex > mLastTimePointDisplayed)
+		{
+			mClearVolumeRendererInterface.requestDisplay();
 
-		mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	lRenderLayer,
-																															mWaitForCopyTimeout,
-																															mTimeUnit);
+			mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	mWaitForCopyTimeout,
+																																mTimeUnit);
+			mLastTimePointDisplayed = lTimePointIndex;
+		}
 
 		if (getRelaySink() != null)
 			getRelaySink().sendVolume(pVolume);

@@ -27,7 +27,10 @@ public class MultiChannelTimeShiftingSinkDemo
 		ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"TimeShift And MultiChannel Demo",
 																																																		512,
 																																																		512,
-																																																		1);
+																																																		1,
+																																																		512,
+																																																		512,
+																																																		2);
 		lClearVolumeRenderer.setVisible(true);
 
 		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,

@@ -231,6 +231,14 @@ public interface ClearVolumeRendererInterface	extends
 	 * 
 	 * @return true is completed, false if it timed-out.
 	 */
+	public boolean waitToFinishAllDataBufferCopy(	long pTimeOut,
+																								TimeUnit pTimeUnit);
+
+	/**
+	 * Waits until volume data copy completes for current layer.
+	 * 
+	 * @return true is completed, false if it timed-out.
+	 */
 	public boolean waitToFinishDataBufferCopy(long pTimeOut,
 																						TimeUnit pTimeUnit);
 

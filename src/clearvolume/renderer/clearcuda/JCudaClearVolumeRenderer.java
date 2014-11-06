@@ -345,7 +345,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private void pointTextureToArray(final int pRenderLayerIndex)
 	{
 		mVolumeDataCudaTexture.setTo(mVolumeDataCudaArrays[pRenderLayerIndex]);
-		mVolumeRenderingFunction.setTexture(mVolumeDataCudaTexture);
+		// mVolumeRenderingFunction.setTexture(mVolumeDataCudaTexture);
 	}
 
 	/**
@@ -443,15 +443,11 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	{
 		boolean[] lUpdated = new boolean[getNumberOfRenderLayers()];
 
-		// TODO: should only update modified TFs
-		for (int i = 0; i < getNumberOfRenderLayers(); i++)
-			prepareTransferFunctionArray(i);
+		boolean lAnyVolumeDataUpdated = false;
 
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
-			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(i);
-
-			boolean lVolumeDataUpdated = false;
+			ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(i);
 
 			if (lVolumeDataBuffer != null)
 			{
@@ -473,18 +469,21 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 					}
 
 					notifyCompletionOfDataBufferCopy(i);
-					lVolumeDataUpdated = true;
+					lAnyVolumeDataUpdated |= true;
 				}
 
 			}
+		}
 
-			if (mVolumeDataCudaArrays[i] != null)
-				if (lVolumeDataUpdated || getIsUpdateVolumeRenderingParameters())
+		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters())
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				if (mVolumeDataCudaArrays[i] != null)
 				{
 					runKernel(i);
 					lUpdated[i] = true;
 				}
-		}
+			}
 		clearIsUpdateVolumeParameters();
 		clearVolumeDimensionsChanged();
 
@@ -498,6 +497,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	{
 		if (mOpenGLBufferDevicePointers[pRenderLayerIndex] == null)
 			return;
+
+		prepareTransferFunctionArray(pRenderLayerIndex);
 
 		pointTransferFunctionTextureToArray(pRenderLayerIndex);
 		pointTextureToArray(pRenderLayerIndex);

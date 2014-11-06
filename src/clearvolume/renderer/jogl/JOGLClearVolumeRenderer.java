@@ -2,6 +2,7 @@ package clearvolume.renderer.jogl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -102,6 +103,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLMatrix mQuadProjectionMatrix = new GLMatrix();
 
 	private int mMaxTextureWidth = 768, mMaxTextureHeight = 768;
+	protected boolean mUsePBOs = true;
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
@@ -574,6 +576,13 @@ public abstract class JOGLClearVolumeRenderer	extends
 	protected abstract void unregisterPBO(int pRenderLayerIndex,
 																				int pPixelBufferObjectId);
 
+	public void copyBufferToTexture(int pRenderLayerIndex,
+																	ByteBuffer pByteBuffer)
+	{
+		pByteBuffer.rewind();
+		mLayerTextures[pRenderLayerIndex].copyFrom(pByteBuffer);
+	}
+
 	/**
 	 * Implementation of GLEventListener: Called when the given GLAutoDrawable is
 	 * to be displayed.
@@ -582,7 +591,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public void display(final GLAutoDrawable drawable)
 	{
 		final GL4 lGL4 = drawable.getGL().getGL4();
-
+		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
 		setDefaultProjectionMatrix();
 
@@ -612,9 +621,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 		if (anyIsTrue(lUpdated = renderVolume(lInvVolumeMatrix.getFloatArray(),
 																					lInvProjection.getFloatArray())))
 		{
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
-				if (lUpdated[i])
-					mLayerTextures[i].copyFrom(mPixelBufferObjects[i]);
+			if (mUsePBOs)
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+					if (lUpdated[i])
+						mLayerTextures[i].copyFrom(mPixelBufferObjects[i]);
 
 			mGLProgram.use(lGL4);
 			mGLProgram.bind();
@@ -625,7 +635,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 			mQuadProjectionMatrixUniform.setFloatMatrix(mQuadProjectionMatrix.getFloatArray(),
 																									false);
 
-			lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 			mQuadVertexArray.draw(GL.GL_TRIANGLES);
 
 			// draw the box
@@ -661,8 +670,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 			updateFrameRateDisplay();
 
 		}
-
-
 
 	}
 

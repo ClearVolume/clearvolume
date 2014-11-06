@@ -233,7 +233,7 @@ public class Volume<T> implements ClearVolumeCloseable
 		mRealUnitName = pRealUnitName;
 	}
 
-	public long getIndex()
+	public long getTimeIndex()
 	{
 		return mTimeIndex;
 	}

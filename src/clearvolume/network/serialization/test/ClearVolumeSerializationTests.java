@@ -36,7 +36,7 @@ public class ClearVolumeSerializationTests
 		Volume<Byte> lDeserializedVolume = new Volume<Byte>();
 		ClearVolumeSerialization.deserialize(lBuffer, lDeserializedVolume);
 		
-		assertEquals(2, lDeserializedVolume.getIndex());
+		assertEquals(2, lDeserializedVolume.getTimeIndex());
 		assertEquals(3.3, lDeserializedVolume.getTimeInSeconds(), 0);
 		assertEquals(4, lDeserializedVolume.getChannelID());
 		assertEquals("um", lDeserializedVolume.getRealUnitName());

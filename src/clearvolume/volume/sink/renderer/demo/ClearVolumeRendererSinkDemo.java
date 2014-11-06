@@ -60,14 +60,17 @@ public class ClearVolumeRendererSinkDemo
 
 			final int lDepth = (int) (cDepth * (1.0 * i / lMaxVolumesSent));
 
+			final int yStart = lChannel * cHeight / 3;
+			final int yEnd = yStart + 2 * cHeight / 3;
+			
 			lVolumeData.rewind();
 			for (int z = 0; z < lDepth; z++)
-				for (int y = 0; y < cHeight; y++)
+				for (int y = yStart; y < yEnd; y++)
 					for (int x = 0; x < cWidth; x++)
 					{
 						final int lIndex = x + cWidth * y + cWidth * cHeight * z;
 
-						byte lByteValue = (byte) (((byte) lTimePoint ^ (byte) x
+						byte lByteValue = (byte) (((byte) x
 																				^ (byte) y ^ (byte) z));
 
 						if (lChannel == 1)

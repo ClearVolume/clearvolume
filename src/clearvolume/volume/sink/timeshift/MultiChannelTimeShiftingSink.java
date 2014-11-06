@@ -121,11 +121,11 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 																		lTimePointIndexToVolumeMapReference);
 		}
 
-		lTimePointIndexToVolumeMapReference.put(pVolume.getIndex(),
+		lTimePointIndexToVolumeMapReference.put(pVolume.getTimeIndex(),
 																						wrapWithReference(pVolume));
 
 		mHighestTimePointIndexSeen = Math.max(mHighestTimePointIndexSeen,
-																					pVolume.getIndex());
+																					pVolume.getTimeIndex());
 
 		sendVolumeInternal(lVolumeChannelID);
 	}

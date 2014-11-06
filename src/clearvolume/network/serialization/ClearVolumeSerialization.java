@@ -50,7 +50,7 @@ public class ClearVolumeSerialization
 																				StringBuilder pStringBuilder)
 	{
 		LinkedHashMap<String, String> lHeaderMap = new LinkedHashMap<String, String>();
-		lHeaderMap.put("index", "" + pVolume.getIndex());
+		lHeaderMap.put("index", "" + pVolume.getTimeIndex());
 		lHeaderMap.put("time", "" + pVolume.getTimeInSeconds());
 		lHeaderMap.put("channel", "" + pVolume.getChannelID());
 		lHeaderMap.put("dim", "" + pVolume.getDimension());

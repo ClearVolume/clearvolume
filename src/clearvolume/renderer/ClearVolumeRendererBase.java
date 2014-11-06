@@ -636,7 +636,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	public ByteBuffer getVolumeDataBuffer()
 	{
-		return getVolumeDataBuffer(mCurrentRenderLayerIndex);
+		return getVolumeDataBuffer(getCurrentRenderLayer());
 	}
 
 	/**
@@ -745,7 +745,7 @@ public abstract class ClearVolumeRendererBase	implements
 																	final double pVolumeSizeY,
 																	final double pVolumeSizeZ)
 	{
-		synchronized (getSetVolumeDataBufferLock(mCurrentRenderLayerIndex))
+		synchronized (getSetVolumeDataBufferLock(getCurrentRenderLayer()))
 		{
 
 			if (mVolumeSizeX != pSizeX || mVolumeSizeY != pSizeY
@@ -762,17 +762,18 @@ public abstract class ClearVolumeRendererBase	implements
 			mScaleY = (float) pVolumeSizeY;
 			mScaleZ = (float) pVolumeSizeZ;
 
-			mVolumeDataByteBuffers[mCurrentRenderLayerIndex] = pByteBuffer;
 
+			mVolumeDataByteBuffers[getCurrentRenderLayer()] = pByteBuffer;
+
+			clearCompletionOfDataBufferCopy(getCurrentRenderLayer());
 			notifyUpdateOfVolumeRenderingParameters();
-			clearCompletionOfDataBufferCopy(mCurrentRenderLayerIndex);
 		}
 	}
 
 	@Override
 	public void setVolumeDataBuffer(Volume<?> pVolume)
 	{
-		synchronized (getSetVolumeDataBufferLock(mCurrentRenderLayerIndex))
+		synchronized (getSetVolumeDataBufferLock(getCurrentRenderLayer()))
 		{
 			setVolumeDataBuffer(pVolume.getDataBuffer(),
 													pVolume.getWidthInVoxels(),
@@ -807,7 +808,25 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Waits until volume data copy completes for all layers.
+	 * Waits until volume data copy completes all layers.
+	 * 
+	 * @return true is completed, false if it timed-out.
+	 */
+	@Override
+	public boolean waitToFinishAllDataBufferCopy(	long pTimeOut,
+																						TimeUnit pTimeUnit)
+	{
+		boolean lNoTimeOut = true;
+		for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			lNoTimeOut &= waitToFinishDataBufferCopy(	getCurrentRenderLayer(),
+																			pTimeOut,
+																			pTimeUnit);
+
+		return lNoTimeOut;
+	}
+
+	/**
+	 * Waits until volume data copy completes for current layer.
 	 * 
 	 * @return true is completed, false if it timed-out.
 	 */
