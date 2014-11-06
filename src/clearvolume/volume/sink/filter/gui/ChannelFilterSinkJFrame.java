@@ -1,4 +1,4 @@
-package clearvolume.volume.sink.timeshift.gui;
+package clearvolume.volume.sink.filter.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -9,10 +9,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import clearvolume.utils.ClearVolumeJFrame;
-import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
+import clearvolume.volume.sink.filter.ChannelFilterSink;
 
-public class MultiChannelTimeShiftingSinkJFrame	extends
-																								ClearVolumeJFrame
+public class ChannelFilterSinkJFrame extends ClearVolumeJFrame
 {
 
 	/**
@@ -25,7 +24,7 @@ public class MultiChannelTimeShiftingSinkJFrame	extends
 	/**
 	 * Launch the application.
 	 */
-	public static void launch(MultiChannelTimeShiftingSink pMultiChannelTimeShiftingSink)
+	public static void launch(ChannelFilterSink pChannelFilterSink)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -34,7 +33,7 @@ public class MultiChannelTimeShiftingSinkJFrame	extends
 			{
 				try
 				{
-					MultiChannelTimeShiftingSinkJFrame frame = new MultiChannelTimeShiftingSinkJFrame(pMultiChannelTimeShiftingSink);
+					ChannelFilterSinkJFrame frame = new ChannelFilterSinkJFrame(pChannelFilterSink);
 					frame.setVisible(true);
 				}
 				catch (Exception e)
@@ -50,22 +49,25 @@ public class MultiChannelTimeShiftingSinkJFrame	extends
 	 * 
 	 * @param pMultiChannelTimeShiftingSink
 	 */
-	public MultiChannelTimeShiftingSinkJFrame(MultiChannelTimeShiftingSink pMultiChannelTimeShiftingSink)
+	public ChannelFilterSinkJFrame(ChannelFilterSink pChannelFilterSink)
 	{
-		setTitle("TimeShift and MultiChannel");
-		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		setResizable(false);
+		setTitle("Channel Filter Selection");
+		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 651, 118);
+		setBounds(100, 100, 275, 327);
 		mContentPane = new JPanel();
 		mContentPane.setBackground(Color.WHITE);
 		mContentPane.setBorder(null);
 		mContentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(mContentPane);
 
-		MultiChannelTimeShiftingSinkJPanel lMultiChannelTimeShiftingSinkPanel = new MultiChannelTimeShiftingSinkJPanel(pMultiChannelTimeShiftingSink);
-		mContentPane.add(lMultiChannelTimeShiftingSinkPanel);
+		if (pChannelFilterSink != null)
+		{
+			ChannelFilterSinkJPanel lChannelFilterSinkJPanel = new ChannelFilterSinkJPanel(pChannelFilterSink);
+			mContentPane.add(lChannelFilterSinkJPanel);
+		}
 	}
 
 }

@@ -17,8 +17,6 @@ import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
 public class MultiChannelTimeShiftingSinkJPanel extends JPanel
 {
 
-	private MultiChannelTimeShiftingSink mMultiChannelTimeShiftingSink;
-
 	public static final void createJFrame(MultiChannelTimeShiftingSink pMultiChannelTimeShiftingSink)
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -89,8 +87,6 @@ public class MultiChannelTimeShiftingSinkJPanel extends JPanel
 		JButton lNextChannelButton = new JButton("next channel");
 		lNextChannelButton.addActionListener(e -> pMultiChannelTimeShiftingSink.nextChannel());
 		add(lNextChannelButton, "cell 1 1");
-
-		mMultiChannelTimeShiftingSink = pMultiChannelTimeShiftingSink;
 
 	}
 

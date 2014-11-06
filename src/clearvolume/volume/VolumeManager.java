@@ -18,6 +18,17 @@ public class VolumeManager
 		mAvailableVolumesQueue = new ArrayBlockingQueue<SoftReference<Volume<?>>>(mMaxAvailableVolumes);
 	}
 
+	public <T> Volume<T> requestAndWaitForVolumeLike(	int pTimeOut,
+																										TimeUnit pTimeUnit,
+																										Volume<T> pVolume)
+	{
+		return requestAndWaitForVolume(	pTimeOut,
+																		pTimeUnit,
+																		pVolume.getType(),
+																		pVolume.getDimensionsInVoxels());
+
+	}
+
 	public <T> Volume<T> requestAndWaitForVolume(	long pTimeOut,
 																								TimeUnit pTimeUnit,
 																								Class<T> pType,

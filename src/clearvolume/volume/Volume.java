@@ -19,12 +19,12 @@ public class Volume<T> implements ClearVolumeCloseable
 	private volatile String mRealUnitName;
 
 	private volatile int mChannelID;
+	private volatile String mChannelName = "noname";
 	private float[] mColor = null;
 	private float[] mViewMatrix = null;
 
 	private volatile long mTimeIndex;
 	private volatile double mTimeInSeconds;
-
 
 	public Volume()
 	{
@@ -72,7 +72,7 @@ public class Volume<T> implements ClearVolumeCloseable
 	}
 
 	public void setDimensionsInRealUnits(	String pRealUnitName,
-																							double... VolumeDimensionsInRealUnits)
+																				double... VolumeDimensionsInRealUnits)
 	{
 		setRealUnitName(pRealUnitName);
 		mDimensionsInRealUnits = VolumeDimensionsInRealUnits;
@@ -258,9 +258,19 @@ public class Volume<T> implements ClearVolumeCloseable
 		return mChannelID;
 	}
 
-	public void setChannelID(int pVolumeChannel)
+	public void setChannelID(int pChannelID)
 	{
-		mChannelID = pVolumeChannel;
+		mChannelID = pChannelID;
+	}
+
+	public String getChannelName()
+	{
+		return mChannelName;
+	}
+
+	public void setChannelName(String pChannelName)
+	{
+		mChannelName = pChannelName;
 	}
 
 	public float[] getColor()
@@ -281,6 +291,34 @@ public class Volume<T> implements ClearVolumeCloseable
 	public void setViewMatrix(float[] pViewMatrix)
 	{
 		mViewMatrix = pViewMatrix;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void copyMetaDataFrom(Volume<?> pVolume)
+	{
+		mChannelID = pVolume.mChannelID;
+		if (pVolume.mChannelName != null)
+			mChannelName = new String(pVolume.mChannelName);
+
+		if (pVolume.mColor != null)
+			mColor = Arrays.copyOf(pVolume.mColor, pVolume.mColor.length);
+
+		if (pVolume.mDimensionsInRealUnits != null)
+			mDimensionsInRealUnits = Arrays.copyOf(	pVolume.mDimensionsInRealUnits,
+																							pVolume.mDimensionsInRealUnits.length);
+
+		if (pVolume.mDimensionsInVoxels != null)
+			mDimensionsInVoxels = Arrays.copyOf(pVolume.mDimensionsInVoxels,
+																					pVolume.mDimensionsInVoxels.length);
+
+		if (mRealUnitName != null)
+			mRealUnitName = new String(pVolume.mRealUnitName);
+		mTimeIndex = pVolume.mTimeIndex;
+		mTimeInSeconds = pVolume.mTimeInSeconds;
+		mType = (Class<T>) pVolume.mType;
+		if (pVolume.mViewMatrix != null)
+			mViewMatrix = Arrays.copyOf(pVolume.mViewMatrix,
+																	pVolume.mViewMatrix.length);
 	}
 
 	public void writeToByteBuffer(ByteBuffer pByteBuffer)

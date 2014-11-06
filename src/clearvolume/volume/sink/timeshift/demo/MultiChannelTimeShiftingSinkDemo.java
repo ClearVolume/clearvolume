@@ -65,6 +65,10 @@ public class MultiChannelTimeShiftingSinkDemo
 			ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
 			lVolumeData.rewind();
+			for (int j = 0; j < cWidth * cHeight * cDepth; j++)
+				lVolumeData.put((byte) 0);
+
+			lVolumeData.rewind();
 
 			final int lDepth = (int) (cDepth * (1.0 * i / lMaxVolumesSent));
 
