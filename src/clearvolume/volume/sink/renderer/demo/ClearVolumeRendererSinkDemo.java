@@ -9,6 +9,8 @@ import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
+import clearvolume.volume.sink.filter.ChannelFilterSink;
+import clearvolume.volume.sink.filter.gui.ChannelFilterSinkJFrame;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 
 public class ClearVolumeRendererSinkDemo
@@ -36,7 +38,12 @@ public class ClearVolumeRendererSinkDemo
 																																										100,
 																																										TimeUnit.MILLISECONDS);
 
-		VolumeManager lManager = lClearVolumeRendererSink.getManager();
+
+		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink(lClearVolumeRendererSink);
+
+		ChannelFilterSinkJFrame.launch(lChannelFilterSink);
+		
+		VolumeManager lManager = lChannelFilterSink.getManager();
 
 		final int lMaxVolumesSent = 1000;
 		for (int i = 0; i < lMaxVolumesSent; i++)
@@ -83,8 +90,8 @@ public class ClearVolumeRendererSinkDemo
 			lVolume.setTimeInSeconds(0.1 * lTimePoint);
 			lVolume.setChannelID(lChannel);
 
-			// if (lChannel == 0)
-			lClearVolumeRendererSink.sendVolume(lVolume);
+
+			lChannelFilterSink.sendVolume(lVolume);
 
 			Thread.sleep(50);
 		}

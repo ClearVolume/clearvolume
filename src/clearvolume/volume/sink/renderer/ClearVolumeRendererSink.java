@@ -1,7 +1,12 @@
 package clearvolume.volume.sink.renderer;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.AbstractListModel;
+import javax.swing.ListModel;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.transferf.TransferFunction;
@@ -20,6 +25,9 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 	private VolumeManager mVolumeManager;
 	private long mWaitForCopyTimeout;
 	private TimeUnit mTimeUnit;
+
+	private TreeMap<Integer, String> mSeenChannelIdToNameMap = new TreeMap<Integer, String>();
+	private ArrayList<Integer> mSeenChannelList = new ArrayList<Integer>();
 
 	private volatile long mLastTimePointDisplayed = Long.MIN_VALUE;
 
@@ -51,6 +59,8 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 
 		final long lTimePointIndex = pVolume.getTimeIndex();
 		final int lChannelID = pVolume.getChannelID();
+		final String lChannelName = pVolume.getChannelName();
+		mSeenChannelIdToNameMap.put(lChannelID, lChannelName);
 		final int lNumberOfRenderLayers = mClearVolumeRendererInterface.getNumberOfRenderLayers();
 		final int lRenderLayer = lChannelID % lNumberOfRenderLayers;
 
@@ -95,6 +105,27 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 			if (getRelaySink() != null)
 				return getRelaySink().getManager();
 		return mVolumeManager;
+	}
+
+	public ListModel<String> getChannelListModel()
+	{
+		return new AbstractListModel<String>()
+		{
+
+			@Override
+			public int getSize()
+			{
+
+				return mSeenChannelIdToNameMap.size();
+			}
+
+			@Override
+			public String getElementAt(int pIndex)
+			{
+				return mSeenChannelIdToNameMap.get(mSeenChannelList.get(pIndex));
+			}
+
+		};
 	}
 
 }

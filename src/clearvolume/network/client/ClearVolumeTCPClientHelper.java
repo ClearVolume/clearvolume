@@ -14,8 +14,8 @@ import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.VolumeSinkInterface;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
-import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
-import clearvolume.volume.sink.timeshift.gui.MultiChannelTimeShiftingSinkJFrame;
+import clearvolume.volume.sink.timeshift.TimeShiftingSink;
+import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 
 public abstract class ClearVolumeTCPClientHelper
 {
@@ -52,21 +52,21 @@ public abstract class ClearVolumeTCPClientHelper
 
 				VolumeSinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
 
-				MultiChannelTimeShiftingSink lMultiChannelTimeShiftingSink = null;
-				MultiChannelTimeShiftingSinkJFrame lMultiChannelTimeShiftingSinkJFrame = null;
+				TimeShiftingSink lTimeShiftingSink = null;
+				TimeShiftingSinkJFrame lTimeShiftingSinkJFrame = null;
 				if (pTimeShiftMultiChannel)
 				{
-					lMultiChannelTimeShiftingSink = new MultiChannelTimeShiftingSink(	cSoftHoryzon,
+					lTimeShiftingSink = new TimeShiftingSink(	cSoftHoryzon,
 																																						cHardHoryzon);
 
-					lMultiChannelTimeShiftingSinkJFrame = new MultiChannelTimeShiftingSinkJFrame(lMultiChannelTimeShiftingSink);
-					lMultiChannelTimeShiftingSinkJFrame.setVisible(true);
+					lTimeShiftingSinkJFrame = new TimeShiftingSinkJFrame(lTimeShiftingSink);
+					lTimeShiftingSinkJFrame.setVisible(true);
 
-					lMultiChannelTimeShiftingSink.setRelaySink(lClearVolumeRendererSink);
+					lTimeShiftingSink.setRelaySink(lClearVolumeRendererSink);
 
 					lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
-					lSinkAfterAsynchronousVolumeSinkAdapter = lMultiChannelTimeShiftingSink;
+					lSinkAfterAsynchronousVolumeSinkAdapter = lTimeShiftingSink;
 				}
 
 				AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
@@ -99,11 +99,11 @@ public abstract class ClearVolumeTCPClientHelper
 				}
 
 				assertTrue(lAsynchronousVolumeSinkAdapter.stop());
-				if (lMultiChannelTimeShiftingSink != null)
+				if (lTimeShiftingSink != null)
 				{
-					lMultiChannelTimeShiftingSinkJFrame.setVisible(false);
-					lMultiChannelTimeShiftingSinkJFrame.dispose();
-					lMultiChannelTimeShiftingSink.close();
+					lTimeShiftingSinkJFrame.setVisible(false);
+					lTimeShiftingSinkJFrame.dispose();
+					lTimeShiftingSink.close();
 				}
 				assertTrue(lClearVolumeTCPClient.stop());
 				lClearVolumeTCPClient.close();

@@ -7,10 +7,10 @@ import org.junit.Test;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.VolumeSinkInterface;
-import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
-import clearvolume.volume.sink.timeshift.gui.MultiChannelTimeShiftingSinkJFrame;
+import clearvolume.volume.sink.timeshift.TimeShiftingSink;
+import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 
-public class MultiChannelTimeShiftingSinkJFrameDemo
+public class TimeShiftingSinkJFrameDemo
 {
 
 	@Test
@@ -34,13 +34,13 @@ public class MultiChannelTimeShiftingSinkJFrameDemo
 			}
 		};
 
-		MultiChannelTimeShiftingSink lMultiChannelTimeShiftingSink = new MultiChannelTimeShiftingSink(50,
+		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
 																																																	100);
-		MultiChannelTimeShiftingSinkJFrame.launch(lMultiChannelTimeShiftingSink);
+		TimeShiftingSinkJFrame.launch(lTimeShiftingSink);
 
-		lMultiChannelTimeShiftingSink.setRelaySink(lVolumeSinkInterface);
+		lTimeShiftingSink.setRelaySink(lVolumeSinkInterface);
 
-		VolumeManager lManager = lMultiChannelTimeShiftingSink.getManager();
+		VolumeManager lManager = lTimeShiftingSink.getManager();
 
 		for (int i = 0; i < 10000000; i++)
 		{
@@ -62,7 +62,7 @@ public class MultiChannelTimeShiftingSinkJFrameDemo
 			System.out.format("Sending timepoint=%d channel=%d \n",
 												lTimePoint,
 												lChannel);
-			lMultiChannelTimeShiftingSink.sendVolume(lVolume);
+			lTimeShiftingSink.sendVolume(lVolume);
 
 			Thread.sleep(200);
 		}

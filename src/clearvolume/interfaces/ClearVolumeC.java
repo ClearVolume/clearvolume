@@ -22,8 +22,8 @@ import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.VolumeSinkInterface;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
-import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
-import clearvolume.volume.sink.timeshift.gui.MultiChannelTimeShiftingSinkJFrame;
+import clearvolume.volume.sink.timeshift.TimeShiftingSink;
+import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 
 public class ClearVolumeC
 {
@@ -36,8 +36,8 @@ public class ClearVolumeC
 	private static ConcurrentHashMap<Integer, ClearVolumeTCPServerSink> sIDToServerMap = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Integer, VolumeSinkInterface> sIDToVolumeSink = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Integer, AsynchronousVolumeSinkAdapter> sIDToVolumeAsyncSink = new ConcurrentHashMap<>();
-	private static ConcurrentHashMap<Integer, MultiChannelTimeShiftingSink> sIDToMultiChannelTimeShiftingSink = new ConcurrentHashMap<>();
-	private static ConcurrentHashMap<Integer, MultiChannelTimeShiftingSinkJFrame> sIDToMultiChannelTimeShiftingSinkJFrame = new ConcurrentHashMap<>();
+	private static ConcurrentHashMap<Integer, TimeShiftingSink> sIDToMultiChannelTimeShiftingSink = new ConcurrentHashMap<>();
+	private static ConcurrentHashMap<Integer, TimeShiftingSinkJFrame> sIDToMultiChannelTimeShiftingSinkJFrame = new ConcurrentHashMap<>();
 
 	private static ConcurrentHashMap<Integer, VolumeManager> sIDToVolumeManager = new ConcurrentHashMap<>();
 
@@ -122,25 +122,25 @@ public class ClearVolumeC
 																																											TimeUnit.MILLISECONDS);
 			VolumeSinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
 
-			MultiChannelTimeShiftingSink lMultiChannelTimeShiftingSink = null;
-			MultiChannelTimeShiftingSinkJFrame lMultiChannelTimeShiftingSinkJFrame = null;
+			TimeShiftingSink lTimeShiftingSink = null;
+			TimeShiftingSinkJFrame lTimeShiftingSinkJFrame = null;
 			if (pTimeShiftAndMultiChannel)
 			{
-				lMultiChannelTimeShiftingSink = new MultiChannelTimeShiftingSink(	cTimeShiftSoftHoryzon,
+				lTimeShiftingSink = new TimeShiftingSink(	cTimeShiftSoftHoryzon,
 																																					cTimeShiftHardHoryzon);
 				sIDToMultiChannelTimeShiftingSink.put(pRendererId,
-																							lMultiChannelTimeShiftingSink);
+																							lTimeShiftingSink);
 
-				lMultiChannelTimeShiftingSinkJFrame = new MultiChannelTimeShiftingSinkJFrame(lMultiChannelTimeShiftingSink);
-				lMultiChannelTimeShiftingSinkJFrame.setVisible(true);
+				lTimeShiftingSinkJFrame = new TimeShiftingSinkJFrame(lTimeShiftingSink);
+				lTimeShiftingSinkJFrame.setVisible(true);
 				sIDToMultiChannelTimeShiftingSinkJFrame.put(pRendererId,
-																										lMultiChannelTimeShiftingSinkJFrame);
+																										lTimeShiftingSinkJFrame);
 
-				lMultiChannelTimeShiftingSink.setRelaySink(lClearVolumeRendererSink);
+				lTimeShiftingSink.setRelaySink(lClearVolumeRendererSink);
 
 				lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
-				lSinkAfterAsynchronousVolumeSinkAdapter = lMultiChannelTimeShiftingSink;
+				lSinkAfterAsynchronousVolumeSinkAdapter = lTimeShiftingSink;
 			}
 
 			AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
@@ -185,13 +185,13 @@ public class ClearVolumeC
 
 		try
 		{
-			MultiChannelTimeShiftingSink lMultiChannelTimeShiftingSink = sIDToMultiChannelTimeShiftingSink.get(pRendererId);
-			if (lMultiChannelTimeShiftingSink != null)
+			TimeShiftingSink lTimeShiftingSink = sIDToMultiChannelTimeShiftingSink.get(pRendererId);
+			if (lTimeShiftingSink != null)
 			{
-				MultiChannelTimeShiftingSinkJFrame lMultiChannelTimeShiftingSinkJFrame = sIDToMultiChannelTimeShiftingSinkJFrame.get(pRendererId);
-				lMultiChannelTimeShiftingSinkJFrame.setVisible(false);
-				lMultiChannelTimeShiftingSinkJFrame.dispose();
-				lMultiChannelTimeShiftingSink.close();
+				TimeShiftingSinkJFrame lTimeShiftingSinkJFrame = sIDToMultiChannelTimeShiftingSinkJFrame.get(pRendererId);
+				lTimeShiftingSinkJFrame.setVisible(false);
+				lTimeShiftingSinkJFrame.dispose();
+				lTimeShiftingSink.close();
 				sIDToMultiChannelTimeShiftingSinkJFrame.remove(pRendererId);
 				sIDToMultiChannelTimeShiftingSink.remove(pRendererId);
 			}

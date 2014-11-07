@@ -9,9 +9,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import clearvolume.utils.ClearVolumeJFrame;
-import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
+import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 
-public class MultiChannelTimeShiftingSinkJFrame	extends
+public class TimeShiftingSinkJFrame	extends
 																								ClearVolumeJFrame
 {
 
@@ -25,7 +25,7 @@ public class MultiChannelTimeShiftingSinkJFrame	extends
 	/**
 	 * Launch the application.
 	 */
-	public static void launch(MultiChannelTimeShiftingSink pMultiChannelTimeShiftingSink)
+	public static void launch(TimeShiftingSink pTimeShiftingSink)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -34,7 +34,7 @@ public class MultiChannelTimeShiftingSinkJFrame	extends
 			{
 				try
 				{
-					MultiChannelTimeShiftingSinkJFrame frame = new MultiChannelTimeShiftingSinkJFrame(pMultiChannelTimeShiftingSink);
+					TimeShiftingSinkJFrame frame = new TimeShiftingSinkJFrame(pTimeShiftingSink);
 					frame.setVisible(true);
 				}
 				catch (Exception e)
@@ -48,23 +48,23 @@ public class MultiChannelTimeShiftingSinkJFrame	extends
 	/**
 	 * Create the frame.
 	 * 
-	 * @param pMultiChannelTimeShiftingSink
+	 * @param pTimeShiftingSink
 	 */
-	public MultiChannelTimeShiftingSinkJFrame(MultiChannelTimeShiftingSink pMultiChannelTimeShiftingSink)
+	public TimeShiftingSinkJFrame(TimeShiftingSink pTimeShiftingSink)
 	{
-		setTitle("TimeShift and MultiChannel");
+		setTitle("TimeShift");
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		setResizable(false);
 		setBackground(Color.WHITE);
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		setBounds(100, 100, 651, 118);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setBounds(100, 100, 651, 188);
 		mContentPane = new JPanel();
 		mContentPane.setBackground(Color.WHITE);
 		mContentPane.setBorder(null);
 		mContentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(mContentPane);
 
-		MultiChannelTimeShiftingSinkJPanel lMultiChannelTimeShiftingSinkPanel = new MultiChannelTimeShiftingSinkJPanel(pMultiChannelTimeShiftingSink);
+		TimeShiftingSinkJPanel lMultiChannelTimeShiftingSinkPanel = new TimeShiftingSinkJPanel(pTimeShiftingSink);
 		mContentPane.add(lMultiChannelTimeShiftingSinkPanel);
 	}
 

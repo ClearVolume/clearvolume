@@ -7,9 +7,9 @@ import org.junit.Test;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.VolumeSinkInterface;
-import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
+import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 
-public class MultiChannelTimeShiftingSinkTests
+public class TimeShiftingSinkTests
 {
 
 	@Test
@@ -33,12 +33,11 @@ public class MultiChannelTimeShiftingSinkTests
 			}
 		};
 
-		MultiChannelTimeShiftingSink lMultiChannelTimeShiftingSink = new MultiChannelTimeShiftingSink(50,
-																																																	100);
+		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50, 100);
 
-		lMultiChannelTimeShiftingSink.setRelaySink(lVolumeSinkInterface);
+		lTimeShiftingSink.setRelaySink(lVolumeSinkInterface);
 
-		VolumeManager lManager = lMultiChannelTimeShiftingSink.getManager();
+		VolumeManager lManager = lTimeShiftingSink.getManager();
 
 		for (int i = 0; i < 1000; i++)
 		{
@@ -60,18 +59,15 @@ public class MultiChannelTimeShiftingSinkTests
 			/*System.out.format("Sending timepoint=%d channel=%d \n",
 												lTimePoint,
 												lChannel);/**/
-			lMultiChannelTimeShiftingSink.sendVolume(lVolume);
+			lTimeShiftingSink.sendVolume(lVolume);
 
 			if (lChannel == 0)
 			{
-				if (lTimePoint % 50 == 0)
-					lMultiChannelTimeShiftingSink.nextChannel();
-
 				if (lTimePoint == 100)
-					lMultiChannelTimeShiftingSink.setTimeShift(-50);
+					lTimeShiftingSink.setTimeShift(-50);
 
 				if (lTimePoint == 200)
-					lMultiChannelTimeShiftingSink.setTimeShift(-100);
+					lTimeShiftingSink.setTimeShift(-100);
 			}
 
 		}
