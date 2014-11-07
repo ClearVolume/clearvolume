@@ -241,7 +241,10 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 				prepareVolumeDataArray(i, null);
 			prepareVolumeDataTexture();
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
 				prepareTransferFunctionArray(i);
+				copyTransferFunctionArray(i);
+			}
 			prepareTransferFunctionTexture();
 
 			return true;
@@ -349,8 +352,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	}
 
 	/**
-	 * Allocates CUDA array for transfer function, configures texture and copies
-	 * transfer function data.
+	 * Allocates CUDA array for transfer function, configures texture
 	 */
 	private void prepareTransferFunctionArray(final int pRenderLayerIndex)
 	{
@@ -365,6 +367,18 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																																		true,
 																																		false,
 																																		false);
+
+		mTransferFunctionCudaArrays[pRenderLayerIndex].copyFrom(lTransferFunctionArray,
+																														true);
+
+	}
+
+	/**
+	 * Copies transfer function data.
+	 */
+	private void copyTransferFunctionArray(final int pRenderLayerIndex)
+	{
+		final float[] lTransferFunctionArray = getTransfertFunction(pRenderLayerIndex).getArray();
 
 		mTransferFunctionCudaArrays[pRenderLayerIndex].copyFrom(lTransferFunctionArray,
 																														true);
@@ -498,7 +512,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		if (mOpenGLBufferDevicePointers[pRenderLayerIndex] == null)
 			return;
 
-		prepareTransferFunctionArray(pRenderLayerIndex);
+		copyTransferFunctionArray(pRenderLayerIndex);
 
 		pointTransferFunctionTextureToArray(pRenderLayerIndex);
 		pointTextureToArray(pRenderLayerIndex);

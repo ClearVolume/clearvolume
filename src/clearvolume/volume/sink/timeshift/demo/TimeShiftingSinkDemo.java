@@ -39,8 +39,7 @@ public class TimeShiftingSinkDemo
 																																										TimeUnit.MILLISECONDS);
 		lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
-		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
-																																																	100);
+		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50, 100);
 
 		TimeShiftingSinkJFrame.launch(lTimeShiftingSink);
 
@@ -78,8 +77,7 @@ public class TimeShiftingSinkDemo
 					{
 						final int lIndex = x + cWidth * y + cWidth * cHeight * z;
 
-						byte lByteValue = (byte) (((byte) lTimePoint ^ (byte) x
-																				^ (byte) y ^ (byte) z));
+						byte lByteValue = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 
 						lVolumeData.put(lIndex, lByteValue);
 					}/**/

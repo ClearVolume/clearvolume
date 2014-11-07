@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
 import clearvolume.ClearVolumeCloseable;
@@ -14,11 +16,12 @@ import clearvolume.volume.sink.relay.RelaySinkAdapter;
 import clearvolume.volume.sink.relay.RelaySinkInterface;
 
 public class TimeShiftingSink extends RelaySinkAdapter implements
-																																	RelaySinkInterface,
-																																	ClearVolumeCloseable
+																											RelaySinkInterface,
+																											ClearVolumeCloseable
 {
 	private static final float cCleanUpRatio = 0.25f;
 
+	private static final ExecutorService mSeekingExecutor = Executors.newSingleThreadExecutor();
 	private SwitchableSoftReferenceManager<Volume<?>> mSwitchableSoftReferenceManager;
 
 	private ReentrantLock lLock = new ReentrantLock();
@@ -34,7 +37,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	private volatile boolean mIsPlaying = true;
 
 	public TimeShiftingSink(long pSoftMemoryHoryzonInTimePointIndices,
-																			long pHardMemoryHoryzonInTimePointIndices)
+													long pHardMemoryHoryzonInTimePointIndices)
 	{
 		super();
 		mSwitchableSoftReferenceManager = new SwitchableSoftReferenceManager<>();
@@ -45,9 +48,15 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 		mCleanUpPeriodInTimePoints = (long) (mSoftMemoryHoryzonInTimePointIndices * cCleanUpRatio);
 	}
 
-	public void setTimeShiftNormalized(double pTimeShiftNormalized)
+	public void setTimeShiftNormalized(final double pTimeShiftNormalized)
 	{
-		mTimeShift = -Math.round(mHardMemoryHoryzonInTimePointIndices * pTimeShiftNormalized);
+		mSeekingExecutor.execute(() -> {
+			final long lPreviousTimeShift = mTimeShift;
+			mTimeShift = -Math.round(mHardMemoryHoryzonInTimePointIndices * pTimeShiftNormalized);
+			if (!mIsPlaying && lPreviousTimeShift != mTimeShift)
+				for (int lChannel : mAvailableChannels)
+					sendVolumeInternal(lChannel);
+		});
 	}
 
 	public void setTimeShift(long pTimeShift)
