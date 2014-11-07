@@ -278,7 +278,7 @@ public class Volume<T> implements ClearVolumeCloseable
 		return mColor;
 	}
 
-	public void setColor(float[] pColor)
+	public void setColor(float... pColor)
 	{
 		mColor = pColor;
 	}

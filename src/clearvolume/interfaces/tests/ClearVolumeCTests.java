@@ -16,6 +16,11 @@ public class ClearVolumeCTests
 		int lChannelId = 1;
 		ClearVolumeC.createRenderer(lRendererId, 256, 256, 1, 512, 512);
 
+		ClearVolumeC.setChannelColor(lChannelId, new float[]
+		{ 1, 1, 1, 1 });
+		ClearVolumeC.setChannelName(lChannelId, "channel 1");
+
+
 		final int lResolutionX = 128;
 		final int lResolutionY = lResolutionX + 1;
 		final int lResolutionZ = lResolutionX + 3;
@@ -40,6 +45,7 @@ public class ClearVolumeCTests
 						lVolumeDataArray[lIndex] = (byte) lValue;
 					}
 
+
 			ClearVolumeC.setVolumeIndexAndTime(lRendererId, i, 0.1 * i);
 			ClearVolumeC.send8bitUINTVolumeDataToSink(lRendererId,
 																								lChannelId,
@@ -59,6 +65,10 @@ public class ClearVolumeCTests
 		int lRendererId = 1;
 		int lChannelId = 1;
 		ClearVolumeC.createRenderer(lRendererId, 256, 256, 2, 512, 512);
+
+		ClearVolumeC.setChannelColor(lChannelId, new float[]
+		{ 1, 1, 1, 1 });
+		ClearVolumeC.setChannelName(lChannelId, "channel 1");
 
 		final int lResolutionX = 128;
 		final int lResolutionY = lResolutionX + 1;
@@ -105,6 +115,10 @@ public class ClearVolumeCTests
 		int lServerId = 1;
 		int lChannelId = 1;
 		ClearVolumeC.createServer(lServerId);
+
+		ClearVolumeC.setChannelColor(lChannelId, new float[]
+		{ 1, 1, 1, 1 });
+		ClearVolumeC.setChannelName(lChannelId, "channel 1");
 
 		final int lResolutionX = 128;
 		final int lResolutionY = lResolutionX + 1;

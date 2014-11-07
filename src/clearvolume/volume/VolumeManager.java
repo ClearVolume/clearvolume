@@ -4,7 +4,9 @@ import java.lang.ref.SoftReference;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class VolumeManager
+import clearvolume.ClearVolumeCloseable;
+
+public class VolumeManager implements ClearVolumeCloseable
 {
 
 	private final ArrayBlockingQueue<SoftReference<Volume<?>>> mAvailableVolumesQueue;
@@ -103,6 +105,17 @@ public class VolumeManager
 		Volume<T> lVolume = new Volume<T>(pType, pDimensions);
 		lVolume.setManager(this);
 		return lVolume;
+	}
+
+	@Override
+	public void close()
+	{
+		for (SoftReference<Volume<?>> lVolumeSoftReference : mAvailableVolumesQueue)
+		{
+			Volume<?> lVolume = lVolumeSoftReference.get();
+			lVolume.close();
+		}
+		mAvailableVolumesQueue.clear();
 	}
 
 }

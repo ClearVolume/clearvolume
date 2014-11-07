@@ -53,10 +53,13 @@ public class ClearVolumeSerialization
 		lHeaderMap.put("index", "" + pVolume.getTimeIndex());
 		lHeaderMap.put("time", "" + pVolume.getTimeInSeconds());
 		lHeaderMap.put("channel", "" + pVolume.getChannelID());
+		lHeaderMap.put("channelname", pVolume.getChannelName());
+		lHeaderMap.put("color", serializeFloatArray(pVolume.getColor()));
+		lHeaderMap.put(	"viewmatrix",
+										serializeFloatArray(pVolume.getViewMatrix()));
 		lHeaderMap.put("dim", "" + pVolume.getDimension());
 		lHeaderMap.put("type", "" + pVolume.getTypeName());
-		lHeaderMap.put("bytespervoxel",
-										"" + pVolume.getBytesPerVoxel());
+		lHeaderMap.put("bytespervoxel", "" + pVolume.getBytesPerVoxel());
 		lHeaderMap.put("elementsize", "" + pVolume.getElementSize());
 		lHeaderMap.put("widthvoxels", "" + pVolume.getWidthInVoxels());
 		lHeaderMap.put("heightvoxels", "" + pVolume.getHeightInVoxels());
@@ -80,6 +83,9 @@ public class ClearVolumeSerialization
 		final long lIndex = Long.parseLong(lHeaderMap.get("index"));
 		final double lTime = Double.parseDouble(lHeaderMap.get("time"));
 		final int lVolumeChannelID = Integer.parseInt(lHeaderMap.get("channel"));
+		final String lVolumeChannelName = lHeaderMap.get("channelname");
+		final float[] lColor = deserializeFloatArray(lHeaderMap.get("color"));
+		final float[] lViewMatrix = deserializeFloatArray(lHeaderMap.get("viewmatrix"));
 		final int lDim = Integer.parseInt(lHeaderMap.get("dim"));
 		final String lType = lHeaderMap.get("type");
 		final long lElementSize = Long.parseLong(lHeaderMap.get("elementsize"));
@@ -96,18 +102,57 @@ public class ClearVolumeSerialization
 		pVolume.setTimeInSeconds(lTime);
 		pVolume.setType(lType);
 		pVolume.setChannelID(lVolumeChannelID);
+		pVolume.setChannelName(lVolumeChannelName);
+		pVolume.setColor(lColor);
+		pVolume.setViewMatrix(lViewMatrix);
 		pVolume.setDimension(lDim);
 		pVolume.setDimensionsInVoxels(lElementSize,
-																				lWidthVoxels,
-																				lHeightVoxels,
-																				lDepthVoxels);
+																	lWidthVoxels,
+																	lHeightVoxels,
+																	lDepthVoxels);
 
 		pVolume.setDimensionsInRealUnits(	lRealUnitName,
-																						lWidthReal,
-																						lHeightReal,
-																						lDepthReal);
+																			lWidthReal,
+																			lHeightReal,
+																			lDepthReal);
 
 	};
+
+	private static String serializeFloatArray(float[] pFloatArray)
+	{
+		if (pFloatArray == null)
+			return "";
+		StringBuilder lStringBuilder = new StringBuilder();
+		for (int i = 0; i < pFloatArray.length; i++)
+		{
+			final float lValue = pFloatArray[i];
+			lStringBuilder.append(lValue);
+			if (i != pFloatArray.length - 1)
+				lStringBuilder.append(" ");
+		}
+		return lStringBuilder.toString();
+	}
+
+	private static float[] deserializeFloatArray(String pString)
+	{
+		if (pString == null || pString.isEmpty())
+			return null;
+		float[] lFloatArray;
+		try
+		{
+			pString = pString.trim();
+			String[] lSplittedString = pString.split(" ", -1);
+			lFloatArray = new float[lSplittedString.length];
+			for (int i = 0; i < lFloatArray.length; i++)
+				lFloatArray[i] = Float.parseFloat(lSplittedString[i]);
+			return lFloatArray;
+		}
+		catch (NumberFormatException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 	private static ThreadLocal<ByteBuffer> sScratchBufferThreadLocal = new ThreadLocal<ByteBuffer>();
 
@@ -169,7 +214,6 @@ public class ClearVolumeSerialization
 		}
 		pScratchBuffer.rewind();
 	}
-
 
 	private static ByteBuffer ensureScratchBufferLengthIsEnough(ByteBuffer pScratchBuffer,
 																															final int lHeaderLength)
