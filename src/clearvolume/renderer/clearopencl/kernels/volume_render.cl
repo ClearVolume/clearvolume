@@ -467,7 +467,7 @@ max_project(__global uint *d_output,
   	if (t > tfar) break;
   }
 
-  float4 colVal4 = 0.0001 * brightness * colVal * color;
+  float4 colVal4 = 1.f/32767.f *brightness * colVal * color;
   
   if ((x < Nx) && (y < Ny))
 		d_output[x+Nx*y] = rgbaFloatToInt(colVal4);
