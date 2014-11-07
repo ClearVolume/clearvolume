@@ -3,7 +3,6 @@ package clearvolume.renderer.clearopencl;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import java.util.Arrays;
 
 import javax.media.opengl.GLEventListener;
 
@@ -91,11 +90,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		mCLTransferColorBuffers = new CLBuffer[pNumberOfRenderLayers];
 
-		// mTransferFunctionCudaArrays = new CudaArray[pNumberOfRenderLayers];
-		// mVolumeDataCudaArrays = new CudaArray[pNumberOfRenderLayers];
-		// mOpenGLBufferDevicePointers = new
-		// CudaOpenGLBufferObject[pNumberOfRenderLayers];
-
 	}
 
 	@Override
@@ -172,7 +166,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																																					lHeight,
 																																					lDepth,
 																																					CLImageFormat.ChannelOrder.R,
-																																					CLImageFormat.ChannelDataType.SignedInt16);
+																																					CLImageFormat.ChannelDataType.SNormInt16);
 
 			lVolumeDataBuffer.rewind();
 
@@ -200,8 +194,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			lTransferFunctionArray[lTransferFunctionArrayLength - 2],
 			lTransferFunctionArray[lTransferFunctionArrayLength - 1] };
 
-		System.out.println("prepare+ " + pRenderLayerIndex
-												+ Arrays.toString(color4));
+		// System.out.println("prepare+ " + pRenderLayerIndex
+		// + Arrays.toString(color4));
 
 		mCLDevice.writeFloatBuffer(	mCLTransferColorBuffers[pRenderLayerIndex],
 																FloatBuffer.wrap(color4));
@@ -339,24 +333,18 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 											mCLInvModelViewBuffer,
 											mCLVolumeImages[pRenderLayerIndex]);
 
-		System.out.println(getBrightness() + " "
-												+ getTransferRangeMin()
-												+ " "
-												+ getTransferRangeMax()
-												+ " "
-												+ getGamma());
-
-		long startTime = System.nanoTime();
+		// long startTime = System.nanoTime();
 
 		mCLDevice.run(getTextureWidth(), getTextureHeight());
 
 		copyBufferToTexture(pRenderLayerIndex,
 												mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]));
 
-		long endTime = System.nanoTime();
+		// long endTime = System.nanoTime();
 
-		System.out.println("time to render: " + (endTime - startTime)
-												/ 1000000.
-												+ " ms");
+		// System.out.println("time to render: " + (endTime - startTime)
+		// / 1000000.
+		// + " ms");
+
 	}
 }

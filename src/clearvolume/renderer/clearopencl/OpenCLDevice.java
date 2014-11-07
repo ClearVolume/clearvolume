@@ -55,6 +55,7 @@ public class OpenCLDevice
 			else
 			{
 				mCLContext = JavaCL.createBestContext();
+
 			}
 		}
 		catch (Exception e)
