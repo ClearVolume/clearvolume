@@ -2,6 +2,7 @@ package clearvolume.renderer.factory;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
+import clearvolume.renderer.clearopencl.OpenCLVolumeRenderer;
 
 public class ClearVolumeRendererFactory
 {
@@ -87,12 +88,22 @@ public class ClearVolumeRendererFactory
 																																		final int pMaxTextureHeight,
 																																		final int pNumberOfRenderLayers)
 	{
-		return new JCudaClearVolumeRenderer(pWindowName,
-																				pWindowWidth,
-																				pWindowHeight,
-																				pBytesPerVoxel,
-																				pMaxTextureWidth,
-																				pMaxTextureHeight,
-																				pNumberOfRenderLayers);
+		if (false)
+			return new JCudaClearVolumeRenderer(pWindowName,
+																					pWindowWidth,
+																					pWindowHeight,
+																					pBytesPerVoxel,
+																					pMaxTextureWidth,
+																					pMaxTextureHeight,
+																					pNumberOfRenderLayers);
+		else
+			return new OpenCLVolumeRenderer(pWindowName,
+																			pWindowWidth,
+																			pWindowHeight,
+																			pBytesPerVoxel,
+																			pMaxTextureWidth,
+																			pMaxTextureHeight,
+																			pNumberOfRenderLayers);
+
 	}
 }

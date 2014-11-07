@@ -1,4 +1,4 @@
-package clearvolume.renderer.clearopencl;
+package clearvolume.renderer.clearcuda;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -6,24 +6,23 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
+import clearvolume.transferf.TransferFunctions;
 
-public class TestOpenCLVolumeRenderer
+public class TestJCudaClearVolumeRenderer
 {
-
 	@Test
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,
 																						IOException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new OpenCLVolumeRenderer(	"ClearVolumeTest",
-																																												512,
-																																												512,
-																																												2,
-																																												512,
-																																												512,
-																																												1);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
+																																														512,
+																																														512,
+																																														2,
+																																														512,
+																																														512,
+																																														1);
 
-		// lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
-		// lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getBlueGradient());
+		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 
 		lClearVolumeRenderer.setVisible(true);
 
@@ -61,4 +60,5 @@ public class TestOpenCLVolumeRenderer
 
 		lClearVolumeRenderer.close();
 	}
+
 }

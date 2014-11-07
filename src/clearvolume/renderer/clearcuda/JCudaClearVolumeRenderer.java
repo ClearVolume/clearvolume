@@ -472,6 +472,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 		}
 
+		long startTime = System.nanoTime();
+
 		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters())
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
@@ -483,6 +485,12 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 		clearIsUpdateVolumeParameters();
 		clearVolumeDimensionsChanged();
+
+		long endTime = System.nanoTime();
+
+		System.out.println("time to render: " + (endTime - startTime)
+												/ 1000000.
+												+ " ms");
 
 		return lUpdated;
 	}

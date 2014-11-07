@@ -3,6 +3,7 @@ package clearvolume.renderer.clearopencl;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Arrays;
 
 import javax.media.opengl.GLEventListener;
 
@@ -183,11 +184,12 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	private void prepareTransferFunctionArray(int pRenderLayerIndex)
 	{
+
 		final float[] lTransferFunctionArray = getTransfertFunction(pRenderLayerIndex).getArray();
 
 		final int lTransferFunctionArrayLength = lTransferFunctionArray.length;
 
-		mCLTransferFunctionImages[pRenderLayerIndex] = mCLDevice.createGenericImage2D(	lTransferFunctionArrayLength / 4,
+		mCLTransferFunctionImages[pRenderLayerIndex] = mCLDevice.createGenericImage2D(lTransferFunctionArrayLength / 4,
 																																									1,
 																																									CLImageFormat.ChannelOrder.RGBA,
 																																									CLImageFormat.ChannelDataType.Float);
@@ -197,6 +199,9 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			lTransferFunctionArray[lTransferFunctionArrayLength - 3],
 			lTransferFunctionArray[lTransferFunctionArrayLength - 2],
 			lTransferFunctionArray[lTransferFunctionArrayLength - 1] };
+
+		System.out.println("prepare+ " + pRenderLayerIndex
+												+ Arrays.toString(color4));
 
 		mCLDevice.writeFloatBuffer(	mCLTransferColorBuffers[pRenderLayerIndex],
 																FloatBuffer.wrap(color4));
@@ -334,10 +339,24 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 											mCLInvModelViewBuffer,
 											mCLVolumeImages[pRenderLayerIndex]);
 
+		System.out.println(getBrightness() + " "
+												+ getTransferRangeMin()
+												+ " "
+												+ getTransferRangeMax()
+												+ " "
+												+ getGamma());
+
+		long startTime = System.nanoTime();
+
 		mCLDevice.run(getTextureWidth(), getTextureHeight());
 
 		copyBufferToTexture(pRenderLayerIndex,
 												mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]));
 
+		long endTime = System.nanoTime();
+
+		System.out.println("time to render: " + (endTime - startTime)
+												/ 1000000.
+												+ " ms");
 	}
 }

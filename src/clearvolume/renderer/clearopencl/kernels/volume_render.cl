@@ -9,7 +9,7 @@
 
 
 #define maxSteps 200
-#define tstep 0.01f
+#define tstep 0.04f
 
 // intersect ray with a box
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm
@@ -398,6 +398,7 @@ max_project(__global uint *d_output,
 
   float ta = 1.f/(trangemax-trangemin);
   float tb = trangemin/(trangemin-trangemax); 
+  float4 color = (float4)(transferColor4[0],transferColor4[1],transferColor4[2],transferColor4[3]);
   
   float u = (x / (float) Nx)*2.0f-1.0f;
   float v = (y / (float) Ny)*2.0f-1.0f;
@@ -457,7 +458,6 @@ max_project(__global uint *d_output,
 
 
   float colVal = 0;
-  float4 colVal4;
   
   float t = tnear;
 
@@ -472,24 +472,25 @@ max_project(__global uint *d_output,
   	// read from 3D texture        
   	uint newVal = read_imageui(volume, volumeSampler, pos).x;
 		float mappedVal = pow(ta*newVal+tb,gamma);
-		mappedVal = 1.f*newVal;
+		
   	colVal = max(colVal, mappedVal);
 
-	  //float4 newVal4 = read_imagef(transfer,transferSampler,(float2)(mappedVal,0.f));
-	  float4 newVal4 = mappedVal*(float4)(transferColor4[0],transferColor4[1],transferColor4[2],transferColor4[3]);
-	  colVal4 = max(colVal4,newVal4);
-  	t += tstep;
+	  t += tstep;
   	if (t > tfar) break;
   }
 
-
+  float4 colVal4 = 0.0001 * brightness * colVal * color;
+  
   if ((x < Nx) && (y < Ny))
-		//d_output[x+Nx*y] = rgbaFloatToInt((float4)(.01*colVal,0.f,0.f,1.f));
-		d_output[x+Nx*y] = rgbaFloatToInt(0.01*colVal4);
+		d_output[x+Nx*y] = rgbaFloatToInt(colVal4);
 	
-	if ((x==1) &&(y==1))
+	//if ((x==1) &&(y==1))
 		//printf("inside: %.2f\n",transferColor4[0]);
-		printf4(colVal4);
+	//	printf4(colVal4);
+ 
+ 	if ((x==Nx/2) &&(y==Ny/2));
+	//	printf4((float4)(brightness, ta,tb,gamma));
+	//	printf4(colVal4);
  
   
   
