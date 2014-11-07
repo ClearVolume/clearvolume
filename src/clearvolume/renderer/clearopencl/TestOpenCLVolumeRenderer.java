@@ -43,7 +43,7 @@ public class TestOpenCLVolumeRenderer
 																													* z);
 					lVolumeDataArray[lIndex + 1] = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 
-					lVolumeDataArray[lIndex + 1] = (byte) (y % 255);
+					// lVolumeDataArray[lIndex + 1] = (byte) (x);
 
 				}
 
@@ -51,6 +51,7 @@ public class TestOpenCLVolumeRenderer
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
+
 		lClearVolumeRenderer.requestDisplay();
 
 		while (lClearVolumeRenderer.isShowing())

@@ -16,6 +16,7 @@ import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLImage3D;
 import com.nativelibs4java.opencl.CLImageFormat;
 import com.nativelibs4java.opencl.CLImageFormat.ChannelDataType;
+import com.nativelibs4java.opencl.CLImageFormat.ChannelOrder;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLProgram;
@@ -166,6 +167,19 @@ public class OpenCLDevice
 		return evt;
 	}
 
+	public CLImage2D createGenericImage2D(final long Nx,
+																				final long Ny,
+																				ChannelOrder pChannelOrder,
+																				ChannelDataType pChannelDataType)
+	{
+
+		final CLImageFormat fmt = new CLImageFormat(pChannelOrder,
+																								pChannelDataType);
+
+		return mCLContext.createImage2D(Usage.Input, fmt, Nx, Ny);
+
+	}
+
 	public CLImage2D createImage2D(final int Nx, final int Ny)
 	{
 
@@ -188,13 +202,14 @@ public class OpenCLDevice
 
 	}
 
-	public CLImage3D createImage3D(	final long Nx,
-																	final long Ny,
-																	final long Nz,
-																	ChannelDataType pChannelDataType)
+	public CLImage3D createGenericImage3D(final long Nx,
+																				final long Ny,
+																				final long Nz,
+																				ChannelOrder pChannelOrder,
+																				ChannelDataType pChannelDataType)
 	{
 
-		final CLImageFormat fmt = new CLImageFormat(CLImageFormat.ChannelOrder.R,
+		final CLImageFormat fmt = new CLImageFormat(pChannelOrder,
 																								pChannelDataType);
 
 		return mCLContext.createImage3D(Usage.Input, fmt, Nx, Ny, Nz);
@@ -318,4 +333,19 @@ public class OpenCLDevice
 
 	}
 
+	public CLEvent writeFloatImage2D(	final CLImage2D img,
+																		final FloatBuffer pFloatBuffer)
+
+	{
+
+		return img.write(	mCLQueue,
+											0,
+											0,
+											img.getWidth(),
+											img.getHeight(),
+											0,
+											pFloatBuffer,
+											true);
+
+	}
 }

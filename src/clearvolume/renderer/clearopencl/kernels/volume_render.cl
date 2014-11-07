@@ -8,8 +8,8 @@
 
 
 
-#define maxSteps 700
-#define tstep 0.005f
+#define maxSteps 200
+#define tstep 0.01f
 
 // intersect ray with a box
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm
@@ -354,12 +354,143 @@ test(__global uint *d_output,
   uint y = get_global_id(1);
 
 
-  float val = 1.f*read_imageui(volume,volumeSampler,(float4)(1.f*x/Nx,1.f*y/Ny,.5f,0.f)).x;
+  uint val = 1.f*read_imageui(volume,volumeSampler,(float4)(0.f,0.f,.0f,0.f)).x;
+
+	if ((x==0) &&(y==0))
+		printf("inside: %d\n",val);
+
 
   if ((x < Nx) && (y < Ny)){
-		d_output[x+Nx*y] = rgbaFloatToInt((float4)(1.f*x/Nx,.0f,.0f,1.f));
+		d_output[x+Nx*y] = rgbaFloatToInt((float4)(1.f*val/257.,0.f,.0f,1.f));
 		
 	}
+  
+  
+
+}
+
+__kernel void
+max_project(__global uint *d_output, 
+			uint Nx, uint Ny,
+			float brightness,
+			float trangemin, 
+			float trangemax, 
+			float gamma,
+			//__read_only image2d_t transfer,
+			__constant float* transferColor4,
+			__constant float* invP,
+			__constant float* invM,
+			__read_only image3d_t volume)
+{
+  const sampler_t volumeSampler =   CLK_NORMALIZED_COORDS_TRUE |
+	CLK_ADDRESS_CLAMP_TO_EDGE |
+	// CLK_FILTER_NEAREST ;
+	CLK_FILTER_LINEAR ;
+
+	const sampler_t transferSampler =   CLK_NORMALIZED_COORDS_TRUE |
+	CLK_ADDRESS_CLAMP_TO_EDGE |
+	CLK_FILTER_LINEAR ;
+
+
+
+  uint x = get_global_id(0);
+  uint y = get_global_id(1);
+
+  float ta = 1.f/(trangemax-trangemin);
+  float tb = trangemin/(trangemin-trangemax); 
+  
+  float u = (x / (float) Nx)*2.0f-1.0f;
+  float v = (y / (float) Ny)*2.0f-1.0f;
+
+  float4 boxMin = (float4)(-1.0f, -1.0f, -1.0f,-1.0f);
+  float4 boxMax = (float4)(1.0f, 1.0f, 1.0f,1.0f);
+
+  // calculate eye ray in world space
+  float4 orig0, orig;
+  float4 direc0, direc;
+  float4 temp;
+  float4 back,front;
+
+  
+  front = (float4)(u,v,-1,1);
+  back = (float4)(u,v,1,1);
+  
+  orig0.x = dot(front, ((float4)(invP[0],invP[1],invP[2],invP[3])));
+  orig0.y = dot(front, ((float4)(invP[4],invP[5],invP[6],invP[7])));
+  orig0.z = dot(front, ((float4)(invP[8],invP[9],invP[10],invP[11])));
+  orig0.w = dot(front, ((float4)(invP[12],invP[13],invP[14],invP[15])));
+
+  orig0 *= 1.f/orig0.w;
+
+  orig.x = dot(orig0, ((float4)(invM[0],invM[1],invM[2],invM[3])));
+  orig.y = dot(orig0, ((float4)(invM[4],invM[5],invM[6],invM[7])));
+  orig.z = dot(orig0, ((float4)(invM[8],invM[9],invM[10],invM[11])));
+  orig.w = dot(orig0, ((float4)(invM[12],invM[13],invM[14],invM[15])));
+
+  orig *= 1.f/orig.w;
+  
+  direc0.x = dot(back, ((float4)(invP[0],invP[1],invP[2],invP[3])));
+  direc0.y = dot(back, ((float4)(invP[4],invP[5],invP[6],invP[7])));
+  direc0.z = dot(back, ((float4)(invP[8],invP[9],invP[10],invP[11])));
+  direc0.w = dot(back, ((float4)(invP[12],invP[13],invP[14],invP[15])));
+
+  direc0 *= 1.f/direc0.w;
+
+  direc0 = normalize(direc0-orig0);
+
+  direc.x = dot(direc0, ((float4)(invM[0],invM[1],invM[2],invM[3])));
+  direc.y = dot(direc0, ((float4)(invM[4],invM[5],invM[6],invM[7])));
+  direc.z = dot(direc0, ((float4)(invM[8],invM[9],invM[10],invM[11])));
+  direc.w = 0.0f;
+
+ 
+  // find intersection with box
+  float tnear, tfar;
+  int hit = intersectBox(orig,direc, boxMin, boxMax, &tnear, &tfar);
+  if (!hit) {
+  	if ((x < Nx) && (y < Ny)) {
+  	  d_output[x+Nx*y] = 0.f;
+  	}
+  	return;
+  }
+  if (tnear < 0.0f) tnear = 0.0f;     // clamp to near plane
+
+
+  float colVal = 0;
+  float4 colVal4;
+  
+  float t = tnear;
+
+  float4 pos;
+  uint i;
+  for(i=0; i<maxSteps; i++) {		
+  	pos = orig + t*direc;
+
+
+	  pos = pos*0.5f+0.5f;    // map position to [0, 1] coordinates
+
+  	// read from 3D texture        
+  	uint newVal = read_imageui(volume, volumeSampler, pos).x;
+		float mappedVal = pow(ta*newVal+tb,gamma);
+		mappedVal = 1.f*newVal;
+  	colVal = max(colVal, mappedVal);
+
+	  //float4 newVal4 = read_imagef(transfer,transferSampler,(float2)(mappedVal,0.f));
+	  float4 newVal4 = mappedVal*(float4)(transferColor4[0],transferColor4[1],transferColor4[2],transferColor4[3]);
+	  colVal4 = max(colVal4,newVal4);
+  	t += tstep;
+  	if (t > tfar) break;
+  }
+
+
+  if ((x < Nx) && (y < Ny))
+		//d_output[x+Nx*y] = rgbaFloatToInt((float4)(.01*colVal,0.f,0.f,1.f));
+		d_output[x+Nx*y] = rgbaFloatToInt(0.01*colVal4);
+	
+	if ((x==1) &&(y==1))
+		//printf("inside: %.2f\n",transferColor4[0]);
+		printf4(colVal4);
+ 
   
   
 
