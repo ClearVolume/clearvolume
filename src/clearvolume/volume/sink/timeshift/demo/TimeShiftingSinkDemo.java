@@ -11,10 +11,10 @@ import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
-import clearvolume.volume.sink.timeshift.MultiChannelTimeShiftingSink;
-import clearvolume.volume.sink.timeshift.gui.MultiChannelTimeShiftingSinkJFrame;
+import clearvolume.volume.sink.timeshift.TimeShiftingSink;
+import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 
-public class MultiChannelTimeShiftingSinkDemo
+public class TimeShiftingSinkDemo
 {
 	private static final int cSizeMultFactor = 1;
 	private static final int cWidth = 128 * cSizeMultFactor;
@@ -24,7 +24,7 @@ public class MultiChannelTimeShiftingSinkDemo
 	@Test
 	public void demo() throws InterruptedException
 	{
-		ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"TimeShift And MultiChannel Demo",
+		ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"TimeShift Demo",
 																																																		512,
 																																																		512,
 																																																		1,
@@ -39,14 +39,14 @@ public class MultiChannelTimeShiftingSinkDemo
 																																										TimeUnit.MILLISECONDS);
 		lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
-		MultiChannelTimeShiftingSink lMultiChannelTimeShiftingSink = new MultiChannelTimeShiftingSink(50,
+		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
 																																																	100);
 
-		MultiChannelTimeShiftingSinkJFrame.launch(lMultiChannelTimeShiftingSink);
+		TimeShiftingSinkJFrame.launch(lTimeShiftingSink);
 
-		lMultiChannelTimeShiftingSink.setRelaySink(lClearVolumeRendererSink);
+		lTimeShiftingSink.setRelaySink(lClearVolumeRendererSink);
 
-		VolumeManager lManager = lMultiChannelTimeShiftingSink.getManager();
+		VolumeManager lManager = lTimeShiftingSink.getManager();
 
 		final int lMaxVolumesSent = 1000;
 		for (int i = 0; i < lMaxVolumesSent; i++)
@@ -87,7 +87,7 @@ public class MultiChannelTimeShiftingSinkDemo
 			lVolume.setTimeIndex(lTimePoint);
 			lVolume.setChannelID(lChannel);
 
-			lMultiChannelTimeShiftingSink.sendVolume(lVolume);
+			lTimeShiftingSink.sendVolume(lVolume);
 
 			Thread.sleep(50);
 		}

@@ -13,7 +13,7 @@ import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.relay.RelaySinkAdapter;
 import clearvolume.volume.sink.relay.RelaySinkInterface;
 
-public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
+public class TimeShiftingSink extends RelaySinkAdapter implements
 																																	RelaySinkInterface,
 																																	ClearVolumeCloseable
 {
@@ -31,9 +31,9 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 	private volatile long mCleanUpPeriodInTimePoints;
 	private volatile long mHighestTimePointIndexSeen = 0;
 	private volatile long mTimeShift = 0;
-	private volatile int mCurrentChannelID = 0;
+	private volatile boolean mIsPlaying = true;
 
-	public MultiChannelTimeShiftingSink(long pSoftMemoryHoryzonInTimePointIndices,
+	public TimeShiftingSink(long pSoftMemoryHoryzonInTimePointIndices,
 																			long pHardMemoryHoryzonInTimePointIndices)
 	{
 		super();
@@ -70,42 +70,6 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 		return mAvailableChannels.size();
 	}
 
-	public Integer nextChannel()
-	{
-		final int lPreviousChannelID = mCurrentChannelID;
-
-		if (mAvailableChannels.isEmpty())
-			return null;
-		Integer lHigher = mAvailableChannels.higher(mCurrentChannelID);
-		if (lHigher == null)
-			mCurrentChannelID = mAvailableChannels.first();
-		else
-			mCurrentChannelID = lHigher;
-
-		if (mCurrentChannelID != lPreviousChannelID)
-			sendVolumeInternal(mCurrentChannelID);
-
-		return mCurrentChannelID;
-	}
-
-	public Integer previousChannel()
-	{
-		final int lPreviousChannelID = mCurrentChannelID;
-
-		if (mAvailableChannels.isEmpty())
-			return null;
-		Integer lLower = mAvailableChannels.lower(mCurrentChannelID);
-		if (lLower == null)
-			mCurrentChannelID = mAvailableChannels.last();
-		else
-			mCurrentChannelID = lLower;
-
-		if (mCurrentChannelID != lPreviousChannelID)
-			sendVolumeInternal(mCurrentChannelID);
-
-		return mCurrentChannelID;
-	}
-
 	@Override
 	public void sendVolume(Volume<?> pVolume)
 	{
@@ -127,7 +91,8 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 		mHighestTimePointIndexSeen = Math.max(mHighestTimePointIndexSeen,
 																					pVolume.getTimeIndex());
 
-		sendVolumeInternal(lVolumeChannelID);
+		if (mIsPlaying)
+			sendVolumeInternal(lVolumeChannelID);
 	}
 
 	private void sendVolumeInternal(int lVolumeChannelID)
@@ -151,20 +116,8 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 
 	private Volume<?> getVolumeToSend(int pVolumeChannelID)
 	{
-		if (!mAvailableChannels.contains(mCurrentChannelID))
-		{
-			Integer lNewCurrentChannelID = mAvailableChannels.floor(mCurrentChannelID);
-			if (lNewCurrentChannelID == null)
-			{
-				lNewCurrentChannelID = mAvailableChannels.ceiling(mCurrentChannelID);
-			}
-			mCurrentChannelID = lNewCurrentChannelID;
-		}
 
-		if (pVolumeChannelID != mCurrentChannelID)
-			return null;
-
-		TreeMap<Long, SwitchableSoftReference<Volume<?>>> lTimePointIndexToVolumeMap = mChannelToVolumeListsMap.get(mCurrentChannelID);
+		TreeMap<Long, SwitchableSoftReference<Volume<?>>> lTimePointIndexToVolumeMap = mChannelToVolumeListsMap.get(pVolumeChannelID);
 
 		if (lTimePointIndexToVolumeMap.isEmpty())
 			return null;
@@ -253,6 +206,16 @@ public class MultiChannelTimeShiftingSink extends RelaySinkAdapter implements
 
 		mAvailableChannels.clear();
 
+	}
+
+	public void pause()
+	{
+		mIsPlaying = false;
+	}
+
+	public void play()
+	{
+		mIsPlaying = true;
 	}
 
 }
