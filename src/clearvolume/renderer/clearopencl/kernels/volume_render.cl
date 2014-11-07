@@ -353,17 +353,6 @@ test(__global uint *d_output,
   uint x = get_global_id(0);
   uint y = get_global_id(1);
 
-
-  uint val = 1.f*read_imageui(volume,volumeSampler,(float4)(0.f,0.f,.0f,0.f)).x;
-
-	if ((x==0) &&(y==0))
-		printf("inside: %d\n",val);
-
-
-  if ((x < Nx) && (y < Ny)){
-		d_output[x+Nx*y] = rgbaFloatToInt((float4)(1.f*val/257.,0.f,.0f,1.f));
-		
-	}
   
   
 
@@ -376,7 +365,6 @@ max_project(__global uint *d_output,
 			float trangemin, 
 			float trangemax, 
 			float gamma,
-			//__read_only image2d_t transfer,
 			__constant float* transferColor4,
 			__constant float* invP,
 			__constant float* invM,
