@@ -101,11 +101,6 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private Pointer mKernelParametersPointer;
 
 	/**
-	 * inverted view-matrix as float array.
-	 */
-	final float invViewMatrix[] = new float[12];
-
-	/**
 	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
 	 * name, width and height.
 	 * 
@@ -239,7 +234,9 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 				prepareVolumeDataArray(i, null);
+
 			prepareVolumeDataTexture();
+
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
 				prepareTransferFunctionArray(i);
@@ -489,6 +486,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 		}
 
+		long startTime = System.nanoTime();
+
 		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters())
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
@@ -500,6 +499,12 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 		clearIsUpdateVolumeParameters();
 		clearVolumeDimensionsChanged();
+
+		long endTime = System.nanoTime();
+
+		System.out.println("time to render: " + (endTime - startTime)
+												/ 1000000.
+												+ " ms");
 
 		return lUpdated;
 	}
