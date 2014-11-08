@@ -18,7 +18,6 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 																															Closeable,
 																															RelaySinkInterface
 {
-	private VolumeManager mVolumeManager;
 
 	private ServerSocketChannel mServerSocketChannel;
 
@@ -28,11 +27,9 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 	private SourceToSinkBufferedAdapter mSourceToSinkBufferedAdapter;
 
 	public ClearVolumeTCPServerSink(VolumeSinkInterface pVolumeSinkInterface,
-																	VolumeManager pVolumeManager,
 																	int pMaxCapacity)
 	{
 		super();
-		mVolumeManager = pVolumeManager;
 		setRelaySink(pVolumeSinkInterface);
 		mSourceToSinkBufferedAdapter = new SourceToSinkBufferedAdapter(	getManager(),
 																																		pMaxCapacity);
@@ -90,7 +87,7 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 	@Override
 	public VolumeManager getManager()
 	{
-		return mVolumeManager;
+		return getRelaySink().getManager();
 	}
 
 }

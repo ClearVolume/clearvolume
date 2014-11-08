@@ -44,7 +44,6 @@ public class ClearVolumeNetworkDemo
 			VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
 
 			ClearVolumeTCPServerSink lClearVolumeTCPServer = new ClearVolumeTCPServerSink(new NullVolumeSink(),
-			                                                                              lVolumeManager,
 																																										cNumberOfAvailableVolumes);
 
 			SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
