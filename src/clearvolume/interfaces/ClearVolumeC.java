@@ -141,7 +141,7 @@ public class ClearVolumeC
 				lTimeShiftingSinkJFrame = new TimeShiftingSinkJFrame(lTimeShiftingSink);
 				lTimeShiftingSinkJFrame.setVisible(true);
 				sIDToTimeShiftingSinkJFrame.put(pRendererId,
-																										lTimeShiftingSinkJFrame);
+																				lTimeShiftingSinkJFrame);
 
 				lTimeShiftingSink.setRelaySink(lSinkAfterAsynchronousVolumeSinkAdapter);
 
@@ -287,7 +287,8 @@ public class ClearVolumeC
 			VolumeManager lVolumeManager = new VolumeManager(sMaxAvailableVolumes);
 			sIDToVolumeManager.put(pServerId, lVolumeManager);
 
-			ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(lVolumeManager,
+			ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(new NullVolumeSink(),
+																																												lVolumeManager,
 																																												sMaxAvailableVolumes);
 
 			SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
@@ -517,7 +518,7 @@ public class ClearVolumeC
 
 			double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 			if (lDimensionsInRealUnits != null)
-				lRequestedVolume.setVoxelSizeInRealUnits("um",
+				lRequestedVolume.setVoxelSizeInRealUnits(	"um",
 																									lDimensionsInRealUnits);
 
 			ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
@@ -625,7 +626,7 @@ public class ClearVolumeC
 
 		double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 		if (lDimensionsInRealUnits != null)
-			lRequestedVolume.setVoxelSizeInRealUnits("um",
+			lRequestedVolume.setVoxelSizeInRealUnits(	"um",
 																								lDimensionsInRealUnits);
 	}
 
@@ -707,7 +708,7 @@ public class ClearVolumeC
 
 			double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 			if (lDimensionsInRealUnits != null)
-				lRequestedVolume.setVoxelSizeInRealUnits("um",
+				lRequestedVolume.setVoxelSizeInRealUnits(	"um",
 																									lDimensionsInRealUnits);
 
 			ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
