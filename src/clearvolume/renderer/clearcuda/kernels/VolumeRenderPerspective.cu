@@ -179,7 +179,6 @@ inline __device__ bool algo(float4 &acc, float4 &col )
 
 extern "C" __global__ void
 volumerender(uint *d_output, uint imageW, uint imageH,
-		 			float scalex, float scaley, float scalez,
          	float brightness, float trangemin, float trangemax, float gamma)
 {
 		
@@ -189,11 +188,9 @@ volumerender(uint *d_output, uint imageW, uint imageH,
     const float ta = 1.0/(trangemax-trangemin);
     const float tb = trangemin/(trangemin-trangemax); 
     
-    const float invscalex = 1/scalex;
-    const float invscaley = 1/scaley;
-    const float invscalez = 1/scalez;
-    const float3 boxMin = make_float3(-scalex, -scaley, -scalez);
-    const float3 boxMax = make_float3(scalex, scaley, scalez);
+   
+    const float3 boxMin = make_float3(-1.f, -1.f, -1.f);
+    const float3 boxMax = make_float3(1.f,1.f,1.f);
 
     const uint x = blockIdx.x*blockDim.x + threadIdx.x;
     const uint y = blockIdx.y*blockDim.y + threadIdx.y;

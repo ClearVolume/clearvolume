@@ -10,7 +10,6 @@ import clearvolume.controller.ExternalRotationController;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
-import clearvolume.renderer.clearopencl.OpenCLVolumeRenderer;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
 
@@ -74,19 +73,19 @@ public class ClearVolumeDemo
 	public void demoAspectRatio()	throws InterruptedException,
 																IOException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new OpenCLVolumeRenderer(	"ClearVolumeTest",
-																																												512,
-																																												512,
-																																												1,
-																																												512,
-																																												512,
-																																												1);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
+																																														512,
+																																														512,
+																																														1,
+																																														512,
+																																														512,
+																																														1);
 		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 100;
-		final int lResolutionY = 200;
-		final int lResolutionZ = 300;
+		final int lResolutionX = 400;
+		final int lResolutionY = 100;
+		final int lResolutionZ = 200;
 
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ];
