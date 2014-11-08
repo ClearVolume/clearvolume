@@ -347,14 +347,6 @@ public class OpenCLDevice
 	public CLEvent writeImage(final CLImage3D img,
 														final ByteBuffer pByteBuffer)
 	{
-		/*if (img.getWidth() * img.getHeight()
-				* img.getDepth()*img. != pByteBuffer.capacity())
-		{
-
-			System.err.println("image and buffer sizes dont align!");
-			return null;
-		}/**/
-
 		return img.write(	mCLQueue,
 											0,
 											0,
@@ -366,7 +358,6 @@ public class OpenCLDevice
 											0,
 											pByteBuffer,
 											true);
-
 	}
 
 	public CLEvent writeFloatImage2D(	final CLImage2D img,

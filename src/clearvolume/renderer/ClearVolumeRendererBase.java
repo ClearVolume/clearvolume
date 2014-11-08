@@ -1,5 +1,7 @@
 package clearvolume.renderer;
 
+import static java.lang.Math.max;
+
 import java.awt.BorderLayout;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
@@ -741,9 +743,9 @@ public abstract class ClearVolumeRendererBase	implements
 																	final long pSizeX,
 																	final long pSizeY,
 																	final long pSizeZ,
-																	final double pVolumeSizeX,
-																	final double pVolumeSizeY,
-																	final double pVolumeSizeZ)
+																	final double pVoxelSizeX,
+																	final double pVoxelSizeY,
+																	final double pVoxelSizeZ)
 	{
 		synchronized (getSetVolumeDataBufferLock(getCurrentRenderLayer()))
 		{
@@ -758,10 +760,12 @@ public abstract class ClearVolumeRendererBase	implements
 			mVolumeSizeY = pSizeY;
 			mVolumeSizeZ = pSizeZ;
 
-			mScaleX = (float) pVolumeSizeX;
-			mScaleY = (float) pVolumeSizeY;
-			mScaleZ = (float) pVolumeSizeZ;
+			double lMaxSize = max(max(mVolumeSizeX, mVolumeSizeY),
+														mVolumeSizeZ);
 
+			mScaleX = (float) (pVoxelSizeX * mVolumeSizeX / lMaxSize);
+			mScaleY = (float) (pVoxelSizeY * mVolumeSizeY / lMaxSize);
+			mScaleZ = (float) (pVoxelSizeZ * mVolumeSizeZ / lMaxSize);
 
 			mVolumeDataByteBuffers[getCurrentRenderLayer()] = pByteBuffer;
 
@@ -779,9 +783,9 @@ public abstract class ClearVolumeRendererBase	implements
 													pVolume.getWidthInVoxels(),
 													pVolume.getHeightInVoxels(),
 													pVolume.getDepthInVoxels(),
-													pVolume.getWidthInRealUnits(),
-													pVolume.getHeightInRealUnits(),
-													pVolume.getDepthInRealUnits());
+													pVolume.getVoxelWidthInRealUnits(),
+													pVolume.getVoxelHeightInRealUnits(),
+													pVolume.getVoxelDepthInRealUnits());
 		}
 	}
 
@@ -814,13 +818,13 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	@Override
 	public boolean waitToFinishAllDataBufferCopy(	long pTimeOut,
-																						TimeUnit pTimeUnit)
+																								TimeUnit pTimeUnit)
 	{
 		boolean lNoTimeOut = true;
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			lNoTimeOut &= waitToFinishDataBufferCopy(	getCurrentRenderLayer(),
-																			pTimeOut,
-																			pTimeUnit);
+																								pTimeOut,
+																								pTimeUnit);
 
 		return lNoTimeOut;
 	}
@@ -851,7 +855,8 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		boolean lNoTimeOut = true;
 		long lStartTimeInNanoseconds = System.nanoTime();
-		long lTimeOutTimeInNanoseconds = lStartTimeInNanoseconds+TimeUnit.NANOSECONDS.convert(pTimeOut,pTimeUnit);
+		long lTimeOutTimeInNanoseconds = lStartTimeInNanoseconds + TimeUnit.NANOSECONDS.convert(pTimeOut,
+																																														pTimeUnit);
 		while ((lNoTimeOut = System.nanoTime() < lTimeOutTimeInNanoseconds) && mDataBufferCopyIsFinished.get(pRenderLayerIndex) == 0)
 		{
 			try

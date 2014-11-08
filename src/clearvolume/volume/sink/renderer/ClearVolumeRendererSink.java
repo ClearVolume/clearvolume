@@ -1,6 +1,5 @@
 package clearvolume.volume.sink.renderer;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -48,15 +47,6 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 	public void sendVolume(Volume<?> pVolume)
 	{
 
-		final ByteBuffer lVolumeDataBuffer = pVolume.getDataBuffer();
-		final long lVoxelWidth = pVolume.getWidthInVoxels();
-		final long lVoxelHeight = pVolume.getHeightInVoxels();
-		final long lVoxelDepth = pVolume.getDepthInVoxels();
-
-		final double lRealWidth = pVolume.getWidthInRealUnits();
-		final double lRealHeight = pVolume.getHeightInRealUnits();
-		final double lRealDepth = pVolume.getDepthInRealUnits();
-
 		final long lTimePointIndex = pVolume.getTimeIndex();
 		final int lChannelID = pVolume.getChannelID();
 		final String lChannelName = pVolume.getChannelName();
@@ -74,13 +64,7 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 			lTransferFunction = TransferFunctions.getGradientForColor(lRenderLayer);
 
 		mClearVolumeRendererInterface.setTransfertFunction(lTransferFunction);
-		mClearVolumeRendererInterface.setVolumeDataBuffer(lVolumeDataBuffer,
-																											lVoxelWidth,
-																											lVoxelHeight,
-																											lVoxelDepth,
-																											lRealWidth,
-																											lRealHeight,
-																											lRealDepth);
+		mClearVolumeRendererInterface.setVolumeDataBuffer(pVolume);
 
 		// if (lTimePointIndex > mLastTimePointDisplayed)
 		{

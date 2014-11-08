@@ -61,12 +61,15 @@ public class ClearVolumeSerialization
 		lHeaderMap.put("type", "" + pVolume.getTypeName());
 		lHeaderMap.put("bytespervoxel", "" + pVolume.getBytesPerVoxel());
 		lHeaderMap.put("elementsize", "" + pVolume.getElementSize());
-		lHeaderMap.put("widthvoxels", "" + pVolume.getWidthInVoxels());
-		lHeaderMap.put("heightvoxels", "" + pVolume.getHeightInVoxels());
-		lHeaderMap.put("depthvoxels", "" + pVolume.getDepthInVoxels());
-		lHeaderMap.put("widthreal", "" + pVolume.getWidthInRealUnits());
-		lHeaderMap.put("heightreal", "" + pVolume.getHeightInRealUnits());
-		lHeaderMap.put("depthreal", "" + pVolume.getDepthInRealUnits());
+		lHeaderMap.put("width", "" + pVolume.getWidthInVoxels());
+		lHeaderMap.put("height", "" + pVolume.getHeightInVoxels());
+		lHeaderMap.put("depth", "" + pVolume.getDepthInVoxels());
+		lHeaderMap.put(	"voxelwidth",
+										"" + pVolume.getVoxelWidthInRealUnits());
+		lHeaderMap.put(	"voxelheight",
+										"" + pVolume.getVoxelHeightInRealUnits());
+		lHeaderMap.put(	"voxeldepth",
+										"" + pVolume.getVoxelDepthInRealUnits());
 		lHeaderMap.put("realunit", pVolume.getRealUnitName());
 
 		KeyValueMaps.writeStringFromMap(lHeaderMap, pStringBuilder);
@@ -89,14 +92,14 @@ public class ClearVolumeSerialization
 		final int lDim = Integer.parseInt(lHeaderMap.get("dim"));
 		final String lType = lHeaderMap.get("type");
 		final long lElementSize = Long.parseLong(lHeaderMap.get("elementsize"));
-		final long lWidthVoxels = Long.parseLong(lHeaderMap.get("widthvoxels"));
-		final long lHeightVoxels = Long.parseLong(lHeaderMap.get("heightvoxels"));
-		final long lDepthVoxels = Long.parseLong(lHeaderMap.get("depthvoxels"));
+		final long lWidth = Long.parseLong(lHeaderMap.get("width"));
+		final long lHeight = Long.parseLong(lHeaderMap.get("height"));
+		final long lDepth = Long.parseLong(lHeaderMap.get("depth"));
 
 		final String lRealUnitName = lHeaderMap.get("realunit");
-		final double lWidthReal = Double.parseDouble(lHeaderMap.get("widthreal"));
-		final double lHeightReal = Double.parseDouble(lHeaderMap.get("heightreal"));
-		final double lDepthReal = Double.parseDouble(lHeaderMap.get("depthreal"));
+		final double lVoxelWidth = Double.parseDouble(lHeaderMap.get("voxelwidth"));
+		final double lVoxelHeight = Double.parseDouble(lHeaderMap.get("voxelheight"));
+		final double lVoxelDepth = Double.parseDouble(lHeaderMap.get("voxeldepth"));
 
 		pVolume.setTimeIndex(lIndex);
 		pVolume.setTimeInSeconds(lTime);
@@ -107,14 +110,14 @@ public class ClearVolumeSerialization
 		pVolume.setViewMatrix(lViewMatrix);
 		pVolume.setDimension(lDim);
 		pVolume.setDimensionsInVoxels(lElementSize,
-																	lWidthVoxels,
-																	lHeightVoxels,
-																	lDepthVoxels);
+																	lWidth,
+																	lHeight,
+																	lDepth);
 
-		pVolume.setDimensionsInRealUnits(	lRealUnitName,
-																			lWidthReal,
-																			lHeightReal,
-																			lDepthReal);
+		pVolume.setVoxelSizeInRealUnits(lRealUnitName,
+																		lVoxelWidth,
+																		lVoxelHeight,
+																		lVoxelDepth);
 
 	};
 
