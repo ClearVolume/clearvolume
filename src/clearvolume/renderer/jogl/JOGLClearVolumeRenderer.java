@@ -1,5 +1,7 @@
 package clearvolume.renderer.jogl;
 
+import static java.lang.Math.max;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -609,8 +611,21 @@ public abstract class JOGLClearVolumeRenderer	extends
 																-getTranslationY(),
 																-getTranslationZ());
 
+		// scaling...
+
+		double scaleX = getVolumeSizeX() * getVoxelSizeX();
+		double scaleY = getVolumeSizeY() * getVoxelSizeY();
+		double scaleZ = getVolumeSizeZ() * getVoxelSizeZ();
+		double maxScale = max(max(scaleX, scaleY), scaleZ);
+
 		GLMatrix lInvVolumeMatrix = new GLMatrix();
-		lInvVolumeMatrix.copy(mVolumeViewMatrix);
+		lInvVolumeMatrix.setIdentity();
+		lInvVolumeMatrix.scale(	(float) (maxScale / scaleX),
+														(float) (maxScale / scaleY),
+														(float) (maxScale / scaleZ));
+
+		lInvVolumeMatrix.mult(mVolumeViewMatrix);
+		// lInvVolumeMatrix.copy(mVolumeViewMatrix);
 		lInvVolumeMatrix.transpose();
 
 		GLMatrix lInvProjection = new GLMatrix();
@@ -646,7 +661,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				// invert Matrix is the modelview used by renderer which is actually the
 				// inverted modelview Matrix
-				mBoxModelViewMatrix.copy(mVolumeViewMatrix);
+				// mBoxModelViewMatrix.copy(mVolumeViewMatrix);
+				mBoxModelViewMatrix.copy(lInvVolumeMatrix);
+				mBoxModelViewMatrix.transpose();
 				mBoxModelViewMatrix.invert();
 
 				mBoxModelViewMatrixUniform.setFloatMatrix(mBoxModelViewMatrix.getFloatArray(),
