@@ -76,6 +76,11 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile long mVolumeSizeX;
 	private volatile long mVolumeSizeY;
 	private volatile long mVolumeSizeZ;
+	private volatile double mVoxelSizeX;
+
+	private volatile double mVoxelSizeY;
+	private volatile double mVoxelSizeZ;
+
 	private volatile boolean mVolumeDimensionsChanged;
 
 	// data copy locking and waiting
@@ -202,6 +207,21 @@ public abstract class ClearVolumeRendererBase	implements
 	public long getVolumeSizeZ()
 	{
 		return mVolumeSizeZ;
+	}
+
+	public double getVoxelSizeX()
+	{
+		return mVoxelSizeX;
+	}
+
+	public double getVoxelSizeY()
+	{
+		return mVoxelSizeY;
+	}
+
+	public double getVoxelSizeZ()
+	{
+		return mVoxelSizeZ;
 	}
 
 	/**
@@ -723,13 +743,7 @@ public abstract class ClearVolumeRendererBase	implements
 																	final long pSizeY,
 																	final long pSizeZ)
 	{
-		setVolumeDataBuffer(pByteBuffer,
-												pSizeX,
-												pSizeY,
-												pSizeZ,
-												1,
-												((double) pSizeY) / pSizeX,
-												((double) pSizeZ) / pSizeX);
+		setVolumeDataBuffer(pByteBuffer, pSizeX, pSizeY, pSizeZ, 1, 1, 1);
 	}
 
 	/**
@@ -759,6 +773,10 @@ public abstract class ClearVolumeRendererBase	implements
 			mVolumeSizeX = pSizeX;
 			mVolumeSizeY = pSizeY;
 			mVolumeSizeZ = pSizeZ;
+
+			mVoxelSizeX = pVoxelSizeX;
+			mVoxelSizeY = pVoxelSizeY;
+			mVoxelSizeZ = pVoxelSizeZ;
 
 			double lMaxSize = max(max(mVolumeSizeX, mVolumeSizeY),
 														mVolumeSizeZ);

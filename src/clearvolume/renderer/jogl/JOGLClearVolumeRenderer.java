@@ -1,5 +1,7 @@
 package clearvolume.renderer.jogl;
 
+import static java.lang.Math.max;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -596,22 +598,36 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 		setDefaultProjectionMatrix();
 
-		mVolumeViewMatrix.euler(-getRotationX() * 0.01,
-														-getRotationY() * 0.01,
-														0.0f);
+		// scaling...
+
+		double scaleX = getVolumeSizeX() * getVoxelSizeX();
+		double scaleY = getVolumeSizeY() * getVoxelSizeY();
+		double scaleZ = getVolumeSizeZ() * getVoxelSizeZ();
+		double maxScale = max(max(scaleX, scaleY), scaleZ);
+
+		// building up the inverse Modelview
+
+		GLMatrix eulerMat = new GLMatrix();
+
+		eulerMat.euler(getRotationX() * 0.01, getRotationY() * 0.01, 0.0f);
 		if (hasRotationController())
 		{
-			getRotationController().rotate(mVolumeViewMatrix);
+			getRotationController().rotate(eulerMat);
 			notifyUpdateOfVolumeRenderingParameters();
 		}
 
-		mVolumeViewMatrix.translate(-getTranslationX(),
+		GLMatrix lInvVolumeMatrix = new GLMatrix();
+		lInvVolumeMatrix.setIdentity();
+		lInvVolumeMatrix.translate(	-getTranslationX(),
 																-getTranslationY(),
 																-getTranslationZ());
-
-		GLMatrix lInvVolumeMatrix = new GLMatrix();
-		lInvVolumeMatrix.copy(mVolumeViewMatrix);
 		lInvVolumeMatrix.transpose();
+
+		lInvVolumeMatrix.mult(eulerMat);
+
+		lInvVolumeMatrix.scale(	(float) (maxScale / scaleX),
+														(float) (maxScale / scaleY),
+														(float) (maxScale / scaleZ));
 
 		GLMatrix lInvProjection = new GLMatrix();
 		lInvProjection.copy(getClearGLWindow().getProjectionMatrix());
@@ -646,10 +662,12 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				// invert Matrix is the modelview used by renderer which is actually the
 				// inverted modelview Matrix
-				mBoxModelViewMatrix.copy(mVolumeViewMatrix);
-				mBoxModelViewMatrix.invert();
+				GLMatrix lInvBoxMatrix = new GLMatrix();
+				lInvBoxMatrix.copy(lInvVolumeMatrix);
+				lInvBoxMatrix.transpose();
+				lInvBoxMatrix.invert();
 
-				mBoxModelViewMatrixUniform.setFloatMatrix(mBoxModelViewMatrix.getFloatArray(),
+				mBoxModelViewMatrixUniform.setFloatMatrix(lInvBoxMatrix.getFloatArray(),
 																									false);
 
 				GLMatrix lProjectionMatrix = getClearGLWindow().getProjectionMatrix();
