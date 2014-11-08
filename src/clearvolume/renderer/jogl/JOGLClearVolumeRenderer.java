@@ -592,7 +592,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void display(final GLAutoDrawable drawable)
 	{
-
 		final GL4 lGL4 = drawable.getGL().getGL4();
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
@@ -634,10 +633,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 		lInvProjection.transpose();
 		lInvProjection.invert();
 
-		boolean[] lUpdated;
-
-		if (anyIsTrue(lUpdated = renderVolume(lInvVolumeMatrix.getFloatArray(),
-																					lInvProjection.getFloatArray())))
+		boolean[] lUpdated= renderVolume(lInvVolumeMatrix.getFloatArray(),
+																			lInvProjection.getFloatArray());
 		{
 			if (mUsePBOs)
 				for (int i = 0; i < getNumberOfRenderLayers(); i++)
