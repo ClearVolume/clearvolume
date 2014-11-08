@@ -602,6 +602,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		double scaleX = getVolumeSizeX() * getVoxelSizeX();
 		double scaleY = getVolumeSizeY() * getVoxelSizeY();
 		double scaleZ = getVolumeSizeZ() * getVoxelSizeZ();
+
 		double maxScale = max(max(scaleX, scaleY), scaleZ);
 
 		// building up the inverse Modelview
@@ -633,7 +634,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		lInvProjection.transpose();
 		lInvProjection.invert();
 
-		boolean[] lUpdated= renderVolume(lInvVolumeMatrix.getFloatArray(),
+		boolean[] lUpdated = renderVolume(lInvVolumeMatrix.getFloatArray(),
 																			lInvProjection.getFloatArray());
 		{
 			if (mUsePBOs)
