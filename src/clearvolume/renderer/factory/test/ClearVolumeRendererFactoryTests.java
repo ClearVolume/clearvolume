@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 
 public class ClearVolumeRendererFactoryTests
@@ -15,9 +16,11 @@ public class ClearVolumeRendererFactoryTests
 	{
 		try
 		{
-			assertNotNull(ClearVolumeRendererFactory.newBestRenderer(	"Test",
-																																128,
-																																128));
+			ClearVolumeRendererInterface lNewBestRenderer = ClearVolumeRendererFactory.newBestRenderer(	"Test",
+																																																	128,
+																																																	128);
+			System.out.println(lNewBestRenderer.getClass());
+			assertNotNull(lNewBestRenderer);
 		}
 		catch (Throwable e)
 		{
