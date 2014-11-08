@@ -20,8 +20,9 @@ public class ClearVolumeRendererFactory
 																																		final int pWindowWidth,
 																																		final int pWindowHeight)
 	{
-		return new JCudaClearVolumeRenderer(pWindowName, 1024, 1024);
+		return newBestRenderer(pWindowName, 1024, 1024, 1);
 	}
+
 
 	/**
 	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
@@ -37,10 +38,12 @@ public class ClearVolumeRendererFactory
 																																		final int pWindowHeight,
 																																		final int pBytesPerVoxel)
 	{
-		return new JCudaClearVolumeRenderer(pWindowName,
-																				pWindowWidth,
-																				pWindowHeight,
-																				pBytesPerVoxel);
+		return newBestRenderer(	pWindowName,
+														pWindowWidth,
+														pWindowHeight,
+														pBytesPerVoxel,
+														768,
+														768);
 	}
 
 	/**
@@ -61,12 +64,13 @@ public class ClearVolumeRendererFactory
 																																		final int pMaxTextureWidth,
 																																		final int pMaxTextureHeight)
 	{
-		return new JCudaClearVolumeRenderer(pWindowName,
-																				pWindowWidth,
-																				pWindowHeight,
-																				pBytesPerVoxel,
-																				pMaxTextureWidth,
-																				pMaxTextureHeight);
+		return newBestRenderer(	pWindowName,
+														pWindowWidth,
+														pWindowHeight,
+														pBytesPerVoxel,
+														pMaxTextureWidth,
+														pMaxTextureHeight,
+														1);
 	}
 
 	/**
