@@ -20,7 +20,7 @@ public class ClearVolumeRendererFactory
 																																		final int pWindowWidth,
 																																		final int pWindowHeight)
 	{
-		return newBestRenderer(pWindowName, 1024, 1024);
+		return newBestRenderer(pWindowName, 1024, 1024, 1);
 	}
 
 
