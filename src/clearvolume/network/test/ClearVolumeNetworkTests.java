@@ -17,6 +17,7 @@ import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
+import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.VolumeSinkAdapter;
 import clearvolume.volume.sink.VolumeSinkInterface;
@@ -77,6 +78,7 @@ public class ClearVolumeNetworkTests
 		int lPortRandomizer = (int) (Math.random() * 100);
 
 		ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(new NullVolumeSink(),
+																																											new VolumeManager(cNumberOfAvailableVolumes),
 																																											cVolumeQueueLength);
 
 		SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort + lPortRandomizer);

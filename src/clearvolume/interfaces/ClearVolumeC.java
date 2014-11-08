@@ -288,6 +288,7 @@ public class ClearVolumeC
 			sIDToVolumeManager.put(pServerId, lVolumeManager);
 
 			ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(new NullVolumeSink(),
+																																												lVolumeManager,
 																																												sMaxAvailableVolumes);
 
 			SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
