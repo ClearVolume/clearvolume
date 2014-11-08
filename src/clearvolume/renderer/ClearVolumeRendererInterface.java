@@ -185,6 +185,15 @@ public interface ClearVolumeRendererInterface	extends
 														long pSizeX,
 														long pSizeY,
 														long pSizeZ);
+	
+	/**
+	 * Updates the voxel size of subsequently rendered volumes
+	 * 
+	 * @param pVoxelSizeX
+	 * @param pVoxelSizeY
+	 * @param pVoxelSizeZ
+	 */
+	public void setVoxelSize(double pVoxelSizeX, double pVoxelSizeY, double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
