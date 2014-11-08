@@ -49,6 +49,7 @@ public class ClearVolumeSerialization
 	private static void writeVolumeHeader(Volume<?> pVolume,
 																				StringBuilder pStringBuilder)
 	{
+
 		LinkedHashMap<String, String> lHeaderMap = new LinkedHashMap<String, String>();
 		lHeaderMap.put("index", "" + pVolume.getTimeIndex());
 		lHeaderMap.put("time", "" + pVolume.getTimeInSeconds());
@@ -83,23 +84,55 @@ public class ClearVolumeSerialization
 		Map<String, String> lHeaderMap = KeyValueMaps.readMapFromBuffer(pByteBuffer,
 																																		pHeaderLength,
 																																		null);
-		final long lIndex = parseLong(lHeaderMap.get("index"));
-		final double lTime = parseDouble(lHeaderMap.get("time"));
-		final int lVolumeChannelID = parseInt(lHeaderMap.get("channel"));
-		final String lVolumeChannelName = parseString(lHeaderMap.get("channelname"));
-		final float[] lColor = deserializeFloatArray(lHeaderMap.get("color"));
-		final float[] lViewMatrix = deserializeFloatArray(lHeaderMap.get("viewmatrix"));
-		final int lDim = parseInt(lHeaderMap.get("dim"));
+		final long lIndex = parseLong(lHeaderMap.get("index"), 0);
+		final double lTime = parseDouble(lHeaderMap.get("time"), 0);
+		final int lVolumeChannelID = parseInt(lHeaderMap.get("channel"),
+																					0);
+		final String lVolumeChannelName = parseString(lHeaderMap.get("channelname"),
+																									"noname");
+
+		final float[] lColor = parseFloatArray(	lHeaderMap.get("color"),
+																						new float[]
+																						{ 1.f, 1.f, 1.f, 1.f });
+
+		final float[] lViewMatrix = parseFloatArray(lHeaderMap.get("viewmatrix"),
+																								new float[]
+																								{ 1.f,
+																									0.f,
+																									0.f,
+																									0.f,
+																									0.f,
+																									1.f,
+																									0.f,
+																									0.f,
+																									0.f,
+																									0.f,
+																									1.f,
+																									0.f,
+																									0.f,
+																									0.f,
+																									0.f,
+																									1.f });
+
+		final int lDim = parseInt(lHeaderMap.get("dim"), 3);
+
 		final String lType = lHeaderMap.get("type");
-		final long lElementSize = parseLong(lHeaderMap.get("elementsize"));
+
+		final long lElementSize = parseLong(lHeaderMap.get("elementsize"),
+																				1);
+
 		final long lWidth = parseLong(lHeaderMap.get("width"));
 		final long lHeight = parseLong(lHeaderMap.get("height"));
 		final long lDepth = parseLong(lHeaderMap.get("depth"));
 
-		final String lRealUnitName = parseString(lHeaderMap.get("realunit"));
-		final double lVoxelWidth = parseDouble(lHeaderMap.get("voxelwidth"));
-		final double lVoxelHeight = parseDouble(lHeaderMap.get("voxelheight"));
-		final double lVoxelDepth = parseDouble(lHeaderMap.get("voxeldepth"));
+		final String lRealUnitName = parseString(	lHeaderMap.get("realunit"),
+																							"1");
+		final double lVoxelWidth = parseDouble(	lHeaderMap.get("voxelwidth"),
+																						1.);
+		final double lVoxelHeight = parseDouble(lHeaderMap.get("voxelheight"),
+																						1.);
+		final double lVoxelDepth = parseDouble(	lHeaderMap.get("voxeldepth"),
+																						1.);
 
 		pVolume.setTimeIndex(lIndex);
 		pVolume.setTimeInSeconds(lTime);
@@ -120,6 +153,14 @@ public class ClearVolumeSerialization
 																		lVoxelDepth);
 
 	};
+
+	private static float[] parseFloatArray(	String pString,
+																					final float[] defaultValue)
+	{
+		return (pString == null) ? defaultValue
+														: deserializeFloatArray(pString);
+
+	}
 
 	private static double parseDouble(String pString)
 	{
@@ -147,6 +188,30 @@ public class ClearVolumeSerialization
 		if (pString == null)
 			return 0;
 		return Long.parseLong(pString);
+	}
+
+	private static double parseDouble(String pString,
+																		double defaultValue)
+	{
+		return (pString == null) ? defaultValue
+														: Double.parseDouble(pString);
+	}
+
+	private static String parseString(String pString,
+																		String defaultValue)
+	{
+		return (pString == null) ? defaultValue : pString;
+	}
+
+	private static int parseInt(String pString, int defaultValue)
+	{
+		return (pString == null) ? defaultValue
+														: Integer.parseInt(pString);
+	}
+
+	private static long parseLong(String pString, long defaultValue)
+	{
+		return (pString == null) ? defaultValue : Long.parseLong(pString);
 	}
 
 	private static String serializeFloatArray(float[] pFloatArray)

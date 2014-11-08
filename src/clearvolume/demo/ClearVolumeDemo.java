@@ -83,9 +83,9 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 400;
-		final int lResolutionY = 100;
-		final int lResolutionZ = 200;
+		final int lResolutionX = 128;
+		final int lResolutionY = 128;
+		final int lResolutionZ = 128;
 
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ];
@@ -111,6 +111,7 @@ public class ClearVolumeDemo
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
+
 		lClearVolumeRenderer.requestDisplay();
 
 		while (lClearVolumeRenderer.isShowing())
@@ -120,10 +121,10 @@ public class ClearVolumeDemo
 
 		lClearVolumeRenderer.close();
 	}
-	
+
 	@Test
 	public void demoAspectRatioPreset()	throws InterruptedException,
-																IOException
+																			IOException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																																														512,
@@ -159,9 +160,14 @@ public class ClearVolumeDemo
 				}
 
 		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray), lResolutionX, lResolutionY, lResolutionZ );
-		
-		lClearVolumeRenderer.setVoxelSize(lResolutionX*5.0, lResolutionY*4.0, lResolutionZ*3.0);
+		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
+
+		lClearVolumeRenderer.setVoxelSize(lResolutionX * 5.0,
+																			lResolutionY * 4.0,
+																			lResolutionZ * 3.0);
 		lClearVolumeRenderer.requestDisplay();
 
 		while (lClearVolumeRenderer.isShowing())
