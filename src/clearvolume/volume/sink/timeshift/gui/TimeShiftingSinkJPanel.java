@@ -112,10 +112,11 @@ public class TimeShiftingSinkJPanel extends JPanel
 																						"[grow,center][grow,center][grow,center][grow,center]",
 																						"[grow,fill]"));
 
-		ImageIcon lBeginningIcon = createScaledImageIcon("./icons/beginning.png");
-		ImageIcon lPauseIcon = createScaledImageIcon("./icons/pause.png");
-		ImageIcon lPlayIcon = createScaledImageIcon("./icons/play.png");
-		ImageIcon lEndIcon = createScaledImageIcon("./icons/end.png");
+		String lIconsPath = "/clearvolume/volume/sink/timeshift/gui/icons/";
+		ImageIcon lBeginningIcon = createScaledImageIcon(lIconsPath+"beginning.png");
+		ImageIcon lPauseIcon = createScaledImageIcon(lIconsPath+"pause.png");
+		ImageIcon lPlayIcon = createScaledImageIcon(lIconsPath+"play.png");
+		ImageIcon lEndIcon = createScaledImageIcon(lIconsPath+"end.png");
 
 		JButton lGoToBeginButton = new JButton(lBeginningIcon);
 		lGoToBeginButton.setBorder(new EmptyBorder(0, 0, 0, 0));
