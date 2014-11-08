@@ -83,23 +83,23 @@ public class ClearVolumeSerialization
 		Map<String, String> lHeaderMap = KeyValueMaps.readMapFromBuffer(pByteBuffer,
 																																		pHeaderLength,
 																																		null);
-		final long lIndex = Long.parseLong(lHeaderMap.get("index"));
-		final double lTime = Double.parseDouble(lHeaderMap.get("time"));
-		final int lVolumeChannelID = Integer.parseInt(lHeaderMap.get("channel"));
-		final String lVolumeChannelName = lHeaderMap.get("channelname");
+		final long lIndex = parseLong(lHeaderMap.get("index"));
+		final double lTime = parseDouble(lHeaderMap.get("time"));
+		final int lVolumeChannelID = parseInt(lHeaderMap.get("channel"));
+		final String lVolumeChannelName = parseString(lHeaderMap.get("channelname"));
 		final float[] lColor = deserializeFloatArray(lHeaderMap.get("color"));
 		final float[] lViewMatrix = deserializeFloatArray(lHeaderMap.get("viewmatrix"));
-		final int lDim = Integer.parseInt(lHeaderMap.get("dim"));
+		final int lDim = parseInt(lHeaderMap.get("dim"));
 		final String lType = lHeaderMap.get("type");
-		final long lElementSize = Long.parseLong(lHeaderMap.get("elementsize"));
-		final long lWidth = Long.parseLong(lHeaderMap.get("width"));
-		final long lHeight = Long.parseLong(lHeaderMap.get("height"));
-		final long lDepth = Long.parseLong(lHeaderMap.get("depth"));
+		final long lElementSize = parseLong(lHeaderMap.get("elementsize"));
+		final long lWidth = parseLong(lHeaderMap.get("width"));
+		final long lHeight = parseLong(lHeaderMap.get("height"));
+		final long lDepth = parseLong(lHeaderMap.get("depth"));
 
-		final String lRealUnitName = lHeaderMap.get("realunit");
-		final double lVoxelWidth = Double.parseDouble(lHeaderMap.get("voxelwidth"));
-		final double lVoxelHeight = Double.parseDouble(lHeaderMap.get("voxelheight"));
-		final double lVoxelDepth = Double.parseDouble(lHeaderMap.get("voxeldepth"));
+		final String lRealUnitName = parseString(lHeaderMap.get("realunit"));
+		final double lVoxelWidth = parseDouble(lHeaderMap.get("voxelwidth"));
+		final double lVoxelHeight = parseDouble(lHeaderMap.get("voxelheight"));
+		final double lVoxelDepth = parseDouble(lHeaderMap.get("voxeldepth"));
 
 		pVolume.setTimeIndex(lIndex);
 		pVolume.setTimeInSeconds(lTime);
@@ -120,6 +120,34 @@ public class ClearVolumeSerialization
 																		lVoxelDepth);
 
 	};
+
+	private static double parseDouble(String pString)
+	{
+		if (pString == null)
+			return 0;
+		return Double.parseDouble(pString);
+	}
+
+	private static String parseString(String pString)
+	{
+		if (pString == null)
+			return "";
+		return pString;
+	}
+
+	private static int parseInt(String pString)
+	{
+		if (pString == null)
+			return 0;
+		return Integer.parseInt(pString);
+	}
+
+	private static long parseLong(String pString)
+	{
+		if (pString == null)
+			return 0;
+		return Long.parseLong(pString);
+	}
 
 	private static String serializeFloatArray(float[] pFloatArray)
 	{
