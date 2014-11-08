@@ -175,7 +175,7 @@ max_project(__global uint *d_output,
   	if (t > tfar) break;
   }
 
-  float4 colVal4 = 1000*brightness * colVal * color;
+  float4 colVal4 = brightness * colVal * color;
   
   
   if ((x < Nx) && (y < Ny))

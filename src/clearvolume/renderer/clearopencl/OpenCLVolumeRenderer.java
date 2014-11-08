@@ -2,7 +2,6 @@ package clearvolume.renderer.clearopencl;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 import javax.media.opengl.GLEventListener;
 
@@ -25,7 +24,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	private ByteBuffer RenderBuffers;
 
-	private CLBuffer mCLInvModelViewBuffer, mCLInvProjectionBuffer;
+	private CLBuffer<Float> mCLInvModelViewBuffer, mCLInvProjectionBuffer;
 
 	private CLBuffer<Float>[] mCLTransferColorBuffers;
 
@@ -62,6 +61,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	}
 
+	@SuppressWarnings("unchecked")
 	public OpenCLVolumeRenderer(final String pWindowName,
 															final int pWindowWidth,
 															final int pWindowHeight,
@@ -80,22 +80,14 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 					pNumberOfRenderLayers);
 
 		mCLRenderBuffers = new CLBuffer[pNumberOfRenderLayers];
-
 		mCLVolumeImages = new CLImage3D[pNumberOfRenderLayers];
-
-		// ByteBuffer foo = ByteBuffer.allocateDirect(100)
-		// .order(ByteOrder.nativeOrder());
-
 		mCLTransferFunctionImages = new CLImage2D[pNumberOfRenderLayers];
-
 		mCLTransferColorBuffers = new CLBuffer[pNumberOfRenderLayers];
-
 	}
 
 	@Override
 	protected boolean initVolumeRenderer()
 	{
-
 		mUsePBOs = false;
 
 		mCLDevice = new OpenCLDevice();
@@ -104,13 +96,11 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		// mCLDevice.initCL(true);
 
 		mCLDevice.initCL(false);
-
 		mCLDevice.printInfo();
 		mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/volume_render.cl"),
 														"max_project");
 
 		mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
-
 		mCLInvProjectionBuffer = mCLDevice.createInputFloatBuffer(16);
 
 		int lRenderBufferSize = getTextureHeight() * getTextureWidth();
@@ -118,8 +108,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		// setting up the OpenCL Renderbuffer we will write the render result into
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
-			mCLRenderBuffers[i] = (CLBuffer<Integer>) mCLDevice.createOutputIntBuffer(lRenderBufferSize);
-			mCLTransferColorBuffers[i] = (CLBuffer<Float>) mCLDevice.createInputFloatBuffer(4);
+			mCLRenderBuffers[i] = mCLDevice.createOutputIntBuffer(lRenderBufferSize);
+			mCLTransferColorBuffers[i] = mCLDevice.createInputFloatBuffer(4);
 
 		}
 
@@ -162,11 +152,18 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			final long lHeight = getVolumeSizeY();
 			final long lDepth = getVolumeSizeZ();
 
-			mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
-																																					lHeight,
-																																					lDepth,
-																																					CLImageFormat.ChannelOrder.R,
-																																					CLImageFormat.ChannelDataType.SNormInt16);
+			if (getBytesPerVoxel() == 1)
+				mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
+																																						lHeight,
+																																						lDepth,
+																																						CLImageFormat.ChannelOrder.R,
+																																						CLImageFormat.ChannelDataType.UNormInt8);
+			else if (getBytesPerVoxel() == 2)
+				mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
+																																						lHeight,
+																																						lDepth,
+																																						CLImageFormat.ChannelOrder.R,
+																																						CLImageFormat.ChannelDataType.UNormInt16);
 
 			lVolumeDataBuffer.rewind();
 
@@ -294,23 +291,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private void fillWithByteBufferAsShort(	CLImage3D clImage3D,
 																					ByteBuffer lVolumeDataBuffer)
 	{
-
-		// FIXME: somehow, opencl doesnt like writing from direct allocated
-		// ByteBuffer!!!!
-		// so we have to copy it unfortunately, waiting for the magic workaround
-		// Loic will surely come up with
-
-		ShortBuffer tmp = ShortBuffer.allocate(lVolumeDataBuffer.capacity() / 2);
-
-		for (int i = 0; i < tmp.capacity(); i++)
-		{
-			tmp.put(lVolumeDataBuffer.getShort());
-		}
-
-		tmp.rewind();
-
-		mCLDevice.writeShortImage(clImage3D, tmp);
-
+		lVolumeDataBuffer.rewind();
+		mCLDevice.writeImage(clImage3D, lVolumeDataBuffer);
 	}
 
 	private void runKernel(int pRenderLayerIndex)

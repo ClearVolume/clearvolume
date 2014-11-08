@@ -1,5 +1,6 @@
 package clearvolume.renderer.factory;
 
+import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.clearopencl.OpenCLVolumeRenderer;
@@ -88,7 +89,7 @@ public class ClearVolumeRendererFactory
 																																		final int pMaxTextureHeight,
 																																		final int pNumberOfRenderLayers)
 	{
-		if (false)
+		if (CudaAvailability.isClearCudaOperational())
 			return new JCudaClearVolumeRenderer(pWindowName,
 																					pWindowWidth,
 																					pWindowHeight,

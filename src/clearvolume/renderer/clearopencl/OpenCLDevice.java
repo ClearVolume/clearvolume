@@ -77,7 +77,7 @@ public class OpenCLDevice
 
 		try
 		{
-			mCLDevice = mCLContext.getDevices()[0];
+			mCLDevice = getBestDevice();
 		}
 		catch (Exception e)
 		{
@@ -90,6 +90,16 @@ public class OpenCLDevice
 
 		return (mCLContext != null && mCLContext != null && mCLQueue != null);
 
+	}
+
+	private CLDevice getBestDevice()
+	{
+		CLDevice[] lDevices = mCLContext.getDevices();
+
+		for (CLDevice lCLDevice : lDevices)
+			System.out.println(lCLDevice);
+
+		return lDevices[0];
 	}
 
 	public CLContext getContext()
@@ -330,6 +340,31 @@ public class OpenCLDevice
 											0,
 											0,
 											pShortBuffer,
+											true);
+
+	}
+
+	public CLEvent writeImage(final CLImage3D img,
+														final ByteBuffer pByteBuffer)
+	{
+		/*if (img.getWidth() * img.getHeight()
+				* img.getDepth()*img. != pByteBuffer.capacity())
+		{
+
+			System.err.println("image and buffer sizes dont align!");
+			return null;
+		}/**/
+
+		return img.write(	mCLQueue,
+											0,
+											0,
+											0,
+											img.getWidth(),
+											img.getHeight(),
+											img.getDepth(),
+											0,
+											0,
+											pByteBuffer,
 											true);
 
 	}

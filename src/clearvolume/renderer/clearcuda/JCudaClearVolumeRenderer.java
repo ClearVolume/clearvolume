@@ -488,9 +488,9 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		long endTime = System.nanoTime();
 
-		System.out.println("time to render: " + (endTime - startTime)
+		/*System.out.println("time to render: " + (endTime - startTime)
 												/ 1000000.
-												+ " ms");
+												+ " ms");/**/
 
 		return lUpdated;
 	}

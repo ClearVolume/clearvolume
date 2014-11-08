@@ -10,7 +10,6 @@ import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
 
 import org.apache.commons.io.IOUtils;
@@ -259,7 +258,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		{
 			mClearGLWindow.close();
 		}
-		catch (GLException e)
+		catch (Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 		}
