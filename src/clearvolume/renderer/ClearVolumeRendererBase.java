@@ -749,6 +749,17 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVoxelSize(java.nio.ByteBuffer, double, double, double)
+	 */
+	public void setVoxelSize(double pVoxelSizeX, double pVoxelSizeY, double pVoxelSizeZ) {
+		mVoxelSizeX = pVoxelSizeX;
+		mVoxelSizeY = pVoxelSizeY;
+		mVoxelSizeZ = pVoxelSizeZ;
+	}
+	
+	/**
+	 * Interface method implementation
+	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
 	 *      long, long, long, double, double, double)
 	 */
