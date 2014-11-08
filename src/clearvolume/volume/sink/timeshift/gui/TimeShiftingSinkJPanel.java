@@ -48,6 +48,11 @@ public class TimeShiftingSinkJPanel extends JPanel
 		});
 	}
 
+	public TimeShiftingSinkJPanel()
+	{
+		this(null);
+	}
+
 	/**
 	 * Create the panel.
 	 */
@@ -55,24 +60,24 @@ public class TimeShiftingSinkJPanel extends JPanel
 	{
 		setBackground(Color.WHITE);
 		setLayout(new MigLayout("",
-														"[grow,fill][grow,fill][grow,fill][grow,fill]",
+														"[14.00,grow,fill][grow][grow,fill][grow,fill][grow][grow,fill]",
 														"[][26px:26px,center][grow]"));
 
 		JPanel lPastPresentPanel = new JPanel();
 		lPastPresentPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		lPastPresentPanel.setBackground(Color.WHITE);
-		add(lPastPresentPanel, "cell 0 0 4 1,grow");
+		add(lPastPresentPanel, "cell 0 0 6 1,grow");
 		lPastPresentPanel.setLayout(new BorderLayout(0, 0));
 
 		JLabel lPastLabel = new JLabel("  past");
 		lPastPresentPanel.add(lPastLabel, BorderLayout.WEST);
 
-		JLabel lPresentLabel = new JLabel("present     ");
+		JLabel lPresentLabel = new JLabel("present   ");
 		lPastPresentPanel.add(lPresentLabel, BorderLayout.EAST);
 
 		JLayeredPane lJLayeredPane = new JLayeredPane();
 		lJLayeredPane.setBorder(new EmptyBorder(0, 0, 0, 0));
-		add(lJLayeredPane, "cell 0 1 4 1,grow");
+		add(lJLayeredPane, "cell 0 1 6 1,grow");
 		lJLayeredPane.setLayout(null);
 
 		mPlayBar = new JProgressBar();
@@ -99,6 +104,14 @@ public class TimeShiftingSinkJPanel extends JPanel
 			});
 		lJLayeredPane.add(mTimeShiftSlider);
 
+		JPanel lPlayPausePanel = new JPanel();
+		lPlayPausePanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+		lPlayPausePanel.setBackground(Color.WHITE);
+		add(lPlayPausePanel, "cell 2 2 2 1,grow");
+		lPlayPausePanel.setLayout(new MigLayout("",
+																						"[grow,center][grow,center][grow,center][grow,center]",
+																						"[grow,fill]"));
+
 		ImageIcon lBeginningIcon = createScaledImageIcon("./icons/beginning.png");
 		ImageIcon lPauseIcon = createScaledImageIcon("./icons/pause.png");
 		ImageIcon lPlayIcon = createScaledImageIcon("./icons/play.png");
@@ -111,7 +124,7 @@ public class TimeShiftingSinkJPanel extends JPanel
 				setTimeShiftSliderToPast();
 				pTimeShiftingSink.setTimeShiftNormalized(1);
 			});
-		add(lGoToBeginButton, "cell 0 2");
+		lPlayPausePanel.add(lGoToBeginButton, "cell 0 0");
 
 		JButton lPauseButton = new JButton(lPauseIcon);
 		lPauseButton.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -120,7 +133,7 @@ public class TimeShiftingSinkJPanel extends JPanel
 				setPlayBarPaused();
 				pTimeShiftingSink.pause();
 			});
-		add(lPauseButton, "cell 1 2");
+		lPlayPausePanel.add(lPauseButton, "cell 1 0");
 
 		JButton lPlayButton = new JButton(lPlayIcon);
 		lPlayButton.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -129,7 +142,7 @@ public class TimeShiftingSinkJPanel extends JPanel
 				setPlayBarPlaying();
 				pTimeShiftingSink.play();
 			});
-		add(lPlayButton, "cell 2 2");
+		lPlayPausePanel.add(lPlayButton, "cell 2 0");
 
 		JButton lGoToEndButton = new JButton(lEndIcon);
 		lGoToEndButton.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -138,7 +151,7 @@ public class TimeShiftingSinkJPanel extends JPanel
 				setTimeShiftSliderToNow();
 				pTimeShiftingSink.setTimeShiftNormalized(0);
 			});
-		add(lGoToEndButton, "cell 3 2");
+		lPlayPausePanel.add(lGoToEndButton, "cell 3 0");
 
 	}
 
@@ -164,7 +177,7 @@ public class TimeShiftingSinkJPanel extends JPanel
 
 	protected ImageIcon createScaledImageIcon(String path)
 	{
-		final int lDownScaling = 8;
+		final int lDownScaling = 16;
 		ImageIcon lCreatedImageIcon = createImageIcon(path);
 		Image lImage = lCreatedImageIcon.getImage()
 																		.getScaledInstance(	lCreatedImageIcon.getIconWidth() / lDownScaling,

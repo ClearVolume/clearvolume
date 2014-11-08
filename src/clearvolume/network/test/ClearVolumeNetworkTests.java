@@ -42,7 +42,7 @@ public class ClearVolumeNetworkTests
 			@Override
 			public void sendVolume(Volume<?> pVolume)
 			{
-				System.out.println("Received volume:" + pVolume);
+				// System.out.println("Received volume:" + pVolume);
 			}
 		};
 		networkConduit(lVolumeSink, cNumberOfVolumesToSend, true);

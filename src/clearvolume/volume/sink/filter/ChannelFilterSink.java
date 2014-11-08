@@ -6,7 +6,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
+import clearvolume.ClearVolumeCloseable;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.NullVolumeSink;
@@ -15,7 +18,8 @@ import clearvolume.volume.sink.relay.RelaySinkAdapter;
 import clearvolume.volume.sink.relay.RelaySinkInterface;
 
 public class ChannelFilterSink extends RelaySinkAdapter	implements
-																												RelaySinkInterface
+																												RelaySinkInterface,
+																												ClearVolumeCloseable
 {
 
 	private ConcurrentHashMap<Integer, String> mSeenChannelIdToNameMap = new ConcurrentHashMap<Integer, String>();
@@ -31,7 +35,7 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 		@Override
 		public int getSize()
 		{
-			return mSeenChannelIdToNameMap.size();
+			return mSeenChannelList.size();
 		}
 
 		@Override
@@ -81,6 +85,15 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 		{
 			mSeenChannelList.add(lChannelID);
 			mActiveChannelMap.put(lChannelID, true);
+			ListDataListener[] lListeners = mChannelListModel.getListeners(ListDataListener.class);
+			for (ListDataListener lListDataListener : lListeners)
+			{
+				ListDataEvent lListDataEvent = new ListDataEvent(	lListDataListener,
+																													ListDataEvent.CONTENTS_CHANGED,
+																													0,
+																													mSeenChannelList.size());
+				lListDataListener.contentsChanged(lListDataEvent);
+			}
 		}
 		mSeenChannelIdToNameMap.put(lChannelID, lChannelName);
 
@@ -115,6 +128,15 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 	public ListModel<String> getChannelListModel()
 	{
 		return mChannelListModel;
+	}
+
+	@Override
+	public void close()
+	{
+		mSeenChannelIdToNameMap.clear();
+		mSeenChannelList.clear();
+		mActiveChannelMap.clear();
+		mEmptyVolumeManager.close();
 	}
 
 }

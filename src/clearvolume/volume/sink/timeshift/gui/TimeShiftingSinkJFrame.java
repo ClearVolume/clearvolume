@@ -57,15 +57,15 @@ public class TimeShiftingSinkJFrame	extends
 		setResizable(false);
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 651, 188);
+		setBounds(100, 100, 651, 159);
 		mContentPane = new JPanel();
 		mContentPane.setBackground(Color.WHITE);
 		mContentPane.setBorder(null);
 		mContentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(mContentPane);
 
-		TimeShiftingSinkJPanel lMultiChannelTimeShiftingSinkPanel = new TimeShiftingSinkJPanel(pTimeShiftingSink);
-		mContentPane.add(lMultiChannelTimeShiftingSinkPanel);
+		TimeShiftingSinkJPanel lTimeShiftingSinkPanel = new TimeShiftingSinkJPanel(pTimeShiftingSink);
+		mContentPane.add(lTimeShiftingSinkPanel);
 	}
 
 }
