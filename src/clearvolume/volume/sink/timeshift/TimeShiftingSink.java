@@ -132,9 +132,14 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			return null;
 
 		Entry<Long, SwitchableSoftReference<Volume<?>>> lIndexVolumeEntry = lTimePointIndexToVolumeMap.floorEntry(mHighestTimePointIndexSeen + mTimeShift);
+		if (lIndexVolumeEntry == null)
+			lIndexVolumeEntry = lTimePointIndexToVolumeMap.ceilingEntry(mHighestTimePointIndexSeen + mTimeShift);
 
 		if (lIndexVolumeEntry == null)
+		{
+			System.out.println();
 			return null;
+		}
 
 		Volume<?> lVolume = lIndexVolumeEntry.getValue().get();
 		if (lVolume == null)

@@ -1,4 +1,4 @@
-package clearvolume.volume.sink.timeshift.demo;
+package clearvolume.volume.sink.filter.demo;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
@@ -10,11 +10,11 @@ import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.NullVolumeSink;
+import clearvolume.volume.sink.filter.ChannelFilterSink;
+import clearvolume.volume.sink.filter.gui.ChannelFilterSinkJFrame;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
-import clearvolume.volume.sink.timeshift.TimeShiftingSink;
-import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 
-public class TimeShiftingSinkDemo
+public class FilterSinkDemo
 {
 	private static final int cSizeMultFactor = 1;
 	private static final int cWidth = 128 * cSizeMultFactor;
@@ -39,13 +39,13 @@ public class TimeShiftingSinkDemo
 																																										TimeUnit.MILLISECONDS);
 		lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
-		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50, 100);
+		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
 
-		TimeShiftingSinkJFrame.launch(lTimeShiftingSink);
+		ChannelFilterSinkJFrame.launch(lChannelFilterSink);
 
-		lTimeShiftingSink.setRelaySink(lClearVolumeRendererSink);
+		lChannelFilterSink.setRelaySink(lClearVolumeRendererSink);
 
-		VolumeManager lManager = lTimeShiftingSink.getManager();
+		VolumeManager lManager = lChannelFilterSink.getManager();
 
 		final int lMaxVolumesSent = 1000;
 		for (int i = 0; i < lMaxVolumesSent; i++)
@@ -84,10 +84,11 @@ public class TimeShiftingSinkDemo
 
 			lVolume.setTimeIndex(lTimePoint);
 			lVolume.setChannelID(lChannel);
+			lVolume.setChannelName("Channel " + lChannel);
 
-			lTimeShiftingSink.sendVolume(lVolume);
+			lChannelFilterSink.sendVolume(lVolume);
 
-			Thread.sleep(50);
+			Thread.sleep(20);
 		}
 	}
 }
