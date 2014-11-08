@@ -18,6 +18,7 @@ import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
+import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 
 public class ClearVolumeNetworkDemo
@@ -42,7 +43,8 @@ public class ClearVolumeNetworkDemo
 		{
 			VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
 
-			ClearVolumeTCPServerSink lClearVolumeTCPServer = new ClearVolumeTCPServerSink(lVolumeManager,
+			ClearVolumeTCPServerSink lClearVolumeTCPServer = new ClearVolumeTCPServerSink(new NullVolumeSink(),
+			                                                                              lVolumeManager,
 																																										cNumberOfAvailableVolumes);
 
 			SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
