@@ -336,7 +336,6 @@ public class Volume<T> implements ClearVolumeCloseable
 	@Override
 	public void close()
 	{
-		mDataBuffer = null;
 	}
 
 	@Override
