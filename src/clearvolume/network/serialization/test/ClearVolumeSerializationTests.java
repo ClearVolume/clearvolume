@@ -27,7 +27,7 @@ public class ClearVolumeSerializationTests
 		lVolume.setColor(1f, 0.5f, 0.3f, 0.2f);
 		lVolume.setViewMatrix(new float[]
 		{ 1 });
-		lVolume.setDimensionsInRealUnits("um", 10, 11, 12);
+		lVolume.setVoxelSizeInRealUnits("um", 10, 11, 12);
 
 		ByteBuffer lSerializedVolumeData = lVolume.getDataBuffer();
 
@@ -50,9 +50,9 @@ public class ClearVolumeSerializationTests
 		assertEquals(0.2, lDeserializedVolume.getColor()[3], 0.001);
 		assertEquals(1, lDeserializedVolume.getViewMatrix()[0], 0.001);
 		assertEquals("um", lDeserializedVolume.getRealUnitName());
-		assertEquals(10, lDeserializedVolume.getWidthInRealUnits(), 0);
-		assertEquals(11, lDeserializedVolume.getHeightInRealUnits(), 0);
-		assertEquals(12, lDeserializedVolume.getDepthInRealUnits(), 0);
+		assertEquals(10, lDeserializedVolume.getVoxelWidthInRealUnits(), 0);
+		assertEquals(11, lDeserializedVolume.getVoxelHeightInRealUnits(), 0);
+		assertEquals(12, lDeserializedVolume.getVoxelDepthInRealUnits(), 0);
 
 		ByteBuffer lDeserializedVolumeData = lDeserializedVolume.getDataBuffer();
 		lDeserializedVolumeData.rewind();

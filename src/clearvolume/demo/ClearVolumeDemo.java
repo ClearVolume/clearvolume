@@ -33,8 +33,8 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
-		final int lResolutionY = lResolutionX;
-		final int lResolutionZ = lResolutionX;
+		final int lResolutionY = lResolutionX + 100;
+		final int lResolutionZ = lResolutionX - 50;
 
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ];

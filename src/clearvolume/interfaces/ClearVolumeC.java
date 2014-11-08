@@ -517,7 +517,7 @@ public class ClearVolumeC
 
 			double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 			if (lDimensionsInRealUnits != null)
-				lRequestedVolume.setDimensionsInRealUnits("um",
+				lRequestedVolume.setVoxelSizeInRealUnits("um",
 																									lDimensionsInRealUnits);
 
 			ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
@@ -625,7 +625,7 @@ public class ClearVolumeC
 
 		double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 		if (lDimensionsInRealUnits != null)
-			lRequestedVolume.setDimensionsInRealUnits("um",
+			lRequestedVolume.setVoxelSizeInRealUnits("um",
 																								lDimensionsInRealUnits);
 	}
 
@@ -707,7 +707,7 @@ public class ClearVolumeC
 
 			double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 			if (lDimensionsInRealUnits != null)
-				lRequestedVolume.setDimensionsInRealUnits("um",
+				lRequestedVolume.setVoxelSizeInRealUnits("um",
 																									lDimensionsInRealUnits);
 
 			ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();

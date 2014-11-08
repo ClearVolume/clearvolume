@@ -194,17 +194,17 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pSizeX
 	 * @param pSizeY
 	 * @param pSizeZ
-	 * @param pVolumeSizeX
-	 * @param pVolumeSizeY
-	 * @param pVolumeSizeZ
+	 * @param pVoxelSizeX
+	 * @param pVoxelSizeY
+	 * @param pVoxelSizeZ
 	 */
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
 														long pSizeX,
 														long pSizeY,
 														long pSizeZ,
-														double pVolumeSizeX,
-														double pVolumeSizeY,
-														double pVolumeSizeZ);
+														double pVoxelSizeX,
+														double pVoxelSizeY,
+														double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
