@@ -79,7 +79,7 @@ public class ClearVolumeNetworkTests
 
 		VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
 		ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(cVolumeQueueLength);
-		lClearVolumeTCPServerSink.setRelaySink(new NullVolumeSink());
+		lClearVolumeTCPServerSink.setRelaySink(new NullVolumeSink(lVolumeManager));
 
 		SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort + lPortRandomizer);
 		assertTrue(lClearVolumeTCPServerSink.open(lServerSocketAddress));
