@@ -1,4 +1,4 @@
-package clearvolume.volume.sink.filter.demo;
+package clearvolume.volume.sink.demo;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
@@ -13,8 +13,10 @@ import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.filter.ChannelFilterSink;
 import clearvolume.volume.sink.filter.gui.ChannelFilterSinkJFrame;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
+import clearvolume.volume.sink.timeshift.TimeShiftingSink;
+import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 
-public class FilterSinkDemo
+public class TimeShiftingAndChannelFilterSinksDemo
 {
 	private static final int cSizeMultFactor = 1;
 	private static final int cWidth = 128 * cSizeMultFactor;
@@ -37,17 +39,19 @@ public class FilterSinkDemo
 																																										lClearVolumeRenderer.createCompatibleVolumeManager(200),
 																																										100,
 																																										TimeUnit.MILLISECONDS);
-		lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
-
+		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50, 100);
 		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink(new NullVolumeSink());
 
+		TimeShiftingSinkJFrame.launch(lTimeShiftingSink);
 		ChannelFilterSinkJFrame.launch(lChannelFilterSink);
 
+		lTimeShiftingSink.setRelaySink(lChannelFilterSink);
 		lChannelFilterSink.setRelaySink(lClearVolumeRendererSink);
+		lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
-		VolumeManager lManager = lChannelFilterSink.getManager();
+		VolumeManager lManager = lTimeShiftingSink.getManager();
 
-		final int lMaxVolumesSent = 1000;
+		final int lMaxVolumesSent = 2000;
 		for (int i = 0; i < lMaxVolumesSent; i++)
 		{
 			final int lTimePoint = i / 2;
@@ -84,11 +88,10 @@ public class FilterSinkDemo
 
 			lVolume.setTimeIndex(lTimePoint);
 			lVolume.setChannelID(lChannel);
-			lVolume.setChannelName("Channel " + lChannel);
 
-			lChannelFilterSink.sendVolume(lVolume);
+			lTimeShiftingSink.sendVolume(lVolume);
 
-			Thread.sleep(20);
+			Thread.sleep(100);
 		}
 	}
 }
