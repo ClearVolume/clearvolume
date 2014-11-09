@@ -6,16 +6,30 @@ import clearvolume.volume.VolumeManager;
 public class NullVolumeSink implements VolumeSinkInterface
 {
 
+	private VolumeManager mVolumeManager;
+
+	public NullVolumeSink()
+	{
+		super();
+	}
+
+	public NullVolumeSink(VolumeManager pVolumeManager)
+	{
+		super();
+		mVolumeManager = pVolumeManager;
+	}
+
 	@Override
 	public void sendVolume(Volume<?> pVolume)
 	{
-		// no nothing - in purpose...
+		if (mVolumeManager != null)
+			pVolume.makeAvailableToManager();
 	}
 
 	@Override
 	public VolumeManager getManager()
 	{
-		return null;
+		return mVolumeManager;
 	}
 
 }

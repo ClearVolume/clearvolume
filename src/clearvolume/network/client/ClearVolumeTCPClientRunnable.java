@@ -43,15 +43,23 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 
 			while (!mStopSignal)
 			{
-				Volume<?> lVolume = mVolumeManager.requestAndWaitForNextAvailableVolume(1,
-																																								TimeUnit.MILLISECONDS);
+				try
+				{
+					Volume<?> lVolume = mVolumeManager.requestAndWaitForNextAvailableVolume(1,
+																																									TimeUnit.MILLISECONDS);
 
-				lVolume = ClearVolumeSerialization.deserialize(	mSocketChannel,
-																												lVolume);
+					lVolume = ClearVolumeSerialization.deserialize(	mSocketChannel,
+																													lVolume);
 
-				lVolume.setManager(mVolumeManager);
+					lVolume.setManager(mVolumeManager);
 
-				mVolumeSink.sendVolume(lVolume);
+					mVolumeSink.sendVolume(lVolume);
+				}
+				catch (OutOfMemoryError e)
+				{
+					System.gc();
+					e.printStackTrace();
+				}
 
 			}
 

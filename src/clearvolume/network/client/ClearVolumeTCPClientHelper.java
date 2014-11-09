@@ -12,7 +12,9 @@ import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.NullVolumeSink;
-import clearvolume.volume.sink.VolumeSinkInterface;
+import clearvolume.volume.sink.filter.ChannelFilterSink;
+import clearvolume.volume.sink.filter.gui.ChannelFilterSinkJFrame;
+import clearvolume.volume.sink.relay.RelaySinkInterface;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
@@ -30,8 +32,9 @@ public abstract class ClearVolumeTCPClientHelper
 													int pPortNumber,
 													int pWindowSize,
 													int pBytesPerVoxel,
-													boolean pTimeShiftMultiChannel,
-													boolean pMultiColor)
+													boolean pTimeShift,
+													boolean pChannelFilter,
+													int pNumberOfLayers)
 	{
 		try (final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolume[" + pServerAddress
 																																																									+ ":"
@@ -39,7 +42,10 @@ public abstract class ClearVolumeTCPClientHelper
 																																																									+ "]",
 																																																							pWindowSize,
 																																																							pWindowSize,
-																																																							pBytesPerVoxel))
+																																																							pBytesPerVoxel,
+																																																							(int) (pWindowSize * 1.33),
+																																																							(int) (pWindowSize * 1.33),
+																																																							pNumberOfLayers))
 		{
 			try
 			{
@@ -50,24 +56,40 @@ public abstract class ClearVolumeTCPClientHelper
 																																												cMaxMillisecondsToWaitForCopy,
 																																												TimeUnit.MILLISECONDS);
 
-				VolumeSinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
+				RelaySinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
+
+				ChannelFilterSink lChannelFilterSink = null;
+				ChannelFilterSinkJFrame lChannelFilterSinkJFrame = null;
+				if (pChannelFilter)
+				{
+					lChannelFilterSink = new ChannelFilterSink(new NullVolumeSink());
+
+					lChannelFilterSinkJFrame = new ChannelFilterSinkJFrame(lChannelFilterSink);
+					lChannelFilterSinkJFrame.setVisible(true);
+
+					lChannelFilterSink.setRelaySink(lClearVolumeRendererSink);
+
+					lSinkAfterAsynchronousVolumeSinkAdapter = lChannelFilterSink;
+				}
 
 				TimeShiftingSink lTimeShiftingSink = null;
 				TimeShiftingSinkJFrame lTimeShiftingSinkJFrame = null;
-				if (pTimeShiftMultiChannel)
+				if (pTimeShift)
 				{
 					lTimeShiftingSink = new TimeShiftingSink(	cSoftHoryzon,
-																																						cHardHoryzon);
+																										cHardHoryzon);
 
 					lTimeShiftingSinkJFrame = new TimeShiftingSinkJFrame(lTimeShiftingSink);
 					lTimeShiftingSinkJFrame.setVisible(true);
 
-					lTimeShiftingSink.setRelaySink(lClearVolumeRendererSink);
+					lTimeShiftingSink.setRelaySink(lSinkAfterAsynchronousVolumeSinkAdapter);
 
 					lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
 					lSinkAfterAsynchronousVolumeSinkAdapter = lTimeShiftingSink;
 				}
+
+
 
 				AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
 																																																					cMaxQueueLength,
@@ -105,6 +127,13 @@ public abstract class ClearVolumeTCPClientHelper
 					lTimeShiftingSinkJFrame.dispose();
 					lTimeShiftingSink.close();
 				}
+				if (lChannelFilterSink != null)
+				{
+					lChannelFilterSinkJFrame.setVisible(false);
+					lChannelFilterSinkJFrame.dispose();
+					lChannelFilterSink.close();
+				}
+
 				assertTrue(lClearVolumeTCPClient.stop());
 				lClearVolumeTCPClient.close();
 			}

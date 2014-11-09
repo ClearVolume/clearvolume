@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
@@ -67,9 +68,6 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 		}
 
 	};
-
-
-
 
 	public ChannelFilterSink(VolumeSinkInterface pVolumeSinkForFilteredVolumes)
 	{
@@ -130,18 +128,14 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 																														ListDataEvent.CONTENTS_CHANGED,
 																														0,
 																														mSeenChannelList.size());
-					lListDataListener.contentsChanged(lListDataEvent);
+					SwingUtilities.invokeLater(() -> lListDataListener.contentsChanged(lListDataEvent));
 				}
 			}
 			mSeenChannelIdToNameMap.put(lChannelID, lChannelName);
 
-
-
 			sendVolumeInternal(lChannelID);
 		}
 	}
-
-
 
 	private void sendVolumeInternal(final int lChannelID)
 	{

@@ -112,6 +112,8 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 
 			if (mIsPlaying)
 				sendVolumeInternal(lVolumeChannelID);
+
+			cleanUpOldVolumes(mHighestTimePointIndexSeen, lVolumeChannelID);
 		}
 	}
 

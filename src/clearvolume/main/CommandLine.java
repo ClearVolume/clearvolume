@@ -61,6 +61,10 @@ public class CommandLine
 	{ "--multi-color" }, usage = "Multi-Color rendering.")
 	public boolean mMultiColor;
 
+	@Option(name = "-l", aliases =
+	{ "--nb-colors" }, usage = "Number of colors (layers) to render simultaneously.")
+	public int mNumberOfLayers;
+
 	public boolean isDemoServer()
 	{
 		return mDemoServer;

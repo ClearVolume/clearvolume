@@ -54,7 +54,8 @@ public class ClearVolumeClientMain
 															int pWindowSize,
 															int pBytesPerVoxel,
 															boolean pTimeShiftMultiChannel,
-															boolean pMultiColor)
+															boolean pMultiColor,
+															int pNumberOfLayers)
 	{
 
 		ClearVolumeTCPClientHelper lClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper()
@@ -76,7 +77,8 @@ public class ClearVolumeClientMain
 																						pWindowSize,
 																						pBytesPerVoxel,
 																						pTimeShiftMultiChannel,
-																						pMultiColor);
+																						pMultiColor,
+																						pNumberOfLayers);
 
 	}
 
@@ -96,7 +98,7 @@ public class ClearVolumeClientMain
 	{
 		mApplicationJFrame = new ClearVolumeJFrame();
 		mApplicationJFrame.getContentPane().setBackground(Color.WHITE);
-		mApplicationJFrame.setBounds(100, 100, 529, 372);
+		mApplicationJFrame.setBounds(100, 100, 529, 455);
 		mApplicationJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JMenuBar lMenuBar = new JMenuBar();
@@ -116,7 +118,7 @@ public class ClearVolumeClientMain
 		ConnectionPanel connectionPanel = new ConnectionPanel();
 		connectionPanel.setBackground(Color.WHITE);
 		connectionPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-		connectionPanel.setBounds(8, 174, 512, 157);
+		connectionPanel.setBounds(8, 174, 512, 231);
 		mApplicationJFrame.getContentPane().add(connectionPanel);
 
 	}
