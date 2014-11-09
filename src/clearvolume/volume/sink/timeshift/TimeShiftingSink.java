@@ -49,13 +49,20 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	public void setTimeShiftNormalized(final double pTimeShiftNormalized)
 	{
 		mSeekingExecutor.execute(() -> {
+
 			synchronized (mLock)
 			{
-				final long lPreviousTimeShift = mTimeShift;
-				mTimeShift = -Math.round(mHardMemoryHoryzonInTimePointIndices * pTimeShiftNormalized);
-				if (!mIsPlaying && lPreviousTimeShift != mTimeShift)
-					for (int lChannel : mAvailableChannels)
-						sendVolumeInternal(lChannel);
+			final long lPreviousTimeShift = mTimeShift;
+			
+			// find the available data interval to evade invalid indices
+			final long startPos = Math.max(0, mHighestTimePointIndexSeen - mHardMemoryHoryzonInTimePointIndices);
+			final long interval = mHighestTimePointIndexSeen - startPos;
+			
+			System.err.println("interval=[" + startPos +"," +interval+"]");
+			mTimeShift = -Math.round(interval * pTimeShiftNormalized);
+			if (!mIsPlaying && lPreviousTimeShift != mTimeShift)
+				for (int lChannel : mAvailableChannels)
+					sendVolumeInternal(lChannel);
 			}
 		});
 	}
@@ -96,6 +103,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 																			lTimePointIndexToVolumeMapReference);
 			}
 
+
 			lTimePointIndexToVolumeMapReference.put(pVolume.getTimeIndex(),
 																							wrapWithReference(pVolume));
 
@@ -113,10 +121,15 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	{
 		synchronized (mLock)
 		{
-			Volume<?> lVolumeToSend = getVolumeToSend(lVolumeChannelID);
+			Volume<?> lVolumeToSend = getVolumeToSend(lVolumeChannelID);		
 
-			if (lVolumeToSend != null)
+			if (lVolumeToSend != null) {
 				getRelaySink().sendVolume(lVolumeToSend);
+			} else {
+				System.err.println("Did not have any volume to send :(");
+			}
+
+			cleanUpOldVolumes(mHighestTimePointIndexSeen, lVolumeChannelID);
 		}
 	}
 
@@ -141,6 +154,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			Entry<Long, SwitchableSoftReference<Volume<?>>> lIndexVolumeEntry = lTimePointIndexToVolumeMap.floorEntry(mHighestTimePointIndexSeen + mTimeShift);
 			if (lIndexVolumeEntry == null)
 				lIndexVolumeEntry = lTimePointIndexToVolumeMap.ceilingEntry(mHighestTimePointIndexSeen + mTimeShift);
+
 
 			if (lIndexVolumeEntry == null)
 			{
