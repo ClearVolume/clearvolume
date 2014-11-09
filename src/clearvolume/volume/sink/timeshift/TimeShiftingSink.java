@@ -76,6 +76,18 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	{
 		return mTimeShift;
 	}
+	
+	public long getHardMemoryHorizon() {
+		return mHardMemoryHorizonInTimePointIndices;
+	}
+	
+	public long getSoftMemoryHorizon() {
+		return mSoftMemoryHorizonInTimePointIndices;
+	}
+	
+	public long getNumberOfTimepoints() {
+		return mHighestTimePointIndexSeen;
+	}
 
 	public int getNumberOfAvailableChannels()
 	{

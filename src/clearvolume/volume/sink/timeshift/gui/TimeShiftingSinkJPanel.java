@@ -23,6 +23,9 @@ public class TimeShiftingSinkJPanel extends JPanel
 
 	private JSlider mTimeShiftSlider;
 	private JProgressBar mPlayBar;
+	private Thread mGUIUpdateThread;
+	private JLabel mPresentLabel;
+	private JLabel mPastLabel;
 
 	public static final void createJFrame(TimeShiftingSink pTimeShiftingSink)
 	{
@@ -47,6 +50,7 @@ public class TimeShiftingSinkJPanel extends JPanel
 			}
 		});
 	}
+	
 
 	public TimeShiftingSinkJPanel()
 	{
@@ -69,11 +73,11 @@ public class TimeShiftingSinkJPanel extends JPanel
 		add(lPastPresentPanel, "cell 0 0 6 1,grow");
 		lPastPresentPanel.setLayout(new BorderLayout(0, 0));
 
-		JLabel lPastLabel = new JLabel(" past");
-		lPastPresentPanel.add(lPastLabel, BorderLayout.WEST);
+		mPastLabel = new JLabel(" " + pTimeShiftingSink.getHardMemoryHorizon() + " timepoints past");
+		lPastPresentPanel.add(mPastLabel, BorderLayout.WEST);
 
-		JLabel lPresentLabel = new JLabel("present   ");
-		lPastPresentPanel.add(lPresentLabel, BorderLayout.EAST);
+		mPresentLabel = new JLabel("present: timepoint " + pTimeShiftingSink.getNumberOfTimepoints() + "   ");
+		lPastPresentPanel.add(mPresentLabel, BorderLayout.EAST);
 
 		JLayeredPane lJLayeredPane = new JLayeredPane();
 		lJLayeredPane.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -153,6 +157,24 @@ public class TimeShiftingSinkJPanel extends JPanel
 				pTimeShiftingSink.setTimeShiftNormalized(0);
 			});
 		lPlayPausePanel.add(lGoToEndButton, "cell 3 0");
+		
+		mGUIUpdateThread = new Thread() {
+			@Override
+			public void run() {
+				while(true) {
+					mPresentLabel.setText("present: timepoint " + pTimeShiftingSink.getNumberOfTimepoints() + "   ");
+					
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		
+		mGUIUpdateThread.start();
 
 	}
 
