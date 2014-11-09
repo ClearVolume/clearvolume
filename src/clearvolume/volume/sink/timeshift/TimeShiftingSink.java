@@ -52,7 +52,13 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	{
 		mSeekingExecutor.execute(() -> {
 			final long lPreviousTimeShift = mTimeShift;
-			mTimeShift = -Math.round(mHardMemoryHoryzonInTimePointIndices * pTimeShiftNormalized);
+			
+			// find the available data interval to evade invalid indices
+			final long startPos = Math.max(0, mHighestTimePointIndexSeen - mHardMemoryHoryzonInTimePointIndices);
+			final long interval = mHighestTimePointIndexSeen - startPos;
+			
+			System.err.println("interval=[" + startPos +"," +interval+"]");
+			mTimeShift = -Math.round(interval * pTimeShiftNormalized);
 			if (!mIsPlaying && lPreviousTimeShift != mTimeShift)
 				for (int lChannel : mAvailableChannels)
 					sendVolumeInternal(lChannel);
@@ -99,6 +105,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 
 		mHighestTimePointIndexSeen = Math.max(mHighestTimePointIndexSeen,
 																					pVolume.getTimeIndex());
+		System.err.println("Highest timepoint: " + mHighestTimePointIndexSeen);
 
 		if (mIsPlaying)
 			sendVolumeInternal(lVolumeChannelID);
@@ -108,8 +115,12 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	{
 		Volume<?> lVolumeToSend = getVolumeToSend(lVolumeChannelID);
 
-		if (lVolumeToSend != null)
+		if (lVolumeToSend != null) {
 			getRelaySink().sendVolume(lVolumeToSend);
+		}
+		else {
+			System.err.println("Did not have any volume to send :(");
+		}
 
 		cleanUpOldVolumes(mHighestTimePointIndexSeen, lVolumeChannelID);
 	}
@@ -137,7 +148,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 
 		if (lIndexVolumeEntry == null)
 		{
-			System.out.println();
+			System.err.println("Did not find volume!");
 			return null;
 		}
 
