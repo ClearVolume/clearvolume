@@ -104,6 +104,8 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 
 			if (mIsPlaying)
 				sendVolumeInternal(lVolumeChannelID);
+
+			cleanUpOldVolumes(mHighestTimePointIndexSeen, lVolumeChannelID);
 		}
 	}
 
@@ -115,8 +117,6 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 
 			if (lVolumeToSend != null)
 				getRelaySink().sendVolume(lVolumeToSend);
-
-			cleanUpOldVolumes(mHighestTimePointIndexSeen, lVolumeChannelID);
 		}
 	}
 

@@ -41,7 +41,8 @@ public class ClearVolumeMain
 																			lCommandLineValues.mWindowSize,
 																			lCommandLineValues.mBytesPerVoxel,
 																			lCommandLineValues.mTimeShiftAndMultiChannel,
-																			lCommandLineValues.mMultiColor);
+																			lCommandLineValues.mMultiColor,
+																			lCommandLineValues.mNumberOfLayers);
 			else
 				ClearVolumeClientMain.main(args);
 		}

@@ -77,9 +77,9 @@ public class ClearVolumeNetworkTests
 	{
 		int lPortRandomizer = (int) (Math.random() * 100);
 
-		ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(new NullVolumeSink(),
-																																											new VolumeManager(cNumberOfAvailableVolumes),
-																																											cVolumeQueueLength);
+		VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
+		ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(cVolumeQueueLength);
+		lClearVolumeTCPServerSink.setRelaySink(new NullVolumeSink());
 
 		SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort + lPortRandomizer);
 		assertTrue(lClearVolumeTCPServerSink.open(lServerSocketAddress));
