@@ -58,7 +58,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			final long startPos = Math.max(0, mHighestTimePointIndexSeen - mHardMemoryHorizonInTimePointIndices);
 			final long interval = mHighestTimePointIndexSeen - startPos;
 			
-			System.err.println("interval=[" + startPos +"," +interval+"]");
+				// System.err.println("interval=[" + startPos +"," +interval+"]");
 			mTimeShift = -Math.round(interval * pTimeShiftNormalized);
 			if (!mIsPlaying && lPreviousTimeShift != mTimeShift)
 				for (int lChannel : mAvailableChannels)
@@ -169,10 +169,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 
 
 			if (lIndexVolumeEntry == null)
-			{
-				System.out.println();
 				return null;
-			}
 
 			Volume<?> lVolume = lIndexVolumeEntry.getValue().get();
 			if (lVolume == null)
