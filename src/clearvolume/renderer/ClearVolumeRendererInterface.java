@@ -135,7 +135,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * 
 	 * @param pProjectionAlgorithm
 	 */
-	void setProjectionAlgorythm(ProjectionAlgorithm pProjectionAlgorithm);
+	void setProjectionAlgorithm(ProjectionAlgorithm pProjectionAlgorithm);
 
 	/**
 	 * Sets the rotation controller used (in addition to the mouse).

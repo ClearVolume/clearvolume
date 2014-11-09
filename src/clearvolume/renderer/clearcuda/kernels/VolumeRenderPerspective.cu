@@ -256,7 +256,7 @@ volumerender(uint *d_output, uint imageW, uint imageH,
 		  // lookup in transfer function texture
 		  float4 col = tex1D(transferTex,mappedsample);
 	        
-		  algo/*ProjectionAlgorythm*/(acc,col);
+		  algo/*ProjectionAlgorithm*/(acc,col);
 	
 		  t += tstep;
 		  if (t > tfar) break;

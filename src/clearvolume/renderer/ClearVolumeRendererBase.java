@@ -49,7 +49,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Projection algorithm used
 	 */
-	private ProjectionAlgorithm mProjectionAlgorythm = ProjectionAlgorithm.MaxProjection;
+	private ProjectionAlgorithm mProjectionAlgorithm = ProjectionAlgorithm.MaxProjection;
 
 	/**
 	 * Transfer functions used
@@ -635,20 +635,20 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * @return
 	 */
-	public ProjectionAlgorithm getProjectionAlgorythm()
+	public ProjectionAlgorithm getProjectionAlgorithm()
 	{
-		return mProjectionAlgorythm;
+		return mProjectionAlgorithm;
 	}
 
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setProjectionAlgorythm(clearvolume.projections.ProjectionAlgorithm)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setProjectionAlgorithm(clearvolume.projections.ProjectionAlgorithm)
 	 */
 	@Override
-	public void setProjectionAlgorythm(final ProjectionAlgorithm pProjectionAlgorithm)
+	public void setProjectionAlgorithm(final ProjectionAlgorithm pProjectionAlgorithm)
 	{
-		mProjectionAlgorythm = pProjectionAlgorithm;
+		mProjectionAlgorithm = pProjectionAlgorithm;
 	}
 
 	/**

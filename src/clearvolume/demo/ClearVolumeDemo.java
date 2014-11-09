@@ -231,7 +231,7 @@ public class ClearVolumeDemo
 																																																					512);
 		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
-		lClearVolumeRenderer.setProjectionAlgorythm(ProjectionAlgorithm.MaxProjection);
+		lClearVolumeRenderer.setProjectionAlgorithm(ProjectionAlgorithm.MaxProjection);
 
 		ExternalRotationController lEgg3DController = null;
 		try

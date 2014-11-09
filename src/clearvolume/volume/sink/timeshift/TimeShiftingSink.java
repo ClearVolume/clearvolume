@@ -27,8 +27,8 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	private HashMap<Integer, TreeMap<Long, SwitchableSoftReference<Volume<?>>>> mChannelToVolumeListsMap = new HashMap<>();
 	private TreeSet<Integer> mAvailableChannels = new TreeSet<>();
 
-	private volatile long mSoftMemoryHoryzonInTimePointIndices;
-	private volatile long mHardMemoryHoryzonInTimePointIndices;
+	private volatile long mSoftMemoryHorizonInTimePointIndices;
+	private volatile long mHardMemoryHorizonInTimePointIndices;
 	private volatile long mCleanUpPeriodInTimePoints;
 	private volatile long mHighestTimePointIndexSeen = 0;
 	private volatile long mTimeShift = 0;
@@ -39,11 +39,11 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	{
 		super();
 		mSwitchableSoftReferenceManager = new SwitchableSoftReferenceManager<>();
-		mSoftMemoryHoryzonInTimePointIndices = Math.min(pSoftMemoryHoryzonInTimePointIndices,
+		mSoftMemoryHorizonInTimePointIndices = Math.min(pSoftMemoryHoryzonInTimePointIndices,
 																										pHardMemoryHoryzonInTimePointIndices);
-		mHardMemoryHoryzonInTimePointIndices = Math.max(pHardMemoryHoryzonInTimePointIndices,
+		mHardMemoryHorizonInTimePointIndices = Math.max(pHardMemoryHoryzonInTimePointIndices,
 																										pSoftMemoryHoryzonInTimePointIndices);
-		mCleanUpPeriodInTimePoints = (long) (mSoftMemoryHoryzonInTimePointIndices * cCleanUpRatio);
+		mCleanUpPeriodInTimePoints = (long) (mSoftMemoryHorizonInTimePointIndices * cCleanUpRatio);
 	}
 
 	public void setTimeShiftNormalized(final double pTimeShiftNormalized)
@@ -55,7 +55,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			final long lPreviousTimeShift = mTimeShift;
 			
 			// find the available data interval to evade invalid indices
-			final long startPos = Math.max(0, mHighestTimePointIndexSeen - mHardMemoryHoryzonInTimePointIndices);
+			final long startPos = Math.max(0, mHighestTimePointIndexSeen - mHardMemoryHorizonInTimePointIndices);
 			final long interval = mHighestTimePointIndexSeen - startPos;
 			
 			System.err.println("interval=[" + startPos +"," +interval+"]");
@@ -188,11 +188,11 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			Long lLastTimePoint = lTimePointIndexToVolumeMap.lastKey();
 
 			Long lTimePoint = lLastTimePoint;
-			while (lTimePoint != null && lTimePoint > lLastTimePoint - mSoftMemoryHoryzonInTimePointIndices)
+			while (lTimePoint != null && lTimePoint > lLastTimePoint - mSoftMemoryHorizonInTimePointIndices)
 			{
 				lTimePoint = lTimePointIndexToVolumeMap.lowerKey(lTimePoint);
 			}
-			while (lTimePoint != null && lTimePoint > lLastTimePoint - mHardMemoryHoryzonInTimePointIndices)
+			while (lTimePoint != null && lTimePoint > lLastTimePoint - mHardMemoryHorizonInTimePointIndices)
 			{
 				SwitchableSoftReference<Volume<?>> lSwitchableSoftReference = lTimePointIndexToVolumeMap.get(lTimePoint);
 				if (lSwitchableSoftReference.isGone())

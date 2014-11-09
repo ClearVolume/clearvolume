@@ -69,7 +69,7 @@ public class TimeShiftingSinkJPanel extends JPanel
 		add(lPastPresentPanel, "cell 0 0 6 1,grow");
 		lPastPresentPanel.setLayout(new BorderLayout(0, 0));
 
-		JLabel lPastLabel = new JLabel("  past");
+		JLabel lPastLabel = new JLabel(" past");
 		lPastPresentPanel.add(lPastLabel, BorderLayout.WEST);
 
 		JLabel lPresentLabel = new JLabel("present   ");
