@@ -1,5 +1,8 @@
 # ClearVolume #
 
+![ClearVolumeLogo512_crop.png](https://bitbucket.org/repo/GXoqjE/images/401185445-ClearVolumeLogo512_crop.png)
+
+
 ClearVolume is a real-time live 3D visualisation library designed for high-end volumetric microscopes such as SPIM and DLSM microscopes. With ClearVolume you can see live on your screen the stacks acquired by your microscope instead of waiting for offline post-processing to give view an intuitive and comprehensive view on your data. The biologists can immediately decide whether a sample is worth imaging. 
 
 ClearVolume can easily be integrated into existing Java, C, or LabView based microscope software. Moreover, it has a dedicated interface to MicroManager/OpenSpim/OpenSpin control software. In addition, it offers the possibility of remote viewing of volume data
