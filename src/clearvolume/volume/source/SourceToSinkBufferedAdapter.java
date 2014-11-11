@@ -2,19 +2,19 @@ package clearvolume.volume.source;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.VolumeSinkInterface;
 
 public class SourceToSinkBufferedAdapter implements
-																						VolumeSinkInterface,
-																						VolumeSourceInterface
+																				VolumeSinkInterface,
+																				VolumeSourceInterface
 {
 
 	private final BlockingQueue<Volume<?>> mVolumeQueue;
 	private VolumeManager mVolumeManager;
-
 
 	public SourceToSinkBufferedAdapter(	VolumeManager pVolumeManager,
 																			int pMaxCapacity)
@@ -27,7 +27,12 @@ public class SourceToSinkBufferedAdapter implements
 	@Override
 	public void sendVolume(Volume<?> pVolume)
 	{
-		mVolumeQueue.offer(pVolume);
+		sendVolumeWithFeedback(pVolume);
+	}
+
+	public boolean sendVolumeWithFeedback(Volume<?> pVolume)
+	{
+		return mVolumeQueue.offer(pVolume);
 	}
 
 	@Override
@@ -42,6 +47,26 @@ public class SourceToSinkBufferedAdapter implements
 		{
 			return requestVolume();
 		}
+	}
+
+	public Volume<?> requestVolumeAndWait(int pTimeOut,
+																				TimeUnit pTimeUnit)
+	{
+		try
+		{
+			Volume<?> lVolume = mVolumeQueue.poll(pTimeOut, pTimeUnit);
+			return lVolume;
+		}
+		catch (InterruptedException e)
+		{
+			return requestVolume();
+		}
+	}
+
+	public Volume<?> peekVolume()
+	{
+		Volume<?> lVolume = mVolumeQueue.peek();
+		return lVolume;
 	}
 
 	@Override

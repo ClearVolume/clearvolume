@@ -71,8 +71,8 @@ public class Volume<T> implements ClearVolumeCloseable
 		mDimensionsInVoxels = pDimensionsInVoxels;
 	}
 
-	public void setVoxelSizeInRealUnits(	String pRealUnitName,
-																				double... pVoxelSizeInRealUnits)
+	public void setVoxelSizeInRealUnits(String pRealUnitName,
+																			double... pVoxelSizeInRealUnits)
 	{
 		setRealUnitName(pRealUnitName);
 		mVoxelSizeInRealUnits = pVoxelSizeInRealUnits;
@@ -291,6 +291,17 @@ public class Volume<T> implements ClearVolumeCloseable
 	public void setViewMatrix(float[] pViewMatrix)
 	{
 		mViewMatrix = pViewMatrix;
+	}
+
+	public void copyDataFrom(Volume<?> pVolume)
+	{
+		if (mDataBuffer.capacity() != pVolume.mDataBuffer.capacity())
+			mDataBuffer = ByteBuffer.allocateDirect(pVolume.mDataBuffer.capacity())
+															.order(ByteOrder.nativeOrder());
+
+		mDataBuffer.clear();
+		pVolume.mDataBuffer.clear();
+		mDataBuffer.put(pVolume.mDataBuffer);
 	}
 
 	@SuppressWarnings("unchecked")

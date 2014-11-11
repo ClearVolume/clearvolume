@@ -76,7 +76,7 @@ public class ClearVolumeNetworkDemo
 						lVolumeData.put((byte) 0);
 
 					lVolumeData.rewind();
-					for (int z = 0; z < i % cDepth; z++)
+					for (int z = 0; z < (i + 10) % cDepth; z++)
 						for (int y = 0; y < cHeight / (1 + lChannleID); y++)
 							for (int x = cWidth / 2 * (lChannleID); x < cWidth; x++)
 							{
@@ -86,14 +86,14 @@ public class ClearVolumeNetworkDemo
 							}
 
 					lClearVolumeTCPServerSink.sendVolume(lVolume);
-					Thread.sleep(300);
+					Thread.sleep(1);
 				}
 				catch (Throwable e)
 				{
 					e.printStackTrace();
 				}
 			}
-			Thread.sleep(500);
+			Thread.sleep(1000);
 
 			assertTrue(lClearVolumeTCPServerSink.stop());
 			lClearVolumeTCPServerSink.close();
