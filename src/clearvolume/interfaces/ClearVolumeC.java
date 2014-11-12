@@ -118,14 +118,14 @@ public class ClearVolumeC
 																																																			pMaxTextureWidth,
 																																																			pMaxTextureHeight);
 
-			VolumeManager lVolumeManager = lClearVolumeRenderer.createCompatibleVolumeManager(sMaxQueueLength);
+			VolumeManager lVolumeManager = lClearVolumeRenderer.createCompatibleVolumeManager(sMaxAvailableVolumes);
 			sIDToVolumeManager.put(pRendererId, lVolumeManager);
 
 			lClearVolumeRenderer.setVisible(true);
 			sIDToRendererMap.put(pRendererId, lClearVolumeRenderer);
 
 			ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																											lClearVolumeRenderer.createCompatibleVolumeManager(sMaxAvailableVolumes),
+																																											lVolumeManager,
 																																											sMaxMillisecondsToWaitForCopy,
 																																											TimeUnit.MILLISECONDS);
 			VolumeSinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;

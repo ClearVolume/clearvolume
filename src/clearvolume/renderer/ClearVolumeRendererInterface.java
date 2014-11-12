@@ -354,11 +354,18 @@ public interface ClearVolumeRendererInterface	extends
 	boolean isShowing();
 
 	/**
+	 * Prevents the closing of the window.
+	 */
+	void disableClose();
+
+	/**
 	 * Interface method implementation
 	 * 
 	 * @see java.io.Closeable#close()
 	 */
 	@Override
 	void close();
+
+
 
 }

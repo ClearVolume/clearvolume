@@ -23,6 +23,17 @@ public class TransferFunction1D implements TransferFunction
 	}
 
 	/**
+	 * Adds a point in this 1D transfer function. e.g: addPointComponent(1.0)
+	 * 
+	 * @param pComponent
+	 *          red , blue, green or apha component
+	 */
+	public void addPointComponent(final double pComponent)
+	{
+		mTransferFunctionList.add((float) pComponent);
+	}
+
+	/**
 	 * Adds a point in this 1D transfer function. e.g: addPoint(1.0,0.5,0.3,1)
 	 * 
 	 * @param pRGBA

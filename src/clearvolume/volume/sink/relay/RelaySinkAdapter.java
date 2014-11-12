@@ -2,10 +2,18 @@ package clearvolume.volume.sink.relay;
 
 import clearvolume.volume.sink.VolumeSinkInterface;
 
-
 public abstract class RelaySinkAdapter implements RelaySinkInterface
 {
 	VolumeSinkInterface mRelaySink;
+
+	public RelaySinkAdapter()
+	{
+	}
+
+	public RelaySinkAdapter(VolumeSinkInterface pRelaySink)
+	{
+		mRelaySink = pRelaySink;
+	}
 
 	@Override
 	public void setRelaySink(VolumeSinkInterface pVolumeSinkInterface)
@@ -18,6 +26,5 @@ public abstract class RelaySinkAdapter implements RelaySinkInterface
 	{
 		return mRelaySink;
 	}
-
 
 }

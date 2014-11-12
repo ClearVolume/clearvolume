@@ -1,6 +1,5 @@
 package clearvolume.transferf;
 
-
 /**
  * Class TransferFunctions
  * 
@@ -140,6 +139,11 @@ public class TransferFunctions
 		lTransfertFunction.addPoint(1, 0, 0, 1);
 		lTransfertFunction.addPoint(1, 0, 1, 1);
 		return lTransfertFunction;
+	}
+
+	public static TransferFunction getCoolWarm()
+	{
+		return CoolWarmTransferFunction.get();
 	}
 
 }

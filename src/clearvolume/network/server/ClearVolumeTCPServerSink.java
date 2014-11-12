@@ -25,7 +25,9 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 
 	private SourceToSinkBufferedAdapter mSourceToSinkBufferedAdapter;
 
+	private VolumeManager mManager = new VolumeManager(2);
 	private volatile Volume<?> mLastVolumeSeen;
+
 
 	public ClearVolumeTCPServerSink(int pBufferMaxCapacity)
 	{
@@ -85,7 +87,7 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 			Volume<?> lNewLastSeenVolume;
 			if (mLastVolumeSeen == null)
 			{
-				lNewLastSeenVolume = getManager().requestAndWaitForVolumeLike(1,
+				lNewLastSeenVolume = mManager.requestAndWaitForVolumeLike(1,
 																																			TimeUnit.MILLISECONDS,
 																																			pVolume);
 			}

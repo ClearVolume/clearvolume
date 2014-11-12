@@ -144,31 +144,31 @@ public class Volume<T> implements ClearVolumeCloseable
 
 	public long getBytesPerVoxel()
 	{
-		if (mType == Byte.class)
+		if (mType == Byte.class || mType == byte.class)
 		{
 			return Byte.BYTES;
 		}
-		else if (mType == Short.class)
+		else if (mType == Short.class || mType == short.class)
 		{
 			return Short.BYTES;
 		}
-		else if (mType == Character.class)
+		else if (mType == Character.class || mType == char.class)
 		{
 			return Character.BYTES;
 		}
-		else if (mType == Integer.class)
+		else if (mType == Integer.class || mType == int.class)
 		{
 			return Integer.BYTES;
 		}
-		else if (mType == Long.class)
+		else if (mType == Long.class || mType == long.class)
 		{
 			return Long.BYTES;
 		}
-		else if (mType == Float.class)
+		else if (mType == Float.class || mType == float.class)
 		{
 			return Float.BYTES;
 		}
-		else if (mType == Double.class)
+		else if (mType == Double.class || mType == double.class)
 		{
 			return Double.BYTES;
 		}
@@ -293,6 +293,13 @@ public class Volume<T> implements ClearVolumeCloseable
 		mViewMatrix = pViewMatrix;
 	}
 
+	public void copyDataFrom(ByteBuffer pByteBuffer)
+	{
+		pByteBuffer.rewind();
+		mDataBuffer.clear();
+		mDataBuffer.put(pByteBuffer);
+	}
+
 	public void copyDataFrom(Volume<?> pVolume)
 	{
 		if (mDataBuffer.capacity() != pVolume.mDataBuffer.capacity())
@@ -300,7 +307,7 @@ public class Volume<T> implements ClearVolumeCloseable
 															.order(ByteOrder.nativeOrder());
 
 		mDataBuffer.clear();
-		pVolume.mDataBuffer.clear();
+		pVolume.mDataBuffer.rewind();
 		mDataBuffer.put(pVolume.mDataBuffer);
 	}
 
