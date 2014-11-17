@@ -20,7 +20,7 @@ model {
         libs(PrebuiltLibraries) {
             jvm {
                 binaries.withType(SharedLibraryBinary) {
-                    sharedLibraryFile = file("./cpp/jvmlib/jvm.lib")
+                    sharedLibraryFile = file("./src/cpp/jvmlib/jvm.lib")
                 }
             }
         }
@@ -50,11 +50,11 @@ sources {
     cvlib {
         cpp {
             source {
-                srcDirs "cpp"
+                srcDirs "src/cpp"
                 include "**/*.cpp"
             }
             exportedHeaders {
-                srcDirs "cpp","cpp/lib"
+                srcDirs "src/cpp","src/cpp/lib"
                 include "**/*.h"
             } 
         }
@@ -75,7 +75,7 @@ sources {
     cvlib_test {
         cpp {
             source {
-                srcDir "cpp"
+                srcDir "src/cpp"
                 include "cvlib_test.cpp"
             }
             lib library: 'jvm'
@@ -95,23 +95,23 @@ sourceSets
   {
     java 
     {
-      srcDir 'src'
+      srcDir 'src/java'
     }
     resources 
     { 
-      srcDir 'src'
-      srcDir 'cpp/jogllibs'
+      srcDir 'src/java'
+      srcDir 'src/cpp/jogllibs'
     }
   }
   test
   {
     java 
     {
-      srcDir 'src'
+      srcDir 'src/java'
     }
     resources 
     { 
-      srcDir 'src'
+      srcDir 'src/java'
     }
   }
 }
@@ -262,7 +262,7 @@ task packagecvlib {
 
         copy
         {
-            from('./cpp/')
+            from('./src/cpp/')
             into('./build/cvlib/')
             include('cvlib.h')
         }
@@ -292,15 +292,22 @@ task packagelvcvlib {
     {
         copy
         {
-            from('./cpp/labview/')
+            from('./src/labview/')
             into('./build/labview/')
             include('*')
         }
 
         copy
         {
-            from('./cpp/labview/lvcvlib')
+            from('./src/labview/lvcvlib')
             into('./build/labview/lvcvlib/')
+            include('*')
+        }
+
+        copy
+        {
+            from('./src/labview/lvcvlib/VIs')
+            into('./build/labview/lvcvlib/VIs')
             include('*')
         }
 

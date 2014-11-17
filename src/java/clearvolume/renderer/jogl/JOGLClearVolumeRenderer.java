@@ -640,6 +640,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 		boolean[] lUpdated = renderVolume(lInvVolumeMatrix.getFloatArray(),
 																			lInvProjection.getFloatArray());
+
+		if (lUpdated != null)
 		{
 			if (mUsePBOs)
 				for (int i = 0; i < getNumberOfRenderLayers(); i++)
