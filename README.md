@@ -10,9 +10,16 @@ ClearVolume can easily be integrated into existing Java, C/C++, or LabVIEW based
 
  1. Java JDK or JRE version 8 (1.8)  
  2. Gradle 2.1 (get it [here](http://www.gradle.org/downloads))
- 3. NVidia graphics card (for now)
- 4. CUDA SDK 6.5 (get it [here](http://developer.nvidia.com/cuda-downloads))
- 5. On windows you need VisualStudio installed (get it [here](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-desktop))
+
+### Prerequisites for CUDA backend:
+
+ 1. NVidia graphics card (for now)
+ 2. CUDA SDK 6.5 (get it [here](http://developer.nvidia.com/cuda-downloads))
+ 3. On windows you need VisualStudio installed (get it [here](http://www.visualstudio.com/downloads/download-visual-studio-vs#d-express-windows-desktop))
+
+### Prerequisites for OpenCL backend:
+
+ 1. OpenCL 1.2 capable raphics card with preferably at least 1G of GPURAM.
 
 Notes:
  
