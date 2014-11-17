@@ -6,7 +6,7 @@ ClearVolume is a real-time live 3D visualisation library designed for high-end v
 
 ClearVolume can easily be integrated into existing Java, C/C++, or LabVIEW based microscope software. Moreover, it has a dedicated interface to MicroManager/OpenSpim/OpenSpin control software. In addition, it offers the possibility of remote viewing of volume data
 
-### Prerequisites:
+### Overall Prerequisites:
 
  1. Java JDK or JRE version 8 (1.8)  
  2. Gradle 2.1 (get it [here](http://www.gradle.org/downloads))
