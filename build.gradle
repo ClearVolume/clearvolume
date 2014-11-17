@@ -1,6 +1,8 @@
+
 plugins {
   id "us.kirchmeier.capsule" version "0.9.0"
 }
+
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -8,6 +10,8 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'c'
 apply plugin: 'cpp'
+
+
 
 model {
     platforms {
@@ -118,6 +122,7 @@ sourceSets
 
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 group = 'royer'
 version = '1.0'
 
@@ -328,8 +333,6 @@ task packagelvcvlib {
     }
   }
 }
-
-
 
 
 

@@ -7,7 +7,7 @@ import com.jogamp.opengl.math.Quaternion;
 /**
  * Class QuaternionRotationController
  * 
- * Exmaple implementation of a RotationControllerInterface using quaternions.
+ * Example implementation of a RotationControllerInterface using quaternions.
  *
  * @author Loic Royer 2014
  *
