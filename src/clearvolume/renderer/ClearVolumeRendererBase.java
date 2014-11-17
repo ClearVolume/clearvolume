@@ -26,6 +26,32 @@ import clearvolume.volume.VolumeManager;
  * @author Loic Royer 2014
  *
  */
+/**
+ * Class ClearVolumeRendererBase 
+ * 
+ * Instances of this class ...
+ *
+ * @author Loic Royer
+ * 2014
+ *
+ */
+/**
+ * Class ClearVolumeRendererBase 
+ * 
+ * Instances of this class ...
+ *
+ * @author Loic Royer
+ * 2014
+ *
+ */
+/**
+ * Class ClearVolumeRendererBase
+ * 
+ * Instances of this class ...
+ *
+ * @author Loic Royer 2014
+ *
+ */
 public abstract class ClearVolumeRendererBase	implements
 																							ClearVolumeRendererInterface
 {
@@ -132,7 +158,10 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * @return
+	 * Returns the state of the flag indicating whether current/new rendering
+	 * parameters have been used for last rendering.
+	 * 
+	 * @return true if rednering parameters up-to-date.
 	 */
 	public boolean getIsUpdateVolumeRenderingParameters()
 	{
@@ -224,8 +253,12 @@ public abstract class ClearVolumeRendererBase	implements
 		return mVoxelSizeZ;
 	}
 
+
 	/**
-	 * @return
+	 * Returns whether the volume dimensions have been changed since last data
+	 * upload.
+	 * 
+	 * @return true if volume dimensions changed.
 	 */
 	public boolean haveVolumeDimensionsChanged()
 	{
@@ -302,9 +335,9 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Returns
+	 * Returns the brightness level.
 	 * 
-	 * @return
+	 * @return brightness level.
 	 */
 	public double getBrightness()
 	{
@@ -315,7 +348,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets brightness.
 	 * 
 	 * @param pBrightness
-	 *          brightness
+	 *          brightness level
 	 */
 	@Override
 	public void setBrightness(final double pBrightness)
@@ -327,7 +360,9 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * @return
+	 * Returns the Gamma value.
+	 * 
+	 * @return gamma value
 	 */
 	public double getGamma()
 	{
@@ -454,10 +489,11 @@ public abstract class ClearVolumeRendererBase	implements
 		setTransferFunctionRangeMax(mTransferFunctionRangeMax + pDelta);
 	}
 
-	/**
+
+		/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationX(float)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationX(double)
 	 */
 	@Override
 	public void addTranslationX(double pDX)
@@ -466,10 +502,11 @@ public abstract class ClearVolumeRendererBase	implements
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
-	/**
+
+		/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationY(float)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationY(double)
 	 */
 	@Override
 	public void addTranslationY(double pDY)
@@ -633,7 +670,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Returns currently used projection algorithm.
 	 * 
-	 * @return
+	 * @return currently used projection algorithm
 	 */
 	public ProjectionAlgorithm getProjectionAlgorithm()
 	{
@@ -654,7 +691,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Returns current volume data buffer.
 	 * 
-	 * @return
+	 * @return current data buffer.
 	 */
 	public ByteBuffer getVolumeDataBuffer()
 	{
@@ -664,7 +701,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Returns for a given index the corresponding volume data buffer.
 	 * 
-	 * @return
+	 * @return data buffer for a given render layer.
 	 */
 	public ByteBuffer getVolumeDataBuffer(final int pVolumeDataBufferIndex)
 	{
@@ -731,7 +768,8 @@ public abstract class ClearVolumeRendererBase	implements
 		return mNumberOfRenderLayers;
 	}
 
-	/**
+
+		/**
 	 * Interface method implementation
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
@@ -746,17 +784,22 @@ public abstract class ClearVolumeRendererBase	implements
 		setVolumeDataBuffer(pByteBuffer, pSizeX, pSizeY, pSizeZ, 1, 1, 1);
 	}
 
-	/**
+
+		/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVoxelSize(java.nio.ByteBuffer, double, double, double)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVoxelSize(double,
+	 *      double, double)
 	 */
-	public void setVoxelSize(double pVoxelSizeX, double pVoxelSizeY, double pVoxelSizeZ) {
+	public void setVoxelSize(	double pVoxelSizeX,
+														double pVoxelSizeY,
+														double pVoxelSizeZ)
+	{
 		mVoxelSizeX = pVoxelSizeX;
 		mVoxelSizeY = pVoxelSizeY;
 		mVoxelSizeZ = pVoxelSizeZ;
 	}
-	
+
 	/**
 	 * Interface method implementation
 	 * 
@@ -903,7 +946,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Returns the currently used rotation controller.
 	 * 
-	 * @return
+	 * @return currently used rotation controller.
 	 */
 	public RotationControllerInterface getRotationController()
 	{
@@ -959,7 +1002,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Clamps the value pValue to e interval [pMin,pMax]
 	 * 
-	 * @param pValuevalue
+	 * @param pValue
 	 *          to be clamped
 	 * @param pMin
 	 *          minimum

@@ -226,7 +226,7 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Creates a compatible VolumeManager - possibly capable of allocating pinned
-	 * memory or memory optimized in other ways. pMaxAvailableVolumes is the
+	 * memory or memory optimised in other ways. pMaxAvailableVolumes is the
 	 * maximal number of volumes to be kept allocated and available so as to avoid
 	 * memory trashing.
 	 * 

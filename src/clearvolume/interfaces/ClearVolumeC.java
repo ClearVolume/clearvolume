@@ -30,8 +30,6 @@ import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 
 public class ClearVolumeC
 {
-	private static final long cTimeShiftSoftHoryzon = 50;
-	private static final long cTimeShiftHardHoryzon = 100;
 
 	private static Throwable sLastThrowableException = null;
 
@@ -53,6 +51,8 @@ public class ClearVolumeC
 	private static ConcurrentHashMap<Integer, float[]> sChannelIDToChannelColor = new ConcurrentHashMap<>();
 	private static ConcurrentHashMap<Integer, float[]> sChannelIDToChannelViewMatrix = new ConcurrentHashMap<>();
 
+	private static volatile long sTimeShiftSoftHoryzon = 10;
+	private static volatile long sTimeShiftHardHoryzon = 20;
 	private static volatile int sMaxAvailableVolumes = 10;
 	private static volatile int sMaxQueueLength = 10;
 	private static volatile long sMaxMillisecondsToWaitForCopy = 10;
@@ -134,8 +134,8 @@ public class ClearVolumeC
 			TimeShiftingSinkJFrame lTimeShiftingSinkJFrame = null;
 			if (pTimeShift)
 			{
-				lTimeShiftingSink = new TimeShiftingSink(	cTimeShiftSoftHoryzon,
-																									cTimeShiftHardHoryzon);
+				lTimeShiftingSink = new TimeShiftingSink(	sTimeShiftSoftHoryzon,
+																									sTimeShiftHardHoryzon);
 				sIDToTimeShiftingSink.put(pRendererId, lTimeShiftingSink);
 
 				lTimeShiftingSinkJFrame = new TimeShiftingSinkJFrame(lTimeShiftingSink);

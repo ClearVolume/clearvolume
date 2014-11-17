@@ -64,7 +64,7 @@ public class QuaternionRotationController	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.controller.RotationControllerInterface#rotate(javax.media.opengl.GL2)
+	 * @see clearvolume.controller.RotationControllerInterface#rotate(cleargl.GLMatrix)
 	 */
 	@Override
 	public void rotate(GLMatrix pGLMatrix)

@@ -20,7 +20,7 @@ public interface RotationControllerInterface
 	/**
 	 * Is controller active?
 	 * 
-	 * @return
+	 * @return true if controller is active.
 	 */
 	boolean isActive();
 

@@ -416,11 +416,12 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		return (a % b != 0) ? (a / b + 1) : (a / b);
 	}
 
-	/**
+
+		/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.jogl.JOGLClearVolumeRenderer#renderVolume(final
-	 *      float[] pModelViewMatrix, final float[] pProjectionMatrix)
+	 * @see clearvolume.renderer.jogl.JOGLClearVolumeRenderer#renderVolume(float[],
+	 *      float[])
 	 */
 	@Override
 	protected boolean[] renderVolume(	float[] invModelView,

@@ -130,7 +130,7 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
 
 
 		getLastExceptionMessageID		= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "getLastExceptionMessage", "()Ljava/lang/String;");
-		createRendererID 				= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "createRenderer", "(IIIIII)I");
+		createRendererID 				= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "createRenderer", "(IIIIIIZZ)I");
 		destroyRendererID 				= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "destroyRenderer", "(I)I");
 		createServerID    				= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "createServer", "(I)I");
 		destroyServerID 				= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "destroyServer", "(I)I");
@@ -240,7 +240,43 @@ __declspec(dllexport) jint __cdecl createRenderer(	jint pRendererId,
 										pWindowHeight, 
 										pBytesPerVoxel,
 										pMaxTextureWidth,
-										pMaxTextureHeight);
+										pMaxTextureHeight,
+										false,
+										false);
+
+	}
+	catch (...)
+	{
+		sJavaLastError = "Error while creating Renderer";
+		return -1;
+	}
+}
+
+__declspec(dllexport) jint __cdecl createRenderer(	jint pRendererId,
+													jint pWindowWidth,
+													jint pWindowHeight,
+													jint pBytesPerVoxel,
+													jint pMaxTextureWidth,
+													jint pMaxTextureHeight,
+													jboolean pTimeShift,
+													jboolean pChannelSelector)
+{
+	try
+	{
+		clearError();
+		JNIEnv *lJNIEnv;
+		sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+
+		return lJNIEnv->CallStaticIntMethod(sClearVolumeClass,
+										createRendererID,
+										pRendererId, 
+										pWindowWidth, 
+										pWindowHeight, 
+										pBytesPerVoxel,
+										pMaxTextureWidth,
+										pMaxTextureHeight,
+										pTimeShift,
+										pChannelSelector);
 
 	}
 	catch (...)

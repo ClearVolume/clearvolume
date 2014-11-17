@@ -47,7 +47,7 @@ public class ChannelFilterSinkJFrame extends ClearVolumeJFrame
 	/**
 	 * Create the frame.
 	 * 
-	 * @param pMultiChannelTimeShiftingSink
+	 * @param pChannelFilterSink
 	 */
 	public ChannelFilterSinkJFrame(ChannelFilterSink pChannelFilterSink)
 	{

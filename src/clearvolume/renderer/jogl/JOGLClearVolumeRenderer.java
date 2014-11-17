@@ -130,7 +130,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
-	 * @param pBytesPerPixel
+	 * @param pBytesPerVoxel
 	 */
 	public JOGLClearVolumeRenderer(	final String pWindowName,
 																	final int pWindowWidth,
@@ -183,7 +183,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 * @param pBytesPerVoxel
 	 * @param pMaxTextureWidth
 	 * @param pMaxTextureHeight
-	 * @param pNumberOfChannels
+	 * @param pNumberOfRenderLayers
 	 */
 
 	@SuppressWarnings("unchecked")
@@ -322,7 +322,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 	}
 
 	/**
-	 * @return
+	 * Returns the render texture width.
+	 * 
+	 * @return texture width
 	 */
 	public int getTextureWidth()
 	{
@@ -330,7 +332,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 	}
 
 	/**
-	 * @return
+	 * Returns the render texture height.
+	 * 
+	 * @return texture height
 	 */
 	public int getTextureHeight()
 	{

@@ -38,6 +38,14 @@ import com.jogamp.opengl.math.Quaternion;
  * @author Loic Royer 2014
  *
  */
+/**
+ * Class ExternalRotationController
+ * 
+ * Instances of this class ...
+ *
+ * @author Loic Royer 2014
+ *
+ */
 public class ExternalRotationController	implements
 																				RotationControllerInterface,
 																				Closeable,
@@ -121,7 +129,7 @@ public class ExternalRotationController	implements
 	 * Makes one attempt at connecting to the TCP server and proceeds to start the
 	 * reception thread.
 	 * 
-	 * @return
+	 * @return true if connection succeeded.
 	 */
 	public boolean connect()
 	{
@@ -144,10 +152,11 @@ public class ExternalRotationController	implements
 	}
 
 
-	/**
+
+		/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.controller.RotationControllerInterface#rotate(javax.media.opengl.GL2)
+	 * @see clearvolume.controller.RotationControllerInterface#rotate(cleargl.GLMatrix)
 	 */
 	@Override
 	public void rotate(final GLMatrix pGLMatrix)
