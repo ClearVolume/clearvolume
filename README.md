@@ -66,7 +66,7 @@ There are two types possibilities for integration:
 It is possible to have both: in-process with ClearVolume server listening for incoming connections, this mode
 offers the possibility to monitor long-term time-lapses remotely.
 
-### ClarVolume Wiki-based manual ###
+### ClearVolume Wiki-based manual ###
 
 The [ClearVolume wiki](http://bitbucket.org/clearvolume/clearvolume/wiki/Home) has detailed information on how to
 integrate, use and develop with ClearVolume.
