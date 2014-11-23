@@ -20,7 +20,7 @@ ClearVolume can easily be integrated into existing Java, C/C++, or LabVIEW based
 
 ### Prerequisites for OpenCL backend:
 
- 1. OpenCL 1.2 capable raphics card with preferably at least 1G of GPU RAM.
+ 1. OpenCL 1.2 capable graphics card with preferably at least 1G of GPU RAM.
 
 ### Prerequisites for LabVIEW bindings:
 
