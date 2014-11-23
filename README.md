@@ -68,7 +68,7 @@ offers the possibility to monitor long-term time-lapses remotely.
 
 ### ClarVolume Wiki-based manual ###
 
-The [ClearVolume wiki](https://bitbucket.org/clearvolume/clearvolume/wiki/Home) has detailed information on how to
+The [ClearVolume wiki](http://bitbucket.org/clearvolume/clearvolume/wiki/Home) has detailed information on how to
 integrate, use and develop with ClearVolume.
 
 ### Contribution guidelines ###
