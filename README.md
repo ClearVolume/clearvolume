@@ -58,78 +58,18 @@ displayed.
 
 ### How do I integrate into my control software? ###
 
-There are two possibilities for integration:
+ClearVolume comes with bindings with al major languages used for developing
+microscope control software: Python, Java, C/C++, LabVIEW.
+There are two types possibilities for integration:
 1.  Network    : ClearVolume receives data over the network via streaming
 2.  In-Process: ClearVolume lives in the same process and thus data can be transferred at maximal speed.
 It is possible to have both: in-process with ClearVolume server listening for incoming connections, this mode
 offers the possibility to monitor long-term time-lapses remotely.
 
-* Integration onto Java-based microscope control software
+### ClarVolume Wiki-based manual ###
 
-The API relies on the metaphor of volume (or stacks) sinks and sources.
-The following code creates a ClearVolume renderer, wraps it with an asynchronous sink,
-and repeatedly updates the volume data:
-
-
-```
-#!java
-
-int lMaxInUseVolumes = 20; 
-VolumeManager lVolumeManager = new VolumeManager(lMaxInUseVolumes);
-
-
-try (final ClearVolumeRendererInterface lClearVolumeRenderer =
-       ClearVolumeRendererFactory.newBestRenderer("ClearVolumeTest",
-                                                  pWindowSize,
-                                                  pWindowSize,
-                                                  pBytesPerVoxel))
- {
-      lClearVolumeRenderer.setTransfertFunction(TransfertFunctions.getGrayLevel());
-      ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(lClearVolumeRenderer,
-                                                                                     cMaxMillisecondsToWaitForCopy,
-                                                                                     TimeUnit.MILLISECONDS);
-
-      AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(lClearVolumeRendererSink,
-                                                                                                       cMaxQueueLength,
-                                                                                                       cMaxMillisecondsToWait,
-                                                                                                       TimeUnit.MILLISECONDS);
-
-      lAsynchronousVolumeSinkAdapter.start();
-
-      for(int i=0; i<1000; i++)
-      {
-        // send volume data:
-
-        Volume<?> lVolume = mVolumeManager.requestAndWaitForNextAvailableVolume(1,
-                                                                                TimeUnit.MILLISECONDS, 
-                                                                                Byte.class, 
-                                                                                1,
-                                                                                128,
-                                                                                128,
-                                                                                128);
-
-        // Here update the contents of the ByteBuffer provided by lVolume.getVolumeData()
-        // ... bla bla ...
-      
-        // send new volume to ClearVolume
-        mVolumeSink.sendVolume(lVolume);
-      }
-
-      lAsynchronousVolumeSinkAdapter.stop();
-
-}
-```
-
-
-* Integration onto LabView-based microscope control software
-
-* Integration onto C-based microscope control software
-
-the cvlib native library for windows is generated in the build folder: .build/cvlib/
-together with a test executable. Try it:
-
-    ./build/cvlib/cvlib_test.exe
-
+The [ClearVolume wiki](https://bitbucket.org/clearvolume/clearvolume/wiki/Home) has detailed information on how to
+integrate, use and develop with ClearVolume.
 
 ### Contribution guidelines ###
 
