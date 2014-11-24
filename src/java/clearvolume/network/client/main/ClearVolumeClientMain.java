@@ -112,7 +112,7 @@ public class ClearVolumeClientMain
 		label.setBounds(8, 5, 512, 157);
 		label.setHorizontalTextPosition(SwingConstants.CENTER);
 		label.setHorizontalAlignment(SwingConstants.CENTER);
-		label.setIcon(new ImageIcon(ClearVolumeClientMain.class.getResource("images/Logo.inverted.cropped.png")));
+		label.setIcon(new ImageIcon(ClearVolumeClientMain.class.getResource("images/ClearVolumeLogo_cropped.png")));
 		mApplicationJFrame.getContentPane().add(label);
 
 		ConnectionPanel connectionPanel = new ConnectionPanel();
