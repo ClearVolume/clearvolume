@@ -36,6 +36,11 @@ public class ClearVolumeNetworkDemo
 	@Test
 	public void startServer()
 	{
+		startServer(1);
+	}
+
+	public void startServer(long pNumberOfChannels)
+	{
 		try
 		{
 			VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
@@ -61,8 +66,8 @@ public class ClearVolumeNetworkDemo
 																																							cHeight,
 																																							cDepth);
 
-					final long lTimePoint = i / 2;
-					final int lChannleID = (int) (i % 2);
+					final long lTimePoint = i / pNumberOfChannels;
+					final int lChannleID = (int) (i % pNumberOfChannels);
 
 					lVolume.setTimeIndex(lTimePoint);
 					lVolume.setTimeInSeconds(lTimePoint * cSecondsPerTimePoint);
@@ -72,7 +77,7 @@ public class ClearVolumeNetworkDemo
 					ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
 					lVolumeData.rewind();
-					for (int j = 0; j < cDepth*cHeight*cWidth*2; j++)
+					for (int j = 0; j < cDepth * cHeight * cWidth * 2; j++)
 						lVolumeData.put((byte) 0);
 
 					lVolumeData.rewind();
@@ -86,7 +91,7 @@ public class ClearVolumeNetworkDemo
 							}
 
 					lClearVolumeTCPServerSink.sendVolume(lVolume);
-					Thread.sleep(1);
+					Thread.sleep(100);
 				}
 				catch (Throwable e)
 				{
