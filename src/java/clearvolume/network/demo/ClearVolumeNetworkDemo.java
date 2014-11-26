@@ -120,7 +120,7 @@ public class ClearVolumeNetworkDemo
 																																														256,
 																																														256,
 																																														2);
-		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,

@@ -29,7 +29,7 @@ public class ClearVolumeDemo
 																																														512,
 																																														512,
 																																														1);
-		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -80,7 +80,7 @@ public class ClearVolumeDemo
 																																														512,
 																																														512,
 																																														1);
-		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 128;
@@ -133,7 +133,7 @@ public class ClearVolumeDemo
 																																														512,
 																																														512,
 																																														1);
-		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 400;
@@ -186,7 +186,7 @@ public class ClearVolumeDemo
 																																																					768,
 																																																					768,
 																																																					2);
-		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -229,7 +229,7 @@ public class ClearVolumeDemo
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
 																																																					512,
 																																																					512);
-		lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 		lClearVolumeRenderer.setProjectionAlgorithm(ProjectionAlgorithm.MaxProjection);
 
@@ -413,7 +413,7 @@ public class ClearVolumeDemo
 																																			512,
 																																			pBytesPerVoxel);
 
-		mClearVolumeRenderer.setTransfertFunction(TransferFunctions.getRainbow());
+		mClearVolumeRenderer.setTransferFunction(TransferFunctions.getRainbow());
 		mClearVolumeRenderer.setVisible(true);
 
 		mClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(data),

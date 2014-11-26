@@ -82,7 +82,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pTransfertFunction
 	 *          transfer function
 	 */
-	void setTransfertFunction(TransferFunction pTransfertFunction);
+	void setTransferFunction(TransferFunction pTransfertFunction);
 
 	/**
 	 * Sets the transfer function range. Both min and max values should be within

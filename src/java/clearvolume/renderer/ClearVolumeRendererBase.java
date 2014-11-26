@@ -639,10 +639,10 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Interface method implementation
 	 * 
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransfertFunction(clearvolume.transferf.TransferFunction)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransferFunction(clearvolume.transferf.TransferFunction)
 	 */
 	@Override
-	public void setTransfertFunction(final TransferFunction pTransfertFunction)
+	public void setTransferFunction(final TransferFunction pTransfertFunction)
 	{
 		mTransferFunctions[getCurrentRenderLayer()] = pTransfertFunction;
 	}
