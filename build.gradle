@@ -174,9 +174,6 @@ repositories
     maven 
     {
         url "http://bitbucket.org/api/1.0/repositories/clearvolume/clearvolumemavenrepo/raw/master/"
-    } 
-    maven 
-    {
         url "http://oss.sonatype.org/content/groups/public"
     } 
 
