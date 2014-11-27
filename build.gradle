@@ -173,7 +173,7 @@ repositories
     mavenCentral()
     maven 
     {
-        url "http://bitbucket.org/api/1.0/repositories/royerloic/repos/raw/master/"
+        url "http://bitbucket.org/api/1.0/repositories/clearvolume/clearvolumemavenrepo/raw/master/"
     } 
     maven 
     {
@@ -230,7 +230,7 @@ uploadArchives
     {
         mavenDeployer 
         {
-            repository(url: "file:../../Repos/")
+            repository(url: "file:../../Repos/ClearVolumeMavenRepo")
         }
     }
 }
