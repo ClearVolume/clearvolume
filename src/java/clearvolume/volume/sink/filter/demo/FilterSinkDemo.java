@@ -39,7 +39,7 @@ public class FilterSinkDemo
 																																										TimeUnit.MILLISECONDS);
 		lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
-		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink(new NullVolumeSink());
+		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
 
 		ChannelFilterSinkJFrame.launch(lChannelFilterSink);
 
@@ -47,11 +47,12 @@ public class FilterSinkDemo
 
 		VolumeManager lManager = lChannelFilterSink.getManager();
 
+		final int lNumberOfChannels = 1;
 		final int lMaxVolumesSent = 1000;
 		for (int i = 0; i < lMaxVolumesSent; i++)
 		{
-			final int lTimePoint = i / 2;
-			final int lChannel = i % 2;
+			final int lTimePoint = i / lNumberOfChannels;
+			final int lChannel = i % lNumberOfChannels;
 
 			Volume<Byte> lVolume = lManager.requestAndWaitForVolume(1,
 																															TimeUnit.MILLISECONDS,

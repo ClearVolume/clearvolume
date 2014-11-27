@@ -34,7 +34,7 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 	private ConcurrentHashMap<Integer, Volume<?>> mChanneltoVolumeMap = new ConcurrentHashMap<>();
 
 	private VolumeManager mEmptyVolumeManager = new VolumeManager(2);
-	private VolumeSinkInterface mVolumeSinkForFilteredVolumes;
+	private VolumeSinkInterface mVolumeSinkForFilteredVolumes = new NullVolumeSink();;
 
 	AbstractListModel<String> mChannelListModel = new AbstractListModel<String>()
 	{
@@ -69,9 +69,15 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 
 	};
 
-	public ChannelFilterSink(VolumeSinkInterface pVolumeSinkForFilteredVolumes)
+	public ChannelFilterSink()
 	{
-		mVolumeSinkForFilteredVolumes = pVolumeSinkForFilteredVolumes;
+
+	}
+
+	public ChannelFilterSink(VolumeSinkInterface pRelaySink)
+	{
+		super(pRelaySink);
+
 	}
 
 	public void setActiveChannels(int[] pActiveChannels)

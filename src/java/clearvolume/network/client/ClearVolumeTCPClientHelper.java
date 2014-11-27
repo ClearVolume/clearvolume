@@ -62,12 +62,14 @@ public abstract class ClearVolumeTCPClientHelper
 				ChannelFilterSinkJFrame lChannelFilterSinkJFrame = null;
 				if (pChannelFilter)
 				{
-					lChannelFilterSink = new ChannelFilterSink(new NullVolumeSink());
+					lChannelFilterSink = new ChannelFilterSink();
 
 					lChannelFilterSinkJFrame = new ChannelFilterSinkJFrame(lChannelFilterSink);
 					lChannelFilterSinkJFrame.setVisible(true);
 
 					lChannelFilterSink.setRelaySink(lClearVolumeRendererSink);
+
+					lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
 					lSinkAfterAsynchronousVolumeSinkAdapter = lChannelFilterSink;
 				}

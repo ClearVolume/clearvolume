@@ -48,7 +48,7 @@ public class TimeShiftingAndChannelFilterSinksDemo
 																																										100,
 																																										TimeUnit.MILLISECONDS);
 		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50, 100);
-		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink(new NullVolumeSink());
+		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
 		
 		ClearVolumeTCPServerSink lClearVolumeTCPServer = new ClearVolumeTCPServerSink(cNumberOfAvailableVolumes);
 

@@ -38,7 +38,7 @@ public class ClearVolumeRendererSinkDemo
 																																										100,
 																																										TimeUnit.MILLISECONDS);
 
-		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink(lClearVolumeRendererSink);
+		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
 
 		ChannelFilterSinkJFrame.launch(lChannelFilterSink);
 

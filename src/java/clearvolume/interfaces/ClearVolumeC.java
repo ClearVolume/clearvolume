@@ -154,7 +154,7 @@ public class ClearVolumeC
 			ChannelFilterSinkJFrame lChannelFilterSinkJFrame = null;
 			if (pChannelSelector)
 			{
-				lChannelFilterSink = new ChannelFilterSink(new NullVolumeSink());
+				lChannelFilterSink = new ChannelFilterSink();
 				sIDToChannelFilterSink.put(pRendererId, lChannelFilterSink);
 
 				lChannelFilterSinkJFrame = new ChannelFilterSinkJFrame(lChannelFilterSink);
