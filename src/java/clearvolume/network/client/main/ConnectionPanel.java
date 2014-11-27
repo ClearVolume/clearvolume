@@ -37,6 +37,7 @@ public class ConnectionPanel extends JPanel
 	private JCheckBox mChannelFilterCheckBox;
 
 	private JTextField mNumberOfColorsField;
+	private JTextField mTCPPortTextField;
 
 	public ConnectionPanel()
 	{
@@ -58,7 +59,7 @@ public class ConnectionPanel extends JPanel
 			}
 		});
 		lServerAddressTextField.setBorder(null);
-		lServerAddressTextField.setText("localhost");
+		lServerAddressTextField.setText("clearvolume.mpi-cbg.de");
 		lServerAddressTextField.setBackground(new Color(220, 220, 220));
 		add(lServerAddressTextField, "cell 0 1 2 1,growx,aligny top");
 
@@ -165,6 +166,20 @@ public class ConnectionPanel extends JPanel
 		mNumberOfColorsField.setBounds(148, 60, 45, 16);
 		lOptionsPanel.add(mNumberOfColorsField);
 
+		mTCPPortTextField = new JTextField();
+		mTCPPortTextField.setText("" + ClearVolumeSerialization.cStandardTCPPort);
+		mTCPPortTextField.setHorizontalAlignment(SwingConstants.TRAILING);
+		mTCPPortTextField.setColumns(10);
+		mTCPPortTextField.setBorder(new EmptyBorder(0, 0, 0, 0));
+		mTCPPortTextField.setBackground(new Color(220, 220, 220));
+		mTCPPortTextField.setBounds(359, 6, 45, 16);
+		lOptionsPanel.add(mTCPPortTextField);
+
+		JLabel lTCPPortLabel = new JLabel("port");
+		lTCPPortLabel.setHorizontalAlignment(SwingConstants.TRAILING);
+		lTCPPortLabel.setBounds(228, 6, 119, 16);
+		lOptionsPanel.add(lTCPPortLabel);
+
 		mErrorTextArea = new JTextArea();
 		mErrorTextArea.setEditable(false);
 		mErrorTextArea.setForeground(Color.RED);
@@ -193,13 +208,15 @@ public class ConnectionPanel extends JPanel
 		try
 		{
 			mErrorTextArea.setText("");
+			final String lServerAddress = lServerAddressTextField.getText();
+			final int lTCPPort = Integer.parseInt(mTCPPortTextField.getText());
 			final int lWindowSize = Integer.parseInt(mWindowSizeField.getText());
 			final int lBytesPerVoxel = Integer.parseInt(mBytesPerVoxelTextField.getText());
 			final boolean lTimeShiftMultiChannel = mTimeShiftAndMultiChannelCheckBox.isSelected();
 			final boolean lChannelFilter = mChannelFilterCheckBox.isSelected();
 			final int lNumberOfLayers = Integer.parseInt(mNumberOfColorsField.getText());
-			Runnable lStartClientRunnable = () -> mClearVolumeTCPClientHelper.startClient(lServerAddressTextField.getText(),
-																																										ClearVolumeSerialization.cStandardTCPPort,
+			Runnable lStartClientRunnable = () -> mClearVolumeTCPClientHelper.startClient(lServerAddress,
+																																										lTCPPort,
 																																										lWindowSize,
 																																										lBytesPerVoxel,
 																																										lTimeShiftMultiChannel,
