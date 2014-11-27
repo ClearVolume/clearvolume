@@ -1,1 +1,1 @@
-gradle clean cleanEclipse eclipse build publishToMavenLocal FatCapsule copyCapsule packagecvlib packagelvcvlib 
+gradle cleanEclipse eclipse build publishToMavenLocal FatCapsule copyCapsule packagecvlib packagelvcvlib 
