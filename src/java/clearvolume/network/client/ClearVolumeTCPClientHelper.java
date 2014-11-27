@@ -49,7 +49,7 @@ public abstract class ClearVolumeTCPClientHelper
 		{
 			try
 			{
-				lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
+				lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 
 				ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
 																																												lClearVolumeRenderer.createCompatibleVolumeManager(cMaxAvailableVolumes),

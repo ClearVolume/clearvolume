@@ -63,7 +63,7 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		else
 			lTransferFunction = TransferFunctions.getGradientForColor(lRenderLayer);
 
-		mClearVolumeRendererInterface.setTransfertFunction(lTransferFunction);
+		mClearVolumeRendererInterface.setTransferFunction(lTransferFunction);
 		mClearVolumeRendererInterface.setVolumeDataBuffer(pVolume);
 
 		// if (lTimePointIndex > mLastTimePointDisplayed)

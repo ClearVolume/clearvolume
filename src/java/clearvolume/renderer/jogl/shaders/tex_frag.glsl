@@ -7,7 +7,7 @@
  *
  */
  
-// IMPORTANT NOTE: do not remove the insertpoint comments, this is used to automatically generate variants of this shader  
+// IMPORTANT NOTE: do not remove the 'insertpoint' comments, this is used to automatically generate variants of this shader  
  
 uniform sampler2D texUnit0; 
 //insertpoint1

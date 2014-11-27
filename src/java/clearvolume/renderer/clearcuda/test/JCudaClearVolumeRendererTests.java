@@ -22,7 +22,7 @@ public class JCudaClearVolumeRendererTests
 																																															768,
 																																															1);
 
-			lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
+			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 
 			lClearVolumeRenderer.setVisible(true);
 
@@ -70,7 +70,7 @@ public class JCudaClearVolumeRendererTests
 																																															768,
 																																															768,
 																																															2);
-			lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
+			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 			lClearVolumeRenderer.setVisible(true);
 
 			final int lResolutionX = 256;
