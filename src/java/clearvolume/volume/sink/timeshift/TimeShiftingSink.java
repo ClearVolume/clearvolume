@@ -60,7 +60,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			
 				// System.err.println("interval=[" + startPos +"," +interval+"]");
 			mTimeShift = -Math.round(interval * pTimeShiftNormalized);
-			if (!mIsPlaying && lPreviousTimeShift != mTimeShift)
+				if (lPreviousTimeShift != mTimeShift)
 				for (int lChannel : mAvailableChannels)
 					sendVolumeInternal(lChannel);
 			}

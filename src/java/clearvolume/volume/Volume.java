@@ -58,6 +58,22 @@ public class Volume<T> implements ClearVolumeCloseable
 																						mDimensionsInVoxels));
 	}
 
+	public long getNumberOfVoxels()
+	{
+		long lNumberOfVoxels = 1;
+		for (int i = 1; i < getDimensionsInVoxels().length; i++)
+			lNumberOfVoxels *= getDimensionsInVoxels()[i];
+		return lNumberOfVoxels;
+	}
+
+	public long getNumberOfElements()
+	{
+		long lNumberOfElements = 1;
+		for (int i = 0; i < getDimensionsInVoxels().length; i++)
+			lNumberOfElements *= getDimensionsInVoxels()[i];
+		return lNumberOfElements;
+	}
+
 	public long getDataSizeInBytes()
 	{
 		long lVolumeDataSize = getBytesPerVoxel();
@@ -372,5 +388,6 @@ public class Volume<T> implements ClearVolumeCloseable
 													mVolumeManager,
 													mDataBuffer);
 	}
+
 
 }

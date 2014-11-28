@@ -20,10 +20,20 @@ public class VolumeManager implements ClearVolumeCloseable
 		mAvailableVolumesQueue = new ArrayBlockingQueue<SoftReference<Volume<?>>>(mMaxAvailableVolumes);
 	}
 
-	public <T> Volume<T> requestAndWaitForVolumeLike(	int pTimeOut,
+	public <T> Volume<?> requestAndWaitForVolumeLike(	int pTimeOut,
 																										TimeUnit pTimeUnit,
 																										Volume<T> pVolume)
 	{
+		if (pVolume.getDataBuffer().remaining() == 2 * pVolume.getBytesPerVoxel()
+																				* pVolume.getNumberOfVoxels() && pVolume.getType()
+																																								.equals(Byte.class))
+		{
+			return requestAndWaitForVolume(	pTimeOut,
+																			pTimeUnit,
+																			Character.class,
+																			pVolume.getDimensionsInVoxels());
+		}
+
 		return requestAndWaitForVolume(	pTimeOut,
 																		pTimeUnit,
 																		pVolume.getType(),
