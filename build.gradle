@@ -269,7 +269,7 @@ task packagecvlib {
         {
             from('./src/cpp/')
             into('./build/cvlib/')
-            include('cvlib.h')
+            include('cvlib.h','cvlib_test.cpp')
         }
 
         copy

@@ -3,6 +3,7 @@ package clearvolume.renderer;
 import static java.lang.Math.max;
 
 import java.awt.EventQueue;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -114,6 +115,15 @@ public abstract class ClearVolumeRendererBase	implements
 				{
 					mControlFrame = new ControlPanelJFrame();
 					mControlFrame.setClearVolumeRendererInterface(lThis);
+
+					String lHostName = InetAddress.getLocalHost()
+																				.getHostName()
+																				.toLowerCase();
+
+					// LOL: the pros drg the mouse on the canvas while clicking Shift or
+					// Control...
+					if (!(lHostName.contains("mpi-cbg") || lHostName.contains("myers")))
+						mControlFrame.setVisible(true);
 				}
 				catch (Exception e)
 				{
@@ -121,7 +131,6 @@ public abstract class ClearVolumeRendererBase	implements
 				}
 			}
 		});
-
 
 	}
 
