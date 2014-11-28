@@ -11,7 +11,7 @@ public class ClearVolumeDemoServerMain
 	public static void main(String[] args)
 	{
 		ClearVolumeNetworkDemo lClearVolumeNetworkDemo = new ClearVolumeNetworkDemo();
-		lClearVolumeNetworkDemo.startServer();
+		lClearVolumeNetworkDemo.startServerOneChannel();
 	}
 
 }

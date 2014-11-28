@@ -158,7 +158,7 @@ public class Volume<T> implements ClearVolumeCloseable
 		return mDimensionsInVoxels;
 	}
 
-	public long getBytesPerVoxel()
+	public int getBytesPerVoxel()
 	{
 		if (mType == Byte.class || mType == byte.class)
 		{

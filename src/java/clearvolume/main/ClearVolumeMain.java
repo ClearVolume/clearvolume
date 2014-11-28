@@ -40,9 +40,10 @@ public class ClearVolumeMain
 																			lCommandLineValues.mConnectPort,
 																			lCommandLineValues.mWindowSize,
 																			lCommandLineValues.mBytesPerVoxel,
+																			lCommandLineValues.mNumberOfLayers,
 																			lCommandLineValues.mTimeShiftAndMultiChannel,
-																			lCommandLineValues.mMultiColor,
-																			lCommandLineValues.mNumberOfLayers);
+																			lCommandLineValues.mMultiColor
+																			);
 			else
 				ClearVolumeClientMain.main(args);
 		}

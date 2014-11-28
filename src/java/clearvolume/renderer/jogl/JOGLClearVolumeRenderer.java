@@ -256,6 +256,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void close()
 	{
+		super.close();
 		try
 		{
 			mClearGLWindow.close();
@@ -859,14 +860,14 @@ public abstract class JOGLClearVolumeRenderer	extends
 		}
 	}
 
-	/**
-	 * 
-	 */
+
+	@Override
 	public void disableClose()
 	{
 		mClearGLWindow.getGLWindow()
 									.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
 	}
+
 
 	private boolean anyIsTrue(boolean[] pBooleanArray)
 	{
@@ -875,5 +876,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 				return true;
 		return false;
 	}
+
 
 }

@@ -1,9 +1,9 @@
 package clearvolume.renderer;
 
-import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
+import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.transferf.TransferFunction;
@@ -21,7 +21,7 @@ import clearvolume.volume.VolumeManager;
  */
 public interface ClearVolumeRendererInterface	extends
 																							DisplayRequestInterface,
-																							Closeable
+																							ClearVolumeCloseable
 {
 
 	/**
@@ -345,6 +345,11 @@ public interface ClearVolumeRendererInterface	extends
 	 * update is needed.
 	 */
 	void notifyUpdateOfVolumeRenderingParameters();
+
+	/**
+	 * Toggles the display of the Control Frame;
+	 */
+	void toggleControlPanelDisplay();
 
 	/**
 	 * Returns whether the renderer's display is showing.

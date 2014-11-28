@@ -219,9 +219,9 @@ public class ConnectionPanel extends JPanel
 																																										lTCPPort,
 																																										lWindowSize,
 																																										lBytesPerVoxel,
+																																										lNumberOfLayers,
 																																										lTimeShiftMultiChannel,
-																																										lChannelFilter,
-																																										lNumberOfLayers);
+																																										lChannelFilter);
 			Thread lStartClientThread = new Thread(	lStartClientRunnable,
 																							"StartClientThread" + lServerAddressTextField.getText());
 			lStartClientThread.setDaemon(true);

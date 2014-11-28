@@ -49,22 +49,21 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 		@Override
 		public String getElementAt(int pIndex)
 		{
-			synchronized (mLock)
+
+			try
 			{
-				try
-				{
-					Integer lChannelId = mSeenChannelList.get(pIndex);
-					return lChannelId + " | "
-									+ mSeenChannelIdToNameMap.get(lChannelId);
-				}
-				catch (Exception e)
-				{
-					int lSize = mSeenChannelIdToNameMap.size();
-					if (pIndex >= lSize)
-						pIndex = lSize;
-					return getElementAt(pIndex);
-				}
+				Integer lChannelId = mSeenChannelList.get(pIndex);
+				return lChannelId + " | "
+								+ mSeenChannelIdToNameMap.get(lChannelId);
 			}
+			catch (Exception e)
+			{
+				int lSize = mSeenChannelIdToNameMap.size();
+				if (pIndex >= lSize)
+					pIndex = lSize;
+				return getElementAt(pIndex);
+			}
+
 		}
 
 	};

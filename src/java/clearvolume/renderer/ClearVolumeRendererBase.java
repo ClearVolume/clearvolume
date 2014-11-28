@@ -2,14 +2,12 @@ package clearvolume.renderer;
 
 import static java.lang.Math.max;
 
-import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
+import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.transferf.TransferFunction;
@@ -20,40 +18,14 @@ import clearvolume.volume.VolumeManager;
 /**
  * Class ClearVolumeRendererBase
  * 
- * Abstract class providing basic functionality for classes implementing the
- * ClearVolumeRendere interface
- *
- * @author Loic Royer 2014
- *
- */
-/**
- * Class ClearVolumeRendererBase 
- * 
- * Instances of this class ...
- *
- * @author Loic Royer
- * 2014
- *
- */
-/**
- * Class ClearVolumeRendererBase 
- * 
- * Instances of this class ...
- *
- * @author Loic Royer
- * 2014
- *
- */
-/**
- * Class ClearVolumeRendererBase
- * 
  * Instances of this class ...
  *
  * @author Loic Royer 2014
  *
  */
 public abstract class ClearVolumeRendererBase	implements
-																							ClearVolumeRendererInterface
+																							ClearVolumeRendererInterface,
+																							ClearVolumeCloseable
 {
 
 	/**
@@ -115,7 +87,7 @@ public abstract class ClearVolumeRendererBase	implements
 	private AtomicIntegerArray mDataBufferCopyIsFinished;
 
 	// Control frame:
-	private JFrame mControlFrame;
+	private ControlPanelJFrame mControlFrame;
 
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
@@ -131,6 +103,25 @@ public abstract class ClearVolumeRendererBase	implements
 			mDataBufferCopyIsFinished.set(i, 0);
 			mTransferFunctions[i] = TransferFunctions.getGradientForColor(i);
 		}
+
+		ClearVolumeRendererBase lThis = this;
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					mControlFrame = new ControlPanelJFrame();
+					mControlFrame.setClearVolumeRendererInterface(lThis);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+		});
+
 
 	}
 
@@ -252,7 +243,6 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		return mVoxelSizeZ;
 	}
-
 
 	/**
 	 * Returns whether the volume dimensions have been changed since last data
@@ -489,8 +479,7 @@ public abstract class ClearVolumeRendererBase	implements
 		setTransferFunctionRangeMax(mTransferFunctionRangeMax + pDelta);
 	}
 
-
-		/**
+	/**
 	 * Interface method implementation
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationX(double)
@@ -502,8 +491,7 @@ public abstract class ClearVolumeRendererBase	implements
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
-
-		/**
+	/**
 	 * Interface method implementation
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationY(double)
@@ -768,8 +756,7 @@ public abstract class ClearVolumeRendererBase	implements
 		return mNumberOfRenderLayers;
 	}
 
-
-		/**
+	/**
 	 * Interface method implementation
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
@@ -784,13 +771,13 @@ public abstract class ClearVolumeRendererBase	implements
 		setVolumeDataBuffer(pByteBuffer, pSizeX, pSizeY, pSizeZ, 1, 1, 1);
 	}
 
-
-		/**
+	/**
 	 * Interface method implementation
 	 * 
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVoxelSize(double,
 	 *      double, double)
 	 */
+	@Override
 	public void setVoxelSize(	double pVoxelSizeX,
 														double pVoxelSizeY,
 														double pVoxelSizeZ)
@@ -976,27 +963,13 @@ public abstract class ClearVolumeRendererBase	implements
 		mRotationController = quaternionController;
 	}
 
-	public void openControlFrame()
-	{
-		mControlFrame = new JFrame("ClearVolume Rendering Parameters");
-		mControlFrame.setLayout(new BorderLayout());
-		mControlFrame.add(createControlPanel(), BorderLayout.SOUTH);
-		mControlFrame.pack();
-		// mControlFrame.setAlwaysOnTop(true);
-		mControlFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		mControlFrame.setVisible(true);
-	}
-
 	/**
-	 * Create the control panel containing the sliders for setting the
-	 * visualization parameters.
-	 * 
-	 * @return The control panel
+	 * Toggles the display of the Control Frame;
 	 */
-	private JPanel createControlPanel()
+	@Override
+	public void toggleControlPanelDisplay()
 	{
-		ControlPanel lControlPanel = new ControlPanel(this);
-		return lControlPanel;
+		mControlFrame.setVisible(!mControlFrame.isVisible());
 	}
 
 	/**
@@ -1015,6 +988,13 @@ public abstract class ClearVolumeRendererBase	implements
 															final double pMax)
 	{
 		return Math.min(Math.max(pValue, pMin), pMax);
+	}
+
+	@Override
+	public void close()
+	{
+		if (mControlFrame != null)
+			mControlFrame.dispose();
 	}
 
 }

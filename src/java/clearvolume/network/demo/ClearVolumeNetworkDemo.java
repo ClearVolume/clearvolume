@@ -34,9 +34,15 @@ public class ClearVolumeNetworkDemo
 	private static final int cVolumeQueueLength = 11;
 
 	@Test
-	public void startServer()
+	public void startServerOneChannel()
 	{
 		startServer(1);
+	}
+
+	@Test
+	public void startServerTwoChannels()
+	{
+		startServer(2);
 	}
 
 	public void startServer(long pNumberOfChannels)

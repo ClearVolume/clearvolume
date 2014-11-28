@@ -1,13 +1,12 @@
 package clearvolume.volume.sink.renderer;
 
-import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.AbstractListModel;
-import javax.swing.ListModel;
-
+import clearvolume.ClearVolumeCloseable;
+import clearvolume.ClearVolumeException;
 import clearvolume.renderer.ClearVolumeRendererInterface;
+import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
@@ -17,18 +16,22 @@ import clearvolume.volume.sink.relay.RelaySinkAdapter;
 import clearvolume.volume.sink.relay.RelaySinkInterface;
 
 public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
-																															RelaySinkInterface
+																															RelaySinkInterface,
+																															ClearVolumeCloseable
 {
 
-	private ClearVolumeRendererInterface mClearVolumeRendererInterface;
-	private VolumeManager mVolumeManager;
+	private volatile ClearVolumeRendererInterface mClearVolumeRendererInterface;
+	private volatile boolean mSwitchingRenderers;
+	private volatile VolumeManager mVolumeManager;
 	private long mWaitForCopyTimeout;
 	private TimeUnit mTimeUnit;
 
-	private TreeMap<Integer, String> mSeenChannelIdToNameMap = new TreeMap<Integer, String>();
-	private ArrayList<Integer> mSeenChannelList = new ArrayList<Integer>();
+	private String mRequestedWindowTitle;
+	private int mRequestedWindowWidth, mRequestedWindowHeight;
+	private int mMaxNumberOfAvailableVolumes;
+	private int mNumberOfLayers;
 
-	private volatile long mLastTimePointDisplayed = Long.MIN_VALUE;
+	private TreeMap<Integer, String> mSeenChannelIdToNameMap = new TreeMap<Integer, String>();
 
 	public ClearVolumeRendererSink(	ClearVolumeRendererInterface pClearVolumeRendererInterface,
 																	VolumeManager pVolumeManager,
@@ -43,14 +46,55 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 
 	}
 
+	public ClearVolumeRendererSink(	final String pRequestedWindowTitle,
+																	final int pRequestedWindowWidth,
+																	final int pRequestedWindowHeight,
+																	final int pBytesPerVoxel,
+																	final int pNumberOfLayers,
+																	final long pWaitForCopyTimeout,
+																	final TimeUnit pTimeUnit,
+																	final int pMaxNumberOfAvailableVolumes)
+	{
+		super();
+		mRequestedWindowTitle = pRequestedWindowTitle;
+		mRequestedWindowWidth = pRequestedWindowWidth;
+		mRequestedWindowHeight = pRequestedWindowHeight;
+		mWaitForCopyTimeout = pWaitForCopyTimeout;
+		mTimeUnit = pTimeUnit;
+		mNumberOfLayers = pNumberOfLayers;
+		mMaxNumberOfAvailableVolumes = pMaxNumberOfAvailableVolumes;
+
+		createRenderer(pBytesPerVoxel, pNumberOfLayers);
+	}
+
 	@Override
 	public void sendVolume(Volume<?> pVolume)
 	{
-
 		final long lTimePointIndex = pVolume.getTimeIndex();
 		final int lChannelID = pVolume.getChannelID();
 		final String lChannelName = pVolume.getChannelName();
 		mSeenChannelIdToNameMap.put(lChannelID, lChannelName);
+
+		final int lBytesPerVoxel = pVolume.getBytesPerVoxel();
+		int lNumberOfChannelsSeen = mSeenChannelIdToNameMap.keySet()
+																												.size();
+		final int lNumberOfLayersNeeded = lNumberOfChannelsSeen;
+
+		if (mClearVolumeRendererInterface == null || mClearVolumeRendererInterface.getNumberOfRenderLayers() < lNumberOfLayersNeeded
+				|| mClearVolumeRendererInterface.getBytesPerVoxel() != lBytesPerVoxel)
+		{
+			System.out.println("Creating new Renderer!");
+			System.out.format("Volume: nb channels seen: %d \n",
+												lNumberOfChannelsSeen);
+			System.out.format("Volume: bytes per voxel: %d \n",
+												lBytesPerVoxel);
+			System.out.format("Renderer: nb of layers: %d \n",
+												mClearVolumeRendererInterface.getNumberOfRenderLayers());
+			System.out.format("Renderer: bytes per voxel: %d \n",
+												mClearVolumeRendererInterface.getBytesPerVoxel());
+			createRenderer(lBytesPerVoxel, lNumberOfLayersNeeded);
+		}
+
 		final int lNumberOfRenderLayers = mClearVolumeRendererInterface.getNumberOfRenderLayers();
 		final int lRenderLayer = lChannelID % lNumberOfRenderLayers;
 
@@ -66,20 +110,51 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		mClearVolumeRendererInterface.setTransferFunction(lTransferFunction);
 		mClearVolumeRendererInterface.setVolumeDataBuffer(pVolume);
 
-		// if (lTimePointIndex > mLastTimePointDisplayed)
-		{
-			mClearVolumeRendererInterface.requestDisplay();
+		mClearVolumeRendererInterface.requestDisplay();
 
-			mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	mWaitForCopyTimeout,
-																																mTimeUnit);
-			mLastTimePointDisplayed = lTimePointIndex;
-		}
+		mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	mWaitForCopyTimeout,
+																															mTimeUnit);
 
 		if (getRelaySink() != null)
 			getRelaySink().sendVolume(pVolume);
 		else
 			pVolume.makeAvailableToManager();/**/
 
+	}
+
+	private void createRenderer(int pBytesPerVoxel, int pNumberOfLayers)
+	{
+		mSwitchingRenderers = true;
+		try
+		{
+			if (mClearVolumeRendererInterface != null)
+				mClearVolumeRendererInterface.close();
+		}
+		catch (Throwable e)
+		{
+		}
+
+		mClearVolumeRendererInterface = ClearVolumeRendererFactory.newBestRenderer(	mRequestedWindowTitle,
+																																								mRequestedWindowWidth,
+																																								mRequestedWindowHeight,
+																																								pBytesPerVoxel,
+																																								mRequestedWindowWidth,
+																																								mRequestedWindowHeight,
+																																								pNumberOfLayers);
+		mClearVolumeRendererInterface.setVisible(true);
+
+		try
+		{
+			if (mVolumeManager != null)
+				mVolumeManager.close();
+		}
+		catch (Throwable e)
+		{
+		}
+
+		mVolumeManager = mClearVolumeRendererInterface.createCompatibleVolumeManager(mMaxNumberOfAvailableVolumes);
+
+		mSwitchingRenderers = false;
 	}
 
 	@Override
@@ -91,25 +166,37 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		return mVolumeManager;
 	}
 
-	public ListModel<String> getChannelListModel()
+	public void setVisible(boolean pIsVisible)
 	{
-		return new AbstractListModel<String>()
+		if (mClearVolumeRendererInterface != null)
+			mClearVolumeRendererInterface.setVisible(pIsVisible);
+	}
+
+	public boolean isShowing()
+	{
+		try
 		{
+			while (mSwitchingRenderers)
+				Thread.sleep(1);
+		}
+		catch (InterruptedException e)
+		{
+		}
+		if (mClearVolumeRendererInterface != null)
+			return mClearVolumeRendererInterface.isShowing();
+		return false;
+	}
 
-			@Override
-			public int getSize()
-			{
+	public boolean isRendererCreated()
+	{
+		return mClearVolumeRendererInterface != null;
+	}
 
-				return mSeenChannelIdToNameMap.size();
-			}
-
-			@Override
-			public String getElementAt(int pIndex)
-			{
-				return mSeenChannelIdToNameMap.get(mSeenChannelList.get(pIndex));
-			}
-
-		};
+	@Override
+	public void close() throws ClearVolumeException
+	{
+		if (mClearVolumeRendererInterface != null)
+			mClearVolumeRendererInterface.close();
 	}
 
 }

@@ -53,9 +53,9 @@ public class ClearVolumeClientMain
 															int pPortNumber,
 															int pWindowSize,
 															int pBytesPerVoxel,
+															int pNumberOfLayers,
 															boolean pTimeShiftMultiChannel,
-															boolean pMultiColor,
-															int pNumberOfLayers)
+															boolean pMultiColor)
 	{
 
 		ClearVolumeTCPClientHelper lClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper()
@@ -76,9 +76,9 @@ public class ClearVolumeClientMain
 																						pPortNumber,
 																						pWindowSize,
 																						pBytesPerVoxel,
+																						pNumberOfLayers,
 																						pTimeShiftMultiChannel,
-																						pMultiColor,
-																						pNumberOfLayers);
+																						pMultiColor);
 
 	}
 
@@ -97,6 +97,7 @@ public class ClearVolumeClientMain
 	private void initialize()
 	{
 		mApplicationJFrame = new ClearVolumeJFrame();
+		mApplicationJFrame.setResizable(false);
 		mApplicationJFrame.getContentPane().setBackground(Color.WHITE);
 		mApplicationJFrame.setBounds(100, 100, 529, 455);
 		mApplicationJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -7,9 +7,6 @@ import java.net.SocketAddress;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.TimeUnit;
 
-import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.factory.ClearVolumeRendererFactory;
-import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.filter.ChannelFilterSink;
@@ -32,29 +29,27 @@ public abstract class ClearVolumeTCPClientHelper
 													int pPortNumber,
 													int pWindowSize,
 													int pBytesPerVoxel,
+													int pNumberOfLayers,
 													boolean pTimeShift,
-													boolean pChannelFilter,
-													int pNumberOfLayers)
+													boolean pChannelFilter)
 	{
-		try (final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolume[" + pServerAddress
-																																																									+ ":"
-																																																									+ pPortNumber
-																																																									+ "]",
-																																																							pWindowSize,
-																																																							pWindowSize,
-																																																							pBytesPerVoxel,
-																																																							(int) (pWindowSize * 1.33),
-																																																							(int) (pWindowSize * 1.33),
-																																																							pNumberOfLayers))
-		{
-			try
-			{
-				lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		String lWindowTitle = "ClearVolume[" + pServerAddress
+													+ ":"
+													+ pPortNumber
+													+ "]";
 
-				ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																												lClearVolumeRenderer.createCompatibleVolumeManager(cMaxAvailableVolumes),
-																																												cMaxMillisecondsToWaitForCopy,
-																																												TimeUnit.MILLISECONDS);
+		try
+		{
+
+			try (ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(lWindowTitle,
+																																													pWindowSize,
+																																													pWindowSize,
+																																													pBytesPerVoxel,
+																																													pNumberOfLayers,
+																																													cMaxMillisecondsToWaitForCopy,
+																																													TimeUnit.MILLISECONDS,
+																																													cMaxAvailableVolumes);)
+			{
 
 				RelaySinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
 
@@ -91,8 +86,6 @@ public abstract class ClearVolumeTCPClientHelper
 					lSinkAfterAsynchronousVolumeSinkAdapter = lTimeShiftingSink;
 				}
 
-
-
 				AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
 																																																					cMaxQueueLength,
 																																																					cMaxMillisecondsToWait,
@@ -108,9 +101,9 @@ public abstract class ClearVolumeTCPClientHelper
 
 				assertTrue(lAsynchronousVolumeSinkAdapter.start());
 
-				lClearVolumeRenderer.setVisible(true);
+				lClearVolumeRendererSink.setVisible(true);
 
-				while (lClearVolumeRenderer.isShowing())
+				while (lClearVolumeRendererSink.isShowing())
 				{
 					try
 					{
@@ -139,15 +132,15 @@ public abstract class ClearVolumeTCPClientHelper
 				assertTrue(lClearVolumeTCPClient.stop());
 				lClearVolumeTCPClient.close();
 			}
-			catch (UnresolvedAddressException uae)
-			{
-				reportError(uae, "Cannot find host: '" + pServerAddress + "'");
-			}
-			catch (Throwable e)
-			{
-				reportError(e, e.getLocalizedMessage());
-				e.printStackTrace();
-			}
+		}
+		catch (UnresolvedAddressException uae)
+		{
+			reportError(uae, "Cannot find host: '" + pServerAddress + "'");
+		}
+		catch (Throwable e)
+		{
+			reportError(e, e.getLocalizedMessage());
+			e.printStackTrace();
 		}
 	}
 
