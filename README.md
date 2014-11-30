@@ -82,11 +82,11 @@ You can also simply double click on the ClearVolume.exe.jar file (OSX, Linux)
 
 Now point the Client to the url mentioned above (that should be the default):
  
-![Smaller icon](ClearVolumeClient_small.png "ClearVolume Client ")
+![Smaller icon](https://bitbucket.org/clearvolume/clearvolume/raw/master/ClearVolumeClient_small.png "ClearVolume Client ")
 
 and you should see some nice mitotic division of *C. Elegans* cells:
 
-![Smaller icon](Screenshot_worms.png "Screenshot ")
+![Smaller icon](https://bitbucket.org/clearvolume/clearvolume/raw/master/Screenshot_worms.png "Screenshot ")
 
 
 ### start a demo server locally
@@ -107,18 +107,16 @@ You can also simply double click on the ClearVolume.exe.jar file (OSX, Linux)
 
 Connect to the server on localhost
 
-![Client](ClearVolumeClient_localhost_small.png "ClearVolume Client ")
+![Client](https://bitbucket.org/clearvolume/clearvolume/raw/master/ClearVolumeClient_localhost_small.png "ClearVolume Client ")
 
-You should see a volume rendering of a 3D Volume stream of changing 3D data (adjust the gamma value with the [Keyboard shortcuts](KeyShortcuts) if necessary). 
-
- ![ClearVolume Demo](Demo_Screenshot.png "Demo")
+ ![ClearVolume Demo](https://bitbucket.org/clearvolume/clearvolume/raw/master/Demo_Screenshot.png "Demo")
 
 ## ClearVolume network client
 
 The ClearVolume network client allows you to connect to your ClearVolume enabled microscope software from anywhere in the planet where your internet connection is fast enough. In the worst case scenario it just takes a bit of time to download the data... Since the rendering is happening on the client, once you have a stack/volume on your client computer you can rotate and zoom virtually all you want.
 The ClearVolume network client (ClearVolume.exe.jar) is also available for download [here](https://bitbucket.org/clearvolume/clearvolume/downloads)
 
-![Smaller icon](ClearVolumeClient_small.png "ClearVolume Client ")
+![Smaller icon](https://bitbucket.org/clearvolume/clearvolume/raw/master/ClearVolumeClient_small.png "ClearVolume Client ")
 
 You need to provide a network address, decide on a window size. Importantly you need to specify the  type of data: typically 16 bit and 1 color. If you provide the wrong information the client will return an error. We will try to improve this in a future version.
 If you want to use the time-shift and channel filter features just tick the mark. Note: remote time-shift only works with stacks received by the client.
