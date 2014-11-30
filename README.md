@@ -1,6 +1,6 @@
 # Welcome to the *ClearVolume* Wiki #
 
-![ClearVolume Logo](https://bitbucket.org/clearvolume/clearvolume/raw/master/artework/ClearVolumeLogo.png "Logo")
+![ClearVolume Logo](https://bitbucket.org/clearvolume/clearvolume/raw/master/ClearVolumeLogo.png "Logo")
 
 ClearVolume is a real-time live 3D visualization library designed for high-end volumetric microscopes such as SPIM and DLSM microscopes. With ClearVolume you can see live on your screen the stacks acquired by your microscope instead of waiting for offline post-processing to give you an intuitive and comprehensive view on your data. The biologists can immediately decide whether a sample is worth imaging. 
 
