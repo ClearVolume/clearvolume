@@ -155,11 +155,16 @@ Different integration guides can be found here:
 
 ClearVolume is an open project and we welcome contributions, collaborations and integration with other projects. The entry-point for more advanced informations and guides is here: [[SystemInternals]]
 
+## ClearVolume Wiki-based manual
+The [ClearVolume wiki](https://bitbucket.org/clearvolume/clearvolume/wiki/Home) has detailed information on how to integrate, use and develop with ClearVolume.
+
+
 ### Contribution guidelines 
 
 * torture of animals with the exception of bugs is prohibited
 * exhibit openness of mind towards idiosyncratic ideas
 * be nice
+
 
 ### Contributors 
 
