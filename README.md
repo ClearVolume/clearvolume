@@ -159,14 +159,14 @@ ClearVolume is an open project and we welcome contributions, collaborations and 
 The [ClearVolume wiki](https://bitbucket.org/clearvolume/clearvolume/wiki/Home) has detailed information on how to integrate, use and develop with ClearVolume.
 
 
-### Contribution guidelines 
+## Contribution guidelines 
 
 * torture of animals with the exception of bugs is prohibited
 * exhibit openness of mind towards idiosyncratic ideas
 * be nice
 
 
-### Contributors 
+## Contributors 
 
 * Loic Royer (royer -at- mpi-cbg -point- de)
 * Martin Weigert (mweigert -at- mpi-cbg -point- de)
