@@ -32,24 +32,40 @@ public class ClearVolumeClientMain
 			{
 				@Override
 				public void run()
-				{	
+				{
 					try
 					{
 						// check for correct system architecture and version
-						if(!System.getProperty("os.arch").startsWith("x86_64")) {
+						if (!(System.getProperty("os.arch")
+												.toLowerCase()
+												.contains("x86_64") || System.getProperty("os.arch")
+																											.toLowerCase()
+																											.contains("amd64")))
+						{
 							System.err.println("Sorry, but due to the large data handled, ClearVolume only supports 64bit architectures.");
-							JOptionPane.showMessageDialog(null, "Sorry, but due to the large data handled, ClearVolume only supports 64bit architectures.", "Unsupported architecture", JOptionPane.ERROR_MESSAGE);
+							JOptionPane.showMessageDialog(null,
+																						"Sorry, but due to the large data handled, ClearVolume only supports 64bit architectures.",
+																						"Unsupported architecture",
+																						JOptionPane.ERROR_MESSAGE);
 							throw new UnsupportedArchitectureException("ClearVolume only supports 64bit architectures.");
 						}
-						
-						if(System.getProperty("os.name").startsWith("Mac OS X")) {
-							if(Integer.parseInt(System.getProperty("os.version").split("\\.")[1]) < 9) {
+
+						if (System.getProperty("os.name")
+											.toLowerCase()
+											.contains("OS X"))
+						{
+							if (Integer.parseInt(System.getProperty("os.version")
+																					.split("\\.")[1]) < 9)
+							{
 								System.err.println("ClearVolume required Mac OS X 10.9 or higher. If possible, please upgrade.");
-								JOptionPane.showMessageDialog(null, "ClearVolume required Mac OS X 10.9 or higher. If possible, please upgrade.", "Unsupported OS X version", JOptionPane.ERROR_MESSAGE);
+								JOptionPane.showMessageDialog(null,
+																							"ClearVolume required Mac OS X 10.9 or higher. If possible, please upgrade.",
+																							"Unsupported OS X version",
+																							JOptionPane.ERROR_MESSAGE);
 								throw new UnsupportedArchitectureException("ClearVolume only supports OS X 10.9 or higher.");
 							}
 						}
-						
+
 						ClearVolumeClientMain lClearVolumeMain = new ClearVolumeClientMain();
 						lClearVolumeMain.mApplicationJFrame.setVisible(true);
 					}

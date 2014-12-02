@@ -104,7 +104,6 @@ sourceSets
     resources 
     { 
       srcDir 'src/java'
-      srcDir 'src/cpp/jogllibs'
     }
   }
   test
@@ -185,14 +184,6 @@ repositories
 jar {
     def classpath  = configurations.compile.collect { it.directory&&{println it; true} ? it : zipTree(it) } 
     from(classpath)
-    {
-        exclude "gluegen-rt.dll"
-        exclude "jogl_desktop.dll"
-        exclude "jogl_mobile.dll"
-        exclude "nativewindow_awt.dll"
-        exclude "nativewindow_win32.dll"
-        exclude "newt.dll"
-    }
     
     manifest {
         attributes("Class-Path": ".")
