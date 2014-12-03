@@ -123,7 +123,7 @@ sourceSets
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 group = 'royer'
-version = '1.0'
+version = '1.0-SNAPSHOT'
 
 test 
 {
@@ -159,8 +159,8 @@ dependencies
     compile 'com.nativelibs4java:bridj:0.7-SNAPSHOT'
     compile 'com.nativelibs4java:javacl:1.0-SNAPSHOT'
 
-    compile group: "royer", name: "ClearGL", version: "1.+", changing: true, transitive: true 
-    compile group: "royer", name: "ClearCuda", version: "1.+", changing: true, transitive: true 
+    compile group: "royer", name: "ClearGL", version: "1.0-SNAPSHOT", changing: true, transitive: true 
+    compile group: "royer", name: "ClearCuda", version: "1.0-SNAPSHOT", changing: true, transitive: true 
     compile fileTree(dir: 'libs/jcuda', include: '*.jar')
 
     compile group: 'junit', name: 'junit', version: '4.+'
@@ -274,8 +274,8 @@ task packagecvlib {
         {
             from('./build/libs/')
             into('./build/cvlib/')
-            include('ClearVolume-???.jar')
-            rename('ClearVolume-.+.jar','ClearVolume.jar')
+            include('ClearVolume-???-SNAPSHOT.jar')
+            rename('ClearVolume-.+-SNAPSHOT.jar','ClearVolume.jar')
         }
     }
   }
@@ -318,8 +318,8 @@ task packagelvcvlib {
         {
             from('./build/libs/')
             into('./build/labview/')
-            include('ClearVolume-???.jar')
-            rename('ClearVolume-.+.jar','ClearVolume.jar')
+            include('ClearVolume-???-SNAPSHOT.jar')
+            rename('ClearVolume-.+-SNAPSHOT.jar','ClearVolume.jar')
         }
     }
   }
