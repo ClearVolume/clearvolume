@@ -93,7 +93,18 @@ public class ClearVolumeRendererFactory
 																																		final int pMaxTextureHeight,
 																																		final int pNumberOfRenderLayers)
 	{
-		if (CudaAvailability.isClearCudaOperational())
+		boolean lCUDAOperational = false;
+		
+		try
+		{
+			lCUDAOperational = CudaAvailability.isClearCudaOperational();
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+		}
+
+		if (lCUDAOperational)
 			return new JCudaClearVolumeRenderer(pWindowName,
 																					pWindowWidth,
 																					pWindowHeight,

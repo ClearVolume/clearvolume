@@ -12,7 +12,6 @@ import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLProfile;
 
 import org.apache.commons.io.IOUtils;
 
@@ -213,14 +212,17 @@ public abstract class JOGLClearVolumeRenderer	extends
 		setBytesPerVoxel(pBytesPerVoxel);
 
 		// Initialize the GL component
-		final GLProfile lProfile = GLProfile.getMaxFixedFunc(true);
+		// final GLProfile lProfile = GLProfile.getMaxFixedFunc(true);
 		// final GLCapabilities lCapabilities = new GLCapabilities(lProfile);
+
+		System.err.println("before window");
 
 		mClearGLWindow = new ClearGLWindow(	pWindowName,
 																				pWindowWidth,
 																				pWindowHeight,
 																				this);
 
+		System.err.println("after window");
 		// Initialize the mouse controls
 		final MouseControl lMouseControl = new MouseControl(this);
 		mClearGLWindow.getGLWindow().addMouseListener(lMouseControl);
