@@ -12,14 +12,13 @@ public class ClearVolumeCTests
 	@Test
 	public void test8bitStreaming() throws InterruptedException
 	{
-		int lRendererId = 1;
-		int lChannelId = 1;
+		final int lRendererId = 1;
+		final int lChannelId = 1;
 		ClearVolumeC.createRenderer(lRendererId, 256, 256, 1, 512, 512);
 
 		ClearVolumeC.setChannelColor(lChannelId, new float[]
 		{ 1, 1, 1, 1 });
 		ClearVolumeC.setChannelName(lChannelId, "channel 1");
-
 
 		final int lResolutionX = 128;
 		final int lResolutionY = lResolutionX + 1;
@@ -45,7 +44,6 @@ public class ClearVolumeCTests
 						lVolumeDataArray[lIndex] = (byte) lValue;
 					}
 
-
 			ClearVolumeC.setVolumeIndexAndTime(lRendererId, i, 0.1 * i);
 			ClearVolumeC.send8bitUINTVolumeDataToSink(lRendererId,
 																								lChannelId,
@@ -62,8 +60,9 @@ public class ClearVolumeCTests
 	@Test
 	public void test16bitStreaming() throws InterruptedException
 	{
-		int lRendererId = 1;
-		int lChannelId = 1;
+
+		final int lRendererId = 1;
+		final int lChannelId = 1;
 		ClearVolumeC.createRenderer(lRendererId, 256, 256, 2, 512, 512);
 
 		ClearVolumeC.setChannelColor(lChannelId, new float[]
@@ -109,11 +108,12 @@ public class ClearVolumeCTests
 
 	}
 
-	@Test
+	// @Test
 	public void testCreateServer16bit() throws InterruptedException
 	{
-		int lServerId = 1;
-		int lChannelId = 1;
+
+		final int lServerId = 1;
+		final int lChannelId = 1;
 		ClearVolumeC.createServer(lServerId);
 
 		ClearVolumeC.setChannelColor(lChannelId, new float[]

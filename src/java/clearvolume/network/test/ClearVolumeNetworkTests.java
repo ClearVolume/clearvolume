@@ -38,10 +38,10 @@ public class ClearVolumeNetworkTests
 	@Test
 	public void testConsole() throws IOException, InterruptedException
 	{
-		VolumeSinkInterface lVolumeSink = new VolumeSinkAdapter(cNumberOfAvailableVolumes)
+		final VolumeSinkInterface lVolumeSink = new VolumeSinkAdapter(cNumberOfAvailableVolumes)
 		{
 			@Override
-			public void sendVolume(Volume<?> pVolume)
+			public void sendVolume(final Volume<?> pVolume)
 			{
 				// System.out.println("Received volume:" + pVolume);
 			}
@@ -49,7 +49,7 @@ public class ClearVolumeNetworkTests
 		networkConduit(lVolumeSink, cNumberOfVolumesToSend, true);
 	}
 
-	@Test
+	// @Test
 	public void testLive() throws IOException, InterruptedException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
@@ -58,10 +58,10 @@ public class ClearVolumeNetworkTests
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																										lClearVolumeRenderer.createCompatibleVolumeManager(cVolumeQueueLength),
-																																										100,
-																																										TimeUnit.MILLISECONDS);
+		final ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
+																																													lClearVolumeRenderer.createCompatibleVolumeManager(cVolumeQueueLength),
+																																													100,
+																																													TimeUnit.MILLISECONDS);
 		networkConduit(	lClearVolumeRendererSink,
 										cNumberOfVolumesToSend,
 										false);
@@ -70,40 +70,40 @@ public class ClearVolumeNetworkTests
 
 	}
 
-	private void networkConduit(VolumeSinkInterface lVolumeSink,
-															int pNumberOfVolumes,
-															boolean pClose)	throws IOException,
-																							InterruptedException
+	private void networkConduit(final VolumeSinkInterface lVolumeSink,
+															final int pNumberOfVolumes,
+															final boolean pClose)	throws IOException,
+																										InterruptedException
 	{
-		int lPortRandomizer = (int) (Math.random() * 100);
+		final int lPortRandomizer = (int) (Math.random() * 100);
 
-		VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
-		ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(cVolumeQueueLength);
+		final VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
+		final ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(cVolumeQueueLength);
 		lClearVolumeTCPServerSink.setRelaySink(new NullVolumeSink(lVolumeManager));
 
-		SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort + lPortRandomizer);
+		final SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort + lPortRandomizer);
 		assertTrue(lClearVolumeTCPServerSink.open(lServerSocketAddress));
 		assertTrue(lClearVolumeTCPServerSink.start());
 
-		ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lVolumeSink);
+		final ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lVolumeSink);
 
-		SocketAddress lClientSocketAddress = new InetSocketAddress(	"localhost",
-																																ClearVolumeSerialization.cStandardTCPPort + lPortRandomizer);
+		final SocketAddress lClientSocketAddress = new InetSocketAddress(	"localhost",
+																																			ClearVolumeSerialization.cStandardTCPPort + lPortRandomizer);
 		assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
 
 		assertTrue(lClearVolumeTCPClient.start());
 
-		Volume<Byte> lVolume = lClearVolumeTCPServerSink.getManager()
-																										.requestAndWaitForVolume(	1,
-																																							TimeUnit.MILLISECONDS,
-																																							Byte.class,
-																																							1,
-																																							cWidth,
-																																							cHeight,
-																																							cDepth);
+		final Volume<Byte> lVolume = lClearVolumeTCPServerSink.getManager()
+																													.requestAndWaitForVolume(	1,
+																																										TimeUnit.MILLISECONDS,
+																																										Byte.class,
+																																										1,
+																																										cWidth,
+																																										cHeight,
+																																										cDepth);
 		for (int i = 0; i < pNumberOfVolumes; i++)
 		{
-			ByteBuffer lVolumeData = lVolume.getDataBuffer();
+			final ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
 			lVolumeData.rewind();
 			for (int z = 0; z < cWidth; z++)

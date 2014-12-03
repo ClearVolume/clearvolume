@@ -12,7 +12,6 @@ import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLProfile;
 
 import org.apache.commons.io.IOUtils;
 
@@ -58,13 +57,13 @@ public abstract class JOGLClearVolumeRenderer	extends
 	// ClearGL Window.
 	private ClearGLWindow mClearGLWindow;
 	private volatile int mLastWindowWidth, mLastWindowHeight;
-	private ReentrantLock mDisplayReentrantLock = new ReentrantLock();
+	private final ReentrantLock mDisplayReentrantLock = new ReentrantLock();
 
 	// pixelbuffer objects.
 	protected GLPixelBufferObject[] mPixelBufferObjects;
 
 	// texture and its dimensions.
-	private GLTexture<Byte>[] mLayerTextures;
+	private final GLTexture<Byte>[] mLayerTextures;
 
 	// Internal fields for calculating FPS.
 	private volatile int step = 0;
@@ -79,7 +78,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{ 1.f, 1.f, 1.f, 1.f });
 
 	// Window:
-	private String mWindowName;
+	private final String mWindowName;
 	private GLProgram mGLProgram;
 	private GLProgram mBoxGLProgram;
 
@@ -99,12 +98,12 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLUniform mBoxModelViewMatrixUniform;
 	private GLUniform mBoxProjectionMatrixUniform;
 
-	private GLMatrix mBoxModelViewMatrix = new GLMatrix();
-	private GLMatrix mVolumeViewMatrix = new GLMatrix();
-	private GLMatrix mQuadProjectionMatrix = new GLMatrix();
+	private final GLMatrix mBoxModelViewMatrix = new GLMatrix();
+	private final GLMatrix mVolumeViewMatrix = new GLMatrix();
+	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
 
-	private int mMaxTextureWidth = 768, mMaxTextureHeight = 768;
-	private int mTextureWidth, mTextureHeight;
+	private final int mMaxTextureWidth = 768, mMaxTextureHeight = 768;
+	private final int mTextureWidth, mTextureHeight;
 
 	protected boolean mUsePBOs = true;
 
@@ -213,7 +212,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		setBytesPerVoxel(pBytesPerVoxel);
 
 		// Initialize the GL component
-		final GLProfile lProfile = GLProfile.getMaxFixedFunc(true);
+		// final GLProfile lProfile = GLProfile.getMaxFixedFunc(true);
 		// final GLCapabilities lCapabilities = new GLCapabilities(lProfile);
 
 		mClearGLWindow = new ClearGLWindow(	pWindowName,
@@ -241,7 +240,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	}
 
 	@Override
-	public void setClearGLWindow(ClearGLWindow pClearGLWindow)
+	public void setClearGLWindow(final ClearGLWindow pClearGLWindow)
 	{
 
 		mClearGLWindow = pClearGLWindow;
@@ -261,7 +260,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		{
 			mClearGLWindow.close();
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 		}
@@ -394,20 +393,20 @@ public abstract class JOGLClearVolumeRenderer	extends
 			// texture display: construct the program and related objects
 			try
 			{
-				InputStream lVertexShaderResourceAsStream = JOGLClearVolumeRenderer.class.getResourceAsStream("shaders/tex_vert.glsl");
-				InputStream lFragmentShaderResourceAsStream = JOGLClearVolumeRenderer.class.getResourceAsStream("shaders/tex_frag.glsl");
+				final InputStream lVertexShaderResourceAsStream = JOGLClearVolumeRenderer.class.getResourceAsStream("shaders/tex_vert.glsl");
+				final InputStream lFragmentShaderResourceAsStream = JOGLClearVolumeRenderer.class.getResourceAsStream("shaders/tex_frag.glsl");
 
-				String lVertexShaderSource = IOUtils.toString(lVertexShaderResourceAsStream,
-																											"UTF-8");
+				final String lVertexShaderSource = IOUtils.toString(lVertexShaderResourceAsStream,
+																														"UTF-8");
 				String lFragmentShaderSource = IOUtils.toString(lFragmentShaderResourceAsStream,
 																												"UTF-8");
 
 				for (int i = 1; i < getNumberOfRenderLayers(); i++)
 				{
-					String lStringToInsert1 = String.format("uniform sampler2D texUnit%d; \n//insertpoin1t",
-																									i);
-					String lStringToInsert2 = String.format("tempOutColor = max(tempOutColor,texture(texUnit%d, ftexcoord));\n//insertpoint2",
-																									i);
+					final String lStringToInsert1 = String.format("uniform sampler2D texUnit%d; \n//insertpoin1t",
+																												i);
+					final String lStringToInsert2 = String.format("tempOutColor = max(tempOutColor,texture(texUnit%d, ftexcoord));\n//insertpoint2",
+																												i);
 
 					lFragmentShaderSource = lFragmentShaderSource.replace("//insertpoint1",
 																																lStringToInsert1);
@@ -434,7 +433,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 				mPositionAttributeArray = new GLVertexAttributeArray(	mPositionAttribute,
 																															4);
 
-				GLFloatArray lVerticesFloatArray = new GLFloatArray(6, 4);
+				final GLFloatArray lVerticesFloatArray = new GLFloatArray(6,
+																																	4);
 				lVerticesFloatArray.add(-1, -1, 0, 1);
 				lVerticesFloatArray.add(1, -1, 0, 1);
 				lVerticesFloatArray.add(1, 1, 0, 1);
@@ -448,7 +448,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 				mTexCoordAttributeArray = new GLVertexAttributeArray(	mTexCoordAttribute,
 																															2);
 
-				GLFloatArray lTexCoordFloatArray = new GLFloatArray(6, 2);
+				final GLFloatArray lTexCoordFloatArray = new GLFloatArray(6,
+																																	2);
 				lTexCoordFloatArray.add(0, 0);
 				lTexCoordFloatArray.add(1, 0);
 				lTexCoordFloatArray.add(1, 1);
@@ -480,7 +481,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 				}
 
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
 				e.printStackTrace();
 			}
@@ -510,7 +511,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				// FIXME this should be done with IndexArrays, but lets be lazy for
 				// now...
-				GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 4);
+				final GLFloatArray lVerticesFloatArray = new GLFloatArray(24,
+																																	4);
 
 				final float w = .5f;
 
@@ -543,7 +545,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 																								lVerticesFloatArray.getFloatBuffer());
 
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
 				e.printStackTrace();
 			}
@@ -583,8 +585,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	protected abstract void unregisterPBO(int pRenderLayerIndex,
 																				int pPixelBufferObjectId);
 
-	public void copyBufferToTexture(int pRenderLayerIndex,
-																	ByteBuffer pByteBuffer)
+	public void copyBufferToTexture(final int pRenderLayerIndex,
+																	final ByteBuffer pByteBuffer)
 	{
 		pByteBuffer.rewind();
 		mLayerTextures[pRenderLayerIndex].copyFrom(pByteBuffer);
@@ -604,15 +606,15 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 		// scaling...
 
-		double scaleX = getVolumeSizeX() * getVoxelSizeX();
-		double scaleY = getVolumeSizeY() * getVoxelSizeY();
-		double scaleZ = getVolumeSizeZ() * getVoxelSizeZ();
+		final double scaleX = getVolumeSizeX() * getVoxelSizeX();
+		final double scaleY = getVolumeSizeY() * getVoxelSizeY();
+		final double scaleZ = getVolumeSizeZ() * getVoxelSizeZ();
 
-		double maxScale = max(max(scaleX, scaleY), scaleZ);
+		final double maxScale = max(max(scaleX, scaleY), scaleZ);
 
 		// building up the inverse Modelview
 
-		GLMatrix eulerMat = new GLMatrix();
+		final GLMatrix eulerMat = new GLMatrix();
 
 		eulerMat.euler(getRotationX() * 0.01, getRotationY() * 0.01, 0.0f);
 		if (hasRotationController())
@@ -621,7 +623,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 			notifyUpdateOfVolumeRenderingParameters();
 		}
 
-		GLMatrix lInvVolumeMatrix = new GLMatrix();
+		final GLMatrix lInvVolumeMatrix = new GLMatrix();
 		lInvVolumeMatrix.setIdentity();
 		lInvVolumeMatrix.translate(	-getTranslationX(),
 																-getTranslationY(),
@@ -634,13 +636,13 @@ public abstract class JOGLClearVolumeRenderer	extends
 														(float) (maxScale / scaleY),
 														(float) (maxScale / scaleZ));
 
-		GLMatrix lInvProjection = new GLMatrix();
+		final GLMatrix lInvProjection = new GLMatrix();
 		lInvProjection.copy(getClearGLWindow().getProjectionMatrix());
 		lInvProjection.transpose();
 		lInvProjection.invert();
 
-		boolean[] lUpdated = renderVolume(lInvVolumeMatrix.getFloatArray(),
-																			lInvProjection.getFloatArray());
+		final boolean[] lUpdated = renderVolume(lInvVolumeMatrix.getFloatArray(),
+																						lInvProjection.getFloatArray());
 
 		if (lUpdated != null)
 		{
@@ -667,7 +669,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				// invert Matrix is the modelview used by renderer which is actually the
 				// inverted modelview Matrix
-				GLMatrix lInvBoxMatrix = new GLMatrix();
+				final GLMatrix lInvBoxMatrix = new GLMatrix();
 				lInvBoxMatrix.copy(lInvVolumeMatrix);
 				lInvBoxMatrix.transpose();
 				lInvBoxMatrix.invert();
@@ -675,7 +677,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 				mBoxModelViewMatrixUniform.setFloatMatrix(lInvBoxMatrix.getFloatArray(),
 																									false);
 
-				GLMatrix lProjectionMatrix = getClearGLWindow().getProjectionMatrix();
+				final GLMatrix lProjectionMatrix = getClearGLWindow().getProjectionMatrix();
 
 				getClearGLWindow().getProjectionMatrix()
 													.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
@@ -746,15 +748,15 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 *      int, int, int, int)
 	 */
 	@Override
-	public void reshape(GLAutoDrawable drawable,
-											int x,
-											int y,
-											int pWidth,
+	public void reshape(final GLAutoDrawable drawable,
+											final int x,
+											final int y,
+											final int pWidth,
 											int pHeight)
 	{
 		if (pHeight == 0)
 			pHeight = 1;
-		float lAspectRatio = (1.0f * pWidth) / pHeight;
+		final float lAspectRatio = (1.0f * pWidth) / pHeight;
 
 		if (lAspectRatio >= 1)
 			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
@@ -846,7 +848,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void requestDisplay()
 	{
-		boolean lLocked = mDisplayReentrantLock.tryLock();
+		final boolean lLocked = mDisplayReentrantLock.tryLock();
 		if (lLocked)
 		{
 			try
@@ -860,7 +862,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 		}
 	}
 
-
 	@Override
 	public void disableClose()
 	{
@@ -868,14 +869,12 @@ public abstract class JOGLClearVolumeRenderer	extends
 									.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
 	}
 
-
-	private boolean anyIsTrue(boolean[] pBooleanArray)
+	private boolean anyIsTrue(final boolean[] pBooleanArray)
 	{
-		for (boolean lBoolean : pBooleanArray)
+		for (final boolean lBoolean : pBooleanArray)
 			if (lBoolean)
 				return true;
 		return false;
 	}
-
 
 }
