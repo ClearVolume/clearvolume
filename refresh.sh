@@ -1,1 +1,1 @@
-gradle build --refresh-dependencies
+gradle clean build --refresh-dependencies
