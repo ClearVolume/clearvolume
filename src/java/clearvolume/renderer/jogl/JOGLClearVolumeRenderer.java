@@ -215,14 +215,11 @@ public abstract class JOGLClearVolumeRenderer	extends
 		// final GLProfile lProfile = GLProfile.getMaxFixedFunc(true);
 		// final GLCapabilities lCapabilities = new GLCapabilities(lProfile);
 
-		System.err.println("before window");
-
 		mClearGLWindow = new ClearGLWindow(	pWindowName,
 																				pWindowWidth,
 																				pWindowHeight,
 																				this);
 
-		System.err.println("after window");
 		// Initialize the mouse controls
 		final MouseControl lMouseControl = new MouseControl(this);
 		mClearGLWindow.getGLWindow().addMouseListener(lMouseControl);

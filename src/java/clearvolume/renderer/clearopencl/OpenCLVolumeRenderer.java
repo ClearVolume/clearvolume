@@ -24,7 +24,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	private ByteBuffer RenderBuffers;
 
-	private CLBuffer<Float> mCLInvModelViewBuffer, mCLInvProjectionBuffer;
+	private CLBuffer<Float> mCLInvModelViewBuffer,
+			mCLInvProjectionBuffer;
 
 	private CLBuffer<Float>[] mCLTransferColorBuffers;
 
@@ -32,7 +33,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 															final int pWindowWidth,
 															final int pWindowHeight)
 	{
-		super(pWindowName, pWindowWidth, pWindowHeight);
+		super("[OpenCL] " + pWindowName, pWindowWidth, pWindowHeight);
 
 	}
 
@@ -41,7 +42,10 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 															final int pWindowHeight,
 															final int pBytesPerVoxel)
 	{
-		super(pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel);
+		super("[OpenCL] " + pWindowName,
+					pWindowWidth,
+					pWindowHeight,
+					pBytesPerVoxel);
 
 	}
 
@@ -52,7 +56,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 															final int pMaxTextureWidth,
 															final int pMaxTextureHeight)
 	{
-		super(pWindowName,
+		super("[OpenCL] " + pWindowName,
 					pWindowWidth,
 					pWindowHeight,
 					pBytesPerVoxel,
@@ -71,7 +75,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 															final int pNumberOfRenderLayers)
 	{
 
-		super(pWindowName,
+		super("[OpenCL] " + pWindowName,
 					pWindowWidth,
 					pWindowHeight,
 					pBytesPerVoxel,
@@ -110,7 +114,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		{
 			mCLRenderBuffers[i] = mCLDevice.createOutputIntBuffer(lRenderBufferSize);
 			mCLTransferColorBuffers[i] = mCLDevice.createInputFloatBuffer(4);
-
 		}
 
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)

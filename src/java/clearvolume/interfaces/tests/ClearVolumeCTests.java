@@ -108,7 +108,7 @@ public class ClearVolumeCTests
 
 	}
 
-	// @Test
+	@Test
 	public void testCreateServer16bit() throws InterruptedException
 	{
 

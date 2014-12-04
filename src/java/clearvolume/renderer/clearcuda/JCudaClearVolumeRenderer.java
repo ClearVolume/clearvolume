@@ -112,7 +112,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																	final int pWindowWidth,
 																	final int pWindowHeight)
 	{
-		super(pWindowName, pWindowWidth, pWindowHeight);
+		super("[CUDA] " + pWindowName, pWindowWidth, pWindowHeight);
 	}
 
 	/**
@@ -129,7 +129,10 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																	final int pWindowHeight,
 																	final int pBytesPerVoxel)
 	{
-		super(pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel);
+		super("[CUDA] " + pWindowName,
+					pWindowWidth,
+					pWindowHeight,
+					pBytesPerVoxel);
 	}
 
 	/**
@@ -150,7 +153,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																	final int pMaxTextureWidth,
 																	final int pMaxTextureHeight)
 	{
-		super(pWindowName,
+		super("[CUDA] " + pWindowName,
 					pWindowWidth,
 					pWindowHeight,
 					pBytesPerVoxel,
@@ -178,7 +181,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																	final int pMaxTextureHeight,
 																	final int pNumberOfRenderLayers)
 	{
-		super(pWindowName,
+		super("[CUDA] " + pWindowName,
 					pWindowWidth,
 					pWindowHeight,
 					pBytesPerVoxel,

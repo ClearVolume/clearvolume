@@ -49,7 +49,7 @@ public class ClearVolumeNetworkTests
 		networkConduit(lVolumeSink, cNumberOfVolumesToSend, true);
 	}
 
-	// @Test
+	@Test
 	public void testLive() throws IOException, InterruptedException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
