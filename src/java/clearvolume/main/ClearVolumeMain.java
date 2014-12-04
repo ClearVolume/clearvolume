@@ -16,6 +16,8 @@ public class ClearVolumeMain
 	{
 		try
 		{
+			CheckRequirements.check();
+
 			CommandLine lCommandLineValues = new CommandLine();
 			CmdLineParser lCmdLineParser = new CmdLineParser(lCommandLineValues);
 			lCmdLineParser.getProperties().withUsageWidth(80);

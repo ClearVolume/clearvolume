@@ -8,13 +8,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import clearvolume.main.CheckRequirements;
 import clearvolume.network.client.ClearVolumeTCPClientHelper;
 import clearvolume.utils.ClearVolumeJFrame;
-import clearvolume.utils.UnsupportedArchitectureException;
 
 public class ClearVolumeClientMain
 {
@@ -35,37 +34,7 @@ public class ClearVolumeClientMain
 				{
 					try
 					{
-						// check for correct system architecture and version
-						if (!(System.getProperty("os.arch")
-												.toLowerCase()
-												.contains("x86_64") || System.getProperty("os.arch")
-																											.toLowerCase()
-																											.contains("amd64")))
-						{
-							System.err.println("Sorry, but due to the large data handled, ClearVolume only supports 64bit architectures.");
-							JOptionPane.showMessageDialog(null,
-																						"Sorry, but due to the large data handled, ClearVolume only supports 64bit architectures.",
-																						"Unsupported architecture",
-																						JOptionPane.ERROR_MESSAGE);
-							throw new UnsupportedArchitectureException("ClearVolume only supports 64bit architectures.");
-						}
-
-						if (System.getProperty("os.name")
-											.toLowerCase()
-											.contains("OS X"))
-						{
-							if (Integer.parseInt(System.getProperty("os.version")
-																					.split("\\.")[1]) < 9)
-							{
-								System.err.println("ClearVolume required Mac OS X 10.9 or higher. If possible, please upgrade.");
-								JOptionPane.showMessageDialog(null,
-																							"ClearVolume required Mac OS X 10.9 or higher. If possible, please upgrade.",
-																							"Unsupported OS X version",
-																							JOptionPane.ERROR_MESSAGE);
-								throw new UnsupportedArchitectureException("ClearVolume only supports OS X 10.9 or higher.");
-							}
-						}
-
+						CheckRequirements.check();
 						ClearVolumeClientMain lClearVolumeMain = new ClearVolumeClientMain();
 						lClearVolumeMain.mApplicationJFrame.setVisible(true);
 					}
@@ -81,6 +50,8 @@ public class ClearVolumeClientMain
 			e.printStackTrace();
 		}
 	}
+
+
 
 	public static void connect(	final String pHostName,
 															final int pPortNumber,
