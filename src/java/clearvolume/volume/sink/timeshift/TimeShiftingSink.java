@@ -48,23 +48,29 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 
 	public void setTimeShiftNormalized(final double pTimeShiftNormalized)
 	{
-		mSeekingExecutor.execute(() -> {
-
-			synchronized (mLock)
+		Runnable lRunnable = new Runnable() {
+			
+			@Override
+			public void run() 
 			{
-			final long lPreviousTimeShift = mTimeShift;
-			
-			// find the available data interval to evade invalid indices
-			final long startPos = Math.max(0, mHighestTimePointIndexSeen - mHardMemoryHorizonInTimePointIndices);
-			final long interval = mHighestTimePointIndexSeen - startPos;
-			
-				// System.err.println("interval=[" + startPos +"," +interval+"]");
-			mTimeShift = -Math.round(interval * pTimeShiftNormalized);
-				if (lPreviousTimeShift != mTimeShift)
-				for (int lChannel : mAvailableChannels)
-					sendVolumeInternal(lChannel);
+				synchronized (mLock)
+				{
+				final long lPreviousTimeShift = mTimeShift;
+				
+				// find the available data interval to evade invalid indices
+				final long startPos = Math.max(0, mHighestTimePointIndexSeen - mHardMemoryHorizonInTimePointIndices);
+				final long interval = mHighestTimePointIndexSeen - startPos;
+				
+					// System.err.println("interval=[" + startPos +"," +interval+"]");
+				mTimeShift = -Math.round(interval * pTimeShiftNormalized);
+					if (lPreviousTimeShift != mTimeShift)
+					for (int lChannel : mAvailableChannels)
+						sendVolumeInternal(lChannel);
+				}
 			}
-		});
+		};
+		
+		mSeekingExecutor.execute(lRunnable);
 	}
 
 	public void setTimeShift(long pTimeShift)
@@ -145,13 +151,18 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 		}
 	}
 
-	private SwitchableSoftReference<Volume<?>> wrapWithReference(Volume<?> pVolume)
+	private SwitchableSoftReference<Volume<?>> wrapWithReference(final Volume<?> pVolume)
 	{
-		return mSwitchableSoftReferenceManager.wrapReference(	pVolume,
-																													() -> {
-																														System.out.println("CLEANING!");
-																														pVolume.makeAvailableToManager();
-																													});
+		Runnable lCleaningRunnable = new Runnable() 
+		{
+			@Override
+			public void run() 
+			{
+				System.out.println("CLEANING!");
+				pVolume.makeAvailableToManager();
+			}
+		};
+		return mSwitchableSoftReferenceManager.wrapReference(	pVolume, lCleaningRunnable);
 	}
 
 	private Volume<?> getVolumeToSend(int pVolumeChannelID)

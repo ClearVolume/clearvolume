@@ -1,7 +1,5 @@
 package clearvolume.network.serialization;
 
-import static java.lang.Math.toIntExact;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -10,13 +8,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import clearvolume.network.serialization.keyvalue.KeyValueMaps;
+import clearvolume.utils.ToIntExact;
 import clearvolume.volume.Volume;
 
 public class ClearVolumeSerialization
 {
 	// first 4 digits of the CRC32 of 'ClearVolume' string :-)
 	public static final int cStandardTCPPort = 9140;
-	private static final int cLongSizeInBytes = Long.BYTES;
+	private static final int cLongSizeInBytes = 8;
 
 	public static final ByteBuffer serialize(	Volume<?> pVolume,
 																						ByteBuffer pByteBuffer)
@@ -27,7 +26,7 @@ public class ClearVolumeSerialization
 		final int lHeaderLength = lStringBuilder.length();
 
 		final long lDataLength = pVolume.getDataSizeInBytes();
-		int lNeededBufferLength = toIntExact(3 * cLongSizeInBytes
+		int lNeededBufferLength = ToIntExact.toIntExact(3 * cLongSizeInBytes
 																					+ lHeaderLength
 																					+ lDataLength);
 		if (pByteBuffer == null || pByteBuffer.capacity() != lNeededBufferLength)
@@ -326,23 +325,25 @@ public class ClearVolumeSerialization
 																		ByteBuffer pScratchBuffer) throws IOException
 	{
 		pScratchBuffer.clear();
-		pScratchBuffer.limit(Long.BYTES);
+		pScratchBuffer.limit(cLongSizeInBytes);
 		while (pScratchBuffer.hasRemaining())
 		{
 			pSocketChannel.read(pScratchBuffer);
 			sleep();
 		}
 		pScratchBuffer.rewind();
-		final int lHeaderLength = toIntExact(pScratchBuffer.getLong());
+		final int lHeaderLength = ToIntExact.toIntExact(pScratchBuffer.getLong());
 		return lHeaderLength;
 	};
+
+
 
 	public static final <T> Volume<T> deserialize(ByteBuffer pByteBuffer,
 																								Volume<T> pVolume)
 	{
 		pByteBuffer.rewind();
-		final int lWholeLength = toIntExact(pByteBuffer.getLong());
-		final int lHeaderLength = toIntExact(pByteBuffer.getLong());
+		final int lWholeLength = ToIntExact.toIntExact(pByteBuffer.getLong());
+		final int lHeaderLength = ToIntExact.toIntExact(pByteBuffer.getLong());
 		readVolumeHeader(pByteBuffer, lHeaderLength, pVolume);
 		final long lDataLength = pByteBuffer.getLong();
 		readVolumeData(pByteBuffer, lDataLength, pVolume);
@@ -357,7 +358,7 @@ public class ClearVolumeSerialization
 		if (pVolume.getDataBuffer() == null || pVolume.getDataBuffer()
 																									.capacity() != pDataLength)
 		{
-			ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(toIntExact(pDataLength));
+			ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(ToIntExact.toIntExact(pDataLength));
 			lByteBuffer.order(ByteOrder.nativeOrder());
 			lByteBuffer.clear();
 			pVolume.setDataBuffer(lByteBuffer);
@@ -366,6 +367,8 @@ public class ClearVolumeSerialization
 		pVolume.readFromByteBuffer(pByteBuffer);
 	}
 
+	
+	
 	private static void sleep()
 	{
 		try

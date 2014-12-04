@@ -16,35 +16,40 @@ public class SwitchableSoftReferenceManager<T>
 	public SwitchableSoftReferenceManager()
 	{
 		super();
-		Runnable lRunnable = () -> {
-			while (true)
-			{
-				try
+		Runnable lRunnable = new Runnable() {
+			
+			@Override
+			public void run() {
+				while (true)
 				{
-					while (true)
+					try
 					{
-						Reference<? extends T> lReference = mReferenceQueue.poll();
-						if (lReference == null)
-							break;
+						while (true)
+						{
+							Reference<? extends T> lReference = mReferenceQueue.poll();
+							if (lReference == null)
+								break;
 
-						@SuppressWarnings("unchecked")
-						SwitchableSoftReference<T> lSwitchableSoftReference = (SwitchableSoftReference<T>) lReference;
+							@SuppressWarnings("unchecked")
+							SwitchableSoftReference<T> lSwitchableSoftReference = (SwitchableSoftReference<T>) lReference;
 
-						Runnable lCleanUpRunnable = lSwitchableSoftReference.getCleanUpRunnable();
+							Runnable lCleanUpRunnable = lSwitchableSoftReference.getCleanUpRunnable();
 
-						if (lCleanUpRunnable != null)
-							mExecutor.execute(lCleanUpRunnable);
+							if (lCleanUpRunnable != null)
+								mExecutor.execute(lCleanUpRunnable);
 
+						}
+
+						Thread.sleep(cCleanUpPeriodInMilliseconds);
 					}
-
-					Thread.sleep(cCleanUpPeriodInMilliseconds);
-				}
-				catch (Throwable e)
-				{
-					e.printStackTrace();
+					catch (Throwable e)
+					{
+						e.printStackTrace();
+					}
 				}
 			}
 		};
+				
 		Thread lCleanUpThread = new Thread(	lRunnable,
 																				"SwitchableSoftReferenceCleanUpThread");
 		lCleanUpThread.setDaemon(true);

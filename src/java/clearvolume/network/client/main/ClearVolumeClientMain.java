@@ -82,8 +82,8 @@ public class ClearVolumeClientMain
 		}
 	}
 
-	public static void connect(	String pHostName,
-															int pPortNumber,
+	public static void connect(	final String pHostName,
+															final int pPortNumber,
 															int pWindowSize,
 															int pBytesPerVoxel,
 															int pNumberOfLayers,

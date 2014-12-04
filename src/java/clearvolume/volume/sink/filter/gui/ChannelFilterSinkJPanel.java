@@ -27,7 +27,7 @@ public class ChannelFilterSinkJPanel extends JPanel	implements
 	private JList<String> mActiveChannelJList;
 	private ChannelFilterSink mChannelFilterSink;
 
-	public static final void createJFrame(ChannelFilterSink pChannelFilterSink)
+	public static final void createJFrame(final ChannelFilterSink pChannelFilterSink)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -131,13 +131,18 @@ public class ChannelFilterSinkJPanel extends JPanel	implements
 	}
 
 	@Override
-	public void intervalAdded(ListDataEvent pE)
+	public void intervalAdded(final ListDataEvent pE)
 	{
-		SwingUtilities.invokeLater(() -> {
-			TIntArrayList lSelectedIndices = new TIntArrayList(mActiveChannelJList.getSelectedIndices());
-			for (int i = pE.getIndex0(); i < pE.getIndex1(); i++)
-				lSelectedIndices.add(i);
-			mActiveChannelJList.setSelectedIndices(lSelectedIndices.toArray());
+		SwingUtilities.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				TIntArrayList lSelectedIndices = new TIntArrayList(mActiveChannelJList.getSelectedIndices());
+				for (int i = pE.getIndex0(); i < pE.getIndex1(); i++)
+					lSelectedIndices.add(i);
+				mActiveChannelJList.setSelectedIndices(lSelectedIndices.toArray());
+				
+			}
 		});
 	}
 

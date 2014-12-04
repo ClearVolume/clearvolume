@@ -24,7 +24,7 @@ public class ChannelFilterSinkJFrame extends ClearVolumeJFrame
 	/**
 	 * Launch the application.
 	 */
-	public static void launch(ChannelFilterSink pChannelFilterSink)
+	public static void launch(final ChannelFilterSink pChannelFilterSink)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{

@@ -1,12 +1,11 @@
 package clearvolume.volume;
 
-import static java.lang.Math.toIntExact;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import clearvolume.ClearVolumeCloseable;
+import clearvolume.utils.ToIntExact;
 
 public class Volume<T> implements ClearVolumeCloseable
 {
@@ -36,7 +35,7 @@ public class Volume<T> implements ClearVolumeCloseable
 		mType = pType;
 		mDimensionsInVoxels = pDimensions;
 		final long lBufferLength = getDataSizeInBytes();
-		final int lBufferLengthInt = toIntExact(lBufferLength);
+		final int lBufferLengthInt = ToIntExact.toIntExact(lBufferLength);
 		mDataBuffer = ByteBuffer.allocateDirect(lBufferLengthInt)
 														.order(ByteOrder.nativeOrder());
 	}
@@ -139,7 +138,7 @@ public class Volume<T> implements ClearVolumeCloseable
 
 	public String getTypeName()
 	{
-		return mType.getTypeName().replaceAll("java.lang.", "");
+		return mType.getName().replaceAll("java.lang.", "");
 	}
 
 	public void setDimension(int pDim)
@@ -162,31 +161,31 @@ public class Volume<T> implements ClearVolumeCloseable
 	{
 		if (mType == Byte.class || mType == byte.class)
 		{
-			return Byte.BYTES;
+			return 1;
 		}
 		else if (mType == Short.class || mType == short.class)
 		{
-			return Short.BYTES;
+			return 2;
 		}
 		else if (mType == Character.class || mType == char.class)
 		{
-			return Character.BYTES;
+			return 2;
 		}
 		else if (mType == Integer.class || mType == int.class)
 		{
-			return Integer.BYTES;
+			return 4;
 		}
 		else if (mType == Long.class || mType == long.class)
 		{
-			return Long.BYTES;
+			return 8;
 		}
 		else if (mType == Float.class || mType == float.class)
 		{
-			return Float.BYTES;
+			return 4;
 		}
 		else if (mType == Double.class || mType == double.class)
 		{
-			return Double.BYTES;
+			return 8;
 		}
 		return 0;
 	}

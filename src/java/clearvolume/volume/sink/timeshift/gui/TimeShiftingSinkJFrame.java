@@ -25,7 +25,7 @@ public class TimeShiftingSinkJFrame	extends
 	/**
 	 * Launch the application.
 	 */
-	public static void launch(TimeShiftingSink pTimeShiftingSink)
+	public static void launch(final TimeShiftingSink pTimeShiftingSink)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{

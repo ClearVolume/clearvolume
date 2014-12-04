@@ -48,21 +48,26 @@ public class AsynchronousVolumeSinkAdapter implements
 
 	public boolean start()
 	{
-		Runnable lRunnable = () -> {
-			while (!mStopSignal)
+		Runnable lRunnable = new Runnable() {
+			
+			@Override
+			public void run() 
 			{
-				try
+				while (!mStopSignal)
 				{
-					// System.out.println(mVolumeQueue.size());
-					Volume<?> lVolume = mVolumeQueue.take();
-					mDelegatedVolumeSink.sendVolume(lVolume);
+					try
+					{
+						// System.out.println(mVolumeQueue.size());
+						Volume<?> lVolume = mVolumeQueue.take();
+						mDelegatedVolumeSink.sendVolume(lVolume);
+					}
+					catch (Throwable e)
+					{
+						e.printStackTrace();
+					}
 				}
-				catch (Throwable e)
-				{
-					e.printStackTrace();
-				}
+				mStoppedSignal = true;
 			}
-			mStoppedSignal = true;
 		};
 
 		Thread lThread = new Thread(lRunnable, this.getClass()

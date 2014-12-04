@@ -105,7 +105,7 @@ public abstract class ClearVolumeRendererBase	implements
 			mTransferFunctions[i] = TransferFunctions.getGradientForColor(i);
 		}
 
-		ClearVolumeRendererBase lThis = this;
+		final ClearVolumeRendererBase lThis = this;
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override

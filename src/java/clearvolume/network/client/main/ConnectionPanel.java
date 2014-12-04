@@ -21,8 +21,7 @@ import net.miginfocom.swing.MigLayout;
 import clearvolume.network.client.ClearVolumeTCPClientHelper;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 
-public class ConnectionPanel extends JPanel
-{
+public class ConnectionPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -39,22 +38,19 @@ public class ConnectionPanel extends JPanel
 	private JTextField mNumberOfColorsField;
 	private JTextField mTCPPortTextField;
 
-	public ConnectionPanel()
-	{
+	public ConnectionPanel() {
 		setBackground(Color.WHITE);
-		ConnectionPanel lThis = this;
-		setLayout(new MigLayout("",
-														"[435.00px,grow][435.00px,grow]",
-														"[16px][16px][29px][50.00px:n,grow][10px:n,grow]"));
-		JLabel lblNewLabel = new JLabel("Enter IP address or hostname of ClearVolume server:");
+		final ConnectionPanel lThis = this;
+		setLayout(new MigLayout("", "[435.00px,grow][435.00px,grow]",
+				"[16px][16px][29px][50.00px:n,grow][10px:n,grow]"));
+		JLabel lblNewLabel = new JLabel(
+				"Enter IP address or hostname of ClearVolume server:");
 		add(lblNewLabel, "cell 0 0 2 1,alignx left,aligny top");
 
-		JTextField lServerAddressTextField = new JTextField();
-		lServerAddressTextField.addActionListener(new ActionListener()
-		{
+		final JTextField lServerAddressTextField = new JTextField();
+		lServerAddressTextField.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e)
-			{
+			public void actionPerformed(ActionEvent e) {
 				startClientAsync(lServerAddressTextField);
 			}
 		});
@@ -65,11 +61,9 @@ public class ConnectionPanel extends JPanel
 
 		JButton lConnectButton = new JButton("connect");
 		lConnectButton.setBorder(null);
-		lConnectButton.addActionListener(new ActionListener()
-		{
+		lConnectButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e)
-			{
+			public void actionPerformed(ActionEvent e) {
 				startClientAsync(lServerAddressTextField);
 			}
 		});
@@ -83,16 +77,14 @@ public class ConnectionPanel extends JPanel
 		add(lAdvancedButton, "cell 0 2,aligny top");
 		add(lConnectButton, "cell 1 2,alignx right,aligny top");
 
-		JPanel lOptionsPanel = new JPanel();
+		final JPanel lOptionsPanel = new JPanel();
 		lOptionsPanel.setVisible(false);
 		lOptionsPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		lOptionsPanel.setBackground(Color.WHITE);
 		add(lOptionsPanel, "cell 0 3 2 1,grow");
-		lAdvancedButton.addActionListener(new ActionListener()
-		{
+		lAdvancedButton.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e)
-			{
+			public void actionPerformed(ActionEvent e) {
 				lOptionsPanel.setVisible(!lOptionsPanel.isVisible());
 			}
 		});
@@ -127,16 +119,16 @@ public class ConnectionPanel extends JPanel
 		lOptionsPanel.add(mBytesPerVoxelTextField);
 
 		JLabel lTimeShiftAndMultiChannelLabel = new JLabel("TimeShift");
-		lTimeShiftAndMultiChannelLabel.setHorizontalAlignment(SwingConstants.TRAILING);
+		lTimeShiftAndMultiChannelLabel
+				.setHorizontalAlignment(SwingConstants.TRAILING);
 		lTimeShiftAndMultiChannelLabel.setBounds(205, 32, 171, 16);
 		lOptionsPanel.add(lTimeShiftAndMultiChannelLabel);
 
 		mTimeShiftAndMultiChannelCheckBox = new JCheckBox("");
-		mTimeShiftAndMultiChannelCheckBox.setAlignmentX(Component.CENTER_ALIGNMENT);
-		mTimeShiftAndMultiChannelCheckBox.setMinimumSize(new Dimension(	30,
-																																		30));
-		mTimeShiftAndMultiChannelCheckBox.setMaximumSize(new Dimension(	30,
-																																		30));
+		mTimeShiftAndMultiChannelCheckBox
+				.setAlignmentX(Component.CENTER_ALIGNMENT);
+		mTimeShiftAndMultiChannelCheckBox.setMinimumSize(new Dimension(30, 30));
+		mTimeShiftAndMultiChannelCheckBox.setMaximumSize(new Dimension(30, 30));
 		mTimeShiftAndMultiChannelCheckBox.setBounds(382, 29, 28, 20);
 		lOptionsPanel.add(mTimeShiftAndMultiChannelCheckBox);
 
@@ -167,7 +159,8 @@ public class ConnectionPanel extends JPanel
 		lOptionsPanel.add(mNumberOfColorsField);
 
 		mTCPPortTextField = new JTextField();
-		mTCPPortTextField.setText("" + ClearVolumeSerialization.cStandardTCPPort);
+		mTCPPortTextField.setText(""
+				+ ClearVolumeSerialization.cStandardTCPPort);
 		mTCPPortTextField.setHorizontalAlignment(SwingConstants.TRAILING);
 		mTCPPortTextField.setColumns(10);
 		mTCPPortTextField.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -186,17 +179,21 @@ public class ConnectionPanel extends JPanel
 		mErrorTextArea.setBackground(Color.WHITE);
 		add(mErrorTextArea, "cell 0 4 2 1,grow");
 
-		mClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper()
-		{
+		mClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper() {
 
 			@Override
-			public void reportError(Throwable pE, String pErrorMessage)
-			{
-				SwingUtilities.invokeLater(() -> {
-					mErrorTextArea.setText(pE.getClass().getName() + (pErrorMessage == null	? ""
-																																									: ": " + pErrorMessage));
-					lThis.revalidate();
-					lThis.repaint();
+			public void reportError(final Throwable pE,
+					final String pErrorMessage) {
+				SwingUtilities.invokeLater(new Runnable() {
+
+					@Override
+					public void run() {
+						mErrorTextArea.setText(pE.getClass().getName()
+								+ (pErrorMessage == null ? "" : ": "
+										+ pErrorMessage));
+						lThis.revalidate();
+						lThis.repaint();
+					};
 				});
 			}
 		};
@@ -215,13 +212,22 @@ public class ConnectionPanel extends JPanel
 			final boolean lTimeShiftMultiChannel = mTimeShiftAndMultiChannelCheckBox.isSelected();
 			final boolean lChannelFilter = mChannelFilterCheckBox.isSelected();
 			final int lNumberOfLayers = Integer.parseInt(mNumberOfColorsField.getText());
-			Runnable lStartClientRunnable = () -> mClearVolumeTCPClientHelper.startClient(lServerAddress,
-																																										lTCPPort,
-																																										lWindowSize,
-																																										lBytesPerVoxel,
-																																										lNumberOfLayers,
-																																										lTimeShiftMultiChannel,
-																																										lChannelFilter);
+			Runnable lStartClientRunnable = new Runnable() 
+			{
+				@Override
+				public void run() {
+					mClearVolumeTCPClientHelper.startClient(lServerAddress,
+							lTCPPort,
+							lWindowSize,
+							lBytesPerVoxel,
+							lNumberOfLayers,
+							lTimeShiftMultiChannel,
+							lChannelFilter);
+				}
+			};
+					
+					
+				
 			Thread lStartClientThread = new Thread(	lStartClientRunnable,
 																							"StartClientThread" + lServerAddressTextField.getText());
 			lStartClientThread.setDaemon(true);

@@ -57,12 +57,12 @@ public class ControlJPanel extends JPanel
 		add(lLayeredPane, "cell 0 3,grow");
 		lLayeredPane.setLayout(null);
 
-		JSlider lMinSlider = new JSlider(0, cPrecision, 0);
+		final JSlider lMinSlider = new JSlider(0, cPrecision, 0);
 		lMinSlider.setBounds(0, 23, 412, 20);
 		lLayeredPane.add(lMinSlider);
 		lMinSlider.setPaintTrack(false);
 
-		JSlider lMaxSlider = new JSlider(0, cPrecision, cPrecision);
+		final JSlider lMaxSlider = new JSlider(0, cPrecision, cPrecision);
 		lMaxSlider.setBounds(0, 0, 412, 20);
 		lMaxSlider.setPaintTrack(false);
 		lLayeredPane.add(lMaxSlider);

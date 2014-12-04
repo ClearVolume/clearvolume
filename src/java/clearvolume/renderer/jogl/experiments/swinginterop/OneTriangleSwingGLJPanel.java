@@ -10,6 +10,7 @@ import javax.media.opengl.GLProfile;
 import javax.swing.JFrame;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -19,8 +20,7 @@ import net.miginfocom.swing.MigLayout;
  *
  * @author Wade Walker
  */
-public class OneTriangleSwingGLJPanel
-{
+public class OneTriangleSwingGLJPanel {
 
 	public static void main(String[] args)
 	{
@@ -40,7 +40,7 @@ public class OneTriangleSwingGLJPanel
 
 		GLProfile glprofile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities(glprofile);
-		GLJPanelWB gljpanel = new GLJPanelWB(glcapabilities);
+		final GLJPanelWB gljpanel = new GLJPanelWB(glcapabilities);
 
 		gljpanel.addGLEventListener(new GLEventListener()
 		{
@@ -80,28 +80,42 @@ public class OneTriangleSwingGLJPanel
 		jframe.add(gljpanel,
 																"cell 0 0,alignx center,aligny top");
 
-		JSlider slide1 = new JSlider(JSlider.HORIZONTAL, 0, 255, 128);
-		slide1.addChangeListener((ChangeEvent pE) -> {
-			OneTriangle.r = slide1.getValue() / 255f;
-			gljpanel.repaint();
+		final JSlider slide1 = new JSlider(JSlider.HORIZONTAL, 0, 255, 128);
+		slide1.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+
+				OneTriangle.r = slide1.getValue() / 255f;
+				gljpanel.repaint();
+				
+			}
 		});
 
 		jframe.add(slide1,
 																"cell 0 1,alignx center,aligny top");
 
-		JSlider slide2 = new JSlider(JSlider.HORIZONTAL, 0, 255, 128);
-		slide2.addChangeListener((ChangeEvent pE) -> {
-			OneTriangle.g = slide2.getValue() / 255f;
-			gljpanel.repaint();
+		final JSlider slide2 = new JSlider(JSlider.HORIZONTAL, 0, 255, 128);
+		slide2.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				OneTriangle.g = slide2.getValue() / 255f;
+				gljpanel.repaint();
+				
+			}
 		});
 
 		jframe.add(slide2,
 																"cell 0 2,alignx center,aligny top");
 
-		JSlider slide3 = new JSlider(JSlider.HORIZONTAL, 0, 255, 128);
-		slide3.addChangeListener((ChangeEvent pE) -> {
-			OneTriangle.b = slide3.getValue() / 255f;
-			gljpanel.repaint();
+		final JSlider slide3 = new JSlider(JSlider.HORIZONTAL, 0, 255, 128);
+		slide3.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				OneTriangle.b = slide3.getValue() / 255f;
+				gljpanel.repaint();
+			}
 		});
 
 		jframe.add(slide3,

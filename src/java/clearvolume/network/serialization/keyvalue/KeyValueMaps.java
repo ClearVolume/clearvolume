@@ -55,7 +55,7 @@ public class KeyValueMaps
 		pStringBuilder.append('[');
 
 		boolean isFirst = true;
-		for (HashMap.Entry<String, String> lKeyValueEntry : pDestMap.entrySet())
+		for (Map.Entry<String, String> lKeyValueEntry : pDestMap.entrySet())
 		{
 			final String lKey = lKeyValueEntry.getKey();
 			final String lValue = lKeyValueEntry.getValue();
@@ -78,7 +78,7 @@ public class KeyValueMaps
 		pByteBuffer.putChar('[');
 
 		boolean isFirst = true;
-		for (HashMap.Entry<String, String> lKeyValueEntry : pDestMap.entrySet())
+		for (Map.Entry<String, String> lKeyValueEntry : pDestMap.entrySet())
 		{
 			final String lKey = lKeyValueEntry.getKey();
 			final String lValue = lKeyValueEntry.getValue();
