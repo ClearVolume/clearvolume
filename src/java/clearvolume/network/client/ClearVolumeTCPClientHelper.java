@@ -159,17 +159,14 @@ public abstract class ClearVolumeTCPClientHelper
 
 		try
 		{
-			if (pThrowable.getLocalizedMessage() != null && pThrowable.getLocalizedMessage()
-																																.toLowerCase()
-																																.contains("initSingleton"))
+			if (ExceptionUtils.getFullStackTrace(pThrowable)
+												.contains("initSingleton"))
 				JOptionPane.showMessageDialog(null,
 																			"Sorry, but your OpenGL driver is not supported.",
 																			"OpenGL error",
 																			JOptionPane.ERROR_MESSAGE);
-			else if (pThrowable.getClass()
-													.toString()
-													.toLowerCase()
-													.contains("CLException"))
+			else if (ExceptionUtils.getFullStackTrace(pThrowable)
+															.contains("requires OpenCL version"))
 				JOptionPane.showMessageDialog(null,
 																			"Sorry, but your version of OpenCL is not supported (min 1.2).",
 																			"Unsupported OpenCL version",
