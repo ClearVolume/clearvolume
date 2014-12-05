@@ -2,16 +2,15 @@ package clearvolume.utils;
 
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.net.URL;
 
-import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 public class ClearVolumeJFrame extends JFrame
 {
 
-	private static final String cClearVolumeWindowIconRessourcePath = "/clearvolume/icon/ClearVolumeIcon32.png";
+	private static final String cClearVolumeWindowIconRessourcePath = "/clearvolume/icon/ClearVolumeIcon256.png";
 	/**
 	 * 
 	 */
@@ -43,22 +42,20 @@ public class ClearVolumeJFrame extends JFrame
 
 	private void setClearVolumeIcon()
 	{
-		/*ImageIcon lImageIcon = SwingUtilities.loadIcon(	getClass(),
-																										cClearVolumeWindowIconRessourcePath);
-		if (lImageIcon == null)
-		{
-			System.err.println("Cannot find ClearVolume window icon at" + cClearVolumeWindowIconRessourcePath);
-			return;
-		}
-		setIconImage(lImageIcon.getImage());/**/
-
 		try
 		{
-			InputStream lResourceAsStream = this.getClass()
-																					.getResourceAsStream(cClearVolumeWindowIconRessourcePath);
-			setIconImage(ImageIO.read(lResourceAsStream));
+			URL lImageURL = getClass().getResource(cClearVolumeWindowIconRessourcePath);
+			ImageIcon lImageIcon = new ImageIcon(lImageURL);
+
+			if(AppleMac.isMac())
+			{
+				AppleMac.setApplicationIcon(lImageIcon.getImage());
+				AppleMac.setApplicationName("ClearVolume");
+			}
+			
+			this.setIconImage(lImageIcon.getImage());
 		}
-		catch (IOException e)
+		catch (Throwable e)
 		{
 			e.printStackTrace();
 		}

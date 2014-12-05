@@ -116,11 +116,20 @@ public abstract class ClearVolumeRendererBase	implements
 					mControlFrame = new ControlPanelJFrame();
 					mControlFrame.setClearVolumeRendererInterface(lThis);
 
-					String lHostName = InetAddress.getLocalHost()
-																				.getHostName()
-																				.toLowerCase();
+					String lHostName = "localhost";
+					try
+					{
+						lHostName = InetAddress.getLocalHost()
+																					.getHostName()
+																					.toLowerCase();
+					}
+					catch (Throwable e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
-					// LOL: the pros drg the mouse on the canvas while clicking Shift or
+					// LOL: the pros drag the mouse on the canvas while clicking Shift or
 					// Control...
 					if (!(lHostName.contains("mpi-cbg") || lHostName.contains("myers")))
 						mControlFrame.setVisible(true);

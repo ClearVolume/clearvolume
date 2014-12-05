@@ -186,7 +186,7 @@ jar {
     from(classpath)
     
     manifest {
-        attributes("Class-Path": ".")
+        attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')
     }
 }
 
@@ -242,6 +242,8 @@ task copyCapsule{
         }
     }
 }
+
+copyCapsule.dependsOn build
 
 
 task packagecvlib {
@@ -324,6 +326,136 @@ task packagelvcvlib {
     }
   }
 }
+
+task packageosxapp {
+  
+    copy
+    {
+        from('./deploy/osx/ClearVolume.app/')
+        into('./build/executable/ClearVolume.app/')
+        include "*.*"
+        include '**/**'
+        include '**/**/**'
+        include '**/**/**/**/'    
+        include '**/**/**/**/**/'  
+        include '**/**/**/**/**/**/'    
+        include '**/**/**/**/**/**/**/'
+        include '**/**/**/**/**/**/**/**/'      
+    }
+
+    def javahome = System.getenv('JAVA_HOME')
+
+    copy
+    {
+        from(javahome+'/jre/')
+        into('./build/executable/ClearVolume.app/Contents/Resources/jre')
+        include "*.*"
+        include '**/**'
+        include '**/**/**'
+        include '**/**/**/**/'    
+        include '**/**/**/**/**/'  
+        include '**/**/**/**/**/**/'    
+        include '**/**/**/**/**/**/**/'
+        include '**/**/**/**/**/**/**/**/'  
+        exclude 'libjfxwebkit.dylib'
+        exclude 'jfxrt.jar'
+    }
+
+    copy
+    {
+        from('./build/executable/')
+        into('./build/executable/ClearVolume.app/Contents/Resources')
+        include('ClearVolume.exe.jar')
+    }
+}
+
+packageosxapp.dependsOn copyCapsule
+
+task packagewinapp(type:Exec) {
+  
+    def userhome = System.getenv('HOME')
+
+    copy
+    {
+        from(userhome+'/.winjre/')
+        into('./build/executable/ClearVolumeWin/jre')
+        include "*.*"
+        include '**/**'
+        include '**/**/**'
+        include '**/**/**/**/'    
+        include '**/**/**/**/**/'  
+        include '**/**/**/**/**/**/'    
+        include '**/**/**/**/**/**/**/'
+        include '**/**/**/**/**/**/**/**/'  
+        exclude 'libjfxwebkit.dll'
+        exclude 'jfxrt.jar'
+    }
+
+    copy
+    {
+        from('./deploy/win/libs/')
+        into('./build/executable/ClearVolumeWin/dlls/')
+        include "*.dll"
+    }
+
+    workingDir '.'
+    commandLine './packagewinapp.sh'
+
+    standardOutput = new ByteArrayOutputStream()
+
+    ext.output = {return standardOutput.toString()}
+}
+
+packagewinapp.dependsOn copyCapsule
+
+
+task collectdistribution(dependsOn:[packageosxapp,packagewinapp]) {
+  
+    copy
+    {
+        from('./build/executable/')
+        into('./build/distribution/')
+        include "*.*"
+        include '**/**'
+        include '**/**/**'
+        include '**/**/**/**/'    
+        include '**/**/**/**/**/'  
+        include '**/**/**/**/**/**/'    
+        include '**/**/**/**/**/**/**/'
+        include '**/**/**/**/**/**/**/**/'      
+    }
+
+    copy
+    {
+        from('./build/libs/')
+        into('./build/distribution/javalibs')
+        include "*.*"
+        include '**/**'
+    }
+}
+
+
+task packagedmg(type:Exec,dependsOn:collectdistribution ) {
+  
+    workingDir '.'
+    commandLine './packagedmg.sh'
+    standardOutput = new ByteArrayOutputStream()
+    ext.output = {return standardOutput.toString()}
+}
+
+
+task packagezip(type:Exec,dependsOn:collectdistribution) {
+  
+    workingDir '.'
+    commandLine './packagezip.sh'
+    standardOutput = new ByteArrayOutputStream()
+    ext.output = {return standardOutput.toString()}
+}
+
+
+
+
+
 
 
 

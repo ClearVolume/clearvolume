@@ -1,6 +1,7 @@
 package clearvolume.volume.sink.filter;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -76,8 +77,8 @@ public class ChannelFilterSink extends RelaySinkAdapter implements
 			@Override
 			public void run() {
 				synchronized (mLock) {
-					ArrayList<Integer> lOldActiveChannels = new ArrayList<>(
-							mActiveChannelMap.keySet());
+					Set<Integer> lOldActiveChannelsKeySet = mActiveChannelMap.keySet();
+					ArrayList<Integer> lOldActiveChannels = new ArrayList<Integer>(lOldActiveChannelsKeySet);
 					mActiveChannelMap.clear();
 					for (int lActiveChannel : pActiveChannels) {
 						mActiveChannelMap.put(lActiveChannel, true);

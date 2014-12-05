@@ -7,6 +7,12 @@ import java.net.SocketAddress;
 import java.nio.channels.UnresolvedAddressException;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
+
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.filter.ChannelFilterSink;
@@ -135,13 +141,102 @@ public abstract class ClearVolumeTCPClientHelper
 		}
 		catch (UnresolvedAddressException uae)
 		{
-			reportError(uae, "Cannot find host: '" + pServerAddress + "'");
+			reportErrorWithPopUp(	uae,
+														"Cannot find host: '" + pServerAddress
+																+ "'");
 		}
 		catch (Throwable e)
 		{
-			reportError(e, e.getLocalizedMessage());
+			reportErrorWithPopUp(e, e.getLocalizedMessage());
 			e.printStackTrace();
 		}
+	}
+
+	public void reportErrorWithPopUp(	Throwable pThrowable,
+																		String pErrorMessage)
+	{
+		reportError(pThrowable, pErrorMessage);
+
+		try
+		{
+			if (pThrowable.getLocalizedMessage() != null && pThrowable.getLocalizedMessage()
+																																.toLowerCase()
+																																.contains("initSingleton"))
+				JOptionPane.showMessageDialog(null,
+																			"Sorry, but your OpenGL driver is not supported.",
+																			"OpenGL error",
+																			JOptionPane.ERROR_MESSAGE);
+			else if (pThrowable.getClass()
+													.toString()
+													.toLowerCase()
+													.contains("CLException"))
+				JOptionPane.showMessageDialog(null,
+																			"Sorry, but your version of OpenCL is not supported (min 1.2).",
+																			"Unsupported OpenCL version",
+																			JOptionPane.ERROR_MESSAGE);
+			else if (pThrowable.getClass()
+													.toString()
+													.toLowerCase()
+													.contains("CudaException"))
+				JOptionPane.showMessageDialog(null,
+																			"Sorry, but your version of CUDA is not supported (min 6.5).",
+																			"Unsupported OpenCL version",
+																			JOptionPane.ERROR_MESSAGE);
+			else if (pThrowable.getClass()
+													.toString()
+													.contains("UnresolvedAddressException"))
+				JOptionPane.showMessageDialog(null,
+																			"Sorry, but there is no ClearVolume server at that address.",
+																			"Unknown host error",
+																			JOptionPane.ERROR_MESSAGE);
+			else if (pThrowable.getClass()
+													.toString()
+													.contains("ConnectException") && pThrowable.getLocalizedMessage() != null
+								&& pThrowable.getLocalizedMessage()
+															.toLowerCase()
+															.contains("connection refused"))
+				JOptionPane.showMessageDialog(null,
+																			"Sorry, but there is no ClearVolume server listening on that machine/port",
+																			"Connection refused error",
+																			JOptionPane.ERROR_MESSAGE);
+			else
+				showEditableOptionPane(	ExceptionUtils.getFullStackTrace(pThrowable),
+																"Unknown error, please copy and send to royer@mpi-cbg.de",
+																JOptionPane.ERROR_MESSAGE);
+		}
+		catch (Throwable e)
+		{
+			try
+			{
+				showEditableOptionPane(	ExceptionUtils.getFullStackTrace(e) + "\n"
+																		+ ExceptionUtils.getFullStackTrace(pThrowable),
+																"Unknown error, please copy and send to royer@mpi-cbg.de",
+																JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
+			}
+			catch (Throwable e1)
+			{
+				e1.printStackTrace();
+			}
+		}
+
+	}
+
+	private void showEditableOptionPane(String pText,
+																			String pTitle,
+																			int pMessageType)
+	{
+		JTextArea ta = new JTextArea(48, 100);
+		ta.setText(pText);
+		ta.setWrapStyleWord(true);
+		ta.setLineWrap(false);
+		ta.setCaretPosition(0);
+		ta.setEditable(false);
+
+		JOptionPane.showMessageDialog(null,
+																	new JScrollPane(ta),
+																	pTitle,
+																	pMessageType);
 	}
 
 	public abstract void reportError(Throwable e, String pErrorMessage);

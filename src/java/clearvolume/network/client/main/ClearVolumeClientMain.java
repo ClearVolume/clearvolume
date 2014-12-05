@@ -2,12 +2,15 @@ package clearvolume.network.client.main;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
@@ -50,8 +53,6 @@ public class ClearVolumeClientMain
 			e.printStackTrace();
 		}
 	}
-
-
 
 	public static void connect(	final String pHostName,
 															final int pPortNumber,
@@ -103,13 +104,24 @@ public class ClearVolumeClientMain
 		mApplicationJFrame = new ClearVolumeJFrame();
 		mApplicationJFrame.setResizable(false);
 		mApplicationJFrame.getContentPane().setBackground(Color.WHITE);
-		mApplicationJFrame.setBounds(100, 100, 529, 455);
+		mApplicationJFrame.setBounds(100, 100, 529, 529);
 		mApplicationJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JMenuBar lMenuBar = new JMenuBar();
 		mApplicationJFrame.setJMenuBar(lMenuBar);
 
 		JMenuItem lConnectToJMenuItem = new JMenuItem("About");
+		lConnectToJMenuItem.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				JOptionPane.showMessageDialog(mApplicationJFrame,
+																			"ClearVolume 1.0\nMPI-CBG\nAuthors: Loic Royer, Martin Weigert, Ulrik Günther.\n Contact: royer@mpi-cbg.de",
+																			"About ClearVolume",
+																			JOptionPane.INFORMATION_MESSAGE);
+			}
+		});
 		lMenuBar.add(lConnectToJMenuItem);
 		mApplicationJFrame.getContentPane().setLayout(null);
 
@@ -123,7 +135,7 @@ public class ClearVolumeClientMain
 		ConnectionPanel connectionPanel = new ConnectionPanel();
 		connectionPanel.setBackground(Color.WHITE);
 		connectionPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-		connectionPanel.setBounds(8, 174, 512, 231);
+		connectionPanel.setBounds(8, 174, 512, 305);
 		mApplicationJFrame.getContentPane().add(connectionPanel);
 
 	}

@@ -1,0 +1,18 @@
+#!/bin/bash
+# ClearVolume OSX APP Bundle launcher
+# Author: Loic Royer (2014)
+
+# Where we get the paths from
+name=$(basename "$0")
+echo $name
+
+dirn=$(dirname "$0")
+echo $dirn
+
+bundle=$(cd "$dirn/../../" && pwd)
+bundle_contents="$bundle"/Contents
+bundle_res="$bundle_contents"/Resources/
+
+#pwd
+mkdir ~/.clearvolume/
+$bundle_res/jre/bin/java -jar $bundle_res/ClearVolume.exe.jar &> ~/.clearvolume/lastlog.txt
