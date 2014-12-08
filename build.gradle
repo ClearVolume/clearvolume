@@ -162,6 +162,7 @@ dependencies
     compile 'com.nativelibs4java:bridj:0.7-SNAPSHOT'
     compile 'com.nativelibs4java:javacl:1.0-SNAPSHOT'
 
+    compile group: "royer", name: "CoreMem", version: "1.+", changing: true, transitive:true
     compile group: "royer", name: "ClearGL", version: "1.0-SNAPSHOT", changing: true, transitive: true 
     compile group: "royer", name: "ClearCuda", version: "1.0-SNAPSHOT", changing: true, transitive: true 
     compile fileTree(dir: 'libs/jcuda', include: '*.jar')
@@ -176,6 +177,10 @@ repositories
     maven 
     {
         url "http://bitbucket.org/api/1.0/repositories/clearvolume/clearvolumemavenrepo/raw/master/"
+    } 
+    maven 
+    {
+        url "http://bitbucket.org/api/1.0/repositories/rtlib/rtlibmavenrepo/raw/master/"
     } 
     maven 
     {
