@@ -153,6 +153,9 @@ dependencies
     compile group: 'commons-lang', name: 'commons-lang', version: '2.+'
     compile group: 'commons-io', name: 'commons-io', version: '2.+'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.+'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.1'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.1'
+    
     compile 'net.sf.trove4j:trove4j:3.0.3'
     compile 'com.miglayout:miglayout:3.7.4'
     compile 'args4j:args4j:2.0.29'
