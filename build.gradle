@@ -11,7 +11,24 @@ apply plugin: 'maven-publish'
 apply plugin: 'c'
 apply plugin: 'cpp'
 
-
+ext { 
+    javaHome = System.getenv('JAVA_HOME')
+    javaHomeInclude = javaHome + '/include'
+    if (System.properties['os.name'].toLowerCase().contains('linux'))
+    {
+        javaHomeIncludeOs = javaHomeInclude + '/linux'
+    }
+    else
+    {
+        javaHomeIncludeOs = javaHomeInclude + '/win32'
+    }
+}
+dependencies {
+    if (! javaHome) {
+        logger.error('JAVA_HOME is not set.')
+    }
+    println 'JAVA_HOME: ' + javaHome
+}
 
 model {
     platforms {
@@ -24,7 +41,7 @@ model {
         libs(PrebuiltLibraries) {
             jvm {
                 binaries.withType(SharedLibraryBinary) {
-                    sharedLibraryFile = file("./src/cpp/jvmlib/jvm.lib")
+                    sharedLibraryFile = file(javaHome + "/lib/jvm.lib")
                 }
             }
         }
@@ -70,7 +87,6 @@ executables {
         targetPlatforms "x64"
         binaries.all {
             lib libraries.cvlib.shared 
-            //cCompiler.args "-ljvm", "-std=gnu99" 
         }
     }
 }
