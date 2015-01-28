@@ -65,12 +65,12 @@ public class ClearVolumeNetworkDemo
 					if (i % 1000 == 0)
 						System.out.println("sending volume with index=" + i);
 					Volume<Character> lVolume = lVolumeManager.requestAndWaitForVolume(	1,
-																																							TimeUnit.MILLISECONDS,
-																																							Character.class,
-																																							1,
-																																							cWidth,
-																																							cHeight,
-																																							cDepth);
+							TimeUnit.MILLISECONDS,
+							Character.class,
+							1,
+							cWidth,
+							cHeight,
+							cDepth);
 
 					final long lTimePoint = i / pNumberOfChannels;
 					final int lChannleID = (int) (i % pNumberOfChannels);
@@ -120,24 +120,25 @@ public class ClearVolumeNetworkDemo
 	public void startClient() throws IOException, InterruptedException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
-																																														256,
-																																														256,
-																																														2,
-																																														256,
-																																														256,
-																																														2);
+				256,
+				256,
+				2,
+				256,
+				256,
+				2,
+				false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																										lClearVolumeRenderer.createCompatibleVolumeManager(cNumberOfAvailableVolumes),
-																																										10,
-																																										TimeUnit.MILLISECONDS);
+				lClearVolumeRenderer.createCompatibleVolumeManager(cNumberOfAvailableVolumes),
+				10,
+				TimeUnit.MILLISECONDS);
 
 		ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lClearVolumeRendererSink);
 
 		SocketAddress lClientSocketAddress = new InetSocketAddress(	"localhost",
-																																ClearVolumeSerialization.cStandardTCPPort);
+				ClearVolumeSerialization.cStandardTCPPort);
 		assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
 
 		assertTrue(lClearVolumeTCPClient.start());

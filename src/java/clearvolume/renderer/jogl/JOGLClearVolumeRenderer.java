@@ -29,6 +29,7 @@ import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
 import clearvolume.renderer.ClearVolumeRendererBase;
 
+import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 
@@ -41,7 +42,7 @@ import com.jogamp.newt.event.WindowEvent;
  * @author Loic Royer 2014
  *
  */
-public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBase implements ClearGLEventListener {
+public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase implements ClearGLEventListener {
 
 	static {
 		// attempt at solving Jug's Dreadlock bug:
@@ -54,6 +55,7 @@ public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBa
 
 	// ClearGL Window.
 	private ClearGLWindow mClearGLWindow;
+	private final NewtCanvasAWT newtCanvasAWT;
 	private volatile int mLastWindowWidth, mLastWindowHeight;
 	private final ReentrantLock mDisplayReentrantLock = new ReentrantLock();
 
@@ -112,7 +114,7 @@ public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBa
 	 * @param pWindowWidth
 	 * @param pWindowHeight
 	 */
-	public JOGLClearVolumeFrameRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight ) {
+	public JOGLClearVolumeRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight ) {
 		this( pWindowName, pWindowWidth, pWindowHeight, 1 );
 	}
 
@@ -125,7 +127,7 @@ public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBa
 	 * @param pWindowHeight
 	 * @param pBytesPerVoxel
 	 */
-	public JOGLClearVolumeFrameRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel ) {
+	public JOGLClearVolumeRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel ) {
 		this( pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel, 768, 768 );
 	}
 
@@ -140,8 +142,26 @@ public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBa
 	 * @param pMaxTextureWidth
 	 * @param pMaxTextureHeight
 	 */
-	public JOGLClearVolumeFrameRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel, final int pMaxTextureWidth, final int pMaxTextureHeight ) {
+	public JOGLClearVolumeRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel, final int pMaxTextureWidth, final int pMaxTextureHeight ) {
 		this( pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel, pMaxTextureWidth, pMaxTextureHeight, 1 );
+	}
+
+	/**
+	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
+	 * name, its dimensions, and bytes-per-voxel.
+	 *
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 * @param pBytesPerVoxel
+	 * @param pMaxTextureWidth
+	 * @param pMaxTextureHeight
+	 * @param useInCanvas
+	 *            if true, this Renderer will not be displayed in a window of
+	 *            it's own, but must be embedded in a GUI as Canvas.
+	 */
+	public JOGLClearVolumeRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel, final int pMaxTextureWidth, final int pMaxTextureHeight, final boolean useInCanvas ) {
+		this( pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel, pMaxTextureWidth, pMaxTextureHeight, 1, useInCanvas );
 	}
 
 	/**
@@ -158,17 +178,37 @@ public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBa
 	 * @param pMaxTextureHeight
 	 * @param pNumberOfRenderLayers
 	 */
+	public JOGLClearVolumeRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel, final int pMaxTextureWidth, final int pMaxTextureHeight, final int pNumberOfRenderLayers ) {
+		this( pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel, pMaxTextureWidth, pMaxTextureHeight, 1, false );
+	}
 
+	/**
+	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
+	 * name, its dimensions, number of bytes-per-voxel, max texture width,
+	 * height
+	 * and number of render layers.
+	 *
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 * @param pBytesPerVoxel
+	 * @param pMaxTextureWidth
+	 * @param pMaxTextureHeight
+	 * @param pNumberOfRenderLayers
+	 * @param useInCanvas
+	 *            if true, this Renderer will not be displayed in a window of
+	 *            it's own, but must be embedded in a GUI as Canvas.
+	 */
 	@SuppressWarnings( "unchecked" )
-	public JOGLClearVolumeFrameRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel, final int pMaxTextureWidth, final int pMaxTextureHeight, final int pNumberOfRenderLayers ) {
+	public JOGLClearVolumeRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel, final int pMaxTextureWidth, final int pMaxTextureHeight, final int pNumberOfRenderLayers, final boolean useInCanvas ) {
 		super( pNumberOfRenderLayers );
 
 		mTextureWidth = Math.min( mMaxTextureWidth, pWindowWidth );
 		mTextureHeight = Math.min( mMaxTextureHeight, pWindowHeight );
 
 		mWindowName = pWindowName;
-		mLastWindowWidth = pMaxTextureWidth;
-		mLastWindowHeight = pMaxTextureHeight;
+		mLastWindowWidth = pWindowWidth;
+		mLastWindowHeight = pWindowHeight;
 		setNumberOfRenderLayers( pNumberOfRenderLayers );
 
 		mLayerTextures = new GLTexture[ getNumberOfRenderLayers() ];
@@ -178,11 +218,12 @@ public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBa
 		resetRotationTranslation();
 		setBytesPerVoxel( pBytesPerVoxel );
 
-		// Initialize the GL component
-		// final GLProfile lProfile = GLProfile.getMaxFixedFunc(true);
-		// final GLCapabilities lCapabilities = new GLCapabilities(lProfile);
-
 		mClearGLWindow = new ClearGLWindow( pWindowName, pWindowWidth, pWindowHeight, this );
+		if ( useInCanvas ) {
+			newtCanvasAWT = new NewtCanvasAWT( mClearGLWindow.getGLWindow() );
+		} else {
+			newtCanvasAWT = null;
+		}
 
 		// Initialize the mouse controls
 		final MouseControl lMouseControl = new MouseControl( this );
@@ -338,8 +379,8 @@ public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBa
 
 			// texture display: construct the program and related objects
 			try {
-				final InputStream lVertexShaderResourceAsStream = JOGLClearVolumeFrameRenderer.class.getResourceAsStream( "shaders/tex_vert.glsl" );
-				final InputStream lFragmentShaderResourceAsStream = JOGLClearVolumeFrameRenderer.class.getResourceAsStream( "shaders/tex_frag.glsl" );
+				final InputStream lVertexShaderResourceAsStream = JOGLClearVolumeRenderer.class.getResourceAsStream( "shaders/tex_vert.glsl" );
+				final InputStream lFragmentShaderResourceAsStream = JOGLClearVolumeRenderer.class.getResourceAsStream( "shaders/tex_frag.glsl" );
 
 				final String lVertexShaderSource = IOUtils.toString( lVertexShaderResourceAsStream, "UTF-8" );
 				String lFragmentShaderSource = IOUtils.toString( lFragmentShaderResourceAsStream, "UTF-8" );
@@ -405,7 +446,7 @@ public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBa
 
 			// box display: construct the program and related objects
 			try {
-				mBoxGLProgram = GLProgram.buildProgram( lGL4, JOGLClearVolumeFrameRenderer.class, "shaders/box_vert.glsl", "shaders/box_frag.glsl" );
+				mBoxGLProgram = GLProgram.buildProgram( lGL4, JOGLClearVolumeRenderer.class, "shaders/box_vert.glsl", "shaders/box_frag.glsl" );
 
 				// set the line with of the box
 				lGL4.glLineWidth( cBoxLineWidth );
@@ -704,7 +745,11 @@ public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBa
 		if ( lLocked ) {
 			try {
 				mClearGLWindow.getGLWindow().display();
-				setVisible( true );
+				if ( newtCanvasAWT != null ) {
+					mClearGLWindow.setVisible( true );
+				} else {
+					setVisible( true );
+				}
 			}
 			finally {
 				mDisplayReentrantLock.unlock();
@@ -721,6 +766,14 @@ public abstract class JOGLClearVolumeFrameRenderer extends ClearVolumeRendererBa
 		for ( final boolean lBoolean : pBooleanArray )
 			if ( lBoolean ) return true;
 		return false;
+	}
+
+	/**
+	 * @return the newtCanvasAWT
+	 */
+	@Override
+	public NewtCanvasAWT getNewtCanvasAWT() {
+		return newtCanvasAWT;
 	}
 
 }

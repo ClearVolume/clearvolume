@@ -36,7 +36,7 @@ import clearcuda.CudaFunction;
 import clearcuda.CudaModule;
 import clearcuda.CudaOpenGLBufferObject;
 import clearcuda.CudaTextureReference;
-import clearvolume.renderer.jogl.JOGLClearVolumeFrameRenderer;
+import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
 
 /**
  * Class JCudaClearVolumeRenderer
@@ -47,7 +47,7 @@ import clearvolume.renderer.jogl.JOGLClearVolumeFrameRenderer;
  * @author Loic Royer 2014
  *
  */
-public class JCudaClearVolumeRenderer extends JOGLClearVolumeFrameRenderer implements
+public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer implements
 																																			GLEventListener
 {
 
@@ -179,7 +179,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeFrameRenderer imple
 																	final int pBytesPerVoxel,
 																	final int pMaxTextureWidth,
 																	final int pMaxTextureHeight,
-																	final int pNumberOfRenderLayers)
+																	final int pNumberOfRenderLayers,
+																	final boolean useInCanvas )
 	{
 		super("[CUDA] " + pWindowName,
 					pWindowWidth,
@@ -187,7 +188,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeFrameRenderer imple
 					pBytesPerVoxel,
 					pMaxTextureWidth,
 					pMaxTextureHeight,
-					pNumberOfRenderLayers);
+					pNumberOfRenderLayers,
+					useInCanvas);
 		mTransferFunctionCudaArrays = new CudaArray[pNumberOfRenderLayers];
 		mVolumeDataCudaArrays = new CudaArray[pNumberOfRenderLayers];
 		mOpenGLBufferDevicePointers = new CudaOpenGLBufferObject[pNumberOfRenderLayers];

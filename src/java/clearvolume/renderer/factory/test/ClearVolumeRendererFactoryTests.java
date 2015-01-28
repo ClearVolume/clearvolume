@@ -17,8 +17,9 @@ public class ClearVolumeRendererFactoryTests
 		try
 		{
 			ClearVolumeRendererInterface lNewBestRenderer = ClearVolumeRendererFactory.newBestRenderer(	"Test",
-																																																	128,
-																																																	128);
+					128,
+					128,
+					false);
 			System.out.println(lNewBestRenderer.getClass());
 			assertNotNull(lNewBestRenderer);
 		}
