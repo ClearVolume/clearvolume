@@ -2,6 +2,9 @@ package clearvolume.renderer.jogl;
 
 import static java.lang.Math.max;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -13,6 +16,8 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLProfile;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.IOUtils;
 
@@ -29,19 +34,20 @@ import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
 import clearvolume.renderer.ClearVolumeRendererBase;
 
+import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 
 /**
  * Abstract Class JoglPBOVolumeRenderer
- * 
+ *
  * Classes that derive from this abstract class are provided with basic
  * JOGL-based display capability for implementing a ClearVolumeRenderer.
- * 
+ *
  * @author Loic Royer 2014
- * 
+ *
  */
-public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase implements ClearGLEventListener {
+public abstract class JOGLClearVolumeComponentRenderer extends ClearVolumeRendererBase implements ClearGLEventListener {
 
 	static {
 		// attempt at solving Jug's Dreadlock bug:
@@ -49,12 +55,16 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 //		System.out.println( lProfile );
 
 		// load icons:
-		ClearGLWindow.setWindowIcons( "clearvolume/icon/ClearVolumeIcon16.png", "clearvolume/icon/ClearVolumeIcon32.png", "clearvolume/icon/ClearVolumeIcon64.png", "clearvolume/icon/ClearVolumeIcon128.png", "clearvolume/icon/ClearVolumeIcon256.png", "clearvolume/icon/ClearVolumeIcon512.png" );
+//		ClearGLWindow.setWindowIcons( "clearvolume/icon/ClearVolumeIcon16.png", "clearvolume/icon/ClearVolumeIcon32.png", "clearvolume/icon/ClearVolumeIcon64.png", "clearvolume/icon/ClearVolumeIcon128.png", "clearvolume/icon/ClearVolumeIcon256.png", "clearvolume/icon/ClearVolumeIcon512.png" );
 	}
 
 	// ClearGL Window.
 	private ClearGLWindow mClearGLWindow;
-	private volatile int mLastWindowWidth, mLastWindowHeight;
+	JFrame frame;
+	private boolean isFullScreen = false;
+	private final Container container;
+	private final NewtCanvasAWT newtCanvasAWT;
+	private volatile int mLastGLWindowWidth, mLastGLWindowHeight;
 	private final ReentrantLock mDisplayReentrantLock = new ReentrantLock();
 
 	// pixelbuffer objects.
@@ -107,32 +117,32 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
 	 * name and its dimensions.
-	 * 
+	 *
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
 	 */
-	public JOGLClearVolumeRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight ) {
+	public JOGLClearVolumeComponentRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight ) {
 		this( pWindowName, pWindowWidth, pWindowHeight, 1 );
 	}
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
 	 * name, its dimensions, and bytes-per-voxel.
-	 * 
+	 *
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
 	 * @param pBytesPerVoxel
 	 */
-	public JOGLClearVolumeRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel ) {
+	public JOGLClearVolumeComponentRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel ) {
 		this( pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel, 768, 768 );
 	}
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
 	 * name, its dimensions, and bytes-per-voxel.
-	 * 
+	 *
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
@@ -140,7 +150,7 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 	 * @param pMaxTextureWidth
 	 * @param pMaxTextureHeight
 	 */
-	public JOGLClearVolumeRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel, final int pMaxTextureWidth, final int pMaxTextureHeight ) {
+	public JOGLClearVolumeComponentRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel, final int pMaxTextureWidth, final int pMaxTextureHeight ) {
 		this( pWindowName, pWindowWidth, pWindowHeight, pBytesPerVoxel, pMaxTextureWidth, pMaxTextureHeight, 1 );
 	}
 
@@ -149,7 +159,7 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 	 * name, its dimensions, number of bytes-per-voxel, max texture width,
 	 * height
 	 * and number of render layers.
-	 * 
+	 *
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
@@ -160,15 +170,15 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 	 */
 
 	@SuppressWarnings( "unchecked" )
-	public JOGLClearVolumeRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel, final int pMaxTextureWidth, final int pMaxTextureHeight, final int pNumberOfRenderLayers ) {
+	public JOGLClearVolumeComponentRenderer( final String pWindowName, final int pWindowWidth, final int pWindowHeight, final int pBytesPerVoxel, final int pMaxTextureWidth, final int pMaxTextureHeight, final int pNumberOfRenderLayers ) {
 		super( pNumberOfRenderLayers );
 
 		mTextureWidth = Math.min( mMaxTextureWidth, pWindowWidth );
 		mTextureHeight = Math.min( mMaxTextureHeight, pWindowHeight );
 
 		mWindowName = pWindowName;
-		mLastWindowWidth = pMaxTextureWidth;
-		mLastWindowHeight = pMaxTextureHeight;
+		mLastGLWindowWidth = pWindowWidth;
+		mLastGLWindowHeight = pWindowHeight;
 		setNumberOfRenderLayers( pNumberOfRenderLayers );
 
 		mLayerTextures = new GLTexture[ getNumberOfRenderLayers() ];
@@ -178,11 +188,23 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 		resetRotationTranslation();
 		setBytesPerVoxel( pBytesPerVoxel );
 
-		// Initialize the GL component
-		// final GLProfile lProfile = GLProfile.getMaxFixedFunc(true);
-		// final GLCapabilities lCapabilities = new GLCapabilities(lProfile);
-
 		mClearGLWindow = new ClearGLWindow( pWindowName, pWindowWidth, pWindowHeight, this );
+		newtCanvasAWT = new NewtCanvasAWT( mClearGLWindow.getGLWindow() );
+
+		frame = new JFrame( "ClearVolume" );
+		frame.setLayout( new BorderLayout() );
+		container = new Container();
+		container.setLayout( new BorderLayout() );
+		container.add( newtCanvasAWT, BorderLayout.CENTER );
+		frame.setSize( new Dimension( mLastGLWindowWidth, mLastGLWindowHeight ) );
+		frame.add( container );
+
+//		final Dimension containerSize = container1.getPreferredSize();
+//		mClearGLWindow.getGLWindow().setSize( containerSize.width, containerSize.height );
+//		System.out.println( String.format( "\n\n>> %d, %d <<\n", mLastGLWindowWidth, mLastGLWindowHeight ) );
+//		mLastGLWindowWidth = containerSize.width;
+//		mLastGLWindowHeight = containerSize.height;
+//		System.out.println( String.format( "\n\n>> %d, %d <<\n", containerSize.width, containerSize.height ) );
 
 		// Initialize the mouse controls
 		final MouseControl lMouseControl = new MouseControl( this );
@@ -224,7 +246,7 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 	/**
 	 * Interface method implementation
-	 * 
+	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#isShowing()
 	 */
 	@Override
@@ -234,17 +256,18 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 	/**
 	 * Interface method implementation
-	 * 
+	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVisible(boolean)
 	 */
 	@Override
 	public void setVisible( final boolean pIsVisible ) {
 		mClearGLWindow.getGLWindow().setVisible( pIsVisible );
+		frame.setVisible( true );
 	}
 
 	/**
 	 * Interface method implementation
-	 * 
+	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowName()
 	 */
 	@Override
@@ -254,27 +277,29 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 	/**
 	 * Interface method implementation
-	 * 
+	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowWidth()
 	 */
 	@Override
 	public int getWindowWidth() {
-		return mClearGLWindow.getGLWindow().getWidth();
+//		return mClearGLWindow.getGLWindow().getWidth();
+		return frame.getWidth();
 	}
 
 	/**
 	 * Interface method implementation
-	 * 
+	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowHeight()
 	 */
 	@Override
 	public int getWindowHeight() {
-		return mClearGLWindow.getGLWindow().getHeight();
+//		return mClearGLWindow.getGLWindow().getHeight();
+		return frame.getHeight();
 	}
 
 	/**
 	 * Returns the render texture width.
-	 * 
+	 *
 	 * @return texture width
 	 */
 	public int getTextureWidth() {
@@ -283,7 +308,7 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 	/**
 	 * Returns the render texture height.
-	 * 
+	 *
 	 * @return texture height
 	 */
 	public int getTextureHeight() {
@@ -308,38 +333,16 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 		lGL4.glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
 		lGL4.glClear( GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT );
 
-		// getClearGLWindow().setOrthoProjectionMatrix(0,
-		// drawable.getSurfaceWidth(),
-		// 0,
-		// drawable.getSurfaceHeight(),
-		// 0,
-		// 1);
-
 		setDefaultProjectionMatrix();
 
 		mQuadProjectionMatrix.setOrthoProjectionMatrix( -1, 1, -1, 1, 0, 1000 );
 
 		if ( initVolumeRenderer() ) {
-			/*
-			 * if (mPixelBufferObject != null)
-			 * {
-			 * unregisterPBO(mPixelBufferObject.getId());
-			 * mPixelBufferObject.close();
-			 * mPixelBufferObject = null;
-			 * }
-			 * 
-			 * /*
-			 * if (mTexture != null)
-			 * {
-			 * mTexture.close();
-			 * mTexture = null;
-			 * }/*
-			 */
 
 			// texture display: construct the program and related objects
 			try {
-				final InputStream lVertexShaderResourceAsStream = JOGLClearVolumeRenderer.class.getResourceAsStream( "shaders/tex_vert.glsl" );
-				final InputStream lFragmentShaderResourceAsStream = JOGLClearVolumeRenderer.class.getResourceAsStream( "shaders/tex_frag.glsl" );
+				final InputStream lVertexShaderResourceAsStream = JOGLClearVolumeComponentRenderer.class.getResourceAsStream( "shaders/tex_vert.glsl" );
+				final InputStream lFragmentShaderResourceAsStream = JOGLClearVolumeComponentRenderer.class.getResourceAsStream( "shaders/tex_frag.glsl" );
 
 				final String lVertexShaderSource = IOUtils.toString( lVertexShaderResourceAsStream, "UTF-8" );
 				String lFragmentShaderSource = IOUtils.toString( lFragmentShaderResourceAsStream, "UTF-8" );
@@ -405,7 +408,7 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 			// box display: construct the program and related objects
 			try {
-				mBoxGLProgram = GLProgram.buildProgram( lGL4, JOGLClearVolumeRenderer.class, "shaders/box_vert.glsl", "shaders/box_frag.glsl" );
+				mBoxGLProgram = GLProgram.buildProgram( lGL4, JOGLClearVolumeComponentRenderer.class, "shaders/box_vert.glsl", "shaders/box_frag.glsl" );
 
 				// set the line with of the box
 				lGL4.glLineWidth( cBoxLineWidth );
@@ -473,7 +476,7 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 	/**
 	 * Register PBO object with any descendant of this abstract class.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @param pPixelBufferObjectId
 	 */
@@ -481,7 +484,7 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 	/**
 	 * Unregisters PBO object with any descendant of this abstract class.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @param pPixelBufferObjectId
 	 */
@@ -624,7 +627,7 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 	/**
 	 * Interface method implementation
-	 * 
+	 *
 	 * @see javax.media.opengl.GLEventListener#reshape(javax.media.opengl.GLAutoDrawable,
 	 *      int, int, int, int)
 	 */
@@ -653,31 +656,23 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 	/**
 	 * Interface method implementation
-	 * 
+	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#toggleFullScreen()
 	 */
 	@Override
 	public void toggleFullScreen() {
-		try {
-			if ( mClearGLWindow.getGLWindow().isFullscreen() ) {
-				if ( mLastWindowWidth > 0 && mLastWindowHeight > 0 )
-					mClearGLWindow.getGLWindow().setSize( mLastWindowWidth, mLastWindowHeight );
-				mClearGLWindow.getGLWindow().setFullscreen( false );
-			} else {
-				mLastWindowWidth = getWindowWidth();
-				mLastWindowHeight = getWindowHeight();
-				mClearGLWindow.getGLWindow().setFullscreen( true );
-			}
-			// notifyUpdateOfVolumeRenderingParameters();
-			requestDisplay();
-		} catch ( final Exception e ) {
-			e.printStackTrace();
+		if ( isFullScreen ) {
+			frame.setExtendedState( JFrame.NORMAL );
+		} else {
+			frame.setExtendedState( JFrame.MAXIMIZED_BOTH );
 		}
+		isFullScreen = !isFullScreen;
+		frame.setVisible( true );
 	}
 
 	/**
 	 * Interface method implementation
-	 * 
+	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#isFullScreen()
 	 */
 	@Override
@@ -695,7 +690,7 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 	/**
 	 * Interface method implementation
-	 * 
+	 *
 	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
 	 */
 	@Override
@@ -704,6 +699,16 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 		if ( lLocked ) {
 			try {
 				mClearGLWindow.getGLWindow().display();
+				mClearGLWindow.setVisible( true );
+				SwingUtilities.invokeLater( new Runnable() {
+
+					@Override
+					public void run() {
+						if ( !mClearGLWindow.getGLWindow().isFullscreen() ) {
+							frame.setVisible( true );
+						}
+					}
+				} );
 			}
 			finally {
 				mDisplayReentrantLock.unlock();
@@ -713,13 +718,20 @@ public abstract class JOGLClearVolumeRenderer extends ClearVolumeRendererBase im
 
 	@Override
 	public void disableClose() {
-		mClearGLWindow.getGLWindow().setDefaultCloseOperation( WindowClosingMode.DO_NOTHING_ON_CLOSE );
+		mClearGLWindow.getGLWindow().setDefaultCloseOperation( WindowClosingMode.DISPOSE_ON_CLOSE );
 	}
 
 	private boolean anyIsTrue( final boolean[] pBooleanArray ) {
 		for ( final boolean lBoolean : pBooleanArray )
 			if ( lBoolean ) return true;
 		return false;
+	}
+
+	/**
+	 * @return the newtCanvasAWT
+	 */
+	public NewtCanvasAWT getNewtCanvasAWT() {
+		return newtCanvasAWT;
 	}
 
 }

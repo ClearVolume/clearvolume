@@ -6,14 +6,14 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.GLEventListener;
 
 import jcuda.CudaException;
-import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
+import clearvolume.renderer.jogl.JOGLClearVolumeFrameRenderer;
 
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLImage3D;
 import com.nativelibs4java.opencl.CLImageFormat;
 
-public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
+public class OpenCLVolumeRenderer extends JOGLClearVolumeFrameRenderer	implements
 																																	GLEventListener
 {
 	private OpenCLDevice mCLDevice;

@@ -17,8 +17,8 @@ public class ClearVolumeRendererFactory
 	 * @param pWindowHeight
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-																																		final int pWindowWidth,
-																																		final int pWindowHeight)
+			final int pWindowWidth,
+			final int pWindowHeight)
 	{
 		return newBestRenderer(pWindowName, 1024, 1024, 1);
 	}
@@ -34,16 +34,16 @@ public class ClearVolumeRendererFactory
 	 * @param pBytesPerVoxel
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-																																		final int pWindowWidth,
-																																		final int pWindowHeight,
-																																		final int pBytesPerVoxel)
+			final int pWindowWidth,
+			final int pWindowHeight,
+			final int pBytesPerVoxel)
 	{
 		return newBestRenderer(	pWindowName,
-														pWindowWidth,
-														pWindowHeight,
-														pBytesPerVoxel,
-														768,
-														768);
+				pWindowWidth,
+				pWindowHeight,
+				pBytesPerVoxel,
+				768,
+				768);
 	}
 
 	/**
@@ -58,19 +58,19 @@ public class ClearVolumeRendererFactory
 	 * @param pMaxTextureHeight
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-																																		final int pWindowWidth,
-																																		final int pWindowHeight,
-																																		final int pBytesPerVoxel,
-																																		final int pMaxTextureWidth,
-																																		final int pMaxTextureHeight)
+			final int pWindowWidth,
+			final int pWindowHeight,
+			final int pBytesPerVoxel,
+			final int pMaxTextureWidth,
+			final int pMaxTextureHeight)
 	{
 		return newBestRenderer(	pWindowName,
-														pWindowWidth,
-														pWindowHeight,
-														pBytesPerVoxel,
-														pMaxTextureWidth,
-														pMaxTextureHeight,
-														1);
+				pWindowWidth,
+				pWindowHeight,
+				pBytesPerVoxel,
+				pMaxTextureWidth,
+				pMaxTextureHeight,
+				1);
 	}
 
 	/**
@@ -86,15 +86,15 @@ public class ClearVolumeRendererFactory
 	 * @param pNumberOfRenderLayers
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-																																		final int pWindowWidth,
-																																		final int pWindowHeight,
-																																		final int pBytesPerVoxel,
-																																		final int pMaxTextureWidth,
-																																		final int pMaxTextureHeight,
-																																		final int pNumberOfRenderLayers)
+			final int pWindowWidth,
+			final int pWindowHeight,
+			final int pBytesPerVoxel,
+			final int pMaxTextureWidth,
+			final int pMaxTextureHeight,
+			final int pNumberOfRenderLayers)
 	{
 		boolean lCUDAOperational = false;
-		
+
 		try
 		{
 			lCUDAOperational = CudaAvailability.isClearCudaOperational();
@@ -106,20 +106,20 @@ public class ClearVolumeRendererFactory
 
 		if (lCUDAOperational)
 			return new JCudaClearVolumeRenderer(pWindowName,
-																					pWindowWidth,
-																					pWindowHeight,
-																					pBytesPerVoxel,
-																					pMaxTextureWidth,
-																					pMaxTextureHeight,
-																					pNumberOfRenderLayers);
+					pWindowWidth,
+					pWindowHeight,
+					pBytesPerVoxel,
+					pMaxTextureWidth,
+					pMaxTextureHeight,
+					pNumberOfRenderLayers);
 		else
 			return new OpenCLVolumeRenderer(pWindowName,
-																			pWindowWidth,
-																			pWindowHeight,
-																			pBytesPerVoxel,
-																			pMaxTextureWidth,
-																			pMaxTextureHeight,
-																			pNumberOfRenderLayers);
+					pWindowWidth,
+					pWindowHeight,
+					pBytesPerVoxel,
+					pMaxTextureWidth,
+					pMaxTextureHeight,
+					pNumberOfRenderLayers);
 
 	}
 }

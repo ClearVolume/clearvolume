@@ -36,18 +36,18 @@ import clearcuda.CudaFunction;
 import clearcuda.CudaModule;
 import clearcuda.CudaOpenGLBufferObject;
 import clearcuda.CudaTextureReference;
-import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
+import clearvolume.renderer.jogl.JOGLClearVolumeFrameRenderer;
 
 /**
  * Class JCudaClearVolumeRenderer
- * 
+ *
  * Implements a JOGLPBOClearVolumeRenderer usin a CUDA kernel for rendering the
  * 2D projection.
  *
  * @author Loic Royer 2014
  *
  */
-public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
+public class JCudaClearVolumeRenderer extends JOGLClearVolumeFrameRenderer implements
 																																			GLEventListener
 {
 
@@ -103,7 +103,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	/**
 	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
 	 * name, width and height.
-	 * 
+	 *
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
@@ -118,7 +118,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	/**
 	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
 	 * name, width, height, and bytes=per-voxel.
-	 * 
+	 *
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
@@ -138,7 +138,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	/**
 	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
 	 * name, width, height, and bytes=per-voxel.
-	 * 
+	 *
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
@@ -164,7 +164,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	/**
 	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
 	 * name, width, height, and bytes=per-voxel.
-	 * 
+	 *
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
@@ -194,15 +194,15 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	}
 
 	@Override
-	protected void registerPBO(	int pRenderLayerIndex,
-															int pPixelBufferObjectId)
+	protected void registerPBO(	final int pRenderLayerIndex,
+															final int pPixelBufferObjectId)
 	{
 		mOpenGLBufferDevicePointers[pRenderLayerIndex] = new CudaOpenGLBufferObject(pPixelBufferObjectId);
 	}
 
 	@Override
-	protected void unregisterPBO(	int pRenderLayerIndex,
-																int pPixelBufferObjectId)
+	protected void unregisterPBO(	final int pRenderLayerIndex,
+																final int pPixelBufferObjectId)
 	{
 		mOpenGLBufferDevicePointers[pRenderLayerIndex].close();
 		mOpenGLBufferDevicePointers[pRenderLayerIndex] = null;
@@ -210,7 +210,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	/**
 	 * Initialises CUDA and the 3D texture with the current volume data.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Override
@@ -222,9 +222,9 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			mCudaContext = new CudaContext(mCudaDevice, true);
 
-			Class<?> lRootClass = JCudaClearVolumeRenderer.class;
+			final Class<?> lRootClass = JCudaClearVolumeRenderer.class;
 
-			File lPTXFile = compileCUDA(lRootClass);
+			final File lPTXFile = compileCUDA(lRootClass);
 
 			mCudaModule = CudaModule.moduleFromPTX(lPTXFile);
 
@@ -256,13 +256,13 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		}
 	}
 
-	private File compileCUDA(Class<?> lRootClass) throws IOException
+	private File compileCUDA(final Class<?> lRootClass) throws IOException
 	{
 		File lPTXFile;
 
 		try
 		{
-			CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
+			final CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
 																										lRootClass.getSimpleName());
 
 			lCudaCompiler.setParameter(	Pattern.quote("/*ProjectionAlgorithm*/"),
@@ -270,7 +270,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			lCudaCompiler.setParameter(	Pattern.quote("/*BytesPerVoxel*/"),
 																	"" + getBytesPerVoxel());
 
-			File lCUFile = lCudaCompiler.addFile(	lRootClass,
+			final File lCUFile = lCudaCompiler.addFile(	lRootClass,
 																						"kernels/VolumeRenderPerspective.cu");
 
 			lCudaCompiler.addFiles(	lRootClass,
@@ -280,10 +280,10 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			lPTXFile = lCudaCompiler.compile(lCUFile);
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 
-			InputStream lInputStreamPTXFile = lRootClass.getResourceAsStream("kernels/VolumeRender.backup.ptx");
+			final InputStream lInputStreamPTXFile = lRootClass.getResourceAsStream("kernels/VolumeRender.backup.ptx");
 			final StringWriter lStringWriter = new StringWriter();
 			IOUtils.copy(	lInputStreamPTXFile,
 										lStringWriter,
@@ -302,7 +302,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 * Allocates, configures and copies 3D volume data.
 	 */
 	private void prepareVolumeDataArray(final int pRenderLayerIndex,
-																			ByteBuffer pByteBuffer)
+																			final ByteBuffer pByteBuffer)
 	{
 		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
@@ -398,7 +398,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	}
 
-	private void pointTransferFunctionTextureToArray(int pRenderLayerIndex)
+	private void pointTransferFunctionTextureToArray(final int pRenderLayerIndex)
 	{
 		mSizeOfTransferFunction.setFloat(getTransfertFunction(pRenderLayerIndex).getArray().length);
 		mTransferFunctionTexture.setTo(mTransferFunctionCudaArrays[pRenderLayerIndex]);
@@ -407,7 +407,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	/**
 	 * Integral division, rounding the result to the next highest integer.
-	 * 
+	 *
 	 * @param a
 	 *          Dividend
 	 * @param b
@@ -422,13 +422,13 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		/**
 	 * Interface method implementation
-	 * 
-	 * @see clearvolume.renderer.jogl.JOGLClearVolumeRenderer#renderVolume(float[],
+	 *
+	 * @see clearvolume.renderer.jogl.JOGLClearVolumeFrameRenderer#renderVolume(float[],
 	 *      float[])
 	 */
 	@Override
-	protected boolean[] renderVolume(	float[] invModelView,
-																		float[] invProjection)
+	protected boolean[] renderVolume(	final float[] invModelView,
+																		final float[] invProjection)
 	{
 		if (mCudaContext == null)
 			return null;
@@ -442,7 +442,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			return updateBufferAndRunKernel();
 		}
-		catch (CudaException e)
+		catch (final CudaException e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return null;
@@ -451,18 +451,18 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	/**
 	 * Call the kernel function, rendering the 3D volume data image into PBOs
-	 * 
+	 *
 	 * @return boolean array indicating which layer was updated.
 	 */
 	boolean[] updateBufferAndRunKernel()
 	{
-		boolean[] lUpdated = new boolean[getNumberOfRenderLayers()];
+		final boolean[] lUpdated = new boolean[getNumberOfRenderLayers()];
 
 		boolean lAnyVolumeDataUpdated = false;
 
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
-			ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(i);
+			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer( i );
 
 			if (lVolumeDataBuffer != null)
 			{
@@ -490,7 +490,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 		}
 
-		long startTime = System.nanoTime();
+		final long startTime = System.nanoTime();
 
 		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters())
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
@@ -504,7 +504,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		clearIsUpdateVolumeParameters();
 		clearVolumeDimensionsChanged();
 
-		long endTime = System.nanoTime();
+		final long endTime = System.nanoTime();
 
 		/*System.out.println("time to render: " + (endTime - startTime)
 												/ 1000000.
@@ -551,13 +551,13 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	/**
 	 * Interface method implementation
-	 * 
-	 * @see clearvolume.renderer.jogl.JOGLClearVolumeRenderer#close()
+	 *
+	 * @see clearvolume.renderer.jogl.JOGLClearVolumeFrameRenderer#close()
 	 */
 	@Override
 	public void close()
 	{
-		CudaContext lCudaContext = mCudaContext;
+		final CudaContext lCudaContext = mCudaContext;
 		mCudaContext = null;
 
 		try
