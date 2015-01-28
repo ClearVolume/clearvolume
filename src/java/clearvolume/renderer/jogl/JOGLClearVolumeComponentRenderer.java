@@ -262,7 +262,7 @@ public abstract class JOGLClearVolumeComponentRenderer extends ClearVolumeRender
 	@Override
 	public void setVisible( final boolean pIsVisible ) {
 		mClearGLWindow.getGLWindow().setVisible( pIsVisible );
-		frame.setVisible( true );
+		frame.setVisible( pIsVisible );
 	}
 
 	/**
