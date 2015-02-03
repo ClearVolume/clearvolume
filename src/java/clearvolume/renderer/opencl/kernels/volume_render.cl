@@ -3,7 +3,7 @@
   http://developer.download.nvidia.com/compute/cuda/4_2/rel/sdk/website/OpenCL/html/samples.html
  
 
-  mweigert@mpi-cbg.de
+  Author: Martin Weigert (mweigert@mpi-cbg.de)
  */
 
 

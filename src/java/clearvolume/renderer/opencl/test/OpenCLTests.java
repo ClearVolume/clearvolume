@@ -1,10 +1,10 @@
-package clearvolume.renderer.clearopencl.test;
+package clearvolume.renderer.opencl.test;
 
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import clearvolume.renderer.clearopencl.OpenCLDevice;
+import clearvolume.renderer.opencl.OpenCLDevice;
 
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage3D;

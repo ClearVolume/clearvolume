@@ -114,7 +114,7 @@ float4 mul(const float4x4 &M, const float4 &v)
     r.x = dot(v, M.m[0]);
     r.y = dot(v, M.m[1]);
     r.z = dot(v, M.m[2]);
-	r.w = dot(v, M.m[3]);
+		r.w = dot(v, M.m[3]);
 
     return r;
 }
@@ -175,7 +175,7 @@ inline __device__ bool algo(float4 &acc, float4 &col )
 
 
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//Render function:
 
 extern "C" __global__ void
 volumerender(uint *d_output, uint imageW, uint imageH,
@@ -268,22 +268,6 @@ volumerender(uint *d_output, uint imageW, uint imageH,
     d_output[y*imageW + x] = rgbaFloatToInt(acc);
 }
 
-
-/*
-extern "C"
-void render_kernel(dim3 gridSize, dim3 blockSize, uint *d_output, uint imageW, uint imageH,
-                   float scalex, float scaley, float scalez, float brightness, float trangemin, float trangemax, float gamma)
-{
-    d_render<<<gridSize, blockSize>>>(d_output, imageW, imageH, scalex, scaley, scalez, 
-                                      brightness, trangemin, trangemax, gamma);
-}
-
-extern "C"
-void copyInvViewMatrix(float *invViewMatrix, size_t sizeofMatrix)
-{
-    checkCudaErrors(cudaMemcpyToSymbol(c_invViewMatrix, invViewMatrix, sizeofMatrix));
-}
-/**/
 
 
 #endif // #ifndef _VOLUMERENDER_KERNEL_CU_

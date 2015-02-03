@@ -3,7 +3,7 @@ package clearvolume.renderer.factory;
 import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
-import clearvolume.renderer.clearopencl.OpenCLVolumeRenderer;
+import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
 
 public class ClearVolumeRendererFactory
 {

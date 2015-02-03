@@ -1,4 +1,4 @@
-package clearvolume.renderer.clearopencl.demo;
+package clearvolume.renderer.opencl.demo;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -7,7 +7,7 @@ import java.nio.ByteOrder;
 import org.junit.Test;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.clearopencl.OpenCLVolumeRenderer;
+import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
 
 public class OpenCLVolumeRendererDemo
 {

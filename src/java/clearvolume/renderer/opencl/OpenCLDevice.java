@@ -1,4 +1,4 @@
-package clearvolume.renderer.clearopencl;
+package clearvolume.renderer.opencl;
 
 import java.net.URL;
 import java.nio.ByteBuffer;

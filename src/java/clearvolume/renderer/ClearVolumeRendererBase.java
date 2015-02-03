@@ -5,12 +5,15 @@ import static java.lang.Math.max;
 import java.awt.EventQueue;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
+import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
@@ -89,6 +92,9 @@ public abstract class ClearVolumeRendererBase	implements
 
 	// Control frame:
 	private ControlPanelJFrame mControlFrame;
+
+	// Map of processors:
+	protected Map<String, Processor<?>> mProcessorsMap = new ConcurrentHashMap<>();
 
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
@@ -988,6 +994,15 @@ public abstract class ClearVolumeRendererBase	implements
 	public void toggleControlPanelDisplay()
 	{
 		mControlFrame.setVisible(!mControlFrame.isVisible());
+	}
+
+	/**
+	 * Toggles the display of the Control Frame;
+	 */
+	@Override
+	public void addProcessor(Processor<?> pProcessor)
+	{
+		mProcessorsMap.put(pProcessor.getName(), pProcessor);
 	}
 
 	/**

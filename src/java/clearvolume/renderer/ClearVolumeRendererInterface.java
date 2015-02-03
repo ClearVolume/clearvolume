@@ -7,6 +7,7 @@ import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.jogl.overlay.Overlay;
+import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
@@ -196,7 +197,9 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pVoxelSizeY
 	 * @param pVoxelSizeZ
 	 */
-	public void setVoxelSize(double pVoxelSizeX, double pVoxelSizeY, double pVoxelSizeZ);
+	public void setVoxelSize(	double pVoxelSizeX,
+														double pVoxelSizeY,
+														double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -368,8 +371,26 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Adds overlay module to draw with 3D primitives within the rendering volume.
+	 * 
+	 * @param pOverlay
+	 *          Overlay to add.
 	 */
 	void addOverlay(Overlay pOverlay);
+
+	/**
+	 * Adds a processor to this renderer.
+	 * 
+	 * @param pProcessor
+	 *          Processor to add.
+	 */
+	public void addProcessor(Processor<?> pProcessor);
+
+	/**
+	 * Returns a Canvas that can be used to embed this renderer.
+	 *
+	 * @return A NewtCanvasAWT object or null if the renderer cannot be embedded.
+	 */
+	public NewtCanvasAWT getNewtCanvasAWT();
 
 	/**
 	 * Interface method implementation
@@ -378,15 +399,5 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
-
-	/**
-	 * Returns a Canvas that can be used to embed this renderer.
-	 *
-	 * @return A NewtCanvasAWT object or null if the renderer cannot be
-	 *         embedded.
-	 */
-	public NewtCanvasAWT getNewtCanvasAWT();
-
-
 
 }

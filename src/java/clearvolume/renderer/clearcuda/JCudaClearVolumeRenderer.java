@@ -37,6 +37,8 @@ import clearcuda.CudaModule;
 import clearcuda.CudaOpenGLBufferObject;
 import clearcuda.CudaTextureReference;
 import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
+import clearvolume.renderer.processors.CUDAProcessor;
+import clearvolume.renderer.processors.Processor;
 
 /**
  * Class JCudaClearVolumeRenderer
@@ -249,6 +251,14 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 			prepareTransferFunctionTexture();
 
+			for (Processor<?> lProcessor : mProcessorsMap.values())
+				if (lProcessor.isCompatibleRenderer(getClass()))
+				{
+					CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
+					lCUDAProcessor.setDeviceAndContext(	mCudaDevice,
+																							mCudaContext);
+				}
+
 			return true;
 		}
 		catch (final IOException e)
@@ -273,12 +283,14 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																	"" + getBytesPerVoxel());
 
 			final File lCUFile = lCudaCompiler.addFile(	lRootClass,
-																									"kernels/VolumeRenderPerspective.cu");
+																									"kernels/VolumeRenderPerspective.cu",
+																									true);
 
-			lCudaCompiler.addFiles(	lRootClass,
-															"kernels/helper_cuda.h",
-															"kernels/helper_math.h",
-															"kernels/helper_string.h");
+			lCudaCompiler.addFiles(	CudaCompiler.class,
+															true,
+															"includes/helper_cuda.h",
+															"includes/helper_math.h",
+															"includes/helper_string.h");
 
 			lPTXFile = lCudaCompiler.compile(lCUFile);
 		}
@@ -344,7 +356,6 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mVolumeDataCudaTexture.setAddressMode(1,
 																					CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
 		mVolumeDataCudaTexture.setFlags(CU_TRSF_NORMALIZED_COORDINATES);
-
 	}
 
 	private void pointTextureToArray(final int pRenderLayerIndex)
@@ -461,31 +472,34 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		boolean lAnyVolumeDataUpdated = false;
 
-		for (int i = 0; i < getNumberOfRenderLayers(); i++)
+		for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++)
 		{
-			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(i);
+			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(lLayerIndex);
 
 			if (lVolumeDataBuffer != null)
 			{
-				synchronized (getSetVolumeDataBufferLock(i))
+				synchronized (getSetVolumeDataBufferLock(lLayerIndex))
 				{
-					clearVolumeDataBufferReference(i);
+					clearVolumeDataBufferReference(lLayerIndex);
 
-					if (haveVolumeDimensionsChanged() || mVolumeDataCudaArrays[i] == null)
+					if (haveVolumeDimensionsChanged() || mVolumeDataCudaArrays[lLayerIndex] == null)
 					{
-						if (mVolumeDataCudaArrays[i] != null)
-							mVolumeDataCudaArrays[i].close();
+						if (mVolumeDataCudaArrays[lLayerIndex] != null)
+							mVolumeDataCudaArrays[lLayerIndex].close();
 
-						prepareVolumeDataArray(i, lVolumeDataBuffer);
+						prepareVolumeDataArray(lLayerIndex, lVolumeDataBuffer);
 					}
 					else
 					{
 						lVolumeDataBuffer.rewind();
-						mVolumeDataCudaArrays[i].copyFrom(lVolumeDataBuffer, true);
+						mVolumeDataCudaArrays[lLayerIndex].copyFrom(lVolumeDataBuffer,
+																												true);
 					}
 
-					notifyCompletionOfDataBufferCopy(i);
+					notifyCompletionOfDataBufferCopy(lLayerIndex);
 					lAnyVolumeDataUpdated |= true;
+
+					runProcessorsHook(lLayerIndex);
 				}
 
 			}
@@ -548,6 +562,20 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mCudaContext.synchronize();
 		mOpenGLBufferDevicePointers[pRenderLayerIndex].unmap();
 
+	}
+
+	private void runProcessorsHook(int pRenderLayerIndex)
+	{
+		for (Processor<?> lProcessor : mProcessorsMap.values())
+			if (lProcessor.isCompatibleRenderer(getClass()))
+			{
+				CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
+				lCUDAProcessor.applyToArray(mVolumeDataCudaArrays[pRenderLayerIndex]);
+				lCUDAProcessor.process(	pRenderLayerIndex,
+																getVolumeSizeX(),
+																getVolumeSizeY(),
+																getVolumeSizeZ());
+			}
 	}
 
 	/**

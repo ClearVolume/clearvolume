@@ -1,4 +1,4 @@
-package clearvolume.renderer.clearopencl;
+package clearvolume.renderer.opencl;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -7,13 +7,14 @@ import javax.media.opengl.GLEventListener;
 
 import jcuda.CudaException;
 import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
+import clearvolume.renderer.processors.Processor;
 
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLImage3D;
 import com.nativelibs4java.opencl.CLImageFormat;
 
-public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer implements
+public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																																	GLEventListener
 {
 	private OpenCLDevice mCLDevice;
@@ -73,7 +74,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer implements
 															final int pMaxTextureWidth,
 															final int pMaxTextureHeight,
 															final int pNumberOfRenderLayers,
-															final boolean useInCanvas )
+															final boolean useInCanvas)
 	{
 
 		super("[OpenCL] " + pWindowName,
@@ -240,37 +241,39 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer implements
 
 		boolean lAnyVolumeDataUpdated = false;
 
-		for (int i = 0; i < getNumberOfRenderLayers(); i++)
+		for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++)
 		{
-			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(i);
+			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(lLayerIndex);
 
 			if (lVolumeDataBuffer != null)
 			{
-				synchronized (getSetVolumeDataBufferLock(i))
+				synchronized (getSetVolumeDataBufferLock(lLayerIndex))
 				{
-					clearVolumeDataBufferReference(i);
+					clearVolumeDataBufferReference(lLayerIndex);
 
-					if (haveVolumeDimensionsChanged() || mCLVolumeImages[i] == null)
+					if (haveVolumeDimensionsChanged() || mCLVolumeImages[lLayerIndex] == null)
 					{
-						if (mCLVolumeImages[i] != null)
+						if (mCLVolumeImages[lLayerIndex] != null)
 						{
 
-							mCLVolumeImages[i].release();
+							mCLVolumeImages[lLayerIndex].release();
 						}
 
-						prepareVolumeDataArray(i, lVolumeDataBuffer);
+						prepareVolumeDataArray(lLayerIndex, lVolumeDataBuffer);
 					}
 					else
 					{
 						lVolumeDataBuffer.rewind();
 
-						fillWithByteBufferAsShort(mCLVolumeImages[i],
+						fillWithByteBufferAsShort(mCLVolumeImages[lLayerIndex],
 																			lVolumeDataBuffer);
 
 					}
 
-					notifyCompletionOfDataBufferCopy(i);
+					notifyCompletionOfDataBufferCopy(lLayerIndex);
 					lAnyVolumeDataUpdated |= true;
+
+					runProcessorHook(lLayerIndex);
 				}
 
 			}
@@ -333,5 +336,18 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer implements
 		// / 1000000.
 		// + " ms");
 
+	}
+
+	private void runProcessorHook(int pRenderLayerIndex)
+	{
+		for (Processor<?> lProcessor : mProcessorsMap.values())
+			if (lProcessor.isCompatibleRenderer(getClass()))
+			{
+				mCLDevice.setArgs(mCLVolumeImages[pRenderLayerIndex]);
+				lProcessor.process(	pRenderLayerIndex,
+														getVolumeSizeX(),
+														getVolumeSizeY(),
+														getVolumeSizeZ());
+			}
 	}
 }
