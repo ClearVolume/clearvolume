@@ -117,7 +117,7 @@ public class ClearVolumeClientMain
 			public void actionPerformed(ActionEvent e)
 			{
 				JOptionPane.showMessageDialog(mApplicationJFrame,
-																			"ClearVolume 1.0\nMPI-CBG\nAuthors: Loic Royer, Martin Weigert, Ulrik Günther.\n Contact: royer@mpi-cbg.de",
+																			"ClearVolume 1.0\nMPI-CBG\nAuthors: Loic Royer, Martin Weigert, Ulrik Guenther.\n Contact: royer@mpi-cbg.de",
 																			"About ClearVolume",
 																			JOptionPane.INFORMATION_MESSAGE);
 			}

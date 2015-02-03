@@ -11,6 +11,8 @@ apply plugin: 'maven-publish'
 apply plugin: 'c'
 apply plugin: 'cpp'
 
+[ compileJava, compileTestJava ]*.options*.encoding = 'UTF-8'
+
 ext { 
     javaHome = System.getenv('JAVA_HOME')
     javaHomeInclude = javaHome + '/include'
@@ -135,6 +137,9 @@ sourceSets
   }
 }
 
+javadoc {
+    options.charSet = 'UTF-8'
+}
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -481,4 +486,3 @@ publishing {
     }
   }
 }
-
