@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
+import clearvolume.renderer.jogl.overlay.Overlay;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
@@ -366,6 +367,11 @@ public interface ClearVolumeRendererInterface	extends
 	void disableClose();
 
 	/**
+	 * Adds overlay module to draw with 3D primitives within the rendering volume.
+	 */
+	void addOverlay(Overlay pOverlay);
+
+	/**
 	 * Interface method implementation
 	 *
 	 * @see java.io.Closeable#close()
@@ -380,5 +386,7 @@ public interface ClearVolumeRendererInterface	extends
 	 *         embedded.
 	 */
 	public NewtCanvasAWT getNewtCanvasAWT();
+
+
 
 }

@@ -5,7 +5,8 @@ import static java.lang.Math.max;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
@@ -28,6 +29,9 @@ import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
 import clearvolume.renderer.ClearVolumeRendererBase;
+import clearvolume.renderer.jogl.overlay.JOGLOverlay;
+import clearvolume.renderer.jogl.overlay.Overlay;
+import clearvolume.renderer.jogl.overlay.std.BoxOverlay;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.newt.event.WindowAdapter;
@@ -78,18 +82,12 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private volatile int step = 0;
 	private volatile long prevTimeNS = -1;
 
-	// Box
-	private volatile boolean mRenderBox = true;
-	private static final float cBoxLineWidth = 1.f; // only cBoxLineWidth = 1.f
-	// seems to be supported
-
-	private static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
-	{ 1.f, 1.f, 1.f, 1.f });
+	// Overlay stuff:
+	private Map<String, JOGLOverlay> mOverlayMap = new ConcurrentHashMap<String, JOGLOverlay>();
 
 	// Window:
 	private final String mWindowName;
 	private GLProgram mGLProgram;
-	private GLProgram mBoxGLProgram;
 
 	// Shader attributes, uniforms and arrays:
 	private GLAttribute mPositionAttribute;
@@ -99,13 +97,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLAttribute mTexCoordAttribute;
 	private GLUniform[] mTexUnits;
 	private GLVertexAttributeArray mTexCoordAttributeArray;
-
-	private GLAttribute mBoxPositionAttribute;
-	private GLVertexArray mBoxVertexArray;
-	private GLVertexAttributeArray mBoxPositionAttributeArray;
-	private GLUniform mBoxColorUniform;
-	private GLUniform mBoxModelViewMatrixUniform;
-	private GLUniform mBoxProjectionMatrixUniform;
 
 	private final GLMatrix mBoxModelViewMatrix = new GLMatrix();
 	private final GLMatrix mVolumeViewMatrix = new GLMatrix();
@@ -285,6 +276,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 		resetBrightnessAndGammaAndTransferFunctionRanges();
 		resetRotationTranslation();
 		setBytesPerVoxel(pBytesPerVoxel);
+
+		addOverlay(new BoxOverlay());
 
 		mClearGLWindow = new ClearGLWindow(	pWindowName,
 																				pWindowWidth,
@@ -568,68 +561,16 @@ public abstract class JOGLClearVolumeRenderer	extends
 				e.printStackTrace();
 			}
 
-			// box display: construct the program and related objects
-			try
+			for (JOGLOverlay lOverlay : mOverlayMap.values())
 			{
-				mBoxGLProgram = GLProgram.buildProgram(	lGL4,
-																								JOGLClearVolumeRenderer.class,
-																								"shaders/box_vert.glsl",
-																								"shaders/box_frag.glsl");
-
-				// set the line with of the box
-				lGL4.glLineWidth(cBoxLineWidth);
-
-				// get all the shaders uniform locations
-				mBoxPositionAttribute = mBoxGLProgram.getAtribute("position");
-				mBoxModelViewMatrixUniform = mBoxGLProgram.getUniform("modelview");
-				mBoxProjectionMatrixUniform = mBoxGLProgram.getUniform("projection");
-				mBoxColorUniform = mBoxGLProgram.getUniform("color");
-
-				// set up the vertices of the box
-				mBoxVertexArray = new GLVertexArray(mBoxGLProgram);
-				mBoxVertexArray.bind();
-				mBoxPositionAttributeArray = new GLVertexAttributeArray(mBoxPositionAttribute,
-																																4);
-
-				// FIXME this should be done with IndexArrays, but lets be lazy for
-				// now...
-				final GLFloatArray lVerticesFloatArray = new GLFloatArray(24,
-																																	4);
-
-				final float w = .5f;
-
-				lVerticesFloatArray.add(w, w, w, w);
-				lVerticesFloatArray.add(-w, w, w, w);
-				lVerticesFloatArray.add(-w, w, w, w);
-				lVerticesFloatArray.add(-w, -w, w, w);
-				lVerticesFloatArray.add(-w, -w, w, w);
-				lVerticesFloatArray.add(w, -w, w, w);
-				lVerticesFloatArray.add(w, -w, w, w);
-				lVerticesFloatArray.add(w, w, w, w);
-				lVerticesFloatArray.add(w, w, -w, w);
-				lVerticesFloatArray.add(-w, w, -w, w);
-				lVerticesFloatArray.add(-w, w, -w, w);
-				lVerticesFloatArray.add(-w, -w, -w, w);
-				lVerticesFloatArray.add(-w, -w, -w, w);
-				lVerticesFloatArray.add(w, -w, -w, w);
-				lVerticesFloatArray.add(w, -w, -w, w);
-				lVerticesFloatArray.add(w, w, -w, w);
-				lVerticesFloatArray.add(w, w, w, w);
-				lVerticesFloatArray.add(w, w, -w, w);
-				lVerticesFloatArray.add(-w, w, w, w);
-				lVerticesFloatArray.add(-w, w, -w, w);
-				lVerticesFloatArray.add(-w, -w, w, w);
-				lVerticesFloatArray.add(-w, -w, -w, w);
-				lVerticesFloatArray.add(w, -w, w, w);
-				lVerticesFloatArray.add(w, -w, -w, w);
-
-				mBoxVertexArray.addVertexAttributeArray(mBoxPositionAttributeArray,
-																								lVerticesFloatArray.getFloatBuffer());
-
-			}
-			catch (final IOException e)
-			{
-				e.printStackTrace();
+				try
+				{
+					lOverlay.init(lGL4);
+				}
+				catch (final Throwable e)
+				{
+					e.printStackTrace();
+				}
 			}
 
 		}
@@ -682,9 +623,17 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public void display(final GLAutoDrawable drawable)
 	{
 		final GL4 lGL4 = drawable.getGL().getGL4();
+		lGL4.glClearColor(0, 0, 0, 1);
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
 		setDefaultProjectionMatrix();
+
+		mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
+																										1,
+																										-1,
+																										1,
+																										0,
+																										1000);
 
 		// scaling...
 
@@ -744,41 +693,30 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 			mQuadVertexArray.draw(GL.GL_TRIANGLES);
 
-			// draw the box
-			if (mRenderBox)
+			/*getClearGLWindow().getProjectionMatrix()
+												.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
+			getClearGLWindow().getProjectionMatrix()
+												.mult(1, 1, mQuadProjectionMatrix.get(1, 1));/**/
+
+
+			for (JOGLOverlay lOverlay : mOverlayMap.values())
 			{
-				mBoxGLProgram.use(lGL4);
-
-				// invert Matrix is the modelview used by renderer which is actually the
-				// inverted modelview Matrix
-				final GLMatrix lInvBoxMatrix = new GLMatrix();
-				lInvBoxMatrix.copy(lInvVolumeMatrix);
-				lInvBoxMatrix.transpose();
-				lInvBoxMatrix.invert();
-
-				mBoxModelViewMatrixUniform.setFloatMatrix(lInvBoxMatrix.getFloatArray(),
-																									false);
-
-				final GLMatrix lProjectionMatrix = getClearGLWindow().getProjectionMatrix();
-
-				getClearGLWindow().getProjectionMatrix()
-													.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
-				getClearGLWindow().getProjectionMatrix()
-													.mult(1, 1, mQuadProjectionMatrix.get(1, 1));
-
-				mBoxProjectionMatrixUniform.setFloatMatrix(	getClearGLWindow().getProjectionMatrix()
-																																			.getFloatArray(),
-																										false);
-
-				mBoxColorUniform.setFloatVector4(cBoxColor);
-
-				mBoxVertexArray.draw(GL.GL_LINES);
-
+				try
+				{
+					lOverlay.render(lGL4,
+													getClearGLWindow().getProjectionMatrix(),
+													lInvVolumeMatrix);
+				}
+				catch (final Throwable e)
+				{
+					e.printStackTrace();
+				}
 			}
+			
 
 			updateFrameRateDisplay();
 
-		}
+		}/**/
 
 	}
 
@@ -836,11 +774,21 @@ public abstract class JOGLClearVolumeRenderer	extends
 											final int pWidth,
 											int pHeight)
 	{
-		if (pHeight == 0)
-			pHeight = 1;
-		final float lAspectRatio = (1.0f * pWidth) / pHeight;
+		if (pHeight < 8)
+			pHeight = 8;
 
-		if (lAspectRatio >= 1)
+		final GL4 lGL4 = drawable.getGL().getGL4();
+
+		int lViewPortWidth = max(pWidth, pHeight);
+
+		lGL4.glViewport((pWidth - lViewPortWidth) / 2,
+										(pHeight - lViewPortWidth) / 2,
+										lViewPortWidth,
+										lViewPortWidth);
+
+		/*final float lAspectRatio = 1; // (1.0f * pWidth) / pHeight;
+
+		/*if (lAspectRatio >= 1)
 			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
 																											1,
 																											-1	/ lAspectRatio,
@@ -853,7 +801,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 																											-1,
 																											1,
 																											0,
-																											1000);
+																											1000);/**/
 	}
 
 	/**
@@ -919,7 +867,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void toggleBoxDisplay()
 	{
-		mRenderBox = !mRenderBox;
+		mOverlayMap.get("box").toggleDisplay();
 	}
 
 	/**
@@ -950,6 +898,13 @@ public abstract class JOGLClearVolumeRenderer	extends
 				mDisplayReentrantLock.unlock();
 			}
 		}
+	}
+
+	@Override
+	public void addOverlay(Overlay pOverlay)
+	{
+		JOGLOverlay lJOGLOverlay = (JOGLOverlay) pOverlay;
+		mOverlayMap.put(lJOGLOverlay.getName(), lJOGLOverlay);
 	}
 
 	@Override
