@@ -14,17 +14,18 @@ public class OpenCLVolumeRendererDemo
 
 	@Test
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,
-																						IOException
+	IOException
 	{
 		int lBytesPerVoxel = 1;
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new OpenCLVolumeRenderer(	"ClearVolumeTest",
-																																												512,
-																																												512,
-																																												lBytesPerVoxel,
-																																												512,
-																																												512,
-																																												1);
+				512,
+				512,
+				lBytesPerVoxel,
+				512,
+				512,
+				1,
+				false);
 
 		// lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		// lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getBlueGradient());
@@ -36,9 +37,9 @@ public class OpenCLVolumeRendererDemo
 		final int lResolutionZ = lResolutionX;
 
 		ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(lResolutionX * lResolutionY
-																												* lResolutionZ
-																												* lBytesPerVoxel)
-																				.order(ByteOrder.nativeOrder());
+				* lResolutionZ
+				* lBytesPerVoxel)
+				.order(ByteOrder.nativeOrder());
 
 		for (int z = 0; z < lResolutionZ; z++)
 			for (int y = 0; y < lResolutionY; y++)
@@ -49,9 +50,9 @@ public class OpenCLVolumeRendererDemo
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	lByteBuffer,
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+				lResolutionX,
+				lResolutionY,
+				lResolutionZ);
 
 		lClearVolumeRenderer.requestDisplay();
 
@@ -65,17 +66,18 @@ public class OpenCLVolumeRendererDemo
 
 	@Test
 	public void demoWith16BitGeneratedDataset()	throws InterruptedException,
-																							IOException
+	IOException
 	{
 		int lBytesPerVoxel = 2;
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new OpenCLVolumeRenderer(	"ClearVolumeTest",
-																																												512,
-																																												512,
-																																												lBytesPerVoxel,
-																																												512,
-																																												512,
-																																												1);
+				512,
+				512,
+				lBytesPerVoxel,
+				512,
+				512,
+				1,
+				false);
 
 		// lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		// lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getBlueGradient());
@@ -87,9 +89,9 @@ public class OpenCLVolumeRendererDemo
 		final int lResolutionZ = lResolutionX;
 
 		ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(lResolutionX * lResolutionY
-																												* lResolutionZ
-																												* lBytesPerVoxel)
-																				.order(ByteOrder.nativeOrder());
+				* lResolutionZ
+				* lBytesPerVoxel)
+				.order(ByteOrder.nativeOrder());
 
 		for (int z = 0; z < lResolutionZ; z++)
 			for (int y = 0; y < lResolutionY; y++)
@@ -101,9 +103,9 @@ public class OpenCLVolumeRendererDemo
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	lByteBuffer,
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+				lResolutionX,
+				lResolutionY,
+				lResolutionZ);
 
 		lClearVolumeRenderer.requestDisplay();
 

@@ -13,7 +13,7 @@ import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLImage3D;
 import com.nativelibs4java.opencl.CLImageFormat;
 
-public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
+public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer implements
 																																	GLEventListener
 {
 	private OpenCLDevice mCLDevice;
@@ -72,7 +72,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 															final int pBytesPerVoxel,
 															final int pMaxTextureWidth,
 															final int pMaxTextureHeight,
-															final int pNumberOfRenderLayers)
+															final int pNumberOfRenderLayers,
+															final boolean useInCanvas )
 	{
 
 		super("[OpenCL] " + pWindowName,
@@ -81,7 +82,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 					pBytesPerVoxel,
 					pMaxTextureWidth,
 					pMaxTextureHeight,
-					pNumberOfRenderLayers);
+					pNumberOfRenderLayers,
+					useInCanvas);
 
 		mCLRenderBuffers = new CLBuffer[pNumberOfRenderLayers];
 		mCLVolumeImages = new CLImage3D[pNumberOfRenderLayers];
@@ -107,7 +109,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
 		mCLInvProjectionBuffer = mCLDevice.createInputFloatBuffer(16);
 
-		int lRenderBufferSize = getTextureHeight() * getTextureWidth();
+		final int lRenderBufferSize = getTextureHeight() * getTextureWidth();
 
 		// setting up the OpenCL Renderbuffer we will write the render result into
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
@@ -126,21 +128,21 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	}
 
 	@Override
-	protected void registerPBO(	int pRenderLayerIndex,
-															int pPixelBufferObjectId)
+	protected void registerPBO(	final int pRenderLayerIndex,
+															final int pPixelBufferObjectId)
 	{
 		// no need to do anything here, as we're not using PBOs
 	}
 
 	@Override
-	protected void unregisterPBO(	int pRenderLayerIndex,
-																int pPixelBufferObjectId)
+	protected void unregisterPBO(	final int pRenderLayerIndex,
+																final int pPixelBufferObjectId)
 	{
 		// no need to do anything here, as we're not using PBOs
 	}
 
 	private void prepareVolumeDataArray(final int pRenderLayerIndex,
-																			ByteBuffer pByteBuffer)
+																			final ByteBuffer pByteBuffer)
 	{
 		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
@@ -176,7 +178,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		}
 	}
 
-	private void prepareTransferFunctionArray(int pRenderLayerIndex)
+	private void prepareTransferFunctionArray(final int pRenderLayerIndex)
 	{
 
 		final float[] lTransferFunctionArray = getTransfertFunction(pRenderLayerIndex).getArray();
@@ -206,8 +208,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	}
 
 	@Override
-	protected boolean[] renderVolume(	float[] pInvModelViewMatrix,
-																		float[] pInvProjectionMatrix)
+	protected boolean[] renderVolume(	final float[] pInvModelViewMatrix,
+																		final float[] pInvProjectionMatrix)
 	{
 
 		// System.out.println("render");
@@ -222,7 +224,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			return updateBufferAndRunKernel();
 		}
-		catch (CudaException e)
+		catch (final CudaException e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return null;
@@ -232,7 +234,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	private boolean[] updateBufferAndRunKernel()
 	{
-		boolean[] lUpdated = new boolean[getNumberOfRenderLayers()];
+		final boolean[] lUpdated = new boolean[getNumberOfRenderLayers()];
 
 		lUpdated[0] = true;
 
@@ -240,7 +242,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
-			ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(i);
+			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(i);
 
 			if (lVolumeDataBuffer != null)
 			{
@@ -291,14 +293,14 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		return lUpdated;
 	}
 
-	private void fillWithByteBufferAsShort(	CLImage3D clImage3D,
-																					ByteBuffer lVolumeDataBuffer)
+	private void fillWithByteBufferAsShort(	final CLImage3D clImage3D,
+																					final ByteBuffer lVolumeDataBuffer)
 	{
 		lVolumeDataBuffer.rewind();
 		mCLDevice.writeImage(clImage3D, lVolumeDataBuffer);
 	}
 
-	private void runKernel(int pRenderLayerIndex)
+	private void runKernel(final int pRenderLayerIndex)
 	{
 		// System.out.println("kernel");
 		// System.out.println(mCLVolumeImages[i].getHeight());
