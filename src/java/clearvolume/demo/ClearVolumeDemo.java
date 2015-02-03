@@ -1,8 +1,14 @@
 package clearvolume.demo;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import org.junit.Test;
 
@@ -13,10 +19,84 @@ import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
 
+import com.jogamp.newt.awt.NewtCanvasAWT;
+
 public class ClearVolumeDemo
 {
 
 	private static ClearVolumeRendererInterface mClearVolumeRenderer;
+
+	@Test
+	public void demoRendererInJFrame() throws InterruptedException,
+																		IOException
+	{
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
+																																																					1024,
+																																																					1024,
+																																																					1,
+																																																					512,
+																																																					512,
+																																																					1,
+																																																					true);
+		NewtCanvasAWT lNewtCanvasAWT = lClearVolumeRenderer.getNewtCanvasAWT();
+
+		final JFrame lJFrame = new JFrame("ClearVolume");
+		lJFrame.setLayout(new BorderLayout());
+		final Container lContainer = new Container();
+		lContainer.setLayout(new BorderLayout());
+		lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);
+		lJFrame.setSize(new Dimension(1024, 1024));
+		lJFrame.add(lContainer);
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				lJFrame.setVisible(true);
+			}
+		});
+
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
+
+		final int lResolutionX = 256;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																							* lResolutionZ];
+
+		for (int z = 0; z < lResolutionZ; z++)
+			for (int y = 0; y < lResolutionY; y++)
+				for (int x = 0; x < lResolutionX; x++)
+				{
+					final int lIndex = x + lResolutionX
+															* y
+															+ lResolutionX
+															* lResolutionY
+															* z;
+					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
+					if (lCharValue < 12)
+						lCharValue = 0;
+					lVolumeDataArray[lIndex] = (byte) lCharValue;
+				}
+
+		lClearVolumeRenderer.setCurrentRenderLayer(0);
+		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
+		lClearVolumeRenderer.requestDisplay();
+
+		while (lClearVolumeRenderer.isShowing())
+		{
+			Thread.sleep(100);
+			lJFrame.setTitle("BRAVO! THIS IS A JFRAME! It WORKS!");
+		}
+
+		lClearVolumeRenderer.close();
+	}
 
 	@Test
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,

@@ -16,20 +16,19 @@ public class ClearVolumeRendererFactory
 	 * @param pWindowWidth
 	 * @param pWindowHeight
 	 * @param useInCanvas
-	 *            must be set true if you will use ClearVolume embedded in an
-	 *            AWT or Swing container.
+	 *          must be set true if you will use ClearVolume embedded in an AWT or
+	 *          Swing container.
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-			final int pWindowWidth,
- final int pWindowHeight, final boolean useInCanvas )
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final boolean useInCanvas)
 	{
-		return newBestRenderer( pWindowName, 1024, 1024, 1, useInCanvas );
+		return newBestRenderer(pWindowName, 1024, 1024, 1, useInCanvas);
 	}
 
-
 	/**
-	 * Constructs an instance of the JCudaClearVolumeRenderer class given a
-	 * window
+	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
 	 * name, width, height, and bytes=per-voxel.
 	 * 
 	 * @param pWindowName
@@ -37,20 +36,22 @@ public class ClearVolumeRendererFactory
 	 * @param pWindowHeight
 	 * @param pBytesPerVoxel
 	 * @param useInCanvas
-	 *            must be set true if you will use ClearVolume embedded in an
-	 *            AWT or Swing container.
+	 *          must be set true if you will use ClearVolume embedded in an AWT or
+	 *          Swing container.
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-			final int pWindowWidth,
-			final int pWindowHeight,
- final int pBytesPerVoxel, final boolean useInCanvas )
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final int pBytesPerVoxel,
+																																		final boolean useInCanvas)
 	{
 		return newBestRenderer(	pWindowName,
-				pWindowWidth,
-				pWindowHeight,
-				pBytesPerVoxel,
-				768,
- 768, useInCanvas );
+														pWindowWidth,
+														pWindowHeight,
+														pBytesPerVoxel,
+														768,
+														768,
+														useInCanvas);
 	}
 
 	/**
@@ -64,25 +65,25 @@ public class ClearVolumeRendererFactory
 	 * @param pMaxTextureWidth
 	 * @param pMaxTextureHeight
 	 * @param useInCanvas
-	 *            must be set true if you will use ClearVolume embedded in an
-	 *            AWT or Swing container.
+	 *          must be set true if you will use ClearVolume embedded in an AWT or
+	 *          Swing container.
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-			final int pWindowWidth,
-			final int pWindowHeight,
-			final int pBytesPerVoxel,
-			final int pMaxTextureWidth,
-			final int pMaxTextureHeight,
-			final boolean useInCanvas)
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final int pBytesPerVoxel,
+																																		final int pMaxTextureWidth,
+																																		final int pMaxTextureHeight,
+																																		final boolean useInCanvas)
 	{
 		return newBestRenderer(	pWindowName,
-				pWindowWidth,
-				pWindowHeight,
-				pBytesPerVoxel,
-				pMaxTextureWidth,
-				pMaxTextureHeight,
-				1,
-				useInCanvas);
+														pWindowWidth,
+														pWindowHeight,
+														pBytesPerVoxel,
+														pMaxTextureWidth,
+														pMaxTextureHeight,
+														1,
+														useInCanvas);
 	}
 
 	/**
@@ -96,18 +97,18 @@ public class ClearVolumeRendererFactory
 	 * @param pMaxTextureWidth
 	 * @param pMaxTextureHeight
 	 * @param pNumberOfRenderLayers
-	 * @param useInCanvas
-	 *            must be set true if you will use ClearVolume embedded in an
-	 *            AWT or Swing container.
+	 * @param pUseInCanvas
+	 *          must be set true if you will use ClearVolume embedded in an AWT or
+	 *          Swing container.
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-			final int pWindowWidth,
-			final int pWindowHeight,
-			final int pBytesPerVoxel,
-			final int pMaxTextureWidth,
-			final int pMaxTextureHeight,
-			final int pNumberOfRenderLayers,
-			final boolean useInCanvas)
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final int pBytesPerVoxel,
+																																		final int pMaxTextureWidth,
+																																		final int pMaxTextureHeight,
+																																		final int pNumberOfRenderLayers,
+																																		final boolean pUseInCanvas)
 	{
 		boolean lCUDAOperational = false;
 
@@ -122,22 +123,22 @@ public class ClearVolumeRendererFactory
 
 		if (lCUDAOperational)
 			return new JCudaClearVolumeRenderer(pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					pBytesPerVoxel,
-					pMaxTextureWidth,
-					pMaxTextureHeight,
-					pNumberOfRenderLayers,
-					useInCanvas);
+																					pWindowWidth,
+																					pWindowHeight,
+																					pBytesPerVoxel,
+																					pMaxTextureWidth,
+																					pMaxTextureHeight,
+																					pNumberOfRenderLayers,
+																					pUseInCanvas);
 		else
 			return new OpenCLVolumeRenderer(pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					pBytesPerVoxel,
-					pMaxTextureWidth,
-					pMaxTextureHeight,
-					pNumberOfRenderLayers,
-					useInCanvas);
+																			pWindowWidth,
+																			pWindowHeight,
+																			pBytesPerVoxel,
+																			pMaxTextureWidth,
+																			pMaxTextureHeight,
+																			pNumberOfRenderLayers,
+																			pUseInCanvas);
 
 	}
 }

@@ -47,7 +47,7 @@ import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
  * @author Loic Royer 2014
  *
  */
-public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer implements
+public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																																			GLEventListener
 {
 
@@ -180,7 +180,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer implements
 																	final int pMaxTextureWidth,
 																	final int pMaxTextureHeight,
 																	final int pNumberOfRenderLayers,
-																	final boolean useInCanvas )
+																	final boolean pUseInCanvas)
 	{
 		super("[CUDA] " + pWindowName,
 					pWindowWidth,
@@ -189,7 +189,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer implements
 					pMaxTextureWidth,
 					pMaxTextureHeight,
 					pNumberOfRenderLayers,
-					useInCanvas);
+					pUseInCanvas);
 		mTransferFunctionCudaArrays = new CudaArray[pNumberOfRenderLayers];
 		mVolumeDataCudaArrays = new CudaArray[pNumberOfRenderLayers];
 		mOpenGLBufferDevicePointers = new CudaOpenGLBufferObject[pNumberOfRenderLayers];
@@ -265,7 +265,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer implements
 		try
 		{
 			final CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
-																										lRootClass.getSimpleName());
+																													lRootClass.getSimpleName());
 
 			lCudaCompiler.setParameter(	Pattern.quote("/*ProjectionAlgorithm*/"),
 																	getProjectionAlgorithm().name());
@@ -273,7 +273,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer implements
 																	"" + getBytesPerVoxel());
 
 			final File lCUFile = lCudaCompiler.addFile(	lRootClass,
-																						"kernels/VolumeRenderPerspective.cu");
+																									"kernels/VolumeRenderPerspective.cu");
 
 			lCudaCompiler.addFiles(	lRootClass,
 															"kernels/helper_cuda.h",
@@ -421,8 +421,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer implements
 		return (a % b != 0) ? (a / b + 1) : (a / b);
 	}
 
-
-		/**
+	/**
 	 * Interface method implementation
 	 *
 	 * @see clearvolume.renderer.jogl.JOGLClearVolumeFrameRenderer#renderVolume(float[],
@@ -464,7 +463,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer implements
 
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
-			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer( i );
+			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(i);
 
 			if (lVolumeDataBuffer != null)
 			{
