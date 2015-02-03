@@ -24,8 +24,8 @@ public class ClearVolumeDemo
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					1024,
-																																																					1024,
+																																																					512,
+																																																					512,
 																																																					1,
 																																																					512,
 																																																					512,
