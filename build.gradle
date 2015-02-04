@@ -141,8 +141,8 @@ javadoc {
     options.charSet = 'UTF-8'
 }
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 group = 'royer'
 version = '1.0-SNAPSHOT'
 
@@ -183,11 +183,34 @@ dependencies
     compile 'com.nativelibs4java:bridj:0.7-SNAPSHOT'
     compile 'com.nativelibs4java:javacl:1.0-SNAPSHOT'
 
-    compile group: "royer", name: "ClearGL", version: "1.0-SNAPSHOT", changing: true, transitive: true 
-    compile group: "royer", name: "ClearCuda", version: "1.0-SNAPSHOT", changing: true, transitive: true 
+    def clearGLDir = null
+    def clearCUDADir = null
+
+    if (!(new File('build.gradle').exists()) && (new File('settings.gradle').exists())) {
+        // we're in the root path, clearGL and clearCUDA are in the same dir
+        clearGLDir = new File('cleargl')
+        clearCUDADir = new File('clearcuda')
+    }
+    else {
+        // we're in clearvolume directory, clearGL and clearCUDA are one level below
+        clearGLDir = new File('../cleargl')
+        clearCUDADir = new File('../clearcuda')
+    }
+    
+    if (clearGLDir.isDirectory() && clearCUDADir.isDirectory()) {
+        println 'Using local clearCUDA and clearGL sources'
+        compile project(':cleargl')
+        compile project(':clearcuda')
+    } 
+    else {
+        println 'Using clearCUDA and clearGL from Maven repository'
+        compile group: "royer", name: "ClearGL", version: "1.0-SNAPSHOT", changing: true, transitive: true 
+        compile group: "royer", name: "ClearCuda", version: "1.0-SNAPSHOT", changing: true, transitive: true 
+    }
     compile fileTree(dir: 'libs/jcuda', include: '*.jar')
 
     compile group: 'junit', name: 'junit', version: '4.12'
+
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
