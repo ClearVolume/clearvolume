@@ -5,7 +5,7 @@ import javax.media.opengl.GL4;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 
-public interface Overlay
+public interface Overlay2D
 {
 	public String getName();
 
@@ -13,7 +13,7 @@ public interface Overlay
 
 	public boolean isDisplayed();
 
-	public void init(GL4 pGL4,
+	public void init(	GL4 pGL4,
 										DisplayRequestInterface pDisplayRequestInterface);
 
 	public void render(	GL4 pGL4,

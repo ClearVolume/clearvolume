@@ -468,7 +468,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	boolean[] updateBufferAndRunKernel()
 	{
-		final boolean[] lUpdated = new boolean[getNumberOfRenderLayers()];
+		final boolean[] lUpdatedLayer = new boolean[getNumberOfRenderLayers()];
 
 		boolean lAnyVolumeDataUpdated = false;
 
@@ -513,7 +513,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 				if (mVolumeDataCudaArrays[i] != null)
 				{
 					runKernel(i);
-					lUpdated[i] = true;
+					lUpdatedLayer[i] = true;
 				}
 			}
 		clearIsUpdateVolumeParameters();
@@ -525,7 +525,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 												/ 1000000.
 												+ " ms");/**/
 
-		return lUpdated;
+		return lUpdatedLayer;
 	}
 
 	/**

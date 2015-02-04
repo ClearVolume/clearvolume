@@ -13,6 +13,7 @@ import cleargl.GLProgram;
 import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
+import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
 import clearvolume.renderer.jogl.overlay.JOGLOverlay;
 
@@ -22,7 +23,7 @@ public class BoxOverlay extends JOGLOverlay
 	// seems to be supported
 
 	private static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
-	{ 1.f, 1.f, 1.f, 1.f });
+	{ 1.f, 1.f, 1.f, 0.5f });
 
 	private GLProgram mBoxGLProgram;
 
@@ -34,7 +35,6 @@ public class BoxOverlay extends JOGLOverlay
 	private GLUniform mOverlayModelViewMatrixUniform;
 	private GLUniform mOverlayProjectionMatrixUniform;
 
-
 	@Override
 	public String getName()
 	{
@@ -42,7 +42,14 @@ public class BoxOverlay extends JOGLOverlay
 	}
 
 	@Override
-	public void init(GL4 pGL4)
+	public boolean hasChanged()
+	{
+		return false;
+	}
+
+	@Override
+	public void init(	GL4 pGL4,
+										DisplayRequestInterface pDisplayRequestInterface)
 	{
 		// box display: construct the program and related objects
 		try
@@ -54,6 +61,10 @@ public class BoxOverlay extends JOGLOverlay
 
 			mOverlayModelViewMatrixUniform = mBoxGLProgram.getUniform("modelview");
 			mOverlayProjectionMatrixUniform = mBoxGLProgram.getUniform("projection");
+
+			// Makes line anti-aliased:
+			// pGL4.glEnable(GL4.GL_BLEND);
+			// pGL4.glEnable(GL4.GL_LINE_SMOOTH);
 
 			// set the line with of the box
 			pGL4.glLineWidth(cBoxLineWidth);
