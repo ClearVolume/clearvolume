@@ -1,20 +1,13 @@
 package clearvolume.renderer.jogl.overlay.std;
 
-import java.io.IOException;
-import java.nio.FloatBuffer;
+import cleargl.*;
+import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
+import clearvolume.renderer.jogl.overlay.JOGLOverlay;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
-
-import cleargl.GLAttribute;
-import cleargl.GLFloatArray;
-import cleargl.GLMatrix;
-import cleargl.GLProgram;
-import cleargl.GLUniform;
-import cleargl.GLVertexArray;
-import cleargl.GLVertexAttributeArray;
-import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
-import clearvolume.renderer.jogl.overlay.JOGLOverlay;
+import java.io.IOException;
+import java.nio.FloatBuffer;
 
 public class BoxOverlay extends JOGLOverlay
 {
@@ -22,12 +15,13 @@ public class BoxOverlay extends JOGLOverlay
 	// seems to be supported
 
 	private static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
-	{ 1.f, 1.f, 1.f, 1.f });
+	{ 1.f, 1.f, 0.5f, 0.5f });
 
 	private GLProgram mBoxGLProgram;
 
 	private GLAttribute mBoxPositionAttribute;
 	private GLVertexArray mBoxVertexArray;
+	private GLVertexArray mBoxNormalArray;
 	private GLVertexAttributeArray mBoxPositionAttributeArray;
 	private GLUniform mBoxColorUniform;
 
@@ -68,40 +62,53 @@ public class BoxOverlay extends JOGLOverlay
 			mBoxVertexArray.bind();
 			mBoxPositionAttributeArray = new GLVertexAttributeArray(mBoxPositionAttribute,
 																															4);
+			
+			
 
 			// FIXME this should be done with IndexArrays, but lets be lazy for
 			// now...
-			final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 4);
+			final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 3);
 
 			final float w = 0.5f;
+			
+		    // Front
+	        lVerticesFloatArray.add(-w, -w, w);
+	        lVerticesFloatArray.add(w, -w, w);
+	        lVerticesFloatArray.add(w,  w, w);
+	        lVerticesFloatArray.add(-w,  w, w);
+	        // Right
+	        lVerticesFloatArray.add(w, -w, w);
+	        lVerticesFloatArray.add(w, -w, -w);
+	        lVerticesFloatArray.add(w,  w, -w);
+	        lVerticesFloatArray.add(w,  w, w);
+	        // Back
+	        lVerticesFloatArray.add(w, -w, -w);
+	        lVerticesFloatArray.add(-w,  w, -w);
+	        lVerticesFloatArray.add(w,  w, -w);
+	        lVerticesFloatArray.add(w, -w, -w);
+	        // Left
+	        lVerticesFloatArray.add(-w, -w, w);
+	        lVerticesFloatArray.add(-w,  w, w);
+	        lVerticesFloatArray.add(-w,  w, -w);
+	        lVerticesFloatArray.add(-w, -w, -w);
+	        // Bottom
+	        lVerticesFloatArray.add(-w, -w, w);
+	        lVerticesFloatArray.add(-w, -w, -w);
+	        lVerticesFloatArray.add(w, -w, -w);
+	        lVerticesFloatArray.add(w, -w, w);
+	        // Top
+	        lVerticesFloatArray.add(w,  w, w);
+	        lVerticesFloatArray.add(w,  w, w);
+	        lVerticesFloatArray.add(w,  w, -w);
+	        lVerticesFloatArray.add(w,  w, -w);
+	        
+	        final GLIntArray lIndexIntArray = new GLIntArray(10, 1);
 
-			lVerticesFloatArray.add(w, w, w, w);
-			lVerticesFloatArray.add(-w, w, w, w);
-			lVerticesFloatArray.add(-w, w, w, w);
-			lVerticesFloatArray.add(-w, -w, w, w);
-			lVerticesFloatArray.add(-w, -w, w, w);
-			lVerticesFloatArray.add(w, -w, w, w);
-			lVerticesFloatArray.add(w, -w, w, w);
-			lVerticesFloatArray.add(w, w, w, w);
-			lVerticesFloatArray.add(w, w, -w, w);
-			lVerticesFloatArray.add(-w, w, -w, w);
-			lVerticesFloatArray.add(-w, w, -w, w);
-			lVerticesFloatArray.add(-w, -w, -w, w);
-			lVerticesFloatArray.add(-w, -w, -w, w);
-			lVerticesFloatArray.add(w, -w, -w, w);
-			lVerticesFloatArray.add(w, -w, -w, w);
-			lVerticesFloatArray.add(w, w, -w, w);
-			lVerticesFloatArray.add(w, w, w, w);
-			lVerticesFloatArray.add(w, w, -w, w);
-			lVerticesFloatArray.add(-w, w, w, w);
-			lVerticesFloatArray.add(-w, w, -w, w);
-			lVerticesFloatArray.add(-w, -w, w, w);
-			lVerticesFloatArray.add(-w, -w, -w, w);
-			lVerticesFloatArray.add(w, -w, w, w);
-			lVerticesFloatArray.add(w, -w, -w, w);
 
 			mBoxVertexArray.addVertexAttributeArray(mBoxPositionAttributeArray,
 																							lVerticesFloatArray.getFloatBuffer());
+
+
 
 		}
 		catch (final IOException e)
@@ -134,7 +141,7 @@ public class BoxOverlay extends JOGLOverlay
 
 			mBoxColorUniform.setFloatVector4(cBoxColor);
 
-			mBoxVertexArray.draw(GL.GL_LINES);
+			mBoxVertexArray.draw(GL.GL_TRIANGLES);
 
 		}
 	}
