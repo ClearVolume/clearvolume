@@ -12,7 +12,7 @@ texture<VolumeType/*BytesPerVoxel*/, 3, cudaReadModeNormalizedFloat> tex;
 extern "C" __global__ void test()
 {
 	if(blockIdx.x == 0 && threadIdx.x==0)
-		printf("value=%f\n", tex3D(tex, 10, 10, 10));
+		printf("value=%f\n", tex3D(tex, 0.5, 0.5, 0.5));
 }
 
 

@@ -4,7 +4,9 @@
  
 
   Author: Martin Weigert (mweigert@mpi-cbg.de)
- */
+    			Loic Royer		 (royer@mpi-cbg.de)
+  				Martin Weigert (mweigert@mpi-cbg.de)
+*/
 
 
 
@@ -67,7 +69,7 @@ uint rgbaFloatToInt(float4 rgba)
 
 
 __kernel void
-max_project(__global uint *d_output, 
+volumerender(__global uint *d_output, 
 			uint Nx, uint Ny,
 			float brightness,
 			float trangemin, 

@@ -55,7 +55,7 @@ public class OpenCLTests
 			lOpenCLDevice.printInfo();
 
 			CLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
-																				"test_char");
+																												"test_char");
 		}
 		catch (Throwable e)
 		{

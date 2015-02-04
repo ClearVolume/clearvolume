@@ -9,8 +9,6 @@ import jcuda.driver.CUaddress_mode;
 import jcuda.driver.CUfilter_mode;
 import clearcuda.CudaArray;
 import clearcuda.CudaCompiler;
-import clearcuda.CudaContext;
-import clearcuda.CudaDevice;
 import clearcuda.CudaFunction;
 import clearcuda.CudaModule;
 import clearcuda.CudaTextureReference;
@@ -20,8 +18,6 @@ public class CUDAProcessorTest extends CUDAProcessor<Double>
 {
 	private static final int cBlockSize = 32;
 
-	private CudaDevice mCudaDevice;
-	private CudaContext mCudaContext;
 	private CudaFunction mSumFunction;
 
 	private CudaTextureReference mVolumeDataCudaTexture;
@@ -38,20 +34,14 @@ public class CUDAProcessorTest extends CUDAProcessor<Double>
 
 	}
 
-	@Override
-	public void setDeviceAndContext(CudaDevice pCudaDevice,
-																	CudaContext pCudaContext)
-	{
-		mCudaDevice = pCudaDevice;
-		mCudaContext = pCudaContext;
-	}
+
 
 	private void ensureCudaInitialized()
 	{
 		if (mSumFunction == null)
 			try
 			{
-				final CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
+				final CudaCompiler lCudaCompiler = new CudaCompiler(getDevice(),
 																														this.getClass()
 																																.getSimpleName());
 
@@ -104,7 +94,7 @@ public class CUDAProcessorTest extends CUDAProcessor<Double>
 														1);// (int) iDivUp(pDepthInVoxels, cBlockSize));
 		mSumFunction.setBlockDim(cBlockSize, cBlockSize, 1);
 		mSumFunction.launch();
-		mCudaContext.synchronize();
+		getContext().synchronize();
 	}
 
 }
