@@ -186,7 +186,7 @@ dependencies
     def clearGLDir = null
     def clearCUDADir = null
 
-    if (!(new File('build.gradle').exists()) && (new File('settings.gradle').exists()) {
+    if (!(new File('build.gradle').exists()) && (new File('settings.gradle').exists())) {
         // we're in the root path, clearGL and clearCUDA are in the same dir
         clearGLDir = new File('cleargl')
         clearCUDADir = new File('clearcuda')
@@ -197,9 +197,6 @@ dependencies
         clearCUDADir = new File('../clearcuda')
     }
     
-    println clearGLDir.exists()
-    println clearCUDADir.exists()
-
     if (clearGLDir.isDirectory() && clearCUDADir.isDirectory()) {
         println 'Using local clearCUDA and clearGL sources'
         compile project(':cleargl')
