@@ -42,6 +42,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 	public void keyPressed(final KeyEvent pE)
 	{
 		final boolean lIsShiftPressed = pE.isShiftDown();
+		final boolean lIsCtrlPressed = pE.isControlDown();
 		final float speed = lIsShiftPressed ? 0.1f : 0.001f;
 
 		switch (pE.getKeyCode())
@@ -78,9 +79,16 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			mClearVolumeRenderer.requestDisplay();
 			break;
 		case KeyEvent.VK_R:
-			mClearVolumeRenderer.resetBrightnessAndGammaAndTransferFunctionRanges();
-			mClearVolumeRenderer.resetRotationTranslation();
-			mClearVolumeRenderer.requestDisplay();
+			if (lIsCtrlPressed)
+			{
+				mClearVolumeRenderer.toggleRecording();
+			}
+			else
+			{
+				mClearVolumeRenderer.resetBrightnessAndGammaAndTransferFunctionRanges();
+				mClearVolumeRenderer.resetRotationTranslation();
+				mClearVolumeRenderer.requestDisplay();
+			}
 			break;
 		case KeyEvent.VK_B:
 			mClearVolumeRenderer.toggleBoxDisplay();
@@ -90,8 +98,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			mClearVolumeRenderer.toggleControlPanelDisplay();
 			mClearVolumeRenderer.requestDisplay();
 			break;
+
 		}
 
 	}
-
 }

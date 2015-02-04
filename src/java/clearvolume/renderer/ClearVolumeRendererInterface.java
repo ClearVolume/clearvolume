@@ -359,6 +359,11 @@ public interface ClearVolumeRendererInterface	extends
 	void toggleControlPanelDisplay();
 
 	/**
+	 * Toggles recording of rendered window frames.
+	 */
+	void toggleRecording();
+
+	/**
 	 * Returns whether the renderer's display is showing.
 	 *
 	 * @return true if renderer's display is showing/running.
@@ -394,6 +399,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	public void addProcessor(Processor<?> pProcessor);
 
+
 	/**
 	 * Returns a Canvas that can be used to embed this renderer.
 	 *
@@ -408,5 +414,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
+
+
 
 }

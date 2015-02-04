@@ -2,6 +2,7 @@ package clearvolume.renderer.jogl;
 
 import static java.lang.Math.max;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -16,6 +17,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLProfile;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
 
 import cleargl.ClearGLEventListener;
 import cleargl.ClearGLWindow;
@@ -28,6 +30,7 @@ import cleargl.GLTexture;
 import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
+import cleargl.util.GLVideoRecorder;
 import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.jogl.overlay.Overlay;
 import clearvolume.renderer.jogl.overlay.Overlay2D;
@@ -107,6 +110,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private final int mTextureWidth, mTextureHeight;
 
 	protected boolean mUsePBOs = true;
+	
+	//Recorder:
+	private final GLVideoRecorder mGLVideoRecorder = new GLVideoRecorder(new File(SystemUtils.USER_HOME,
+																																								"Videos/ClearVolume"));
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
@@ -666,9 +673,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 * to be displayed.
 	 */
 	@Override
-	public void display(final GLAutoDrawable drawable)
+	public void display(final GLAutoDrawable pDrawable)
 	{
-		final GL4 lGL4 = drawable.getGL().getGL4();
+		final GL4 lGL4 = pDrawable.getGL().getGL4();
 		lGL4.glClearColor(0, 0, 0, 1);
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
@@ -751,6 +758,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 			renderOverlays(lGL4, lInvVolumeMatrix);
 
 			updateFrameRateDisplay();
+
+			mGLVideoRecorder.screenshot(pDrawable);
 
 		}/**/
 
@@ -952,6 +961,15 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public void toggleBoxDisplay()
 	{
 		mOverlay3DMap.get("box").toggleDisplay();
+	}
+
+	/**
+	 * Toggles recording of rendered window frames.
+	 */
+	@Override
+	public void toggleRecording()
+	{
+		mGLVideoRecorder.toggleActive();
 	}
 
 	/**
