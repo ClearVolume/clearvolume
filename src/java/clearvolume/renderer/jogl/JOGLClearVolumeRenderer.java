@@ -30,7 +30,7 @@ import cleargl.GLTexture;
 import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
-import cleargl.util.GLVideoRecorder;
+import cleargl.util.recorder.GLVideoRecorder;
 import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.jogl.overlay.Overlay;
 import clearvolume.renderer.jogl.overlay.Overlay2D;
@@ -59,14 +59,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 		// attempt at solving Jug's Dreadlock bug:
 		final GLProfile lProfile = GLProfile.get(GLProfile.GL4);
 		// System.out.println( lProfile );
-
-		// load icons:
-		ClearGLWindow.setWindowIcons(	"clearvolume/icon/ClearVolumeIcon16.png",
-																	"clearvolume/icon/ClearVolumeIcon32.png",
-																	"clearvolume/icon/ClearVolumeIcon64.png",
-																	"clearvolume/icon/ClearVolumeIcon128.png",
-																	"clearvolume/icon/ClearVolumeIcon256.png",
-																	"clearvolume/icon/ClearVolumeIcon512.png");
 	}
 
 	// ClearGL Window.
@@ -459,7 +451,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public void init(final GLAutoDrawable drawable)
 	{
 		final GL4 lGL4 = drawable.getGL().getGL4();
-		lGL4.setSwapInterval(0);
+		lGL4.setSwapInterval(1);
 		lGL4.glDisable(GL4.GL_DEPTH_TEST);
 		lGL4.glDisable(GL4.GL_STENCIL_TEST);
 		lGL4.glEnable(GL4.GL_TEXTURE_2D);
@@ -625,6 +617,18 @@ public abstract class JOGLClearVolumeRenderer	extends
 					e.printStackTrace();
 				}
 			}
+
+			/*
+			Runnable lDisplayRequestRunnable = new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					requestDisplay();
+				}
+			};
+			mGLVideoRecorder.startDisplayRequestDeamonThread(lDisplayRequestRunnable);
+			/**/
 
 		}
 
