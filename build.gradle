@@ -10,6 +10,7 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'c'
 apply plugin: 'cpp'
+apply plugin: 'idea'
 
 [ compileJava, compileTestJava ]*.options*.encoding = 'UTF-8'
 
