@@ -41,7 +41,6 @@ public class BoxOverlay extends JOGLOverlay
   public void init(	GL4 pGL4,
                      DisplayRequestInterface pDisplayRequestInterface)
   {
-    // box display: construct the program and related objects
     try
     {
       geom = new CLGeometryObject(pGL4, 3, GL4.GL_TRIANGLES);
@@ -53,23 +52,9 @@ public class BoxOverlay extends JOGLOverlay
 
       geom.setProgram(mBoxGLProgram);
 
-      //pGL4.getGL().glFrontFace(GL.GL_CW);
-      //pGL4.getGL().glEnable(GL.GL_CULL_FACE);
-      //pGL4.getGL().glCullFace(GL.GL_FRONT);
-
-      //mOverlayModelViewMatrixUniform = mBoxGLProgram.getUniform("modelview");
-      //mOverlayProjectionMatrixUniform = mBoxGLProgram.getUniform("projection");
-
-      // set the line with of the box
-      //pGL4.glLineWidth(cBoxLineWidth);
-
-      // get all the shaders uniform locations
-      //mBoxPositionAttribute = mBoxGLProgram.getAtribute("position");
-
-      //mBoxColorUniform = mBoxGLProgram.getUniform("color");
       final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 3);
 
-      final float w = 0.5f;
+      final float w = 1.0f;
 
       // Front
       lVerticesFloatArray.add(-w, -w, w);
@@ -197,11 +182,7 @@ public class BoxOverlay extends JOGLOverlay
 											GLMatrix pInvVolumeMatrix)
 	{
 		if (isDisplayed())
-		{
-			//pGL4.glEnable(GL4.GL_CULL_FACE);
-
-			// invert Matrix is the modelview used by renderer which is actually the
-			// inverted modelview Matrix
+    {
 			final GLMatrix lInvBoxMatrix = new GLMatrix();
 			lInvBoxMatrix.copy(pInvVolumeMatrix);
 			lInvBoxMatrix.transpose();
@@ -210,9 +191,12 @@ public class BoxOverlay extends JOGLOverlay
       geom.setModelView(lInvBoxMatrix);
       geom.setProjection(pProjectionMatrix);
 
+      pGL4.glEnable(GL4.GL_DEPTH_TEST);
+      pGL4.glEnable(GL4.GL_CULL_FACE);
+      pGL4.glFrontFace(GL4.GL_CW);
       geom.draw();
-
-      //pGL4.glDisable(GL4.GL_CULL_FACE);
+      pGL4.glDisable(GL4.GL_DEPTH_TEST);
+      pGL4.glDisable(GL4.GL_CULL_FACE);
 		}
 	}
 

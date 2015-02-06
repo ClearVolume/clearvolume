@@ -12,10 +12,9 @@ out VertexData {
 
 uniform mat4 modelview;
 uniform mat4 projection;
-
-out float attenuation;  
-
 uniform vec3 position = vec3(0.0, 0.0, 0.0);
+
+out float attenuation;
 
 void main()
 {
@@ -24,7 +23,7 @@ void main()
    VertexOut.TexCoord = vertexTexCoord;
    attenuation = 1;
 
-   gl_Position = modelview*projection*vec4(vertexPosition + position, 1.0);
+   gl_Position = (projection*modelview)*vec4(vertexPosition + position, 1.0);
 }
 
 
