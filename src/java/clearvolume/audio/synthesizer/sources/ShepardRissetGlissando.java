@@ -1,6 +1,7 @@
 package clearvolume.audio.synthesizer.sources;
 
 import static java.lang.Math.PI;
+import static java.lang.Math.max;
 import static java.lang.Math.pow;
 import static java.lang.Math.sin;
 
@@ -13,12 +14,13 @@ public class ShepardRissetGlissando extends SourceBase implements
 	private float mBottomFrequency;
 	private float mTopFrequency;
 	private float mFrequencySpacing;
+	private volatile float mAmplitude = 1;
 
 	private ArrayList<Sinusoid> mSinusoidList = new ArrayList<>();
 
 	public ShepardRissetGlissando()
 	{
-		this(440, 4 * 440, 440);
+		this(440, 4 * 440, 220);
 	}
 
 	public ShepardRissetGlissando(float pBottomFrequency,
@@ -43,19 +45,21 @@ public class ShepardRissetGlissando extends SourceBase implements
 		{
 			float lFrequency = lSinusoid.getFrequencyInHertz();
 			lFrequency += pDeltaFrequencyHertz;
+			float lFrequencyBand = mTopFrequency - mBottomFrequency;
 			if (lFrequency > mTopFrequency)
 			{
-				lFrequency -= mTopFrequency - mBottomFrequency;
+				lFrequency -= lFrequencyBand;
 			}
 			else if (lFrequency < mBottomFrequency)
 			{
-				lFrequency += mTopFrequency - mBottomFrequency;
+				lFrequency += lFrequencyBand;
 			}
 			lSinusoid.setFrequencyInHertz(lFrequency);
 
 			float lAmplitude = getAmplitudeEnvelopp(lFrequency);
 			lSinusoid.setAmplitude(lAmplitude);
 		}
+
 	}
 
 	private float getAmplitudeEnvelopp(float pFrequency)
@@ -63,7 +67,8 @@ public class ShepardRissetGlissando extends SourceBase implements
 		if (pFrequency < mBottomFrequency || pFrequency > mTopFrequency)
 			return 0;
 		float lNormalizedFrequency = (pFrequency - mBottomFrequency) / (mTopFrequency - mBottomFrequency);
-		float lAmplitude = (float) pow(sin(PI * lNormalizedFrequency), 2);
+		float lAmplitude = (float) (mAmplitude * pow(	sin(PI * lNormalizedFrequency),
+																									2));
 		return lAmplitude;
 	}
 
@@ -74,10 +79,31 @@ public class ShepardRissetGlissando extends SourceBase implements
 		for (Sinusoid lSinusoid : mSinusoidList)
 		{
 			float lSinusoidSample = lSinusoid.next();
-			// System.out.println(lSinusoidSample);
 			lSample += lSinusoidSample;
 		}
 		return lSample;
+	}
+
+	public float getAmplitude()
+	{
+		return mAmplitude;
+	}
+
+	public void setAmplitude(float pAmplitude)
+	{
+		mAmplitude = pAmplitude;
+	}
+
+	@Override
+	public int getPeriodInSamples()
+	{
+		int lMaxPeriodInSamples = 0;
+		for (Sinusoid lSinusoid : mSinusoidList)
+		{
+			int lPeriodInSamples = lSinusoid.getPeriodInSamples();
+			lMaxPeriodInSamples = max(lMaxPeriodInSamples, lPeriodInSamples);
+		}
+		return lMaxPeriodInSamples;
 	}
 
 }

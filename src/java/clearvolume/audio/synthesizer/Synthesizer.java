@@ -1,7 +1,5 @@
 package clearvolume.audio.synthesizer;
 
-import org.junit.Test;
-
 import clearvolume.audio.SoundOut;
 import clearvolume.audio.synthesizer.sources.Source;
 
@@ -20,7 +18,12 @@ public class Synthesizer
 		mSoundOut = pSoundOut;
 	}
 
-	@Test
+	public void playSamples()
+	{
+		int lPreferredNumberOfSamples = mSource.getPeriodInSamples();
+		playSamples(lPreferredNumberOfSamples);
+	}
+
 	public void playSamples(int pNumberOfSamples)
 	{
 		if (mBuffer == null || mBuffer.length < pNumberOfSamples)
