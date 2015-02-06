@@ -4,6 +4,7 @@ import gnu.trove.list.array.TByteArrayList;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 public class SoundOut
@@ -18,45 +19,19 @@ public class SoundOut
 		super();
 	}
 
-	public void start()
+	public void start() throws LineUnavailableException
 	{
-		try
-		{
-			mAudioFormat = getDefaultAudioFormat();
-			/*************************************************************************
-			 * DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class,
-			 * mAudioFormat); mSourceDataLine = (SourceDataLine)
-			 * AudioSystem.getLine(dataLineInfo);/
-			 ************************************************************************/
-
-			mSourceDataLine = AudioSystem.getSourceDataLine(getDefaultAudioFormat());
-
-			mSourceDataLine.open(mAudioFormat);
-			mSourceDataLine.start();
-
-		}
-		catch (final Exception e)
-		{
-			e.printStackTrace();
-			System.out.println(e);
-			System.exit(0);
-		}
+		mAudioFormat = getDefaultAudioFormat();
+		mSourceDataLine = AudioSystem.getSourceDataLine(getDefaultAudioFormat());
+		mSourceDataLine.open(mAudioFormat);
+		mSourceDataLine.start();
 	}
 
 	public void stop()
 	{
-		try
-		{
-			mSourceDataLine.flush();
-			mSourceDataLine.stop();
-			mSourceDataLine.close();
-		}
-		catch (final Exception e)
-		{
-			e.printStackTrace();
-			System.out.println(e);
-			System.exit(0);
-		}
+		mSourceDataLine.flush();
+		mSourceDataLine.stop();
+		mSourceDataLine.close();
 	}
 
 	TByteArrayList mTemporaryBuffer = new TByteArrayList();

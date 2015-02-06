@@ -3,13 +3,15 @@ package clearvolume.audio.synthesizer.demo;
 import static java.lang.Math.PI;
 import static java.lang.Math.sin;
 
+import javax.sound.sampled.LineUnavailableException;
+
 import org.junit.Test;
 
 import clearvolume.audio.SoundOut;
 import clearvolume.audio.synthesizer.Synthesizer;
 import clearvolume.audio.synthesizer.filters.LowPassFilter;
+import clearvolume.audio.synthesizer.filters.NoiseFilter;
 import clearvolume.audio.synthesizer.filters.ReverbFilter;
-import clearvolume.audio.synthesizer.filters.WarmFilter;
 import clearvolume.audio.synthesizer.sources.Guitar;
 import clearvolume.audio.synthesizer.sources.ShepardRissetGlissando;
 import clearvolume.audio.synthesizer.sources.Sinusoid;
@@ -18,7 +20,7 @@ public class SynthesizerDemo
 {
 
 	@Test
-	public void testSinusoid()
+	public void demoSinusoid() throws LineUnavailableException
 	{
 		Sinusoid lSinusoid = new Sinusoid();
 
@@ -33,20 +35,20 @@ public class SynthesizerDemo
 	}
 
 	@Test
-	public void testGuitar()
+	public void demoGuitar() throws LineUnavailableException
 	{
 		Guitar lGuitar = new Guitar();
 
-		WarmFilter lWarmFilter = new WarmFilter();
-		lWarmFilter.setSource(lGuitar);
+		NoiseFilter lNoiseFilter = new NoiseFilter(0.1f);
+		lNoiseFilter.setSource(lGuitar);
 
-		ReverbFilter lReverbFilter = new ReverbFilter(0.01f);
-		lReverbFilter.setSource(lWarmFilter);
+		ReverbFilter lReverbFilter = new ReverbFilter(0.001f);
+		lReverbFilter.setSource(lNoiseFilter);/**/
 
 		LowPassFilter lLowPassFilter = new LowPassFilter();
 		lLowPassFilter.setSource(lReverbFilter);/**/
 
-		lGuitar.setAmplitude(0.1f);
+		lGuitar.setAmplitude(1f);
 
 		SoundOut lSoundOut = new SoundOut();
 
@@ -54,14 +56,14 @@ public class SynthesizerDemo
 																								lSoundOut);
 
 		lSoundOut.start();
-		for (int i = 0; i < 10000; i++)
+		for (int i = 0; i < 100000; i++)
 		{
 			lSynthesizer.playSamples();
 
-			lGuitar.setFrequencyInHertz((float) (440 + 400 * sin(2 * PI
+			lGuitar.setFrequencyInHertz((float) (440 + 220 * sin(2 * PI
 																														* i
-																														/ 1000)));
-			if (i % 100 == 0)
+																														/ 10000)));
+			if (i % 200 == 0)
 				lGuitar.strike(0.5f);
 
 		}
@@ -70,7 +72,7 @@ public class SynthesizerDemo
 	}
 
 	@Test
-	public void testShepardRissetGlissando()
+	public void demoShepardRissetGlissando() throws LineUnavailableException
 	{
 		ShepardRissetGlissando lShepardRissetGlissando = new ShepardRissetGlissando();
 		lShepardRissetGlissando.setAmplitude(0.05f);

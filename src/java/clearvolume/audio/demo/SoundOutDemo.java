@@ -3,6 +3,8 @@ package clearvolume.audio.demo;
 import static java.lang.Math.PI;
 import static java.lang.Math.sin;
 
+import javax.sound.sampled.LineUnavailableException;
+
 import org.junit.Test;
 
 import clearvolume.audio.SoundOut;
@@ -11,7 +13,7 @@ public class SoundOutDemo
 {
 
 	@Test
-	public void testGuitarSound()
+	public void testGuitarSound() throws LineUnavailableException
 	{
 		SoundOut lSoundOut = new SoundOut();
 
@@ -53,7 +55,7 @@ public class SoundOutDemo
 	}
 
 	@Test
-	public void testDevilStaircase()
+	public void testDevilStaircase() throws LineUnavailableException
 	{
 		SoundOut lSoundOut = new SoundOut();
 
