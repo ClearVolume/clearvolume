@@ -4,7 +4,6 @@ import cleargl.*;
 import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
 import clearvolume.renderer.jogl.overlay.JOGLOverlay;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -53,7 +52,7 @@ public class BoxOverlay extends JOGLOverlay
 
       geom.setProgram(mBoxGLProgram);
 
-      pGL4.getGL().glFrontFace(GL.GL_CW);
+      //pGL4.getGL().glFrontFace(GL.GL_CW);
       //pGL4.getGL().glEnable(GL.GL_CULL_FACE);
       //pGL4.getGL().glCullFace(GL.GL_FRONT);
 
@@ -61,16 +60,13 @@ public class BoxOverlay extends JOGLOverlay
       //mOverlayProjectionMatrixUniform = mBoxGLProgram.getUniform("projection");
 
       // set the line with of the box
-      pGL4.glLineWidth(cBoxLineWidth);
+      //pGL4.glLineWidth(cBoxLineWidth);
 
       // get all the shaders uniform locations
       //mBoxPositionAttribute = mBoxGLProgram.getAtribute("position");
 
       //mBoxColorUniform = mBoxGLProgram.getUniform("color");
-
-      // FIXME this should be done with IndexArrays, but lets be lazy for
-      // now...
-      final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 4);
+      final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 3);
 
       final float w = 0.5f;
 
@@ -104,6 +100,40 @@ public class BoxOverlay extends JOGLOverlay
       lVerticesFloatArray.add(w, w, w);
       lVerticesFloatArray.add(w, w, -w);
       lVerticesFloatArray.add(w, w, -w);
+
+      final GLFloatArray lNormalArray = new GLFloatArray(24, 3);
+
+      // Front
+      lNormalArray.add(0.0f, 0.0f, 1.0f);
+      lNormalArray.add(0.0f, 0.0f, 1.0f);
+      lNormalArray.add(0.0f, 0.0f, 1.0f);
+      lNormalArray.add(0.0f, 0.0f, 1.0f);
+      // Right
+      lNormalArray.add(1.0f, 0.0f, 0.0f);
+      lNormalArray.add(1.0f, 0.0f, 0.0f);
+      lNormalArray.add(1.0f, 0.0f, 0.0f);
+      lNormalArray.add(1.0f, 0.0f, 0.0f);
+      // Back
+      lNormalArray.add(0.0f, 0.0f, -1.0f);
+      lNormalArray.add(0.0f, 0.0f, -1.0f);
+      lNormalArray.add(0.0f, 0.0f, -1.0f);
+      lNormalArray.add(0.0f, 0.0f, -1.0f);
+      // Left
+      lNormalArray.add(-1.0f, 0.0f, 0.0f);
+      lNormalArray.add(-1.0f, 0.0f, 0.0f);
+      lNormalArray.add(-1.0f, 0.0f, 0.0f);
+      lNormalArray.add(-1.0f, 0.0f, 0.0f);
+      // Bottom
+      lNormalArray.add(0.0f, -1.0f, 0.0f);
+      lNormalArray.add(0.0f, -1.0f, 0.0f);
+      lNormalArray.add(0.0f, -1.0f, 0.0f);
+      lNormalArray.add(0.0f, -1.0f, 0.0f);
+      // Top
+      lNormalArray.add(0.0f, 1.0f, 0.0f);
+      lNormalArray.add(0.0f, 1.0f, 0.0f);
+      lNormalArray.add(0.0f, 1.0f, 0.0f);
+      lNormalArray.add(0.0f, 1.0f, 0.0f);
+
 
       final GLIntArray lIndexIntArray = new GLIntArray(36, 1);
 
@@ -142,8 +172,9 @@ public class BoxOverlay extends JOGLOverlay
       lTexCoordFloatArray.add(0.0f, 1.0f);
 
       geom.setVerticesAndCreateBuffer(lVerticesFloatArray.getFloatBuffer());
-      geom.setNormalsAndCreateBuffer(lVerticesFloatArray.getFloatBuffer());
+      geom.setNormalsAndCreateBuffer(lNormalArray.getFloatBuffer());
       geom.setTextureCoordsAndCreateBuffer(lTexCoordFloatArray.getFloatBuffer());
+
       geom.setIndicesAndCreateBuffer(lIndexIntArray.getIntBuffer());
 
     }
@@ -171,6 +202,7 @@ public class BoxOverlay extends JOGLOverlay
 
       geom.setModelView(lInvBoxMatrix);
       geom.setProjection(pProjectionMatrix);
+
       geom.draw();
 
       //pGL4.glDisable(GL4.GL_CULL_FACE);
