@@ -1,7 +1,20 @@
 package clearvolume.renderer.jogl;
 
-import static java.lang.Math.max;
+import cleargl.*;
+import clearvolume.renderer.ClearVolumeRendererBase;
+import clearvolume.renderer.jogl.overlay.JOGLOverlay;
+import clearvolume.renderer.jogl.overlay.Overlay;
+import clearvolume.renderer.jogl.overlay.std.BoxOverlay;
+import com.jogamp.newt.awt.NewtCanvasAWT;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
+import org.apache.commons.io.IOUtils;
 
+import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL4;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLProfile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -9,33 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
-import javax.media.opengl.GL;
-import javax.media.opengl.GL4;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLProfile;
-
-import org.apache.commons.io.IOUtils;
-
-import cleargl.ClearGLEventListener;
-import cleargl.ClearGLWindow;
-import cleargl.GLAttribute;
-import cleargl.GLFloatArray;
-import cleargl.GLMatrix;
-import cleargl.GLPixelBufferObject;
-import cleargl.GLProgram;
-import cleargl.GLTexture;
-import cleargl.GLUniform;
-import cleargl.GLVertexArray;
-import cleargl.GLVertexAttributeArray;
-import clearvolume.renderer.ClearVolumeRendererBase;
-import clearvolume.renderer.jogl.overlay.JOGLOverlay;
-import clearvolume.renderer.jogl.overlay.Overlay;
-import clearvolume.renderer.jogl.overlay.std.BoxOverlay;
-
-import com.jogamp.newt.awt.NewtCanvasAWT;
-import com.jogamp.newt.event.WindowAdapter;
-import com.jogamp.newt.event.WindowEvent;
+import static java.lang.Math.max;
 
 /**
  * Abstract Class JoglPBOVolumeRenderer
@@ -425,8 +412,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 		final GL4 lGL4 = drawable.getGL().getGL4();
 		lGL4.setSwapInterval(0);
 		lGL4.glDisable(GL4.GL_DEPTH_TEST);
+    lGL4.glEnable(GL4.GL_BLEND);
 		lGL4.glDisable(GL4.GL_STENCIL_TEST);
-		lGL4.glEnable(GL4.GL_TEXTURE_2D);
 
 		lGL4.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
@@ -509,7 +496,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 																															4);
 
 				final GLFloatArray lVerticesFloatArray = new GLFloatArray(6,
-																																	4);
+
+        																																	4);
+
 				lVerticesFloatArray.add(-1, -1, 0, 1);
 				lVerticesFloatArray.add(1, -1, 0, 1);
 				lVerticesFloatArray.add(1, 1, 0, 1);
@@ -683,7 +672,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 						mLayerTextures[i].copyFrom(mPixelBufferObjects[i]);
 
 			mGLProgram.use(lGL4);
-			mGLProgram.bind();
 
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 				mLayerTextures[i].bind(i);
