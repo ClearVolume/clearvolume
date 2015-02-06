@@ -7,6 +7,7 @@ import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.jogl.overlay.Overlay;
+import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.volume.Volume;
@@ -358,6 +359,11 @@ public interface ClearVolumeRendererInterface	extends
 	void toggleControlPanelDisplay();
 
 	/**
+	 * Toggles recording of rendered window frames.
+	 */
+	void toggleRecording();
+
+	/**
 	 * Returns whether the renderer's display is showing.
 	 *
 	 * @return true if renderer's display is showing/running.
@@ -378,12 +384,21 @@ public interface ClearVolumeRendererInterface	extends
 	void addOverlay(Overlay pOverlay);
 
 	/**
+	 * Adds overlay module to draw with 3D primitives within the rendering volume.
+	 * 
+	 * @param pOverlay
+	 *          Overlay to add.
+	 */
+	void addOverlay2D(Overlay2D pOverlay2D);
+
+	/**
 	 * Adds a processor to this renderer.
 	 * 
 	 * @param pProcessor
 	 *          Processor to add.
 	 */
 	public void addProcessor(Processor<?> pProcessor);
+
 
 	/**
 	 * Returns a Canvas that can be used to embed this renderer.
@@ -399,5 +414,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
+
+
 
 }

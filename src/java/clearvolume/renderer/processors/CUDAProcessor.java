@@ -8,6 +8,8 @@ import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 public abstract class CUDAProcessor<R> extends ProcessorBase<R>	implements
 																																Processor<R>
 {
+	private CudaDevice mCudaDevice;
+	private CudaContext mCudaContext;
 
 	@Override
 	public boolean isCompatibleRenderer(Class<?> pRendererClass)
@@ -15,8 +17,22 @@ public abstract class CUDAProcessor<R> extends ProcessorBase<R>	implements
 		return pRendererClass == JCudaClearVolumeRenderer.class;
 	}
 
-	public abstract void setDeviceAndContext(	CudaDevice pCudaDevice,
-																						CudaContext pCudaContext);
+	public void setDeviceAndContext(CudaDevice pCudaDevice,
+																	CudaContext pCudaContext)
+	{
+		mCudaDevice = pCudaDevice;
+		mCudaContext = pCudaContext;
+	}
+
+	public CudaDevice getDevice()
+	{
+		return mCudaDevice;
+	}
+
+	public CudaContext getContext()
+	{
+		return mCudaContext;
+	}
 
 	public abstract void applyToArray(CudaArray pCudaArray);
 
@@ -25,8 +41,5 @@ public abstract class CUDAProcessor<R> extends ProcessorBase<R>	implements
 																long pWidthInVoxels,
 																long pHeightInVoxels,
 																long pDepthInVoxels);
-
-
-
 
 }

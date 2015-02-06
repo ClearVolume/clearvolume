@@ -110,8 +110,39 @@ public class ClearVolumeRendererFactory
 																																		final int pNumberOfRenderLayers,
 																																		final boolean pUseInCanvas)
 	{
-		boolean lCUDAOperational = false;
+		ClearVolumeRendererInterface lNewCudaRenderer = newCudaRenderer(pWindowName,
+																																		pWindowWidth,
+																																		pWindowHeight,
+																																		pBytesPerVoxel,
+																																		pMaxTextureWidth,
+																																		pMaxTextureHeight,
+																																		pNumberOfRenderLayers,
+																																		pUseInCanvas);
 
+		if (lNewCudaRenderer != null)
+			return lNewCudaRenderer;
+
+		return new OpenCLVolumeRenderer(pWindowName,
+																		pWindowWidth,
+																		pWindowHeight,
+																		pBytesPerVoxel,
+																		pMaxTextureWidth,
+																		pMaxTextureHeight,
+																		pNumberOfRenderLayers,
+																		pUseInCanvas);
+
+	}
+
+	public static final ClearVolumeRendererInterface newCudaRenderer(	final String pWindowName,
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final int pBytesPerVoxel,
+																																		final int pMaxTextureWidth,
+																																		final int pMaxTextureHeight,
+																																		final int pNumberOfRenderLayers,
+																																		final boolean pUseInCanvas)
+	{
+		boolean lCUDAOperational = false;
 		try
 		{
 			lCUDAOperational = CudaAvailability.isClearCudaOperational();
@@ -121,24 +152,35 @@ public class ClearVolumeRendererFactory
 			e.printStackTrace();
 		}
 
-		if (lCUDAOperational)
-			return new JCudaClearVolumeRenderer(pWindowName,
-																					pWindowWidth,
-																					pWindowHeight,
-																					pBytesPerVoxel,
-																					pMaxTextureWidth,
-																					pMaxTextureHeight,
-																					pNumberOfRenderLayers,
-																					pUseInCanvas);
-		else
-			return new OpenCLVolumeRenderer(pWindowName,
-																			pWindowWidth,
-																			pWindowHeight,
-																			pBytesPerVoxel,
-																			pMaxTextureWidth,
-																			pMaxTextureHeight,
-																			pNumberOfRenderLayers,
-																			pUseInCanvas);
+		if (!lCUDAOperational)
+			return null;
 
+		return new JCudaClearVolumeRenderer(pWindowName,
+																				pWindowWidth,
+																				pWindowHeight,
+																				pBytesPerVoxel,
+																				pMaxTextureWidth,
+																				pMaxTextureHeight,
+																				pNumberOfRenderLayers,
+																				pUseInCanvas);
+	}
+
+	public static final ClearVolumeRendererInterface newOpenCLRenderer(	final String pWindowName,
+																																			final int pWindowWidth,
+																																			final int pWindowHeight,
+																																			final int pBytesPerVoxel,
+																																			final int pMaxTextureWidth,
+																																			final int pMaxTextureHeight,
+																																			final int pNumberOfRenderLayers,
+																																			final boolean pUseInCanvas)
+	{
+		return new OpenCLVolumeRenderer(pWindowName,
+																		pWindowWidth,
+																		pWindowHeight,
+																		pBytesPerVoxel,
+																		pMaxTextureWidth,
+																		pMaxTextureHeight,
+																		pNumberOfRenderLayers,
+																		pUseInCanvas);
 	}
 }

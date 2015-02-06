@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
 
 import org.bridj.Pointer;
 
@@ -33,7 +34,7 @@ public class OpenCLDevice
 	public CLQueue mCLQueue;
 	public ByteOrder mCLContextByteOrder;
 
-	public CLKernel mCLKernel;
+	public ArrayList<CLKernel> mCLKernelList = new ArrayList<CLKernel>();
 
 	public boolean initCL()
 	{
@@ -114,6 +115,11 @@ public class OpenCLDevice
 
 	}
 
+	public int getKernelIndex(CLKernel pCLKernel)
+	{
+		return mCLKernelList.indexOf(pCLKernel);
+	}
+
 	public CLKernel compileKernel(final URL url, final String kernelName)
 	{
 
@@ -141,9 +147,11 @@ public class OpenCLDevice
 			return null;
 		}
 
+		CLKernel lNewKernel = null;
 		try
 		{
-			mCLKernel = mCLProgram.createKernel(kernelName);
+			lNewKernel = mCLProgram.createKernel(kernelName);
+			mCLKernelList.add(lNewKernel);
 		}
 		catch (final Exception e)
 		{
@@ -152,27 +160,60 @@ public class OpenCLDevice
 			e.printStackTrace();
 		}
 
-		return mCLKernel;
+		return lNewKernel;
 	}
 
-	public void setArgs(Object... args)
+	public void setArgs(final CLKernel pCLKernel, Object... args)
 	{
-
-		mCLKernel.setArgs(args);
-
+		pCLKernel.setArgs(args);
 	}
 
-	public CLEvent run(final int mNx, final int mNy)
+	public void setArgs(final int pKernelIndex, Object... args)
 	{
-		final CLEvent evt = mCLKernel.enqueueNDRange(mCLQueue, new int[]
+		mCLKernelList.get(pKernelIndex).setArgs(args);
+	}
+
+	public CLEvent run(	final int pKernelIndex,
+											final int mNx,
+											final int mNy)
+	{
+		final CLEvent evt = mCLKernelList.get(pKernelIndex)
+																			.enqueueNDRange(mCLQueue,
+																											new int[]
+																											{ mNx, mNy });
+		evt.waitFor();
+		return evt;
+	}
+
+	public CLEvent run(	final int pKernelIndex,
+											final int mNx,
+											final int mNy,
+											final int mNz)
+	{
+		final CLEvent evt = mCLKernelList.get(pKernelIndex)
+																			.enqueueNDRange(mCLQueue,
+																											new int[]
+																											{ mNx, mNy, mNz });
+		evt.waitFor();
+		return evt;
+	}
+
+	public CLEvent run(	final CLKernel pCLKernel,
+											final int mNx,
+											final int mNy)
+	{
+		final CLEvent evt = pCLKernel.enqueueNDRange(mCLQueue, new int[]
 		{ mNx, mNy });
 		evt.waitFor();
 		return evt;
 	}
 
-	public CLEvent run(final int mNx, final int mNy, final int mNz)
+	public CLEvent run(	final CLKernel pCLKernel,
+											final int mNx,
+											final int mNy,
+											final int mNz)
 	{
-		final CLEvent evt = mCLKernel.enqueueNDRange(mCLQueue, new int[]
+		final CLEvent evt = pCLKernel.enqueueNDRange(mCLQueue, new int[]
 		{ mNx, mNy, mNz });
 		evt.waitFor();
 		return evt;

@@ -1,6 +1,8 @@
 package clearvolume.renderer.jogl.overlay.std;
 
+
 import cleargl.*;
+import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
 import clearvolume.renderer.jogl.overlay.JOGLOverlay;
 
@@ -15,7 +17,6 @@ public class BoxOverlay extends JOGLOverlay
 
 	private static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
 	{ 1.f, 0.f, 0.0f, 0.1f });
-
 	private GLProgram mBoxGLProgram;
 
 	private GLAttribute mBoxPositionAttribute;
@@ -30,7 +31,6 @@ public class BoxOverlay extends JOGLOverlay
 	private GLUniform mOverlayModelViewMatrixUniform;
 	private GLUniform mOverlayProjectionMatrixUniform;
 
-
 	@Override
 	public String getName()
 	{
@@ -38,7 +38,8 @@ public class BoxOverlay extends JOGLOverlay
 	}
 
   @Override
-  public void init(GL4 pGL4)
+  public void init(	GL4 pGL4,
+                     DisplayRequestInterface pDisplayRequestInterface)
   {
     // box display: construct the program and related objects
     try
@@ -183,6 +184,12 @@ public class BoxOverlay extends JOGLOverlay
       e.printStackTrace();
     }
   }
+
+	@Override
+	public boolean hasChanged()
+	{
+		return false;
+	}
 
 	@Override
 	public void render(	GL4 pGL4,

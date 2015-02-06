@@ -5,6 +5,7 @@ import org.kohsuke.args4j.CmdLineParser;
 
 import clearvolume.network.client.main.ClearVolumeClientMain;
 import clearvolume.network.server.main.ClearVolumeDemoServerMain;
+import clearvolume.renderer.jogl.ClearVolumeIcon;
 
 public class ClearVolumeMain
 {
@@ -34,6 +35,8 @@ public class ClearVolumeMain
 				System.err.println();
 				System.exit(1);
 			}
+
+			ClearVolumeIcon.setIcon();
 
 			if (lCommandLineValues.isDemoServer())
 				ClearVolumeDemoServerMain.main(args);

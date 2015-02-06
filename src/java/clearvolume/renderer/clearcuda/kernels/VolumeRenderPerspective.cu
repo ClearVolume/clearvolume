@@ -8,6 +8,15 @@
  * is strictly prohibited.
  *
  */
+ 
+ /*
+  Adapted from the Nvidia CUDA samples
+  http://developer.download.nvidia.com/compute/cuda/4_2/rel/sdk/website/OpenCL/html/samples.html
+ 
+
+  Authors: 	Loic Royer		 (royer@mpi-cbg.de)
+  					Martin Weigert (mweigert@mpi-cbg.de)
+ */
 
 // Simple 3D volume renderer
 // calculates the eye coordinate from user provided projection matrix 

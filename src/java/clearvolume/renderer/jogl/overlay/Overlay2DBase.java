@@ -5,7 +5,7 @@ import javax.media.opengl.GL4;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 
-public abstract class JOGLOverlay implements Overlay
+public abstract class Overlay2DBase implements Overlay2D
 {
 	private volatile boolean mDisplay = true;
 

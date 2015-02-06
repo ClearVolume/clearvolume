@@ -7,12 +7,14 @@ import javax.media.opengl.GLEventListener;
 
 import jcuda.CudaException;
 import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
+import clearvolume.renderer.processors.OpenCLProcessor;
 import clearvolume.renderer.processors.Processor;
 
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLImage3D;
 import com.nativelibs4java.opencl.CLImageFormat;
+import com.nativelibs4java.opencl.CLKernel;
 
 public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																																	GLEventListener
@@ -29,6 +31,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			mCLInvProjectionBuffer;
 
 	private CLBuffer<Float>[] mCLTransferColorBuffers;
+
+	private CLKernel mRenderKernel;
 
 	public OpenCLVolumeRenderer(final String pWindowName,
 															final int pWindowWidth,
@@ -104,8 +108,15 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		mCLDevice.initCL(false);
 		mCLDevice.printInfo();
-		mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/volume_render.cl"),
-														"max_project");
+		mRenderKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRenderPerspective.cl"),
+														"volumerender");
+
+		for (Processor<?> lProcessor : mProcessorsMap.values())
+			if (lProcessor.isCompatibleRenderer(getClass()))
+			{
+				OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
+				lOpenCLProcessor.setDevice(mCLDevice);
+			}
 
 		mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
 		mCLInvProjectionBuffer = mCLDevice.createInputFloatBuffer(16);
@@ -310,7 +321,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		prepareTransferFunctionArray(pRenderLayerIndex);
 
-		mCLDevice.setArgs(mCLRenderBuffers[pRenderLayerIndex],
+		mCLDevice.setArgs(mRenderKernel,
+											mCLRenderBuffers[pRenderLayerIndex],
 											getTextureWidth(),
 											getTextureHeight(),
 											(float) getBrightness(),
@@ -325,7 +337,9 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		// long startTime = System.nanoTime();
 
-		mCLDevice.run(getTextureWidth(), getTextureHeight());
+		mCLDevice.run(mRenderKernel,
+									getTextureWidth(),
+									getTextureHeight());
 
 		copyBufferToTexture(pRenderLayerIndex,
 												mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]));
@@ -343,11 +357,12 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		for (Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleRenderer(getClass()))
 			{
-				mCLDevice.setArgs(mCLVolumeImages[pRenderLayerIndex]);
-				lProcessor.process(	pRenderLayerIndex,
-														getVolumeSizeX(),
-														getVolumeSizeY(),
-														getVolumeSizeZ());
+				OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
+				lOpenCLProcessor.setArgs(mCLVolumeImages[pRenderLayerIndex]);
+				lOpenCLProcessor.process(	pRenderLayerIndex,
+																	getVolumeSizeX(),
+																	getVolumeSizeY(),
+																	getVolumeSizeZ());
 			}
 	}
 }

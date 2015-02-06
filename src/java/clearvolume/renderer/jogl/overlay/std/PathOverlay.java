@@ -13,6 +13,7 @@ import cleargl.GLProgram;
 import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
+import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
 import clearvolume.renderer.jogl.overlay.JOGLOverlay;
 
@@ -41,7 +42,14 @@ public class PathOverlay extends JOGLOverlay
 	}
 
 	@Override
-	public void init(GL4 pGL4)
+	public boolean hasChanged()
+	{
+		return false;
+	}
+
+	@Override
+	public void init(	GL4 pGL4,
+										DisplayRequestInterface pDisplayRequestInterface)
 	{
 		// box display: construct the program and related objects
 		try
@@ -117,9 +125,10 @@ public class PathOverlay extends JOGLOverlay
 
 			mBoxColorUniform.setFloatVector4(cBoxColor);
 
-			mBoxVertexArray.draw(GL.GL_LINES);
+			mBoxVertexArray.draw(GL.GL_LINE_STRIP);
 
 		}
 	}
+
 
 }
