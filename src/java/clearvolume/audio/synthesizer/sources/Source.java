@@ -1,4 +1,4 @@
-package clearvolume.audio.synthesizer;
+package clearvolume.audio.synthesizer.sources;
 
 public interface Source
 {

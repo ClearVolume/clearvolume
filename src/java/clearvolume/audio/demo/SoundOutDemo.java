@@ -1,4 +1,4 @@
-package clearvolume.audio.test;
+package clearvolume.audio.demo;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.sin;

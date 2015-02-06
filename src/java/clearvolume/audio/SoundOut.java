@@ -71,12 +71,30 @@ public class SoundOut
 			final int lIntValue = (int) (lDoubleValue * (1 << 15));
 			byte a = (byte) ((lIntValue) & 0xff);
 			byte b = (byte) ((lIntValue >> 8) & 0xff);
-			// byte c = (byte) ((lIntValue >> 24) & 0xff);
-			// System.out.format("a=%d, b=%d \n", a, b);
 
 			mTemporaryBuffer.add(a);
 			mTemporaryBuffer.add(b);
-			// mTemporaryBuffer.add(c);
+		}
+
+		if (mTemporaryArray == null || mTemporaryArray.length < mTemporaryBuffer.size())
+			mTemporaryArray = new byte[mTemporaryBuffer.size()];
+		mTemporaryArray = mTemporaryBuffer.toArray(mTemporaryArray);
+
+		play(mTemporaryArray, 2 * pLength);
+	}
+
+	public void play(final float[] pBuffer, final int pLength)
+	{
+		mTemporaryBuffer.reset();
+		for (int i = 0; i < pBuffer.length; i++)
+		{
+			final double lDoubleValue = pBuffer[i];
+			final int lIntValue = (int) (lDoubleValue * (1 << 15));
+			byte a = (byte) ((lIntValue) & 0xff);
+			byte b = (byte) ((lIntValue >> 8) & 0xff);
+
+			mTemporaryBuffer.add(a);
+			mTemporaryBuffer.add(b);
 		}
 
 		if (mTemporaryArray == null || mTemporaryArray.length < mTemporaryBuffer.size())

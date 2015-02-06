@@ -1,10 +1,10 @@
-package clearvolume.audio.synthesizer;
+package clearvolume.audio.synthesizer.sources;
 
 public abstract class SourceBase
 {
 	protected float mSamplingFrequency = 44100f;
 
-	protected float mSourceTime = 0;
+	private volatile long mTime = 0;
 
 	public SourceBase()
 	{
@@ -25,6 +25,21 @@ public abstract class SourceBase
 	public void setSamplingFrequency(float pSamplingFrequency)
 	{
 		mSamplingFrequency = pSamplingFrequency;
+	}
+
+	public long getTime()
+	{
+		return mTime;
+	}
+
+	public long getTimeAndIncrement()
+	{
+		return mTime++;
+	}
+
+	public void setSourceTime(long pTime)
+	{
+		mTime = pTime;
 	}
 
 	
