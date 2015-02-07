@@ -5,6 +5,8 @@ import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
 
+import java.util.Properties;
+
 public class ClearVolumeRendererFactory
 {
 
@@ -110,27 +112,39 @@ public class ClearVolumeRendererFactory
 																																		final int pNumberOfRenderLayers,
 																																		final boolean pUseInCanvas)
 	{
-		ClearVolumeRendererInterface lNewCudaRenderer = newCudaRenderer(pWindowName,
-																																		pWindowWidth,
-																																		pWindowHeight,
-																																		pBytesPerVoxel,
-																																		pMaxTextureWidth,
-																																		pMaxTextureHeight,
-																																		pNumberOfRenderLayers,
-																																		pUseInCanvas);
+    Properties p = new Properties(System.getProperties());
 
-		if (lNewCudaRenderer != null)
-			return lNewCudaRenderer;
+    if(p.getProperty("ClearVolume.disableCUDA") == null) {
+      ClearVolumeRendererInterface lNewCudaRenderer = newCudaRenderer(pWindowName,
+              pWindowWidth,
+              pWindowHeight,
+              pBytesPerVoxel,
+              pMaxTextureWidth,
+              pMaxTextureHeight,
+              pNumberOfRenderLayers,
+              pUseInCanvas);
 
-		return new OpenCLVolumeRenderer(pWindowName,
-																		pWindowWidth,
-																		pWindowHeight,
-																		pBytesPerVoxel,
-																		pMaxTextureWidth,
-																		pMaxTextureHeight,
-																		pNumberOfRenderLayers,
-																		pUseInCanvas);
+      if (lNewCudaRenderer != null)
+        return lNewCudaRenderer;
+    } else {
+      System.err.println("Caution: Use of CUDA has been explicitly disabled!");
+    }
 
+    if(p.getProperty("ClearVolume.disableOpenCL") == null) {
+      return new OpenCLVolumeRenderer(pWindowName,
+              pWindowWidth,
+              pWindowHeight,
+              pBytesPerVoxel,
+              pMaxTextureWidth,
+              pMaxTextureHeight,
+              pNumberOfRenderLayers,
+              pUseInCanvas);
+    } else {
+      System.err.println("Caution: Use of OpenCL has been explicitly disabled!");
+    }
+
+    System.err.println("Your system cannot run ClearVolume because it does not support CUDA or OpenCL.");
+    return null;
 	}
 
 	public static final ClearVolumeRendererInterface newCudaRenderer(	final String pWindowName,
