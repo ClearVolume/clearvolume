@@ -1,29 +1,18 @@
 package clearvolume.renderer.opencl;
 
+import com.nativelibs4java.opencl.*;
+import com.nativelibs4java.opencl.CLImageFormat.ChannelDataType;
+import com.nativelibs4java.opencl.CLImageFormat.ChannelOrder;
+import com.nativelibs4java.opencl.CLMem.Usage;
+import com.nativelibs4java.util.IOUtils;
+import org.bridj.Pointer;
+
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
-
-import org.bridj.Pointer;
-
-import com.nativelibs4java.opencl.CLBuffer;
-import com.nativelibs4java.opencl.CLContext;
-import com.nativelibs4java.opencl.CLDevice;
-import com.nativelibs4java.opencl.CLEvent;
-import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLImage3D;
-import com.nativelibs4java.opencl.CLImageFormat;
-import com.nativelibs4java.opencl.CLImageFormat.ChannelDataType;
-import com.nativelibs4java.opencl.CLImageFormat.ChannelOrder;
-import com.nativelibs4java.opencl.CLKernel;
-import com.nativelibs4java.opencl.CLMem.Usage;
-import com.nativelibs4java.opencl.CLProgram;
-import com.nativelibs4java.opencl.CLQueue;
-import com.nativelibs4java.opencl.JavaCL;
-import com.nativelibs4java.util.IOUtils;
 
 public class OpenCLDevice
 {
@@ -45,8 +34,11 @@ public class OpenCLDevice
 	{
 		// initialize the platform and devices OpenCL will use
 		// usually chooses the best, i.e. fastest, platform/device/context
-		try
+    CLPlatform bestPlatform = null;
+    CLDevice bestDevice = null;
+    try
 		{
+
 			if (useExistingOpenGLContext)
 			{
 				// FIXME using existing OpenGL context does not work yet
@@ -55,7 +47,23 @@ public class OpenCLDevice
 			}
 			else
 			{
-				mCLContext = JavaCL.createBestContext();
+        CLPlatform[] platforms = JavaCL.listPlatforms();
+
+        long maxMemory = 0;
+
+        for(CLPlatform p: platforms) {
+          CLDevice bestDeviceInPlatform = getDeviceWithMostMemory(p.listGPUDevices(true));
+
+          if(bestDeviceInPlatform.getGlobalMemSize() > maxMemory) {
+            maxMemory = bestDeviceInPlatform.getGlobalMemSize();
+            bestDevice = bestDeviceInPlatform;
+            bestPlatform = p;
+          }
+        }
+
+        System.out.println("Using " + bestDevice.getName() + " from platform " + bestPlatform.getName());
+
+				mCLContext = JavaCL.createContext(null, bestDevice);
 
 			}
 		}
@@ -78,7 +86,7 @@ public class OpenCLDevice
 
 		try
 		{
-			mCLDevice = getBestDevice();
+			mCLDevice = bestDevice;
 		}
 		catch (Exception e)
 		{
@@ -93,14 +101,28 @@ public class OpenCLDevice
 
 	}
 
-	private CLDevice getBestDevice()
+	private CLDevice getDeviceWithMostMemory(CLDevice[] devices)
 	{
-		CLDevice[] lDevices = mCLContext.getDevices();
+    long globalMemSize = 0;
+    CLDevice bestDevice = null;
 
-		for (CLDevice lCLDevice : lDevices)
-			System.out.println(lCLDevice);
+		for (CLDevice lCLDevice : devices) {
+      long tmp = lCLDevice.getGlobalMemSize();
 
-		return lDevices[0];
+      System.out.println(lCLDevice.getPlatform().getName() + "." + lCLDevice.getName() + " L" + lCLDevice.getLocalMemSize()/1024 + "k/G" + lCLDevice.getGlobalMemSize()/1024/1024 + "M mem with " + lCLDevice.getMaxComputeUnits() + " compute units");
+
+      if(tmp > globalMemSize) {
+        bestDevice = lCLDevice;
+        globalMemSize = tmp;
+      }
+    }
+
+    if(bestDevice == null) {
+      bestDevice = devices[0];
+    }
+
+    System.out.println(bestDevice.getName() + " is best in platform " + bestDevice.getPlatform().getName());
+		return bestDevice;
 	}
 
 	public CLContext getContext()
@@ -111,7 +133,7 @@ public class OpenCLDevice
 	public void printInfo()
 	{
 
-		System.out.printf("Device name:    \t %s \n", mCLDevice);
+		System.out.printf("Device name: \t %s \n", mCLDevice);
 
 	}
 
