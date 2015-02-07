@@ -67,7 +67,7 @@ public class BoxOverlay extends JOGLOverlay
       lVerticesFloatArray.add(w, w, -w);
       lVerticesFloatArray.add(w, w, w);
       // Back
-      lVerticesFloatArray.add(w, -w, -w);
+      lVerticesFloatArray.add(-w, -w, -w);
       lVerticesFloatArray.add(-w, w, -w);
       lVerticesFloatArray.add(w, w, -w);
       lVerticesFloatArray.add(w, -w, -w);
@@ -82,10 +82,10 @@ public class BoxOverlay extends JOGLOverlay
       lVerticesFloatArray.add(w, -w, -w);
       lVerticesFloatArray.add(w, -w, w);
       // Top
-      lVerticesFloatArray.add(w, w, w);
+      lVerticesFloatArray.add(-w, w, w);
       lVerticesFloatArray.add(w, w, w);
       lVerticesFloatArray.add(w, w, -w);
-      lVerticesFloatArray.add(w, w, -w);
+      lVerticesFloatArray.add(-w, w, -w);
 
       final GLFloatArray lNormalArray = new GLFloatArray(24, 3);
 

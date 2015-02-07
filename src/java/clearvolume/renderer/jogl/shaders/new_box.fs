@@ -12,7 +12,7 @@ in float attenuation;
  
 void main()
 {
-    bvec2 toDiscard = greaterThan(fract(VertexIn.TexCoord*10.0), vec2(0.01, 0.01));
+    bvec2 toDiscard = greaterThan(fract(VertexIn.TexCoord*10.0), vec2(0.015, 0.015));
 
     if(all(toDiscard)) {
         discard;
