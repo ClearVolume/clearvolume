@@ -1,14 +1,10 @@
 package clearvolume.renderer;
 
-import java.awt.Color;
+import java.awt.Dimension;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -27,9 +23,7 @@ public class ControlJPanel extends JPanel
 	{
 		super();
 
-		setLayout(new MigLayout("",
-														"[225px,grow]",
-														"[][][][51.00px,center]"));
+		setLayout(new MigLayout("", "[][225px,grow]", "[][][]"));
 
 		JSlider lGammaSlider = new JSlider(0, cPrecision, cPrecision / 2);
 		lGammaSlider.addChangeListener(new ChangeListener()
@@ -47,36 +41,16 @@ public class ControlJPanel extends JPanel
 		JLabel lblGamma = new JLabel("gamma");
 		add(lblGamma, "cell 0 0");
 
-		add(lGammaSlider, "cell 0 1,grow");
-
-		JLabel lblMinMax = new JLabel("min & max");
-		add(lblMinMax, "cell 0 2");
-
-		JLayeredPane lLayeredPane = new JLayeredPane();
-		lLayeredPane.setBorder(new EmptyBorder(0, 0, 0, 0));
-		add(lLayeredPane, "cell 0 3,grow");
-		lLayeredPane.setLayout(null);
-
-		final JSlider lMinSlider = new JSlider(0, cPrecision, 0);
-		lMinSlider.setBounds(0, 23, 412, 20);
-		lLayeredPane.add(lMinSlider);
-		lMinSlider.setPaintTrack(false);
+		add(lGammaSlider, "cell 1 0,grow");
 
 		final JSlider lMaxSlider = new JSlider(0, cPrecision, cPrecision);
-		lMaxSlider.setBounds(0, 0, 412, 20);
-		lMaxSlider.setPaintTrack(false);
-		lLayeredPane.add(lMaxSlider);
+		final JSlider lMinSlider = new JSlider(0, cPrecision, 0);
+		lMinSlider.setPreferredSize(new Dimension(0, 0));
 
-		JButton separator = new JButton();
-		separator.setHideActionText(true);
-		separator.setBorder(new BevelBorder(BevelBorder.LOWERED,
-																				Color.LIGHT_GRAY,
-																				null,
-																				null,
-																				null));
-		separator.setForeground(Color.DARK_GRAY);
-		separator.setBounds(14, 19, 388, 4);
-		lLayeredPane.add(separator);
+		JLabel lblMinMax = new JLabel("max");
+		add(lblMinMax, "cell 0 1");
+
+		add(lMaxSlider, "cell 1 1,grow");
 		lMaxSlider.addChangeListener(new ChangeListener()
 		{
 			@Override
@@ -93,6 +67,11 @@ public class ControlJPanel extends JPanel
 				getClearVolumeRendererInterface().requestDisplay();
 			}
 		});
+
+		JLabel lblMax = new JLabel("min");
+		add(lblMax, "cell 0 2");
+
+		add(lMinSlider, "cell 1 2,grow");
 		lMinSlider.addChangeListener(new ChangeListener()
 		{
 			@Override

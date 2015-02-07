@@ -15,7 +15,7 @@ public class ControlPanelJFrame extends JFrame
 	public ControlPanelJFrame()
 	{
 		super();
-		setSize(448, 186);
+		setSize(448, 149);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		mControlJPanel = new ControlJPanel();
