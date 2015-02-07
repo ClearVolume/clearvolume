@@ -1,4 +1,4 @@
-package clearvolume.audio;
+package clearvolume.audio.sound;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;

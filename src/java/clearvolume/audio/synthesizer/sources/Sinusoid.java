@@ -3,22 +3,38 @@ package clearvolume.audio.synthesizer.sources;
 import static java.lang.Math.PI;
 import static java.lang.Math.sin;
 
+/**
+ * Sinusoid source.
+ *
+ * @author Loic Royer (2015)
+ *
+ */
 public class Sinusoid extends ToneBase implements Source
 {
 
 	private volatile float mTime = 0;
 
+	/**
+	 * Constructs a sinusoid source with default frequency (440 Hz).
+	 */
 	public Sinusoid()
 	{
 		super();
 	}
 
+	/**
+	 * Constructs a sinusoid source with given frequency.
+	 * 
+	 * @param pFrequency
+	 */
 	public Sinusoid(float pFrequency)
 	{
 		super(pFrequency);
 	}
 
-
+	/* (non-Javadoc)
+	 * @see clearvolume.audio.synthesizer.sources.Source#next()
+	 */
 	@Override
 	public float next()
 	{

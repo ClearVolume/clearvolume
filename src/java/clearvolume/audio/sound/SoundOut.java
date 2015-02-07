@@ -1,6 +1,8 @@
-package clearvolume.audio;
+package clearvolume.audio.sound;
 
 import gnu.trove.list.array.TByteArrayList;
+
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -39,26 +41,12 @@ public class SoundOut
 
 	public void play(final double[] pBuffer, final int pLength)
 	{
-		mTemporaryBuffer.reset();
-		for (int i = 0; i < pBuffer.length; i++)
-		{
-			final double lDoubleValue = pBuffer[i];
-			final int lIntValue = (int) (lDoubleValue * (1 << 15));
-			byte a = (byte) ((lIntValue) & 0xff);
-			byte b = (byte) ((lIntValue >> 8) & 0xff);
-
-			mTemporaryBuffer.add(a);
-			mTemporaryBuffer.add(b);
-		}
-
-		if (mTemporaryArray == null || mTemporaryArray.length < mTemporaryBuffer.size())
-			mTemporaryArray = new byte[mTemporaryBuffer.size()];
-		mTemporaryArray = mTemporaryBuffer.toArray(mTemporaryArray);
-
-		play(mTemporaryArray, 2 * pLength);
+		play(pBuffer, pLength, null);
 	}
 
-	public void play(final float[] pBuffer, final int pLength)
+	public void play(	final double[] pBuffer,
+										final int pLength,
+										ReentrantLock pReentrantLock)
 	{
 		mTemporaryBuffer.reset();
 		for (int i = 0; i < pBuffer.length; i++)
@@ -76,10 +64,45 @@ public class SoundOut
 			mTemporaryArray = new byte[mTemporaryBuffer.size()];
 		mTemporaryArray = mTemporaryBuffer.toArray(mTemporaryArray);
 
-		play(mTemporaryArray, 2 * pLength);
+		play(mTemporaryArray, 2 * pLength, pReentrantLock);
+	}
+
+	public void play(final float[] pBuffer, final int pLength)
+	{
+		play(pBuffer, pLength, null);
+	}
+
+	public void play(	final float[] pBuffer,
+										final int pLength,
+										ReentrantLock pReentrantLock)
+	{
+		mTemporaryBuffer.reset();
+		for (int i = 0; i < pBuffer.length; i++)
+		{
+			final double lDoubleValue = pBuffer[i];
+			final int lIntValue = (int) (lDoubleValue * (1 << 15));
+			byte a = (byte) ((lIntValue) & 0xff);
+			byte b = (byte) ((lIntValue >> 8) & 0xff);
+
+			mTemporaryBuffer.add(a);
+			mTemporaryBuffer.add(b);
+		}
+
+		if (mTemporaryArray == null || mTemporaryArray.length < mTemporaryBuffer.size())
+			mTemporaryArray = new byte[mTemporaryBuffer.size()];
+		mTemporaryArray = mTemporaryBuffer.toArray(mTemporaryArray);
+
+		play(mTemporaryArray, 2 * pLength, pReentrantLock);
 	}
 
 	public void play(final byte[] pBuffer, final int pLength)
+	{
+		play(pBuffer, pLength, null);
+	}
+
+	public void play(	final byte[] pBuffer,
+										final int pLength,
+										ReentrantLock pReentrantLock)
 	{
 		int lLength;
 		if (pLength > pBuffer.length)
@@ -90,6 +113,9 @@ public class SoundOut
 		{
 			lLength = pLength;
 		}
+
+		if (pReentrantLock != null && pReentrantLock.isHeldByCurrentThread())
+			pReentrantLock.unlock();
 		mSourceDataLine.write(pBuffer, 0, lLength);
 	}
 

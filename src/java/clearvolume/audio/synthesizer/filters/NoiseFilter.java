@@ -1,9 +1,5 @@
 package clearvolume.audio.synthesizer.filters;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.pow;
-import static java.lang.Math.signum;
-
 import java.util.concurrent.ThreadLocalRandom;
 
 import clearvolume.audio.synthesizer.sources.Source;
@@ -11,7 +7,12 @@ import clearvolume.audio.synthesizer.sources.Source;
 public class NoiseFilter extends FilterBase
 {
 
-	double mAmplitude = 0.1;
+	double mAmplitude;
+
+	public NoiseFilter()
+	{
+		this(0.02f);
+	}
 
 	public NoiseFilter(float pAmplitude)
 	{
@@ -27,14 +28,10 @@ public class NoiseFilter extends FilterBase
 
 		ThreadLocalRandom lThreadLocalRandom = ThreadLocalRandom.current();
 
-		double lAdditiveNoise = 0.2 * (lThreadLocalRandom.nextFloat() - 0.5);
-		double lMultiplicativeNoise = 0.02 * (lThreadLocalRandom.nextFloat() - 0.5);
-		double lPowerNoise = 1 + 0.002 * (lThreadLocalRandom.nextFloat() - 0.5);
+		double lAdditiveNoise = 2 * (lThreadLocalRandom.nextFloat() - 0.5);
+		double lMultiplicativeNoise = 0.2 * (lThreadLocalRandom.nextFloat() - 0.5);
 		double lOutValue = lInValue + mAmplitude
-												* (lAdditiveNoise * lInValue
-														+ lMultiplicativeNoise
-														* lInValue + signum(lInValue) * pow(abs(lInValue),
-																																lPowerNoise));
+												* (lAdditiveNoise + lInValue * lMultiplicativeNoise);
 
 		return (float) lOutValue;
 	}

@@ -7,7 +7,7 @@ import javax.sound.sampled.LineUnavailableException;
 
 import org.junit.Test;
 
-import clearvolume.audio.SoundOut;
+import clearvolume.audio.sound.SoundOut;
 
 public class SoundOutDemo
 {

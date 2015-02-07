@@ -8,6 +8,11 @@ public class ReverbFilter extends FilterBase
 	private float[] mReverbBuffer;
 	private float[] mWorkBuffer;
 
+	public ReverbFilter()
+	{
+		this(0.001f);
+	}
+
 	public ReverbFilter(float pReverbPeriodInSeconds)
 	{
 		super();

@@ -7,7 +7,18 @@ public class LowPassFilter extends FilterBase
 
 	private volatile double mValue;
 
-	private volatile double mAlpha = 0.05;
+	private volatile double mAlpha;
+
+	public LowPassFilter()
+	{
+		this(0.1f);
+	}
+
+	public LowPassFilter(double pAlpha)
+	{
+		super();
+		mAlpha = pAlpha;
+	}
 
 	@Override
 	public float next()
