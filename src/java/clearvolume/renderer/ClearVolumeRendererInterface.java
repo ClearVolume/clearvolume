@@ -7,7 +7,6 @@ import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.jogl.overlay.Overlay;
-import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.volume.Volume;
@@ -136,7 +135,7 @@ public interface ClearVolumeRendererInterface	extends
 	void resetBrightnessAndGammaAndTransferFunctionRanges();
 
 	/**
-	 * Sets the projection algorithm used.
+	 * Sets the mProjectionMatrix algorithm used.
 	 *
 	 * @param pProjectionAlgorithm
 	 */
@@ -376,20 +375,13 @@ public interface ClearVolumeRendererInterface	extends
 	void disableClose();
 
 	/**
-	 * Adds overlay module to draw with 3D primitives within the rendering volume.
+	 * Adds overlay module to draw with 3D primitives within the rendering volume
+	 * and 2D primitives on top of the whole image.
 	 * 
-	 * @param pOverlay
-	 *          Overlay to add.
+	 * @param pOverlay3D
+	 *          Overlay3D to add.
 	 */
 	void addOverlay(Overlay pOverlay);
-
-	/**
-	 * Adds overlay module to draw with 3D primitives within the rendering volume.
-	 * 
-	 * @param pOverlay
-	 *          Overlay to add.
-	 */
-	void addOverlay2D(Overlay2D pOverlay2D);
 
 	/**
 	 * Adds a processor to this renderer.
@@ -398,7 +390,6 @@ public interface ClearVolumeRendererInterface	extends
 	 *          Processor to add.
 	 */
 	public void addProcessor(Processor<?> pProcessor);
-
 
 	/**
 	 * Returns a Canvas that can be used to embed this renderer.
@@ -414,7 +405,5 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
-
-
 
 }

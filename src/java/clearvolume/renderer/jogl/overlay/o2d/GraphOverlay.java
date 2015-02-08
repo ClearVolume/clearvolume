@@ -17,9 +17,9 @@ import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
 import clearvolume.renderer.DisplayRequestInterface;
-import clearvolume.renderer.jogl.overlay.Overlay2DBase;
+import clearvolume.renderer.jogl.overlay.OverlayBase;
 
-public class GraphOverlay extends Overlay2DBase
+public class GraphOverlay extends OverlayBase
 {
 
 	private static final int cMaximalWaitTimeForDrawingInMilliseconds = 10;
@@ -57,7 +57,13 @@ public class GraphOverlay extends Overlay2DBase
 	}
 
 	@Override
-	public boolean hasChanged()
+	public boolean hasChanged2D()
+	{
+		return mHasChanged;
+	}
+
+	@Override
+	public boolean hasChanged3D()
 	{
 		return mHasChanged;
 	}
@@ -136,7 +142,7 @@ public class GraphOverlay extends Overlay2DBase
 	}
 
 	@Override
-	public void render(	GL4 pGL4,
+	public void render2D(	GL4 pGL4,
 											GLMatrix pProjectionMatrix,
 											GLMatrix pInvVolumeMatrix)
 	{
@@ -184,6 +190,18 @@ public class GraphOverlay extends Overlay2DBase
 
 			mVertexArray.draw(GL4.GL_LINE_STRIP);
 			mHasChanged = false;
+		}
+	}
+
+	@Override
+	public void render3D(	GL4 pGL4,
+												GLMatrix pProjectionMatrix,
+												GLMatrix pInvVolumeMatrix)
+	{
+		if (isDisplayed())
+		{
+			// TODO: do something!
+
 		}
 	}
 

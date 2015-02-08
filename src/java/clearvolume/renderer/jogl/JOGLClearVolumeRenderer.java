@@ -1,22 +1,7 @@
 package clearvolume.renderer.jogl;
 
-import cleargl.*;
-import cleargl.util.recorder.GLVideoRecorder;
-import clearvolume.renderer.ClearVolumeRendererBase;
-import clearvolume.renderer.jogl.overlay.Overlay;
-import clearvolume.renderer.jogl.overlay.Overlay2D;
-import clearvolume.renderer.jogl.overlay.std.BoxOverlay;
-import com.jogamp.newt.awt.NewtCanvasAWT;
-import com.jogamp.newt.event.WindowAdapter;
-import com.jogamp.newt.event.WindowEvent;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.SystemUtils;
+import static java.lang.Math.max;
 
-import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
-import javax.media.opengl.GL;
-import javax.media.opengl.GL4;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLProfile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +10,35 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.lang.Math.max;
+import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL4;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLProfile;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
+
+import cleargl.ClearGLEventListener;
+import cleargl.ClearGLWindow;
+import cleargl.GLAttribute;
+import cleargl.GLFloatArray;
+import cleargl.GLMatrix;
+import cleargl.GLPixelBufferObject;
+import cleargl.GLProgram;
+import cleargl.GLTexture;
+import cleargl.GLUniform;
+import cleargl.GLVertexArray;
+import cleargl.GLVertexAttributeArray;
+import cleargl.util.recorder.GLVideoRecorder;
+import clearvolume.renderer.ClearVolumeRendererBase;
+import clearvolume.renderer.jogl.overlay.Overlay;
+import clearvolume.renderer.jogl.overlay.Overlay3D;
+import clearvolume.renderer.jogl.overlay.o3d.BoxOverlay;
+
+import com.jogamp.newt.awt.NewtCanvasAWT;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 
 /**
  * Abstract Class JoglPBOVolumeRenderer
@@ -64,9 +77,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private volatile int step = 0;
 	private volatile long prevTimeNS = -1;
 
-	// Overlay stuff:
-	private Map<String, Overlay2D> mOverlay2DMap = new ConcurrentHashMap<String, Overlay2D>();
-	private Map<String, Overlay> mOverlay3DMap = new ConcurrentHashMap<String, Overlay>();
+	// Overlay3D stuff:
+	private Map<String, Overlay> mOverlayMap = new ConcurrentHashMap<String, Overlay>();
 
 	// Window:
 	private final String mWindowName;
@@ -583,19 +595,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 				e.printStackTrace();
 			}
 
-			for (Overlay2D lOverlay2D : mOverlay2DMap.values())
-			{
-				try
-				{
-					lOverlay2D.init(lGL4, this);
-				}
-				catch (final Throwable e)
-				{
-					e.printStackTrace();
-				}
-			}
-
-			for (Overlay lOverlay : mOverlay3DMap.values())
+			for (Overlay lOverlay : mOverlayMap.values())
 			{
 				try
 				{
@@ -760,54 +760,61 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private boolean isOverlay2DChanged()
 	{
 		boolean lHasAnyChanged = false;
-		for (Overlay2D lOverlay2D : mOverlay2DMap.values())
-			lHasAnyChanged |= lOverlay2D.hasChanged();
+		for (Overlay lOverlay : mOverlayMap.values())
+			lHasAnyChanged |= lOverlay.hasChanged2D();
 		return lHasAnyChanged;
 	}
 
 	private boolean isOverlay3DChanged()
 	{
 		boolean lHasAnyChanged = false;
-		for (Overlay lOverlay3D : mOverlay3DMap.values())
-			lHasAnyChanged |= lOverlay3D.hasChanged();
+		for (Overlay3D lOverlay3D3D : mOverlayMap.values())
+			lHasAnyChanged |= lOverlay3D3D.hasChanged3D();
 		return lHasAnyChanged;
 	}
 
 	private void renderOverlays(final GL4 lGL4,
 															final GLMatrix lInvVolumeMatrix)
 	{
-		for (Overlay lOverlay : mOverlay3DMap.values())
+		try
 		{
-			try
+			for (Overlay lOverlay : mOverlayMap.values())
 			{
-				lOverlay.render(lGL4,
-												getClearGLWindow().getProjectionMatrix(),
-												lInvVolumeMatrix);
-			}
-			catch (final Throwable e)
-			{
-				e.printStackTrace();
-			}
-		}
-
-		for (Overlay2D lOverlay2D : mOverlay2DMap.values())
-		{
-			try
-			{
-				lOverlay2D.render(lGL4,
+				try
+				{
+					lOverlay.render3D(lGL4,
 													getClearGLWindow().getProjectionMatrix(),
 													lInvVolumeMatrix);
+				}
+				catch (final Throwable e)
+				{
+					e.printStackTrace();
+				}
 			}
-			catch (final Throwable e)
+
+			for (Overlay lOverlay : mOverlayMap.values())
 			{
-				e.printStackTrace();
+				try
+				{
+					lOverlay.render2D(lGL4,
+														getClearGLWindow().getProjectionMatrix(),
+														lInvVolumeMatrix);
+				}
+				catch (final Throwable e)
+				{
+					e.printStackTrace();
+				}
 			}
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
 		}
 	}
 
 	/**
 	 * @param pModelViewMatrix
-	 *          Model-view matrix as float array
+	 *          Model-mViewMatrix matrix as float array
 	 * @param pProjectionMatrix
 	 *          Projection matrix as float array
 	 * @return boolean array indicating for each layer if it was updated.
@@ -952,7 +959,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void toggleBoxDisplay()
 	{
-		mOverlay3DMap.get("box").toggleDisplay();
+		mOverlayMap.get("box").toggleDisplay();
 	}
 
 	/**
@@ -1009,14 +1016,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void addOverlay(Overlay pOverlay)
 	{
-		mOverlay3DMap.put(pOverlay.getName(), pOverlay);
+		mOverlayMap.put(pOverlay.getName(), pOverlay);
 	}
 
-	@Override
-	public void addOverlay2D(Overlay2D pOverlay2D)
-	{
-		mOverlay2DMap.put(pOverlay2D.getName(), pOverlay2D);
-	}
 
 	@Override
 	public void disableClose()

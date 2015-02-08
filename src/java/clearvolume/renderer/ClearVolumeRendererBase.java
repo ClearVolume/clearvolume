@@ -680,9 +680,9 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Returns currently used projection algorithm.
+	 * Returns currently used mProjectionMatrix algorithm.
 	 * 
-	 * @return currently used projection algorithm
+	 * @return currently used mProjectionMatrix algorithm
 	 */
 	public ProjectionAlgorithm getProjectionAlgorithm()
 	{

@@ -44,7 +44,7 @@ import clearvolume.renderer.processors.Processor;
  * Class JCudaClearVolumeRenderer
  *
  * Implements a JOGLPBOClearVolumeRenderer usin a CUDA kernel for rendering the
- * 2D projection.
+ * 2D mProjectionMatrix.
  *
  * @author Loic Royer 2014
  *
@@ -79,7 +79,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	/**
 	 * CUDA Device pointers to the device itself, which are in constant memory:
-	 * inverted view-matrix, projection matrix, transfer function.
+	 * inverted mViewMatrix-matrix, mProjectionMatrix matrix, transfer function.
 	 */
 
 	private CudaDevicePointer mInvertedViewMatrix,
