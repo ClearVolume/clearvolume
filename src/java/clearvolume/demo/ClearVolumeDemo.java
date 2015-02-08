@@ -1,17 +1,5 @@
 package clearvolume.demo;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
-import org.junit.Test;
-
 import clearvolume.controller.ExternalRotationController;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.ClearVolumeRendererInterface;
@@ -22,13 +10,57 @@ import clearvolume.renderer.jogl.overlay.std.PathOverlay;
 import clearvolume.renderer.processors.impl.CUDAProcessorTest;
 import clearvolume.renderer.processors.impl.OpenCLTest;
 import clearvolume.transferf.TransferFunctions;
-
 import com.jogamp.newt.awt.NewtCanvasAWT;
+import org.junit.Test;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 
 public class ClearVolumeDemo
 {
 
 	private static ClearVolumeRendererInterface mClearVolumeRenderer;
+
+  public static void main(String[] argv) throws ClassNotFoundException {
+    if(argv.length == 0) {
+      Class<?> c = Class.forName("clearvolume.demo.ClearVolumeDemo");
+
+      System.out.println("Give one of the following method names as parameter:");
+
+      for (Member m : c.getMethods()) {
+        String name = ((Method)m).getName();
+
+        if(name.substring(0, 4).equals("demo")) {
+          System.out.println("Demo: " + ((Method) m).getName());
+        }
+      }
+    } else {
+      ClearVolumeDemo cvdemo = new ClearVolumeDemo();
+      Method m;
+
+      try {
+        m = cvdemo.getClass().getMethod(argv[0]);
+      } catch (Exception e) {
+        System.out.println("Could not launch " + argv[0] + " because ...");
+        e.printStackTrace();
+
+        return;
+      }
+
+      try {
+        System.out.println("Running " + argv[0] + "()...");
+        m.invoke(cvdemo);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+
+  }
 
 	@Test
 	public void demoOpenCLProcessors() throws InterruptedException,
@@ -206,7 +238,6 @@ public class ClearVolumeDemo
 	public void demoOverlay3D()	throws InterruptedException,
 															IOException
 	{
-
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
 																																																					1024,
 																																																					1024,
