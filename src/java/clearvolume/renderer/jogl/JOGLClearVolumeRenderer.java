@@ -63,7 +63,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 	// ClearGL Window.
 	private volatile ClearGLWindow mClearGLWindow;
-	private final NewtCanvasAWT mNewtCanvasAWT;
+	private NewtCanvasAWT mNewtCanvasAWT;
 	private volatile int mLastWindowWidth, mLastWindowHeight;
 	private final ReentrantLock mDisplayReentrantLock = new ReentrantLock();
 
@@ -101,8 +101,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private final int mTextureWidth, mTextureHeight;
 
 	protected boolean mUsePBOs = true;
-	
-	//Recorder:
+
+	// Recorder:
 	private final GLVideoRecorder mGLVideoRecorder = new GLVideoRecorder(new File(SystemUtils.USER_HOME,
 																																								"Videos/ClearVolume"));
 
@@ -298,6 +298,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		if (pUseInCanvas)
 		{
 			mNewtCanvasAWT = new NewtCanvasAWT(mClearGLWindow.getGLWindow());
+			mNewtCanvasAWT.setShallUseOffscreenLayer(true);
 		}
 		else
 		{
@@ -343,6 +344,19 @@ public abstract class JOGLClearVolumeRenderer	extends
 		super.close();
 		try
 		{
+			try
+			{
+				if (mNewtCanvasAWT != null)
+				{
+					mNewtCanvasAWT.destroy();
+					mNewtCanvasAWT = null;
+				}
+			}
+			catch (Throwable e)
+			{
+				e.printStackTrace();
+			}
+
 			if (mClearGLWindow == null)
 				return;
 			mClearGLWindow.close();
@@ -367,14 +381,18 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		try
 		{
-			if (mClearGLWindow == null)
-				return false;
-			return mClearGLWindow.getGLWindow().isVisible();
+			if (mNewtCanvasAWT != null)
+				return mNewtCanvasAWT.isVisible();
+
+			if (mClearGLWindow != null)
+				return mClearGLWindow.getGLWindow().isVisible();
 		}
 		catch (NullPointerException e)
 		{
 			return false;
 		}
+
+		return false;
 	}
 
 	/**
@@ -385,7 +403,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void setVisible(final boolean pIsVisible)
 	{
-		mClearGLWindow.getGLWindow().setVisible(pIsVisible);
+		if (mNewtCanvasAWT == null)
+			mClearGLWindow.getGLWindow().setVisible(pIsVisible);
 	}
 
 	/**
@@ -452,7 +471,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		final GL4 lGL4 = drawable.getGL().getGL4();
 		lGL4.setSwapInterval(1);
 		lGL4.glDisable(GL4.GL_DEPTH_TEST);
-    lGL4.glEnable(GL4.GL_BLEND);
+		lGL4.glEnable(GL4.GL_BLEND);
 		lGL4.glDisable(GL4.GL_STENCIL_TEST);
 
 		lGL4.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -542,7 +561,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				final GLFloatArray lVerticesFloatArray = new GLFloatArray(6,
 
-        																																	4);
+				4);
 
 				lVerticesFloatArray.add(-1, -1, 0, 1);
 				lVerticesFloatArray.add(1, -1, 0, 1);
@@ -783,8 +802,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 				try
 				{
 					lOverlay.render3D(lGL4,
-													getClearGLWindow().getProjectionMatrix(),
-													lInvVolumeMatrix);
+														getClearGLWindow().getProjectionMatrix(),
+														lInvVolumeMatrix);
 				}
 				catch (final Throwable e)
 				{
@@ -876,7 +895,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		lGL4.glViewport((pWidth - lViewPortWidth) / 2,
 										(pHeight - lViewPortWidth) / 2,
 										lViewPortWidth,
-										lViewPortWidth);
+										lViewPortWidth);/**/
 
 		/*final float lAspectRatio = 1; // (1.0f * pWidth) / pHeight;
 
@@ -907,7 +926,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 			mLayerTextures[i].close();
 			mPixelBufferObjects[i].close();
 		}
-
 	}
 
 	/**
@@ -987,14 +1005,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 				if (mClearGLWindow == null)
 					return;
 				mClearGLWindow.getGLWindow().display();
-				if (mNewtCanvasAWT != null)
-				{
-					mClearGLWindow.setVisible(true);
-				}
-				else
-				{
-					setVisible(true);
-				}
+				// setVisible(true);
 			}
 			catch (NullPointerException e)
 			{
@@ -1018,7 +1029,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		mOverlayMap.put(pOverlay.getName(), pOverlay);
 	}
-
 
 	@Override
 	public void disableClose()
