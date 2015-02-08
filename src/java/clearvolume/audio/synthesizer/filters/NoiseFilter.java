@@ -4,22 +4,37 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import clearvolume.audio.synthesizer.sources.Source;
 
+/**
+ * Filter that adds additive and multiplicative noise to a source.
+ *
+ * @author Loic Royer (2015)
+ *
+ */
 public class NoiseFilter extends FilterBase
 {
 
-	double mAmplitude;
-
+	/**
+	 * Default constructor.
+	 */
 	public NoiseFilter()
 	{
 		this(0.02f);
 	}
 
+	/**
+	 * Constructor thats sets the amplitude of the noise.
+	 * 
+	 * @param pAmplitude
+	 *          amplitude
+	 */
 	public NoiseFilter(float pAmplitude)
 	{
-		super();
-		mAmplitude = pAmplitude;
+		super(pAmplitude);
 	}
 
+	/* (non-Javadoc)
+	 * @see clearvolume.audio.synthesizer.sources.Source#next()
+	 */
 	@Override
 	public float next()
 	{
@@ -30,7 +45,7 @@ public class NoiseFilter extends FilterBase
 
 		double lAdditiveNoise = 2 * (lThreadLocalRandom.nextFloat() - 0.5);
 		double lMultiplicativeNoise = 0.2 * (lThreadLocalRandom.nextFloat() - 0.5);
-		double lOutValue = lInValue + mAmplitude
+		double lOutValue = lInValue + getAmplitude()
 												* (lAdditiveNoise + lInValue * lMultiplicativeNoise);
 
 		return (float) lOutValue;

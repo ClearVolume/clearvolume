@@ -65,7 +65,7 @@ public class AudioPlotDemo
 		for (float v = -10; v < 10; v += 0.05)
 		{
 			double g = 1 / (1 + pow(v, 2));
-			// System.out.println(g);
+			System.out.println(v);
 			lAudioPlot.setValue(g);
 			Thread.sleep(100);
 

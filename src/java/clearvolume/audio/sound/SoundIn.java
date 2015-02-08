@@ -4,6 +4,12 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.TargetDataLine;
 
+/**
+ * Simple single-class facade on top of the sound output JavaSound API.
+ *
+ * @author Loic Royer (2015)
+ *
+ */
 public class SoundIn
 {
 

@@ -9,6 +9,12 @@ import org.junit.Test;
 
 import clearvolume.audio.sound.SoundOut;
 
+/**
+ * Demo of the facade API.
+ *
+ * @author Loic Royer (2015)
+ *
+ */
 public class SoundOutDemo
 {
 

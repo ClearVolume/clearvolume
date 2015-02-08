@@ -36,7 +36,7 @@ public class SynthesizerDemo
 	}
 
 	@Test
-	public void demoGuitar() throws LineUnavailableException
+	public void demoHighlyFilteredGuitar() throws LineUnavailableException
 	{
 		Guitar lGuitar = new Guitar();
 

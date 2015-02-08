@@ -99,8 +99,7 @@ public class Synthesizer
 
 		mSoundOut.play(mBuffer, pNumberOfSamples, pReentrantLock);
 
-		return (long) (pNumberOfSamples / mSoundOut.getDefaultAudioFormat()
-																								.getSampleRate());
+		return (long) (pNumberOfSamples / mSoundOut.getSampleRate());
 
 	}
 

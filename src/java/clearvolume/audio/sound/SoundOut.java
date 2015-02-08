@@ -9,6 +9,12 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
+/**
+ * Simple single-class facade on top of the sound output JavaSound API.
+ *
+ * @author Loic Royer (2015)
+ *
+ */
 public class SoundOut
 {
 
@@ -16,19 +22,50 @@ public class SoundOut
 
 	private SourceDataLine mSourceDataLine;
 
+	/**
+	 * Default constructor with 44100f samples per second, 16 bit samples, and 1
+	 * channel.
+	 */
 	public SoundOut()
 	{
-		super();
+		this(44100f, 16, 1);
 	}
 
+	/**
+	 * Constructor that can configure the sample rate, sample bit size, and number
+	 * of channels.
+	 * 
+	 * @param pSampleRate
+	 * @param pSampleSizeInBits
+	 * @param pNumberOfChannels
+	 */
+	public SoundOut(float pSampleRate,
+									int pSampleSizeInBits,
+									int pNumberOfChannels)
+	{
+		super();
+		mAudioFormat = new AudioFormat(	pSampleRate,
+																		pSampleSizeInBits,
+																		pNumberOfChannels,
+																		true,
+																		false);
+	}
+
+	/**
+	 * Starts to process incoming samples.
+	 * 
+	 * @throws LineUnavailableException
+	 */
 	public void start() throws LineUnavailableException
 	{
-		mAudioFormat = getDefaultAudioFormat();
-		mSourceDataLine = AudioSystem.getSourceDataLine(getDefaultAudioFormat());
+		mSourceDataLine = AudioSystem.getSourceDataLine(mAudioFormat);
 		mSourceDataLine.open(mAudioFormat);
 		mSourceDataLine.start();
 	}
 
+	/**
+	 * Stops to process incoming samples.
+	 */
 	public void stop()
 	{
 		mSourceDataLine.flush();
@@ -39,11 +76,30 @@ public class SoundOut
 	TByteArrayList mTemporaryBuffer = new TByteArrayList();
 	byte[] mTemporaryArray;
 
+	/**
+	 * Plays a given double buffer of a given length.
+	 * 
+	 * @param pBuffer
+	 *          double buffer
+	 * @param pLength
+	 *          length of buffer to use
+	 */
 	public void play(final double[] pBuffer, final int pLength)
 	{
 		play(pBuffer, pLength, null);
 	}
 
+	/**
+	 * Plays a given double buffer of a given length - and releases a Lock just
+	 * before sending the samples to the audio driver.
+	 * 
+	 * @param pBuffer
+	 *          double buffer
+	 * @param pLength
+	 *          length of buffer to use
+	 * @param pReentrantLock
+	 *          lock to release
+	 */
 	public void play(	final double[] pBuffer,
 										final int pLength,
 										ReentrantLock pReentrantLock)
@@ -67,11 +123,30 @@ public class SoundOut
 		play(mTemporaryArray, 2 * pLength, pReentrantLock);
 	}
 
+	/**
+	 * Plays a given float buffer of a given length.
+	 * 
+	 * @param pBuffer
+	 *          float buffer
+	 * @param pLength
+	 *          length of buffer to use
+	 */
 	public void play(final float[] pBuffer, final int pLength)
 	{
 		play(pBuffer, pLength, null);
 	}
 
+	/**
+	 * Plays a given float buffer of a given length - and releases a Lock just
+	 * before sending the samples to the audio driver.
+	 * 
+	 * @param pBuffer
+	 *          float buffer
+	 * @param pLength
+	 *          length of buffer to use
+	 * @param pReentrantLock
+	 *          lock to release
+	 */
 	public void play(	final float[] pBuffer,
 										final int pLength,
 										ReentrantLock pReentrantLock)
@@ -95,6 +170,14 @@ public class SoundOut
 		play(mTemporaryArray, 2 * pLength, pReentrantLock);
 	}
 
+	/**
+	 * Plays a given byte buffer of a given length.
+	 * 
+	 * @param pBuffer
+	 *          byte buffer
+	 * @param pLength
+	 *          length of buffer to use
+	 */
 	public void play(final byte[] pBuffer, final int pLength)
 	{
 		play(pBuffer, pLength, null);
@@ -135,23 +218,9 @@ public class SoundOut
 		return pByteArray;
 	}
 
-	public AudioFormat getDefaultAudioFormat()
+	public float getSampleRate()
 	{
-		final float sampleRate = 44100f;
-		// 8000,11025,16000,22050,44100
-		final int sampleSizeInBits = 16;
-		// 8,16
-		final int channels = 1;
-		// 1,2
-		final boolean signed = true;
-		// true,false
-		final boolean bigEndian = false;
-		// true,false
-		return new AudioFormat(	sampleRate,
-														sampleSizeInBits,
-														channels,
-														signed,
-														bigEndian);
+		return mAudioFormat.getSampleRate();
 	}
 
 }

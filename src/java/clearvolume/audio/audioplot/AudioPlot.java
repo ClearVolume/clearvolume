@@ -1,5 +1,7 @@
 package clearvolume.audio.audioplot;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.lang.Math.pow;
 
 import java.util.concurrent.locks.ReentrantLock;
@@ -12,6 +14,17 @@ import clearvolume.audio.synthesizer.filters.ReverbFilter;
 import clearvolume.audio.synthesizer.filters.WarmifyFilter;
 import clearvolume.audio.synthesizer.sources.Guitar;
 
+/**
+ * AudioPlot - this class implements the mapping of a value in the range [0,1]
+ * into an audio range represented by varying beats per second and tone
+ * frequency.
+ *
+ * This class is thread safe and can be directly used in a multi-threaded
+ * environment.
+ *
+ * @author Loic Royer (2015)
+ *
+ */
 public class AudioPlot
 {
 
@@ -29,11 +42,27 @@ public class AudioPlot
 
 	private volatile double mPeriodInSeconds = 1;
 
+	/**
+	 * Default constructor.
+	 */
 	public AudioPlot()
 	{
 		this(1, 0.1, 110, 110 * 4, false);
 	}
 
+	/**
+	 * Constructor that takes: the slow and fast period, and the low and high
+	 * frequency.
+	 * 
+	 * @param pSlowPeriod
+	 *          slow period
+	 * @param pFastPeriod
+	 *          fast period
+	 * @param pLowFreqHz
+	 *          low frequency
+	 * @param pHighFreqHz
+	 *          high frequency
+	 */
 	public AudioPlot(	double pSlowPeriod,
 										double pFastPeriod,
 										double pLowFreqHz,
@@ -42,6 +71,22 @@ public class AudioPlot
 		this(pSlowPeriod, pFastPeriod, pLowFreqHz, pHighFreqHz, false);
 	}
 
+	/**
+	 * Constructor that takes: the slow and fast period, the low and high
+	 * frequency, and a flag thatcontrols whether the range is inverted or not.
+	 * 
+	 * @param pSlowPeriod
+	 *          slow period
+	 * @param pFastPeriod
+	 *          fast period
+	 * @param pLowFreqHz
+	 *          low frequency
+	 * @param pHighFreqHz
+	 *          high frequency
+	 *
+	 * @param pInvertRange
+	 *          if true the audio range is inverted with respect to the default
+	 */
 	public AudioPlot(	double pSlowPeriod,
 										double pFastPeriod,
 										double pLowFreqHz,
@@ -63,7 +108,7 @@ public class AudioPlot
 		WarmifyFilter lWarmifyFilter = new WarmifyFilter(1f);
 		lWarmifyFilter.setSource(lNoiseFilter);
 
-		ReverbFilter lReverbFilter = new ReverbFilter(0.001f);
+		ReverbFilter lReverbFilter = new ReverbFilter(1, 0.001f);
 		lReverbFilter.setSource(lWarmifyFilter);/**/
 
 		LowPassFilter lLowPassFilter = new LowPassFilter();
@@ -136,6 +181,9 @@ public class AudioPlot
 
 	}
 
+	/**
+	 * starts playing the sound.
+	 */
 	public void start()
 	{
 		Thread lThread = new Thread(mDeamonThreadRunnable,
@@ -144,13 +192,25 @@ public class AudioPlot
 		lThread.start();
 	};
 
+	/**
+	 * Stops.
+	 */
 	public void stop()
 	{
 		mStopSignal = true;
 	}
 
+	/**
+	 * Sets the new current value. The value must be normalized within the range
+	 * [0,1].
+	 * 
+	 * @param pValue
+	 *          value within range [0,1]
+	 */
 	public void setValue(double pValue)
 	{
+		pValue = max(min(pValue, 1), 0);
+
 		if (isInvertRange())
 			pValue = 1 - pValue;
 
@@ -177,11 +237,22 @@ public class AudioPlot
 
 	}
 
+	/**
+	 * Returns true if the audio range is inverted.
+	 * 
+	 * @return true if inverted.
+	 */
 	public boolean isInvertRange()
 	{
 		return mInvertRange;
 	}
 
+	/**
+	 * Sets the flag that determines whether the audio range is inverted.
+	 * 
+	 * @param pInvertRange
+	 *          true to invert range
+	 */
 	public void setInvertRange(boolean pInvertRange)
 	{
 		mInvertRange = pInvertRange;
