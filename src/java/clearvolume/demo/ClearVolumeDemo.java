@@ -244,10 +244,13 @@ public class ClearVolumeDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
+		double lValue = 0;
 		while (lClearVolumeRenderer.isShowing())
 		{
-			Thread.sleep(1);
-			lGraphOverlay.addPoint(Math.random());
+			Thread.sleep(10);
+			lValue += Math.random() - 0.5;
+			lValue *= 0.9;
+			lGraphOverlay.addPoint(lValue);
 		}
 
 		lClearVolumeRenderer.close();

@@ -19,7 +19,7 @@ void main()
    VertexOut.Position = vertexPosition;
    VertexOut.TexCoord = vertexTexCoord;
 
-   gl_Position = projection*vertexPosition;
+   gl_Position = projection*vec4(vertexPosition, 1);
 }
 
 

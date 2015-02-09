@@ -35,10 +35,9 @@ public class GraphOverlay extends OverlayBase
 
 	private final ReentrantLock mReentrantLock = new ReentrantLock();
 
-	private volatile int mMaxCapacity = 512;
+	private volatile int mMaxCapacity = cMaxNumberOfPoints;
 
 	private int mMaxNumberOfPoints;
-
 
 	private DisplayRequestInterface mDisplayRequestInterface;
 	private volatile boolean mHasChanged = false;
@@ -47,6 +46,13 @@ public class GraphOverlay extends OverlayBase
 	private GLIntArray mIndexIntArray;
 	private GLFloatArray mNormalArray;
 	private GLFloatArray mTexCoordFloatArray;
+
+	public GraphOverlay()
+	{
+		super();
+		mDataY.add(0);
+		mDataY.add(0);
+	}
 
 	@Override
 	public String getName()
@@ -149,28 +155,53 @@ public class GraphOverlay extends OverlayBase
 
 		if (isDisplayed())
 		{
-
-			float lXOffset = -4, lYOffset = 3;
-
-			mVerticesFloatArray.rewind();
-			mIndexIntArray.rewind();
 			try
 			{
 				boolean lIsLocked = mReentrantLock.tryLock(	cMaximalWaitTimeForDrawingInMilliseconds,
 																										TimeUnit.MILLISECONDS);
 
-				float x = lXOffset, y = 0;
-				float lStepX = 4.0f / mDataY.size();
-				// System.out.format("________________________________________\n");
 				if (lIsLocked)
+				{
+					float lXOffset = -4, lYOffset = 3;
+
+					float x = lXOffset, y = 0;
+					float lStepX = 4.0f / mDataY.size();
+					System.out.format("________________________________________\n");
+					System.out.println(mDataY.size());
+
 					for (int i = 0; i < mDataY.size(); i++)
 					{
+						y = (float) (lYOffset + mDataY.get(i));
 						mVerticesFloatArray.add(x, y, -10);
 						mIndexIntArray.add(i);
 						// System.out.format("%g\t%g\n", x, y);
 						x += lStepX;
-						y = (float) (lYOffset + mDataY.get(i));
+						// System.out.println(y);
 					}
+
+					mVerticesFloatArray.rewind();
+					mIndexIntArray.rewind();
+
+					mClearGeometryObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
+					mClearGeometryObject.updateIndices(mIndexIntArray.getIntBuffer());
+
+					mGLProgram.use(pGL4);
+					mClearGeometryObject.setProjection(pProjectionMatrix);
+
+					pGL4.glEnable(GL4.GL_DEPTH_TEST);
+					pGL4.glDepthMask(false);
+					pGL4.glEnable(GL4.GL_CULL_FACE);
+					pGL4.glEnable(GL4.GL_BLEND);
+					pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
+					pGL4.glBlendEquation(GL4.GL_MAX);
+					pGL4.glFrontFace(GL4.GL_CW);
+					mClearGeometryObject.draw(0, mDataY.size());
+					pGL4.glDisable(GL4.GL_DEPTH_TEST);
+					pGL4.glDepthMask(true);
+					pGL4.glDisable(GL4.GL_CULL_FACE);
+
+					mHasChanged = false;
+				}
 
 			}
 			catch (InterruptedException e)
@@ -180,26 +211,6 @@ public class GraphOverlay extends OverlayBase
 			{
 				mReentrantLock.unlock();
 			}
-
-			mClearGeometryObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
-			mClearGeometryObject.updateIndices(mIndexIntArray.getIntBuffer());
-
-			mGLProgram.use(pGL4);
-			mClearGeometryObject.setProjection(pProjectionMatrix);
-
-			pGL4.glEnable(GL4.GL_DEPTH_TEST);
-			pGL4.glDepthMask(false);
-			pGL4.glEnable(GL4.GL_CULL_FACE);
-			pGL4.glEnable(GL4.GL_BLEND);
-			pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
-			pGL4.glBlendEquation(GL4.GL_MAX);
-			pGL4.glFrontFace(GL4.GL_CW);
-			mClearGeometryObject.draw();
-			pGL4.glDisable(GL4.GL_DEPTH_TEST);
-			pGL4.glDepthMask(true);
-			pGL4.glDisable(GL4.GL_CULL_FACE);
-
-			mHasChanged = false;
 		}
 	}
 
