@@ -22,6 +22,9 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 	private CLBuffer<Float> mBufGx, mBufGy, mBufGz, mBufScratch,
 			mBufRes;
 
+	private long mCurrentWidthInVoxels, mCurrentHeightInVoxels,
+			mCurrentDepthInVoxels;
+
 	private int[] mDownShape = new int[]
 	{ 64, 64, 64 };
 
@@ -72,6 +75,9 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 													long pHeightInVoxels,
 													long pDepthInVoxels)
 	{
+		mCurrentWidthInVoxels = pWidthInVoxels;
+		mCurrentHeightInVoxels = pHeightInVoxels;
+		mCurrentDepthInVoxels = pDepthInVoxels;
 
 		// the downsampled volume shape
 
@@ -84,8 +90,20 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 
 		mDownSize = mDownShape[0] * mDownShape[1] * mDownShape[2];
 
+		// Release previosuly allocated buffer of wrong size...
+		if (mBufDownSampled != null)
+		{
+			mBufDownSampled.release();
+			mBufGx.release();
+			mBufGy.release();
+			mBufGz.release();
+			mBufRes.release();
+			mBufScratch.release();
+		}
+
 		// the buffer for the downsampled volume
 		mBufDownSampled = getDevice().createOutputFloatBuffer(mDownSize);
+
 
 		// the buffers for the sobel responses
 		mBufGx = getDevice().createOutputFloatBuffer(mDownSize);
@@ -108,7 +126,7 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 												mDownShape[0],
 												mDownShape[1],
 												mDownShape[2],
-												(int) flag);
+												flag);
 
 		getDevice().run(mKernelDiff,
 										mDownShape[0],
@@ -129,7 +147,7 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 													mDownShape[0],
 													mDownShape[1],
 													mDownShape[2],
-													(int) flag);
+													flag);
 
 		getDevice().run(mKernelSmooth,
 										mDownShape[0],
@@ -162,7 +180,7 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 												mDownShape[0],
 												mDownShape[1],
 												mDownShape[2],
-												(int) flag);
+												flag);
 
 		getDevice().run(mKernelBlur,
 										mDownShape[0],
@@ -196,7 +214,9 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 
 		ensureOpenCLInitialized();
 
-		if (mBufDownSampled == null)
+		if (mBufDownSampled == null || pWidthInVoxels != mCurrentWidthInVoxels
+				|| pHeightInVoxels != mCurrentHeightInVoxels
+				|| pDepthInVoxels != mCurrentDepthInVoxels)
 		{
 			System.out.println("setting up buffers");
 			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
@@ -212,7 +232,6 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 			blur_step(mBufScratch, mBufDownSampled, 2);
 			blur_step(mBufDownSampled, mBufScratch, 4);
 			copy_step(mBufScratch, mBufDownSampled);
-
 		}
 		// convolve with the sobels
 
@@ -241,7 +260,6 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 
 		FloatBuffer out = getDevice().readFloatBuffer(mBufScratch);
 
-		
 		double meanValue = 0;
 		for (int i = 0; i < out.capacity(); i++)
 			meanValue += out.get(i);
