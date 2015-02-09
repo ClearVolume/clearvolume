@@ -11,7 +11,7 @@ import clearvolume.renderer.DisplayRequestInterface;
  * @author Loic Royer (2015)
  *
  */
-public interface Overlay extends Overlay2D, Overlay3D
+public interface Overlay
 {
 	/**
 	 * Name of overlay.

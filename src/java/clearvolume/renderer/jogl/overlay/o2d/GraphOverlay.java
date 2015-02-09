@@ -1,5 +1,6 @@
 package clearvolume.renderer.jogl.overlay.o2d;
 
+import static java.lang.Math.random;
 import gnu.trove.list.linked.TDoubleLinkedList;
 
 import java.io.IOException;
@@ -15,11 +16,12 @@ import cleargl.GLIntArray;
 import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
 
-public class GraphOverlay extends OverlayBase
+public class GraphOverlay extends OverlayBase implements Overlay2D
 {
-	private static final int cMaxNumberOfPoints = 1024;
+	private static final int cMaxNumberOfPoints = 512;
 	private static final int cMaximalWaitTimeForDrawingInMilliseconds = 10;
 	private static final float cLineWidth = 2.f; // only cLineWidth = 1.f
 
@@ -47,11 +49,13 @@ public class GraphOverlay extends OverlayBase
 	private GLFloatArray mNormalArray;
 	private GLFloatArray mTexCoordFloatArray;
 
+
+
 	public GraphOverlay()
 	{
 		super();
-		mDataY.add(0);
-		mDataY.add(0);
+		for (int i = 0; i < cMaxNumberOfPoints; i++)
+			addPoint(random());
 	}
 
 	@Override
@@ -62,12 +66,6 @@ public class GraphOverlay extends OverlayBase
 
 	@Override
 	public boolean hasChanged2D()
-	{
-		return mHasChanged;
-	}
-
-	@Override
-	public boolean hasChanged3D()
 	{
 		return mHasChanged;
 	}
@@ -102,7 +100,9 @@ public class GraphOverlay extends OverlayBase
 		{
 			mReentrantLock.unlock();
 		}
-		mDisplayRequestInterface.requestDisplay();
+
+		if (mDisplayRequestInterface != null)
+			mDisplayRequestInterface.requestDisplay();
 	}
 
 	@Override
@@ -111,6 +111,7 @@ public class GraphOverlay extends OverlayBase
 	{
 		mDisplayRequestInterface = pDisplayRequestInterface;
 		// box display: construct the program and related objects
+		mReentrantLock.lock();
 		try
 		{
 			mGLProgram = GLProgram.buildProgram(pGL4,
@@ -145,6 +146,10 @@ public class GraphOverlay extends OverlayBase
 		{
 			e.printStackTrace();
 		}
+		finally
+		{
+			mReentrantLock.unlock();
+		}
 	}
 
 	@Override
@@ -162,25 +167,27 @@ public class GraphOverlay extends OverlayBase
 
 				if (lIsLocked)
 				{
-					float lXOffset = -4, lYOffset = 3;
+					float lXOffset = -1, lYOffset = 0;
 
 					float x = lXOffset, y = 0;
-					float lStepX = 4.0f / mDataY.size();
+					float lStepX = 1f / mDataY.size();
 					System.out.format("________________________________________\n");
 					System.out.println(mDataY.size());
+
+					mIndexIntArray.rewind();
+					mVerticesFloatArray.rewind();
 
 					for (int i = 0; i < mDataY.size(); i++)
 					{
 						y = (float) (lYOffset + mDataY.get(i));
 						mVerticesFloatArray.add(x, y, -10);
 						mIndexIntArray.add(i);
-						// System.out.format("%g\t%g\n", x, y);
+						System.out.format("%g\t%g\n", x, y);
 						x += lStepX;
 						// System.out.println(y);
 					}
-
-					mVerticesFloatArray.rewind();
-					mIndexIntArray.rewind();
+					mVerticesFloatArray.padZeros();
+					mIndexIntArray.padZeros();
 
 					mClearGeometryObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
 					mClearGeometryObject.updateIndices(mIndexIntArray.getIntBuffer());
@@ -195,10 +202,16 @@ public class GraphOverlay extends OverlayBase
 					pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
 					pGL4.glBlendEquation(GL4.GL_MAX);
 					pGL4.glFrontFace(GL4.GL_CW);
-					mClearGeometryObject.draw(0, mDataY.size());
+
+					System.out.println("before draw");
+					mClearGeometryObject.draw(); // 0, mDataY.size()
+					System.out.println("after draw");
+
 					pGL4.glDisable(GL4.GL_DEPTH_TEST);
 					pGL4.glDepthMask(true);
 					pGL4.glDisable(GL4.GL_CULL_FACE);
+
+
 
 					mHasChanged = false;
 				}
@@ -211,18 +224,6 @@ public class GraphOverlay extends OverlayBase
 			{
 				mReentrantLock.unlock();
 			}
-		}
-	}
-
-	@Override
-	public void render3D(	GL4 pGL4,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
-	{
-		if (isDisplayed())
-		{
-			// TODO: do something!
-
 		}
 	}
 
