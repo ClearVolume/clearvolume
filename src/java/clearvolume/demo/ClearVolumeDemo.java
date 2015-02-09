@@ -391,7 +391,7 @@ public class ClearVolumeDemo
 																																																					1,
 																																																					false);
 
-		GraphOverlay lGraphOverlay = new GraphOverlay();
+		GraphOverlay lGraphOverlay = new GraphOverlay(1024);
 		lClearVolumeRenderer.addOverlay(lGraphOverlay);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
@@ -426,10 +426,12 @@ public class ClearVolumeDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
+
 		while (lClearVolumeRenderer.isShowing())
 		{
-			Thread.sleep(1);
-			lGraphOverlay.addPoint(Math.random());
+			Thread.sleep(10);
+			double lValue = 0.5 + 0.5 * Math.random();
+			lGraphOverlay.addPoint(lValue);
 		}
 
 		lClearVolumeRenderer.close();

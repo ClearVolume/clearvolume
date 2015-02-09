@@ -15,6 +15,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLProfile;
+import javax.media.opengl.glu.GLU;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -33,6 +34,7 @@ import cleargl.GLVertexAttributeArray;
 import cleargl.util.recorder.GLVideoRecorder;
 import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.jogl.overlay.Overlay;
+import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.jogl.overlay.Overlay3D;
 import clearvolume.renderer.jogl.overlay.o3d.BoxOverlay;
 
@@ -60,6 +62,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 		final GLProfile lProfile = GLProfile.get(GLProfile.GL4);
 		// System.out.println( lProfile );
 	}
+
+	private final GLU mGLU = new GLU();
 
 	// ClearGL Window.
 	private volatile ClearGLWindow mClearGLWindow;
@@ -690,6 +694,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 		final GL4 lGL4 = pDrawable.getGL().getGL4();
 		lGL4.glClearColor(0, 0, 0, 1);
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+		lGL4.glDisable(GL4.GL_CULL_FACE);
+		lGL4.glEnable(GL4.GL_BLEND);
+		lGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
+		lGL4.glBlendEquation(GL4.GL_MAX);
 
 		setDefaultProjectionMatrix();
 
@@ -780,15 +788,23 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		boolean lHasAnyChanged = false;
 		for (Overlay lOverlay : mOverlayMap.values())
-			lHasAnyChanged |= lOverlay.hasChanged2D();
+			if (lOverlay instanceof Overlay2D)
+			{
+				Overlay2D lOverlay2D = (Overlay2D) lOverlay;
+				lHasAnyChanged |= lOverlay2D.hasChanged2D();
+			}
 		return lHasAnyChanged;
 	}
 
 	private boolean isOverlay3DChanged()
 	{
 		boolean lHasAnyChanged = false;
-		for (Overlay3D lOverlay3D3D : mOverlayMap.values())
-			lHasAnyChanged |= lOverlay3D3D.hasChanged3D();
+		for (Overlay lOverlay : mOverlayMap.values())
+			if (lOverlay instanceof Overlay3D)
+			{
+				Overlay3D lOverlay3D = (Overlay3D) lOverlay;
+				lHasAnyChanged |= lOverlay3D.hasChanged3D();
+			}
 		return lHasAnyChanged;
 	}
 
@@ -798,32 +814,43 @@ public abstract class JOGLClearVolumeRenderer	extends
 		try
 		{
 			for (Overlay lOverlay : mOverlayMap.values())
-			{
-				try
+				if (lOverlay instanceof Overlay3D)
 				{
-					lOverlay.render3D(lGL4,
-														getClearGLWindow().getProjectionMatrix(),
-														lInvVolumeMatrix);
+					Overlay3D lOverlay3D = (Overlay3D) lOverlay;
+					try
+					{
+						lOverlay3D.render3D(lGL4,
+																getClearGLWindow().getProjectionMatrix(),
+																lInvVolumeMatrix);
+					}
+					catch (final Throwable e)
+					{
+						e.printStackTrace();
+					}
 				}
-				catch (final Throwable e)
-				{
-					e.printStackTrace();
-				}
-			}
 
 			for (Overlay lOverlay : mOverlayMap.values())
-			{
-				try
+				if (lOverlay instanceof Overlay2D)
 				{
-					lOverlay.render2D(lGL4,
-														getClearGLWindow().getProjectionMatrix(),
-														lInvVolumeMatrix);
+					Overlay2D lOverlay2D = (Overlay2D) lOverlay;
+					try
+					{
+						lOverlay2D.render2D(lGL4,
+																mQuadProjectionMatrix,
+																lInvVolumeMatrix);
+					}
+					catch (final Throwable e)
+					{
+						e.printStackTrace();
+					}
 				}
-				catch (final Throwable e)
-				{
-					e.printStackTrace();
-				}
-			}
+
+			int errorCode = lGL4.glGetError();
+			String errorStr = mGLU.gluErrorString(errorCode);
+			if (errorCode != 0)
+				System.err.format("OPENGL ERROR #%d : %s \n",
+													errorCode,
+													errorStr);
 		}
 		catch (Throwable e)
 		{
