@@ -167,13 +167,11 @@ public class ClearVolumeDemo
 																																																						512,
 																																																						1,
 																																																						false);
-		lClearVolumeRenderer.addOverlay(new PathOverlay());
 		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
 
 		OpenCLTenengrad tenengradProc = new OpenCLTenengrad();
 		tenengradProc.addResultListener(new ProcessorResultListener<Double>()
 		{
-
 			@Override
 			public void notifyResult(	Processor<Double> pSource,
 																Double pResult)
@@ -235,7 +233,6 @@ public class ClearVolumeDemo
 																								lResolutionY,
 																								lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
-
 		}
 
 		lClearVolumeRenderer.close();
