@@ -95,6 +95,10 @@ public class CUDAProcessorTest extends CUDAProcessor<Double>
 		mSumFunction.setBlockDim(cBlockSize, cBlockSize, 1);
 		mSumFunction.launch();
 		getContext().synchronize();
+
+		double lThisValueShouldMakeSenseSomehow = 0;
+
+		notifyListenersOfResult(lThisValueShouldMakeSenseSomehow);
 	}
 
 }

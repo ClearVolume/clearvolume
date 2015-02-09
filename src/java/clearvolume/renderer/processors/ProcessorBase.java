@@ -2,22 +2,33 @@ package clearvolume.renderer.processors;
 
 import java.util.ArrayList;
 
-public abstract class ProcessorBase<R>
+public abstract class ProcessorBase<R> implements Processor<R>
 {
 	private ArrayList<ProcessorResultListener<R>> mListenerList = new ArrayList<>();
 
+	@Override
 	public void addResultListener(ProcessorResultListener<R> pProcessorResultListener)
 	{
 		mListenerList.add(pProcessorResultListener);
 	};
 
+	@Override
 	public void removeResultListener(ProcessorResultListener<R> pProcessorResultListener)
 	{
 		mListenerList.remove(pProcessorResultListener);
 	};
 
+	public void notifyListenersOfResult(R pResult)
+
+	{
+		for (ProcessorResultListener<R> lListener : mListenerList)
+			lListener.notifyResult(this, pResult);
+	};
+
+	@Override
 	public abstract boolean isCompatibleRenderer(Class<?> pRendererClass);
 
+	@Override
 	public abstract void process(	int pRenderLayerIndex,
 																long pWidthInVoxels,
 																long pHeightInVoxels,

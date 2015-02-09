@@ -9,31 +9,24 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL4;
 
-import cleargl.GLAttribute;
+import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
+import cleargl.GLIntArray;
 import cleargl.GLMatrix;
 import cleargl.GLProgram;
-import cleargl.GLUniform;
-import cleargl.GLVertexArray;
-import cleargl.GLVertexAttributeArray;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
 
 public class GraphOverlay extends OverlayBase
 {
-
+	private static final int cMaxNumberOfPoints = 1024;
 	private static final int cMaximalWaitTimeForDrawingInMilliseconds = 10;
 	private static final float cLineWidth = 2.f; // only cLineWidth = 1.f
+
 	// seems to be supported
 
 	private GLProgram mGLProgram;
-
-	private GLAttribute mPositionAttribute;
-	private GLVertexArray mVertexArray;
-	private GLVertexAttributeArray mPositionAttributeArray;
-	private GLUniform mColorUniform;
-
-	private GLUniform mOverlayProjectionMatrixUniform;
+	private ClearGeometryObject mClearGeometryObject;
 
 	private volatile FloatBuffer mGraphColor = FloatBuffer.wrap(new float[]
 	{ 1.f, 1.f, 1.f, 1f });
@@ -45,10 +38,15 @@ public class GraphOverlay extends OverlayBase
 	private volatile int mMaxCapacity = 512;
 
 	private int mMaxNumberOfPoints;
-	private GLFloatArray mVerticesFloatArray;
+
 
 	private DisplayRequestInterface mDisplayRequestInterface;
 	private volatile boolean mHasChanged = false;
+
+	private GLFloatArray mVerticesFloatArray;
+	private GLIntArray mIndexIntArray;
+	private GLFloatArray mNormalArray;
+	private GLFloatArray mTexCoordFloatArray;
 
 	@Override
 	public String getName()
@@ -114,25 +112,27 @@ public class GraphOverlay extends OverlayBase
 																					"shaders/graph_vert.glsl",
 																					"shaders/graph_frag.glsl");
 
-			mOverlayProjectionMatrixUniform = mGLProgram.getUniform("projection");
+			mClearGeometryObject = new ClearGeometryObject(	mGLProgram,
+																											3,
+																											GL4.GL_LINE_STRIP);
+			mClearGeometryObject.setDynamic(true);
 
-			// set the line with of the box
-			pGL4.glLineWidth(cLineWidth);
+			mMaxNumberOfPoints = cMaxNumberOfPoints;
 
-			// get all the shaders uniform locations
-			mPositionAttribute = mGLProgram.getAtribute("position");
+			mVerticesFloatArray = new GLFloatArray(mMaxNumberOfPoints, 3);
+			mNormalArray = new GLFloatArray(mMaxNumberOfPoints, 3);
+			mIndexIntArray = new GLIntArray(mMaxNumberOfPoints, 1);
+			mTexCoordFloatArray = new GLFloatArray(mMaxNumberOfPoints, 2);
 
-			mColorUniform = mGLProgram.getUniform("color");
+			mVerticesFloatArray.fillZeros();
+			mNormalArray.fillZeros();
+			mIndexIntArray.fillZeros();
+			mTexCoordFloatArray.fillZeros();
 
-			// set up the vertices of the box
-			mVertexArray = new GLVertexArray(mGLProgram);
-			mVertexArray.bind();
-			mPositionAttributeArray = new GLVertexAttributeArray(	mPositionAttribute,
-																														4);
-
-			mMaxNumberOfPoints = 1024;
-
-			mVerticesFloatArray = new GLFloatArray(mMaxNumberOfPoints, 4);
+			mClearGeometryObject.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
+			mClearGeometryObject.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
+			mClearGeometryObject.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
+			mClearGeometryObject.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
 
 		}
 		catch (final IOException e)
@@ -143,22 +143,17 @@ public class GraphOverlay extends OverlayBase
 
 	@Override
 	public void render2D(	GL4 pGL4,
-											GLMatrix pProjectionMatrix,
-											GLMatrix pInvVolumeMatrix)
+												GLMatrix pProjectionMatrix,
+												GLMatrix pInvVolumeMatrix)
 	{
+
 		if (isDisplayed())
 		{
-			mGLProgram.use(pGL4);
-
-			mOverlayProjectionMatrixUniform.setFloatMatrix(	pProjectionMatrix.getFloatArray(),
-																											false);
-
-			mColorUniform.setFloatVector4(mGraphColor);
 
 			float lXOffset = -4, lYOffset = 3;
 
 			mVerticesFloatArray.rewind();
-
+			mIndexIntArray.rewind();
 			try
 			{
 				boolean lIsLocked = mReentrantLock.tryLock(	cMaximalWaitTimeForDrawingInMilliseconds,
@@ -170,7 +165,8 @@ public class GraphOverlay extends OverlayBase
 				if (lIsLocked)
 					for (int i = 0; i < mDataY.size(); i++)
 					{
-						mVerticesFloatArray.add(x, y, -10, 1.0f);
+						mVerticesFloatArray.add(x, y, -10);
+						mIndexIntArray.add(i);
 						// System.out.format("%g\t%g\n", x, y);
 						x += lStepX;
 						y = (float) (lYOffset + mDataY.get(i));
@@ -185,10 +181,24 @@ public class GraphOverlay extends OverlayBase
 				mReentrantLock.unlock();
 			}
 
-			mVertexArray.addVertexAttributeArray(	mPositionAttributeArray,
-																						mVerticesFloatArray.getFloatBuffer());
+			mClearGeometryObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
+			mClearGeometryObject.updateIndices(mIndexIntArray.getIntBuffer());
 
-			mVertexArray.draw(GL4.GL_LINE_STRIP);
+			mGLProgram.use(pGL4);
+			mClearGeometryObject.setProjection(pProjectionMatrix);
+
+			pGL4.glEnable(GL4.GL_DEPTH_TEST);
+			pGL4.glDepthMask(false);
+			pGL4.glEnable(GL4.GL_CULL_FACE);
+			pGL4.glEnable(GL4.GL_BLEND);
+			pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
+			pGL4.glBlendEquation(GL4.GL_MAX);
+			pGL4.glFrontFace(GL4.GL_CW);
+			mClearGeometryObject.draw();
+			pGL4.glDisable(GL4.GL_DEPTH_TEST);
+			pGL4.glDepthMask(true);
+			pGL4.glDisable(GL4.GL_CULL_FACE);
+
 			mHasChanged = false;
 		}
 	}

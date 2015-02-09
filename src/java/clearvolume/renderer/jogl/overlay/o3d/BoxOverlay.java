@@ -1,19 +1,14 @@
 package clearvolume.renderer.jogl.overlay.o3d;
 
 import java.io.IOException;
-import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL4;
 
 import cleargl.ClearGeometryObject;
-import cleargl.GLAttribute;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
 import cleargl.GLMatrix;
 import cleargl.GLProgram;
-import cleargl.GLUniform;
-import cleargl.GLVertexArray;
-import cleargl.GLVertexAttributeArray;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
 
@@ -25,24 +20,9 @@ import clearvolume.renderer.jogl.overlay.OverlayBase;
  */
 public class BoxOverlay extends OverlayBase
 {
-	private static final float cBoxLineWidth = 1.f; // only cBoxLineWidth = 1.f
-	// seems to be supported
-
-	private static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
-	{ 1.f, 0.f, 0.0f, 0.1f });
 	private GLProgram mBoxGLProgram;
-
-	private GLAttribute mBoxPositionAttribute;
-	private GLAttribute mTexCoordAttribute;
-	private GLVertexArray mBoxVertexArray;
-	private GLVertexAttributeArray mBoxPositionAttributeArray;
-	private GLVertexAttributeArray mTexCoordAttributeArray;
-	private GLUniform mBoxColorUniform;
-
 	private ClearGeometryObject mClearGeometryObject;
 
-	private GLUniform mOverlayModelViewMatrixUniform;
-	private GLUniform mOverlayProjectionMatrixUniform;
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.jogl.overlay.Overlay#getName()
@@ -261,6 +241,7 @@ public class BoxOverlay extends OverlayBase
 			pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
 			pGL4.glBlendEquation(GL4.GL_MAX);
 			pGL4.glFrontFace(GL4.GL_CW);
+			mBoxGLProgram.use(pGL4);
 			mClearGeometryObject.draw();
 			pGL4.glDisable(GL4.GL_DEPTH_TEST);
 			pGL4.glDepthMask(true);
@@ -279,7 +260,7 @@ public class BoxOverlay extends OverlayBase
 	{
 		if (isDisplayed())
 		{
-			// draw someything
+			// draw something
 		}
 	}
 
