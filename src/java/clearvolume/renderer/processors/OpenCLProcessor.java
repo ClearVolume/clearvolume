@@ -8,7 +8,7 @@ public abstract class OpenCLProcessor<R> extends ProcessorBase<R>	implements
 {
 
 	private OpenCLDevice mOpenCLDevice;
-	private Object[] mArgs;
+	private Object[] mVolumeBuffers;
 
 	@Override
 	public boolean isCompatibleRenderer(Class<?> pRendererClass)
@@ -26,14 +26,14 @@ public abstract class OpenCLProcessor<R> extends ProcessorBase<R>	implements
 		return mOpenCLDevice;
 	}
 
-	public void setArgs(Object... pArgs)
+	public void setVolumeBuffers(Object... pArgs)
 	{
-		mArgs = pArgs;
+		mVolumeBuffers = pArgs;
 	}
 
-	public Object[] getArgs()
+	public Object[] getVolumeBuffers()
 	{
-		return mArgs;
+		return mVolumeBuffers;
 	}
 
 	@Override

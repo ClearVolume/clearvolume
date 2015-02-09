@@ -64,4 +64,32 @@ public class OpenCLTests
 		}
 
 	}
+
+	@Test
+	public void test_run()
+	{
+		try
+		{
+			OpenCLDevice lOpenCLDevice = new OpenCLDevice();
+			lOpenCLDevice.initCL();
+			lOpenCLDevice.printInfo();
+			final int N = 100;
+
+			CLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
+																												"test_float");
+
+			CLBuffer<Float> clBufIn = lOpenCLDevice.createOutputFloatBuffer(N);
+
+			lCLKernel.setArgs(clBufIn, N);
+
+			lOpenCLDevice.run(lCLKernel, N);
+
+		}
+		catch (Throwable e)
+		{
+			e.printStackTrace();
+			fail();
+		}
+
+	}
 }

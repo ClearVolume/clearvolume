@@ -358,7 +358,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			if (lProcessor.isCompatibleRenderer(getClass()))
 			{
 				OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
-				lOpenCLProcessor.setArgs(mCLVolumeImages[pRenderLayerIndex]);
+				lOpenCLProcessor.setVolumeBuffers(mCLVolumeImages[pRenderLayerIndex]);
 				lOpenCLProcessor.process(	pRenderLayerIndex,
 																	getVolumeSizeX(),
 																	getVolumeSizeY(),
