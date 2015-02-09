@@ -1,19 +1,11 @@
 package clearvolume.renderer.jogl.overlay.o3d;
 
-import java.nio.FloatBuffer;
-
-import javax.media.opengl.GL;
-import javax.media.opengl.GL4;
-
-import cleargl.GLAttribute;
-import cleargl.GLFloatArray;
-import cleargl.GLMatrix;
-import cleargl.GLProgram;
-import cleargl.GLUniform;
-import cleargl.GLVertexArray;
-import cleargl.GLVertexAttributeArray;
+import cleargl.*;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
+
+import javax.media.opengl.GL4;
+import java.nio.FloatBuffer;
 
 /**
  * Single Path 3D Overlay.
@@ -23,9 +15,6 @@ import clearvolume.renderer.jogl.overlay.OverlayBase;
  */
 public class PathOverlay extends OverlayBase
 {
-	private static final float cBoxLineWidth = 1.f; // only cBoxLineWidth = 1.f
-	// seems to be supported
-
 	private static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
 	{ 1.f, 1.f, 1.f, 1.f });
 
@@ -38,6 +27,9 @@ public class PathOverlay extends OverlayBase
 
 	private GLUniform mOverlayModelViewMatrixUniform;
 	private GLUniform mOverlayProjectionMatrixUniform;
+
+  private ClearGeometryObject mPath;
+  private GLFloatArray mPathPoints;
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.jogl.overlay.Overlay#getName()
@@ -75,46 +67,23 @@ public class PathOverlay extends OverlayBase
 	{
 		// box display: construct the program and related objects
 		try
-		{
-			mBoxGLProgram = GLProgram.buildProgram(	pGL4,
-																							PathOverlay.class,
-																							"shaders/path_vert.glsl",
-																							"shaders/path_frag.glsl");
+    {
+      mBoxGLProgram =
+              GLProgram.buildProgram(	pGL4,
+                      PathOverlay.class,
+                      new String[]{"shaders/path_vert.glsl",
+                      "shaders/path_frag.glsl"});
+      mPath = new ClearGeometryObject(mBoxGLProgram,
+              3, GL4.GL_LINE_STRIP );
+      mPath.setDynamic(true);
 
-			mOverlayModelViewMatrixUniform = mBoxGLProgram.getUniform("modelview");
-			mOverlayProjectionMatrixUniform = mBoxGLProgram.getUniform("projection");
+      mPathPoints = new GLFloatArray(2, 3);
 
-			// set the line with of the box
-			pGL4.glLineWidth(cBoxLineWidth);
+      // Front
+      mPathPoints.add(0, 0, 0);
+      mPathPoints.add((float)Math.random()*0.4f, (float)Math.random()*0.4f, (float)Math.random()*0.4f);
 
-			// get all the shaders uniform locations
-			mBoxPositionAttribute = mBoxGLProgram.getAtribute("position");
-
-			mBoxColorUniform = mBoxGLProgram.getUniform("color");
-
-			// set up the vertices of the box
-			mBoxVertexArray = new GLVertexArray(mBoxGLProgram);
-			mBoxVertexArray.bind();
-			mBoxPositionAttributeArray = new GLVertexAttributeArray(mBoxPositionAttribute,
-																															4);
-
-			int lNumberOfPoints = 1000;
-
-			final GLFloatArray lVerticesFloatArray = new GLFloatArray(lNumberOfPoints,
-																																4);
-
-			float x = 0, y = 0, z = 0;
-
-			for (int i = 0; i < lNumberOfPoints; i++)
-			{
-				lVerticesFloatArray.add(x, y, z, 1.0f);
-				x += (Math.random() - 0.5) * 0.1;
-				y += (Math.random() - 0.5) * 0.1;
-				z += (Math.random() - 0.5) * 0.1;
-			}
-
-			mBoxVertexArray.addVertexAttributeArray(mBoxPositionAttributeArray,
-																							lVerticesFloatArray.getFloatBuffer());
+      mPath.setVerticesAndCreateBuffer(mPathPoints.getFloatBuffer());
 
 		}
 		catch (final Throwable e)
@@ -133,7 +102,10 @@ public class PathOverlay extends OverlayBase
 	{
 		if (isDisplayed())
 		{
-			mBoxGLProgram.use(pGL4);
+      //mPath.getProgram().use(pGL4);
+      mBoxGLProgram.use(pGL4);
+
+      mPath.getProgram().getUniform("vertexCount").set((mPathPoints.getFloatBuffer().capacity()/3));
 
 			// invert Matrix is the mModelViewMatrix used by renderer which is actually the
 			// inverted mModelViewMatrix Matrix
@@ -142,16 +114,13 @@ public class PathOverlay extends OverlayBase
 			lInvBoxMatrix.transpose();
 			lInvBoxMatrix.invert();
 
-			mOverlayModelViewMatrixUniform.setFloatMatrix(lInvBoxMatrix.getFloatArray(),
-																										false);
+      mPath.setModelView(lInvBoxMatrix);
+      mPath.setProjection(pProjectionMatrix);
 
-			mOverlayProjectionMatrixUniform.setFloatMatrix(	pProjectionMatrix.getFloatArray(),
-																											false);
+			mPath.draw();
 
-			mBoxColorUniform.setFloatVector4(cBoxColor);
-
-			mBoxVertexArray.draw(GL.GL_LINE_STRIP);
-
+      mPathPoints.add(-0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f));
+      mPath.updateVertices(mPathPoints.getFloatBuffer());
 		}
 	}
 

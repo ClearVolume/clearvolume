@@ -1,16 +1,11 @@
 package clearvolume.renderer.jogl.overlay.o3d;
 
-import java.io.IOException;
-
-import javax.media.opengl.GL4;
-
-import cleargl.ClearGeometryObject;
-import cleargl.GLFloatArray;
-import cleargl.GLIntArray;
-import cleargl.GLMatrix;
-import cleargl.GLProgram;
+import cleargl.*;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
+
+import javax.media.opengl.GL4;
+import java.io.IOException;
 
 /**
  * BoxOverlay - Nice shader based box and grid 3D overlay.

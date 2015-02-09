@@ -1,21 +1,15 @@
 package clearvolume.renderer.jogl.overlay.o2d;
 
+import cleargl.*;
+import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.jogl.overlay.OverlayBase;
 import gnu.trove.list.linked.TDoubleLinkedList;
 
+import javax.media.opengl.GL4;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.media.opengl.GL4;
-
-import cleargl.ClearGeometryObject;
-import cleargl.GLFloatArray;
-import cleargl.GLIntArray;
-import cleargl.GLMatrix;
-import cleargl.GLProgram;
-import clearvolume.renderer.DisplayRequestInterface;
-import clearvolume.renderer.jogl.overlay.OverlayBase;
 
 public class GraphOverlay extends OverlayBase
 {
