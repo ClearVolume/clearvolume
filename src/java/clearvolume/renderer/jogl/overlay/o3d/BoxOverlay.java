@@ -226,8 +226,7 @@ public class BoxOverlay extends OverlayBase implements Overlay3D
 			mClearGeometryObject.setModelView(lInvBoxMatrix);
 			mClearGeometryObject.setProjection(pProjectionMatrix);
 
-			pGL4.glEnable(GL4.GL_DEPTH_TEST);
-			pGL4.glDepthMask(false);
+			pGL4.glDisable(GL4.GL_DEPTH_TEST);
 			pGL4.glEnable(GL4.GL_CULL_FACE);
 			pGL4.glEnable(GL4.GL_BLEND);
 			pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
@@ -235,10 +234,7 @@ public class BoxOverlay extends OverlayBase implements Overlay3D
 			pGL4.glFrontFace(GL4.GL_CW);
 			mBoxGLProgram.use(pGL4);
 			mClearGeometryObject.draw();
-			pGL4.glDisable(GL4.GL_DEPTH_TEST);
-			pGL4.glDepthMask(true);
-			pGL4.glDisable(GL4.GL_CULL_FACE);
-			// pGL4.glDisable(GL4.GL_BLEND);
+
 		}
 	}
 

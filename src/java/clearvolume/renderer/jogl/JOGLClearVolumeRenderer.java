@@ -694,6 +694,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		final GL4 lGL4 = pDrawable.getGL().getGL4();
 		lGL4.glClearColor(0, 0, 0, 1);
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+		lGL4.glDisable(GL4.GL_CULL_FACE);
 
 		setDefaultProjectionMatrix();
 
