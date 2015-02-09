@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.util.Arrays;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -24,6 +26,7 @@ import clearvolume.renderer.jogl.overlay.o3d.PathOverlay;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.CUDAProcessorTest;
+import clearvolume.renderer.processors.impl.OpenCLHistogram;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 import clearvolume.renderer.processors.impl.OpenCLTest;
 import clearvolume.transferf.TransferFunctions;
@@ -236,6 +239,82 @@ public class ClearVolumeDemo
 																								lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
 
+		}
+
+		lClearVolumeRenderer.close();
+	}
+
+	@Test
+	public void demoOpenCLHistogram()	throws InterruptedException,
+																		IOException
+	{
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+																																																						512,
+																																																						512,
+																																																						1,
+																																																						512,
+																																																						512,
+																																																						1,
+																																																						false);
+		lClearVolumeRenderer.addOverlay(new PathOverlay());
+		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
+
+		OpenCLHistogram histoProcessor = new OpenCLHistogram();
+		histoProcessor.addResultListener(new ProcessorResultListener<IntBuffer>()
+		{
+
+			@Override
+			public void notifyResult(	Processor<IntBuffer> pSource,
+																IntBuffer pResult)
+			{
+				System.out.println("histogram: " + Arrays.toString(pResult.array()));
+			}
+		});
+
+		lClearVolumeRenderer.addProcessor(histoProcessor);
+
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
+
+		final int lResolutionX = 256;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																							* lResolutionZ];
+
+		for (int z = 0; z < lResolutionZ; z++)
+			for (int y = 0; y < lResolutionY; y++)
+				for (int x = 0; x < lResolutionX; x++)
+				{
+					final int lIndex = x + lResolutionX
+															* y
+															+ lResolutionX
+															* lResolutionY
+															* z;
+					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
+					if (lCharValue < 12)
+						lCharValue = 0;
+
+					// lVolumeDataArray[lIndex] = (byte) lCharValue;
+					lVolumeDataArray[lIndex] = (byte) (255 * x * x
+
+					/ lResolutionX / lResolutionX);
+
+				}
+
+		lClearVolumeRenderer.setCurrentRenderLayer(0);
+		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
+		lClearVolumeRenderer.requestDisplay();
+
+		while (lClearVolumeRenderer.isShowing())
+		{
+			Thread.sleep(500);
+			lClearVolumeRenderer.requestDisplay();
 		}
 
 		lClearVolumeRenderer.close();
