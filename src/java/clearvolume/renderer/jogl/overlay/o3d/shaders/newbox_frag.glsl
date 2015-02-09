@@ -20,13 +20,10 @@ void main()
 	vec2 distmainbox = fract(VertexIn.TexCoord+vec2(0.5,0.5)) -vec2(0.5,0.5);
 	float intx = 1/(1+400*(abs(distmainbox.x)));
 	float inty = 1/(1+400*(abs(distmainbox.y)));
-	
-	float alpha = alphax+alphay+intx+inty;
-	
-	
-	
-	float intensity = 0.3*alpha; //intx + inty;
-    outColor = vec4(intensity,intensity,intensity, alpha);
+
+	float intensity = 0.3*(alphax+alphay+intx+inty); //intx + inty;
+
+    outColor = vec4(intensity,intensity,intensity, 1);
     
 }
 
