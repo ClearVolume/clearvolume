@@ -17,11 +17,13 @@ void main()
 	float alphax = 1/(1+100*(abs(distgrid.x)));
 	float alphay = 1/(1+100*(abs(distgrid.y)));
 	
-	float alpha = alphax+alphay;
-	
 	vec2 distmainbox = fract(VertexIn.TexCoord+vec2(0.5,0.5)) -vec2(0.5,0.5);
-	float intx = 1/(1+1000*(abs(distmainbox.x)));
-	float inty = 1/(1+1000*(abs(distmainbox.y)));
+	float intx = 1/(1+400*(abs(distmainbox.x)));
+	float inty = 1/(1+400*(abs(distmainbox.y)));
+	
+	float alpha = alphax+alphay+intx+inty;
+	
+	
 	
 	float intensity = 0.3*alpha; //intx + inty;
     outColor = vec4(intensity,intensity,intensity, alpha);
