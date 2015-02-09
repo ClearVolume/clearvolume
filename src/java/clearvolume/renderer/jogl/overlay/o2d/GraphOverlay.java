@@ -219,8 +219,9 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 					mClearGeometryObject.setProjection(pProjectionMatrix);
 
 					pGL4.glEnable(GL4.GL_BLEND);
-					pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
-					pGL4.glBlendEquation(GL4.GL_MAX);
+					pGL4.glBlendFunc(	GL4.GL_SRC_ALPHA,
+														GL4.GL_ONE_MINUS_SRC_ALPHA);
+					pGL4.glBlendEquation(GL4.GL_FUNC_ADD);
 
 					mClearGeometryObject.draw();
 

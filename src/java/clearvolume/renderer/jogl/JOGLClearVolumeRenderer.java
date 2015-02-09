@@ -695,6 +695,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 		lGL4.glClearColor(0, 0, 0, 1);
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 		lGL4.glDisable(GL4.GL_CULL_FACE);
+		lGL4.glEnable(GL4.GL_BLEND);
+		lGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
+		lGL4.glBlendEquation(GL4.GL_MAX);
 
 		setDefaultProjectionMatrix();
 
