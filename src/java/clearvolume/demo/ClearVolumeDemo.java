@@ -21,7 +21,10 @@ import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.renderer.jogl.overlay.o2d.GraphOverlay;
 import clearvolume.renderer.jogl.overlay.o3d.PathOverlay;
+import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.CUDAProcessorTest;
+import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 import clearvolume.renderer.processors.impl.OpenCLTest;
 import clearvolume.transferf.TransferFunctions;
 
@@ -96,7 +99,20 @@ public class ClearVolumeDemo
 																																																						false);
 		lClearVolumeRenderer.addOverlay(new PathOverlay());
 		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
-		lClearVolumeRenderer.addProcessor(new OpenCLTest());
+
+		OpenCLTest myProc = new OpenCLTest();
+		myProc.addResultListener(new ProcessorResultListener<Double>()
+		{
+
+			@Override
+			public void notifyResult(	Processor<Double> pSource,
+																Double pResult)
+			{
+				System.out.println(pResult);
+			}
+		});
+
+		lClearVolumeRenderer.addProcessor(myProc);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
@@ -135,6 +151,86 @@ public class ClearVolumeDemo
 			Thread.sleep(500);
 		}
 
+		lClearVolumeRenderer.close();
+	}
+
+	@Test
+	public void demoOpenCLTenengrad()	throws InterruptedException,
+																		IOException
+	{
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+																																																						512,
+																																																						512,
+																																																						1,
+																																																						512,
+																																																						512,
+																																																						1,
+																																																						false);
+		lClearVolumeRenderer.addOverlay(new PathOverlay());
+		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
+
+		OpenCLTenengrad tenengradProc = new OpenCLTenengrad();
+		tenengradProc.addResultListener(new ProcessorResultListener<Double>()
+		{
+
+			@Override
+			public void notifyResult(	Processor<Double> pSource,
+																Double pResult)
+			{
+				System.out.println("tenengrad: " + pResult);
+			}
+		});
+
+		lClearVolumeRenderer.addProcessor(tenengradProc);
+
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
+
+		final int lResolutionX = 256;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																							* lResolutionZ];
+
+		for (int z = 0; z < lResolutionZ; z++)
+			for (int y = 0; y < lResolutionY; y++)
+				for (int x = 0; x < lResolutionX; x++)
+				{
+					final int lIndex = x + lResolutionX
+															* y
+															+ lResolutionX
+															* lResolutionY
+															* z;
+					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
+					if (lCharValue < 12)
+						lCharValue = 0;
+
+					// lVolumeDataArray[lIndex] = (byte) lCharValue;
+					lVolumeDataArray[lIndex] = (byte) (255 * x / lResolutionX);
+
+				}
+
+		lClearVolumeRenderer.setCurrentRenderLayer(0);
+		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
+		lClearVolumeRenderer.requestDisplay();
+
+		// while (lClearVolumeRenderer.isShowing())
+		// {
+		// Thread.sleep(500);
+		// }
+
+		for (int i = 0; i < 10; i++)
+		{
+			tenengradProc.setSigma(1. * i);
+			tenengradProc.process(0, 256, 256, 256);
+			Thread.sleep(1000);
+
+		}
 		lClearVolumeRenderer.close();
 	}
 
