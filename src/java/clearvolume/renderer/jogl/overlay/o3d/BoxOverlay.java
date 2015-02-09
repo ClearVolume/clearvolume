@@ -255,11 +255,17 @@ public class BoxOverlay extends OverlayBase
 			mClearGeometryObject.setProjection(pProjectionMatrix);
 
 			pGL4.glEnable(GL4.GL_DEPTH_TEST);
+			pGL4.glDepthMask(false);
 			pGL4.glEnable(GL4.GL_CULL_FACE);
+			pGL4.glEnable(GL4.GL_BLEND);
+			pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
+			pGL4.glBlendEquation(GL4.GL_MAX);
 			pGL4.glFrontFace(GL4.GL_CW);
 			mClearGeometryObject.draw();
 			pGL4.glDisable(GL4.GL_DEPTH_TEST);
+			pGL4.glDepthMask(true);
 			pGL4.glDisable(GL4.GL_CULL_FACE);
+			// pGL4.glDisable(GL4.GL_BLEND);
 		}
 	}
 

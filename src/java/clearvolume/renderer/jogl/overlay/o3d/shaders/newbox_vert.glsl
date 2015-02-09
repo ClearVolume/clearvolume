@@ -14,14 +14,12 @@ uniform mat4 modelview;
 uniform mat4 projection;
 uniform vec3 position = vec3(0.0, 0.0, 0.0);
 
-out float attenuation;
 
 void main()
 {
    VertexOut.Normal = vertexNormal;
    VertexOut.Position = vec3(modelview*vec4(vertexPosition, 1.0));
    VertexOut.TexCoord = vertexTexCoord;
-   attenuation = 1;
 
    gl_Position = (projection*modelview)*vec4(vertexPosition + position, 1.0);
 }
