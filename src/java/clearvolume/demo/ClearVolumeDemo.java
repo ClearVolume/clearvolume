@@ -207,8 +207,10 @@ public class ClearVolumeDemo
 					if (lCharValue < 12)
 						lCharValue = 0;
 
-					// lVolumeDataArray[lIndex] = (byte) lCharValue;
-					lVolumeDataArray[lIndex] = (byte) (255 * x / lResolutionX);
+					lVolumeDataArray[lIndex] = (byte) lCharValue;
+					// lVolumeDataArray[lIndex] = (byte) (255 * x
+					// * x
+					// / lResolutionX / lResolutionX);
 
 				}
 
@@ -219,18 +221,23 @@ public class ClearVolumeDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-		// while (lClearVolumeRenderer.isShowing())
-		// {
-		// Thread.sleep(500);
-		// }
-
-		for (int i = 0; i < 10; i++)
+		double s = 0;
+		while (lClearVolumeRenderer.isShowing())
 		{
-			tenengradProc.setSigma(1. * i);
-			tenengradProc.process(0, 256, 256, 256);
-			Thread.sleep(1000);
+
+			Thread.sleep(500);
+
+			tenengradProc.setSigma(s);
+			s += .5;
+
+			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+																								lResolutionX,
+																								lResolutionY,
+																								lResolutionZ);
+			lClearVolumeRenderer.requestDisplay();
 
 		}
+
 		lClearVolumeRenderer.close();
 	}
 

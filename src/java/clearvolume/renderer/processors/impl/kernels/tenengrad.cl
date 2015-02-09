@@ -129,106 +129,6 @@ __kernel void convolve_smooth(__global float * input, __global float * output, c
  // 	printf("kernel:  %.5f %.5f \n\n\n",input[i+Nx*j+Nx*Ny*k],input[i+1+Nx*j+Nx*Ny*k]);
 }
 
-__kernel void convolve_diff_inplace(__global float * input, const int Nx,const int Ny,const int Nz, const int flag){
-
-  int i = get_global_id(0);
-  int j = get_global_id(1);
-  int k = get_global_id(2);
-
-    
-  const int dx = flag & 1;
-  const int dy = (flag&2)/2;
-  const int dz = (flag&4)/4;
-
-
-  const float h[3] = {-.5f,0.f,.5f};
-  const int Nh = 3;
-  
-   
-  float res = 0.f;
-  int delta = (Nh-1)/2;
-
-  for (int p = 0; p < Nh; ++p){
-
-	int i1 = i+dx*(p-delta);
-	int j1 = j+dy*(p-delta);
-	int k1 = k+dz*(p-delta);
-	
-	float val = 0.f;
-
-	//clamp to border
-	i1 = clamp(i1,0,Nx-1);
-	j1 = clamp(j1,0,Ny-1);
-	k1 = clamp(k1,0,Nz-1);
-
-	val = input[i1+Nx*j1+Nx*Ny*k1];
-	
-	res += h[p]*val;
-
-  }
-
-  barrier(CLK_GLOBAL_MEM_FENCE);
-
-  input[i+Nx*j+Nx*Ny*k] = res;  
- 
- 
-// if ((i==10) &&(j==10)&&(k==10))
-//  	printf("kernel:  %.10f \n\n\n",input[i+Nx*j+Nx*Ny*k]);
-}
-
-
-
-__kernel void convolve_smooth_inplace(__global float * input, const int Nx,const int Ny,const int Nz, const int flag){
-
-  int i = get_global_id(0);
-  int j = get_global_id(1);
-  int k = get_global_id(2);
-
-    
-  const int dx = flag & 1;
-  const int dy = (flag&2)/2;
-  const int dz = (flag&4)/4;
-
-
-  //const float h[3] = {1.f,2.f,1.f};
-  const float h[3] = {.25f,.5f,.25f};
-  const int Nh = 3;
-  
-   
-  float res = 0.f;
-  int delta = (Nh-1)/2;
-
-  for (int p = 0; p < Nh; ++p){
-
-	int i1 = i+dx*(p-delta);
-	int j1 = j+dy*(p-delta);
-	int k1 = k+dz*(p-delta);
-	
-	float val = 0.f;
-
-	//clamp to border
-	i1 = clamp(i1,0,Nx-1);
-	j1 = clamp(j1,0,Ny-1);
-	k1 = clamp(k1,0,Nz-1);
-
-	val = input[i1+Nx*j1+Nx*Ny*k1];
-	
-	res += h[p]*val;
-
-  }
-
-
-   barrier(CLK_GLOBAL_MEM_FENCE);
-
-  input[i+Nx*j+Nx*Ny*k] = res;  
- 
- 
-// if ((i==10) &&(j==10)&&(k==10))
- // 	printf("kernel:  %.10f \n\n\n",input[i+Nx*j+Nx*Ny*k]);
-}
-
-
-
 __kernel void sum(__global float * inputX, __global float * inputY, __global float * inputZ, __global float * output, const int N){
 
   int i = get_global_id(0);
@@ -242,11 +142,9 @@ __kernel void sum(__global float * inputX, __global float * inputY, __global flo
 	
 	output[i] = sqrt(res);
 	
+ }
 
-}
-
-
-__kernel void blur_inplace(__global float * input, const float sigma, const int Nx,const int Ny,const int Nz, const int flag){
+__kernel void blur(__global float * input, __global float * output , const float sigma, const int Nx,const int Ny,const int Nz, const int flag){
 
   int i = get_global_id(0);
   int j = get_global_id(1);
@@ -257,8 +155,13 @@ __kernel void blur_inplace(__global float * input, const float sigma, const int 
   const int dy = (flag&2)/2;
   const int dz = (flag&4)/4;
 
+	if (flag==0){
+		output[i+Nx*j+Nx*Ny*k] = input[i+Nx*j+Nx*Ny*k];
+		return;
+	}
 
-  //const float h[3] = {1.f,2.f,1.f};
+
+  
   const int Nh = 11;
   
    
@@ -289,13 +192,22 @@ __kernel void blur_inplace(__global float * input, const float sigma, const int 
    hSum += hVal;
   }
 
-	  res *= 1./hSum;
+   res *= 1./hSum;
 	
-   barrier(CLK_GLOBAL_MEM_FENCE);
-
-  input[i+Nx*j+Nx*Ny*k] = res;  
+    output[i+Nx*j+Nx*Ny*k] = res;  
  
  
- if ((i==10) &&(j==10)&&(k==10));
-  	printf("kernel:  %.10f \n\n\n",res);
+// if ((i==10) &&(j==10)&&(k==10))
+//  	printf("kernel:  %.10f \n\n\n",res);
 }
+
+
+
+
+
+__kernel void copy(__global float * input, __global float * output , const int N){
+
+  int i = get_global_id(0);
+  
+  		output[i] = input[i];
+		}

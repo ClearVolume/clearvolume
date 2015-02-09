@@ -13,13 +13,14 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 
 	private CLKernel mKernelDownsample;
 	private CLKernel mKernelDiff;
-	private CLKernel mKernelSmoothInplace;
+	private CLKernel mKernelSmooth;
 	private CLKernel mKernelSum;
-
-	private CLKernel mKernelBlurInplace;
+	private CLKernel mKernelBlur;
+	private CLKernel mKernelCopy;
 
 	private CLBuffer<Float> mBufDownSampled;
-	private CLBuffer<Float> mBufGx, mBufGy, mBufGz, mBufRes;
+	private CLBuffer<Float> mBufGx, mBufGy, mBufGz, mBufScratch,
+			mBufRes;
 
 	private int[] mDownShape = new int[]
 	{ 64, 64, 64 };
@@ -27,7 +28,7 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 	private int mDownSize;
 
 	private final int NDownSample = 3;
-	private double mSigma;
+	volatile private double mSigma;
 
 	@Override
 	public String getName()
@@ -51,25 +52,26 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 			mKernelDiff = getDevice().compileKernel(OpenCLTenengrad.class.getResource("kernels/tenengrad.cl"),
 																							"convolve_diff");
 
-			mKernelSmoothInplace = getDevice().compileKernel(	OpenCLTenengrad.class.getResource("kernels/tenengrad.cl"),
-																												"convolve_smooth_inplace");
+			mKernelSmooth = getDevice().compileKernel(OpenCLTenengrad.class.getResource("kernels/tenengrad.cl"),
+																								"convolve_smooth");
 			mKernelSum = getDevice().compileKernel(	OpenCLTenengrad.class.getResource("kernels/tenengrad.cl"),
 																							"sum");
 
-			mKernelBlurInplace = getDevice().compileKernel(	OpenCLTenengrad.class.getResource("kernels/tenengrad.cl"),
-																											"blur_inplace");
+			mKernelBlur = getDevice().compileKernel(OpenCLTenengrad.class.getResource("kernels/tenengrad.cl"),
+																							"blur");
+
+			mKernelCopy = getDevice().compileKernel(OpenCLTenengrad.class.getResource("kernels/tenengrad.cl"),
+																							"copy");
 
 			setSigma(0.);
 		}
+
 	}
 
-	public void initProcessor(long pWidthInVoxels,
-														long pHeightInVoxels,
-														long pDepthInVoxels)
+	public void initBuffers(long pWidthInVoxels,
+													long pHeightInVoxels,
+													long pDepthInVoxels)
 	{
-
-		if (mBufDownSampled != null)
-			mBufDownSampled.release();
 
 		// the downsampled volume shape
 
@@ -90,6 +92,7 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 		mBufGy = getDevice().createOutputFloatBuffer(mDownSize);
 		mBufGz = getDevice().createOutputFloatBuffer(mDownSize);
 		mBufRes = getDevice().createOutputFloatBuffer(mDownSize);
+		mBufScratch = getDevice().createOutputFloatBuffer(mDownSize);
 
 	}
 
@@ -115,36 +118,53 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 	}
 
 	// the smoothing step (done in place)
-	private void smooth_step(CLBuffer<Float> pBuf, int flag)
+	private void smooth_step(	CLBuffer<Float> pBufIn,
+														CLBuffer<Float> pBufOut,
+														int flag)
 	{
 		// flag is 1 (in x direction), 2 (y) or 4 (z)
 
-		mKernelSmoothInplace.setArgs(	pBuf,
-																	mDownShape[0],
-																	mDownShape[1],
-																	mDownShape[2],
-																	(int) flag);
+		mKernelSmooth.setArgs(pBufIn,
+													pBufOut,
+													mDownShape[0],
+													mDownShape[1],
+													mDownShape[2],
+													(int) flag);
 
-		getDevice().run(mKernelSmoothInplace,
+		getDevice().run(mKernelSmooth,
 										mDownShape[0],
 										mDownShape[1],
 										mDownShape[2]);
 
 	}
 
+	// copy buffer
+	private void copy_step(	CLBuffer<Float> pBufIn,
+													CLBuffer<Float> pBufOut)
+	{
+
+		mKernelCopy.setArgs(pBufIn, pBufOut, mDownSize);
+
+		getDevice().run(mKernelCopy, mDownSize);
+
+	}
+
 	// the blurring step (done in place)
-	private void blur_step(CLBuffer<Float> pBuf, int flag)
+	private void blur_step(	CLBuffer<Float> pBufIn,
+													CLBuffer<Float> pBufOut,
+													int flag)
 	{
 		// flag is 1 (in x direction), 2 (y) or 4 (z)
 
-		mKernelBlurInplace.setArgs(	pBuf,
-																(float) mSigma,
-																mDownShape[0],
-																mDownShape[1],
-																mDownShape[2],
-																(int) flag);
+		mKernelBlur.setArgs(pBufIn,
+												pBufOut,
+												(float) mSigma,
+												mDownShape[0],
+												mDownShape[1],
+												mDownShape[2],
+												(int) flag);
 
-		getDevice().run(mKernelBlurInplace,
+		getDevice().run(mKernelBlur,
 										mDownShape[0],
 										mDownShape[1],
 										mDownShape[2]);
@@ -173,46 +193,55 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 											long pHeightInVoxels,
 											long pDepthInVoxels)
 	{
+
 		ensureOpenCLInitialized();
 
-		initProcessor(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
+		if (mBufDownSampled == null)
+		{
+			System.out.println("setting up buffers");
+			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
+		}
 
 		// downsample
-
 		downsample();
 
 		if (mSigma > 0)
 		{
 			System.out.println("blurring with sigma = " + mSigma);
-			blur_step(mBufDownSampled, 1);
-			blur_step(mBufDownSampled, 2);
-			blur_step(mBufDownSampled, 4);
-		}
+			blur_step(mBufDownSampled, mBufScratch, 1);
+			blur_step(mBufScratch, mBufDownSampled, 2);
+			blur_step(mBufDownSampled, mBufScratch, 4);
+			copy_step(mBufScratch, mBufDownSampled);
 
+		}
 		// convolve with the sobels
 
 		// Gx
-		diff_step(mBufDownSampled, mBufGx, 1);
-		smooth_step(mBufGx, 2);
-		smooth_step(mBufGx, 4);
+		diff_step(mBufDownSampled, mBufScratch, 1);
+		smooth_step(mBufScratch, mBufGx, 2);
+		smooth_step(mBufGx, mBufScratch, 4);
+		copy_step(mBufScratch, mBufGx);
 
 		// Gy
-		diff_step(mBufDownSampled, mBufGy, 2);
-		smooth_step(mBufGy, 1);
-		smooth_step(mBufGy, 4);
+		diff_step(mBufDownSampled, mBufScratch, 2);
+		smooth_step(mBufScratch, mBufGz, 1);
+		smooth_step(mBufGz, mBufScratch, 4);
+		copy_step(mBufScratch, mBufGz);
 
 		// Gz
-		diff_step(mBufDownSampled, mBufGz, 4);
-		smooth_step(mBufGz, 2);
-		smooth_step(mBufGz, 1);
+		diff_step(mBufDownSampled, mBufScratch, 4);
+		smooth_step(mBufScratch, mBufGz, 2);
+		smooth_step(mBufGz, mBufScratch, 1);
+		copy_step(mBufScratch, mBufGz);
 
 		// adding all up
 
-		mKernelSum.setArgs(mBufGx, mBufGy, mBufGz, mBufRes, mDownSize);
+		mKernelSum.setArgs(mBufGx, mBufGy, mBufGz, mBufScratch, mDownSize);
 		getDevice().run(mKernelSum, mDownSize);
 
-		FloatBuffer out = getDevice().readFloatBuffer(mBufRes);
+		FloatBuffer out = getDevice().readFloatBuffer(mBufScratch);
 
+		
 		double meanValue = 0;
 		for (int i = 0; i < out.capacity(); i++)
 			meanValue += out.get(i);
@@ -228,6 +257,11 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 		// }
 
 		// System.out.println("OUTPUT:     " + meanValue);
+
+		// meanValue = out.get(100);
+
+		// meanValue = out.get(16 + 16 * 42 + 16 * 42 * 42);
+
 		notifyListenersOfResult(meanValue);
 
 	}
