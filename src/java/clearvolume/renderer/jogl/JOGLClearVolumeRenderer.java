@@ -407,6 +407,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		if (mNewtCanvasAWT == null)
 			mClearGLWindow.getGLWindow().setVisible(pIsVisible);
+
 	}
 
 	/**

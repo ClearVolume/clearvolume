@@ -779,10 +779,10 @@ public class ClearVolumeDemo
 	IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-		                                                                                                     	512,
-		                                                                                                     	512,
-		                                                                                                     	false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer8Bit(	"ClearVolumeTest",
+		                                                                                                         	512,
+		                                                                                                         	512,
+		                                                                                                         	false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 		lClearVolumeRenderer.setProjectionAlgorithm(ProjectionAlgorithm.MaxProjection);
@@ -1040,7 +1040,21 @@ public class ClearVolumeDemo
 	{
 		for (int i = 0; i < 10; i++)
 		{
-			final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
+
+			final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
+			                                                                                       	(i % 2 == 0) ? 768
+			                                                                                       	             : 64,
+			                                                                                       	             (i % 2 == 0) ? 768
+			                                                                                       	                          : 64,
+			                                                                                       	                          1,
+			                                                                                       	                          (i % 2 == 0) ? 768
+			                                                                                       	                                       : 64,
+			                                                                                       	                                       (i % 2 == 0) ? 768
+			                                                                                       	                                                    : 64,
+			                                                                                       	                                                    1,
+			                                                                                       	                                                    true);
+
+			/*final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
 			                                                                                                     	i % 2 == 0 ? 768
 			                                                                                                     	           : 512,
 			                                                                                                     	           i % 2 == 0 ? 768
@@ -1051,7 +1065,7 @@ public class ClearVolumeDemo
 			                                                                                                     	                                 i % 2 == 0 ? 768
 			                                                                                                     	                                            : 512,
 			                                                                                                     	                                            1,
-			                                                                                                     	                                            true);
+			                                                                                                     	                                            true);/**/
 			final NewtCanvasAWT lNewtCanvasAWT = lClearVolumeRenderer.getNewtCanvasAWT();
 
 			final JFrame lJFrame = new JFrame("ClearVolume");
@@ -1106,7 +1120,7 @@ public class ClearVolumeDemo
 			}
 
 			lJFrame.setTitle("BRAVO! THIS IS A JFRAME! It WORKS! I=" + i);
-			Thread.sleep(10);
+			Thread.sleep(1000);
 
 			SwingUtilities.invokeAndWait(new Runnable()
 			{
