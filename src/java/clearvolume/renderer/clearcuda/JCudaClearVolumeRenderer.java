@@ -544,22 +544,26 @@ GLEventListener
 		mOpenGLBufferDevicePointers[pRenderLayerIndex].map();
 		mOpenGLBufferDevicePointers[pRenderLayerIndex].set(0, true);
 
-		mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
-		                                           	cBlockSize),
-		                                           	iDivUp(	getTextureHeight(),
-		                                           	       	cBlockSize),
-		                                           	       	1);
+		if (isLayerVisible(pRenderLayerIndex))
+		{
+			mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
+			                                           	cBlockSize),
+			                                           	iDivUp(	getTextureHeight(),
+			                                           	       	cBlockSize),
+			                                           	       	1);
 
-		mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
+			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
 
-		mVolumeRenderingFunction.launch(mOpenGLBufferDevicePointers[pRenderLayerIndex],
-		                                getTextureWidth(),
-		                                getTextureHeight(),
-		                                (float) getBrightness(pRenderLayerIndex),
-																		(float) getTransferRangeMin(pRenderLayerIndex),
-																		(float) getTransferRangeMax(pRenderLayerIndex),
-																		(float) getGamma(pRenderLayerIndex));
-		mCudaContext.synchronize();
+			mVolumeRenderingFunction.launch(mOpenGLBufferDevicePointers[pRenderLayerIndex],
+			                                getTextureWidth(),
+			                                getTextureHeight(),
+			                                (float) getBrightness(pRenderLayerIndex),
+			                                (float) getTransferRangeMin(pRenderLayerIndex),
+			                                (float) getTransferRangeMax(pRenderLayerIndex),
+			                                (float) getGamma(pRenderLayerIndex));
+			mCudaContext.synchronize();
+		}
+
 		mOpenGLBufferDevicePointers[pRenderLayerIndex].unmap();
 
 	}
