@@ -10,26 +10,29 @@ import java.nio.FloatBuffer;
 /**
  * Single Path 3D Overlay.
  *
- * @author Loic Royer (2015)
+ * @author Loic Royer, Ulrik Guenther (2015)
  *
  */
 public class PathOverlay extends OverlayBase
 {
-	private static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
+  protected static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
 	{ 1.f, 1.f, 1.f, 1.f });
 
-	private GLProgram mBoxGLProgram;
+	protected GLProgram mBoxGLProgram;
 
-	private GLAttribute mBoxPositionAttribute;
-	private GLVertexArray mBoxVertexArray;
-	private GLVertexAttributeArray mBoxPositionAttributeArray;
-	private GLUniform mBoxColorUniform;
+  protected GLAttribute mBoxPositionAttribute;
+  protected GLVertexArray mBoxVertexArray;
+  protected GLVertexAttributeArray mBoxPositionAttributeArray;
+  protected GLUniform mBoxColorUniform;
 
-	private GLUniform mOverlayModelViewMatrixUniform;
-	private GLUniform mOverlayProjectionMatrixUniform;
+  protected GLUniform mOverlayModelViewMatrixUniform;
+  protected GLUniform mOverlayProjectionMatrixUniform;
 
-  private ClearGeometryObject mPath;
-  private GLFloatArray mPathPoints;
+  protected ClearGeometryObject mPath;
+  protected GLFloatArray mPathPoints;
+
+  protected FloatBuffer mStartColor = FloatBuffer.wrap(new float[]{1.0f, 1.0f, 1.0f, 1.0f});
+  protected FloatBuffer mEndColor = FloatBuffer.wrap(new float[]{1.0f, 1.0f, 1.0f, 1.0f});
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.jogl.overlay.Overlay#getName()
@@ -84,6 +87,7 @@ public class PathOverlay extends OverlayBase
       mPathPoints.add((float)Math.random()*0.4f, (float)Math.random()*0.4f, (float)Math.random()*0.4f);
 
       mPath.setVerticesAndCreateBuffer(mPathPoints.getFloatBuffer());
+      mStartColor = FloatBuffer.wrap(new float[]{1.0f, 0.0f, 0.0f, 1.0f});
 
 		}
 		catch (final Throwable e)
@@ -91,6 +95,11 @@ public class PathOverlay extends OverlayBase
 			e.printStackTrace();
 		}
 	}
+
+  public void setStartEndColor(float[] startColor, float[] endColor) {
+    mStartColor = FloatBuffer.wrap(startColor);
+    mEndColor = FloatBuffer.wrap(endColor);
+  }
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.jogl.overlay.Overlay3D#render3D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
@@ -106,6 +115,8 @@ public class PathOverlay extends OverlayBase
       mBoxGLProgram.use(pGL4);
 
       mPath.getProgram().getUniform("vertexCount").set((mPathPoints.getFloatBuffer().capacity()/3));
+      mPath.getProgram().getUniform("startColor").setFloatVector4(mStartColor);
+      mPath.getProgram().getUniform("endColor").setFloatVector4(mEndColor);
 
 			// invert Matrix is the mModelViewMatrix used by renderer which is actually the
 			// inverted mModelViewMatrix Matrix
@@ -117,9 +128,13 @@ public class PathOverlay extends OverlayBase
       mPath.setModelView(lInvBoxMatrix);
       mPath.setProjection(pProjectionMatrix);
 
-			mPath.draw();
+      pGL4.glEnable(GL4.GL_BLEND);
+      pGL4.glBlendFunc(GL4.GL_SRC_ALPHA, GL4.GL_ONE_MINUS_SRC_ALPHA);
+      pGL4.glBlendEquation(GL4.GL_FUNC_ADD);
 
-      mPathPoints.add(-0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f));
+      mPath.draw();
+
+      mPathPoints.add(-0.2f + (float) Math.random() * ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f));
       mPath.updateVertices(mPathPoints.getFloatBuffer());
 		}
 	}

@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * BoxOverlay - Nice shader based box and grid 3D overlay.
  *
- * @author Ulrik Guenter (2015), Loic Royer (2015)
+ * @author Ulrik Guenther (2015), Loic Royer (2015)
  *
  */
 public class BoxOverlay extends OverlayBase

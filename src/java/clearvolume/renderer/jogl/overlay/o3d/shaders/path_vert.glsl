@@ -17,6 +17,9 @@ uniform mat4 projection;
 
 uniform int vertexCount;
 
+uniform vec4 startColor = vec4(1.0, 1.0, 1.0, 1.0);
+uniform vec4 endColor = vec4(1.0, 1.0, 1.0, 1.0);
+
 
 void main()
 {
@@ -27,10 +30,10 @@ void main()
     gl_Position = (projection*modelview)*vec4(vertexPosition , 1.0);
 
    if(gl_VertexID == 0) {
-        color = vec4(0.0, 1.0, 0.0, 1.0);
+        color = startColor;
         return;
    } if(gl_VertexID == vertexCount-1) {
-        color = vec4(1.0, 0.0, 0.0, 1.0);
+        color = endColor;
         return;
    } else {
         color = vec4(1.0, 1.0, 1.0, 0.5);
