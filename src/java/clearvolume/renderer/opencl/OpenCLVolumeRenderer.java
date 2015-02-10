@@ -377,7 +377,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		}
 		finally
 		{
-			mDisplayReentrantLock.unlock();
+			if (mDisplayReentrantLock.isHeldByCurrentThread())
+				mDisplayReentrantLock.unlock();
 		}
 
 	}

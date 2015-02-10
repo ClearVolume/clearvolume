@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
@@ -67,7 +68,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private volatile ClearGLWindow mClearGLWindow;
 	private NewtCanvasAWT mNewtCanvasAWT;
 	private volatile int mLastWindowWidth, mLastWindowHeight;
-	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock();
+	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
 
 	// pixelbuffer objects.
 	protected GLPixelBufferObject[] mPixelBufferObjects;
@@ -343,7 +344,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void close()
 	{
-		super.close();
 
 		mDisplayReentrantLock.lock();
 		try
@@ -377,10 +377,13 @@ public abstract class JOGLClearVolumeRenderer	extends
 				System.err.println(e.getLocalizedMessage());
 			}
 
+			super.close();
+
 		}
 		finally
 		{
-			mDisplayReentrantLock.unlock();
+			if (mDisplayReentrantLock.isHeldByCurrentThread())
+				mDisplayReentrantLock.unlock();
 		}
 	}
 
@@ -957,10 +960,16 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void dispose(final GLAutoDrawable arg0)
 	{
-		for (int i = 0; i < getNumberOfRenderLayers(); i++)
+		try
 		{
-			mLayerTextures[i].close();
-			mPixelBufferObjects[i].close();
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				unregisterPBO(i, mPixelBufferObjects[i].getId());
+			}
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
 		}
 	}
 
@@ -1031,32 +1040,67 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
 	 */
 	@Override
-	public void requestDisplay()
+	public void requestDisplayUnfairly()
 	{
 		final boolean lLocked = mDisplayReentrantLock.tryLock();
+
 		if (lLocked)
 		{
 			try
 			{
-				if (mClearGLWindow == null)
-					return;
-				mClearGLWindow.getGLWindow().display();
-				// setVisible(true);
-			}
-			catch (final NullPointerException e)
-			{
-			}
-			catch (final Throwable e)
-			{
-				System.err.println("REQUESTED DISPLAY AFTER EDT SHUTDOWN (Warning = it's ok): " + e.getClass()
-																																														.getSimpleName()
-														+ "->"
-														+ e.getLocalizedMessage());
+				requestDisplay();
 			}
 			finally
 			{
-				mDisplayReentrantLock.unlock();
+				if (mDisplayReentrantLock.isHeldByCurrentThread())
+					mDisplayReentrantLock.unlock();
 			}
+		}
+
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
+	 */
+	@Override
+	public void requestDisplay()
+	{
+		boolean lLocked;
+		try
+		{
+			lLocked = mDisplayReentrantLock.tryLock(0,
+																							TimeUnit.MILLISECONDS);
+
+			if (lLocked)
+			{
+				try
+				{
+					if (mClearGLWindow == null)
+						return;
+					mClearGLWindow.getGLWindow().display();
+					// setVisible(true);
+				}
+				catch (final NullPointerException e)
+				{
+				}
+				catch (final Throwable e)
+				{
+					System.err.println("REQUESTED DISPLAY AFTER EDT SHUTDOWN (Warning = it's ok): " + e.getClass()
+																																															.getSimpleName()
+															+ "->"
+															+ e.getLocalizedMessage());
+				}
+				finally
+				{
+					if (mDisplayReentrantLock.isHeldByCurrentThread())
+						mDisplayReentrantLock.unlock();
+				}
+			}
+		}
+		catch (final InterruptedException e1)
+		{
 		}
 	}
 

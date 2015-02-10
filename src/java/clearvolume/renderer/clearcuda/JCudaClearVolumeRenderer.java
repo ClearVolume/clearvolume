@@ -589,26 +589,9 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mDisplayReentrantLock.lock();
 		try
 		{
-			super.close();
 
 			final CudaContext lCudaContext = mCudaContext;
 			mCudaContext = null;
-
-			try
-			{
-				for (int i = 0; i < getNumberOfRenderLayers(); i++)
-				{
-					if (mOpenGLBufferDevicePointers[i] != null)
-						mOpenGLBufferDevicePointers[i].close();
-				}
-			}
-			catch (final Throwable e)
-			{
-				e.printStackTrace();
-				throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																			.getSimpleName(),
-																		e);
-			}
 
 			try
 			{
@@ -681,10 +664,14 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																																			.getSimpleName(),
 																		e);
 			}
+
+			super.close();
+
 		}
 		finally
 		{
-			mDisplayReentrantLock.unlock();
+			if (mDisplayReentrantLock.isHeldByCurrentThread())
+				mDisplayReentrantLock.unlock();
 		}
 	}
 

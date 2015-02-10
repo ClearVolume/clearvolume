@@ -1,16 +1,12 @@
 package clearvolume.renderer.jogl.overlay.o2d;
 
-
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import gnu.trove.list.linked.TFloatLinkedList;
 
-import javax.media.opengl.GL4;
 import java.io.IOException;
-import java.nio.FloatBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-
 
 import javax.media.opengl.GL4;
 
@@ -33,16 +29,16 @@ public class GraphOverlay extends OverlayBase	implements
 																							AutoCloseable
 {
 
-	private static final int cMaximalWaitTimeForDrawingInMilliseconds = 10;
-	private static final float cLineWidth = 2.f; // only cLineWidth = 1.f
+	private static final int cMaximalWaitTimeForLockInMilliseconds = 10;
 
 	// seems to be supported
 
 	private GLProgram mGLProgram;
 	private ClearGeometryObject mClearGeometryObject;
-
-	private volatile FloatBuffer mGraphColor = FloatBuffer.wrap(new float[]
-	{ 1.f, 1.f, 1.f, 1f });
+	private GLFloatArray mVerticesFloatArray;
+	private GLIntArray mIndexIntArray;
+	private GLFloatArray mNormalArray;
+	private GLFloatArray mTexCoordFloatArray;
 
 	private final TFloatLinkedList mDataY = new TFloatLinkedList();
 
@@ -53,26 +49,51 @@ public class GraphOverlay extends OverlayBase	implements
 	private DisplayRequestInterface mDisplayRequestInterface;
 	private volatile boolean mHasChanged = false;
 
-	private GLFloatArray mVerticesFloatArray;
-	private GLIntArray mIndexIntArray;
-	private GLFloatArray mNormalArray;
-	private GLFloatArray mTexCoordFloatArray;
-
 	private volatile float mOffsetX = -1, mOffsetY = 2f / 3;
 	private volatile float mScaleX = 1, mScaleY = 1f / 3;
 	private volatile float mMin = 0;
 	private volatile float mMax = 1;
-	private final float mAlpha = 0.01f;
+	private final float mAlpha = 0.04f;
 
 	private final AudioPlot mAudioPlot = new AudioPlot();
+
+	protected volatile boolean mStopSignal = false;
 
 	public GraphOverlay(int pMaxNumberOfDataPoints)
 	{
 		super();
 		setMaxNumberOfDataPoints(pMaxNumberOfDataPoints);
 
-		/*for (int i = 0; i < mMaxNumberOfDataPoints; i++)
-			addPoint(0);/**/
+		final Runnable lRunnable = new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				while (!mStopSignal)
+				{
+					if (isDisplayed())
+						computeMinMax(mAlpha);
+					if (mDisplayRequestInterface != null)
+						mDisplayRequestInterface.requestDisplay();
+					try
+					{
+						Thread.sleep(10);
+					}
+					catch (final InterruptedException e)
+					{
+					}
+
+				}
+
+			}
+		};
+
+		final Thread lMinMaxCalculationThread = new Thread(	lRunnable,
+																												GraphOverlay.class.getSimpleName() + ".MinMaxCalculationThread");
+		lMinMaxCalculationThread.setDaemon(true);
+		lMinMaxCalculationThread.setPriority(Thread.MIN_PRIORITY);
+		lMinMaxCalculationThread.start();
 
 		mAudioPlot.setInvertRange(true);
 	}
@@ -87,12 +108,6 @@ public class GraphOverlay extends OverlayBase	implements
 	public boolean hasChanged2D()
 	{
 		return mHasChanged;
-	}
-
-	public void setColor(double pR, double pG, double pB, double pA)
-	{
-		mGraphColor = FloatBuffer.wrap(new float[]
-		{ (float) pR, (float) pG, (float) pB, (float) pA });
 	}
 
 	public int getMaxNumberOfDataPoints()
@@ -121,23 +136,23 @@ public class GraphOverlay extends OverlayBase	implements
 			mDataY.add((float) pY);
 			if (mDataY.size() > getMaxNumberOfDataPoints())
 				mDataY.removeAt(0);
-
+			if (mDataY.size() < 20)
+				computeMinMax(0.5f);
 			mHasChanged = true;
 		}
 		finally
 		{
-			mReentrantLock.unlock();
+			if (mReentrantLock.isHeldByCurrentThread())
+				mReentrantLock.unlock();
 		}
 
-		if (mDisplayRequestInterface != null)
-			mDisplayRequestInterface.requestDisplay();
 	}
 
-	private void computeMinMax()
+	private void computeMinMax(float pAlpha)
 	{
 		try
 		{
-			final boolean lIsLocked = mReentrantLock.tryLock(	cMaximalWaitTimeForDrawingInMilliseconds,
+			final boolean lIsLocked = mReentrantLock.tryLock(	cMaximalWaitTimeForLockInMilliseconds,
 																												TimeUnit.MILLISECONDS);
 
 			if (lIsLocked)
@@ -148,8 +163,9 @@ public class GraphOverlay extends OverlayBase	implements
 				final float lMin = mDataY.min();
 				final float lMax = mDataY.max();
 
-				mMin = mAlpha * lMin + (1 - mAlpha) * mMin;
-				mMax = mAlpha * lMax + (1 - mAlpha) * mMax;
+				mMin = pAlpha * lMin + (1 - pAlpha) * mMin;
+				mMax = pAlpha * lMax + (1 - pAlpha) * mMax;
+
 			}
 		}
 		catch (final InterruptedException e)
@@ -157,11 +173,11 @@ public class GraphOverlay extends OverlayBase	implements
 		}
 		finally
 		{
-			mReentrantLock.unlock();
+			if (mReentrantLock.isHeldByCurrentThread())
+				mReentrantLock.unlock();
 		}
 
 	}
-
 
 	@Override
 	public void init(	GL4 pGL4,
@@ -210,7 +226,8 @@ public class GraphOverlay extends OverlayBase	implements
 		}
 		finally
 		{
-			mReentrantLock.unlock();
+			if (mReentrantLock.isHeldByCurrentThread())
+				mReentrantLock.unlock();
 		}
 	}
 
@@ -229,15 +246,11 @@ public class GraphOverlay extends OverlayBase	implements
 												GLMatrix pProjectionMatrix,
 												GLMatrix pInvVolumeMatrix)
 	{
-
 		if (isDisplayed())
 		{
 			try
 			{
-				final boolean lIsLocked = mReentrantLock.tryLock(	cMaximalWaitTimeForDrawingInMilliseconds,
-																													TimeUnit.MILLISECONDS);
-
-				if (lIsLocked)
+				mReentrantLock.lock();
 				{
 
 					// System.out.format("________________________________________\n");
@@ -297,6 +310,7 @@ public class GraphOverlay extends OverlayBase	implements
 					// mGLProgram.use(pGL4);
 					mClearGeometryObject.setProjection(pProjectionMatrix);
 
+					pGL4.glDisable(GL4.GL_DEPTH_TEST);
 					pGL4.glEnable(GL4.GL_BLEND);
 					pGL4.glBlendFunc(	GL4.GL_SRC_ALPHA,
 														GL4.GL_ONE_MINUS_SRC_ALPHA);
@@ -308,12 +322,10 @@ public class GraphOverlay extends OverlayBase	implements
 				}
 
 			}
-			catch (final InterruptedException e)
-			{
-			}
 			finally
 			{
-				mReentrantLock.unlock();
+				if (mReentrantLock.isHeldByCurrentThread())
+					mReentrantLock.unlock();
 			}
 		}
 	}
@@ -329,6 +341,7 @@ public class GraphOverlay extends OverlayBase	implements
 	public void close()
 	{
 		mAudioPlot.stop();
+		mStopSignal = true;
 	}
 
 }
