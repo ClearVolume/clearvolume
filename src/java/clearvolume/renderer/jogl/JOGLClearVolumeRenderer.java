@@ -407,6 +407,7 @@ ClearGLEventListener
 	{
 		if (mNewtCanvasAWT == null)
 			mClearGLWindow.getGLWindow().setVisible(pIsVisible);
+
 	}
 
 	/**
