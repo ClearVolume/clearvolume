@@ -15,7 +15,7 @@ void main()
 
 	float intensity = 1;
 
-    outColor = vec4(intensity*0.2,intensity*0.6,intensity, 0.5);
+    outColor = vec4(intensity*0.2,intensity*0.6,intensity, 0.75);
     
 }
 

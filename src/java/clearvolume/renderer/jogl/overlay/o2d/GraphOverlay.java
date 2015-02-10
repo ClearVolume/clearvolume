@@ -1,6 +1,8 @@
 package clearvolume.renderer.jogl.overlay.o2d;
 
-import gnu.trove.list.linked.TDoubleLinkedList;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import gnu.trove.list.linked.TFloatLinkedList;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -10,6 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.media.opengl.GL4;
 
 import cleargl.ClearGeometryObject;
+import cleargl.GLError;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
 import cleargl.GLMatrix;
@@ -32,7 +35,7 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 	private volatile FloatBuffer mGraphColor = FloatBuffer.wrap(new float[]
 	{ 1.f, 1.f, 1.f, 1f });
 
-	private TDoubleLinkedList mDataY = new TDoubleLinkedList();
+	private TFloatLinkedList mDataY = new TFloatLinkedList();
 
 	private final ReentrantLock mReentrantLock = new ReentrantLock();
 
@@ -46,8 +49,11 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 	private GLFloatArray mNormalArray;
 	private GLFloatArray mTexCoordFloatArray;
 
-	private float mOffsetX = -1, mOffsetY = 2f / 3;
-	private float mScaleX = 1, mScaleY = 1f / 3;
+	private volatile float mOffsetX = -1, mOffsetY = 2f / 3;
+	private volatile float mScaleX = 1, mScaleY = 1f / 3;
+	private volatile float mMin = 0;
+	private volatile float mMax = 1;
+	private float mAlpha = 0.01f;
 
 	public GraphOverlay(int pMaxNumberOfDataPoints)
 	{
@@ -91,9 +97,12 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 		mReentrantLock.lock();
 		try
 		{
-			mDataY.add(pY);
+			mDataY.add((float) pY);
 			if (mDataY.size() > getMaxNumberOfDataPoints())
 				mDataY.removeAt(0);
+
+			computeMinMax();
+
 			mHasChanged = true;
 		}
 		finally
@@ -103,6 +112,15 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 
 		if (mDisplayRequestInterface != null)
 			mDisplayRequestInterface.requestDisplay();
+	}
+
+	private void computeMinMax()
+	{
+		float lMin = mDataY.min();
+		float lMax = mDataY.max();
+
+		mMin = mAlpha * lMin + (1 - mAlpha) * mMin;
+		mMax = mAlpha * lMax + (1 - mAlpha) * mMax;
 	}
 
 	@Override
@@ -140,6 +158,8 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 			mClearGeometryObject.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
 			mClearGeometryObject.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
 			mClearGeometryObject.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
+
+			GLError.printGLErrors(pGL4, "AFTER GRAPH OVERLAY INIT");
 
 		}
 		catch (final IOException e)
@@ -181,16 +201,23 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 					// System.out.format("________________________________________\n");
 					// System.out.println(mDataY.size());
 
-					mIndexIntArray.rewind();
-					mVerticesFloatArray.rewind();
-					mTexCoordFloatArray.rewind();
+					computeMinMax();
+
+					mIndexIntArray.clear();
+					mVerticesFloatArray.clear();
+					mTexCoordFloatArray.clear();
 
 					float lStepX = 1f / mDataY.size();
 					int i = 0;
 					for (i = 0; i < mDataY.size(); i++)
 					{
+						if (mMax == mMin)
+							mMax = mMin + 0.01f;
+						float lValue = (mDataY.get(i) - mMin) / (mMax - mMin);
+						lValue = min(max(lValue, 0), 1);
+
 						float x = transformX(i * lStepX);
-						float y = transformY((float) mDataY.get(i));
+						float y = transformY(lValue);
 
 						mVerticesFloatArray.add(x, transformY(0), -10);
 						mTexCoordFloatArray.add(x, 0);
@@ -211,17 +238,30 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 					mTexCoordFloatArray.padZeros();
 					mIndexIntArray.padZeros();
 
-					mClearGeometryObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
-					mClearGeometryObject.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
-					mClearGeometryObject.updateIndices(mIndexIntArray.getIntBuffer());
+					/*System.out.println("mVerticesFloatArray.getFloatBuffer().limit()=" + mVerticesFloatArray.getFloatBuffer()
+																																																	.limit());
+					System.out.println("mTexCoordFloatArray.getFloatBuffer().limit()=" + mTexCoordFloatArray.getFloatBuffer()
+																																																	.limit());
+					System.out.println("mIndexIntArray.getFloatBuffer().limit()=" + mIndexIntArray.getIntBuffer()
+																																												.limit());/**/
 
-					mGLProgram.use(pGL4);
+					mClearGeometryObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
+					GLError.printGLErrors(pGL4,
+																"AFTER mClearGeometryObject.updateVertices");
+					mClearGeometryObject.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
+					GLError.printGLErrors(pGL4,
+																"AFTER mClearGeometryObject.updateTextureCoords");
+					mClearGeometryObject.updateIndices(mIndexIntArray.getIntBuffer());
+					GLError.printGLErrors(pGL4,
+																"AFTER mClearGeometryObject.updateIndices");
+
+					// mGLProgram.use(pGL4);
 					mClearGeometryObject.setProjection(pProjectionMatrix);
 
 					pGL4.glEnable(GL4.GL_BLEND);
 					pGL4.glBlendFunc(	GL4.GL_SRC_ALPHA,
 														GL4.GL_ONE_MINUS_SRC_ALPHA);
-					pGL4.glBlendEquation(GL4.GL_FUNC_ADD);
+					pGL4.glBlendEquation(GL4.GL_FUNC_ADD);/**/
 
 					mClearGeometryObject.draw();
 
