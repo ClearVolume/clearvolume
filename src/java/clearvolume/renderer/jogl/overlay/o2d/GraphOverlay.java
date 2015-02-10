@@ -17,11 +17,17 @@ import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
 import cleargl.GLMatrix;
 import cleargl.GLProgram;
+import clearvolume.audio.audioplot.AudioPlot;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
+import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorResultListener;
 
-public class GraphOverlay extends OverlayBase implements Overlay2D
+public class GraphOverlay extends OverlayBase	implements
+																							Overlay2D,
+																							ProcessorResultListener<Double>,
+																							AutoCloseable
 {
 
 	private static final int cMaximalWaitTimeForDrawingInMilliseconds = 10;
@@ -35,7 +41,7 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 	private volatile FloatBuffer mGraphColor = FloatBuffer.wrap(new float[]
 	{ 1.f, 1.f, 1.f, 1f });
 
-	private TFloatLinkedList mDataY = new TFloatLinkedList();
+	private final TFloatLinkedList mDataY = new TFloatLinkedList();
 
 	private final ReentrantLock mReentrantLock = new ReentrantLock();
 
@@ -53,7 +59,9 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 	private volatile float mScaleX = 1, mScaleY = 1f / 3;
 	private volatile float mMin = 0;
 	private volatile float mMax = 1;
-	private float mAlpha = 0.01f;
+	private final float mAlpha = 0.01f;
+
+	private final AudioPlot mAudioPlot = new AudioPlot();
 
 	public GraphOverlay(int pMaxNumberOfDataPoints)
 	{
@@ -62,6 +70,8 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 
 		for (int i = 0; i < mMaxNumberOfDataPoints; i++)
 			addPoint(0);
+
+		mAudioPlot.setInvertRange(true);
 	}
 
 	@Override
@@ -92,8 +102,16 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 		mMaxNumberOfDataPoints = pMaxNumberOfDataPoints;
 	}
 
+	@Override
+	public void notifyResult(Processor<Double> pSource, Double pResult)
+	{
+		addPoint(pResult);
+	}
+
 	public void addPoint(double pY)
 	{
+		mAudioPlot.setValue(normalizeAndClamp((float) pY));
+
 		mReentrantLock.lock();
 		try
 		{
@@ -116,8 +134,8 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 
 	private void computeMinMax()
 	{
-		float lMin = mDataY.min();
-		float lMax = mDataY.max();
+		final float lMin = mDataY.min();
+		final float lMax = mDataY.max();
 
 		mMin = mAlpha * lMin + (1 - mAlpha) * mMin;
 		mMax = mAlpha * lMax + (1 - mAlpha) * mMax;
@@ -127,6 +145,8 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 	public void init(	GL4 pGL4,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
+		mAudioPlot.start();
+
 		mDisplayRequestInterface = pDisplayRequestInterface;
 		// box display: construct the program and related objects
 		mReentrantLock.lock();
@@ -142,7 +162,7 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 																											GL4.GL_TRIANGLE_STRIP);
 			mClearGeometryObject.setDynamic(true);
 
-			int lNumberOfPointsToDraw = 2 * getMaxNumberOfDataPoints();
+			final int lNumberOfPointsToDraw = 2 * getMaxNumberOfDataPoints();
 
 			mVerticesFloatArray = new GLFloatArray(lNumberOfPointsToDraw, 3);
 			mNormalArray = new GLFloatArray(lNumberOfPointsToDraw, 3);
@@ -192,8 +212,8 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 		{
 			try
 			{
-				boolean lIsLocked = mReentrantLock.tryLock(	cMaximalWaitTimeForDrawingInMilliseconds,
-																										TimeUnit.MILLISECONDS);
+				final boolean lIsLocked = mReentrantLock.tryLock(	cMaximalWaitTimeForDrawingInMilliseconds,
+																													TimeUnit.MILLISECONDS);
 
 				if (lIsLocked)
 				{
@@ -207,17 +227,16 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 					mVerticesFloatArray.clear();
 					mTexCoordFloatArray.clear();
 
-					float lStepX = 1f / mDataY.size();
+					final float lStepX = 1f / mDataY.size();
 					int i = 0;
 					for (i = 0; i < mDataY.size(); i++)
 					{
 						if (mMax == mMin)
 							mMax = mMin + 0.01f;
-						float lValue = (mDataY.get(i) - mMin) / (mMax - mMin);
-						lValue = min(max(lValue, 0), 1);
+						final float lNormalizedValue = normalizeAndClamp(mDataY.get(i));
 
-						float x = transformX(i * lStepX);
-						float y = transformY(lValue);
+						final float x = transformX(i * lStepX);
+						final float y = transformY(lNormalizedValue);
 
 						mVerticesFloatArray.add(x, transformY(0), -10);
 						mTexCoordFloatArray.add(x, 0);
@@ -269,7 +288,7 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 				}
 
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 			}
 			finally
@@ -277,6 +296,19 @@ public class GraphOverlay extends OverlayBase implements Overlay2D
 				mReentrantLock.unlock();
 			}
 		}
+	}
+
+	private float normalizeAndClamp(float pValue)
+	{
+		float lValue = (pValue - mMin) / (mMax - mMin);
+		lValue = min(max(lValue, 0), 1);
+		return lValue;
+	}
+
+	@Override
+	public void close()
+	{
+		mAudioPlot.stop();
 	}
 
 }
