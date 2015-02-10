@@ -67,7 +67,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private volatile ClearGLWindow mClearGLWindow;
 	private NewtCanvasAWT mNewtCanvasAWT;
 	private volatile int mLastWindowWidth, mLastWindowHeight;
-	private final ReentrantLock mDisplayReentrantLock = new ReentrantLock();
+	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock();
 
 	// pixelbuffer objects.
 	protected GLPixelBufferObject[] mPixelBufferObjects;
@@ -80,7 +80,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private volatile long prevTimeNS = -1;
 
 	// Overlay3D stuff:
-	private Map<String, Overlay> mOverlayMap = new ConcurrentHashMap<String, Overlay>();
+	private final Map<String, Overlay> mOverlayMap = new ConcurrentHashMap<String, Overlay>();
 
 	// Window:
 	private final String mWindowName;
@@ -344,32 +344,43 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public void close()
 	{
 		super.close();
+
+		mDisplayReentrantLock.lock();
 		try
 		{
 			try
 			{
-				if (mNewtCanvasAWT != null)
+				try
 				{
-					mNewtCanvasAWT.destroy();
-					mNewtCanvasAWT = null;
+					if (mNewtCanvasAWT != null)
+					{
+						mNewtCanvasAWT.destroy();
+						mNewtCanvasAWT = null;
+					}
+				}
+				catch (final Throwable e)
+				{
+					e.printStackTrace();
+				}
+
+				if (mClearGLWindow != null)
+				{
+					mClearGLWindow.close();
+					mClearGLWindow = null;
 				}
 			}
-			catch (Throwable e)
+			catch (final NullPointerException e)
 			{
-				e.printStackTrace();
+			}
+			catch (final Throwable e)
+			{
+				System.err.println(e.getLocalizedMessage());
 			}
 
-			if (mClearGLWindow == null)
-				return;
-			mClearGLWindow.close();
-			mClearGLWindow = null;
 		}
-		catch (NullPointerException e)
+		finally
 		{
-		}
-		catch (final Throwable e)
-		{
-			System.err.println(e.getLocalizedMessage());
+			mDisplayReentrantLock.unlock();
 		}
 	}
 
@@ -389,7 +400,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 			if (mClearGLWindow != null)
 				return mClearGLWindow.getGLWindow().isVisible();
 		}
-		catch (NullPointerException e)
+		catch (final NullPointerException e)
 		{
 			return false;
 		}
@@ -617,7 +628,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 				e.printStackTrace();
 			}
 
-			for (Overlay lOverlay : mOverlayMap.values())
+			for (final Overlay lOverlay : mOverlayMap.values())
 			{
 				try
 				{
@@ -790,10 +801,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private boolean isOverlay2DChanged()
 	{
 		boolean lHasAnyChanged = false;
-		for (Overlay lOverlay : mOverlayMap.values())
+		for (final Overlay lOverlay : mOverlayMap.values())
 			if (lOverlay instanceof Overlay2D)
 			{
-				Overlay2D lOverlay2D = (Overlay2D) lOverlay;
+				final Overlay2D lOverlay2D = (Overlay2D) lOverlay;
 				lHasAnyChanged |= lOverlay2D.hasChanged2D();
 			}
 		return lHasAnyChanged;
@@ -802,10 +813,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private boolean isOverlay3DChanged()
 	{
 		boolean lHasAnyChanged = false;
-		for (Overlay lOverlay : mOverlayMap.values())
+		for (final Overlay lOverlay : mOverlayMap.values())
 			if (lOverlay instanceof Overlay3D)
 			{
-				Overlay3D lOverlay3D = (Overlay3D) lOverlay;
+				final Overlay3D lOverlay3D = (Overlay3D) lOverlay;
 				lHasAnyChanged |= lOverlay3D.hasChanged3D();
 			}
 		return lHasAnyChanged;
@@ -816,10 +827,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		try
 		{
-			for (Overlay lOverlay : mOverlayMap.values())
+			for (final Overlay lOverlay : mOverlayMap.values())
 				if (lOverlay instanceof Overlay3D)
 				{
-					Overlay3D lOverlay3D = (Overlay3D) lOverlay;
+					final Overlay3D lOverlay3D = (Overlay3D) lOverlay;
 					try
 					{
 						lOverlay3D.render3D(lGL4,
@@ -832,10 +843,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 					}
 				}
 
-			for (Overlay lOverlay : mOverlayMap.values())
+			for (final Overlay lOverlay : mOverlayMap.values())
 				if (lOverlay instanceof Overlay2D)
 				{
-					Overlay2D lOverlay2D = (Overlay2D) lOverlay;
+					final Overlay2D lOverlay2D = (Overlay2D) lOverlay;
 					try
 					{
 						lOverlay2D.render2D(lGL4,
@@ -850,7 +861,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 			GLError.printGLErrors(lGL4, "AFTER OVERLAYS");
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 		}
@@ -915,7 +926,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 		final GL4 lGL4 = drawable.getGL().getGL4();
 
-		int lViewPortWidth = max(pWidth, pHeight);
+		final int lViewPortWidth = max(pWidth, pHeight);
 
 		lGL4.glViewport((pWidth - lViewPortWidth) / 2,
 										(pHeight - lViewPortWidth) / 2,
@@ -1032,10 +1043,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 				mClearGLWindow.getGLWindow().display();
 				// setVisible(true);
 			}
-			catch (NullPointerException e)
+			catch (final NullPointerException e)
 			{
 			}
-			catch (Throwable e)
+			catch (final Throwable e)
 			{
 				System.err.println("REQUESTED DISPLAY AFTER EDT SHUTDOWN (Warning = it's ok): " + e.getClass()
 																																														.getSimpleName()

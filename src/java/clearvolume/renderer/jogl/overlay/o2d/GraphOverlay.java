@@ -68,8 +68,8 @@ public class GraphOverlay extends OverlayBase	implements
 		super();
 		setMaxNumberOfDataPoints(pMaxNumberOfDataPoints);
 
-		for (int i = 0; i < mMaxNumberOfDataPoints; i++)
-			addPoint(0);
+		/*for (int i = 0; i < mMaxNumberOfDataPoints; i++)
+			addPoint(0);/**/
 
 		mAudioPlot.setInvertRange(true);
 	}
@@ -119,8 +119,6 @@ public class GraphOverlay extends OverlayBase	implements
 			if (mDataY.size() > getMaxNumberOfDataPoints())
 				mDataY.removeAt(0);
 
-			computeMinMax();
-
 			mHasChanged = true;
 		}
 		finally
@@ -134,12 +132,33 @@ public class GraphOverlay extends OverlayBase	implements
 
 	private void computeMinMax()
 	{
-		final float lMin = mDataY.min();
-		final float lMax = mDataY.max();
+		try
+		{
+			final boolean lIsLocked = mReentrantLock.tryLock(	cMaximalWaitTimeForDrawingInMilliseconds,
+																												TimeUnit.MILLISECONDS);
 
-		mMin = mAlpha * lMin + (1 - mAlpha) * mMin;
-		mMax = mAlpha * lMax + (1 - mAlpha) * mMax;
+			if (lIsLocked)
+			{
+				if (mDataY.size() == 0)
+					return;
+
+				final float lMin = mDataY.min();
+				final float lMax = mDataY.max();
+
+				mMin = mAlpha * lMin + (1 - mAlpha) * mMin;
+				mMax = mAlpha * lMax + (1 - mAlpha) * mMax;
+			}
+		}
+		catch (final InterruptedException e)
+		{
+		}
+		finally
+		{
+			mReentrantLock.unlock();
+		}
+
 	}
+
 
 	@Override
 	public void init(	GL4 pGL4,
@@ -221,8 +240,6 @@ public class GraphOverlay extends OverlayBase	implements
 					// System.out.format("________________________________________\n");
 					// System.out.println(mDataY.size());
 
-					computeMinMax();
-
 					mIndexIntArray.clear();
 					mVerticesFloatArray.clear();
 					mTexCoordFloatArray.clear();
@@ -282,7 +299,7 @@ public class GraphOverlay extends OverlayBase	implements
 														GL4.GL_ONE_MINUS_SRC_ALPHA);
 					pGL4.glBlendEquation(GL4.GL_FUNC_ADD);/**/
 
-					mClearGeometryObject.draw();
+					mClearGeometryObject.draw(0, mDataY.size() * 2);
 
 					mHasChanged = false;
 				}

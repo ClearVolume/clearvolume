@@ -11,7 +11,7 @@ public class ClearVolumeTCPClient implements AutoCloseable
 
 	public static final int cSocketBufferLength = 64 * 1024 * 1024;
 	private static final int cMaxInUseVolumes = 20;
-	private VolumeSinkInterface mVolumeSink;
+	private final VolumeSinkInterface mVolumeSink;
 	private SocketChannel mSocketChannel;
 
 	private ClearVolumeTCPClientRunnable lRunnable;
@@ -30,7 +30,7 @@ public class ClearVolumeTCPClient implements AutoCloseable
 		mSocketChannel = SocketChannel.open();
 		mSocketChannel.configureBlocking(true);
 		mSocketChannel.socket().setReceiveBufferSize(cSocketBufferLength);
-		boolean lConnected = mSocketChannel.connect(pSocketAddress);
+		final boolean lConnected = mSocketChannel.connect(pSocketAddress);
 
 		return lConnected;
 	}

@@ -251,10 +251,10 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 			prepareTransferFunctionTexture();
 
-			for (Processor<?> lProcessor : mProcessorsMap.values())
+			for (final Processor<?> lProcessor : mProcessorsMap.values())
 				if (lProcessor.isCompatibleRenderer(getClass()))
 				{
-					CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
+					final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
 					lCUDAProcessor.setDeviceAndContext(	mCudaDevice,
 																							mCudaContext);
 				}
@@ -566,10 +566,10 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	private void runProcessorsHook(int pRenderLayerIndex)
 	{
-		for (Processor<?> lProcessor : mProcessorsMap.values())
+		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleRenderer(getClass()))
 			{
-				CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
+				final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
 				lCUDAProcessor.applyToArray(mVolumeDataCudaArrays[pRenderLayerIndex]);
 				lCUDAProcessor.process(	pRenderLayerIndex,
 																getVolumeSizeX(),
@@ -586,95 +586,105 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	@Override
 	public void close()
 	{
-		final CudaContext lCudaContext = mCudaContext;
-		mCudaContext = null;
-
+		mDisplayReentrantLock.lock();
 		try
 		{
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
-			{
-				if (mOpenGLBufferDevicePointers[i] != null)
-					mOpenGLBufferDevicePointers[i].close();
-			}
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
-		}
-
-		try
-		{
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
-			{
-				if (mVolumeDataCudaArrays[i] != null)
-					mVolumeDataCudaArrays[i].close();
-			}
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
-		}
-
-		try
-		{
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
-			{
-				if (mTransferFunctionCudaArrays[i] != null)
-					mTransferFunctionCudaArrays[i].close();
-			}
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
-		}
-
-		try
-		{
-			if (mCudaModule != null)
-				mCudaModule.close();
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
-		}
-
-		try
-		{
-			if (mCudaContext != null)
-				lCudaContext.close();
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
-		}
-
-		try
-		{
-			if (mCudaDevice != null)
-				mCudaDevice.close();
 			super.close();
+
+			final CudaContext lCudaContext = mCudaContext;
+			mCudaContext = null;
+
+			try
+			{
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					if (mOpenGLBufferDevicePointers[i] != null)
+						mOpenGLBufferDevicePointers[i].close();
+				}
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+			try
+			{
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					if (mVolumeDataCudaArrays[i] != null)
+						mVolumeDataCudaArrays[i].close();
+				}
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+			try
+			{
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					if (mTransferFunctionCudaArrays[i] != null)
+						mTransferFunctionCudaArrays[i].close();
+				}
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+			try
+			{
+				if (mCudaModule != null)
+					mCudaModule.close();
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+			try
+			{
+				if (mCudaContext != null)
+					lCudaContext.close();
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+			try
+			{
+				if (mCudaDevice != null)
+					mCudaDevice.close();
+				super.close();
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
 		}
-		catch (final Throwable e)
+		finally
 		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
+			mDisplayReentrantLock.unlock();
 		}
 	}
 

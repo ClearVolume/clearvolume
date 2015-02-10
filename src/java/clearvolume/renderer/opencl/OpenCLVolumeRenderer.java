@@ -109,12 +109,12 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mCLDevice.initCL(false);
 		mCLDevice.printInfo();
 		mRenderKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRenderPerspective.cl"),
-														"volumerender");
+																						"volumerender");
 
-		for (Processor<?> lProcessor : mProcessorsMap.values())
+		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleRenderer(getClass()))
 			{
-				OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
+				final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
 				lOpenCLProcessor.setDevice(mCLDevice);
 			}
 
@@ -354,10 +354,10 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	private void runProcessorHook(int pRenderLayerIndex)
 	{
-		for (Processor<?> lProcessor : mProcessorsMap.values())
+		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleRenderer(getClass()))
 			{
-				OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
+				final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
 				lOpenCLProcessor.setVolumeBuffers(mCLVolumeImages[pRenderLayerIndex]);
 				lOpenCLProcessor.process(	pRenderLayerIndex,
 																	getVolumeSizeX(),
@@ -365,4 +365,21 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																	getVolumeSizeZ());
 			}
 	}
+
+	@Override
+	public void close()
+	{
+		mDisplayReentrantLock.lock();
+		try
+		{
+			super.close();
+			mCLDevice.close();
+		}
+		finally
+		{
+			mDisplayReentrantLock.unlock();
+		}
+
+	}
+
 }

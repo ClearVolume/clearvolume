@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 import org.bridj.Pointer;
 
+import clearvolume.ClearVolumeCloseable;
+
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLContext;
 import com.nativelibs4java.opencl.CLDevice;
@@ -26,7 +28,7 @@ import com.nativelibs4java.opencl.CLQueue;
 import com.nativelibs4java.opencl.JavaCL;
 import com.nativelibs4java.util.IOUtils;
 
-public class OpenCLDevice
+public class OpenCLDevice implements ClearVolumeCloseable
 {
 
 	public CLContext mCLContext;
@@ -59,13 +61,13 @@ public class OpenCLDevice
 			}
 			else
 			{
-				CLPlatform[] platforms = JavaCL.listPlatforms();
+				final CLPlatform[] platforms = JavaCL.listPlatforms();
 
 				long maxMemory = 0;
 
-				for (CLPlatform p : platforms)
+				for (final CLPlatform p : platforms)
 				{
-					CLDevice bestDeviceInPlatform = getDeviceWithMostMemory(p.listGPUDevices(true));
+					final CLDevice bestDeviceInPlatform = getDeviceWithMostMemory(p.listGPUDevices(true));
 
 					if (bestDeviceInPlatform.getGlobalMemSize() > maxMemory)
 					{
@@ -83,7 +85,7 @@ public class OpenCLDevice
 
 			}
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			System.err.println("failed to create OpenCL context");
 			return false;
@@ -94,7 +96,7 @@ public class OpenCLDevice
 			mCLQueue = mCLContext.createDefaultQueue();
 
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			System.err.println("failed to create OpenCL context");
 			return false;
@@ -104,7 +106,7 @@ public class OpenCLDevice
 		{
 			mCLDevice = bestDevice;
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			System.err.println("could not get opencl device from context");
 			e.printStackTrace();
@@ -122,9 +124,9 @@ public class OpenCLDevice
 		long globalMemSize = 0;
 		CLDevice bestDevice = null;
 
-		for (CLDevice lCLDevice : devices)
+		for (final CLDevice lCLDevice : devices)
 		{
-			long tmp = lCLDevice.getGlobalMemSize();
+			final long tmp = lCLDevice.getGlobalMemSize();
 
 			System.out.println(lCLDevice.getPlatform().getName() + "."
 													+ lCLDevice.getName()
@@ -364,7 +366,7 @@ public class OpenCLDevice
 																	final FloatBuffer pBuffer)
 	{
 
-		Pointer<Float> ptr = Pointer.pointerToFloats(pBuffer);
+		final Pointer<Float> ptr = Pointer.pointerToFloats(pBuffer);
 
 		return pCLBuffer.write(mCLQueue, ptr, true);
 
@@ -374,7 +376,7 @@ public class OpenCLDevice
 																	final ShortBuffer pBuffer)
 	{
 
-		Pointer<Short> ptr = Pointer.pointerToShorts(pBuffer);
+		final Pointer<Short> ptr = Pointer.pointerToShorts(pBuffer);
 
 		return pCLBuffer.write(mCLQueue, ptr, true);
 
@@ -384,7 +386,7 @@ public class OpenCLDevice
 																	final ByteBuffer pBuffer)
 	{
 
-		Pointer<Byte> ptr = Pointer.pointerToBytes(pBuffer);
+		final Pointer<Byte> ptr = Pointer.pointerToBytes(pBuffer);
 
 		return pCLBuffer.write(mCLQueue, ptr, true);
 
@@ -476,5 +478,49 @@ public class OpenCLDevice
 											pFloatBuffer,
 											true);
 
+	}
+
+	@Override
+	public void close()
+	{
+		try
+		{
+
+			if (mCLKernelList != null)
+				for (CLKernel lCLKernel : mCLKernelList)
+				{
+					lCLKernel.release();
+					lCLKernel = null;
+				}
+
+			if (mCLProgram != null)
+			{
+				mCLProgram.release();
+				mCLProgram = null;
+			}
+
+			if (mCLQueue != null)
+			{
+				mCLQueue.release();
+				mCLQueue = null;
+			}
+
+			if (mCLContext != null)
+			{
+				mCLContext.release();
+				mCLContext = null;
+			}
+
+			if (mCLDevice != null)
+			{
+				mCLDevice.release();
+				mCLDevice = null;
+			}
+
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
