@@ -431,7 +431,7 @@ public class ClearVolumeDemo
 		double lTrend = 0;
 		while (lClearVolumeRenderer.isShowing())
 		{
-			Thread.sleep(100);
+			Thread.sleep(10);
 			lTrend += 0.05 * (Math.random() - 0.5);
 			double lValue = lTrend + 0.02 * Math.random();
 			lGraphOverlay.addPoint(lValue);
