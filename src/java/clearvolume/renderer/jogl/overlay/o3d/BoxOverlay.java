@@ -15,8 +15,8 @@ import java.io.IOException;
  */
 public class BoxOverlay extends OverlayBase
 {
-	private GLProgram mBoxGLProgram;
-	private ClearGeometryObject mClearGeometryObject;
+	protected GLProgram mBoxGLProgram;
+  protected ClearGeometryObject mClearGeometryObject;
 
 
 	/* (non-Javadoc)
