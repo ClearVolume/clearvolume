@@ -50,7 +50,7 @@ import clearvolume.renderer.processors.Processor;
  *
  */
 public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
-																																			GLEventListener
+GLEventListener
 {
 
 	private static final int cBlockSize = 32;
@@ -83,7 +83,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 
 	private CudaDevicePointer mInvertedViewMatrix,
-			mInvertedProjectionMatrix, mSizeOfTransferFunction;
+	mInvertedProjectionMatrix, mSizeOfTransferFunction;
 
 	/**
 	 * CUDA arrays to the transfer function and volume data.
@@ -111,8 +111,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 * @param pWindowHeight
 	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
-																	final int pWindowWidth,
-																	final int pWindowHeight)
+	                                final int pWindowWidth,
+	                                final int pWindowHeight)
 	{
 		super("[CUDA] " + pWindowName, pWindowWidth, pWindowHeight);
 	}
@@ -127,14 +127,14 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 * @param pBytesPerVoxel
 	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
-																	final int pWindowWidth,
-																	final int pWindowHeight,
-																	final int pBytesPerVoxel)
+	                                final int pWindowWidth,
+	                                final int pWindowHeight,
+	                                final int pBytesPerVoxel)
 	{
 		super("[CUDA] " + pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					pBytesPerVoxel);
+		      pWindowWidth,
+		      pWindowHeight,
+		      pBytesPerVoxel);
 	}
 
 	/**
@@ -149,18 +149,18 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 * @param pMaxTextureHeight
 	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
-																	final int pWindowWidth,
-																	final int pWindowHeight,
-																	final int pBytesPerVoxel,
-																	final int pMaxTextureWidth,
-																	final int pMaxTextureHeight)
+	                                final int pWindowWidth,
+	                                final int pWindowHeight,
+	                                final int pBytesPerVoxel,
+	                                final int pMaxTextureWidth,
+	                                final int pMaxTextureHeight)
 	{
 		super("[CUDA] " + pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					pBytesPerVoxel,
-					pMaxTextureWidth,
-					pMaxTextureHeight);
+		      pWindowWidth,
+		      pWindowHeight,
+		      pBytesPerVoxel,
+		      pMaxTextureWidth,
+		      pMaxTextureHeight);
 	}
 
 	/**
@@ -176,22 +176,22 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 * @param pNumberOfRenderLayers
 	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
-																	final int pWindowWidth,
-																	final int pWindowHeight,
-																	final int pBytesPerVoxel,
-																	final int pMaxTextureWidth,
-																	final int pMaxTextureHeight,
-																	final int pNumberOfRenderLayers,
-																	final boolean pUseInCanvas)
+	                                final int pWindowWidth,
+	                                final int pWindowHeight,
+	                                final int pBytesPerVoxel,
+	                                final int pMaxTextureWidth,
+	                                final int pMaxTextureHeight,
+	                                final int pNumberOfRenderLayers,
+	                                final boolean pUseInCanvas)
 	{
 		super("[CUDA] " + pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					pBytesPerVoxel,
-					pMaxTextureWidth,
-					pMaxTextureHeight,
-					pNumberOfRenderLayers,
-					pUseInCanvas);
+		      pWindowWidth,
+		      pWindowHeight,
+		      pBytesPerVoxel,
+		      pMaxTextureWidth,
+		      pMaxTextureHeight,
+		      pNumberOfRenderLayers,
+		      pUseInCanvas);
 		mTransferFunctionCudaArrays = new CudaArray[pNumberOfRenderLayers];
 		mVolumeDataCudaArrays = new CudaArray[pNumberOfRenderLayers];
 		mOpenGLBufferDevicePointers = new CudaOpenGLBufferObject[pNumberOfRenderLayers];
@@ -199,14 +199,14 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	@Override
 	protected void registerPBO(	final int pRenderLayerIndex,
-															final int pPixelBufferObjectId)
+	                           	final int pPixelBufferObjectId)
 	{
 		mOpenGLBufferDevicePointers[pRenderLayerIndex] = new CudaOpenGLBufferObject(pPixelBufferObjectId);
 	}
 
 	@Override
 	protected void unregisterPBO(	final int pRenderLayerIndex,
-																final int pPixelBufferObjectId)
+	                             	final int pPixelBufferObjectId)
 	{
 		mOpenGLBufferDevicePointers[pRenderLayerIndex].close();
 		mOpenGLBufferDevicePointers[pRenderLayerIndex] = null;
@@ -256,7 +256,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 				{
 					final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
 					lCUDAProcessor.setDeviceAndContext(	mCudaDevice,
-																							mCudaContext);
+					                                   	mCudaContext);
 				}
 
 			return true;
@@ -275,22 +275,22 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		try
 		{
 			final CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
-																													lRootClass.getSimpleName());
+			                                                    lRootClass.getSimpleName());
 
 			lCudaCompiler.setParameter(	Pattern.quote("/*ProjectionAlgorithm*/"),
-																	getProjectionAlgorithm().name());
+			                           	getProjectionAlgorithm().name());
 			lCudaCompiler.setParameter(	Pattern.quote("/*BytesPerVoxel*/"),
-																	"" + getBytesPerVoxel());
+			                           	"" + getBytesPerVoxel());
 
 			final File lCUFile = lCudaCompiler.addFile(	lRootClass,
-																									"kernels/VolumeRenderPerspective.cu",
-																									true);
+			                                           	"kernels/VolumeRenderPerspective.cu",
+			                                           	true);
 
 			lCudaCompiler.addFiles(	CudaCompiler.class,
-															true,
-															"includes/helper_cuda.h",
-															"includes/helper_math.h",
-															"includes/helper_string.h");
+			                       	true,
+			                       	"includes/helper_cuda.h",
+			                       	"includes/helper_math.h",
+					"includes/helper_string.h");
 
 			lPTXFile = lCudaCompiler.compile(lCUFile);
 		}
@@ -300,11 +300,11 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			final InputStream lInputStreamPTXFile = lRootClass.getResourceAsStream("kernels/VolumeRender.backup.ptx");
 			final StringWriter lStringWriter = new StringWriter();
 			IOUtils.copy(	lInputStreamPTXFile,
-										lStringWriter,
-										Charset.defaultCharset());
+			             	lStringWriter,
+			             	Charset.defaultCharset());
 
 			lPTXFile = File.createTempFile(	this.getClass().getSimpleName(),
-																			".ptx");
+					".ptx");
 			FileUtils.write(lPTXFile, lStringWriter.toString());
 
 		}
@@ -316,7 +316,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 * Allocates, configures and copies 3D volume data.
 	 */
 	private void prepareVolumeDataArray(final int pRenderLayerIndex,
-																			final ByteBuffer pByteBuffer)
+	                                    final ByteBuffer pByteBuffer)
 	{
 		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
@@ -332,17 +332,17 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			final long lDepth = getVolumeSizeZ();
 
 			mVolumeDataCudaArrays[pRenderLayerIndex] = new CudaArray(	1,
-																																lWidth,
-																																lHeight,
-																																lDepth,
-																																getBytesPerVoxel(),
-																																false,
-																																false,
-																																false);
+			                                                         	lWidth,
+			                                                         	lHeight,
+			                                                         	lDepth,
+			                                                         	getBytesPerVoxel(),
+			                                                         	false,
+			                                                         	false,
+			                                                         	false);
 			lVolumeDataBuffer.rewind();
 
 			mVolumeDataCudaArrays[pRenderLayerIndex].copyFrom(lVolumeDataBuffer,
-																												true);
+			                                                  true);
 
 		}
 	}
@@ -352,9 +352,9 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mVolumeDataCudaTexture = mCudaModule.getTexture("tex");
 		mVolumeDataCudaTexture.setFilterMode(CUfilter_mode.CU_TR_FILTER_MODE_LINEAR);
 		mVolumeDataCudaTexture.setAddressMode(0,
-																					CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
+		                                      CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
 		mVolumeDataCudaTexture.setAddressMode(1,
-																					CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
+		                                      CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
 		mVolumeDataCudaTexture.setFlags(CU_TRSF_NORMALIZED_COORDINATES);
 	}
 
@@ -373,16 +373,16 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		final int lTransferFunctionArrayLength = lTransferFunctionArray.length;
 
 		mTransferFunctionCudaArrays[pRenderLayerIndex] = new CudaArray(	4,
-																																		lTransferFunctionArrayLength / 4,
-																																		1,
-																																		1,
-																																		4,
-																																		true,
-																																		false,
-																																		false);
+		                                                               	lTransferFunctionArrayLength / 4,
+		                                                               	1,
+		                                                               	1,
+		                                                               	4,
+		                                                               	true,
+		                                                               	false,
+		                                                               	false);
 
 		mTransferFunctionCudaArrays[pRenderLayerIndex].copyFrom(lTransferFunctionArray,
-																														true);
+		                                                        true);
 
 	}
 
@@ -394,7 +394,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		final float[] lTransferFunctionArray = getTransfertFunction(pRenderLayerIndex).getArray();
 
 		mTransferFunctionCudaArrays[pRenderLayerIndex].copyFrom(lTransferFunctionArray,
-																														true);
+		                                                        true);
 
 	}
 
@@ -404,9 +404,9 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		mTransferFunctionTexture.setFilterMode(CUfilter_mode.CU_TR_FILTER_MODE_LINEAR);
 		mTransferFunctionTexture.setAddressMode(0,
-																						CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
+		                                        CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
 		mTransferFunctionTexture.setAddressMode(1,
-																						CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
+		                                        CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
 		mTransferFunctionTexture.setFlags(CU_TRSF_NORMALIZED_COORDINATES);
 
 	}
@@ -440,7 +440,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	@Override
 	protected boolean[] renderVolume(	final float[] invModelView,
-																		final float[] invProjection)
+	                                 	final float[] invProjection)
 	{
 		if (mCudaContext == null)
 			return null;
@@ -493,7 +493,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 					{
 						lVolumeDataBuffer.rewind();
 						mVolumeDataCudaArrays[lLayerIndex].copyFrom(lVolumeDataBuffer,
-																												true);
+						                                            true);
 					}
 
 					notifyCompletionOfDataBufferCopy(lLayerIndex);
@@ -545,20 +545,20 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mOpenGLBufferDevicePointers[pRenderLayerIndex].set(0, true);
 
 		mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
-																								cBlockSize),
-																				iDivUp(	getTextureHeight(),
-																								cBlockSize),
-																				1);
+		                                           	cBlockSize),
+		                                           	iDivUp(	getTextureHeight(),
+		                                           	       	cBlockSize),
+		                                           	       	1);
 
 		mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
 
 		mVolumeRenderingFunction.launch(mOpenGLBufferDevicePointers[pRenderLayerIndex],
-																		getTextureWidth(),
-																		getTextureHeight(),
-																		(float) getBrightness(),
-																		(float) getTransferRangeMin(),
-																		(float) getTransferRangeMax(),
-																		(float) getGamma());
+		                                getTextureWidth(),
+		                                getTextureHeight(),
+		                                (float) getBrightness(pRenderLayerIndex),
+																		(float) getTransferRangeMin(pRenderLayerIndex),
+																		(float) getTransferRangeMax(pRenderLayerIndex),
+																		(float) getGamma(pRenderLayerIndex));
 		mCudaContext.synchronize();
 		mOpenGLBufferDevicePointers[pRenderLayerIndex].unmap();
 
@@ -572,9 +572,9 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 				final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
 				lCUDAProcessor.applyToArray(mVolumeDataCudaArrays[pRenderLayerIndex]);
 				lCUDAProcessor.process(	pRenderLayerIndex,
-																getVolumeSizeX(),
-																getVolumeSizeY(),
-																getVolumeSizeZ());
+				                       	getVolumeSizeX(),
+				                       	getVolumeSizeY(),
+				                       	getVolumeSizeZ());
 			}
 	}
 
