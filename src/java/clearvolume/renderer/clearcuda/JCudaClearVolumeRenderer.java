@@ -75,7 +75,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	private CudaFunction mVolumeRenderingFunction;
 
-	private volatile CudaOpenGLBufferObject[] mOpenGLBufferDevicePointers = new CudaOpenGLBufferObject[1];
+	private volatile CudaOpenGLBufferObject[] mOpenGLBufferDevicePointers;
 
 	/**
 	 * CUDA Device pointers to the device itself, which are in constant memory:
@@ -588,6 +588,22 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	{
 		final CudaContext lCudaContext = mCudaContext;
 		mCudaContext = null;
+
+		try
+		{
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				if (mOpenGLBufferDevicePointers[i] != null)
+					mOpenGLBufferDevicePointers[i].close();
+			}
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																		.getSimpleName(),
+																	e);
+		}
 
 		try
 		{

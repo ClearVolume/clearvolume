@@ -25,13 +25,13 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 	private long mCurrentWidthInVoxels, mCurrentHeightInVoxels,
 			mCurrentDepthInVoxels;
 
-	private int[] mDownShape = new int[]
+	private final int[] mDownShape = new int[]
 	{ 64, 64, 64 };
 
 	private int mDownSize;
 
 	private final int NDownSample = 3;
-	volatile private double mSigma;
+	volatile private double mSigma = 0;
 
 	@Override
 	public String getName()
@@ -218,7 +218,7 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 				|| pHeightInVoxels != mCurrentHeightInVoxels
 				|| pDepthInVoxels != mCurrentDepthInVoxels)
 		{
-			System.out.println("setting up buffers");
+			// System.out.println("setting up buffers");
 			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 		}
 
@@ -258,7 +258,7 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 		mKernelSum.setArgs(mBufGx, mBufGy, mBufGz, mBufScratch, mDownSize);
 		getDevice().run(mKernelSum, mDownSize);
 
-		FloatBuffer out = getDevice().readFloatBuffer(mBufScratch);
+		final FloatBuffer out = getDevice().readFloatBuffer(mBufScratch);
 
 		double meanValue = 0;
 		for (int i = 0; i < out.capacity(); i++)
