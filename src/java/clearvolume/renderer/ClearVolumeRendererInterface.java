@@ -23,6 +23,12 @@ import com.jogamp.newt.awt.NewtCanvasAWT;
  * @author Loic Royer 2014
  *
  */
+/**
+ *
+ *
+ * @author Loic Royer (2015)
+ *
+ */
 public interface ClearVolumeRendererInterface	extends
 DisplayRequestInterface,
 ClearVolumeCloseable
@@ -79,6 +85,36 @@ ClearVolumeCloseable
 	 * Toggles box display.
 	 */
 	void toggleBoxDisplay();
+
+	/**
+	 * Returns true if the current layer is visible.
+	 *
+	 * @return
+	 */
+	boolean isLayerVisible();
+
+	/**
+	 * returns true if the given layer is visible.
+	 *
+	 * @param pRenderLayerIndex
+	 * @return
+	 */
+	boolean isLayerVisible(int pRenderLayerIndex);
+
+	/**
+	 * Sets visiblility of the current layer.
+	 *
+	 * @param pVisble
+	 */
+	void setLayerVisible(boolean pVisble);
+
+	/**
+	 * Sets visibility of a given layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 * @param pVisble
+	 */
+	void setLayerVisible(int pRenderLayerIndex, boolean pVisble);
 
 	/**
 	 * Returns the brightness of the current render layer index.
@@ -533,5 +569,7 @@ ClearVolumeCloseable
 	 */
 	@Override
 	void close();
+
+
 
 }

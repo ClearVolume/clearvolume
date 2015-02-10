@@ -58,6 +58,8 @@ ClearVolumeCloseable
 	 */
 	private final TransferFunction[] mTransferFunctions;
 
+	private volatile boolean[] mLayerVisiblityFlagArray;
+
 	// geometric, brigthness an contrast settings.
 	private volatile float mTranslationX = 0;
 	private volatile float mTranslationY = 0;
@@ -101,11 +103,13 @@ ClearVolumeCloseable
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
 		super();
+
 		mNumberOfRenderLayers = pNumberOfRenderLayers;
 		mSetVolumeDataBufferLocks = new Object[pNumberOfRenderLayers];
 		mVolumeDataByteBuffers = new ByteBuffer[pNumberOfRenderLayers];
 		mDataBufferCopyIsFinished = new AtomicIntegerArray(pNumberOfRenderLayers);
 		mTransferFunctions = new TransferFunction[pNumberOfRenderLayers];
+		mLayerVisiblityFlagArray = new boolean[pNumberOfRenderLayers];
 		mBrightness = new float[pNumberOfRenderLayers];
 		mTransferFunctionRangeMin = new float[pNumberOfRenderLayers];
 		mTransferFunctionRangeMax = new float[pNumberOfRenderLayers];
@@ -116,6 +120,7 @@ ClearVolumeCloseable
 			mSetVolumeDataBufferLocks[i] = new Object();
 			mDataBufferCopyIsFinished.set(i, 0);
 			mTransferFunctions[i] = TransferFunctions.getGradientForColor(i);
+			mLayerVisiblityFlagArray[i] = true;
 			mBrightness[i] = 1;
 			mTransferFunctionRangeMin[i] = 0f;
 			mTransferFunctionRangeMax[i] = 1f;
@@ -331,6 +336,53 @@ ClearVolumeCloseable
 	public void setScaleZ(final double pScaleZ)
 	{
 		mScaleZ = (float) pScaleZ;
+		notifyUpdateOfVolumeRenderingParameters();
+	}
+
+	/**
+	 * Gets active flag for the current render layer.
+	 *
+	 * @return
+	 */
+	@Override
+	public boolean isLayerVisible()
+	{
+		return isLayerVisible(getCurrentRenderLayerIndex());
+	}
+
+	/**
+	 * Gets active flag for the given render layer.
+	 *
+	 * @return
+	 */
+	@Override
+	public boolean isLayerVisible(final int pRenderLayerIndex)
+	{
+		return mLayerVisiblityFlagArray[pRenderLayerIndex];
+	}
+
+	/**
+	 * Sets active flag for the current render layer.
+	 *
+	 * @param pVisble
+	 */
+	@Override
+	public void setLayerVisible(boolean pVisble)
+	{
+		setLayerVisible(getCurrentRenderLayerIndex(), pVisble);
+	}
+
+	/**
+	 * Sets active flag for the given render layer.
+	 *
+	 * @param pRenderLayerIndex
+	 * @param pVisble
+	 */
+	@Override
+	public void setLayerVisible(final int pRenderLayerIndex,
+	                            boolean pVisble)
+	{
+		mLayerVisiblityFlagArray[pRenderLayerIndex] = pVisble;
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
@@ -623,7 +675,6 @@ ClearVolumeCloseable
 		                                                             	1);
 		notifyUpdateOfVolumeRenderingParameters();
 	}
-
 
 	/**
 	 * Translates the minimum of the transfer function range.
