@@ -1,13 +1,16 @@
 package clearvolume.renderer.jogl.overlay.o2d;
 
+
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import gnu.trove.list.linked.TFloatLinkedList;
 
+import javax.media.opengl.GL4;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+
 
 import javax.media.opengl.GL4;
 
