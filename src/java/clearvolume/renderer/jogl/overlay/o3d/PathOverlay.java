@@ -127,7 +127,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 
       mPath.draw();
 
-      mPathPoints.add(-0.2f + (float) Math.random() * ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f));
+      //mPathPoints.add(-0.2f + (float) Math.random() * ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f));
       mPath.updateVertices(mPathPoints.getFloatBuffer());
 		}
 	}
