@@ -17,7 +17,7 @@ __kernel void histogram(__read_only image3d_t input,__constant float *bins,volat
 	
   atomic_add(&output[pos],1);
   
-  if ((i==10) && (j==10) && (k==0))
-  printf("kernel: %.4f    %d\n",val, output[0]);
+  //if ((i==10) && (j==10) && (k==0))
+  //printf("kernel: %.4f    %d\n",val, output[0]);
 }
 

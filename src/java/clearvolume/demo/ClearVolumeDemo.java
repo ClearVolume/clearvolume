@@ -313,7 +313,11 @@ public class ClearVolumeDemo
 
 		while (lClearVolumeRenderer.isShowing())
 		{
-			Thread.sleep(500);
+			Thread.sleep(1000);
+			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+																								lResolutionX,
+																								lResolutionY,
+																								lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
 		}
 
@@ -378,7 +382,7 @@ public class ClearVolumeDemo
 	}
 
 	@Test
-	public void demoOverlay2D()	throws InterruptedException,
+	public void demoGraphOverlay()	throws InterruptedException,
 															IOException
 	{
 
@@ -427,10 +431,12 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.requestDisplay();
 
 
+		double lTrend = 0;
 		while (lClearVolumeRenderer.isShowing())
 		{
-			Thread.sleep(10);
-			double lValue = 0.5 + 0.5 * Math.random();
+			Thread.sleep(100);
+			lTrend += 0.05 * (Math.random() - 0.5);
+			double lValue = lTrend + 0.02 * Math.random();
 			lGraphOverlay.addPoint(lValue);
 		}
 

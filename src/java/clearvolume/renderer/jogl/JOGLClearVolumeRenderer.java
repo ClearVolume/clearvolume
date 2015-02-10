@@ -15,7 +15,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLProfile;
-import javax.media.opengl.glu.GLU;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -23,6 +22,7 @@ import org.apache.commons.lang.SystemUtils;
 import cleargl.ClearGLEventListener;
 import cleargl.ClearGLWindow;
 import cleargl.GLAttribute;
+import cleargl.GLError;
 import cleargl.GLFloatArray;
 import cleargl.GLMatrix;
 import cleargl.GLPixelBufferObject;
@@ -62,8 +62,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 		final GLProfile lProfile = GLProfile.get(GLProfile.GL4);
 		// System.out.println( lProfile );
 	}
-
-	private final GLU mGLU = new GLU();
 
 	// ClearGL Window.
 	private volatile ClearGLWindow mClearGLWindow;
@@ -745,8 +743,12 @@ public abstract class JOGLClearVolumeRenderer	extends
 		lInvProjection.transpose();
 		lInvProjection.invert();
 
+		GLError.printGLErrors(lGL4, "BEFORE RENDER VOLUME");
+
 		final boolean[] lUpdatedLayersArray = renderVolume(	lInvVolumeMatrix.getFloatArray(),
 																												lInvProjection.getFloatArray());
+
+		GLError.printGLErrors(lGL4, "AFTER RENDER VOLUME");
 
 		final boolean lOverlay2DChanged = isOverlay2DChanged();
 		final boolean lOverlay3DChanged = isOverlay3DChanged();
@@ -845,12 +847,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 					}
 				}
 
-			int errorCode = lGL4.glGetError();
-			String errorStr = mGLU.gluErrorString(errorCode);
-			if (errorCode != 0)
-				System.err.format("OPENGL ERROR #%d : %s \n",
-													errorCode,
-													errorStr);
+			GLError.printGLErrors(lGL4, "AFTER OVERLAYS");
 		}
 		catch (Throwable e)
 		{
