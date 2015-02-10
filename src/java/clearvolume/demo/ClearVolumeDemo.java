@@ -942,14 +942,14 @@ public class ClearVolumeDemo
 	IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-		                                                                                                     	512,
-		                                                                                                     	512,
-		                                                                                                     	1,
-		                                                                                                     	512,
-		                                                                                                     	512,
-		                                                                                                     	2,
-		                                                                                                     	false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
+		                                                                                       	512,
+		                                                                                       	512,
+		                                                                                       	1,
+		                                                                                       	512,
+		                                                                                       	512,
+		                                                                                       	2,
+		                                                                                       	false);
 
 		lClearVolumeRenderer.setVisible(true);
 
