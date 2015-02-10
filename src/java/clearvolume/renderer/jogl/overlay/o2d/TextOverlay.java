@@ -4,9 +4,10 @@ import javax.media.opengl.GL4;
 
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
 
-public class TextOverlay extends OverlayBase
+public class TextOverlay extends OverlayBase implements Overlay2D
 {
 
 
@@ -23,11 +24,6 @@ public class TextOverlay extends OverlayBase
 		return false;
 	}
 
-	@Override
-	public boolean hasChanged3D()
-	{
-		return false;
-	}
 
 	@Override
 	public void init(	GL4 pGL4,
@@ -56,16 +52,5 @@ public class TextOverlay extends OverlayBase
 		}
 	}
 
-	@Override
-	public void render3D(	GL4 pGL4,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
-	{
-		if (isDisplayed())
-		{
-			// TODO: do something!
-
-		}
-	}
 
 }

@@ -22,6 +22,7 @@ import org.apache.commons.lang.SystemUtils;
 import cleargl.ClearGLEventListener;
 import cleargl.ClearGLWindow;
 import cleargl.GLAttribute;
+import cleargl.GLError;
 import cleargl.GLFloatArray;
 import cleargl.GLMatrix;
 import cleargl.GLPixelBufferObject;
@@ -33,6 +34,7 @@ import cleargl.GLVertexAttributeArray;
 import cleargl.util.recorder.GLVideoRecorder;
 import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.jogl.overlay.Overlay;
+import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.jogl.overlay.Overlay3D;
 import clearvolume.renderer.jogl.overlay.o3d.BoxOverlay;
 
@@ -405,6 +407,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		if (mNewtCanvasAWT == null)
 			mClearGLWindow.getGLWindow().setVisible(pIsVisible);
+
 	}
 
 	/**
@@ -690,6 +693,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 		final GL4 lGL4 = pDrawable.getGL().getGL4();
 		lGL4.glClearColor(0, 0, 0, 1);
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+		lGL4.glDisable(GL4.GL_CULL_FACE);
+		lGL4.glEnable(GL4.GL_BLEND);
+		lGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
+		lGL4.glBlendEquation(GL4.GL_MAX);
 
 		setDefaultProjectionMatrix();
 
@@ -737,8 +744,12 @@ public abstract class JOGLClearVolumeRenderer	extends
 		lInvProjection.transpose();
 		lInvProjection.invert();
 
+		GLError.printGLErrors(lGL4, "BEFORE RENDER VOLUME");
+
 		final boolean[] lUpdatedLayersArray = renderVolume(	lInvVolumeMatrix.getFloatArray(),
 																												lInvProjection.getFloatArray());
+
+		GLError.printGLErrors(lGL4, "AFTER RENDER VOLUME");
 
 		final boolean lOverlay2DChanged = isOverlay2DChanged();
 		final boolean lOverlay3DChanged = isOverlay3DChanged();
@@ -780,15 +791,23 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		boolean lHasAnyChanged = false;
 		for (Overlay lOverlay : mOverlayMap.values())
-			lHasAnyChanged |= lOverlay.hasChanged2D();
+			if (lOverlay instanceof Overlay2D)
+			{
+				Overlay2D lOverlay2D = (Overlay2D) lOverlay;
+				lHasAnyChanged |= lOverlay2D.hasChanged2D();
+			}
 		return lHasAnyChanged;
 	}
 
 	private boolean isOverlay3DChanged()
 	{
 		boolean lHasAnyChanged = false;
-		for (Overlay3D lOverlay3D3D : mOverlayMap.values())
-			lHasAnyChanged |= lOverlay3D3D.hasChanged3D();
+		for (Overlay lOverlay : mOverlayMap.values())
+			if (lOverlay instanceof Overlay3D)
+			{
+				Overlay3D lOverlay3D = (Overlay3D) lOverlay;
+				lHasAnyChanged |= lOverlay3D.hasChanged3D();
+			}
 		return lHasAnyChanged;
 	}
 
@@ -798,32 +817,38 @@ public abstract class JOGLClearVolumeRenderer	extends
 		try
 		{
 			for (Overlay lOverlay : mOverlayMap.values())
-			{
-				try
+				if (lOverlay instanceof Overlay3D)
 				{
-					lOverlay.render3D(lGL4,
-														getClearGLWindow().getProjectionMatrix(),
-														lInvVolumeMatrix);
+					Overlay3D lOverlay3D = (Overlay3D) lOverlay;
+					try
+					{
+						lOverlay3D.render3D(lGL4,
+																getClearGLWindow().getProjectionMatrix(),
+																lInvVolumeMatrix);
+					}
+					catch (final Throwable e)
+					{
+						e.printStackTrace();
+					}
 				}
-				catch (final Throwable e)
-				{
-					e.printStackTrace();
-				}
-			}
 
 			for (Overlay lOverlay : mOverlayMap.values())
-			{
-				try
+				if (lOverlay instanceof Overlay2D)
 				{
-					lOverlay.render2D(lGL4,
-														getClearGLWindow().getProjectionMatrix(),
-														lInvVolumeMatrix);
+					Overlay2D lOverlay2D = (Overlay2D) lOverlay;
+					try
+					{
+						lOverlay2D.render2D(lGL4,
+																mQuadProjectionMatrix,
+																lInvVolumeMatrix);
+					}
+					catch (final Throwable e)
+					{
+						e.printStackTrace();
+					}
 				}
-				catch (final Throwable e)
-				{
-					e.printStackTrace();
-				}
-			}
+
+			GLError.printGLErrors(lGL4, "AFTER OVERLAYS");
 		}
 		catch (Throwable e)
 		{

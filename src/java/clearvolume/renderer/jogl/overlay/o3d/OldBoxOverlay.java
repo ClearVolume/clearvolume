@@ -14,6 +14,7 @@ import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.jogl.overlay.Overlay3D;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
 
 /**
@@ -22,7 +23,7 @@ import clearvolume.renderer.jogl.overlay.OverlayBase;
  * @author Loic Royer (2015)
  *
  */
-public class OldBoxOverlay extends OverlayBase
+public class OldBoxOverlay extends OverlayBase implements Overlay3D
 {
 	private static final float cBoxLineWidth = 1.f; // only cBoxLineWidth = 1.f
 	// seems to be supported
@@ -49,14 +50,6 @@ public class OldBoxOverlay extends OverlayBase
 		return "box";
 	}
 
-	/* (non-Javadoc)
-	 * @see clearvolume.renderer.jogl.overlay.Overlay2D#hasChanged2D()
-	 */
-	@Override
-	public boolean hasChanged2D()
-	{
-		return false;
-	}
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.jogl.overlay.Overlay3D#hasChanged3D()
@@ -176,18 +169,5 @@ public class OldBoxOverlay extends OverlayBase
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see clearvolume.renderer.jogl.overlay.Overlay2D#render2D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
-	 */
-	@Override
-	public void render2D(	GL4 pGL4,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
-	{
-		if (isDisplayed())
-		{
-			// draw someything
-		}
-	}
 
 }

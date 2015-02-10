@@ -53,3 +53,16 @@ test_img(__global uint *output, uint Nx, __read_only image3d_t volume)
     output[i+Nx*j] = (uint)read_imageui(volume,sampler,(float4)(0.f,0.f,0.f,0.f)).x;
     
 }
+
+__kernel void
+test_float(__global float *output,
+     int N)
+{
+    
+    int i = get_global_id(0);
+    
+    output[i] = 1.f*i;
+    
+    if (i==0)
+    printf("kernel!  %d \n", N);
+}

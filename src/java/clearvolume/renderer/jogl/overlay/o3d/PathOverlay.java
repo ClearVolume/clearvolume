@@ -2,6 +2,7 @@ package clearvolume.renderer.jogl.overlay.o3d;
 
 import cleargl.*;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.jogl.overlay.Overlay3D;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
 
 import javax.media.opengl.GL4;
@@ -13,7 +14,7 @@ import java.nio.FloatBuffer;
  * @author Loic Royer, Ulrik Guenther (2015)
  *
  */
-public class PathOverlay extends OverlayBase
+public class PathOverlay extends OverlayBase implements Overlay3D
 {
   protected static final FloatBuffer cBoxColor = FloatBuffer.wrap(new float[]
 	{ 1.f, 1.f, 1.f, 1.f });
@@ -43,14 +44,6 @@ public class PathOverlay extends OverlayBase
 		return "path";
 	}
 
-	/* (non-Javadoc)
-	 * @see clearvolume.renderer.jogl.overlay.Overlay2D#hasChanged2D()
-	 */
-	@Override
-	public boolean hasChanged2D()
-	{
-		return false;
-	}
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.jogl.overlay.Overlay3D#hasChanged3D()
@@ -139,18 +132,6 @@ public class PathOverlay extends OverlayBase
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see clearvolume.renderer.jogl.overlay.Overlay2D#render2D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
-	 */
-	@Override
-	public void render2D(	GL4 pGL4,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
-	{
-		if (isDisplayed())
-		{
-			// draw someything
-		}
-	}
+
 
 }

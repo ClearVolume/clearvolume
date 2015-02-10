@@ -2,6 +2,7 @@ package clearvolume.renderer.jogl.overlay.o3d;
 
 import cleargl.*;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.jogl.overlay.Overlay3D;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
 
 import javax.media.opengl.GL4;
@@ -13,7 +14,7 @@ import java.io.IOException;
  * @author Ulrik Guenther (2015), Loic Royer (2015)
  *
  */
-public class BoxOverlay extends OverlayBase
+public class BoxOverlay extends OverlayBase implements Overlay3D
 {
 	protected GLProgram mBoxGLProgram;
   protected ClearGeometryObject mClearGeometryObject;
@@ -26,15 +27,6 @@ public class BoxOverlay extends OverlayBase
 	public String getName()
 	{
 		return "box";
-	}
-
-	/* (non-Javadoc)
-	 * @see clearvolume.renderer.jogl.overlay.Overlay2D#hasChanged2D()
-	 */
-	@Override
-	public boolean hasChanged2D()
-	{
-		return false;
 	}
 
 	/* (non-Javadoc)
@@ -229,8 +221,7 @@ public class BoxOverlay extends OverlayBase
 			mClearGeometryObject.setModelView(lInvBoxMatrix);
 			mClearGeometryObject.setProjection(pProjectionMatrix);
 
-			pGL4.glEnable(GL4.GL_DEPTH_TEST);
-			pGL4.glDepthMask(false);
+			pGL4.glDisable(GL4.GL_DEPTH_TEST);
 			pGL4.glEnable(GL4.GL_CULL_FACE);
 			pGL4.glEnable(GL4.GL_BLEND);
 			pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
@@ -238,25 +229,10 @@ public class BoxOverlay extends OverlayBase
 			pGL4.glFrontFace(GL4.GL_CW);
 			mBoxGLProgram.use(pGL4);
 			mClearGeometryObject.draw();
-			pGL4.glDisable(GL4.GL_DEPTH_TEST);
-			pGL4.glDepthMask(true);
-			pGL4.glDisable(GL4.GL_CULL_FACE);
-			// pGL4.glDisable(GL4.GL_BLEND);
+
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see clearvolume.renderer.jogl.overlay.Overlay2D#render2D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
-	 */
-	@Override
-	public void render2D(	GL4 pGL4,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
-	{
-		if (isDisplayed())
-		{
-			// draw something
-		}
-	}
+
 
 }
