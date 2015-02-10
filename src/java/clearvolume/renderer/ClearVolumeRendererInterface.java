@@ -24,8 +24,8 @@ import com.jogamp.newt.awt.NewtCanvasAWT;
  *
  */
 public interface ClearVolumeRendererInterface	extends
-																							DisplayRequestInterface,
-																							ClearVolumeCloseable
+DisplayRequestInterface,
+ClearVolumeCloseable
 {
 
 	/**
@@ -81,6 +81,111 @@ public interface ClearVolumeRendererInterface	extends
 	void toggleBoxDisplay();
 
 	/**
+	 * Returns the brightness of the current render layer index.
+	 *
+	 * @return brightness
+	 */
+	double getBrightness();
+
+	/**
+	 * Returns the brightness of the current render layer index.
+	 *
+	 * @param pRenderLayerIndex
+	 * @return
+	 */
+	double getBrightness(int pRenderLayerIndex);
+
+	/**
+	 * @return
+	 */
+	double getGamma();
+
+	/**
+	 * @param pRenderLayerIndex
+	 * @return
+	 */
+	double getGamma(int pRenderLayerIndex);
+
+	/**
+	 * @return
+	 */
+	double getTransferRangeMin();
+
+	/**
+	 * @param pRenderLayerIndex
+	 * @return
+	 */
+	double getTransferRangeMin(int pRenderLayerIndex);
+
+	/**
+	 * @return
+	 */
+	double getTransferRangeMax();
+
+	/**
+	 * @param pRenderLayerIndex
+	 * @return
+	 */
+	double getTransferRangeMax(int pRenderLayerIndex);
+
+	/**
+	 * @param pRenderLayerIndex
+	 * @param pTransferRangeMin
+	 * @param pTransferRangeMax
+	 */
+	void setTransferFunctionRange(int pRenderLayerIndex,
+	                              double pTransferRangeMin,
+	                              double pTransferRangeMax);
+
+	/**
+	 * @param pRenderLayerIndex
+	 * @param pTransferRangeMin
+	 */
+	void setTransferFunctionRangeMin(	int pRenderLayerIndex,
+	                                 	double pTransferRangeMin);
+
+	/**
+	 * @param pRenderLayerIndex
+	 * @param pTransferRangeMax
+	 */
+	void setTransferFunctionRangeMax(	int pRenderLayerIndex,
+	                                 	double pTransferRangeMax);
+
+	/**
+	 * @param pDelta
+	 */
+	void addTransferFunctionRangeMin(double pDelta);
+
+	/**
+	 * @param pRenderLayerIndex
+	 * @param pDelta
+	 */
+	void addTransferFunctionRangeMin(	int pRenderLayerIndex,
+	                                 	double pDelta);
+
+	/**
+	 * @param pDelta
+	 */
+	void addTransferFunctionRangeMax(double pDelta);
+
+	/**
+	 * @param pRenderLayerIndex
+	 * @param pDelta
+	 */
+	void addTransferFunctionRangeMax(	int pRenderLayerIndex,
+	                                 	double pDelta);
+
+	/**
+	 * @param pTransferRangePositionDelta
+	 */
+	void addTransferFunctionRangePosition(double pTransferRangePositionDelta);
+
+	/**
+	 * @param pTransferRangeWidthDelta
+	 */
+	void addTransferFunctionRangeWidth(double pTransferRangeWidthDelta);
+
+	/**
 	 * Sets the transfer function used for rendering.
 	 *
 	 * @param pTransfertFunction
@@ -123,11 +228,34 @@ public interface ClearVolumeRendererInterface	extends
 	void setGamma(double pGamma);
 
 	/**
+	 * @param pRenderLayerIndex
+	 * @param pGamma
+	 */
+	void setGamma(int pRenderLayerIndex, double pGamma);
+
+	/**
+	 * @param pRenderLayerIndex
+	 * @param pBrightness
+	 */
+	void setBrightness(int pRenderLayerIndex, double pBrightness);
+
+	/**
 	 * Sets the brightness for display
 	 *
 	 * @param pBrightness
 	 */
 	void setBrightness(double pBrightness);
+
+	/**
+	 * @param pBrightnessDelta
+	 */
+	void addBrightness(double pBrightnessDelta);
+
+	/**
+	 * @param pRenderLayerIndex
+	 * @param pBrightnessDelta
+	 */
+	void addBrightness(int pRenderLayerIndex, double pBrightnessDelta);
 
 	/**
 	 * Resets gamma, brightness, and transfer function range.
@@ -160,7 +288,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Gets the current render layer.
 	 *
 	 */
-	int getCurrentRenderLayer();
+	int getCurrentRenderLayerIndex();
 
 	/**
 	 * Sets number of render layers.
@@ -186,9 +314,9 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pSizeZ
 	 */
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
-														long pSizeX,
-														long pSizeY,
-														long pSizeZ);
+	                         	long pSizeX,
+	                         	long pSizeY,
+	                         	long pSizeZ);
 
 	/**
 	 * Updates the voxel size of subsequently rendered volumes
@@ -198,8 +326,8 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pVoxelSizeZ
 	 */
 	public void setVoxelSize(	double pVoxelSizeX,
-														double pVoxelSizeY,
-														double pVoxelSizeZ);
+	                         	double pVoxelSizeY,
+	                         	double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -214,12 +342,12 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pVoxelSizeZ
 	 */
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
-														long pSizeX,
-														long pSizeY,
-														long pSizeZ,
-														double pVoxelSizeX,
-														double pVoxelSizeY,
-														double pVoxelSizeZ);
+	                         	long pSizeX,
+	                         	long pSizeY,
+	                         	long pSizeZ,
+	                         	double pVoxelSizeX,
+	                         	double pVoxelSizeY,
+	                         	double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -247,7 +375,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishAllDataBufferCopy(	long pTimeOut,
-																								TimeUnit pTimeUnit);
+	                                             	TimeUnit pTimeUnit);
 
 	/**
 	 * Waits until volume data copy completes for current layer.
@@ -255,7 +383,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishDataBufferCopy(long pTimeOut,
-																						TimeUnit pTimeUnit);
+	                                          TimeUnit pTimeUnit);
 
 	/**
 	 * Waits until volume data copy completes for a given layer.
@@ -263,8 +391,8 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
-																						long pTimeOut,
-																						TimeUnit pTimeUnit);
+	                                          long pTimeOut,
+	                                          TimeUnit pTimeUnit);
 
 	/**
 	 * Resets rotation and translation parameters.
@@ -377,7 +505,7 @@ public interface ClearVolumeRendererInterface	extends
 	/**
 	 * Adds overlay module to draw with 3D primitives within the rendering volume
 	 * and 2D primitives on top of the whole image.
-	 * 
+	 *
 	 * @param pOverlay3D
 	 *          Overlay3D to add.
 	 */
@@ -385,7 +513,7 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Adds a processor to this renderer.
-	 * 
+	 *
 	 * @param pProcessor
 	 *          Processor to add.
 	 */
