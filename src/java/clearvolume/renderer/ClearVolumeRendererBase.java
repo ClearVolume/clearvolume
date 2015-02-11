@@ -124,7 +124,7 @@ ClearVolumeCloseable
 			mBrightness[i] = 1;
 			mTransferFunctionRangeMin[i] = 0f;
 			mTransferFunctionRangeMax[i] = 1f;
-			mGamma[i] = 1f;
+			mGamma[ i ] = 1.0f;
 		}
 
 		final ClearVolumeRendererBase lThis = this;
@@ -135,8 +135,7 @@ ClearVolumeCloseable
 			{
 				try
 				{
-					mControlFrame = new ControlPanelJFrame();
-					mControlFrame.setClearVolumeRendererInterface(lThis);
+					mControlFrame = new ControlPanelJFrame( getCurrentRenderLayerIndex(), lThis );
 
 					String lHostName = "localhost";
 					try
@@ -172,7 +171,7 @@ ClearVolumeCloseable
 	 * @param pBytesPerVoxel
 	 *          bytes-per-voxel
 	 */
-	public void setBytesPerVoxel(int pBytesPerVoxel)
+	public void setBytesPerVoxel(final int pBytesPerVoxel)
 	{
 		mBytesPerVoxel = pBytesPerVoxel;
 	}
@@ -367,7 +366,7 @@ ClearVolumeCloseable
 	 * @param pVisble
 	 */
 	@Override
-	public void setLayerVisible(boolean pVisble)
+	public void setLayerVisible(final boolean pVisble)
 	{
 		setLayerVisible(getCurrentRenderLayerIndex(), pVisble);
 	}
@@ -380,7 +379,7 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setLayerVisible(final int pRenderLayerIndex,
-	                            boolean pVisble)
+	                            final boolean pVisble)
 	{
 		mLayerVisiblityFlagArray[pRenderLayerIndex] = pVisble;
 		notifyUpdateOfVolumeRenderingParameters();
@@ -397,7 +396,7 @@ ClearVolumeCloseable
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
 			mBrightness[i] = 1.0f;
-			mGamma[i] = 1f;
+			mGamma[ i ] = 1.0f;
 			mTransferFunctionRangeMin[i] = 0.0f;
 			mTransferFunctionRangeMax[i] = 1.0f;
 		}
@@ -760,7 +759,7 @@ ClearVolumeCloseable
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationX(double)
 	 */
 	@Override
-	public void addTranslationX(double pDX)
+	public void addTranslationX(final double pDX)
 	{
 		mTranslationX += pDX;
 		notifyUpdateOfVolumeRenderingParameters();
@@ -772,7 +771,7 @@ ClearVolumeCloseable
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationY(double)
 	 */
 	@Override
-	public void addTranslationY(double pDY)
+	public void addTranslationY(final double pDY)
 	{
 		mTranslationY += pDY;
 		notifyUpdateOfVolumeRenderingParameters();
@@ -784,7 +783,7 @@ ClearVolumeCloseable
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationZ(double)
 	 */
 	@Override
-	public void addTranslationZ(double pDZ)
+	public void addTranslationZ(final double pDZ)
 	{
 		mTranslationZ += pDZ;
 		notifyUpdateOfVolumeRenderingParameters();
@@ -796,7 +795,7 @@ ClearVolumeCloseable
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addRotationX(int)
 	 */
 	@Override
-	public void addRotationX(int pDRX)
+	public void addRotationX(final int pDRX)
 	{
 		mRotationX += pDRX;
 		notifyUpdateOfVolumeRenderingParameters();
@@ -808,7 +807,7 @@ ClearVolumeCloseable
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addRotationY(int)
 	 */
 	@Override
-	public void addRotationY(int pDRY)
+	public void addRotationY(final int pDRY)
 	{
 		mRotationY += pDRY;
 		notifyUpdateOfVolumeRenderingParameters();
@@ -987,7 +986,7 @@ ClearVolumeCloseable
 	 *
 	 * @return locking object
 	 */
-	public Object getSetVolumeDataBufferLock(int pRenderLayerIndex)
+	public Object getSetVolumeDataBufferLock(final int pRenderLayerIndex)
 	{
 		return mSetVolumeDataBufferLocks[pRenderLayerIndex];
 	}
@@ -1008,7 +1007,7 @@ ClearVolumeCloseable
 	}
 
 	@Override
-	public void setCurrentRenderLayer(int pLayerIndex)
+	public void setCurrentRenderLayer(final int pLayerIndex)
 	{
 		mCurrentRenderLayerIndex = pLayerIndex;
 	}
@@ -1020,7 +1019,7 @@ ClearVolumeCloseable
 	}
 
 	@Override
-	public void setNumberOfRenderLayers(int pNumberOfRenderLayers)
+	public void setNumberOfRenderLayers(final int pNumberOfRenderLayers)
 	{
 		mNumberOfRenderLayers = pNumberOfRenderLayers;
 	}
@@ -1053,9 +1052,9 @@ ClearVolumeCloseable
 	 *      double, double)
 	 */
 	@Override
-	public void setVoxelSize(	double pVoxelSizeX,
-	                         	double pVoxelSizeY,
-	                         	double pVoxelSizeZ)
+	public void setVoxelSize(	final double pVoxelSizeX,
+	                         	final double pVoxelSizeY,
+	                         	final double pVoxelSizeZ)
 	{
 		mVoxelSizeX = pVoxelSizeX;
 		mVoxelSizeY = pVoxelSizeY;
@@ -1109,7 +1108,7 @@ ClearVolumeCloseable
 	}
 
 	@Override
-	public void setVolumeDataBuffer(Volume<?> pVolume)
+	public void setVolumeDataBuffer(final Volume<?> pVolume)
 	{
 		synchronized (getSetVolumeDataBufferLock(getCurrentRenderLayerIndex()))
 		{
@@ -1124,7 +1123,7 @@ ClearVolumeCloseable
 	}
 
 	@Override
-	public VolumeManager createCompatibleVolumeManager(int pMaxAvailableVolumes)
+	public VolumeManager createCompatibleVolumeManager(final int pMaxAvailableVolumes)
 	{
 		return new VolumeManager(pMaxAvailableVolumes);
 	}
@@ -1151,8 +1150,8 @@ ClearVolumeCloseable
 	 * @return true is completed, false if it timed-out.
 	 */
 	@Override
-	public boolean waitToFinishAllDataBufferCopy(	long pTimeOut,
-	                                             	TimeUnit pTimeUnit)
+	public boolean waitToFinishAllDataBufferCopy(	final long pTimeOut,
+	                                             	final TimeUnit pTimeUnit)
 	{
 		boolean lNoTimeOut = true;
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
@@ -1169,8 +1168,8 @@ ClearVolumeCloseable
 	 * @return true is completed, false if it timed-out.
 	 */
 	@Override
-	public boolean waitToFinishDataBufferCopy(long pTimeOut,
-	                                          TimeUnit pTimeUnit)
+	public boolean waitToFinishDataBufferCopy(final long pTimeOut,
+	                                          final TimeUnit pTimeUnit)
 	{
 		return waitToFinishDataBufferCopy(getCurrentRenderLayerIndex(),
 		                                  pTimeOut,
@@ -1184,8 +1183,8 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
-	                                          long pTimeOut,
-	                                          TimeUnit pTimeUnit)
+	                                          final long pTimeOut,
+	                                          final TimeUnit pTimeUnit)
 	{
 		boolean lNoTimeOut = true;
 		final long lStartTimeInNanoseconds = System.nanoTime();
@@ -1251,7 +1250,7 @@ ClearVolumeCloseable
 	 * Toggles the display of the Control Frame;
 	 */
 	@Override
-	public void addProcessor(Processor<?> pProcessor)
+	public void addProcessor(final Processor<?> pProcessor)
 	{
 		mProcessorsMap.put(pProcessor.getName(), pProcessor);
 	}
