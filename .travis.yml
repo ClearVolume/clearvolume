@@ -1,2 +1,5 @@
 language: java
-script: "gradle build"
+script: "./build.sh"
+jdk:
+  - oraclejdk8
+  - oraclejdk7
