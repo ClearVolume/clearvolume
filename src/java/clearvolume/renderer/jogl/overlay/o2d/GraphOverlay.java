@@ -78,7 +78,7 @@ public class GraphOverlay extends OverlayBase	implements
 						mDisplayRequestInterface.requestDisplay();
 					try
 					{
-						Thread.sleep(10);
+						Thread.sleep(50);
 					}
 					catch (final InterruptedException e)
 					{
@@ -152,7 +152,7 @@ public class GraphOverlay extends OverlayBase	implements
 	{
 		try
 		{
-			final boolean lIsLocked = mReentrantLock.tryLock(	cMaximalWaitTimeForLockInMilliseconds,
+			final boolean lIsLocked = mReentrantLock.tryLock(	0,
 																												TimeUnit.MILLISECONDS);
 
 			if (lIsLocked)

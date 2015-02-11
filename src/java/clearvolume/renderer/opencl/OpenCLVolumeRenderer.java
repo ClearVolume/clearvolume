@@ -359,10 +359,17 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			{
 				final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
 				lOpenCLProcessor.setVolumeBuffers(mCLVolumeImages[pRenderLayerIndex]);
+
+				final long lStartTimeNs = System.nanoTime();
 				lOpenCLProcessor.process(	pRenderLayerIndex,
 																	getVolumeSizeX(),
 																	getVolumeSizeY(),
 																	getVolumeSizeZ());
+				final long lStopTimeNs = System.nanoTime();
+				final double lElapsedTimeInMilliseconds = 0.001 * 0.001 * (lStopTimeNs - lStartTimeNs);
+				/*System.out.format("Elapsedtime in '%s' is %g ms \n",
+													lOpenCLProcessor.getClass().getSimpleName(),
+													lElapsedTimeInMilliseconds);/**/
 			}
 	}
 
