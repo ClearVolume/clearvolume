@@ -4,7 +4,28 @@ import java.util.ArrayList;
 
 public abstract class ProcessorBase<R> implements Processor<R>
 {
-	private ArrayList<ProcessorResultListener<R>> mListenerList = new ArrayList<>();
+	private final ArrayList<ProcessorResultListener<R>> mListenerList = new ArrayList<>();
+
+	private volatile boolean mActive = true;
+
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.jogl.overlay.Overlay#toggleDisplay()
+	 */
+	@Override
+	public boolean toggleActive()
+	{
+		mActive = !mActive;
+		return mActive;
+	}
+
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.processors.Processor#isActive()
+	 */
+	@Override
+	public boolean isActive()
+	{
+		return mActive;
+	}
 
 	@Override
 	public void addResultListener(ProcessorResultListener<R> pProcessorResultListener)
@@ -21,7 +42,7 @@ public abstract class ProcessorBase<R> implements Processor<R>
 	public void notifyListenersOfResult(R pResult)
 
 	{
-		for (ProcessorResultListener<R> lListener : mListenerList)
+		for (final ProcessorResultListener<R> lListener : mListenerList)
 			lListener.notifyResult(this, pResult);
 	};
 

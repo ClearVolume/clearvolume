@@ -1,12 +1,21 @@
 package clearvolume.renderer.jogl.overlay.o3d;
 
-import cleargl.*;
+
+import java.io.IOException;
+
+import javax.media.opengl.GL4;
+
+import cleargl.ClearGeometryObject;
+import cleargl.GLFloatArray;
+import cleargl.GLIntArray;
+import cleargl.GLMatrix;
+import cleargl.GLProgram;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.Overlay3D;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
+import clearvolume.renderer.jogl.overlay.SingleKeyToggable;
 
-import javax.media.opengl.GL4;
-import java.io.IOException;
+import com.jogamp.newt.event.KeyEvent;
 
 /**
  * BoxOverlay - Nice shader based box and grid 3D overlay.
@@ -14,11 +23,12 @@ import java.io.IOException;
  * @author Ulrik Guenther (2015), Loic Royer (2015)
  *
  */
-public class BoxOverlay extends OverlayBase implements Overlay3D
+public class BoxOverlay extends OverlayBase	implements
+																						Overlay3D,
+																						SingleKeyToggable
 {
 	protected GLProgram mBoxGLProgram;
-  protected ClearGeometryObject mClearGeometryObject;
-
+	protected ClearGeometryObject mClearGeometryObject;
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.jogl.overlay.Overlay#getName()
@@ -36,6 +46,24 @@ public class BoxOverlay extends OverlayBase implements Overlay3D
 	public boolean hasChanged3D()
 	{
 		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.jogl.overlay.SingleKeyToggable#toggleKeyCode()
+	 */
+	@Override
+	public short toggleKeyCode()
+	{
+		return KeyEvent.VK_B;
+	}
+
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.jogl.overlay.SingleKeyToggable#toggleKeyModifierMask()
+	 */
+	@Override
+	public int toggleKeyModifierMask()
+	{
+		return 0;
 	}
 
 	/* (non-Javadoc)
@@ -232,7 +260,5 @@ public class BoxOverlay extends OverlayBase implements Overlay3D
 
 		}
 	}
-
-
 
 }

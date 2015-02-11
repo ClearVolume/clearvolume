@@ -1,6 +1,10 @@
 package clearvolume.renderer.jogl;
 
+import java.util.Collection;
+
 import clearvolume.renderer.ClearVolumeRendererInterface;
+import clearvolume.renderer.jogl.overlay.Overlay;
+import clearvolume.renderer.jogl.overlay.SingleKeyToggable;
 
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
@@ -90,10 +94,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				mClearVolumeRenderer.requestDisplay();
 			}
 			break;
-		case KeyEvent.VK_B:
-			mClearVolumeRenderer.toggleBoxDisplay();
-			mClearVolumeRenderer.requestDisplay();
-			break;
+
 		case KeyEvent.VK_C:
 			mClearVolumeRenderer.toggleControlPanelDisplay();
 			mClearVolumeRenderer.requestDisplay();
@@ -101,5 +102,32 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 		}
 
+		processOverlayRelatedEvents(pE);
+
+	}
+
+	private void processOverlayRelatedEvents(KeyEvent pE)
+	{
+		final Collection<Overlay> lOverlays = mClearVolumeRenderer.getOverlays();
+
+		boolean lHasAnyOverlayBeenToggled = false;
+
+		for (final Overlay lOverlay : lOverlays)
+			if (lOverlay instanceof SingleKeyToggable)
+			{
+				final SingleKeyToggable lSingleKeyToggable = (SingleKeyToggable) lOverlay;
+
+				final boolean lRightKey = pE.getKeyCode() == lSingleKeyToggable.toggleKeyCode();
+				final boolean lRightModifiers = (pE.getModifiers() & lSingleKeyToggable.toggleKeyModifierMask()) == lSingleKeyToggable.toggleKeyModifierMask();
+
+				if (lRightKey && lRightModifiers)
+				{
+					lOverlay.toggleDisplay();
+					lHasAnyOverlayBeenToggled = true;
+				}
+			}
+
+		if (lHasAnyOverlayBeenToggled)
+			mClearVolumeRenderer.requestDisplay();
 	}
 }

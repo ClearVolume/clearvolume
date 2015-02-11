@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -1158,6 +1159,12 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public void addOverlay(Overlay pOverlay)
 	{
 		mOverlayMap.put(pOverlay.getName(), pOverlay);
+	}
+
+	@Override
+	public Collection<Overlay> getOverlays()
+	{
+		return mOverlayMap.values();
 	}
 
 	@Override

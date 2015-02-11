@@ -37,10 +37,10 @@ public class OpenCLHistogram extends OpenCLProcessor<IntBuffer>
 																							"histogram");
 		}
 
-		float[] bins = new float[10];
+		final float[] bins = new float[10];
 		for (int i = 0; i < bins.length; i++)
 		{
-			bins[i] = (float) (1.f * i / bins.length);
+			bins[i] = 1.f * i / bins.length;
 		}
 		setBins(bins);
 
@@ -49,7 +49,7 @@ public class OpenCLHistogram extends OpenCLProcessor<IntBuffer>
 	public void initBuffers()
 	{
 
-		int lBinSize = mBins.length;
+		final int lBinSize = mBins.length;
 
 		// the buffer containing the counts
 		mBufCounts = getDevice().createOutputIntBuffer(lBinSize);
@@ -65,6 +65,8 @@ public class OpenCLHistogram extends OpenCLProcessor<IntBuffer>
 											long pHeightInVoxels,
 											long pDepthInVoxels)
 	{
+		if (!isActive())
+			return;
 
 		ensureOpenCLInitialized();
 
@@ -77,19 +79,19 @@ public class OpenCLHistogram extends OpenCLProcessor<IntBuffer>
 		// fill the bins
 		getDevice().writeFloatBuffer(mBufBins, FloatBuffer.wrap(mBins));
 
-		FloatBuffer bins = FloatBuffer.wrap(mBins);
+		final FloatBuffer bins = FloatBuffer.wrap(mBins);
 
 		mKernelHist.setArgs(getVolumeBuffers()[0],
 												mBufBins,
 												mBufCounts,
-												(int) mBins.length);
+												mBins.length);
 
 		getDevice().run(mKernelHist,
 										(int) pWidthInVoxels,
 										(int) pHeightInVoxels,
 										(int) pDepthInVoxels);
 
-		IntBuffer out = getDevice().readIntBufferAsByte(mBufCounts)
+		final IntBuffer out = getDevice().readIntBufferAsByte(mBufCounts)
 																.asIntBuffer();
 
 		for (int i = 0; i < out.capacity(); i++)

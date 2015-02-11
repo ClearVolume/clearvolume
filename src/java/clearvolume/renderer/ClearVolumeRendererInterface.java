@@ -1,6 +1,7 @@
 package clearvolume.renderer;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import clearvolume.ClearVolumeCloseable;
@@ -30,8 +31,8 @@ import com.jogamp.newt.awt.NewtCanvasAWT;
  *
  */
 public interface ClearVolumeRendererInterface	extends
-DisplayRequestInterface,
-ClearVolumeCloseable
+																							DisplayRequestInterface,
+																							ClearVolumeCloseable
 {
 
 	/**
@@ -170,22 +171,22 @@ ClearVolumeCloseable
 	 * @param pTransferRangeMax
 	 */
 	void setTransferFunctionRange(int pRenderLayerIndex,
-	                              double pTransferRangeMin,
-	                              double pTransferRangeMax);
+																double pTransferRangeMin,
+																double pTransferRangeMax);
 
 	/**
 	 * @param pRenderLayerIndex
 	 * @param pTransferRangeMin
 	 */
 	void setTransferFunctionRangeMin(	int pRenderLayerIndex,
-	                                 	double pTransferRangeMin);
+																		double pTransferRangeMin);
 
 	/**
 	 * @param pRenderLayerIndex
 	 * @param pTransferRangeMax
 	 */
 	void setTransferFunctionRangeMax(	int pRenderLayerIndex,
-	                                 	double pTransferRangeMax);
+																		double pTransferRangeMax);
 
 	/**
 	 * @param pDelta
@@ -197,7 +198,7 @@ ClearVolumeCloseable
 	 * @param pDelta
 	 */
 	void addTransferFunctionRangeMin(	int pRenderLayerIndex,
-	                                 	double pDelta);
+																		double pDelta);
 
 	/**
 	 * @param pDelta
@@ -209,7 +210,7 @@ ClearVolumeCloseable
 	 * @param pDelta
 	 */
 	void addTransferFunctionRangeMax(	int pRenderLayerIndex,
-	                                 	double pDelta);
+																		double pDelta);
 
 	/**
 	 * @param pTransferRangePositionDelta
@@ -225,7 +226,7 @@ ClearVolumeCloseable
 	 * Sets the transfer function used for rendering.
 	 *
 	 * @param pTransfertFunction
-	 *            transfer function
+	 *          transfer function
 	 */
 	void setTransferFunction(TransferFunction pTransfertFunction);
 
@@ -233,26 +234,26 @@ ClearVolumeCloseable
 	 * Sets the transfer function used for rendering.
 	 * 
 	 * @param pTransfertFunction
-	 *            transfer function
+	 *          transfer function
 	 */
-	void setTransferFunction( int pRenderLayerIndex, TransferFunction pTransfertFunction );
+	void setTransferFunction(	int pRenderLayerIndex,
+														TransferFunction pTransfertFunction);
 
 	/**
 	 * Returns the transfer function set for a given layer.
 	 * 
 	 * @param pRenderLayerIndex
 	 */
-	TransferFunction getTransferFunction( int pRenderLayerIndex );
+	TransferFunction getTransferFunction(int pRenderLayerIndex);
 
 	/**
-	 * Sets the transfer function range. Both min and max values should be
-	 * within
+	 * Sets the transfer function range. Both min and max values should be within
 	 * [0,1].
 	 *
 	 * @param pMin
-	 *            minimum
+	 *          minimum
 	 * @param pMax
-	 *            maximum
+	 *          maximum
 	 */
 	void setTransferFunctionRange(double pMin, double pMax);
 
@@ -366,9 +367,9 @@ ClearVolumeCloseable
 	 * @param pSizeZ
 	 */
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
-	                         	long pSizeX,
-	                         	long pSizeY,
-	                         	long pSizeZ);
+														long pSizeX,
+														long pSizeY,
+														long pSizeZ);
 
 	/**
 	 * Updates the voxel size of subsequently rendered volumes
@@ -378,8 +379,8 @@ ClearVolumeCloseable
 	 * @param pVoxelSizeZ
 	 */
 	public void setVoxelSize(	double pVoxelSizeX,
-	                         	double pVoxelSizeY,
-	                         	double pVoxelSizeZ);
+														double pVoxelSizeY,
+														double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -394,12 +395,12 @@ ClearVolumeCloseable
 	 * @param pVoxelSizeZ
 	 */
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
-	                         	long pSizeX,
-	                         	long pSizeY,
-	                         	long pSizeZ,
-	                         	double pVoxelSizeX,
-	                         	double pVoxelSizeY,
-	                         	double pVoxelSizeZ);
+														long pSizeX,
+														long pSizeY,
+														long pSizeZ,
+														double pVoxelSizeX,
+														double pVoxelSizeY,
+														double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -427,7 +428,7 @@ ClearVolumeCloseable
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishAllDataBufferCopy(	long pTimeOut,
-	                                             	TimeUnit pTimeUnit);
+																								TimeUnit pTimeUnit);
 
 	/**
 	 * Waits until volume data copy completes for current layer.
@@ -435,7 +436,7 @@ ClearVolumeCloseable
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishDataBufferCopy(long pTimeOut,
-	                                          TimeUnit pTimeUnit);
+																						TimeUnit pTimeUnit);
 
 	/**
 	 * Waits until volume data copy completes for a given layer.
@@ -443,8 +444,8 @@ ClearVolumeCloseable
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
-	                                          long pTimeOut,
-	                                          TimeUnit pTimeUnit);
+																						long pTimeOut,
+																						TimeUnit pTimeUnit);
 
 	/**
 	 * Resets rotation and translation parameters.
@@ -572,6 +573,21 @@ ClearVolumeCloseable
 	public void addProcessor(Processor<?> pProcessor);
 
 	/**
+	 * Adds these processors to this renderer.
+	 *
+	 * @param pProcessors
+	 *          Processors to add.
+	 */
+	public void addProcessors(Collection<Processor<?>> pProcessors);
+
+	/**
+	 * Returns the list of overlays in this renderer.
+	 * 
+	 * @return
+	 */
+	public Collection<Overlay> getOverlays();
+
+	/**
 	 * Returns a Canvas that can be used to embed this renderer.
 	 *
 	 * @return A NewtCanvasAWT object or null if the renderer cannot be embedded.
@@ -585,7 +601,5 @@ ClearVolumeCloseable
 	 */
 	@Override
 	void close();
-
-
 
 }

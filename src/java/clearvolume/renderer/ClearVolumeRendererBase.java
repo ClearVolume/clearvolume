@@ -5,6 +5,7 @@ import static java.lang.Math.max;
 import java.awt.EventQueue;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -1284,6 +1285,16 @@ public abstract class ClearVolumeRendererBase	implements
 	public void addProcessor(final Processor<?> pProcessor)
 	{
 		mProcessorsMap.put(pProcessor.getName(), pProcessor);
+	}
+
+	/**
+	 * Toggles the display of the Control Frame;
+	 */
+	@Override
+	public void addProcessors(final Collection<Processor<?>> pProcessors)
+	{
+		for (final Processor<?> lProcessor : pProcessors)
+			addProcessor(lProcessor);
 	}
 
 	/**

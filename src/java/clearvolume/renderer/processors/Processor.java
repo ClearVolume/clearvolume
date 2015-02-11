@@ -17,5 +17,8 @@ public interface Processor<R>
 
 	public String getName();
 
+	public boolean toggleActive();
+
+	public boolean isActive();
 
 }

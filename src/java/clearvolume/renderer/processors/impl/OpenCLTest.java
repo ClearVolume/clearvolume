@@ -30,13 +30,16 @@ public class OpenCLTest extends OpenCLProcessor<Double>
 											long pHeightInVoxels,
 											long pDepthInVoxels)
 	{
+		if (!isActive())
+			return;
+
 		ensureOpenCLInitialized();
 		getDevice().setArgs(mProcessorKernel, getVolumeBuffers());
 		getDevice().run(mProcessorKernel,
 										(int) pWidthInVoxels,
 										(int) pHeightInVoxels);
 
-		double lThisValueShouldMakeSenseSomehow = 0.f;
+		final double lThisValueShouldMakeSenseSomehow = 0.f;
 
 		notifyListenersOfResult(lThisValueShouldMakeSenseSomehow);
 

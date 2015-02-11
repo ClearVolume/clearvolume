@@ -20,11 +20,15 @@ import clearvolume.audio.audioplot.AudioPlot;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
+import clearvolume.renderer.jogl.overlay.SingleKeyToggable;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 
+import com.jogamp.newt.event.KeyEvent;
+
 public class GraphOverlay extends OverlayBase	implements
 																							Overlay2D,
+																							SingleKeyToggable,
 																							ProcessorResultListener<Double>,
 																							AutoCloseable
 {
@@ -99,9 +103,32 @@ public class GraphOverlay extends OverlayBase	implements
 	}
 
 	@Override
+	public boolean toggleDisplay()
+	{
+		final boolean lNewState = super.toggleDisplay();
+		if (lNewState)
+			mAudioPlot.start();
+		else
+			mAudioPlot.stop();
+		return lNewState;
+	}
+
+	@Override
 	public String getName()
 	{
 		return "graph";
+	}
+
+	@Override
+	public short toggleKeyCode()
+	{
+		return KeyEvent.VK_G;
+	}
+
+	@Override
+	public int toggleKeyModifierMask()
+	{
+		return 0;
 	}
 
 	@Override
@@ -309,6 +336,8 @@ public class GraphOverlay extends OverlayBase	implements
 
 					// mGLProgram.use(pGL4);
 					mClearGeometryObject.setProjection(pProjectionMatrix);
+
+					System.out.println(pProjectionMatrix.toString());
 
 					pGL4.glDisable(GL4.GL_DEPTH_TEST);
 					pGL4.glEnable(GL4.GL_BLEND);

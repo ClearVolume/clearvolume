@@ -104,7 +104,6 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 		// the buffer for the downsampled volume
 		mBufDownSampled = getDevice().createOutputFloatBuffer(mDownSize);
 
-
 		// the buffers for the sobel responses
 		mBufGx = getDevice().createOutputFloatBuffer(mDownSize);
 		mBufGy = getDevice().createOutputFloatBuffer(mDownSize);
@@ -211,6 +210,8 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 											long pHeightInVoxels,
 											long pDepthInVoxels)
 	{
+		if (!isActive())
+			return;
 
 		ensureOpenCLInitialized();
 
@@ -279,6 +280,8 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 		// meanValue = out.get(100);
 
 		// meanValue = out.get(16 + 16 * 42 + 16 * 42 * 42);
+
+		System.out.format("Tenengrad measure = %g \n", meanValue);
 
 		notifyListenersOfResult(meanValue);
 
