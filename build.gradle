@@ -1,6 +1,6 @@
 
 plugins {
-  id "us.kirchmeier.capsule" version "0.9.0"
+  id "us.kirchmeier.capsule" version "0.10.0"
 }
 
 
@@ -208,7 +208,6 @@ dependencies
         compile group: "royer", name: "ClearGL", version: "1.0-SNAPSHOT", changing: true, transitive: true 
         compile group: "royer", name: "ClearCuda", version: "1.0-SNAPSHOT", changing: true, transitive: true 
     }
-    compile fileTree(dir: 'libs/jcuda', include: '*.jar')
 
     compile group: 'junit', name: 'junit', version: '4.12'
 

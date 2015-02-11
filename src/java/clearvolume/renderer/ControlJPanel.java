@@ -15,17 +15,25 @@ public class ControlJPanel extends JPanel
 
 	private static final long serialVersionUID = 1L;
 
+	private final int layerId;
+
 	private static final int cPrecision = 1024 * 1024;
 
 	private volatile ClearVolumeRendererInterface mClearVolumeRendererInterface;
 
-	public ControlJPanel()
+	public ControlJPanel(
+			final int layerToBeControlled,
+			final ClearVolumeRendererInterface pClearVolumeRendererInterface )
 	{
 		super();
 
+		this.layerId = layerToBeControlled;
+		this.mClearVolumeRendererInterface = pClearVolumeRendererInterface;
+
 		setLayout(new MigLayout("", "[][225px,grow]", "[][][]"));
 
-		JSlider lGammaSlider = new JSlider(0, cPrecision, cPrecision / 2);
+		final JSlider lGammaSlider =
+				new JSlider( 0, cPrecision, ( int ) ( cPrecision * .5 * mClearVolumeRendererInterface.getGamma( layerId ) ) );
 		lGammaSlider.addChangeListener(new ChangeListener()
 		{
 			@Override
@@ -33,21 +41,23 @@ public class ControlJPanel extends JPanel
 			{
 				final JSlider source = (JSlider) e.getSource();
 				final float lGamma = 2f * (source.getValue()) / cPrecision;
-				getClearVolumeRendererInterface().setGamma(lGamma);
+				getClearVolumeRendererInterface().setGamma( layerId, lGamma );
 				getClearVolumeRendererInterface().requestDisplay();
 			}
 		});
 
-		JLabel lblGamma = new JLabel("gamma");
+		final JLabel lblGamma = new JLabel( String.format( "Ch.%d: gamma", layerId ) );
 		add(lblGamma, "cell 0 0");
 
 		add(lGammaSlider, "cell 1 0,grow");
 
-		final JSlider lMaxSlider = new JSlider(0, cPrecision, cPrecision);
-		final JSlider lMinSlider = new JSlider(0, cPrecision, 0);
+		final JSlider lMaxSlider =
+				new JSlider( 0, cPrecision, ( int ) ( cPrecision * mClearVolumeRendererInterface.getTransferRangeMax( layerId ) ) );
+		final JSlider lMinSlider =
+				new JSlider( 0, cPrecision, ( int ) ( cPrecision * mClearVolumeRendererInterface.getTransferRangeMin( layerId ) ) );
 		lMinSlider.setPreferredSize(new Dimension(0, 0));
 
-		JLabel lblMinMax = new JLabel("max");
+		final JLabel lblMinMax = new JLabel( String.format( "Ch.%d: max", layerId ) );
 		add(lblMinMax, "cell 0 1");
 
 		add(lMaxSlider, "cell 1 1,grow");
@@ -63,12 +73,12 @@ public class ControlJPanel extends JPanel
 					// lMinSlider.repaint();
 				}
 				final float lMax = 1f * source.getValue() / cPrecision;
-				getClearVolumeRendererInterface().setTransferFunctionRangeMax(lMax);
+				getClearVolumeRendererInterface().setTransferFunctionRangeMax( layerId, lMax );
 				getClearVolumeRendererInterface().requestDisplay();
 			}
 		});
 
-		JLabel lblMax = new JLabel("min");
+		final JLabel lblMax = new JLabel( String.format( "Ch.%d: min", layerId ) );
 		add(lblMax, "cell 0 2");
 
 		add(lMinSlider, "cell 1 2,grow");
@@ -84,7 +94,7 @@ public class ControlJPanel extends JPanel
 					// lMaxSlider.repaint();
 				}
 				final float lMin = 1f * source.getValue() / cPrecision;
-				getClearVolumeRendererInterface().setTransferFunctionRangeMin(lMin);
+				getClearVolumeRendererInterface().setTransferFunctionRangeMin( layerId, lMin );
 				getClearVolumeRendererInterface().requestDisplay();
 			}
 		});
@@ -96,7 +106,7 @@ public class ControlJPanel extends JPanel
 		return mClearVolumeRendererInterface;
 	}
 
-	public void setClearVolumeRendererInterface(ClearVolumeRendererInterface pClearVolumeRendererInterface)
+	public void setClearVolumeRendererInterface(final ClearVolumeRendererInterface pClearVolumeRendererInterface)
 	{
 		mClearVolumeRendererInterface = pClearVolumeRendererInterface;
 	}

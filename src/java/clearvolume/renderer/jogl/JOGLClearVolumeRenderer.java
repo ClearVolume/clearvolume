@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
@@ -15,6 +16,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLProfile;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -56,6 +58,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 																																			ClearGLEventListener
 {
 
+	private static final long cMaxWaitingTimeForAcquiringDisplayLockInMs = 200;
+
 	static
 	{
 		// attempt at solving Jug's Dreadlock bug:
@@ -67,7 +71,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private volatile ClearGLWindow mClearGLWindow;
 	private NewtCanvasAWT mNewtCanvasAWT;
 	private volatile int mLastWindowWidth, mLastWindowHeight;
-	private final ReentrantLock mDisplayReentrantLock = new ReentrantLock();
+	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
 
 	// pixelbuffer objects.
 	protected GLPixelBufferObject[] mPixelBufferObjects;
@@ -80,7 +84,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private volatile long prevTimeNS = -1;
 
 	// Overlay3D stuff:
-	private Map<String, Overlay> mOverlayMap = new ConcurrentHashMap<String, Overlay>();
+	private final Map<String, Overlay> mOverlayMap = new ConcurrentHashMap<String, Overlay>();
 
 	// Window:
 	private final String mWindowName;
@@ -99,7 +103,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private final GLMatrix mVolumeViewMatrix = new GLMatrix();
 	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
 
-	private final int mMaxTextureWidth = 768, mMaxTextureHeight = 768;
 	private final int mTextureWidth, mTextureHeight;
 
 	protected boolean mUsePBOs = true;
@@ -263,8 +266,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		super(pNumberOfRenderLayers);
 
-		mTextureWidth = Math.min(mMaxTextureWidth, pWindowWidth);
-		mTextureHeight = Math.min(mMaxTextureHeight, pWindowHeight);
+		mTextureWidth = Math.min(pMaxTextureWidth, pWindowWidth);
+		mTextureHeight = Math.min(pMaxTextureHeight, pWindowHeight);
 
 		mWindowName = pWindowName;
 		mLastWindowWidth = pWindowWidth;
@@ -272,7 +275,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 		setNumberOfRenderLayers(pNumberOfRenderLayers);
 
 		mLayerTextures = new GLTexture[getNumberOfRenderLayers()];
-		mPixelBufferObjects = new GLPixelBufferObject[getNumberOfRenderLayers()];
+
+		if (mUsePBOs)
+			mPixelBufferObjects = new GLPixelBufferObject[getNumberOfRenderLayers()];
 
 		resetBrightnessAndGammaAndTransferFunctionRanges();
 		resetRotationTranslation();
@@ -285,22 +290,11 @@ public abstract class JOGLClearVolumeRenderer	extends
 																				pWindowHeight,
 																				this);
 
-		mClearGLWindow.getGLWindow()
-									.addWindowListener(new WindowAdapter()
-									{
-										@Override
-										public void windowDestroyNotify(WindowEvent pE)
-										{
-											mClearGLWindow = null;
-											super.windowDestroyNotify(pE);
-										}
-
-									});
-
 		if (pUseInCanvas)
 		{
+			System.out.println("new NewtCanvasAWT() ");
 			mNewtCanvasAWT = new NewtCanvasAWT(mClearGLWindow.getGLWindow());
-			mNewtCanvasAWT.setShallUseOffscreenLayer(true);
+			mNewtCanvasAWT.setShallUseOffscreenLayer(false);
 		}
 		else
 		{
@@ -343,34 +337,40 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void close()
 	{
-		super.close();
-		try
+		if (mNewtCanvasAWT != null)
 		{
-			try
+			mNewtCanvasAWT = null;
+			/*try
 			{
-				if (mNewtCanvasAWT != null)
-				{
-					mNewtCanvasAWT.destroy();
-					mNewtCanvasAWT = null;
-				}
+				mNewtCanvasAWT.destroy();
+				mNewtCanvasAWT = null;
 			}
-			catch (Throwable e)
+			catch (final Throwable e)
 			{
 				e.printStackTrace();
-			}
-
-			if (mClearGLWindow == null)
-				return;
-			mClearGLWindow.close();
-			mClearGLWindow = null;
+			}/**/
+			return;
 		}
-		catch (NullPointerException e)
+
+		try
+		{
+
+			if (mClearGLWindow != null)
+			{
+				mClearGLWindow.close();
+				mClearGLWindow = null;
+			}
+		}
+		catch (final NullPointerException e)
 		{
 		}
 		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 		}
+
+		super.close();
+
 	}
 
 	/**
@@ -389,7 +389,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 			if (mClearGLWindow != null)
 				return mClearGLWindow.getGLWindow().isVisible();
 		}
-		catch (NullPointerException e)
+		catch (final NullPointerException e)
 		{
 			return false;
 		}
@@ -601,14 +601,16 @@ public abstract class JOGLClearVolumeRenderer	extends
 																									1,
 																									true,
 																									3);
+					if (mUsePBOs)
+					{
+						mPixelBufferObjects[i] = new GLPixelBufferObject(	mGLProgram,
+																															mTextureWidth,
+																															mTextureHeight);
 
-					mPixelBufferObjects[i] = new GLPixelBufferObject(	mGLProgram,
-																														mTextureWidth,
-																														mTextureHeight);
+						mPixelBufferObjects[i].copyFrom(null);
 
-					mPixelBufferObjects[i].copyFrom(null);
-
-					registerPBO(i, mPixelBufferObjects[i].getId());
+						registerPBO(i, mPixelBufferObjects[i].getId());
+					}
 				}
 
 			}
@@ -617,7 +619,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 				e.printStackTrace();
 			}
 
-			for (Overlay lOverlay : mOverlayMap.values())
+			for (final Overlay lOverlay : mOverlayMap.values())
 			{
 				try
 				{
@@ -683,6 +685,11 @@ public abstract class JOGLClearVolumeRenderer	extends
 		mLayerTextures[pRenderLayerIndex].copyFrom(pByteBuffer);
 	}
 
+	public void clearTexture(final int pRenderLayerIndex)
+	{
+		mLayerTextures[pRenderLayerIndex].clear();
+	}
+
 	/**
 	 * Implementation of GLEventListener: Called when the given GLAutoDrawable is
 	 * to be displayed.
@@ -690,110 +697,129 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void display(final GLAutoDrawable pDrawable)
 	{
-		final GL4 lGL4 = pDrawable.getGL().getGL4();
-		lGL4.glClearColor(0, 0, 0, 1);
-		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
-		lGL4.glDisable(GL4.GL_CULL_FACE);
-		lGL4.glEnable(GL4.GL_BLEND);
-		lGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
-		lGL4.glBlendEquation(GL4.GL_MAX);
-
-		setDefaultProjectionMatrix();
-
-		mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
-																										1,
-																										-1,
-																										1,
-																										0,
-																										1000);
-
-		// scaling...
-
-		final double scaleX = getVolumeSizeX() * getVoxelSizeX();
-		final double scaleY = getVolumeSizeY() * getVoxelSizeY();
-		final double scaleZ = getVolumeSizeZ() * getVoxelSizeZ();
-
-		final double maxScale = max(max(scaleX, scaleY), scaleZ);
-
-		// building up the inverse Modelview
-
-		final GLMatrix eulerMat = new GLMatrix();
-
-		eulerMat.euler(getRotationX() * 0.01, getRotationY() * 0.01, 0.0f);
-		if (hasRotationController())
+		boolean lTryLock = false;
+		try
 		{
-			getRotationController().rotate(eulerMat);
-			notifyUpdateOfVolumeRenderingParameters();
+			lTryLock = mDisplayReentrantLock.tryLock(	cMaxWaitingTimeForAcquiringDisplayLockInMs,
+																								TimeUnit.MILLISECONDS);
 		}
-
-		final GLMatrix lInvVolumeMatrix = new GLMatrix();
-		lInvVolumeMatrix.setIdentity();
-		lInvVolumeMatrix.translate(	-getTranslationX(),
-																-getTranslationY(),
-																-getTranslationZ());
-		lInvVolumeMatrix.transpose();
-
-		lInvVolumeMatrix.mult(eulerMat);
-
-		lInvVolumeMatrix.scale(	(float) (maxScale / scaleX),
-														(float) (maxScale / scaleY),
-														(float) (maxScale / scaleZ));
-
-		final GLMatrix lInvProjection = new GLMatrix();
-		lInvProjection.copy(getClearGLWindow().getProjectionMatrix());
-		lInvProjection.transpose();
-		lInvProjection.invert();
-
-		GLError.printGLErrors(lGL4, "BEFORE RENDER VOLUME");
-
-		final boolean[] lUpdatedLayersArray = renderVolume(	lInvVolumeMatrix.getFloatArray(),
-																												lInvProjection.getFloatArray());
-
-		GLError.printGLErrors(lGL4, "AFTER RENDER VOLUME");
-
-		final boolean lOverlay2DChanged = isOverlay2DChanged();
-		final boolean lOverlay3DChanged = isOverlay3DChanged();
-
-		if (lUpdatedLayersArray != null || lOverlay2DChanged
-				|| lOverlay3DChanged)
+		catch (final InterruptedException e)
 		{
-			if (mUsePBOs)
-				for (int i = 0; i < getNumberOfRenderLayers(); i++)
-					if (lUpdatedLayersArray[i])
-						mLayerTextures[i].copyFrom(mPixelBufferObjects[i]);
+		}
+		if (lTryLock)
+			try
+			{
+				final GL4 lGL4 = pDrawable.getGL().getGL4();
+				lGL4.glClearColor(0, 0, 0, 1);
+				lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+				lGL4.glDisable(GL4.GL_CULL_FACE);
+				lGL4.glEnable(GL4.GL_BLEND);
+				lGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
+				lGL4.glBlendEquation(GL4.GL_MAX);
 
-			mGLProgram.use(lGL4);
+				setDefaultProjectionMatrix();
 
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
-				mLayerTextures[i].bind(i);
+				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
+																												1,
+																												-1,
+																												1,
+																												0,
+																												1000);
 
-			mQuadProjectionMatrixUniform.setFloatMatrix(mQuadProjectionMatrix.getFloatArray(),
-																									false);
+				// scaling...
 
-			mQuadVertexArray.draw(GL.GL_TRIANGLES);
+				final double scaleX = getVolumeSizeX() * getVoxelSizeX();
+				final double scaleY = getVolumeSizeY() * getVoxelSizeY();
+				final double scaleZ = getVolumeSizeZ() * getVoxelSizeZ();
 
-			/*getClearGLWindow().getProjectionMatrix()
-												.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
-			getClearGLWindow().getProjectionMatrix()
-												.mult(1, 1, mQuadProjectionMatrix.get(1, 1));/**/
+				final double maxScale = max(max(scaleX, scaleY), scaleZ);
 
-			renderOverlays(lGL4, lInvVolumeMatrix);
+				// building up the inverse Modelview
 
-			updateFrameRateDisplay();
+				final GLMatrix eulerMat = new GLMatrix();
 
-			mGLVideoRecorder.screenshot(pDrawable);
+				eulerMat.euler(	getRotationX() * 0.01,
+												getRotationY() * 0.01,
+												0.0f);
+				if (hasRotationController())
+				{
+					getRotationController().rotate(eulerMat);
+					notifyUpdateOfVolumeRenderingParameters();
+				}
 
-		}/**/
+				final GLMatrix lInvVolumeMatrix = new GLMatrix();
+				lInvVolumeMatrix.setIdentity();
+				lInvVolumeMatrix.translate(	-getTranslationX(),
+																		-getTranslationY(),
+																		-getTranslationZ());
+				lInvVolumeMatrix.transpose();
 
+				lInvVolumeMatrix.mult(eulerMat);
+
+				lInvVolumeMatrix.scale(	(float) (maxScale / scaleX),
+																(float) (maxScale / scaleY),
+																(float) (maxScale / scaleZ));
+
+				final GLMatrix lInvProjection = new GLMatrix();
+				lInvProjection.copy(getClearGLWindow().getProjectionMatrix());
+				lInvProjection.transpose();
+				lInvProjection.invert();
+
+				GLError.printGLErrors(lGL4, "BEFORE RENDER VOLUME");
+
+				final boolean[] lUpdatedLayersArray = renderVolume(	lInvVolumeMatrix.getFloatArray(),
+																														lInvProjection.getFloatArray());
+
+				GLError.printGLErrors(lGL4, "AFTER RENDER VOLUME");
+
+				final boolean lOverlay2DChanged = isOverlay2DChanged();
+				final boolean lOverlay3DChanged = isOverlay3DChanged();
+
+				if (lUpdatedLayersArray != null || lOverlay2DChanged
+						|| lOverlay3DChanged)
+				{
+					if (mUsePBOs)
+						for (int i = 0; i < getNumberOfRenderLayers(); i++)
+							if (lUpdatedLayersArray[i])
+								mLayerTextures[i].copyFrom(mPixelBufferObjects[i]);
+
+					mGLProgram.use(lGL4);
+
+					for (int i = 0; i < getNumberOfRenderLayers(); i++)
+						mLayerTextures[i].bind(i);
+
+					mQuadProjectionMatrixUniform.setFloatMatrix(mQuadProjectionMatrix.getFloatArray(),
+																											false);
+
+					mQuadVertexArray.draw(GL.GL_TRIANGLES);
+
+					/*getClearGLWindow().getProjectionMatrix()
+														.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
+					getClearGLWindow().getProjectionMatrix()
+														.mult(1, 1, mQuadProjectionMatrix.get(1, 1));/**/
+
+					renderOverlays(lGL4, lInvVolumeMatrix);
+
+					updateFrameRateDisplay();
+
+					mGLVideoRecorder.screenshot(pDrawable);
+
+				}/**/
+			}
+			finally
+			{
+				if (mDisplayReentrantLock.isHeldByCurrentThread())
+					mDisplayReentrantLock.unlock();
+			}
 	}
 
 	private boolean isOverlay2DChanged()
 	{
 		boolean lHasAnyChanged = false;
-		for (Overlay lOverlay : mOverlayMap.values())
+		for (final Overlay lOverlay : mOverlayMap.values())
 			if (lOverlay instanceof Overlay2D)
 			{
-				Overlay2D lOverlay2D = (Overlay2D) lOverlay;
+				final Overlay2D lOverlay2D = (Overlay2D) lOverlay;
 				lHasAnyChanged |= lOverlay2D.hasChanged2D();
 			}
 		return lHasAnyChanged;
@@ -802,10 +828,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private boolean isOverlay3DChanged()
 	{
 		boolean lHasAnyChanged = false;
-		for (Overlay lOverlay : mOverlayMap.values())
+		for (final Overlay lOverlay : mOverlayMap.values())
 			if (lOverlay instanceof Overlay3D)
 			{
-				Overlay3D lOverlay3D = (Overlay3D) lOverlay;
+				final Overlay3D lOverlay3D = (Overlay3D) lOverlay;
 				lHasAnyChanged |= lOverlay3D.hasChanged3D();
 			}
 		return lHasAnyChanged;
@@ -816,10 +842,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		try
 		{
-			for (Overlay lOverlay : mOverlayMap.values())
+			for (final Overlay lOverlay : mOverlayMap.values())
 				if (lOverlay instanceof Overlay3D)
 				{
-					Overlay3D lOverlay3D = (Overlay3D) lOverlay;
+					final Overlay3D lOverlay3D = (Overlay3D) lOverlay;
 					try
 					{
 						lOverlay3D.render3D(lGL4,
@@ -832,10 +858,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 					}
 				}
 
-			for (Overlay lOverlay : mOverlayMap.values())
+			for (final Overlay lOverlay : mOverlayMap.values())
 				if (lOverlay instanceof Overlay2D)
 				{
-					Overlay2D lOverlay2D = (Overlay2D) lOverlay;
+					final Overlay2D lOverlay2D = (Overlay2D) lOverlay;
 					try
 					{
 						lOverlay2D.render2D(lGL4,
@@ -850,7 +876,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 			GLError.printGLErrors(lGL4, "AFTER OVERLAYS");
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 		}
@@ -910,34 +936,43 @@ public abstract class JOGLClearVolumeRenderer	extends
 											final int pWidth,
 											int pHeight)
 	{
-		if (pHeight < 8)
-			pHeight = 8;
+		// mDisplayReentrantLock.lock();
+		try
+		{
+			if (pHeight < 8)
+				pHeight = 8;
 
-		final GL4 lGL4 = drawable.getGL().getGL4();
+			final GL4 lGL4 = drawable.getGL().getGL4();
 
-		int lViewPortWidth = max(pWidth, pHeight);
+			final int lViewPortWidth = max(pWidth, pHeight);
 
-		lGL4.glViewport((pWidth - lViewPortWidth) / 2,
-										(pHeight - lViewPortWidth) / 2,
-										lViewPortWidth,
-										lViewPortWidth);/**/
+			lGL4.glViewport((pWidth - lViewPortWidth) / 2,
+											(pHeight - lViewPortWidth) / 2,
+											lViewPortWidth,
+											lViewPortWidth);/**/
 
-		/*final float lAspectRatio = 1; // (1.0f * pWidth) / pHeight;
+			/*final float lAspectRatio = 1; // (1.0f * pWidth) / pHeight;
 
-		/*if (lAspectRatio >= 1)
-			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
-																											1,
-																											-1	/ lAspectRatio,
-																											1 / lAspectRatio,
-																											0,
-																											1000);
-		else
-			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
-																											lAspectRatio,
-																											-1,
-																											1,
-																											0,
-																											1000);/**/
+			/*if (lAspectRatio >= 1)
+				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
+																												1,
+																												-1	/ lAspectRatio,
+																												1 / lAspectRatio,
+																												0,
+																												1000);
+			else
+				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
+																												lAspectRatio,
+																												-1,
+																												1,
+																												0,
+																												1000);/**/
+		}
+		finally
+		{
+			if (mDisplayReentrantLock.isHeldByCurrentThread())
+				mDisplayReentrantLock.unlock();
+		}
 	}
 
 	/**
@@ -946,11 +981,20 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void dispose(final GLAutoDrawable arg0)
 	{
-		for (int i = 0; i < getNumberOfRenderLayers(); i++)
-		{
-			mLayerTextures[i].close();
-			mPixelBufferObjects[i].close();
-		}
+
+		if (mUsePBOs)
+			try
+			{
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					unregisterPBO(i, mPixelBufferObjects[i].getId());
+				}
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+			}
+
 	}
 
 	/**
@@ -1020,32 +1064,93 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
 	 */
 	@Override
-	public void requestDisplay()
+	public void requestDisplayUnfairly()
 	{
+		if (mNewtCanvasAWT != null)
+			requestDisplay();
+
 		final boolean lLocked = mDisplayReentrantLock.tryLock();
+
 		if (lLocked)
 		{
 			try
 			{
-				if (mClearGLWindow == null)
-					return;
-				mClearGLWindow.getGLWindow().display();
-				// setVisible(true);
-			}
-			catch (NullPointerException e)
-			{
-			}
-			catch (Throwable e)
-			{
-				System.err.println("REQUESTED DISPLAY AFTER EDT SHUTDOWN (Warning = it's ok): " + e.getClass()
-																																														.getSimpleName()
-														+ "->"
-														+ e.getLocalizedMessage());
+				requestDisplay();
 			}
 			finally
 			{
-				mDisplayReentrantLock.unlock();
+				if (mDisplayReentrantLock.isHeldByCurrentThread())
+					mDisplayReentrantLock.unlock();
 			}
+		}
+
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
+	 */
+	@Override
+	public void requestDisplay()
+	{
+		if (mNewtCanvasAWT != null)
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						if (mNewtCanvasAWT != null)
+							mNewtCanvasAWT.repaint();
+					}
+					catch (final NullPointerException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			});
+			return;
+		}
+
+		boolean lLocked;
+		try
+		{
+			lLocked = mDisplayReentrantLock.tryLock(0,
+																							TimeUnit.MILLISECONDS);
+
+			if (lLocked)
+			{
+				try
+				{
+
+					if (mClearGLWindow == null)
+						return;
+					mClearGLWindow.getGLWindow().display();
+					// setVisible(true);
+				}
+				catch (final NullPointerException e)
+				{
+				}
+				catch (final Throwable e)
+				{
+					System.err.println("REQUESTED DISPLAY AFTER EDT SHUTDOWN (Warning = it's ok): " + e.getClass()
+																																															.getSimpleName()
+															+ "->"
+															+ e.getLocalizedMessage());
+					e.printStackTrace();
+				}
+				finally
+				{
+					if (mDisplayReentrantLock.isHeldByCurrentThread())
+						mDisplayReentrantLock.unlock();
+				}
+			}
+		}
+		catch (final InterruptedException e1)
+		{
 		}
 	}
 

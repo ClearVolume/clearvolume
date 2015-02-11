@@ -109,12 +109,12 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mCLDevice.initCL(false);
 		mCLDevice.printInfo();
 		mRenderKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRenderPerspective.cl"),
-														"volumerender");
+																						"volumerender");
 
-		for (Processor<?> lProcessor : mProcessorsMap.values())
+		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleRenderer(getClass()))
 			{
-				OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
+				final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
 				lOpenCLProcessor.setDevice(mCLDevice);
 			}
 
@@ -325,10 +325,10 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 											mCLRenderBuffers[pRenderLayerIndex],
 											getTextureWidth(),
 											getTextureHeight(),
-											(float) getBrightness(),
-											(float) getTransferRangeMin(),
-											(float) getTransferRangeMax(),
-											(float) getGamma(),
+											(float) getBrightness(pRenderLayerIndex),
+											(float) getTransferRangeMin(pRenderLayerIndex),
+											(float) getTransferRangeMax(pRenderLayerIndex),
+											(float) getGamma(pRenderLayerIndex),
 											// mCLTranferFunctionImages[pRenderLayerIndex],
 											mCLTransferColorBuffers[pRenderLayerIndex],
 											mCLInvProjectionBuffer,
@@ -341,8 +341,14 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 									getTextureWidth(),
 									getTextureHeight());
 
-		copyBufferToTexture(pRenderLayerIndex,
-												mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]));
+		if (isLayerVisible(pRenderLayerIndex))
+			copyBufferToTexture(pRenderLayerIndex,
+													mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]));
+		else
+			clearTexture(pRenderLayerIndex);
+
+		final ByteBuffer lRenderedImageBuffer = mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]);
+		copyBufferToTexture(pRenderLayerIndex, lRenderedImageBuffer);
 
 		// long endTime = System.nanoTime();
 
@@ -354,15 +360,40 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	private void runProcessorHook(int pRenderLayerIndex)
 	{
-		for (Processor<?> lProcessor : mProcessorsMap.values())
+		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleRenderer(getClass()))
 			{
-				OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
+				final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
 				lOpenCLProcessor.setVolumeBuffers(mCLVolumeImages[pRenderLayerIndex]);
+
+				final long lStartTimeNs = System.nanoTime();
 				lOpenCLProcessor.process(	pRenderLayerIndex,
 																	getVolumeSizeX(),
 																	getVolumeSizeY(),
 																	getVolumeSizeZ());
+				final long lStopTimeNs = System.nanoTime();
+				final double lElapsedTimeInMilliseconds = 0.001 * 0.001 * (lStopTimeNs - lStartTimeNs);
+				/*System.out.format("Elapsedtime in '%s' is %g ms \n",
+													lOpenCLProcessor.getClass().getSimpleName(),
+													lElapsedTimeInMilliseconds);/**/
 			}
 	}
+
+	@Override
+	public void close()
+	{
+		mDisplayReentrantLock.lock();
+		try
+		{
+			super.close();
+			mCLDevice.close();
+		}
+		finally
+		{
+			if (mDisplayReentrantLock.isHeldByCurrentThread())
+				mDisplayReentrantLock.unlock();
+		}
+
+	}
+
 }

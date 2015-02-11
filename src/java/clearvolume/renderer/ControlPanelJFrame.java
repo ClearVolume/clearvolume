@@ -7,18 +7,20 @@ public class ControlPanelJFrame extends JFrame
 
 	private static final long serialVersionUID = 1L;
 
-	private ControlJPanel mControlJPanel;
+	private final ControlJPanel mControlJPanel;
 
 	/**
 	 * Create the frame.
 	 */
-	public ControlPanelJFrame()
+	public ControlPanelJFrame(
+			final int layerToBeControlled,
+			final ClearVolumeRendererInterface pClearVolumeRendererInterface )
 	{
 		super();
 		setSize(448, 149);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		mControlJPanel = new ControlJPanel();
+		mControlJPanel = new ControlJPanel( layerToBeControlled, pClearVolumeRendererInterface );
 		setContentPane(mControlJPanel);
 
 	}
@@ -28,7 +30,7 @@ public class ControlPanelJFrame extends JFrame
 		return mControlJPanel.getClearVolumeRendererInterface();
 	}
 
-	public void setClearVolumeRendererInterface(ClearVolumeRendererInterface pClearVolumeRendererInterface)
+	public void setClearVolumeRendererInterface(final ClearVolumeRendererInterface pClearVolumeRendererInterface)
 	{
 		mControlJPanel.setClearVolumeRendererInterface(pClearVolumeRendererInterface);
 	}

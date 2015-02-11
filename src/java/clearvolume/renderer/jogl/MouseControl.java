@@ -45,7 +45,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 	{
 		handleRotationAndTranslation(pMouseEvent);
 		handleGammaMinMax(pMouseEvent);
-		mRenderer.requestDisplay();
+		mRenderer.requestDisplayUnfairly();
 
 	}
 
@@ -126,7 +126,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 	public void mouseWheelMoved(final MouseEvent pMouseEvent)
 	{
 
-		float[] lWheelRotation = pMouseEvent.getRotation();
+		final float[] lWheelRotation = pMouseEvent.getRotation();
 
 		final double lZoomWheelFactor = 0.0125f;
 
@@ -137,7 +137,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 		mPreviousMouseY = pMouseEvent.getY();
 
 		mRenderer.notifyUpdateOfVolumeRenderingParameters();
-		mRenderer.requestDisplay();
+		mRenderer.requestDisplayUnfairly();
 	}
 
 	/**
