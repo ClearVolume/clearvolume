@@ -132,6 +132,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 		}
 	}
 
-
-
+  public FloatBuffer getPathPoints() {
+    return mPathPoints.getFloatBuffer();
+  }
 }
