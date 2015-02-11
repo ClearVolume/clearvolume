@@ -513,7 +513,6 @@ public class ClearVolumeDemo
 																																																						1,
 																																																						false);
 		lClearVolumeRenderer.addOverlay(new PathOverlay());
-		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
 
 		final ThreeVectorGenerator tg = new ThreeVectorGenerator();
 		final DriftOverlay driftOverlay = new DriftOverlay();

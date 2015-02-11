@@ -1,29 +1,23 @@
 package clearvolume.renderer.processors.impl;
 
+import static java.lang.Math.random;
+
 import java.nio.FloatBuffer;
 
 import clearvolume.renderer.processors.OpenCLProcessor;
 
-import com.nativelibs4java.opencl.CLKernel;
-
-public class ThreeVectorGenerator extends OpenCLProcessor<FloatBuffer>
+public class ThreeVectorGenerator	extends
+																	OpenCLProcessor<FloatBuffer>
 {
 
-	private CLKernel mProcessorKernel;
+	private final float cDelta = 0.1f;
+
+	private volatile float x, y, z;
 
 	@Override
 	public String getName()
 	{
 		return "threevectorgenerator";
-	}
-
-	public void ensureOpenCLInitialized()
-	{
-		if (mProcessorKernel == null)
-		{
-			mProcessorKernel = getDevice().compileKernel(	OpenCLTest.class.getResource("kernels/test.cl"),
-																										"test");
-		}
 	}
 
 	@Override
@@ -35,18 +29,15 @@ public class ThreeVectorGenerator extends OpenCLProcessor<FloatBuffer>
 		if (!isActive())
 			return;
 
-		ensureOpenCLInitialized();
-		getDevice().setArgs(mProcessorKernel, getVolumeBuffers());
-		getDevice().run(mProcessorKernel,
-										(int) pWidthInVoxels,
-										(int) pHeightInVoxels);
+		x += cDelta * (random() - 0.5);
+		y += cDelta * (random() - 0.5);
+		z += cDelta * (random() - 0.5);
 
-		final FloatBuffer randomVector = FloatBuffer.wrap(new float[]{
-                    -0.4f + (float)Math.random() * ((0.4f - (-0.4f)) + 0.8f),
-                    -0.4f + (float)Math.random() * ((0.4f - (-0.4f)) + 0.8f),
-                    -0.4f + (float)Math.random() * ((0.4f - (-0.4f)) + 0.8f)
-    });
+		final FloatBuffer lRandomVector = FloatBuffer.wrap(new float[]
+		{ x, y, z });
 
-		notifyListenersOfResult(randomVector);
+		System.out.format("new vector: (%g,%g,%g) \n", x, y, z);
+
+		notifyListenersOfResult(lRandomVector);
 	}
 }
