@@ -906,12 +906,25 @@ ClearVolumeCloseable
 	@Override
 	public void setTransferFunction(final TransferFunction pTransfertFunction)
 	{
-		mTransferFunctions[getCurrentRenderLayerIndex()] = pTransfertFunction;
+		setTransferFunction( getCurrentRenderLayerIndex(), pTransfertFunction );
 	}
 
 	/**
 	 * Interface method implementation
-	 * 
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransferFunction(int,
+	 *      clearvolume.transferf.TransferFunction)
+	 */
+	@Override
+	public void setTransferFunction(
+					final int pRenderLayerIndex,
+					final TransferFunction pTransfertFunction ) {
+		mTransferFunctions[ pRenderLayerIndex ] = pTransfertFunction;
+	}
+
+	/**
+	 * Interface method implementation
+	 *
 	 * @return
 	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTransferFunction(int)

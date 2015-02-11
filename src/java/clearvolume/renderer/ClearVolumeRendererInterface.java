@@ -230,8 +230,16 @@ ClearVolumeCloseable
 	void setTransferFunction(TransferFunction pTransfertFunction);
 
 	/**
+	 * Sets the transfer function used for rendering.
+	 * 
+	 * @param pTransfertFunction
+	 *            transfer function
+	 */
+	void setTransferFunction( int pRenderLayerIndex, TransferFunction pTransfertFunction );
+
+	/**
 	 * Returns the transfer function set for a given layer.
-	 *
+	 * 
 	 * @param pRenderLayerIndex
 	 */
 	TransferFunction getTransferFunction( int pRenderLayerIndex );
