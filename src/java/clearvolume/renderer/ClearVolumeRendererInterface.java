@@ -110,7 +110,7 @@ ClearVolumeCloseable
 
 	/**
 	 * Sets visibility of a given layer.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @param pVisble
 	 */
@@ -225,18 +225,26 @@ ClearVolumeCloseable
 	 * Sets the transfer function used for rendering.
 	 *
 	 * @param pTransfertFunction
-	 *          transfer function
+	 *            transfer function
 	 */
 	void setTransferFunction(TransferFunction pTransfertFunction);
 
 	/**
-	 * Sets the transfer function range. Both min and max values should be within
+	 * Returns the transfer function set for a given layer.
+	 *
+	 * @param pRenderLayerIndex
+	 */
+	TransferFunction getTransferFunction( int pRenderLayerIndex );
+
+	/**
+	 * Sets the transfer function range. Both min and max values should be
+	 * within
 	 * [0,1].
 	 *
 	 * @param pMin
-	 *          minimum
+	 *            minimum
 	 * @param pMax
-	 *          maximum
+	 *            maximum
 	 */
 	void setTransferFunctionRange(double pMin, double pMax);
 

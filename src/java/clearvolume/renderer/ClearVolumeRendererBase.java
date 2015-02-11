@@ -910,6 +910,18 @@ ClearVolumeCloseable
 	}
 
 	/**
+	 * Interface method implementation
+	 * 
+	 * @return
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTransferFunction(int)
+	 */
+	@Override
+	public TransferFunction getTransferFunction( final int pRenderLayerIndex ) {
+		return mTransferFunctions[ pRenderLayerIndex ];
+	}
+
+	/**
 	 * Returns transfer function for a given render layer.
 	 *
 	 * @return currently used transfer function
