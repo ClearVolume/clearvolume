@@ -28,6 +28,7 @@ import clearvolume.renderer.jogl.overlay.o3d.PathOverlay;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.CUDAProcessorTest;
+import clearvolume.renderer.processors.impl.OpenCLCenterMass;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 import clearvolume.renderer.processors.impl.OpenCLTest;
@@ -244,6 +245,96 @@ public class ClearVolumeDemo
 			                                         	lResolutionX,
 			                                         	lResolutionY,
 			                                         	lResolutionZ);
+			lClearVolumeRenderer.requestDisplay();
+		}
+
+		lClearVolumeRenderer.close();
+	}
+
+	@Test
+	public void demoOpenCLCenterOfMass() throws InterruptedException,
+																			IOException
+	{
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+																																																						512,
+																																																						512,
+																																																						1,
+																																																						512,
+																																																						512,
+																																																						1,
+																																																						false);
+		final DriftOverlay lDriftOverlay = new DriftOverlay();
+		lClearVolumeRenderer.addOverlay(lDriftOverlay);
+
+		final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
+		lOpenCLCenterMass.addResultListener(new ProcessorResultListener<IntBuffer>()
+		{
+			@Override
+			public void notifyResult(	Processor<IntBuffer> pSource,
+																IntBuffer pResult)
+			{
+
+			}
+		});
+
+		lClearVolumeRenderer.addProcessor(lOpenCLCenterMass);
+		// TODO: put that back: lOpenCLCenterMass.addResultListener(lDriftOverlay);
+
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
+
+		final int lResolutionX = 256;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																							* lResolutionZ];
+
+		for (int z = 0; z < lResolutionZ; z++)
+			for (int y = 0; y < lResolutionY; y++)
+				for (int x = 0; x < lResolutionX; x++)
+				{
+					final int lIndex = x + lResolutionX
+															* y
+															+ lResolutionX
+															* lResolutionY
+															* z;
+					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
+					if (lCharValue < 12)
+						lCharValue = 0;
+
+					lVolumeDataArray[lIndex] = (byte) lCharValue;
+					// lVolumeDataArray[lIndex] = (byte) (255 * x
+					// * x
+					// / lResolutionX / lResolutionX);
+
+				}
+
+		lClearVolumeRenderer.setCurrentRenderLayer(0);
+		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
+		lClearVolumeRenderer.requestDisplay();
+
+		final double s = 0;
+		while (lClearVolumeRenderer.isShowing())
+		{
+
+			Thread.sleep(100);
+
+			// lOpenCLTenengrad.setSigma(s);
+			// s += .5;
+
+			for (int i = 1; i < lVolumeDataArray.length - 1; i++)
+				lVolumeDataArray[i] = (byte) ((lVolumeDataArray[i - 1] + 2
+																				* lVolumeDataArray[i] + lVolumeDataArray[i + 1]) / 4);
+
+			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+																								lResolutionX,
+																								lResolutionY,
+																								lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
 		}
 
