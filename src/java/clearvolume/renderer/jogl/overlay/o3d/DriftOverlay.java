@@ -6,7 +6,7 @@ import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
 import javax.media.opengl.GL4;
 import java.awt.*;
@@ -22,7 +22,7 @@ import java.nio.FloatBuffer;
 public class DriftOverlay extends PathOverlay implements ProcessorResultListener<FloatBuffer>, Overlay2D {
   protected FloatBuffer mStartColor = FloatBuffer.wrap(new float[]{0.0f, 0.0f, 1.0f, 1.0f});
   protected FloatBuffer mEndColor = FloatBuffer.wrap(new float[]{1.0f, 0.0f, 0.0f, 1.0f});
-  protected DescriptiveStatistics stats;
+  protected SynchronizedDescriptiveStatistics stats;
 
   protected ClearTextRenderer textRenderer;
 
@@ -59,7 +59,7 @@ public class DriftOverlay extends PathOverlay implements ProcessorResultListener
   @Override
   public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix, GLMatrix pInvVolumeMatrix) {
     Font font = null;
-    stats = new DescriptiveStatistics();
+    stats = new SynchronizedDescriptiveStatistics();
 
     try {
       font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("fonts/SourceCodeProLight.ttf")).deriveFont(12.0f);
