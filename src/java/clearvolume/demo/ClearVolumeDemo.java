@@ -1081,7 +1081,7 @@ public class ClearVolumeDemo
 	public void demoStressTest() throws InterruptedException,
 	IOException
 	{
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < 50; i++)
 		{
 
 			final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
@@ -1094,9 +1094,9 @@ public class ClearVolumeDemo
 			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 			lClearVolumeRenderer.setVisible(true);
 
-			final int lResolutionX = 256;
-			final int lResolutionY = 256;
-			final int lResolutionZ = 256;
+			final int lResolutionX = 512;
+			final int lResolutionY = lResolutionX;
+			final int lResolutionZ = lResolutionX;
 
 			final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
 			                                         * lResolutionZ
@@ -1129,8 +1129,12 @@ public class ClearVolumeDemo
 																						IOException,
 																						InvocationTargetException
 	{
-		for (int i = 0; i < 20; i++)
+		for (int nfi = 0; nfi < 50; nfi++)
 		{
+			final int i = nfi;
+
+			final JFrame lJFrame = new JFrame("ClearVolume");
+			;
 
 			final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																																															(i % 2 == 0) ? 768
@@ -1145,32 +1149,39 @@ public class ClearVolumeDemo
 																																															1,
 																																															true);
 
-			/*final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-			                                                                                                     	i % 2 == 0 ? 768
-			                                                                                                     	           : 512,
-			                                                                                                     	           i % 2 == 0 ? 768
-			                                                                                                     	                      : 512,
-			                                                                                                     	                      1,
-			                                                                                                     	                      i % 2 == 0 ? 768
-			                                                                                                     	                                 : 512,
-			                                                                                                     	                                 i % 2 == 0 ? 768
-			                                                                                                     	                                            : 512,
-			                                                                                                     	                                            1,
-			                                                                                                     	                                            true);/**/
-			final NewtCanvasAWT lNewtCanvasAWT = lClearVolumeRenderer.getNewtCanvasAWT();
-
-			final JFrame lJFrame = new JFrame("ClearVolume");
-			lJFrame.setLayout(new BorderLayout());
-			final Container lContainer = new Container();
-			lContainer.setLayout(new BorderLayout());
-			lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);
-			lJFrame.setSize(new Dimension(1024, 1024));
-			lJFrame.add(lContainer);
-			SwingUtilities.invokeLater(new Runnable()
+			SwingUtilities.invokeAndWait(new Runnable()
 			{
 				@Override
 				public void run()
 				{
+
+					/*final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
+					                                                                                                     	i % 2 == 0 ? 768
+					                                                                                                     	           : 512,
+					                                                                                                     	           i % 2 == 0 ? 768
+					                                                                                                     	                      : 512,
+					                                                                                                     	                      1,
+					                                                                                                     	                      i % 2 == 0 ? 768
+					                                                                                                     	                                 : 512,
+					                                                                                                     	                                 i % 2 == 0 ? 768
+					                                                                                                     	                                            : 512,
+					                                                                                                     	                                            1,
+					                                                                                                     	                                            true);/**/
+					final NewtCanvasAWT lNewtCanvasAWT = lClearVolumeRenderer.getNewtCanvasAWT();
+
+
+					System.out.println("lJFrame.setTitle(...");
+					lJFrame.setTitle("BRAVO! THIS IS A JFRAME! It WORKS! I=" + i);
+					lJFrame.setLayout(new BorderLayout());
+					final Container lContainer = new Container();
+					lContainer.setLayout(new BorderLayout());
+
+					System.out.println("lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);");
+					lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);
+					lJFrame.setSize(new Dimension(1024, 1024));
+					lJFrame.add(lContainer);
+
+					System.out.println("lJFrame.setVisible(true);");
 					lJFrame.setVisible(true);
 				}
 			});
@@ -1207,24 +1218,34 @@ public class ClearVolumeDemo
 																									lResolutionX,
 																									lResolutionY,
 																									lResolutionZ);
+
+				System.out.println("lClearVolumeRenderer.requestDisplay();");
 				lClearVolumeRenderer.requestDisplay();
 			}
 
-			lJFrame.setTitle("BRAVO! THIS IS A JFRAME! It WORKS! I=" + i);
-			// Thread.sleep(1000);
+			/*try
+			{
+				//Thread.sleep(500);
+			}
+			catch (final InterruptedException e)
+			{
+				e.printStackTrace();
+			}/**/
 
 			SwingUtilities.invokeAndWait(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					lJFrame.setVisible(false);
+					System.out.println("lJFrame.setVisible(true); lJFrame.dispose();");
+					//lJFrame.setVisible(false);
 					lJFrame.dispose();
 				}
-			});
+			});/**/
 
 			lClearVolumeRenderer.close();
 		}
+
 	}
 
 	private static byte[] loadData(	final InputStream pInputStream,
