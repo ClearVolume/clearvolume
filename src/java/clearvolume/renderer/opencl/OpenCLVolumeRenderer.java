@@ -341,8 +341,9 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 									getTextureWidth(),
 									getTextureHeight());
 
+		ByteBuffer lRenderedImageBuffer = mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]);
 		copyBufferToTexture(pRenderLayerIndex,
-												mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]));
+												lRenderedImageBuffer);
 
 		// long endTime = System.nanoTime();
 

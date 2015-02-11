@@ -10,6 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
+import javax.swing.SwingUtilities;
+
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
@@ -56,7 +58,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Transfer functions used
 	 */
-	private TransferFunction[] mTransferFunctions;
+	private final TransferFunction[] mTransferFunctions;
 
 	// geometric, brigthness an contrast settings.
 	private volatile float mTranslationX = 0;
@@ -88,7 +90,7 @@ public abstract class ClearVolumeRendererBase	implements
 	// data copy locking and waiting
 	private final Object[] mSetVolumeDataBufferLocks;
 	private volatile ByteBuffer[] mVolumeDataByteBuffers;
-	private AtomicIntegerArray mDataBufferCopyIsFinished;
+	private final AtomicIntegerArray mDataBufferCopyIsFinished;
 
 	// Control frame:
 	private ControlPanelJFrame mControlFrame;
@@ -126,10 +128,10 @@ public abstract class ClearVolumeRendererBase	implements
 					try
 					{
 						lHostName = InetAddress.getLocalHost()
-																					.getHostName()
-																					.toLowerCase();
+																		.getHostName()
+																		.toLowerCase();
 					}
-					catch (Throwable e)
+					catch (final Throwable e)
 					{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -140,7 +142,7 @@ public abstract class ClearVolumeRendererBase	implements
 					if (!(lHostName.contains("mpi-cbg") || lHostName.contains("myers")))
 						mControlFrame.setVisible(true);
 				}
-				catch (Exception e)
+				catch (final Exception e)
 				{
 					e.printStackTrace();
 				}
@@ -843,8 +845,8 @@ public abstract class ClearVolumeRendererBase	implements
 			mVoxelSizeY = pVoxelSizeY;
 			mVoxelSizeZ = pVoxelSizeZ;
 
-			double lMaxSize = max(max(mVolumeSizeX, mVolumeSizeY),
-														mVolumeSizeZ);
+			final double lMaxSize = max(max(mVolumeSizeX, mVolumeSizeY),
+																	mVolumeSizeZ);
 
 			mScaleX = (float) (pVoxelSizeX * mVolumeSizeX / lMaxSize);
 			mScaleY = (float) (pVoxelSizeY * mVolumeSizeY / lMaxSize);
@@ -937,16 +939,16 @@ public abstract class ClearVolumeRendererBase	implements
 																						TimeUnit pTimeUnit)
 	{
 		boolean lNoTimeOut = true;
-		long lStartTimeInNanoseconds = System.nanoTime();
-		long lTimeOutTimeInNanoseconds = lStartTimeInNanoseconds + TimeUnit.NANOSECONDS.convert(pTimeOut,
-																																														pTimeUnit);
+		final long lStartTimeInNanoseconds = System.nanoTime();
+		final long lTimeOutTimeInNanoseconds = lStartTimeInNanoseconds + TimeUnit.NANOSECONDS.convert(pTimeOut,
+																																																	pTimeUnit);
 		while ((lNoTimeOut = System.nanoTime() < lTimeOutTimeInNanoseconds) && mDataBufferCopyIsFinished.get(pRenderLayerIndex) == 0)
 		{
 			try
 			{
 				Thread.sleep(1);
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				e.printStackTrace();
 			}
@@ -1027,7 +1029,34 @@ public abstract class ClearVolumeRendererBase	implements
 	public void close()
 	{
 		if (mControlFrame != null)
-			mControlFrame.dispose();
+			try
+			{
+				SwingUtilities.invokeLater(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						if (mControlFrame != null)
+							try
+							{
+								mControlFrame.dispose();
+								mControlFrame = null;
+							}
+							catch (final Throwable e)
+							{
+								e.printStackTrace();
+							}
+					}
+				});
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+			}
+
 	}
+
+
 
 }

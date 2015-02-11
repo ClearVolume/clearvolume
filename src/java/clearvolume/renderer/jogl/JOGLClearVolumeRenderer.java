@@ -16,6 +16,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLProfile;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -274,7 +275,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 		setNumberOfRenderLayers(pNumberOfRenderLayers);
 
 		mLayerTextures = new GLTexture[getNumberOfRenderLayers()];
-		mPixelBufferObjects = new GLPixelBufferObject[getNumberOfRenderLayers()];
+
+		if (mUsePBOs)
+			mPixelBufferObjects = new GLPixelBufferObject[getNumberOfRenderLayers()];
 
 		resetBrightnessAndGammaAndTransferFunctionRanges();
 		resetRotationTranslation();
@@ -287,22 +290,11 @@ public abstract class JOGLClearVolumeRenderer	extends
 																				pWindowHeight,
 																				this);
 
-		mClearGLWindow.getGLWindow()
-									.addWindowListener(new WindowAdapter()
-									{
-										@Override
-										public void windowDestroyNotify(WindowEvent pE)
-										{
-											mClearGLWindow = null;
-											super.windowDestroyNotify(pE);
-										}
-
-									});
-
 		if (pUseInCanvas)
 		{
+			System.out.println("new NewtCanvasAWT() ");
 			mNewtCanvasAWT = new NewtCanvasAWT(mClearGLWindow.getGLWindow());
-			mNewtCanvasAWT.setShallUseOffscreenLayer(true);
+			mNewtCanvasAWT.setShallUseOffscreenLayer(false);
 		}
 		else
 		{
@@ -345,24 +337,26 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void close()
 	{
+		if (mNewtCanvasAWT != null)
+		{
+			mNewtCanvasAWT = null;
+			/*try
+			{
+				mNewtCanvasAWT.destroy();
+				mNewtCanvasAWT = null;
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+			}/**/
+			return;
+		}
 
 		mDisplayReentrantLock.lock();
 		try
 		{
 			try
 			{
-				try
-				{
-					if (mNewtCanvasAWT != null)
-					{
-						mNewtCanvasAWT.destroy();
-						mNewtCanvasAWT = null;
-					}
-				}
-				catch (final Throwable e)
-				{
-					e.printStackTrace();
-				}
 
 				if (mClearGLWindow != null)
 				{
@@ -383,8 +377,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 		}
 		finally
 		{
-			if (mDisplayReentrantLock.isHeldByCurrentThread())
-				mDisplayReentrantLock.unlock();
+			// if (mDisplayReentrantLock.isHeldByCurrentThread())
+			// mDisplayReentrantLock.unlock();
 		}
 	}
 
@@ -616,14 +610,16 @@ public abstract class JOGLClearVolumeRenderer	extends
 																									1,
 																									true,
 																									3);
+					if (mUsePBOs)
+					{
+						mPixelBufferObjects[i] = new GLPixelBufferObject(	mGLProgram,
+																															mTextureWidth,
+																															mTextureHeight);
 
-					mPixelBufferObjects[i] = new GLPixelBufferObject(	mGLProgram,
-																														mTextureWidth,
-																														mTextureHeight);
+						mPixelBufferObjects[i].copyFrom(null);
 
-					mPixelBufferObjects[i].copyFrom(null);
-
-					registerPBO(i, mPixelBufferObjects[i].getId());
+						registerPBO(i, mPixelBufferObjects[i].getId());
+					}
 				}
 
 			}
@@ -989,17 +985,19 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void dispose(final GLAutoDrawable arg0)
 	{
-		try
-		{
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+
+		if (mUsePBOs)
+			try
 			{
-				unregisterPBO(i, mPixelBufferObjects[i].getId());
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					unregisterPBO(i, mPixelBufferObjects[i].getId());
+				}
 			}
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-		}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+			}
 
 	}
 
@@ -1097,6 +1095,27 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void requestDisplay()
 	{
+		if (mNewtCanvasAWT != null)
+		{
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						if (mNewtCanvasAWT != null)
+							mNewtCanvasAWT.repaint();
+					}
+					catch (final NullPointerException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			});
+			return;
+		}
+
 		boolean lLocked;
 		try
 		{
@@ -1107,6 +1126,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 			{
 				try
 				{
+
 					if (mClearGLWindow == null)
 						return;
 					mClearGLWindow.getGLWindow().display();
@@ -1121,6 +1141,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 																																															.getSimpleName()
 															+ "->"
 															+ e.getLocalizedMessage());
+					e.printStackTrace();
 				}
 				finally
 				{
