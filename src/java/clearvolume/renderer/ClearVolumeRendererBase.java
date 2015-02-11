@@ -10,6 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
+import javax.swing.SwingUtilities;
+
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
@@ -28,8 +30,8 @@ import clearvolume.volume.VolumeManager;
  *
  */
 public abstract class ClearVolumeRendererBase	implements
-ClearVolumeRendererInterface,
-ClearVolumeCloseable
+																							ClearVolumeRendererInterface,
+																							ClearVolumeCloseable
 {
 
 	/**
@@ -124,7 +126,7 @@ ClearVolumeCloseable
 			mBrightness[i] = 1;
 			mTransferFunctionRangeMin[i] = 0f;
 			mTransferFunctionRangeMax[i] = 1f;
-			mGamma[ i ] = 1.0f;
+			mGamma[i] = 1.0f;
 		}
 
 		final ClearVolumeRendererBase lThis = this;
@@ -135,14 +137,15 @@ ClearVolumeCloseable
 			{
 				try
 				{
-					mControlFrame = new ControlPanelJFrame( getCurrentRenderLayerIndex(), lThis );
+					mControlFrame = new ControlPanelJFrame(	getCurrentRenderLayerIndex(),
+																									lThis);
 
 					String lHostName = "localhost";
 					try
 					{
 						lHostName = InetAddress.getLocalHost()
-								.getHostName()
-								.toLowerCase();
+																		.getHostName()
+																		.toLowerCase();
 					}
 					catch (final Throwable e)
 					{
@@ -226,12 +229,12 @@ ClearVolumeCloseable
 	 * @param pVolumeSizeZ
 	 */
 	public void setVolumeSize(final double pVolumeSizeX,
-	                          final double pVolumeSizeY,
-	                          final double pVolumeSizeZ)
+														final double pVolumeSizeY,
+														final double pVolumeSizeZ)
 	{
 		final double lMaxXYZ = Math.max(Math.max(	pVolumeSizeX,
-		                                         	pVolumeSizeY),
-		                                         	pVolumeSizeZ);
+																							pVolumeSizeY),
+																		pVolumeSizeZ);
 
 		setScaleX(pVolumeSizeX / lMaxXYZ);
 		setScaleY(pVolumeSizeY / lMaxXYZ);
@@ -379,7 +382,7 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setLayerVisible(final int pRenderLayerIndex,
-	                            final boolean pVisble)
+															final boolean pVisble)
 	{
 		mLayerVisiblityFlagArray[pRenderLayerIndex] = pVisble;
 		notifyUpdateOfVolumeRenderingParameters();
@@ -396,7 +399,7 @@ ClearVolumeCloseable
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
 			mBrightness[i] = 1.0f;
-			mGamma[ i ] = 1.0f;
+			mGamma[i] = 1.0f;
 			mTransferFunctionRangeMin[i] = 0.0f;
 			mTransferFunctionRangeMax[i] = 1.0f;
 		}
@@ -422,10 +425,10 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void addBrightness(final int pRenderLayerIndex,
-	                          final double pBrightnessDelta)
+														final double pBrightnessDelta)
 	{
 		setBrightness(pRenderLayerIndex,
-		              getBrightness() + pBrightnessDelta);
+									getBrightness() + pBrightnessDelta);
 	}
 
 	/**
@@ -472,12 +475,12 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setBrightness(final int pRenderLayerIndex,
-	                          final double pBrightness)
+														final double pBrightness)
 	{
 		mBrightness[getCurrentRenderLayerIndex()] = (float) clamp(getBrightness(getCurrentRenderLayerIndex()),
-		                                                          0,
-		                                                          getBytesPerVoxel() == 1	? 16
-		                                                                                 	: 256);
+																															0,
+																															getBytesPerVoxel() == 1	? 16
+																																											: 256);
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
@@ -523,7 +526,7 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setGamma(	final int pRenderLayerIndex,
-	                     	final double pGamma)
+												final double pGamma)
 	{
 		mGamma[pRenderLayerIndex] = (float) pGamma;
 		notifyUpdateOfVolumeRenderingParameters();
@@ -588,11 +591,11 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setTransferFunctionRange(	final double pTransferRangeMin,
-	                                     	final double pTransferRangeMax)
+																				final double pTransferRangeMax)
 	{
 		setTransferFunctionRange(	getCurrentRenderLayerIndex(),
-		                         	pTransferRangeMin,
-		                         	pTransferRangeMax);
+															pTransferRangeMin,
+															pTransferRangeMax);
 	}
 
 	/**
@@ -605,15 +608,15 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setTransferFunctionRange(	final int pRenderLayerIndex,
-	                                     	final double pTransferRangeMin,
-	                                     	final double pTransferRangeMax)
+																				final double pTransferRangeMin,
+																				final double pTransferRangeMax)
 	{
 		mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
-		                                                             	0,
-		                                                             	1);
+																																	0,
+																																	1);
 		mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
-		                                                             	0,
-		                                                             	1);
+																																	0,
+																																	1);
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
@@ -627,7 +630,7 @@ ClearVolumeCloseable
 	public void setTransferFunctionRangeMin(final double pTransferRangeMin)
 	{
 		setTransferFunctionRangeMin(getCurrentRenderLayerIndex(),
-		                            pTransferRangeMin);
+																pTransferRangeMin);
 	}
 
 	/**
@@ -638,11 +641,11 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setTransferFunctionRangeMin(final int pRenderLayerIndex,
-	                                        final double pTransferRangeMin)
+																					final double pTransferRangeMin)
 	{
 		mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
-		                                                             	0,
-		                                                             	1);
+																																	0,
+																																	1);
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
@@ -656,7 +659,7 @@ ClearVolumeCloseable
 	public void setTransferFunctionRangeMax(final double pTransferRangeMax)
 	{
 		setTransferFunctionRangeMax(getCurrentRenderLayerIndex(),
-		                            pTransferRangeMax);
+																pTransferRangeMax);
 	}
 
 	/**
@@ -667,11 +670,11 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setTransferFunctionRangeMax(final int pRenderLayerIndex,
-	                                        final double pTransferRangeMax)
+																					final double pTransferRangeMax)
 	{
 		mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
-		                                                             	0,
-		                                                             	1);
+																																	0,
+																																	1);
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
@@ -695,7 +698,7 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void addTransferFunctionRangeMin(final int pRenderLayerIndex,
-	                                        final double pDelta)
+																					final double pDelta)
 	{
 		setTransferFunctionRangeMin(getTransferRangeMin(pRenderLayerIndex) + pDelta);
 	}
@@ -720,10 +723,10 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void addTransferFunctionRangeMax(final int pRenderLayerIndex,
-	                                        final double pDelta)
+																					final double pDelta)
 	{
 		setTransferFunctionRangeMax(pRenderLayerIndex,
-		                            getTransferRangeMax(pRenderLayerIndex) + pDelta);
+																getTransferRangeMax(pRenderLayerIndex) + pDelta);
 	}
 
 	/**
@@ -906,7 +909,34 @@ ClearVolumeCloseable
 	@Override
 	public void setTransferFunction(final TransferFunction pTransfertFunction)
 	{
-		mTransferFunctions[getCurrentRenderLayerIndex()] = pTransfertFunction;
+		setTransferFunction(getCurrentRenderLayerIndex(),
+												pTransfertFunction);
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransferFunction(int,
+	 *      clearvolume.transferf.TransferFunction)
+	 */
+	@Override
+	public void setTransferFunction(final int pRenderLayerIndex,
+																	final TransferFunction pTransfertFunction)
+	{
+		mTransferFunctions[pRenderLayerIndex] = pTransfertFunction;
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @return
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTransferFunction(int)
+	 */
+	@Override
+	public TransferFunction getTransferFunction(final int pRenderLayerIndex)
+	{
+		return mTransferFunctions[pRenderLayerIndex];
 	}
 
 	/**
@@ -1038,9 +1068,9 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
-	                                final long pSizeX,
-	                                final long pSizeY,
-	                                final long pSizeZ)
+																	final long pSizeX,
+																	final long pSizeY,
+																	final long pSizeZ)
 	{
 		setVolumeDataBuffer(pByteBuffer, pSizeX, pSizeY, pSizeZ, 1, 1, 1);
 	}
@@ -1053,8 +1083,8 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setVoxelSize(	final double pVoxelSizeX,
-	                         	final double pVoxelSizeY,
-	                         	final double pVoxelSizeZ)
+														final double pVoxelSizeY,
+														final double pVoxelSizeZ)
 	{
 		mVoxelSizeX = pVoxelSizeX;
 		mVoxelSizeY = pVoxelSizeY;
@@ -1069,12 +1099,12 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
-	                                final long pSizeX,
-	                                final long pSizeY,
-	                                final long pSizeZ,
-	                                final double pVoxelSizeX,
-	                                final double pVoxelSizeY,
-	                                final double pVoxelSizeZ)
+																	final long pSizeX,
+																	final long pSizeY,
+																	final long pSizeZ,
+																	final double pVoxelSizeX,
+																	final double pVoxelSizeY,
+																	final double pVoxelSizeZ)
 	{
 		synchronized (getSetVolumeDataBufferLock(getCurrentRenderLayerIndex()))
 		{
@@ -1094,7 +1124,7 @@ ClearVolumeCloseable
 			mVoxelSizeZ = pVoxelSizeZ;
 
 			final double lMaxSize = max(max(mVolumeSizeX, mVolumeSizeY),
-			                            mVolumeSizeZ);
+																	mVolumeSizeZ);
 
 			mScaleX = (float) (pVoxelSizeX * mVolumeSizeX / lMaxSize);
 			mScaleY = (float) (pVoxelSizeY * mVolumeSizeY / lMaxSize);
@@ -1113,12 +1143,12 @@ ClearVolumeCloseable
 		synchronized (getSetVolumeDataBufferLock(getCurrentRenderLayerIndex()))
 		{
 			setVolumeDataBuffer(pVolume.getDataBuffer(),
-			                    pVolume.getWidthInVoxels(),
-			                    pVolume.getHeightInVoxels(),
-			                    pVolume.getDepthInVoxels(),
-			                    pVolume.getVoxelWidthInRealUnits(),
-			                    pVolume.getVoxelHeightInRealUnits(),
-			                    pVolume.getVoxelDepthInRealUnits());
+													pVolume.getWidthInVoxels(),
+													pVolume.getHeightInVoxels(),
+													pVolume.getDepthInVoxels(),
+													pVolume.getVoxelWidthInRealUnits(),
+													pVolume.getVoxelHeightInRealUnits(),
+													pVolume.getVoxelDepthInRealUnits());
 		}
 	}
 
@@ -1151,13 +1181,13 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public boolean waitToFinishAllDataBufferCopy(	final long pTimeOut,
-	                                             	final TimeUnit pTimeUnit)
+																								final TimeUnit pTimeUnit)
 	{
 		boolean lNoTimeOut = true;
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			lNoTimeOut &= waitToFinishDataBufferCopy(	getCurrentRenderLayerIndex(),
-			                                         	pTimeOut,
-			                                         	pTimeUnit);
+																								pTimeOut,
+																								pTimeUnit);
 
 		return lNoTimeOut;
 	}
@@ -1169,11 +1199,11 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public boolean waitToFinishDataBufferCopy(final long pTimeOut,
-	                                          final TimeUnit pTimeUnit)
+																						final TimeUnit pTimeUnit)
 	{
 		return waitToFinishDataBufferCopy(getCurrentRenderLayerIndex(),
-		                                  pTimeOut,
-		                                  pTimeUnit);
+																			pTimeOut,
+																			pTimeUnit);
 	}
 
 	/**
@@ -1183,13 +1213,14 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
-	                                          final long pTimeOut,
-	                                          final TimeUnit pTimeUnit)
+																						final long pTimeOut,
+																						final TimeUnit pTimeUnit)
 	{
 		boolean lNoTimeOut = true;
 		final long lStartTimeInNanoseconds = System.nanoTime();
 		final long lTimeOutTimeInNanoseconds = lStartTimeInNanoseconds + TimeUnit.NANOSECONDS.convert(pTimeOut,
-		                                                                                              pTimeUnit);
+																																																	pTimeUnit);
+
 		while ((lNoTimeOut = System.nanoTime() < lTimeOutTimeInNanoseconds) && mDataBufferCopyIsFinished.get(pRenderLayerIndex) == 0)
 		{
 			try
@@ -1223,7 +1254,7 @@ ClearVolumeCloseable
 	public boolean hasRotationController()
 	{
 		return mRotationController != null ? mRotationController.isActive()
-		                                   : false;
+																			: false;
 	}
 
 	/**
@@ -1267,8 +1298,8 @@ ClearVolumeCloseable
 	 * @return clamped value
 	 */
 	public static double clamp(	final double pValue,
-	                           	final double pMin,
-	                           	final double pMax)
+															final double pMin,
+															final double pMax)
 	{
 		return Math.min(Math.max(pValue, pMin), pMax);
 	}
@@ -1277,7 +1308,32 @@ ClearVolumeCloseable
 	public void close()
 	{
 		if (mControlFrame != null)
-			mControlFrame.dispose();
+			try
+			{
+				SwingUtilities.invokeAndWait(new Runnable()
+				{
+
+					@Override
+					public void run()
+					{
+						if (mControlFrame != null)
+							try
+							{
+								mControlFrame.dispose();
+								mControlFrame = null;
+							}
+							catch (final Throwable e)
+							{
+								e.printStackTrace();
+							}
+					}
+				});
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+			}
+
 	}
 
 }
