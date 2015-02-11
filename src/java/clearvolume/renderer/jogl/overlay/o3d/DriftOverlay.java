@@ -6,6 +6,7 @@ import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
 import javax.media.opengl.GL4;
 import java.awt.*;
@@ -21,6 +22,7 @@ import java.nio.FloatBuffer;
 public class DriftOverlay extends PathOverlay implements ProcessorResultListener<FloatBuffer>, Overlay2D {
   protected FloatBuffer mStartColor = FloatBuffer.wrap(new float[]{0.0f, 0.0f, 1.0f, 1.0f});
   protected FloatBuffer mEndColor = FloatBuffer.wrap(new float[]{1.0f, 0.0f, 0.0f, 1.0f});
+  protected SynchronizedDescriptiveStatistics stats;
 
   protected ClearTextRenderer textRenderer;
 
@@ -57,15 +59,27 @@ public class DriftOverlay extends PathOverlay implements ProcessorResultListener
   @Override
   public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix, GLMatrix pInvVolumeMatrix) {
     Font font = null;
+    stats = new SynchronizedDescriptiveStatistics();
+
     try {
-      font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("fonts/SourceCodeProLight.ttf")).deriveFont(18.0f);
+      font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("fonts/SourceCodeProLight.ttf")).deriveFont(12.0f);
     } catch (FontFormatException e) {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
 
-    textRenderer.drawTextAtPosition("hello world", 100, 100, font, FloatBuffer.wrap(new float[]{1.0f, 1.0f, 1.0f}));
+    int i = 0;
+    for(; i < getPathPoints().capacity(); i = i + 3) {
+      float x = getPathPoints().get(i);
+      float y = getPathPoints().get(i+1);
+      float z = getPathPoints().get(i+2);
+      float dist = (float)Math.sqrt(x*x + y*y + z*z);
+
+      stats.addValue(dist);
+    }
+
+    textRenderer.drawTextAtPosition("drift stats: n=" + i/3 + " avg=" + String.format("%.3f", stats.getMean()) + " stddev=" + String.format("%.3f", stats.getStandardDeviation()) + " min=" + String.format("%.3f", stats.getMin()) + " max=" + String.format("%.3f", stats.getMax()), 10, 15, font, FloatBuffer.wrap(new float[]{1.0f, 1.0f, 1.0f}), false);
   }
 }
 
