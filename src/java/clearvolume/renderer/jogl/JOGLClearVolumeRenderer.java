@@ -100,7 +100,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private final GLMatrix mVolumeViewMatrix = new GLMatrix();
 	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
 
-	private final int mMaxTextureWidth = 768, mMaxTextureHeight = 768;
 	private final int mTextureWidth, mTextureHeight;
 
 	protected boolean mUsePBOs = true;
@@ -264,8 +263,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		super(pNumberOfRenderLayers);
 
-		mTextureWidth = Math.min(mMaxTextureWidth, pWindowWidth);
-		mTextureHeight = Math.min(mMaxTextureHeight, pWindowHeight);
+		mTextureWidth = Math.min(pMaxTextureWidth, pWindowWidth);
+		mTextureHeight = Math.min(pMaxTextureHeight, pWindowHeight);
 
 		mWindowName = pWindowName;
 		mLastWindowWidth = pWindowWidth;

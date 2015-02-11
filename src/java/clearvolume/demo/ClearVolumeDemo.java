@@ -1072,7 +1072,7 @@ public class ClearVolumeDemo
 	public void demoStressTest() throws InterruptedException,
 	IOException
 	{
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 20; i++)
 		{
 
 			final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
@@ -1108,7 +1108,7 @@ public class ClearVolumeDemo
 			                                         	lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
 
-			Thread.sleep(100);
+			// Thread.sleep(100);
 
 			lClearVolumeRenderer.close();
 		}
@@ -1202,7 +1202,7 @@ public class ClearVolumeDemo
 			}
 
 			lJFrame.setTitle("BRAVO! THIS IS A JFRAME! It WORKS! I=" + i);
-			Thread.sleep(1000);
+			// Thread.sleep(1000);
 
 			SwingUtilities.invokeAndWait(new Runnable()
 			{
