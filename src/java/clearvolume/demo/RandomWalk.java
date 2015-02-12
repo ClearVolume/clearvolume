@@ -1,13 +1,9 @@
-package clearvolume.renderer.processors.impl;
+package clearvolume.demo;
 
 import static java.lang.Math.random;
+import clearvolume.renderer.processors.ProcessorBase;
 
-import java.nio.FloatBuffer;
-
-import clearvolume.renderer.processors.OpenCLProcessor;
-
-public class ThreeVectorGenerator	extends
-																	OpenCLProcessor<FloatBuffer>
+public class RandomWalk extends ProcessorBase<float[]>
 {
 
 	private final float cDelta = 0.1f;
@@ -33,11 +29,17 @@ public class ThreeVectorGenerator	extends
 		y += cDelta * (random() - 0.5);
 		z += cDelta * (random() - 0.5);
 
-		final FloatBuffer lRandomVector = FloatBuffer.wrap(new float[]
-		{ x, y, z });
+		final float[] lRandomVector = new float[]
+		{ x, y, z };
 
 		System.out.format("new vector: (%g,%g,%g) \n", x, y, z);
 
 		notifyListenersOfResult(lRandomVector);
+	}
+
+	@Override
+	public boolean isCompatibleProcessor(Class<?> pRendererClass)
+	{
+		return true;
 	}
 }

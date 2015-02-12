@@ -11,7 +11,7 @@ public abstract class OpenCLProcessor<R> extends ProcessorBase<R>	implements
 	private Object[] mVolumeBuffers;
 
 	@Override
-	public boolean isCompatibleRenderer(Class<?> pRendererClass)
+	public boolean isCompatibleProcessor(Class<?> pRendererClass)
 	{
 		return pRendererClass == OpenCLVolumeRenderer.class;
 	}

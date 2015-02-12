@@ -8,7 +8,7 @@ public interface Processor<R>
 
 	public void removeResultListener(ProcessorResultListener<R> pProcessorResultListener);
 
-	public boolean isCompatibleRenderer(Class<?> pRendererClass);
+	public boolean isCompatibleProcessor(Class<?> pRendererClass);
 
 	public void process(int pRenderLayerIndex,
 											long pWidthInVoxels,

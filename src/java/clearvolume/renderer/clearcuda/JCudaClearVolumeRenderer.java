@@ -288,7 +288,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 
 			for (final Processor<?> lProcessor : mProcessorsMap.values())
-				if (lProcessor.isCompatibleRenderer(getClass()))
+				if (lProcessor.isCompatibleProcessor(getClass()))
 				{
 					final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
 					lCUDAProcessor.setDeviceAndContext(	mCudaDevice,
@@ -818,7 +818,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private void runProcessorsHook(int pRenderLayerIndex)
 	{
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
-			if (lProcessor.isCompatibleRenderer(getClass()))
+			if (lProcessor.isCompatibleProcessor(getClass()))
 			{
 				final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
 				lCUDAProcessor.applyToArray(mVolumeDataCudaArrays[pRenderLayerIndex]);

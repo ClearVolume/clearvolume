@@ -47,7 +47,7 @@ public abstract class ProcessorBase<R> implements Processor<R>
 	};
 
 	@Override
-	public abstract boolean isCompatibleRenderer(Class<?> pRendererClass);
+	public abstract boolean isCompatibleProcessor(Class<?> pRendererClass);
 
 	@Override
 	public abstract void process(	int pRenderLayerIndex,

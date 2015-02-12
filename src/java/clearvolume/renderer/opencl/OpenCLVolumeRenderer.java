@@ -112,7 +112,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																						"volumerender");
 
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
-			if (lProcessor.isCompatibleRenderer(getClass()))
+			if (lProcessor.isCompatibleProcessor(getClass()))
 			{
 				final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
 				lOpenCLProcessor.setDevice(mCLDevice);
@@ -361,7 +361,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private void runProcessorHook(int pRenderLayerIndex)
 	{
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
-			if (lProcessor.isCompatibleRenderer(getClass()))
+			if (lProcessor.isCompatibleProcessor(getClass()))
 			{
 				final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
 				lOpenCLProcessor.setVolumeBuffers(mCLVolumeImages[pRenderLayerIndex]);

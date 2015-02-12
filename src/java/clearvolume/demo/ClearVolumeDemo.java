@@ -33,7 +33,6 @@ import clearvolume.renderer.processors.impl.OpenCLCenterMass;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 import clearvolume.renderer.processors.impl.OpenCLTest;
-import clearvolume.renderer.processors.impl.ThreeVectorGenerator;
 import clearvolume.transferf.TransferFunctions;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
@@ -514,12 +513,12 @@ public class ClearVolumeDemo
 																																																						false);
 		lClearVolumeRenderer.addOverlay(new PathOverlay());
 
-		final ThreeVectorGenerator tg = new ThreeVectorGenerator();
+		final RandomWalk RandomWalk = new RandomWalk();
 		final DriftOverlay driftOverlay = new DriftOverlay();
 		lClearVolumeRenderer.addOverlay(driftOverlay);
-		tg.addResultListener(driftOverlay);
+		RandomWalk.addResultListener(driftOverlay);
 
-		lClearVolumeRenderer.addProcessor(tg);
+		lClearVolumeRenderer.addProcessor(RandomWalk);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
