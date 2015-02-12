@@ -1,105 +1,106 @@
 package clearvolume.renderer.processors.impl;
 
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 import clearvolume.renderer.processors.OpenCLProcessor;
 
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 
-public class OpenCLCenterMass extends OpenCLProcessor<IntBuffer>
-{
+public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 
-	private CLKernel mKernelHist;
+	private CLKernel mKernel;
 
-	private CLBuffer<Float> mBufBins;
-	private CLBuffer<Integer> mBufCounts;
-	private float[] mBins;
+	private CLBuffer<Float> mBufX, mBufY, mBufZ, mBufSum;
+
+	private long mCurrentWidthInVoxels, mCurrentHeightInVoxels,
+			mCurrentDepthInVoxels;
+
+	private int mPaddedShapeX, mPaddedShapeY, mPaddedShapeZ;
+	private int mLocalShapeX, mLocalShapeY, mLocalShapeZ;
+
+	private final int mLocalSize = 8;
+	private final int mDownSample = 4;
 
 	@Override
-	public String getName()
-	{
-		return "opencl_histogram";
+	public String getName() {
+		return "opencl_center_of_mass";
 	}
 
-	public void setBins(final float[] pBins)
-	{
-		mBins = pBins;
-
-	}
-
-	public void ensureOpenCLInitialized()
-	{
-		if (mKernelHist == null)
-		{
-			mKernelHist = getDevice().compileKernel(OpenCLCenterMass.class.getResource("kernels/histogram.cl"),
-																							"histogram");
+	public void ensureOpenCLInitialized() {
+		if (mKernel == null) {
+			mKernel = getDevice()
+					.compileKernel(
+							OpenCLCenterMass.class
+									.getResource("kernels/centermass.cl"),
+							"center_of_mass_img");
 		}
-
-		final float[] bins = new float[10];
-		for (int i = 0; i < bins.length; i++)
-		{
-			bins[i] = 1.f * i / bins.length;
-		}
-		setBins(bins);
-
 	}
 
-	public void initBuffers()
-	{
+	public void initBuffers(long pWidthInVoxels, long pHeightInVoxels,
+			long pDepthInVoxels) {
 
-		final int lBinSize = mBins.length;
+		final int cutSize = mDownSample * mLocalSize;
 
+		mPaddedShapeX = (int) (Math.ceil(1. * pWidthInVoxels / cutSize) * mLocalSize);
+		mPaddedShapeY = (int) (Math.ceil(1. * pHeightInVoxels / cutSize) * mLocalSize);
+		mPaddedShapeZ = (int) (Math.ceil(1. * pDepthInVoxels / cutSize) * mLocalSize);
+
+		mLocalShapeX = mPaddedShapeX / mLocalSize;
+		mLocalShapeY = mPaddedShapeY / mLocalSize;
+		mLocalShapeZ = mPaddedShapeZ / mLocalSize;
+
+		// System.out.println(mLocalShapeX);
+		// System.out.println(mPaddedShapeX);
+
+		final long lBinSize = mLocalShapeX * mLocalShapeY * mLocalShapeZ;
 		// the buffer containing the counts
-		mBufCounts = getDevice().createOutputIntBuffer(lBinSize);
-
-		// the buffer containing the bins values
-		mBufBins = getDevice().createInputFloatBuffer(lBinSize);
+		mBufX = getDevice().createOutputFloatBuffer(lBinSize);
+		mBufY = getDevice().createOutputFloatBuffer(lBinSize);
+		mBufZ = getDevice().createOutputFloatBuffer(lBinSize);
+		mBufSum = getDevice().createOutputFloatBuffer(lBinSize);
 
 	}
 
 	@Override
-	public void process(int pRenderLayerIndex,
-											long pWidthInVoxels,
-											long pHeightInVoxels,
-											long pDepthInVoxels)
-	{
+	public void process(int pRenderLayerIndex, long pWidthInVoxels,
+			long pHeightInVoxels, long pDepthInVoxels) {
 		if (!isActive())
 			return;
 
 		ensureOpenCLInitialized();
 
-		if (mBufBins == null)
-		{
-			System.out.println("setting up buffers");
-			initBuffers();
+		if (mBufX == null || pWidthInVoxels != mCurrentWidthInVoxels
+				|| pHeightInVoxels != mCurrentHeightInVoxels
+				|| pDepthInVoxels != mCurrentDepthInVoxels) {
+			// System.out.println("setting up buffers");
+			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 		}
 
-		// fill the bins
-		getDevice().writeFloatBuffer(mBufBins, FloatBuffer.wrap(mBins));
+		mKernel.setArgs(getVolumeBuffers()[0], mBufX, mBufY, mBufZ, mBufSum,
+				mDownSample);
 
-		final FloatBuffer bins = FloatBuffer.wrap(mBins);
+		getDevice().run(mKernel, mPaddedShapeX, mPaddedShapeY,
+				mPaddedShapeZ, mLocalSize, mLocalSize,
+				mLocalSize);
 
-		mKernelHist.setArgs(getVolumeBuffers()[0],
-												mBufBins,
-												mBufCounts,
-												mBins.length);
+		final FloatBuffer outX = getDevice().readFloatBuffer(mBufX);
+		final FloatBuffer outY = getDevice().readFloatBuffer(mBufY);
+		final FloatBuffer outZ = getDevice().readFloatBuffer(mBufZ);
 
-		getDevice().run(mKernelHist,
-										(int) pWidthInVoxels,
-										(int) pHeightInVoxels,
-										(int) pDepthInVoxels);
+		final FloatBuffer outSum = getDevice().readFloatBuffer(mBufSum);
 
-		final IntBuffer out = getDevice().readIntBufferAsByte(mBufCounts)
-																.asIntBuffer();
+		float resX = 0.f, resY = 0.f, resZ = 0.f, resSum = 0.f;
 
-		for (int i = 0; i < out.capacity(); i++)
-		{
-			System.out.println(out.get(i));
+		for (int i = 0; i < outX.capacity(); i++) {
+			resX += outX.get(i);
+			resY += outY.get(i);
+			resZ += outZ.get(i);
+			resSum += outSum.get(i);
 		}
 
-		notifyListenersOfResult(out);
+		notifyListenersOfResult(new float[] { resX / resSum, resY / resSum,
+				resZ / resSum, resSum });
 
 	}
 }
