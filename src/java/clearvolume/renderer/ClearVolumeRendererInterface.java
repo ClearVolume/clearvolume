@@ -31,8 +31,8 @@ import com.jogamp.newt.awt.NewtCanvasAWT;
  *
  */
 public interface ClearVolumeRendererInterface	extends
-																							DisplayRequestInterface,
-																							ClearVolumeCloseable
+DisplayRequestInterface,
+ClearVolumeCloseable
 {
 
 	/**
@@ -111,7 +111,11 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Sets visibility of a given layer.
+<<<<<<< HEAD
 	 *
+=======
+	 * 
+>>>>>>> MultiLayerImprovements
 	 * @param pRenderLayerIndex
 	 * @param pVisble
 	 */
@@ -171,22 +175,23 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pTransferRangeMax
 	 */
 	void setTransferFunctionRange(int pRenderLayerIndex,
-																double pTransferRangeMin,
-																double pTransferRangeMax);
+
+	                              double pTransferRangeMin,
+	                              double pTransferRangeMax);
 
 	/**
 	 * @param pRenderLayerIndex
 	 * @param pTransferRangeMin
 	 */
 	void setTransferFunctionRangeMin(	int pRenderLayerIndex,
-																		double pTransferRangeMin);
+	                                 	double pTransferRangeMin);
 
 	/**
 	 * @param pRenderLayerIndex
 	 * @param pTransferRangeMax
 	 */
 	void setTransferFunctionRangeMax(	int pRenderLayerIndex,
-																		double pTransferRangeMax);
+	                                 	double pTransferRangeMax);
 
 	/**
 	 * @param pDelta
@@ -198,7 +203,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pDelta
 	 */
 	void addTransferFunctionRangeMin(	int pRenderLayerIndex,
-																		double pDelta);
+	                                 	double pDelta);
 
 	/**
 	 * @param pDelta
@@ -210,7 +215,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pDelta
 	 */
 	void addTransferFunctionRangeMax(	int pRenderLayerIndex,
-																		double pDelta);
+	                                 	double pDelta);
 
 	/**
 	 * @param pTransferRangePositionDelta
@@ -372,9 +377,9 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pSizeZ
 	 */
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
-														long pSizeX,
-														long pSizeY,
-														long pSizeZ);
+	                         	long pSizeX,
+	                         	long pSizeY,
+	                         	long pSizeZ);
 
 	/**
 	 * Updates the voxel size of subsequently rendered volumes
@@ -384,8 +389,8 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pVoxelSizeZ
 	 */
 	public void setVoxelSize(	double pVoxelSizeX,
-														double pVoxelSizeY,
-														double pVoxelSizeZ);
+	                         	double pVoxelSizeY,
+	                         	double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -400,12 +405,12 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pVoxelSizeZ
 	 */
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
-														long pSizeX,
-														long pSizeY,
-														long pSizeZ,
-														double pVoxelSizeX,
-														double pVoxelSizeY,
-														double pVoxelSizeZ);
+	                         	long pSizeX,
+	                         	long pSizeY,
+	                         	long pSizeZ,
+	                         	double pVoxelSizeX,
+	                         	double pVoxelSizeY,
+	                         	double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -433,7 +438,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishAllDataBufferCopy(	long pTimeOut,
-																								TimeUnit pTimeUnit);
+	                                             	TimeUnit pTimeUnit);
 
 	/**
 	 * Waits until volume data copy completes for current layer.
@@ -441,7 +446,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishDataBufferCopy(long pTimeOut,
-																						TimeUnit pTimeUnit);
+	                                          TimeUnit pTimeUnit);
 
 	/**
 	 * Waits until volume data copy completes for a given layer.
@@ -449,8 +454,8 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
-																						long pTimeOut,
-																						TimeUnit pTimeUnit);
+	                                          long pTimeOut,
+	                                          TimeUnit pTimeUnit);
 
 	/**
 	 * Resets rotation and translation parameters.
@@ -606,5 +611,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
+
+
 
 }
