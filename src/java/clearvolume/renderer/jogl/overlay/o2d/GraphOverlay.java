@@ -337,7 +337,7 @@ public class GraphOverlay extends OverlayBase	implements
 					// mGLProgram.use(pGL4);
 					mClearGeometryObject.setProjection(pProjectionMatrix);
 
-					System.out.println(pProjectionMatrix.toString());
+					// System.out.println(pProjectionMatrix.toString());
 
 					pGL4.glDisable(GL4.GL_DEPTH_TEST);
 					pGL4.glEnable(GL4.GL_BLEND);

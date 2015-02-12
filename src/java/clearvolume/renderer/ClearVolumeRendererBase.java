@@ -2,8 +2,6 @@ package clearvolume.renderer;
 
 import static java.lang.Math.max;
 
-import java.awt.EventQueue;
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
@@ -129,42 +127,6 @@ public abstract class ClearVolumeRendererBase	implements
 			mTransferFunctionRangeMax[i] = 1f;
 			mGamma[i] = 1.0f;
 		}
-
-		final ClearVolumeRendererBase lThis = this;
-		EventQueue.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					mControlFrame = new ControlPanelJFrame(	getCurrentRenderLayerIndex(),
-																									lThis);
-
-					String lHostName = "localhost";
-					try
-					{
-						lHostName = InetAddress.getLocalHost()
-																		.getHostName()
-																		.toLowerCase();
-					}
-					catch (final Throwable e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-					// LOL: the pros drag the mouse on the canvas while clicking Shift or
-					// Control...
-					if (!(lHostName.contains("mpi-cbg") || lHostName.contains("myers")))
-						mControlFrame.setVisible(true);
-				}
-				catch (final Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-		});
 
 	}
 
@@ -478,7 +440,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setBrightness(final int pRenderLayerIndex,
 														final double pBrightness)
 	{
-		mBrightness[getCurrentRenderLayerIndex()] = (float) clamp(getBrightness(getCurrentRenderLayerIndex()),
+		mBrightness[getCurrentRenderLayerIndex()] = (float) clamp(pBrightness,
 																															0,
 																															getBytesPerVoxel() == 1	? 16
 																																											: 256);
