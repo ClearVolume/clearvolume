@@ -412,19 +412,19 @@ public class ClearVolumeDemo
           IOException
   {
 
-    final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
-            512,
-            512,
+    final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer("ClearVolumeTest",
+            1024,
+            1024,
             1,
-            512,
-            512,
+            1024,
+            1024,
             1,
             false);
     final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
     final DriftOverlay lDriftOverlay = new DriftOverlay();
     final Fauxscope fs = new Fauxscope(true, lClearVolumeRenderer);
 
-    fs.use3DStack("somefile");
+    fs.use4DStacksFromDirectory();
 
     lClearVolumeRenderer.addOverlay(lDriftOverlay);
     lOpenCLCenterMass.addResultListener(lDriftOverlay);
@@ -434,64 +434,25 @@ public class ClearVolumeDemo
     lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
     lClearVolumeRenderer.setVisible(true);
 
-    final int lResolutionX = 320;
-    final int lResolutionY = lResolutionX + 1;
-    final int lResolutionZ = 120;
-
-    final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-            * lResolutionZ];
-
-    for (int z = 0; z < lResolutionZ; z++)
-      for (int y = 0; y < lResolutionY; y++)
-        for (int x = 0; x < lResolutionX; x++)
-        {
-          final int lIndex = x + lResolutionX
-                  * y
-                  + lResolutionX
-                  * lResolutionY
-                  * z;
-
-          lVolumeDataArray[lIndex] = (byte) (255 * x / lResolutionX);
-
-        }
+    float[] res = fs.getResolution();
 
     lClearVolumeRenderer.setCurrentRenderLayer(0);
-    lClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
-            lResolutionX,
-            lResolutionY,
-            lResolutionZ);
+    lClearVolumeRenderer.setVolumeDataBuffer(fs.queryNextVolume(),
+            (int)res[0],
+            (int)res[1],
+            (int)res[2], 1.0f, 1.0f, 5.0f);
+
     lClearVolumeRenderer.requestDisplay();
 
-    int x0 = 0, y0 = 0, z0 = 0;
     while (lClearVolumeRenderer.isShowing())
     {
-
-      // Thread.sleep(100);
-
-      for (int z = 0; z < lResolutionZ; z++)
-        for (int y = 0; y < lResolutionY; y++)
-          for (int x = 0; x < lResolutionX; x++)
-          {
-            final int lIndex = x + lResolutionX
-                    * y
-                    + lResolutionX
-                    * lResolutionY
-                    * z;
-
-            lVolumeDataArray[lIndex] = (byte) (255 * Math.exp(-.01 * ((x - x0) * (x - x0)
-                    + (y - y0)
-                    * (y - y0) + (z - z0) * (z - z0))));
-
-          }/**/
-
-      lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
-              lResolutionX,
-              lResolutionY,
-              lResolutionZ);/**/
+      lClearVolumeRenderer.setVolumeDataBuffer(fs.queryNextVolume(),
+              (int)res[0],
+              (int)res[1],
+              (int)res[2], 1.0f, 1.0f, 5.0f);
       lClearVolumeRenderer.requestDisplay();
-      x0 = (x0 + 5) % lResolutionX;
-      y0 = (y0 + 10) % lResolutionY;
-      z0 = (z0 + 20) % lResolutionZ;
+
+      Thread.sleep(1000);
     }
 
     lClearVolumeRenderer.close();
@@ -502,14 +463,14 @@ public class ClearVolumeDemo
 																		IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
-																																																						512,
-																																																						512,
-																																																						1,
-																																																						512,
-																																																						512,
-																																																						1,
-																																																						false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer("ClearVolumeTest",
+            512,
+            512,
+            1,
+            512,
+            512,
+            1,
+            false);
 		lClearVolumeRenderer.addOverlay(new PathOverlay());
 		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
 
@@ -556,10 +517,10 @@ public class ClearVolumeDemo
 				}
 
 		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+		lClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
+            lResolutionX,
+            lResolutionY,
+            lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
 		while (lClearVolumeRenderer.isShowing())
@@ -696,9 +657,8 @@ public class ClearVolumeDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-		while (lClearVolumeRenderer.isShowing())
-		{
-			Thread.sleep(500);
+		while (lClearVolumeRenderer.isShowing()) {
+      Thread.sleep(500);
 		}
 
 		lClearVolumeRenderer.close();
@@ -747,10 +707,10 @@ public class ClearVolumeDemo
 				}
 
 		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+		lClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
+            lResolutionX,
+            lResolutionY,
+            lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
 		double lTrend = 0;
@@ -813,9 +773,8 @@ public class ClearVolumeDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-		while (lClearVolumeRenderer.isShowing())
-		{
-			Thread.sleep(500);
+		while (lClearVolumeRenderer.isShowing()) {
+      Thread.sleep(500);
 		}
 
 		lClearVolumeRenderer.close();
@@ -843,12 +802,10 @@ public class ClearVolumeDemo
 		lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);
 		lJFrame.setSize(new Dimension(1024, 1024));
 		lJFrame.add(lContainer);
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				lJFrame.setVisible(true);
+		SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        lJFrame.setVisible(true);
 			}
 		});
 
@@ -887,7 +844,7 @@ public class ClearVolumeDemo
 		while (lClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(100);
-			lJFrame.setTitle("BRAVO! THIS IS A JFRAME! It WORKS!");
+      lJFrame.setTitle("BRAVO! THIS IS A JFRAME! It WORKS!");
 		}
 
 		lClearVolumeRenderer.close();
@@ -938,9 +895,8 @@ public class ClearVolumeDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-		while (lClearVolumeRenderer.isShowing())
-		{
-			Thread.sleep(500);
+		while (lClearVolumeRenderer.isShowing()) {
+      Thread.sleep(500);
 		}
 
 		lClearVolumeRenderer.close();
@@ -951,14 +907,14 @@ public class ClearVolumeDemo
 																							IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newCudaRenderer(	"ClearVolumeTest",
-																																																					1024,
-																																																					1024,
-																																																					1,
-																																																					512,
-																																																					512,
-																																																					1,
-																																																					false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newCudaRenderer("ClearVolumeTest",
+            1024,
+            1024,
+            1,
+            512,
+            512,
+            1,
+            false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -980,7 +936,7 @@ public class ClearVolumeDemo
 															* z;
 
 					lVolumeDataArray[lIndex] = (byte) (255 * (1.0 / (1.0 + 0.5 * Math.abs(z - lResolutionZ
-																																						/ 2))));
+                  / 2))));
 				}
 
 		lClearVolumeRenderer.setCurrentRenderLayer(0);
@@ -1003,14 +959,14 @@ public class ClearVolumeDemo
 																								IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
-																																																						1024,
-																																																						1024,
-																																																						1,
-																																																						512,
-																																																						512,
-																																																						1,
-																																																						false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer("ClearVolumeTest",
+            1024,
+            1024,
+            1,
+            512,
+            512,
+            1,
+            false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -1040,8 +996,8 @@ public class ClearVolumeDemo
 																* (z - lCenter);
 
 					lVolumeDataArray[lIndex] = (byte) (255 * Math.exp(-.001 * Math.abs(lDistance - lCenter
-																																				* lCenter
-																																				/ 5)));
+                  * lCenter
+                  / 5)));
 
 					/*lVolumeDataArray[lIndex] = (byte) (255 * (1.0 / (1.0 + 0.5 * abs(z - lResolutionZ
 																																						/ 2))));/**/
