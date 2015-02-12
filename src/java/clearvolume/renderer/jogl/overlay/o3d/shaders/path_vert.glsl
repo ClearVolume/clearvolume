@@ -29,10 +29,10 @@ void main()
 
     gl_Position = (projection*modelview)*vec4(vertexPosition , 1.0);
 
-   if(gl_VertexID == 0) {
+   if(gl_VertexID == 0 || gl_VertexID == 1) {
         color = startColor;
         return;
-   } if(gl_VertexID == vertexCount-1) {
+   } if(gl_VertexID == vertexCount-1 || gl_VertexID == vertexCount-2) {
         color = endColor;
         return;
    } else {

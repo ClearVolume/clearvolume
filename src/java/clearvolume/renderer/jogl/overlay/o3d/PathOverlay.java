@@ -1,20 +1,12 @@
 package clearvolume.renderer.jogl.overlay.o3d;
 
-import java.nio.FloatBuffer;
-
-import javax.media.opengl.GL4;
-
-import cleargl.ClearGeometryObject;
-import cleargl.GLAttribute;
-import cleargl.GLFloatArray;
-import cleargl.GLMatrix;
-import cleargl.GLProgram;
-import cleargl.GLUniform;
-import cleargl.GLVertexArray;
-import cleargl.GLVertexAttributeArray;
+import cleargl.*;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.Overlay3D;
 import clearvolume.renderer.jogl.overlay.OverlayBase;
+
+import javax.media.opengl.GL4;
+import java.nio.FloatBuffer;
 
 /**
  * Single Path 3D Overlay.
@@ -81,12 +73,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
               3, GL4.GL_LINE_STRIP );
       mPath.setDynamic(true);
 
-      mPathPoints = new GLFloatArray(2, 3);
-
-      // Front
-			// mPathPoints.add(0, 0, 0);
-			// mPathPoints.add((float)Math.random()*0.4f, (float)Math.random()*0.4f,
-			// (float)Math.random()*0.4f);
+      mPathPoints = new GLFloatArray(1, 3);
 
       mPath.setVerticesAndCreateBuffer(mPathPoints.getFloatBuffer());
       mStartColor = FloatBuffer.wrap(new float[]{1.0f, 0.0f, 0.0f, 1.0f});
