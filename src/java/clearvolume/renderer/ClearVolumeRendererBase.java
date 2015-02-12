@@ -29,8 +29,8 @@ import clearvolume.volume.VolumeManager;
  *
  */
 public abstract class ClearVolumeRendererBase	implements
-																							ClearVolumeRendererInterface,
-																							ClearVolumeCloseable
+ClearVolumeRendererInterface,
+ClearVolumeCloseable
 {
 
 	/**
@@ -128,6 +128,7 @@ public abstract class ClearVolumeRendererBase	implements
 			mGamma[i] = 1.0f;
 		}
 
+
 	}
 
 	/**
@@ -192,12 +193,12 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @param pVolumeSizeZ
 	 */
 	public void setVolumeSize(final double pVolumeSizeX,
-														final double pVolumeSizeY,
-														final double pVolumeSizeZ)
+	                          final double pVolumeSizeY,
+	                          final double pVolumeSizeZ)
 	{
 		final double lMaxXYZ = Math.max(Math.max(	pVolumeSizeX,
-																							pVolumeSizeY),
-																		pVolumeSizeZ);
+		                                         	pVolumeSizeY),
+		                                         	pVolumeSizeZ);
 
 		setScaleX(pVolumeSizeX / lMaxXYZ);
 		setScaleY(pVolumeSizeY / lMaxXYZ);
@@ -332,7 +333,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @param pVisble
 	 */
 	@Override
-	public void setLayerVisible(final boolean pVisble)
+	public void setLayerVisible(boolean pVisble)
 	{
 		setLayerVisible(getCurrentRenderLayerIndex(), pVisble);
 	}
@@ -378,6 +379,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void addBrightness(final double pBrightnessDelta)
 	{
 		addBrightness(getCurrentRenderLayerIndex(), pBrightnessDelta);
+
 	}
 
 	/**
@@ -388,13 +390,14 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	@Override
 	public void addBrightness(final int pRenderLayerIndex,
-														final double pBrightnessDelta)
+	                          final double pBrightnessDelta)
 	{
 		setBrightness(pRenderLayerIndex,
-									getBrightness() + pBrightnessDelta);
+		              getBrightness() + pBrightnessDelta);
 	}
 
 	/**
+
 	 * Returns the brightness level of the current render layer.
 	 *
 	 * @return brightness level.
@@ -444,6 +447,7 @@ public abstract class ClearVolumeRendererBase	implements
 																															0,
 																															getBytesPerVoxel() == 1	? 16
 																																											: 256);
+
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
@@ -490,6 +494,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setGamma(	final int pRenderLayerIndex,
 												final double pGamma)
+
 	{
 		mGamma[pRenderLayerIndex] = (float) pGamma;
 		notifyUpdateOfVolumeRenderingParameters();
@@ -521,6 +526,7 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
+
 	 * Returns the maximum of the transfer function range for the current render
 	 * layer index.
 	 *
@@ -554,11 +560,11 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	@Override
 	public void setTransferFunctionRange(	final double pTransferRangeMin,
-																				final double pTransferRangeMax)
+	                                     	final double pTransferRangeMax)
 	{
 		setTransferFunctionRange(	getCurrentRenderLayerIndex(),
-															pTransferRangeMin,
-															pTransferRangeMax);
+		                         	pTransferRangeMin,
+		                         	pTransferRangeMax);
 	}
 
 	/**
@@ -609,6 +615,7 @@ public abstract class ClearVolumeRendererBase	implements
 		mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
 																																	0,
 																																	1);
+
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
@@ -881,6 +888,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransferFunction(int,
 	 *      clearvolume.transferf.TransferFunction)
+
 	 */
 	@Override
 	public void setTransferFunction(final int pRenderLayerIndex,
@@ -1024,9 +1032,9 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	@Override
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
-																	final long pSizeX,
-																	final long pSizeY,
-																	final long pSizeZ)
+	                                final long pSizeX,
+	                                final long pSizeY,
+	                                final long pSizeZ)
 	{
 		setVolumeDataBuffer(pByteBuffer, pSizeX, pSizeY, pSizeZ, 1, 1, 1);
 	}
@@ -1099,12 +1107,12 @@ public abstract class ClearVolumeRendererBase	implements
 		synchronized (getSetVolumeDataBufferLock(getCurrentRenderLayerIndex()))
 		{
 			setVolumeDataBuffer(pVolume.getDataBuffer(),
-													pVolume.getWidthInVoxels(),
-													pVolume.getHeightInVoxels(),
-													pVolume.getDepthInVoxels(),
-													pVolume.getVoxelWidthInRealUnits(),
-													pVolume.getVoxelHeightInRealUnits(),
-													pVolume.getVoxelDepthInRealUnits());
+			                    pVolume.getWidthInVoxels(),
+			                    pVolume.getHeightInVoxels(),
+			                    pVolume.getDepthInVoxels(),
+			                    pVolume.getVoxelWidthInRealUnits(),
+			                    pVolume.getVoxelHeightInRealUnits(),
+			                    pVolume.getVoxelDepthInRealUnits());
 		}
 	}
 
@@ -1160,6 +1168,7 @@ public abstract class ClearVolumeRendererBase	implements
 		return waitToFinishDataBufferCopy(getCurrentRenderLayerIndex(),
 																			pTimeOut,
 																			pTimeUnit);
+
 	}
 
 	/**
@@ -1171,12 +1180,12 @@ public abstract class ClearVolumeRendererBase	implements
 	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
 																						final long pTimeOut,
 																						final TimeUnit pTimeUnit)
+
 	{
 		boolean lNoTimeOut = true;
 		final long lStartTimeInNanoseconds = System.nanoTime();
 		final long lTimeOutTimeInNanoseconds = lStartTimeInNanoseconds + TimeUnit.NANOSECONDS.convert(pTimeOut,
 																																																	pTimeUnit);
-
 		while ((lNoTimeOut = System.nanoTime() < lTimeOutTimeInNanoseconds) && mDataBufferCopyIsFinished.get(pRenderLayerIndex) == 0)
 		{
 			try
@@ -1210,7 +1219,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public boolean hasRotationController()
 	{
 		return mRotationController != null ? mRotationController.isActive()
-																			: false;
+		                                   : false;
 	}
 
 	/**
@@ -1264,8 +1273,8 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @return clamped value
 	 */
 	public static double clamp(	final double pValue,
-															final double pMin,
-															final double pMax)
+	                           	final double pMin,
+	                           	final double pMax)
 	{
 		return Math.min(Math.max(pValue, pMin), pMax);
 	}
