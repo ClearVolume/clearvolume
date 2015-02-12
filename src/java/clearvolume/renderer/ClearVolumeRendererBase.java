@@ -903,21 +903,12 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Returns transfer function for a given render layer.
-	 *
-	 * @return currently used transfer function
-	 */
-	public TransferFunction getTransfertFunction(final int pRenderLayerIndex)
-	{
-		return mTransferFunctions[pRenderLayerIndex];
-	}
-
-	/**
 	 * Returns currently used transfer function.
 	 *
 	 * @return currently used transfer function
 	 */
-	public TransferFunction getTransfertFunction()
+	@Override
+	public TransferFunction getTransferFunction()
 	{
 		return mTransferFunctions[getCurrentRenderLayerIndex()];
 	}

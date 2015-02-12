@@ -232,7 +232,7 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Sets the transfer function used for rendering.
-	 * 
+	 *
 	 * @param pTransfertFunction
 	 *          transfer function
 	 */
@@ -241,7 +241,12 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Returns the transfer function set for a given layer.
-	 * 
+	 */
+	TransferFunction getTransferFunction();
+
+	/**
+	 * Returns the transfer function set for a given layer.
+	 *
 	 * @param pRenderLayerIndex
 	 */
 	TransferFunction getTransferFunction(int pRenderLayerIndex);
@@ -582,7 +587,7 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Returns the list of overlays in this renderer.
-	 * 
+	 *
 	 * @return
 	 */
 	public Collection<Overlay> getOverlays();

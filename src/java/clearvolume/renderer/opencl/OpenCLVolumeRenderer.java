@@ -194,7 +194,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private void prepareTransferFunctionArray(final int pRenderLayerIndex)
 	{
 
-		final float[] lTransferFunctionArray = getTransfertFunction(pRenderLayerIndex).getArray();
+		final float[] lTransferFunctionArray = getTransferFunction( pRenderLayerIndex ).getArray();
 
 		final int lTransferFunctionArrayLength = lTransferFunctionArray.length;
 
@@ -359,7 +359,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	}
 
-	private void runProcessorHook(int pRenderLayerIndex)
+	private void runProcessorHook(final int pRenderLayerIndex)
 	{
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
