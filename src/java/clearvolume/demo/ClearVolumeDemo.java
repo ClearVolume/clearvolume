@@ -342,7 +342,7 @@ public class ClearVolumeDemo
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
-    
+
 		final int lResolutionX = 320;
 		final int lResolutionY = lResolutionX + 1;
 		final int lResolutionZ = 120;
@@ -405,6 +405,96 @@ public class ClearVolumeDemo
 
 		lClearVolumeRenderer.close();
 	}
+
+  @Test
+  public void demoFauxScopeDrift() throws InterruptedException,
+          IOException
+  {
+
+    final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+            512,
+            512,
+            1,
+            512,
+            512,
+            1,
+            false);
+    final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
+    final DriftOverlay lDriftOverlay = new DriftOverlay();
+    final Fauxscope fs = new Fauxscope(true, lClearVolumeRenderer);
+
+    fs.use3DStack("somefile");
+
+    lClearVolumeRenderer.addOverlay(lDriftOverlay);
+    lOpenCLCenterMass.addResultListener(lDriftOverlay);
+
+    lClearVolumeRenderer.addProcessor(lOpenCLCenterMass);
+
+    lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+    lClearVolumeRenderer.setVisible(true);
+
+    final int lResolutionX = 320;
+    final int lResolutionY = lResolutionX + 1;
+    final int lResolutionZ = 120;
+
+    final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+            * lResolutionZ];
+
+    for (int z = 0; z < lResolutionZ; z++)
+      for (int y = 0; y < lResolutionY; y++)
+        for (int x = 0; x < lResolutionX; x++)
+        {
+          final int lIndex = x + lResolutionX
+                  * y
+                  + lResolutionX
+                  * lResolutionY
+                  * z;
+
+          lVolumeDataArray[lIndex] = (byte) (255 * x / lResolutionX);
+
+        }
+
+    lClearVolumeRenderer.setCurrentRenderLayer(0);
+    lClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
+            lResolutionX,
+            lResolutionY,
+            lResolutionZ);
+    lClearVolumeRenderer.requestDisplay();
+
+    int x0 = 0, y0 = 0, z0 = 0;
+    while (lClearVolumeRenderer.isShowing())
+    {
+
+      // Thread.sleep(100);
+
+      for (int z = 0; z < lResolutionZ; z++)
+        for (int y = 0; y < lResolutionY; y++)
+          for (int x = 0; x < lResolutionX; x++)
+          {
+            final int lIndex = x + lResolutionX
+                    * y
+                    + lResolutionX
+                    * lResolutionY
+                    * z;
+
+            lVolumeDataArray[lIndex] = (byte) (255 * Math.exp(-.01 * ((x - x0) * (x - x0)
+                    + (y - y0)
+                    * (y - y0) + (z - z0) * (z - z0))));
+
+          }/**/
+
+      lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+              lResolutionX,
+              lResolutionY,
+              lResolutionZ);/**/
+      lClearVolumeRenderer.requestDisplay();
+      x0 = (x0 + 5) % lResolutionX;
+      y0 = (y0 + 10) % lResolutionY;
+      z0 = (z0 + 20) % lResolutionZ;
+    }
+
+    lClearVolumeRenderer.close();
+  }
 
 	@Test
 	public void demoOpenCLHistogram()	throws InterruptedException,
