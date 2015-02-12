@@ -1,22 +1,5 @@
 package clearvolume.demo;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.util.Arrays;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
-import org.junit.Test;
-
 import clearvolume.controller.ExternalRotationController;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.ClearVolumeRendererInterface;
@@ -29,14 +12,21 @@ import clearvolume.renderer.jogl.overlay.o3d.PathOverlay;
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
-import clearvolume.renderer.processors.impl.CUDAProcessorTest;
-import clearvolume.renderer.processors.impl.OpenCLCenterMass;
-import clearvolume.renderer.processors.impl.OpenCLHistogram;
-import clearvolume.renderer.processors.impl.OpenCLTenengrad;
-import clearvolume.renderer.processors.impl.OpenCLTest;
+import clearvolume.renderer.processors.impl.*;
 import clearvolume.transferf.TransferFunctions;
-
 import com.jogamp.newt.awt.NewtCanvasAWT;
+import org.junit.Test;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.util.Arrays;
 
 public class ClearVolumeDemo
 {
@@ -342,28 +332,17 @@ public class ClearVolumeDemo
 																																																						512,
 																																																						1,
 																																																						false);
-		final DriftOverlay lDriftOverlay = new DriftOverlay();
+    final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
+    final DriftOverlay lDriftOverlay = new DriftOverlay();
+
 		lClearVolumeRenderer.addOverlay(lDriftOverlay);
+		lOpenCLCenterMass.addResultListener(lDriftOverlay);
 
-		final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
-		lOpenCLCenterMass.addResultListener(new ProcessorResultListener<float[]>()
-		{
-			@Override
-			public void notifyResult(	Processor<float[]> pSource,
-																float[] pResult)
-			{
-
-				System.out.println("center of mass [x,y,z,mass]: " + Arrays.toString(pResult));
-			}
-		});
-
-		lClearVolumeRenderer.addProcessor(lOpenCLCenterMass);
-		// TODO: put that back:
-		// lOpenCLCenterMass.addResultListener(lDriftOverlay);
+    lClearVolumeRenderer.addProcessor(lOpenCLCenterMass);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
-
+    
 		final int lResolutionX = 320;
 		final int lResolutionY = lResolutionX + 1;
 		final int lResolutionZ = 120;
@@ -386,10 +365,10 @@ public class ClearVolumeDemo
 				}
 
 		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+		lClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
+            lResolutionX,
+            lResolutionY,
+            lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
 		int x0 = 0, y0 = 0, z0 = 0;
@@ -444,16 +423,14 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
 
 		final OpenCLHistogram histoProcessor = new OpenCLHistogram();
-		histoProcessor.addResultListener(new ProcessorResultListener<IntBuffer>()
-		{
+		histoProcessor.addResultListener(new ProcessorResultListener<IntBuffer>() {
 
-			@Override
-			public void notifyResult(	Processor<IntBuffer> pSource,
-																IntBuffer pResult)
-			{
-				System.out.println("histogram: " + Arrays.toString(pResult.array()));
-			}
-		});
+      @Override
+      public void notifyResult(Processor<IntBuffer> pSource,
+                               IntBuffer pResult) {
+        System.out.println("histogram: " + Arrays.toString(pResult.array()));
+      }
+    });
 
 		lClearVolumeRenderer.addProcessor(histoProcessor);
 
@@ -520,7 +497,7 @@ public class ClearVolumeDemo
 																																																						512,
 																																																						1,
 																																																						false);
-		lClearVolumeRenderer.addOverlay(new PathOverlay());
+		//lClearVolumeRenderer.addOverlay(new PathOverlay());
 
 		final RandomWalk RandomWalk = new RandomWalk();
 		final DriftOverlay driftOverlay = new DriftOverlay();
@@ -584,14 +561,14 @@ public class ClearVolumeDemo
 																	IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newCudaRenderer(	"ClearVolumeTest",
-																																																					1024,
-																																																					1024,
-																																																					1,
-																																																					512,
-																																																					512,
-																																																					1,
-																																																					false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newCudaRenderer("ClearVolumeTest",
+            1024,
+            1024,
+            1,
+            512,
+            512,
+            1,
+            false);
 		lClearVolumeRenderer.addOverlay(new PathOverlay());
 		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
 		lClearVolumeRenderer.addProcessor(new OpenCLTest());
@@ -641,14 +618,14 @@ public class ClearVolumeDemo
 																IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					1024,
-																																																					1024,
-																																																					1,
-																																																					512,
-																																																					512,
-																																																					1,
-																																																					false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolumeTest",
+            1024,
+            1024,
+            1,
+            512,
+            512,
+            1,
+            false);
 
 		final GraphOverlay lGraphOverlay = new GraphOverlay(1024);
 		lClearVolumeRenderer.addOverlay(lGraphOverlay);
@@ -701,14 +678,14 @@ public class ClearVolumeDemo
 	public void demoPathOverlay3D()	throws InterruptedException,
 																	IOException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					1024,
-																																																					1024,
-																																																					1,
-																																																					512,
-																																																					512,
-																																																					1,
-																																																					false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer("ClearVolumeTest",
+            1024,
+            1024,
+            1,
+            512,
+            512,
+            1,
+            false);
 
 		final PathOverlay lPathOverlay = new PathOverlay();
 		lClearVolumeRenderer.addOverlay(lPathOverlay);
@@ -1069,10 +1046,10 @@ public class ClearVolumeDemo
 					lVolumeDataArray[lIndex + 1] = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 				}
 
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+		lClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
+            lResolutionX,
+            lResolutionY,
+            lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
 		while (lClearVolumeRenderer.isShowing())
@@ -1089,10 +1066,10 @@ public class ClearVolumeDemo
 																									IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer8Bit(	"ClearVolumeTest",
-																																																							512,
-																																																							512,
-																																																							false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer8Bit("ClearVolumeTest",
+            512,
+            512,
+            false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 		lClearVolumeRenderer.setProjectionAlgorithm(ProjectionAlgorithm.MaxProjection);
@@ -1465,11 +1442,9 @@ public class ClearVolumeDemo
 																																															1,
 																																															true);
 
-			SwingUtilities.invokeAndWait(new Runnable()
-			{
-				@Override
-				public void run()
-				{
+			SwingUtilities.invokeAndWait(new Runnable() {
+        @Override
+        public void run() {
 
 					/*
 					 * final ClearVolumeRendererInterface lClearVolumeRenderer =
@@ -1478,23 +1453,23 @@ public class ClearVolumeDemo
 					 * 768 : 512, 1, i % 2 == 0 ? 768 : 512, i % 2 == 0 ? 768 :
 					 * 512, 1, true);/*
 					 */
-					final NewtCanvasAWT lNewtCanvasAWT = lClearVolumeRenderer.getNewtCanvasAWT();
+          final NewtCanvasAWT lNewtCanvasAWT = lClearVolumeRenderer.getNewtCanvasAWT();
 
-					System.out.println("lJFrame.setTitle(...");
-					lJFrame.setTitle("BRAVO! THIS IS A JFRAME! It WORKS! I=" + i);
-					lJFrame.setLayout(new BorderLayout());
-					final Container lContainer = new Container();
-					lContainer.setLayout(new BorderLayout());
+          System.out.println("lJFrame.setTitle(...");
+          lJFrame.setTitle("BRAVO! THIS IS A JFRAME! It WORKS! I=" + i);
+          lJFrame.setLayout(new BorderLayout());
+          final Container lContainer = new Container();
+          lContainer.setLayout(new BorderLayout());
 
-					System.out.println("lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);");
-					lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);
-					lJFrame.setSize(new Dimension(1024, 1024));
-					lJFrame.add(lContainer);
+          System.out.println("lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);");
+          lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);
+          lJFrame.setSize(new Dimension(1024, 1024));
+          lJFrame.add(lContainer);
 
-					System.out.println("lJFrame.setVisible(true);");
-					lJFrame.setVisible(true);
-				}
-			});
+          System.out.println("lJFrame.setVisible(true);");
+          lJFrame.setVisible(true);
+        }
+      });
 
 			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 			lClearVolumeRenderer.setVisible(true);

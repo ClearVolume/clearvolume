@@ -1,11 +1,10 @@
 package clearvolume.renderer.processors.impl;
 
-import java.nio.FloatBuffer;
-
 import clearvolume.renderer.processors.OpenCLProcessor;
-
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
+
+import java.nio.FloatBuffer;
 
 public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 
@@ -41,6 +40,10 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 			long pDepthInVoxels) {
 
 		final int cutSize = mDownSample * mLocalSize;
+
+    mCurrentWidthInVoxels = pWidthInVoxels;
+    mCurrentHeightInVoxels = pHeightInVoxels;
+    mCurrentDepthInVoxels = pDepthInVoxels;
 
 		mPaddedShapeX = (int) (Math.ceil(1. * pWidthInVoxels / cutSize) * mLocalSize);
 		mPaddedShapeY = (int) (Math.ceil(1. * pHeightInVoxels / cutSize) * mLocalSize);
@@ -98,9 +101,16 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 			resZ += outZ.get(i);
 			resSum += outSum.get(i);
 		}
+    float[] result = rescaleToLocalVoxelInterval(resX/resSum, resY/resSum, resZ/resSum);
 
-		notifyListenersOfResult(new float[] { resX / resSum, resY / resSum,
-				resZ / resSum, resSum });
-
+    notifyListenersOfResult(result);
 	}
+
+  private float[] rescaleToLocalVoxelInterval(float x, float y, float z) {
+    float new_x = ((1.0f - (-1.0f)) * (x - 0) / (mCurrentWidthInVoxels - 0)) + -1.0f;
+    float new_y = ((1.0f - (-1.0f)) * (y - 0) / (mCurrentHeightInVoxels - 0)) + -1.0f;
+    float new_z = ((1.0f - (-1.0f)) * (z - 0) / (mCurrentDepthInVoxels - 0)) + -1.0f;
+
+    return new float[] {new_x, new_y, new_z};
+  }
 }
