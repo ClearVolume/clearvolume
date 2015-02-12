@@ -73,7 +73,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
               3, GL4.GL_LINE_STRIP );
       mPath.setDynamic(true);
 
-      mPathPoints = new GLFloatArray(1, 3);
+      mPathPoints = new GLFloatArray(0, 3);
 
       mPath.setVerticesAndCreateBuffer(mPathPoints.getFloatBuffer());
       mStartColor = FloatBuffer.wrap(new float[]{1.0f, 0.0f, 0.0f, 1.0f});
