@@ -11,52 +11,33 @@ import com.nativelibs4java.opencl.CLKernel;
 public class OpenCLCenterMass extends OpenCLProcessor<IntBuffer>
 {
 
-	private CLKernel mKernelHist;
+	private CLKernel mKernel;
 
-	private CLBuffer<Float> mBufBins;
-	private CLBuffer<Integer> mBufCounts;
-	private float[] mBins;
-
+	private CLBuffer<Float> mBufX,mBufY,mBufZ,mBufSum;
+	
 	@Override
 	public String getName()
 	{
-		return "opencl_histogram";
-	}
-
-	public void setBins(final float[] pBins)
-	{
-		mBins = pBins;
-
+		return "opencl_center_of_mass";
 	}
 
 	public void ensureOpenCLInitialized()
 	{
-		if (mKernelHist == null)
+		if (mKernel == null)
 		{
-			mKernelHist = getDevice().compileKernel(OpenCLCenterMass.class.getResource("kernels/histogram.cl"),
-																							"histogram");
+			mKernel = getDevice().compileKernel(OpenCLCenterMass.class.getResource("kernels/center_of_mass.cl"),
+																							"center_of_mass_img");
 		}
-
-		final float[] bins = new float[10];
-		for (int i = 0; i < bins.length; i++)
-		{
-			bins[i] = 1.f * i / bins.length;
-		}
-		setBins(bins);
-
 	}
 
 	public void initBuffers()
 	{
 
-		final int lBinSize = mBins.length;
-
+		long lBinSize = 100;
 		// the buffer containing the counts
-		mBufCounts = getDevice().createOutputIntBuffer(lBinSize);
+		mBufX = getDevice().createOutputFloatBuffer(lBinSize);
 
-		// the buffer containing the bins values
-		mBufBins = getDevice().createInputFloatBuffer(lBinSize);
-
+		
 	}
 
 	@Override

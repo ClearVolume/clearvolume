@@ -1,7 +1,6 @@
 // center of mass calculations
 
-
-#define LSIZE 8
+#define LSIZE_IMG 8
 
 // center of mass
 __kernel void center_of_mass_img(__read_only image3d_t input,
@@ -31,13 +30,19 @@ __kernel void center_of_mass_img(__read_only image3d_t input,
   int jDim = get_num_groups(1);
   int kDim = get_num_groups(2);
 
-  __local float4 partialSums[LSIZE][LSIZE][LSIZE];
+  __local float4 partialSums[LSIZE_IMG][LSIZE_IMG][LSIZE_IMG];
 
   float val = read_imagef(input,sampler,(float4)(i0,j0,k0,0.f)).x;
 
   int i = i0;
   
-  partialSums[iLoc][jLoc][kLoc] = val*(float4)(i0,j0,k0,1.f);
+  partialSums[iLoc][jLoc][kLoc].x = val*i0;
+
+  partialSums[iLoc][jLoc][kLoc].y = val*j0;
+
+  partialSums[iLoc][jLoc][kLoc].z = val*k0;
+  
+  partialSums[iLoc][jLoc][kLoc].w = val;
 
 
   barrier(CLK_LOCAL_MEM_FENCE);
@@ -47,9 +52,9 @@ __kernel void center_of_mass_img(__read_only image3d_t input,
   if (iLoc==0){
 
 	float4 res = 0.f;
-	for (int i2 = 0; i2 < LSIZE; ++i2)
-	  for (int j2 = 0; j2 < LSIZE; ++j2)
-		for (int k2 = 0; k2 < LSIZE; ++k2)
+	for (int i2 = 0; i2 < LSIZE_IMG; ++i2)
+	  for (int j2 = 0; j2 < LSIZE_IMG; ++j2)
+		for (int k2 = 0; k2 < LSIZE_IMG; ++k2)
 		  res += partialSums[i2][j2][k2];
 	
 	rx[iGroup+jGroup*iDim+kGroup*iDim*jDim] = res.x;
@@ -60,5 +65,4 @@ __kernel void center_of_mass_img(__read_only image3d_t input,
   }
  
 }
-
 
