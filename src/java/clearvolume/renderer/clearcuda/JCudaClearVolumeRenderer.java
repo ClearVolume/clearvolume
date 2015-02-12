@@ -743,23 +743,28 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		// mOpenGLBufferDevicePointers[pRenderLayerIndex].map();
 		// mOpenGLBufferDevicePointers[pRenderLayerIndex].set(0, true);
 
-		mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
-																								cBlockSize),
-																				iDivUp(	getTextureHeight(),
-																								cBlockSize),
-																				1);
-
-		mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
-
 		final CudaDevicePointer lCudaDevicePointer = mCudaBufferDevicePointer[pRenderLayerIndex];
+
 		lCudaDevicePointer.fillByte((byte) 0, false);
-		mVolumeRenderingFunction.launch(lCudaDevicePointer,
-																		getTextureWidth(),
-																		getTextureHeight(),
-																		(float) getBrightness(),
-																		(float) getTransferRangeMin(),
-																		(float) getTransferRangeMax(),
-																		(float) getGamma());
+
+		if (isLayerVisible(pRenderLayerIndex))
+		{
+			mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
+																									cBlockSize),
+																					iDivUp(	getTextureHeight(),
+																									cBlockSize),
+																					1);
+
+			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
+
+			mVolumeRenderingFunction.launch(lCudaDevicePointer,
+																			getTextureWidth(),
+																			getTextureHeight(),
+																			(float) getBrightness(pRenderLayerIndex),
+																			(float) getTransferRangeMin(pRenderLayerIndex),
+																			(float) getTransferRangeMax(pRenderLayerIndex),
+																			(float) getGamma(pRenderLayerIndex));
+		}
 
 		if (mTemporaryTransfertBuffer == null || mTemporaryTransfertBuffer.capacity() != lCudaDevicePointer.getSizeInBytes())
 			mTemporaryTransfertBuffer = ByteBuffer.allocateDirect((int) lCudaDevicePointer.getSizeInBytes())
@@ -767,7 +772,6 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		mTemporaryTransfertBuffer.clear();
 
-		mCudaContext.synchronize();
 		mCudaBufferDevicePointer[pRenderLayerIndex].copyTo(	mTemporaryTransfertBuffer,
 																												true);
 
@@ -784,10 +788,13 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		if (mOpenGLBufferDevicePointers[pRenderLayerIndex] == null)
 			return;
 
-		copyTransferFunctionArray(pRenderLayerIndex);
+		if (isLayerVisible(pRenderLayerIndex))
+		{
+			copyTransferFunctionArray(pRenderLayerIndex);
 
-		pointTransferFunctionTextureToArray(pRenderLayerIndex);
-		pointTextureToArray(pRenderLayerIndex);
+			pointTransferFunctionTextureToArray(pRenderLayerIndex);
+			pointTextureToArray(pRenderLayerIndex);
+		}
 
 		mOpenGLBufferDevicePointers[pRenderLayerIndex].map();
 		mOpenGLBufferDevicePointers[pRenderLayerIndex].fillFloat(0, true);

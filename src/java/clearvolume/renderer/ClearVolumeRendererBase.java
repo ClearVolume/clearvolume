@@ -991,12 +991,14 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	@Override
+	@Deprecated
 	public void setCurrentRenderLayer(final int pLayerIndex)
 	{
 		mCurrentRenderLayerIndex = pLayerIndex;
 	}
 
 	@Override
+	@Deprecated
 	public int getCurrentRenderLayerIndex()
 	{
 		return mCurrentRenderLayerIndex;
