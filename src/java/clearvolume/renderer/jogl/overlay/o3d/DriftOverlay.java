@@ -20,7 +20,7 @@ import java.nio.FloatBuffer;
  *
  */
 public class DriftOverlay extends PathOverlay implements ProcessorResultListener<FloatBuffer>, Overlay2D {
-  protected FloatBuffer mStartColor = FloatBuffer.wrap(new float[]{0.0f, 0.0f, 1.0f, 1.0f});
+  protected FloatBuffer mStartColor = FloatBuffer.wrap(new float[]{0.0f, 1.0f, 0.0f, 1.0f});
   protected FloatBuffer mEndColor = FloatBuffer.wrap(new float[]{1.0f, 0.0f, 0.0f, 1.0f});
   protected SynchronizedDescriptiveStatistics stats;
 
@@ -34,6 +34,8 @@ public class DriftOverlay extends PathOverlay implements ProcessorResultListener
                      DisplayRequestInterface pDisplayRequestInterface) {
     super.init(pGL4, pDisplayRequestInterface);
 
+    super.mStartColor = mStartColor;
+    super.mEndColor = mEndColor;
     textRenderer = new ClearTextRenderer(pGL4);
   }
 
