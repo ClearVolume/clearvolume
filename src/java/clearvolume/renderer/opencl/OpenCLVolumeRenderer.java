@@ -113,10 +113,11 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
-			{
-				final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
-				lOpenCLProcessor.setDevice(mCLDevice);
-			}
+				if (lProcessor instanceof OpenCLProcessor)
+				{
+					final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
+					lOpenCLProcessor.setDevice(mCLDevice);
+				}
 
 		mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
 		mCLInvProjectionBuffer = mCLDevice.createInputFloatBuffer(16);
@@ -363,14 +364,17 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
 			{
-				final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
-				lOpenCLProcessor.setVolumeBuffers(mCLVolumeImages[pRenderLayerIndex]);
+				if (lProcessor instanceof OpenCLProcessor)
+				{
+					final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
+					lOpenCLProcessor.setVolumeBuffers(mCLVolumeImages[pRenderLayerIndex]);
+				}
 
 				final long lStartTimeNs = System.nanoTime();
-				lOpenCLProcessor.process(	pRenderLayerIndex,
-																	getVolumeSizeX(),
-																	getVolumeSizeY(),
-																	getVolumeSizeZ());
+				lProcessor.process(	pRenderLayerIndex,
+														getVolumeSizeX(),
+														getVolumeSizeY(),
+														getVolumeSizeZ());
 				final long lStopTimeNs = System.nanoTime();
 				final double lElapsedTimeInMilliseconds = 0.001 * 0.001 * (lStopTimeNs - lStartTimeNs);
 				/*System.out.format("Elapsedtime in '%s' is %g ms \n",

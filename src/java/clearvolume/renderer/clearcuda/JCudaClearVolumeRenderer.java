@@ -289,11 +289,12 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			for (final Processor<?> lProcessor : mProcessorsMap.values())
 				if (lProcessor.isCompatibleProcessor(getClass()))
-				{
-					final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
-					lCUDAProcessor.setDeviceAndContext(	mCudaDevice,
-																							mCudaContext);
-				}
+					if (lProcessor instanceof CUDAProcessor)
+					{
+						final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
+						lCUDAProcessor.setDeviceAndContext(	mCudaDevice,
+																								mCudaContext);
+					}
 
 			return true;
 		}
@@ -820,12 +821,15 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
 			{
-				final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
-				lCUDAProcessor.applyToArray(mVolumeDataCudaArrays[pRenderLayerIndex]);
-				lCUDAProcessor.process(	pRenderLayerIndex,
-																getVolumeSizeX(),
-																getVolumeSizeY(),
-																getVolumeSizeZ());
+				if (lProcessor instanceof CUDAProcessor)
+				{
+					final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
+					lCUDAProcessor.applyToArray(mVolumeDataCudaArrays[pRenderLayerIndex]);
+				}
+				lProcessor.process(	pRenderLayerIndex,
+														getVolumeSizeX(),
+														getVolumeSizeY(),
+														getVolumeSizeZ());
 			}
 	}
 
