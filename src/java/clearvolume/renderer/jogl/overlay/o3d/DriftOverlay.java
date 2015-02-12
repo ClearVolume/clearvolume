@@ -1,20 +1,17 @@
 package clearvolume.renderer.jogl.overlay.o3d;
 
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.io.IOException;
-import java.nio.FloatBuffer;
-
-import javax.media.opengl.GL4;
-
-import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
-
 import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
+
+import javax.media.opengl.GL4;
+import java.awt.*;
+import java.io.IOException;
+import java.nio.FloatBuffer;
 
 /**
  * Drift Path Overlay.
@@ -72,12 +69,15 @@ public class DriftOverlay extends PathOverlay	implements
     Font font = null;
     stats = new SynchronizedDescriptiveStatistics();
 
+    String fontPath = "fonts/SourceCodeProLight.ttf";
+
     try {
-      font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("fonts/SourceCodeProLight.ttf")).deriveFont(12.0f);
-    } catch (final FontFormatException e) {
-      e.printStackTrace();
-    } catch (final IOException e) {
-      e.printStackTrace();
+      font = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream(fontPath)).deriveFont(12.0f);
+    } catch (final FontFormatException | IOException e) {
+      // use a fallback font in case the original couldn't be found or there has been a problem
+      // with the font format
+      System.err.println("Could not use \"" + fontPath + "\" (" + e.toString() + "), falling back to Sans.");
+      font = new Font("Sans", Font.PLAIN, 12);
     }
 
     int i = 0;
