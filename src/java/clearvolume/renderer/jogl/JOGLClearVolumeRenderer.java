@@ -61,6 +61,13 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 	private static final long cMaxWaitingTimeForAcquiringDisplayLockInMs = 200;
 
+	private static final GLMatrix cOverlay2dProjectionMatrix = GLMatrix.getOrthoProjectionMatrix(	-1,
+																																																1,
+																																																-1,
+																																																1,
+																																																0,
+																																																1000);/**/;
+
 	static
 	{
 		// attempt at solving Jug's Dreadlock bug:
@@ -100,6 +107,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLUniform[] mTexUnits;
 	private GLVertexAttributeArray mTexCoordAttributeArray;
 
+	
+
 	private final GLMatrix mBoxModelViewMatrix = new GLMatrix();
 	private final GLMatrix mVolumeViewMatrix = new GLMatrix();
 	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
@@ -111,6 +120,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	// Recorder:
 	private final GLVideoRecorder mGLVideoRecorder = new GLVideoRecorder(new File(SystemUtils.USER_HOME,
 																																								"Videos/ClearVolume"));
+
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
@@ -488,19 +498,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		// 0,
 		// 1);
 
-		setDefaultProjectionMatrix();
-
-		/*lGL4.glViewport((pWidth - lViewPortWidth) / 2,
-										(pHeight - lViewPortWidth) / 2,
-										lViewPortWidth,
-										lViewPortWidth);/**/
-
-		mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
-																										1,
-																										-1,
-																										1,
-																										0,
-																										1000);
+		// setDefaultProjectionMatrix();
 
 		if (initVolumeRenderer())
 		{
@@ -720,13 +718,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				setDefaultProjectionMatrix();
 
-				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
-																												1,
-																												-1,
-																												1,
-																												0,
-																												1000);
-
 				// scaling...
 
 				final double scaleX = getVolumeSizeX() * getVoxelSizeX();
@@ -794,12 +785,20 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 					mQuadVertexArray.draw(GL.GL_TRIANGLES);
 
-					/*getClearGLWindow().getProjectionMatrix()
-														.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
 					getClearGLWindow().getProjectionMatrix()
-														.mult(1, 1, mQuadProjectionMatrix.get(1, 1));/**/
+														.mult(0,
+																	0,
+																	mQuadProjectionMatrix.get(0, 0));
+					getClearGLWindow().getProjectionMatrix()
+														.mult(1,
+																	1,
+																	mQuadProjectionMatrix.get(1, 1));/**/
 
-					renderOverlays(lGL4, lInvVolumeMatrix);
+					renderOverlays3D(	lGL4,
+														getClearGLWindow().getProjectionMatrix(),
+														lInvVolumeMatrix);
+
+					renderOverlays2D(lGL4, cOverlay2dProjectionMatrix);
 
 					updateFrameRateDisplay();
 
@@ -838,8 +837,37 @@ public abstract class JOGLClearVolumeRenderer	extends
 		return lHasAnyChanged;
 	}
 
-	private void renderOverlays(final GL4 lGL4,
-															final GLMatrix lInvVolumeMatrix)
+	private void renderOverlays2D(final GL4 lGL4,
+																final GLMatrix pProjectionMatrix)
+	{
+		try
+		{
+
+			for (final Overlay lOverlay : mOverlayMap.values())
+				if (lOverlay instanceof Overlay2D)
+				{
+					final Overlay2D lOverlay2D = (Overlay2D) lOverlay;
+					try
+					{
+						lOverlay2D.render2D(lGL4, pProjectionMatrix);
+					}
+					catch (final Throwable e)
+					{
+						e.printStackTrace();
+					}
+				}
+
+			GLError.printGLErrors(lGL4, "AFTER OVERLAYS");
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private void renderOverlays3D(final GL4 lGL4,
+																final GLMatrix pProjectionMatrix,
+																final GLMatrix pInvVolumeMatrix)
 	{
 		try
 		{
@@ -850,24 +878,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 					try
 					{
 						lOverlay3D.render3D(lGL4,
-																getClearGLWindow().getProjectionMatrix(),
-																lInvVolumeMatrix);
-					}
-					catch (final Throwable e)
-					{
-						e.printStackTrace();
-					}
-				}
-
-			for (final Overlay lOverlay : mOverlayMap.values())
-				if (lOverlay instanceof Overlay2D)
-				{
-					final Overlay2D lOverlay2D = (Overlay2D) lOverlay;
-					try
-					{
-						lOverlay2D.render2D(lGL4,
-																mQuadProjectionMatrix,
-																lInvVolumeMatrix);
+																pProjectionMatrix,
+																pInvVolumeMatrix);
 					}
 					catch (final Throwable e)
 					{
@@ -937,43 +949,31 @@ public abstract class JOGLClearVolumeRenderer	extends
 											final int pWidth,
 											int pHeight)
 	{
-		// mDisplayReentrantLock.lock();
-		try
-		{
-			if (pHeight < 8)
-				pHeight = 8;
 
-			final GL4 lGL4 = drawable.getGL().getGL4();
+		if (pHeight < 8)
+			pHeight = 8;
 
-			final int lViewPortWidth = max(pWidth, pHeight);
+		final GL4 lGL4 = drawable.getGL().getGL4();
 
-			lGL4.glViewport((pWidth - lViewPortWidth) / 2,
-											(pHeight - lViewPortWidth) / 2,
-											lViewPortWidth,
-											lViewPortWidth);/**/
+		lGL4.glViewport(0, 0, pWidth, pHeight);/**/
 
-			/*final float lAspectRatio = 1; // (1.0f * pWidth) / pHeight;
+		final float lAspectRatio = (1.0f * pWidth) / pHeight;
 
-			/*if (lAspectRatio >= 1)
-				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
-																												1,
-																												-1	/ lAspectRatio,
-																												1 / lAspectRatio,
-																												0,
-																												1000);
-			else
-				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
-																												lAspectRatio,
-																												-1,
-																												1,
-																												0,
-																												1000);/**/
-		}
-		finally
-		{
-			if (mDisplayReentrantLock.isHeldByCurrentThread())
-				mDisplayReentrantLock.unlock();
-		}
+		if (lAspectRatio >= 1)
+			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
+																											1,
+																											-1	/ lAspectRatio,
+																											1 / lAspectRatio,
+																											0,
+																											1000);
+		else
+			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
+																											lAspectRatio,
+																											-1,
+																											1,
+																											0,
+																											1000);/**/
+
 	}
 
 	/**

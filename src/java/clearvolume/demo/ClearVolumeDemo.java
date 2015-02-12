@@ -231,7 +231,7 @@ public class ClearVolumeDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-		double s = 2.;
+		final double s = 2.;
 		while (lClearVolumeRenderer.isShowing())
 		{
 
@@ -651,8 +651,8 @@ public class ClearVolumeDemo
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					1024,
-																																																					1024,
+																																																					512,
+																																																					512,
 																																																					1,
 																																																					512,
 																																																					512,
@@ -840,8 +840,8 @@ public class ClearVolumeDemo
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					1024,
-																																																					1024,
+																																																					512,
+																																																					512,
 																																																					1,
 																																																					512,
 																																																					512,
