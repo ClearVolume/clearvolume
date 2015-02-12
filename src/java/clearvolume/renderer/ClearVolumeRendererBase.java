@@ -440,7 +440,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setBrightness(final int pRenderLayerIndex,
 														final double pBrightness)
 	{
-		mBrightness[getCurrentRenderLayerIndex()] = (float) clamp(pBrightness,
+		mBrightness[pRenderLayerIndex] = (float) clamp(	pBrightness,
 																															0,
 																															getBytesPerVoxel() == 1	? 16
 																																											: 256);

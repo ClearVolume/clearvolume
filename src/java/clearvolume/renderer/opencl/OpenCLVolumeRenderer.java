@@ -293,7 +293,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters())
 		{
-			System.out.println("___________________________");
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
 				if (mCLVolumeImages[i] != null)
@@ -345,13 +344,13 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		if (isLayerVisible(pRenderLayerIndex))
 		{
-			System.out.println("render layer:" + pRenderLayerIndex);
+			// System.out.println("render layer:" + pRenderLayerIndex);
 			final ByteBuffer lRenderedImageBuffer = mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]);
 			copyBufferToTexture(pRenderLayerIndex, lRenderedImageBuffer);
 		}
 		else
 		{
-			System.out.println("CLEAR layer:" + pRenderLayerIndex);
+			// System.out.println("CLEAR layer:" + pRenderLayerIndex);
 			clearTexture(pRenderLayerIndex);
 		}
 
