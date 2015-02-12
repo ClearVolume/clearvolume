@@ -29,7 +29,7 @@ __kernel void downsample(__read_only image3d_t input, __global float* output, co
   output[i+Nx*j+Nx*Ny*k] = res/Ndown/Ndown/Ndown;
  
  
-  //if ((i==10) &&(j==10)&&(k==10))
+ // if ((i==10) &&(j==10)&&(k==10))
   //	printf("kernel:  %.10f \n\n\n",output[i+Nx*j+Nx*Ny*k]);
 }
 
@@ -49,7 +49,9 @@ __kernel void convolve_diff(__global float * input, __global float * output, con
   const float h[3] = {-.5f,0.f,.5f};
   const int Nh = 3;
   
-   
+
+  
+     
   float res = 0.f;
   int delta = (Nh-1)/2;
 
@@ -72,6 +74,7 @@ __kernel void convolve_diff(__global float * input, __global float * output, con
 
   }
 
+  
 
   output[i+Nx*j+Nx*Ny*k] = res;  
  
@@ -143,6 +146,9 @@ __kernel void sum(__global float * inputX, __global float * inputY, __global flo
 	output[i] = sqrt(res);
 	
  }
+ 
+ 
+ 
 
 __kernel void blur(__global float * input, __global float * output , const float sigma, const int Nx,const int Ny,const int Nz, const int flag){
 

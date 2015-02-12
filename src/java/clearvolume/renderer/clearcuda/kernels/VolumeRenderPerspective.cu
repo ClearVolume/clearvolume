@@ -54,7 +54,7 @@ float random(uint x, uint y)
 
     float rnd = (a*1.0)/(79197919);
     
-    return rnd;
+    return rnd-0.5;
 }
 
 
@@ -285,7 +285,7 @@ volumerender(uint *d_output, uint imageW, uint imageH,
     float4 acc = make_float4(0.0f);
 
 		// randomize origin point a bit:
-		uint entropy = (uint)(6779*orig.y) + (uint)(5147*orig.x) + (uint)(6257*orig.z) + (uint)(3271*direc.x) + (uint)(7109*direc.y) + (uint)(3331*direc.z);
+		uint entropy = (uint)( 6779514*length(orig) + 6257327*length(direc) );
 		orig += tstep*random(entropy+x,entropy+y)*direc;
 
 		float t = tnear;

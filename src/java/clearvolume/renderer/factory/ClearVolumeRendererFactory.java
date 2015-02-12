@@ -22,15 +22,15 @@ public class ClearVolumeRendererFactory
 	 *          Swing container.
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer8Bit(	final String pWindowName,
-	                                                                     	final int pWindowWidth,
-	                                                                     	final int pWindowHeight,
-	                                                                     	final boolean useInCanvas)
+																																				final int pWindowWidth,
+																																				final int pWindowHeight,
+																																				final boolean useInCanvas)
 	{
 		return newBestRenderer(	pWindowName,
-		                       	pWindowWidth,
-		                       	pWindowHeight,
-		                       	1,
-		                       	useInCanvas);
+														pWindowWidth,
+														pWindowHeight,
+														1,
+														useInCanvas);
 	}
 
 	/**
@@ -47,18 +47,46 @@ public class ClearVolumeRendererFactory
 	 *          Swing container.
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-	                                                                 	final int pWindowWidth,
-	                                                                 	final int pWindowHeight,
-	                                                                 	final int pBytesPerVoxel,
-	                                                                 	final boolean useInCanvas)
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final int pBytesPerVoxel,
+																																		final boolean useInCanvas)
 	{
 		return newBestRenderer(	pWindowName,
-		                       	pWindowWidth,
-		                       	pWindowHeight,
-		                       	pBytesPerVoxel,
-		                       	768,
-		                       	768,
-		                       	useInCanvas);
+														pWindowWidth,
+														pWindowHeight,
+														pBytesPerVoxel,
+														768,
+														768,
+														useInCanvas);
+	}
+
+	/**
+	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
+	 * name, width, height, bytes=per-voxel, max window width and height.
+	 *
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 * @param pBytesPerVoxel
+	 * @param pMaxTextureWidth
+	 * @param pMaxTextureHeight
+	 */
+	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final int pBytesPerVoxel,
+																																		final int pMaxTextureWidth,
+																																		final int pMaxTextureHeight)
+	{
+		return newBestRenderer(	pWindowName,
+														pWindowWidth,
+														pWindowHeight,
+														pBytesPerVoxel,
+														pMaxTextureWidth,
+														pMaxTextureHeight,
+														1,
+														false);
 	}
 
 	/**
@@ -76,21 +104,21 @@ public class ClearVolumeRendererFactory
 	 *          Swing container.
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-	                                                                 	final int pWindowWidth,
-	                                                                 	final int pWindowHeight,
-	                                                                 	final int pBytesPerVoxel,
-	                                                                 	final int pMaxTextureWidth,
-	                                                                 	final int pMaxTextureHeight,
-	                                                                 	final boolean useInCanvas)
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final int pBytesPerVoxel,
+																																		final int pMaxTextureWidth,
+																																		final int pMaxTextureHeight,
+																																		final boolean useInCanvas)
 	{
 		return newBestRenderer(	pWindowName,
-		                       	pWindowWidth,
-		                       	pWindowHeight,
-		                       	pBytesPerVoxel,
-		                       	pMaxTextureWidth,
-		                       	pMaxTextureHeight,
-		                       	1,
-		                       	useInCanvas);
+														pWindowWidth,
+														pWindowHeight,
+														pBytesPerVoxel,
+														pMaxTextureWidth,
+														pMaxTextureHeight,
+														1,
+														useInCanvas);
 	}
 
 	/**
@@ -109,26 +137,26 @@ public class ClearVolumeRendererFactory
 	 *          Swing container.
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-	                                                                 	final int pWindowWidth,
-	                                                                 	final int pWindowHeight,
-	                                                                 	final int pBytesPerVoxel,
-	                                                                 	final int pMaxTextureWidth,
-	                                                                 	final int pMaxTextureHeight,
-	                                                                 	final int pNumberOfRenderLayers,
-	                                                                 	final boolean pUseInCanvas)
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final int pBytesPerVoxel,
+																																		final int pMaxTextureWidth,
+																																		final int pMaxTextureHeight,
+																																		final int pNumberOfRenderLayers,
+																																		final boolean pUseInCanvas)
 	{
 		final Properties p = new Properties(System.getProperties());
 
 		if (p.getProperty("ClearVolume.disableCUDA") == null)
 		{
 			final ClearVolumeRendererInterface lNewCudaRenderer = newCudaRenderer(pWindowName,
-			                                                                      pWindowWidth,
-			                                                                      pWindowHeight,
-			                                                                      pBytesPerVoxel,
-			                                                                      pMaxTextureWidth,
-			                                                                      pMaxTextureHeight,
-			                                                                      pNumberOfRenderLayers,
-			                                                                      pUseInCanvas);
+																																						pWindowWidth,
+																																						pWindowHeight,
+																																						pBytesPerVoxel,
+																																						pMaxTextureWidth,
+																																						pMaxTextureHeight,
+																																						pNumberOfRenderLayers,
+																																						pUseInCanvas);
 
 			if (lNewCudaRenderer != null)
 				return lNewCudaRenderer;
@@ -141,13 +169,13 @@ public class ClearVolumeRendererFactory
 		if (p.getProperty("ClearVolume.disableOpenCL") == null)
 		{
 			return new OpenCLVolumeRenderer(pWindowName,
-			                                pWindowWidth,
-			                                pWindowHeight,
-			                                pBytesPerVoxel,
-			                                pMaxTextureWidth,
-			                                pMaxTextureHeight,
-			                                pNumberOfRenderLayers,
-			                                pUseInCanvas);
+																			pWindowWidth,
+																			pWindowHeight,
+																			pBytesPerVoxel,
+																			pMaxTextureWidth,
+																			pMaxTextureHeight,
+																			pNumberOfRenderLayers,
+																			pUseInCanvas);
 		}
 		else
 		{
@@ -159,13 +187,13 @@ public class ClearVolumeRendererFactory
 	}
 
 	public static final ClearVolumeRendererInterface newCudaRenderer(	final String pWindowName,
-	                                                                 	final int pWindowWidth,
-	                                                                 	final int pWindowHeight,
-	                                                                 	final int pBytesPerVoxel,
-	                                                                 	final int pMaxTextureWidth,
-	                                                                 	final int pMaxTextureHeight,
-	                                                                 	final int pNumberOfRenderLayers,
-	                                                                 	final boolean pUseInCanvas)
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final int pBytesPerVoxel,
+																																		final int pMaxTextureWidth,
+																																		final int pMaxTextureHeight,
+																																		final int pNumberOfRenderLayers,
+																																		final boolean pUseInCanvas)
 	{
 		boolean lCUDAOperational = false;
 		try
@@ -181,31 +209,31 @@ public class ClearVolumeRendererFactory
 			return null;
 
 		return new JCudaClearVolumeRenderer(pWindowName,
-		                                    pWindowWidth,
-		                                    pWindowHeight,
-		                                    pBytesPerVoxel,
-		                                    pMaxTextureWidth,
-		                                    pMaxTextureHeight,
-		                                    pNumberOfRenderLayers,
-		                                    pUseInCanvas);
+																				pWindowWidth,
+																				pWindowHeight,
+																				pBytesPerVoxel,
+																				pMaxTextureWidth,
+																				pMaxTextureHeight,
+																				pNumberOfRenderLayers,
+																				pUseInCanvas);
 	}
 
 	public static final ClearVolumeRendererInterface newOpenCLRenderer(	final String pWindowName,
-	                                                                   	final int pWindowWidth,
-	                                                                   	final int pWindowHeight,
-	                                                                   	final int pBytesPerVoxel,
-	                                                                   	final int pMaxTextureWidth,
-	                                                                   	final int pMaxTextureHeight,
-	                                                                   	final int pNumberOfRenderLayers,
-	                                                                   	final boolean pUseInCanvas)
+																																			final int pWindowWidth,
+																																			final int pWindowHeight,
+																																			final int pBytesPerVoxel,
+																																			final int pMaxTextureWidth,
+																																			final int pMaxTextureHeight,
+																																			final int pNumberOfRenderLayers,
+																																			final boolean pUseInCanvas)
 	{
 		return new OpenCLVolumeRenderer(pWindowName,
-		                                pWindowWidth,
-		                                pWindowHeight,
-		                                pBytesPerVoxel,
-		                                pMaxTextureWidth,
-		                                pMaxTextureHeight,
-		                                pNumberOfRenderLayers,
-		                                pUseInCanvas);
+																		pWindowWidth,
+																		pWindowHeight,
+																		pBytesPerVoxel,
+																		pMaxTextureWidth,
+																		pMaxTextureHeight,
+																		pNumberOfRenderLayers,
+																		pUseInCanvas);
 	}
 }

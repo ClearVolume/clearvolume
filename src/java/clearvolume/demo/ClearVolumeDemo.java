@@ -231,7 +231,7 @@ public class ClearVolumeDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-		final double s = 0;
+		double s = 2.;
 		while (lClearVolumeRenderer.isShowing())
 		{
 
@@ -240,16 +240,23 @@ public class ClearVolumeDemo
 			// lOpenCLTenengrad.setSigma(s);
 			// s += .5;
 
+			/*			for (int i = 1; i < lVolumeDataArray.length - 1; i++)
+							lVolumeDataArray[i] = (byte) (((lVolumeDataArray[i - 1] + s
+																							* lVolumeDataArray[i] + lVolumeDataArray[i + 1]) / (s + 2)));
+
+			*/
 			for (int i = 1; i < lVolumeDataArray.length - 1; i++)
-				lVolumeDataArray[i] = (byte) ((lVolumeDataArray[i - 1] + 2
-																				* lVolumeDataArray[i] + lVolumeDataArray[i + 1]) / 4);
+				lVolumeDataArray[i] = (byte) (.99 * lVolumeDataArray[i]);
 
 			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
+
+
 		}
+
 
 		lClearVolumeRenderer.close();
 	}

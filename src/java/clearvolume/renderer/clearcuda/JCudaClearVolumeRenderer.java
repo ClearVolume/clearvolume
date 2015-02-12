@@ -389,6 +389,9 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																																false);
 			lVolumeDataBuffer.rewind();
 
+			assert (lVolumeDataBuffer.capacity() == mVolumeDataCudaArrays[pRenderLayerIndex].getSizeInBytes());
+			
+			
 			mVolumeDataCudaArrays[pRenderLayerIndex].copyFrom(lVolumeDataBuffer,
 																												true);
 
@@ -664,37 +667,39 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		boolean lAnyVolumeDataUpdated = false;
 
-		for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++)
+		for (int lRenderLayerIndex = 0; lRenderLayerIndex < getNumberOfRenderLayers(); lRenderLayerIndex++)
 		{
-			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(lLayerIndex);
+			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(lRenderLayerIndex);
 
 			if (lVolumeDataBuffer != null)
 			{
-				synchronized (getSetVolumeDataBufferLock(lLayerIndex))
+				synchronized (getSetVolumeDataBufferLock(lRenderLayerIndex))
 				{
-					clearVolumeDataBufferReference(lLayerIndex);
+					clearVolumeDataBufferReference(lRenderLayerIndex);
 
-					if (haveVolumeDimensionsChanged() || mVolumeDataCudaArrays[lLayerIndex] == null)
+					if (haveVolumeDimensionsChanged() || mVolumeDataCudaArrays[lRenderLayerIndex] == null)
 					{
-						if (mVolumeDataCudaArrays[lLayerIndex] != null)
+						if (mVolumeDataCudaArrays[lRenderLayerIndex] != null)
 						{
-							mVolumeDataCudaArrays[lLayerIndex].close();
-							mVolumeDataCudaArrays[lLayerIndex] = null;
+							mVolumeDataCudaArrays[lRenderLayerIndex].close();
+							mVolumeDataCudaArrays[lRenderLayerIndex] = null;
 						}
 
-						prepareVolumeDataArray(lLayerIndex, lVolumeDataBuffer);
+						prepareVolumeDataArray(	lRenderLayerIndex,
+																		lVolumeDataBuffer);
 					}
 					else
 					{
+						assert (lVolumeDataBuffer.capacity() == mVolumeDataCudaArrays[lRenderLayerIndex].getSizeInBytes());
 						lVolumeDataBuffer.rewind();
-						mVolumeDataCudaArrays[lLayerIndex].copyFrom(lVolumeDataBuffer,
+						mVolumeDataCudaArrays[lRenderLayerIndex].copyFrom(lVolumeDataBuffer,
 																												true);
 					}
 
-					notifyCompletionOfDataBufferCopy(lLayerIndex);
+					notifyCompletionOfDataBufferCopy(lRenderLayerIndex);
 					lAnyVolumeDataUpdated |= true;
 
-					runProcessorsHook(lLayerIndex);
+					runProcessorsHook(lRenderLayerIndex);
 				}
 
 			}

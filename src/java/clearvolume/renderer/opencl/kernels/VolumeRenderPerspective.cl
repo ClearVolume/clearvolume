@@ -26,7 +26,7 @@ float random(uint x, uint y)
 
     float rnd = (a*1.0f)/(79197919);
     
-    return rnd;
+    return rnd-0.5;
 }
 
 
