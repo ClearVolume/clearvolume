@@ -20,7 +20,7 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 	private int mLocalShapeX, mLocalShapeY, mLocalShapeZ;
 
 	private final int mLocalSize = 8;
-	private final int mDownSample = 2;
+	private final int mDownSample = 4;
 
 	@Override
 	public String getName() {
@@ -53,7 +53,7 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 		// System.out.println(mLocalShapeX);
 		// System.out.println(mPaddedShapeX);
 
-		long lBinSize = mLocalShapeX * mLocalShapeY * mLocalShapeZ;
+		final long lBinSize = mLocalShapeX * mLocalShapeY * mLocalShapeZ;
 		// the buffer containing the counts
 		mBufX = getDevice().createOutputFloatBuffer(lBinSize);
 		mBufY = getDevice().createOutputFloatBuffer(lBinSize);
@@ -80,9 +80,9 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 		mKernel.setArgs(getVolumeBuffers()[0], mBufX, mBufY, mBufZ, mBufSum,
 				mDownSample);
 
-		getDevice().run(mKernel, (int) mPaddedShapeX, (int) mPaddedShapeY,
-				(int) mPaddedShapeZ, (int) mLocalSize, (int) mLocalSize,
-				(int) mLocalSize);
+		getDevice().run(mKernel, mPaddedShapeX, mPaddedShapeY,
+				mPaddedShapeZ, mLocalSize, mLocalSize,
+				mLocalSize);
 
 		final FloatBuffer outX = getDevice().readFloatBuffer(mBufX);
 		final FloatBuffer outY = getDevice().readFloatBuffer(mBufY);
