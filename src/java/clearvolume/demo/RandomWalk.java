@@ -1,7 +1,8 @@
 package clearvolume.demo;
 
-import static java.lang.Math.random;
 import clearvolume.renderer.processors.ProcessorBase;
+
+import static java.lang.Math.random;
 
 public class RandomWalk extends ProcessorBase<float[]>
 {
@@ -31,8 +32,6 @@ public class RandomWalk extends ProcessorBase<float[]>
 
 		final float[] lRandomVector = new float[]
 		{ x, y, z };
-
-		System.out.format("new vector: (%g,%g,%g) \n", x, y, z);
 
 		notifyListenersOfResult(lRandomVector);
 	}
