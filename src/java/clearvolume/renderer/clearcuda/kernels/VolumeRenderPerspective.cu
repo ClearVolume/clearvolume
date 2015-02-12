@@ -47,15 +47,12 @@ float random(uint x, uint y)
 {   
     uint a = 4421 +(1+x)*(1+y) +x +y;
 
-    for(int i=0; i < 2; i++)
+    for(int i=0; i < 10; i++)
     {
-        a = (1664525 * a + 1013904223) %7919;
+        a = (1664525 * a + 1013904223) % 79197919;
     }
 
-    
-    float rnd = (a*1.0)/(7919);
-    
-    //printf("%d %d -> %d %f \n",x,y,a,rnd);
+    float rnd = (a*1.0)/(79197919);
     
     return rnd;
 }
@@ -287,8 +284,9 @@ volumerender(uint *d_output, uint imageW, uint imageH,
     // march along ray from front to back, accumulating color
     float4 acc = make_float4(0.0f);
 
-		// randomize origin pint a bit:
-		orig += tstep*random(x,y)*direc;
+		// randomize origin point a bit:
+		uint entropy = (uint)(6779*orig.y) + (uint)(5147*orig.x) + (uint)(6257*orig.z) + (uint)(3271*direc.x) + (uint)(7109*direc.y) + (uint)(3331*direc.z);
+		orig += tstep*random(entropy+x,entropy+y)*direc;
 
 		float t = tnear;
 		float4 pos;

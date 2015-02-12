@@ -128,7 +128,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
 			mCLRenderBuffers[i] = mCLDevice.createOutputIntBuffer(lRenderBufferSize);
-			mCLTransferColorBuffers[i] = mCLDevice.createInputFloatBuffer(4);
 		}
 
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
@@ -194,16 +193,27 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private void prepareTransferFunctionArray(final int pRenderLayerIndex)
 	{
 
-		final float[] lTransferFunctionArray = getTransferFunction( pRenderLayerIndex ).getArray();
+		final float[] lTransferFunctionArray = getTransferFunction(pRenderLayerIndex).getArray();
+
+		/*System.out.println("render layer %" + pRenderLayerIndex
+												+ " -> "
+												+ Arrays.toString(lTransferFunctionArray));/**/
 
 		final int lTransferFunctionArrayLength = lTransferFunctionArray.length;
 
-		mCLTransferFunctionImages[pRenderLayerIndex] = mCLDevice.createGenericImage2D(lTransferFunctionArrayLength / 4,
-																																									1,
-																																									CLImageFormat.ChannelOrder.RGBA,
-																																									CLImageFormat.ChannelDataType.Float);
+		final int lNeededWidth = lTransferFunctionArrayLength / 4;
+		if (mCLTransferFunctionImages[pRenderLayerIndex] == null || mCLTransferFunctionImages[pRenderLayerIndex].getWidth() != lNeededWidth)
+		{
+			if (mCLTransferFunctionImages[pRenderLayerIndex] != null)
+				mCLTransferFunctionImages[pRenderLayerIndex].release();
 
-		final float[] color4 = new float[]
+			mCLTransferFunctionImages[pRenderLayerIndex] = mCLDevice.createGenericImage2D(lNeededWidth,
+																																										1,
+																																										CLImageFormat.ChannelOrder.RGBA,
+																																										CLImageFormat.ChannelDataType.Float);
+		}
+
+		/*final float[] color4 = new float[]
 		{ lTransferFunctionArray[lTransferFunctionArrayLength - 4],
 			lTransferFunctionArray[lTransferFunctionArrayLength - 3],
 			lTransferFunctionArray[lTransferFunctionArrayLength - 2],
@@ -213,7 +223,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		// + Arrays.toString(color4));
 
 		mCLDevice.writeFloatBuffer(	mCLTransferColorBuffers[pRenderLayerIndex],
-																FloatBuffer.wrap(color4));
+																FloatBuffer.wrap(color4));/**/
 
 		mCLDevice.writeFloatImage2D(mCLTransferFunctionImages[pRenderLayerIndex],
 																FloatBuffer.wrap(lTransferFunctionArray));
@@ -331,7 +341,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 											(float) getTransferRangeMax(pRenderLayerIndex),
 											(float) getGamma(pRenderLayerIndex),
 											// mCLTranferFunctionImages[pRenderLayerIndex],
-											mCLTransferColorBuffers[pRenderLayerIndex],
+											mCLTransferFunctionImages[pRenderLayerIndex],
 											mCLInvProjectionBuffer,
 											mCLInvModelViewBuffer,
 											mCLVolumeImages[pRenderLayerIndex]);
@@ -353,8 +363,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			// System.out.println("CLEAR layer:" + pRenderLayerIndex);
 			clearTexture(pRenderLayerIndex);
 		}
-
-
 
 		// long endTime = System.nanoTime();
 
