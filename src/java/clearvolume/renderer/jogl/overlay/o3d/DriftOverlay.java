@@ -40,7 +40,7 @@ public class DriftOverlay extends PathOverlay	implements
 
     super.mStartColor = mStartColor;
     super.mEndColor = mEndColor;
-    textRenderer = new ClearTextRenderer(pGL4);
+    textRenderer = new ClearTextRenderer(pGL4, false);
   }
 
   @Override
