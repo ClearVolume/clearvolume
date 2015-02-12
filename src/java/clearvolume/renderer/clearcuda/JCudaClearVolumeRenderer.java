@@ -417,7 +417,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	private void prepareTransferFunctionArray(final int pRenderLayerIndex)
 	{
-		final float[] lTransferFunctionArray = getTransfertFunction(pRenderLayerIndex).getArray();
+		final float[] lTransferFunctionArray = getTransferFunction( pRenderLayerIndex ).getArray();
 		final int lTransferFunctionArrayLength = lTransferFunctionArray.length;
 
 		assert (mTransferFunctionCudaArrays[pRenderLayerIndex] == null);
@@ -440,7 +440,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	private void copyTransferFunctionArray(final int pRenderLayerIndex)
 	{
-		final float[] lTransferFunctionArray = getTransfertFunction(pRenderLayerIndex).getArray();
+		final float[] lTransferFunctionArray = getTransferFunction( pRenderLayerIndex ).getArray();
 
 		mTransferFunctionCudaArrays[pRenderLayerIndex].copyFrom(lTransferFunctionArray,
 																														true);
@@ -462,13 +462,13 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	private void pointTransferFunctionTextureToArray(final int pRenderLayerIndex)
 	{
-		mSizeOfTransferFunction.setSingleFloat(getTransfertFunction(pRenderLayerIndex).getArray().length);
+		mSizeOfTransferFunction.setSingleFloat( getTransferFunction( pRenderLayerIndex ).getArray().length );
 		mTransferFunctionTexture.setTo(mTransferFunctionCudaArrays[pRenderLayerIndex]);
 		mVolumeRenderingFunction.setTexture(mTransferFunctionTexture);
 	}
 
 	@Override
-	public void dispose(GLAutoDrawable pArg0)
+	public void dispose(final GLAutoDrawable pArg0)
 	{
 		printMemoryState();
 
@@ -816,7 +816,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	}
 
-	private void runProcessorsHook(int pRenderLayerIndex)
+	private void runProcessorsHook(final int pRenderLayerIndex)
 	{
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
