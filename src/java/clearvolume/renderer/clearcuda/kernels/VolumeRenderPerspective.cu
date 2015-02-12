@@ -40,6 +40,27 @@ typedef unsigned short VolumeType2;
 texture<VolumeType/*BytesPerVoxel*/, 3, cudaReadModeNormalizedFloat> tex;         // 3D texture
 texture<float4, 1, cudaReadModeElementType>         transferTex; // 1D transfer function texture
 
+
+__forceinline__
+__device__
+float random(uint x, uint y)
+{   
+    uint a = 4421 +(1+x)*(1+y) +x +y;
+
+    for(int i=0; i < 2; i++)
+    {
+        a = (1664525 * a + 1013904223) %7919;
+    }
+
+    
+    float rnd = (a*1.0)/(7919);
+    
+    //printf("%d %d -> %d %f \n",x,y,a,rnd);
+    
+    return rnd;
+}
+
+
 __constant__ float c_sizeOfTransfertFunction;
 
 typedef struct
@@ -67,6 +88,7 @@ struct Ray
 // intersect ray with a box
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm
 
+__forceinline__
 __device__
 int intersectBox(Ray r, float3 boxmin, float3 boxmax, float *tnear, float *tfar)
 {
@@ -93,6 +115,7 @@ int intersectBox(Ray r, float3 boxmin, float3 boxmax, float *tnear, float *tfar)
 
 
 // transform vector by matrix (no translation)
+__forceinline__
 __device__
 float3 mul(const float3x4 &M, const float3 &v)
 {
@@ -104,6 +127,7 @@ float3 mul(const float3x4 &M, const float3 &v)
 }
 
 // transform vector by matrix with translation
+__forceinline__
 __device__
 float4 mul(const float3x4 &M, const float4 &v)
 {
@@ -116,6 +140,7 @@ float4 mul(const float3x4 &M, const float4 &v)
 }
 
 
+__forceinline__
 __device__
 float4 mul(const float4x4 &M, const float4 &v)
 {
@@ -128,6 +153,7 @@ float4 mul(const float4x4 &M, const float4 &v)
     return r;
 }
 
+__forceinline__
 __device__
 void printf4(const float4 &v)
 {
@@ -135,7 +161,9 @@ void printf4(const float4 &v)
 }
 
 
-__device__ uint rgbaFloatToInt(float4 rgba)
+__forceinline__ 
+__device__ 
+uint rgbaFloatToInt(float4 rgba)
 {
     rgba.x = __saturatef(rgba.x);   // clamp to [0.0, 1.0]
     rgba.y = __saturatef(rgba.y);
@@ -144,14 +172,18 @@ __device__ uint rgbaFloatToInt(float4 rgba)
     return (uint(rgba.w*255)<<24) | (uint(rgba.z*255)<<16) | (uint(rgba.y*255)<<8) | uint(rgba.x*255);
 }
 
-inline __device__ bool algoMaxProjection(float4 &acc, float4 &col )
+__forceinline__
+__device__ 
+bool algoMaxProjection(float4 &acc, float4 &col )
 {
        	acc = fmaxf(acc,col);
         
         return false ;
 }
 
-inline __device__ bool algoSumProjection(float4 &acc, float4 &col )
+__forceinline__
+__device__ 
+bool algoSumProjection(float4 &acc, float4 &col )
 {
        	acc = fmaxf(acc,col);
         
@@ -159,7 +191,9 @@ inline __device__ bool algoSumProjection(float4 &acc, float4 &col )
 }
 
 
-inline __device__ bool algoBlendFrontToBack( float4 &acc, float4 &col )
+__forceinline__
+__device__ 
+bool algoBlendFrontToBack( float4 &acc, float4 &col )
 {
         col *= col.w;
         // "over" operator for front-to-back blending
@@ -168,7 +202,9 @@ inline __device__ bool algoBlendFrontToBack( float4 &acc, float4 &col )
         return false;
 }
 
-inline __device__ bool algoBlendBackToFront(float4 &acc, float4 &col )
+__forceinline__
+__device__ 
+bool algoBlendBackToFront(float4 &acc, float4 &col )
 {
 
         // "under" operator for back-to-front blending
@@ -176,7 +212,9 @@ inline __device__ bool algoBlendBackToFront(float4 &acc, float4 &col )
         return false;
 }
 
-inline __device__ bool algo(float4 &acc, float4 &col )
+__forceinline__
+__device__
+bool algo(float4 &acc, float4 &col )
 {
 		return algoMaxProjection(acc,col);
 }
@@ -249,8 +287,10 @@ volumerender(uint *d_output, uint imageW, uint imageH,
     // march along ray from front to back, accumulating color
     float4 acc = make_float4(0.0f);
 
-		float t = tnear;
+		// randomize origin pint a bit:
+		orig += tstep*random(x,y)*direc;
 
+		float t = tnear;
 		float4 pos;
 		uint i;
 		for(i=0; i<maxSteps; i++) 
