@@ -161,7 +161,9 @@ volumerender(__global uint *d_output,
 
   float4 pos;
   uint i;
-  for(i=0; i<maxSteps; i++) {		
+  for(i=0; i<maxSteps; i++) 
+  {
+ 	
   	pos = orig + t*direc;
 
 
@@ -174,7 +176,7 @@ volumerender(__global uint *d_output,
   	colVal = max(colVal, mappedVal);
 
 	  t += tstep;
-  	if (t > tfar) break;
+ 		if (t > tfar) break;	  	
   }
 
   float4 colVal4 = brightness * colVal * color;

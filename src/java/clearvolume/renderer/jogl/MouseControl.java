@@ -103,6 +103,16 @@ class MouseControl extends MouseAdapter implements MouseListener
 			mRenderer.setGamma(Math.tan(Math.PI * nx / 2));
 
 		}
+
+		if (pMouseEvent.isShiftDown() && pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
+
+			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+
+			mRenderer.setBrightness(Math.tan(Math.PI * nx / 2));
+
+		}
 	}
 
 	/**
