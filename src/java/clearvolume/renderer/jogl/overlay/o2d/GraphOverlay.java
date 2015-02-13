@@ -175,6 +175,23 @@ public class GraphOverlay extends OverlayBase	implements
 
 	}
 
+	public void clear()
+	{
+		mReentrantLock.lock();
+		try
+		{
+			mDataY.clear();
+			clearMinMax();
+			mHasChanged = true;
+		}
+		finally
+		{
+			if (mReentrantLock.isHeldByCurrentThread())
+				mReentrantLock.unlock();
+		}
+
+	}
+
 	private void computeMinMax(float pAlpha)
 	{
 		try
@@ -193,6 +210,29 @@ public class GraphOverlay extends OverlayBase	implements
 				mMin = pAlpha * lMin + (1 - pAlpha) * mMin;
 				mMax = pAlpha * lMax + (1 - pAlpha) * mMax;
 
+			}
+		}
+		catch (final InterruptedException e)
+		{
+		}
+		finally
+		{
+			if (mReentrantLock.isHeldByCurrentThread())
+				mReentrantLock.unlock();
+		}
+
+	}
+
+	private void clearMinMax()
+	{
+		try
+		{
+			final boolean lIsLocked = mReentrantLock.tryLock(	0,
+																												TimeUnit.MILLISECONDS);
+			if (lIsLocked)
+			{
+				mMin = 0;
+				mMax = 1;
 			}
 		}
 		catch (final InterruptedException e)
@@ -367,7 +407,7 @@ public class GraphOverlay extends OverlayBase	implements
 	@Override
 	public void close()
 	{
-		mAudioPlot.stop();
+		mAudioPlot.close();
 		mStopSignal = true;
 	}
 

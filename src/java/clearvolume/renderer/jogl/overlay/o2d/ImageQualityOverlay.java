@@ -13,7 +13,7 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 
 	public ImageQualityOverlay()
 	{
-		this(256);
+		this(64);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -25,6 +25,16 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 
 		lOpenCLTenengrad.addResultListener((ProcessorResultListener<Double>) getDelegatedOverlay());
 		addProcessor(lOpenCLTenengrad);
+	}
+
+	@Override
+	public boolean toggleDisplay()
+	{
+		boolean lToggleDisplay = super.toggleDisplay();
+
+		if (lToggleDisplay)
+			((GraphOverlay) getDelegatedOverlay()).clear();
+		return lToggleDisplay;
 	}
 
 	@Override

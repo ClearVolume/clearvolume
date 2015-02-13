@@ -659,7 +659,7 @@ public class ClearVolumeDemo
 																																																					1,
 																																																					false);
 
-		final GraphOverlay lGraphOverlay = new GraphOverlay(1024);
+		final GraphOverlay lGraphOverlay = new GraphOverlay(64);
 		lClearVolumeRenderer.addOverlay(lGraphOverlay);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
@@ -697,7 +697,7 @@ public class ClearVolumeDemo
 		double lTrend = 0;
 		while (lClearVolumeRenderer.isShowing())
 		{
-			Thread.sleep(10);
+			Thread.sleep(500);
 			lTrend += 0.05 * (Math.random() - 0.5);
 			final double lValue = lTrend + 0.02 * Math.random();
 			lGraphOverlay.addPoint(lValue);
