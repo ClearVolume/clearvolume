@@ -36,7 +36,7 @@ void main()
         color = endColor;
         return;
    } else {
-        color = vec4(1.0, 1.0, 1.0, 0.5);
+        color = vec4(1.0, 0.0, 0.0, 0.5);
         return;
    }
 

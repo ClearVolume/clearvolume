@@ -25,7 +25,7 @@ public class DriftOverlay extends PathOverlay	implements
 																							Overlay2D
 {
   protected FloatBuffer mStartColor = FloatBuffer.wrap(new float[]{0.0f, 1.0f, 0.0f, 1.0f});
-  protected FloatBuffer mEndColor = FloatBuffer.wrap(new float[]{1.0f, 0.0f, 0.0f, 1.0f});
+  protected FloatBuffer mEndColor = FloatBuffer.wrap(new float[]{0.0f, 0.0f, 1.0f, 1.0f});
   protected SynchronizedDescriptiveStatistics stats;
 
   protected ClearTextRenderer textRenderer;
