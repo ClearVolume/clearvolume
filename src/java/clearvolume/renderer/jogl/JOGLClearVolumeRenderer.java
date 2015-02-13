@@ -107,8 +107,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private GLUniform[] mTexUnits;
 	private GLVertexAttributeArray mTexCoordAttributeArray;
 
-	
-
 	private final GLMatrix mBoxModelViewMatrix = new GLMatrix();
 	private final GLMatrix mVolumeViewMatrix = new GLMatrix();
 	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
@@ -120,7 +118,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	// Recorder:
 	private final GLVideoRecorder mGLVideoRecorder = new GLVideoRecorder(new File(SystemUtils.USER_HOME,
 																																								"Videos/ClearVolume"));
-
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
@@ -304,7 +301,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 		if (pUseInCanvas)
 		{
 			System.out.println("new NewtCanvasAWT() ");
-			mNewtCanvasAWT = new NewtCanvasAWT(mClearGLWindow.getGLWindow());
+			mNewtCanvasAWT = mClearGLWindow.getNewtCanvasAWT();
 			mNewtCanvasAWT.setShallUseOffscreenLayer(false);
 		}
 		else
@@ -314,13 +311,13 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 		// Initialize the mouse controls
 		final MouseControl lMouseControl = new MouseControl(this);
-		mClearGLWindow.getGLWindow().addMouseListener(lMouseControl);
+		mClearGLWindow.addMouseListener(lMouseControl);
 
 		// Initialize the keyboard controls
 		final KeyboardControl lKeyboardControl = new KeyboardControl(this);
-		mClearGLWindow.getGLWindow().addKeyListener(lKeyboardControl);
+		mClearGLWindow.addKeyListener(lKeyboardControl);
 
-		mClearGLWindow.getGLWindow()
+		mClearGLWindow
 									.addWindowListener(new WindowAdapter()
 									{
 
@@ -398,7 +395,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 				return mNewtCanvasAWT.isVisible();
 
 			if (mClearGLWindow != null)
-				return mClearGLWindow.getGLWindow().isVisible();
+				return mClearGLWindow.isVisible();
 		}
 		catch (final NullPointerException e)
 		{
@@ -417,7 +414,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public void setVisible(final boolean pIsVisible)
 	{
 		if (mNewtCanvasAWT == null)
-			mClearGLWindow.getGLWindow().setVisible(pIsVisible);
+			mClearGLWindow.setVisible(pIsVisible);
 
 	}
 
@@ -440,7 +437,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public int getWindowWidth()
 	{
-		return mClearGLWindow.getGLWindow().getWidth();
+		return mClearGLWindow.getWidth();
 	}
 
 	/**
@@ -451,7 +448,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public int getWindowHeight()
 	{
-		return mClearGLWindow.getGLWindow().getHeight();
+		return mClearGLWindow.getHeight();
 	}
 
 	/**
@@ -933,7 +930,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 */
 	private void setWindowTitle(final String pTitleString)
 	{
-		mClearGLWindow.getGLWindow().setTitle(pTitleString);
+		mClearGLWindow.setWindowTitle(pTitleString);
 	}
 
 	/**
@@ -1008,18 +1005,18 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		try
 		{
-			if (mClearGLWindow.getGLWindow().isFullscreen())
+			if (mClearGLWindow.isFullscreen())
 			{
 				if (mLastWindowWidth > 0 && mLastWindowHeight > 0)
-					mClearGLWindow.getGLWindow().setSize(	mLastWindowWidth,
+					mClearGLWindow.setSize(mLastWindowWidth,
 																								mLastWindowHeight);
-				mClearGLWindow.getGLWindow().setFullscreen(false);
+				mClearGLWindow.setFullscreen(false);
 			}
 			else
 			{
 				mLastWindowWidth = getWindowWidth();
 				mLastWindowHeight = getWindowHeight();
-				mClearGLWindow.getGLWindow().setFullscreen(true);
+				mClearGLWindow.setFullscreen(true);
 			}
 			// notifyUpdateOfVolumeRenderingParameters();
 			requestDisplay();
@@ -1038,7 +1035,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public boolean isFullScreen()
 	{
-		return mClearGLWindow.getGLWindow().isFullscreen();
+		return mClearGLWindow.isFullscreen();
 	}
 
 	/**
@@ -1129,7 +1126,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 					if (mClearGLWindow == null)
 						return;
-					mClearGLWindow.getGLWindow().display();
+					mClearGLWindow.requestDisplay();
 					// setVisible(true);
 				}
 				catch (final NullPointerException e)
@@ -1170,8 +1167,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void disableClose()
 	{
-		mClearGLWindow.getGLWindow()
-									.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
+		mClearGLWindow.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
 	}
 
 	private boolean anyIsTrue(final boolean[] pBooleanArray)
