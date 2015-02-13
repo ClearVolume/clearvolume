@@ -107,14 +107,12 @@ public class OverlayForProcessors extends OverlayBase	implements
 	}
 
 	@Override
-	public void render2D(	GL4 pGL4,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
+	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix)
 	{
 		if (mOverlay instanceof Overlay2D)
 		{
 			final Overlay2D lOverlay2D = (Overlay2D) mOverlay;
-			lOverlay2D.render2D(pGL4, pProjectionMatrix, pInvVolumeMatrix);
+			lOverlay2D.render2D(pGL4, pProjectionMatrix);
 		}
 	}
 

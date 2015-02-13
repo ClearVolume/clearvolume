@@ -26,8 +26,6 @@ public interface Overlay2D
 	 * @param pProjectionMatrix
 	 * @param pInvVolumeMatrix
 	 */
-	public void render2D(	GL4 pGL4,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix);
+	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix);
 
 }

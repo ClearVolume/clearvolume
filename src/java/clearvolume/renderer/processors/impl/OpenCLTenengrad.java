@@ -49,6 +49,7 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 	{
 		if (mKernelDownsample == null)
 		{
+
 			mKernelDownsample = getDevice().compileKernel(OpenCLTenengrad.class.getResource("kernels/tenengrad.cl"),
 																										"downsample");
 
@@ -244,9 +245,9 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 
 		// Gy
 		diff_step(mBufDownSampled, mBufScratch, 2);
-		smooth_step(mBufScratch, mBufGz, 1);
-		smooth_step(mBufGz, mBufScratch, 4);
-		copy_step(mBufScratch, mBufGz);
+		smooth_step(mBufScratch, mBufGy, 1);
+		smooth_step(mBufGy, mBufScratch, 4);
+		copy_step(mBufScratch, mBufGy);
 
 		// Gz
 		diff_step(mBufDownSampled, mBufScratch, 4);
@@ -259,31 +260,30 @@ public class OpenCLTenengrad extends OpenCLProcessor<Double>
 		mKernelSum.setArgs(mBufGx, mBufGy, mBufGz, mBufScratch, mDownSize);
 		getDevice().run(mKernelSum, mDownSize);
 
+		final FloatBuffer allSumBuf = getDevice().readFloatBuffer(mBufDownSampled);
+		allSumBuf.rewind();
+		float meanValue = 0.f;
+		while (allSumBuf.hasRemaining())
+			meanValue += allSumBuf.get();
+
+		meanValue *= 1.f / allSumBuf.capacity();
+
 		final FloatBuffer out = getDevice().readFloatBuffer(mBufScratch);
 
-		double meanValue = 0;
+		float meanGradient = 0;
 		for (int i = 0; i < out.capacity(); i++)
-			meanValue += out.get(i);
+			meanGradient += out.get(i);
 
-		meanValue *= 1. / out.capacity();
+		meanGradient *= 1. / out.capacity();
 
-		// FloatBuffer out = getDevice().readFloatBuffer(mBufRes);
-		// final int N = mDownShape[0];
-		//
-		// for (int i = 0; i < 4; i++)
-		// {
-		// System.out.println(out.get(10 + (10 + i) * N + 10 * N * N));
-		// }
+		float normalizedGradient = meanGradient / meanValue;
 
-		// System.out.println("OUTPUT:     " + meanValue);
+		/*System.out.format(" Tenengrad measure = %g \n sum = %g  \n old = %g \n",
+									normalizedGradient,
+									meanValue,
+									meanGradient);/**/
 
-		// meanValue = out.get(100);
-
-		// meanValue = out.get(16 + 16 * 42 + 16 * 42 * 42);
-
-		System.out.format("Tenengrad measure = %g \n", meanValue);
-
-		notifyListenersOfResult(meanValue);
+		notifyListenersOfResult((double) normalizedGradient);
 
 	}
 }

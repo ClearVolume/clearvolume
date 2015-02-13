@@ -10,8 +10,6 @@ import clearvolume.renderer.jogl.overlay.OverlayBase;
 public class TextOverlay extends OverlayBase implements Overlay2D
 {
 
-
-
 	@Override
 	public String getName()
 	{
@@ -24,14 +22,12 @@ public class TextOverlay extends OverlayBase implements Overlay2D
 		return false;
 	}
 
-
 	@Override
 	public void init(	GL4 pGL4,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
 		try
 		{
-
 
 		}
 		catch (final Throwable e)
@@ -41,9 +37,7 @@ public class TextOverlay extends OverlayBase implements Overlay2D
 	}
 
 	@Override
-	public void render2D(	GL4 pGL4,
-											GLMatrix pProjectionMatrix,
-											GLMatrix pInvVolumeMatrix)
+	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix)
 	{
 		if (isDisplayed())
 		{
@@ -51,6 +45,5 @@ public class TextOverlay extends OverlayBase implements Overlay2D
 
 		}
 	}
-
 
 }

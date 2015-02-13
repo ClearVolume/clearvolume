@@ -26,7 +26,7 @@ float random(uint x, uint y)
 
     float rnd = (a*1.0f)/(79197919);
     
-    return rnd;
+    return rnd-0.5;
 }
 
 
@@ -56,11 +56,7 @@ int intersectBox(float4 r_o, float4 r_d, float4 boxmin, float4 boxmax, float *tn
 	return smallest_tmax > largest_tmin;
 }
 
-inline
-void printf4(const float4 v)
-{
-  //printf("kernel: %.5f  %.5f  %.5f  %.5f\n",v.x,v.y,v.z,v.w); 
-}
+
 
 __kernel void
 max_project_Short2(__global short *d_output, 

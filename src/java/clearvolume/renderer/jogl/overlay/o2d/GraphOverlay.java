@@ -269,9 +269,7 @@ public class GraphOverlay extends OverlayBase	implements
 	}
 
 	@Override
-	public void render2D(	GL4 pGL4,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
+	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix)
 	{
 		if (isDisplayed())
 		{

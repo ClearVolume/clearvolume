@@ -210,6 +210,8 @@ public class AudioPlot
 	public void setValue(double pValue)
 	{
 		pValue = max(min(pValue, 1), 0);
+		if (Double.isNaN(pValue) || Double.isInfinite(pValue))
+			pValue = 0;
 
 		if (isInvertRange())
 			pValue = 1 - pValue;

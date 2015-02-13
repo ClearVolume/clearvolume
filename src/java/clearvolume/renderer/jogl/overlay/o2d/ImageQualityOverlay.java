@@ -11,10 +11,15 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 																															SingleKeyToggable
 {
 
-	@SuppressWarnings("unchecked")
 	public ImageQualityOverlay()
 	{
-		super(new GraphOverlay(1024));
+		this(256);
+	}
+
+	@SuppressWarnings("unchecked")
+	public ImageQualityOverlay(int pNumberOfPointsInGraph)
+	{
+		super(new GraphOverlay(pNumberOfPointsInGraph));
 
 		final OpenCLTenengrad lOpenCLTenengrad = new OpenCLTenengrad();
 
