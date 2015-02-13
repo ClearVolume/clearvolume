@@ -16,6 +16,7 @@ import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.*;
 import clearvolume.transferf.TransferFunctions;
 import com.jogamp.newt.awt.NewtCanvasAWT;
+import io.scif.FormatException;
 import org.junit.Test;
 
 import javax.swing.*;
@@ -437,22 +438,27 @@ public class ClearVolumeDemo
     float[] res = fs.getResolution();
 
     lClearVolumeRenderer.setCurrentRenderLayer(0);
-    lClearVolumeRenderer.setVolumeDataBuffer(fs.queryNextVolume(),
-            (int)res[0],
-            (int)res[1],
-            (int)res[2], 1.0f, 1.0f, 5.0f);
-
-    lClearVolumeRenderer.requestDisplay();
-
-    while (lClearVolumeRenderer.isShowing())
-    {
+    try {
+      lClearVolumeRenderer.setBytesPerVoxel(fs.queryBytesPerPixel());
       lClearVolumeRenderer.setVolumeDataBuffer(fs.queryNextVolume(),
-              (int)res[0],
-              (int)res[1],
-              (int)res[2], 1.0f, 1.0f, 5.0f);
+              (int) res[0],
+              (int) res[1],
+              (int) res[2], 1.0f, 1.0f, 5.0f);
+
       lClearVolumeRenderer.requestDisplay();
 
-      Thread.sleep(1000);
+      while (lClearVolumeRenderer.isShowing()) {
+        lClearVolumeRenderer.setVolumeDataBuffer(fs.queryNextVolume(),
+                (int) res[0],
+                (int) res[1],
+                (int) res[2], 1.0f, 1.0f, 5.0f);
+        lClearVolumeRenderer.requestDisplay();
+
+        Thread.sleep(1000);
+      }
+    } catch (IOException | FormatException e) {
+      System.err.println("Exception during volume reading: ");
+      e.printStackTrace();
     }
 
     lClearVolumeRenderer.close();

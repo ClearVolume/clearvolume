@@ -1,8 +1,14 @@
 package clearvolume.demo;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
+import io.scif.FormatException;
+import io.scif.Plane;
 import io.scif.Reader;
 import io.scif.SCIFIO;
+import io.scif.config.SCIFIOConfig;
+import io.scif.img.ImageRegion;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 
 import javax.swing.*;
 import java.io.File;
@@ -10,6 +16,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Random;
 
 
 /**
@@ -21,6 +28,7 @@ public class Fauxscope {
   protected final SCIFIO scifio;
   protected ArrayList<Reader> readers = new ArrayList<>();
   protected int currentReaderIndex = 0;
+  protected boolean mRandomDrift;
 
   protected long resolutionX;
   protected long resolutionY;
@@ -30,6 +38,7 @@ public class Fauxscope {
   protected ByteBuffer lVolumeDataArray;
 
   public Fauxscope(boolean randomDrift, ClearVolumeRendererInterface renderer) {
+    mRandomDrift = randomDrift;
     mRenderer = renderer;
     scifio = new SCIFIO();
   }
@@ -87,7 +96,16 @@ public class Fauxscope {
 
   }
 
-  public ByteBuffer queryNextVolume() {
+  public int queryBytesPerPixel() throws FormatException, IOException {
+    if(readers.size() > 0) {
+      int bpp = readers.get(0).openPlane(0,1).getImageMetadata().getBitsPerPixel()/8;
+      return bpp;
+    } else {
+      throw new IOException("No readers registered. Did you click cancel in the file selection dialog?");
+    }
+  }
+
+  public ByteBuffer queryNextVolume() throws IOException, FormatException{
     lVolumeDataArray = null;
 
     if(currentReaderIndex + 1 > readers.size()) {
@@ -95,28 +113,111 @@ public class Fauxscope {
     }
 
     Reader thisReader = readers.get(currentReaderIndex);
-    System.out.println("Loading volume from " + thisReader.getCurrentFile() + " (" + resolutionX*resolutionY*resolutionZ/1024/1024 + "M)");
-    lVolumeDataArray = ByteBuffer.allocate((int)resolutionX * (int)resolutionY * (int)resolutionZ);
-    lVolumeDataArray.order(ByteOrder.LITTLE_ENDIAN);
+    Plane firstPlane = thisReader.openPlane(0,1);
+    int bytesPerPixel = firstPlane.getImageMetadata().getBitsPerPixel()/8;
+    boolean isLittleEndian = firstPlane.getImageMetadata().isLittleEndian();
 
-    try {
-      for (int z = 0; z < resolutionZ; z++) {
-        System.out.println(thisReader.openPlane(0, 1).getImageMetadata().isLittleEndian());
-        lVolumeDataArray.put(thisReader.openPlane(0, z).getBytes());
-      }
-      System.out.println("\n");
-    } catch(IOException | io.scif.FormatException e) {
-      e.printStackTrace();
-      return null;
+    System.out.println("Loading volume from " + thisReader.getCurrentFile() + " (" + bytesPerPixel*resolutionX*resolutionY*resolutionZ/1024/1024 + "M)");
+
+    lVolumeDataArray = ByteBuffer.allocate(bytesPerPixel*(int)resolutionX * (int)resolutionY * (int)resolutionZ);
+    if(isLittleEndian) {
+      lVolumeDataArray.order(ByteOrder.LITTLE_ENDIAN);
+    } else {
+      lVolumeDataArray.order(ByteOrder.BIG_ENDIAN);
     }
 
+    int currentZ = 0;
+    int zStart = 0;
+    int zEnd = (int)resolutionZ;
+
+    int maxZShift = 50;
+    int minZShift = -50;
+    int shiftZ = 0;
+
+    int maxYShift = 600;
+    int minYShift = -600;
+    int shiftY = 0;
+
+    int zReadStart = 0;
+    int zReadEnd = (int)resolutionZ;
+
+    try {
+      if(mRandomDrift) {
+        Random rand = new Random();
+        shiftY = rand.nextInt((maxYShift - minYShift) + 1) + minYShift;
+        shiftZ = rand.nextInt((maxZShift - minZShift) + 1) + minZShift;
+        System.out.format("Shaking volume: ∂y=%d ∂z=%d\n", shiftY, shiftZ);
+
+        zStart += shiftZ;
+        zEnd += shiftZ;
+      }
+
+      if(zEnd > resolutionZ) {
+        // pad volume before, as it is shifted inwards
+        lVolumeDataArray.put(new byte[bytesPerPixel*(int)resolutionX * (int)resolutionY * (zEnd - (int)resolutionZ)]);
+      }
+
+      if(zStart < 0) {
+        zReadStart = 0;
+        zReadEnd = zReadEnd + shiftZ;
+      }
+      if(zEnd > resolutionZ) {
+        zReadStart = zReadStart + shiftZ;
+        zReadEnd = (int)resolutionZ;
+      }
+
+      for (currentZ = zReadStart; currentZ < zReadEnd; currentZ++) {
+        Plane p;
+
+        if(currentZ % 10 == 0) {
+          //System.out.println("offsetting!");
+          SCIFIOConfig c = new SCIFIOConfig();
+          AxisType[] a = new AxisType[]{Axes.X, Axes.Y};
+          c.imgOpenerSetRegion(new ImageRegion(a, new String[]{"500-1920","500-1000"}));
+
+          p = thisReader.openPlane(0, currentZ, c);
+        } else {
+          p = thisReader.openPlane(0, currentZ);
+        }
+        if(mRandomDrift) {
+          lVolumeDataArray.put(cutRowsFromPlane(p, shiftY).array());
+        } else {
+          lVolumeDataArray.put(p.getBytes());
+        }
+      }
+    } catch(IOException | io.scif.FormatException e) {
+      System.out.println("Warning: Exception during reading data. Stack trace follows, returning volume until z=" + currentZ);
+      e.printStackTrace();
+      return lVolumeDataArray;
+    }
+
+    if(zStart < 0) {
+      lVolumeDataArray.put(new byte[bytesPerPixel*(int)resolutionX * (int)resolutionY * Math.abs(zStart)]);
+    }
+
+    System.out.println("Read z=[0," + currentZ + " from " + thisReader.getCurrentFile() + ", returning volume." );
     currentReaderIndex++;
 
-    //lVolumeDataArray.order(ByteOrder.BIG_ENDIAN);
     return lVolumeDataArray;
   }
 
-  public void sendVolume() {
+  public ByteBuffer cutRowsFromPlane(Plane p, int shiftRows) {
+    // allocate padding buffer
+    byte[] padBuffer = new byte[(int)(p.getLengths()[0])*p.getImageMetadata().getBitsPerPixel()/8*Math.abs(shiftRows)];
+    byte[] original = p.getBytes();
 
+    ByteBuffer newBuffer = ByteBuffer.allocate((int)(p.getLengths()[0])*(int)(p.getLengths()[1])*p.getImageMetadata().getBitsPerPixel()/8);
+
+    if(shiftRows > 0) {
+      newBuffer.put(padBuffer);
+      newBuffer.put(original, 0, original.length-padBuffer.length);
+    } else if(shiftRows < 0) {
+      newBuffer.put(original, padBuffer.length, original.length-padBuffer.length);
+      newBuffer.put(padBuffer);
+    } else {
+      return ByteBuffer.wrap(original);
+    }
+
+    return newBuffer;
   }
 }
