@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Random;
 
 
 /**
@@ -29,6 +28,7 @@ public class Fauxscope {
   protected ArrayList<Reader> readers = new ArrayList<>();
   protected int currentReaderIndex = 0;
   protected boolean mRandomDrift;
+  protected FauxscopeRandomizer r;
 
   protected long resolutionX;
   protected long resolutionY;
@@ -37,10 +37,13 @@ public class Fauxscope {
 
   protected ByteBuffer lVolumeDataArray;
 
-  public Fauxscope(boolean randomDrift, ClearVolumeRendererInterface renderer) {
+  public Fauxscope(boolean randomDrift, ClearVolumeRendererInterface renderer, FauxscopeRandomizer randomizer) {
     mRandomDrift = randomDrift;
     mRenderer = renderer;
     scifio = new SCIFIO();
+
+    System.out.println("Fauxscope: Using " + randomizer.getClass().getName() + " randomizer.");
+    r = randomizer;
   }
 
   public void use4DStack(String filename) {
@@ -130,23 +133,30 @@ public class Fauxscope {
     int zStart = 0;
     int zEnd = (int)resolutionZ;
 
-    int maxZShift = 50;
-    int minZShift = -50;
+    int maxZShift = 20;
+    int minZShift = -20;
     int shiftZ = 0;
 
-    int maxYShift = 600;
-    int minYShift = -600;
+    int maxYShift = 200;
+    int minYShift = -200;
     int shiftY = 0;
+
+    int maxXShift = 200;
+    int minXShift = -200;
+    int shiftX;
 
     int zReadStart = 0;
     int zReadEnd = (int)resolutionZ;
 
     try {
       if(mRandomDrift) {
-        Random rand = new Random();
-        shiftY = rand.nextInt((maxYShift - minYShift) + 1) + minYShift;
-        shiftZ = rand.nextInt((maxZShift - minZShift) + 1) + minZShift;
-        System.out.format("Shaking volume: ∂y=%d ∂z=%d\n", shiftY, shiftZ);
+        //Random rand = new Random();
+        float[] shift = new float[3];
+        shift = r.getNextPoint();
+        shiftX = (int)Math.ceil((maxXShift-minXShift)*(shift[0]-1.0)+minXShift);
+        shiftY = (int)Math.ceil((maxYShift-minYShift)*(shift[1]-1.0)+minYShift);
+        shiftZ = (int)Math.ceil((maxZShift-minZShift)*(shift[2]-1.0)+minZShift);
+        System.out.format("Shaking volume: ∂x=%d ∂y=%d ∂z=%d\n", shiftX, shiftY, shiftZ);
 
         zStart += shiftZ;
         zEnd += shiftZ;

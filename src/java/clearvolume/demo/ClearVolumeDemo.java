@@ -238,10 +238,10 @@ public class ClearVolumeDemo
 			for (int i = 1; i < lVolumeDataArray.length - 1; i++)
 				lVolumeDataArray[i] = (byte) (.99 * lVolumeDataArray[i]);
 
-			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
-																								lResolutionX,
-																								lResolutionY,
-																								lResolutionZ);
+			lClearVolumeRenderer.setVolumeDataBuffer(ByteBuffer.wrap(lVolumeDataArray),
+              lResolutionX,
+              lResolutionY,
+              lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
 
 
@@ -430,7 +430,7 @@ public class ClearVolumeDemo
             false);
     final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
     final DriftOverlay lDriftOverlay = new DriftOverlay();
-    final Fauxscope fs = new Fauxscope(true, lClearVolumeRenderer);
+    final Fauxscope fs = new Fauxscope(true, lClearVolumeRenderer, new LevyFlightRandomizer(0.5f, 0.5f));
 
     fs.use4DStacksFromDirectory();
 
