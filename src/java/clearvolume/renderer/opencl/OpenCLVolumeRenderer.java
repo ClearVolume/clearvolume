@@ -332,6 +332,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		prepareTransferFunctionArray(pRenderLayerIndex);
 
+		final int lMaxSteps = getMaxSteps(pRenderLayerIndex);
+
 		mCLDevice.setArgs(mRenderKernel,
 											mCLRenderBuffers[pRenderLayerIndex],
 											getTextureWidth(),
@@ -340,7 +342,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 											(float) getTransferRangeMin(pRenderLayerIndex),
 											(float) getTransferRangeMax(pRenderLayerIndex),
 											(float) getGamma(pRenderLayerIndex),
-											// mCLTranferFunctionImages[pRenderLayerIndex],
+											lMaxSteps,
+											getDithering(pRenderLayerIndex),
 											mCLTransferFunctionImages[pRenderLayerIndex],
 											mCLInvProjectionBuffer,
 											mCLInvModelViewBuffer,

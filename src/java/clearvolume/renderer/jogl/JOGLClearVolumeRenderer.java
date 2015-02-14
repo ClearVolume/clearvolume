@@ -317,16 +317,15 @@ public abstract class JOGLClearVolumeRenderer	extends
 		final KeyboardControl lKeyboardControl = new KeyboardControl(this);
 		mClearGLWindow.addKeyListener(lKeyboardControl);
 
-		mClearGLWindow
-									.addWindowListener(new WindowAdapter()
-									{
+		mClearGLWindow.addWindowListener(new WindowAdapter()
+		{
 
-										@Override
-										public void windowDestroyNotify(final WindowEvent pE)
-										{
-											super.windowDestroyNotify(pE);
-										};
-									});
+			@Override
+			public void windowDestroyNotify(final WindowEvent pE)
+			{
+				super.windowDestroyNotify(pE);
+			};
+		});
 	}
 
 	@Override
@@ -1008,8 +1007,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 			if (mClearGLWindow.isFullscreen())
 			{
 				if (mLastWindowWidth > 0 && mLastWindowHeight > 0)
-					mClearGLWindow.setSize(mLastWindowWidth,
-																								mLastWindowHeight);
+					mClearGLWindow.setSize(mLastWindowWidth, mLastWindowHeight);
 				mClearGLWindow.setFullscreen(false);
 			}
 			else
@@ -1064,6 +1062,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void requestDisplayUnfairly()
 	{
+
 		if (mNewtCanvasAWT != null)
 			requestDisplay();
 
@@ -1084,6 +1083,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 	}
 
+	long mLastRequestTime = Long.MIN_VALUE;
+
 	/**
 	 * Interface method implementation
 	 *
@@ -1092,6 +1093,16 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void requestDisplay()
 	{
+		final long lRequestTime = System.nanoTime();
+		if (lRequestTime < mLastRequestTime + 15 * 1000 * 1000)
+		{
+			// System.out.println("FAIR too soon!");
+			return;
+		}
+		else
+			// System.out.println("FAIR PASS!");
+		mLastRequestTime = lRequestTime;
+
 		if (mNewtCanvasAWT != null)
 		{
 			SwingUtilities.invokeLater(new Runnable()

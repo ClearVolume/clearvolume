@@ -390,8 +390,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			lVolumeDataBuffer.rewind();
 
 			assert (lVolumeDataBuffer.capacity() == mVolumeDataCudaArrays[pRenderLayerIndex].getSizeInBytes());
-			
-			
+
 			mVolumeDataCudaArrays[pRenderLayerIndex].copyFrom(lVolumeDataBuffer,
 																												true);
 
@@ -420,7 +419,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	private void prepareTransferFunctionArray(final int pRenderLayerIndex)
 	{
-		final float[] lTransferFunctionArray = getTransferFunction( pRenderLayerIndex ).getArray();
+		final float[] lTransferFunctionArray = getTransferFunction(pRenderLayerIndex).getArray();
 		final int lTransferFunctionArrayLength = lTransferFunctionArray.length;
 
 		assert (mTransferFunctionCudaArrays[pRenderLayerIndex] == null);
@@ -443,7 +442,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	private void copyTransferFunctionArray(final int pRenderLayerIndex)
 	{
-		final float[] lTransferFunctionArray = getTransferFunction( pRenderLayerIndex ).getArray();
+		final float[] lTransferFunctionArray = getTransferFunction(pRenderLayerIndex).getArray();
 
 		mTransferFunctionCudaArrays[pRenderLayerIndex].copyFrom(lTransferFunctionArray,
 																														true);
@@ -465,7 +464,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	private void pointTransferFunctionTextureToArray(final int pRenderLayerIndex)
 	{
-		mSizeOfTransferFunction.setSingleFloat( getTransferFunction( pRenderLayerIndex ).getArray().length );
+		mSizeOfTransferFunction.setSingleFloat(getTransferFunction(pRenderLayerIndex).getArray().length);
 		mTransferFunctionTexture.setTo(mTransferFunctionCudaArrays[pRenderLayerIndex]);
 		mVolumeRenderingFunction.setTexture(mTransferFunctionTexture);
 	}
@@ -693,7 +692,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 						assert (lVolumeDataBuffer.capacity() == mVolumeDataCudaArrays[lRenderLayerIndex].getSizeInBytes());
 						lVolumeDataBuffer.rewind();
 						mVolumeDataCudaArrays[lRenderLayerIndex].copyFrom(lVolumeDataBuffer,
-																												true);
+																															true);
 					}
 
 					notifyCompletionOfDataBufferCopy(lRenderLayerIndex);
@@ -762,13 +761,17 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
 
+			final int lMaxSteps = getMaxSteps(pRenderLayerIndex);
+
 			mVolumeRenderingFunction.launch(lCudaDevicePointer,
 																			getTextureWidth(),
 																			getTextureHeight(),
 																			(float) getBrightness(pRenderLayerIndex),
 																			(float) getTransferRangeMin(pRenderLayerIndex),
 																			(float) getTransferRangeMax(pRenderLayerIndex),
-																			(float) getGamma(pRenderLayerIndex));
+																			(float) getGamma(pRenderLayerIndex),
+																			lMaxSteps,
+																			getDithering(pRenderLayerIndex));
 		}
 
 		if (mTemporaryTransfertBuffer == null || mTemporaryTransfertBuffer.capacity() != lCudaDevicePointer.getSizeInBytes())
@@ -783,6 +786,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mTemporaryTransfertBuffer.rewind();
 		copyBufferToTexture(pRenderLayerIndex, mTemporaryTransfertBuffer);
 	}
+
+
 
 	/**
 	 * Runs 3D to 2D rendering kernel and store the result in a PBO.
