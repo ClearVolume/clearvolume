@@ -7,6 +7,7 @@ package clearvolume.renderer.clearcuda;
  * Copyright 2009-2011 Marco Hutter - http://www.jcuda.org
  */
 
+import static java.lang.Math.toIntExact;
 import static jcuda.driver.JCudaDriver.CU_TRSF_NORMALIZED_COORDINATES;
 
 import java.io.File;
@@ -640,6 +641,34 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			return null;
 		mCudaContext.setCurrent();
 
+		if (mVolumeCaptureFlag)
+		{
+			final ByteBuffer[] lCaptureBuffers = new ByteBuffer[getNumberOfRenderLayers()];
+
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				lCaptureBuffers[i] = ByteBuffer.allocateDirect(toIntExact(getBytesPerVoxel() * getVolumeSizeX()
+																																	* getVolumeSizeY()
+																																	* getVolumeSizeZ()))
+																				.order(ByteOrder.nativeOrder());
+
+				mVolumeDataCudaArrays[getCurrentRenderLayerIndex()].copyTo(	lCaptureBuffers[i],
+																																		true);
+			}
+
+			notifyVolumeCaptureListeners(	lCaptureBuffers,
+																		false,
+																		getBytesPerVoxel(),
+																		getVolumeSizeX(),
+																		getVolumeSizeY(),
+																		getVolumeSizeZ(),
+																		getVoxelSizeX(),
+																		getVoxelSizeY(),
+																		getVoxelSizeZ());
+
+			mVolumeCaptureFlag = false;
+		}
+
 		try
 		{
 			mInvertedViewMatrix.copyFrom(invModelView, true);
@@ -786,8 +815,6 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mTemporaryTransfertBuffer.rewind();
 		copyBufferToTexture(pRenderLayerIndex, mTemporaryTransfertBuffer);
 	}
-
-
 
 	/**
 	 * Runs 3D to 2D rendering kernel and store the result in a PBO.

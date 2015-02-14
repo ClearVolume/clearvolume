@@ -1,6 +1,9 @@
 package clearvolume.renderer.opencl;
 
+import static java.lang.Math.toIntExact;
+
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GLEventListener;
@@ -234,6 +237,43 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	protected boolean[] renderVolume(	final float[] pInvModelViewMatrix,
 																		final float[] pInvProjectionMatrix)
 	{
+
+		if (mVolumeCaptureFlag)
+		{
+			final ByteBuffer[] lCaptureBuffers = new ByteBuffer[getNumberOfRenderLayers()];
+
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				lCaptureBuffers[i] = ByteBuffer.allocateDirect(toIntExact(getBytesPerVoxel() * getVolumeSizeX()
+																																	* getVolumeSizeY()
+																																	* getVolumeSizeZ()))
+																				.order(ByteOrder.nativeOrder());
+
+				mCLVolumeImages[getCurrentRenderLayerIndex()].read(	mCLDevice.getQueue(),
+																														0,
+																														0,
+																														0,
+																														getVolumeSizeX(),
+																														getVolumeSizeY(),
+																														getVolumeSizeZ(),
+																														0,
+																														0,
+																														lCaptureBuffers[i],
+																														true);
+			}
+
+			notifyVolumeCaptureListeners(	lCaptureBuffers,
+																		false,
+																		getBytesPerVoxel(),
+																		getVolumeSizeX(),
+																		getVolumeSizeY(),
+																		getVolumeSizeZ(),
+																		getVoxelSizeX(),
+																		getVoxelSizeY(),
+																		getVoxelSizeZ());
+
+			mVolumeCaptureFlag = false;
+		}
 
 		// System.out.println("render");
 		try

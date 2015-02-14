@@ -180,6 +180,11 @@ public class OpenCLDevice implements ClearVolumeCloseable
 		return mCLContext;
 	}
 
+	public CLQueue getQueue()
+	{
+		return mCLQueue;
+	}
+
 	public void printInfo()
 	{
 
@@ -602,4 +607,6 @@ public class OpenCLDevice implements ClearVolumeCloseable
 			e.printStackTrace();
 		}
 	}
+
+
 }

@@ -22,6 +22,7 @@ import org.junit.Test;
 import clearvolume.controller.ExternalRotationController;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.ClearVolumeRendererInterface;
+import clearvolume.renderer.VolumeCaptureListener;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.renderer.jogl.overlay.o2d.GraphOverlay;
@@ -254,9 +255,7 @@ public class ClearVolumeDemo
 																								lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
 
-
 		}
-
 
 		lClearVolumeRenderer.close();
 	}
@@ -1626,6 +1625,90 @@ public class ClearVolumeDemo
 			lClearVolumeRenderer.close();
 		}
 
+	}
+
+	@Test
+	public void demoCaptureVolumeData()	throws InterruptedException,
+																			IOException
+	{
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+																																																						512,
+																																																						512,
+																																																						1,
+																																																						512,
+																																																						512,
+																																																						1,
+																																																						false);
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
+
+		lClearVolumeRenderer.addVolumeCaptureListener(new VolumeCaptureListener()
+		{
+
+			@Override
+			public void capturedVolume(	ByteBuffer[] pCaptureBuffers,
+																	boolean pFloatType,
+																	int pBytesPerVoxel,
+																	long pVolumeWidth,
+																	long pVolumeHeight,
+																	long pVolumeDepth,
+																	double pVoxelWidth,
+																	double pVoxelHeight,
+																	double pVoxelDepth)
+			{
+				System.out.format("Captured %d volume %s bpv=%d (%d, %d, %d) (%g, %g, %g) %s\n",
+													pCaptureBuffers.length,
+													pFloatType ? "float" : "int",
+													pBytesPerVoxel,
+													pVolumeWidth,
+													pVolumeHeight,
+													pVolumeDepth,
+													pVoxelWidth,
+													pVoxelHeight,
+													pVoxelDepth,
+													pCaptureBuffers[0].toString());
+
+			}
+		});
+
+		final int lResolutionX = 256;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																							* lResolutionZ];
+
+		lClearVolumeRenderer.requestDisplay();
+
+		while (lClearVolumeRenderer.isShowing())
+		{
+			Thread.sleep(500);
+
+			for (int z = 0; z < lResolutionZ; z++)
+				for (int y = 0; y < lResolutionY; y++)
+					for (int x = 0; x < lResolutionX; x++)
+					{
+						final int lIndex = x + lResolutionX
+																* y
+																+ lResolutionX
+																* lResolutionY
+																* z;
+						int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
+						if (lCharValue < 12)
+							lCharValue = 0;
+						lVolumeDataArray[lIndex] = (byte) lCharValue;
+					}
+
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
+																								lResolutionX,
+																								lResolutionY,
+																								lResolutionZ);
+			lClearVolumeRenderer.requestDisplay();
+		}
+
+		lClearVolumeRenderer.close();
 	}
 
 	private static byte[] loadData(	final InputStream pInputStream,

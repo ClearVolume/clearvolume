@@ -5,6 +5,7 @@ import static java.lang.Math.min;
 import static java.lang.Math.sqrt;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -104,6 +105,10 @@ public abstract class ClearVolumeRendererBase	implements
 
 	// Map of processors:
 	protected Map<String, Processor<?>> mProcessorsMap = new ConcurrentHashMap<>();
+
+	// List of Capture Listeners
+	protected ArrayList<VolumeCaptureListener> mVolumeCaptureListenerList = new ArrayList<VolumeCaptureListener>();
+	protected volatile boolean mVolumeCaptureFlag = false;
 
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
@@ -1396,6 +1401,51 @@ public abstract class ClearVolumeRendererBase	implements
 		for (final Processor<?> lProcessor : pProcessors)
 			addProcessor(lProcessor);
 	}
+
+	/**
+	 * Toggles the display of the Control Frame;
+	 */
+	@Override
+	public void addVolumeCaptureListener(final VolumeCaptureListener pVolumeCaptureListener)
+	{
+		if (pVolumeCaptureListener != null)
+			mVolumeCaptureListenerList.add(pVolumeCaptureListener);
+	}
+
+	public void notifyVolumeCaptureListeners(	ByteBuffer[] pCaptureBuffer,
+																						boolean pFloatType,
+																						int pBytesPerVoxel,
+																						long pVolumeWidth,
+																						long pVolumeHeight,
+																						long pVolumeDepth,
+																						double pVoxelWidth,
+																						double pVoxelHeight,
+																						double pVoxelDepth)
+	{
+		for (final VolumeCaptureListener lVolumeCaptureListener : mVolumeCaptureListenerList)
+		{
+			lVolumeCaptureListener.capturedVolume(pCaptureBuffer,
+																						pFloatType,
+																						pBytesPerVoxel,
+																						pVolumeWidth,
+																						pVolumeHeight,
+																						pVolumeDepth,
+																						pVoxelWidth,
+																						pVoxelHeight,
+																						pVoxelDepth);
+		}
+	}
+
+	/**
+	 * Requests capture of the current displayed volume (Preferably of all layers
+	 * but possibly just of the current layer.)
+	 */
+	@Override
+	public void requestVolumeCapture()
+	{
+		mVolumeCaptureFlag = true;
+		requestDisplay();
+	};
 
 	/**
 	 * Clamps the value pValue to e interval [pMin,pMax]

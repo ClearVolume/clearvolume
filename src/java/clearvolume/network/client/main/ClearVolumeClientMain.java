@@ -16,17 +16,24 @@ import javax.swing.border.EmptyBorder;
 
 import clearvolume.main.CheckRequirements;
 import clearvolume.network.client.ClearVolumeTCPClientHelper;
+import clearvolume.renderer.VolumeCaptureListener;
 import clearvolume.utils.ClearVolumeJFrame;
 
 public class ClearVolumeClientMain
 {
 
 	private JFrame mApplicationJFrame;
+	private VolumeCaptureListener mVolumeCaptureListener;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args)
+	{
+		launchClientGUI(null);
+	}
+
+	public static void launchClientGUI(final VolumeCaptureListener pVolumeCaptureListener)
 	{
 		try
 		{
@@ -38,20 +45,25 @@ public class ClearVolumeClientMain
 					try
 					{
 						CheckRequirements.check();
-						ClearVolumeClientMain lClearVolumeMain = new ClearVolumeClientMain();
+						final ClearVolumeClientMain lClearVolumeMain = new ClearVolumeClientMain(pVolumeCaptureListener);
 						lClearVolumeMain.mApplicationJFrame.setVisible(true);
 					}
-					catch (Exception e)
+					catch (final Exception e)
 					{
 						e.printStackTrace();
 					}
 				}
 			});
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 		}
+	}
+
+	protected void setVolumeCaptureListener(VolumeCaptureListener pVolumeCaptureListener)
+	{
+		mVolumeCaptureListener = pVolumeCaptureListener;
 	}
 
 	public static void connect(	final String pHostName,
@@ -63,7 +75,7 @@ public class ClearVolumeClientMain
 															boolean pMultiColor)
 	{
 
-		ClearVolumeTCPClientHelper lClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper()
+		final ClearVolumeTCPClientHelper lClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper()
 		{
 			@Override
 			public void reportError(Throwable pE, String pErrorMessage)
@@ -77,7 +89,8 @@ public class ClearVolumeClientMain
 			}
 		};
 
-		lClearVolumeTCPClientHelper.startClient(pHostName,
+		lClearVolumeTCPClientHelper.startClient(null,
+																						pHostName,
 																						pPortNumber,
 																						pWindowSize,
 																						pBytesPerVoxel,
@@ -89,17 +102,21 @@ public class ClearVolumeClientMain
 
 	/**
 	 * Create the application.
+	 * 
+	 * @param pVolumeCaptureListener
 	 */
-	public ClearVolumeClientMain()
+	public ClearVolumeClientMain(VolumeCaptureListener pVolumeCaptureListener)
 	{
 		super();
-		initialize();
+		initialize(pVolumeCaptureListener);
 	}
 
 	/**
 	 * Initialize the contents of the frame.
+	 * 
+	 * @param pVolumeCaptureListener
 	 */
-	private void initialize()
+	private void initialize(VolumeCaptureListener pVolumeCaptureListener)
 	{
 		mApplicationJFrame = new ClearVolumeJFrame();
 		mApplicationJFrame.setResizable(false);
@@ -107,17 +124,17 @@ public class ClearVolumeClientMain
 		mApplicationJFrame.setBounds(100, 100, 529, 529);
 		mApplicationJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		JMenuBar lMenuBar = new JMenuBar();
+		final JMenuBar lMenuBar = new JMenuBar();
 		mApplicationJFrame.setJMenuBar(lMenuBar);
 
-		JMenuItem lConnectToJMenuItem = new JMenuItem("About");
+		final JMenuItem lConnectToJMenuItem = new JMenuItem("About");
 		lConnectToJMenuItem.addActionListener(new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				JOptionPane.showMessageDialog(mApplicationJFrame,
-																			"ClearVolume 1.0\nMPI-CBG\nAuthors: Loic Royer, Martin Weigert, Ulrik Guenther.\n Contact: royer@mpi-cbg.de",
+																			"ClearVolume 1.0\nMPI-CBG\nAuthors: Loic Royer, Martin Weigert, Ulrik Guenther, Nicola Maghelli, Florian Jug, Ivo Sbalzarini, Eugene Myers.\n Contact: royer@mpi-cbg.de",
 																			"About ClearVolume",
 																			JOptionPane.INFORMATION_MESSAGE);
 			}
@@ -125,18 +142,24 @@ public class ClearVolumeClientMain
 		lMenuBar.add(lConnectToJMenuItem);
 		mApplicationJFrame.getContentPane().setLayout(null);
 
-		JLabel label = new JLabel("");
+		final JLabel label = new JLabel("");
 		label.setBounds(8, 5, 512, 157);
 		label.setHorizontalTextPosition(SwingConstants.CENTER);
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setIcon(new ImageIcon(ClearVolumeClientMain.class.getResource("images/ClearVolumeLogo_cropped.png")));
 		mApplicationJFrame.getContentPane().add(label);
 
-		ConnectionPanel connectionPanel = new ConnectionPanel();
-		connectionPanel.setBackground(Color.WHITE);
-		connectionPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-		connectionPanel.setBounds(8, 174, 512, 305);
-		mApplicationJFrame.getContentPane().add(connectionPanel);
+		final ConnectionPanel lConnectionPanel = new ConnectionPanel(pVolumeCaptureListener);
+		lConnectionPanel.setBackground(Color.WHITE);
+		lConnectionPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+		lConnectionPanel.setBounds(8, 174, 512, 305);
+		mApplicationJFrame.getContentPane().add(lConnectionPanel);
 
 	}
+
+	public JFrame getApplicationJFrame()
+	{
+		return mApplicationJFrame;
+	}
+
 }

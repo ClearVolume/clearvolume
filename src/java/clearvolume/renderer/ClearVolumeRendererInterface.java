@@ -398,7 +398,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	int getNumberOfRenderLayers();
 
-
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
 	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
@@ -671,6 +670,20 @@ public interface ClearVolumeRendererInterface	extends
 	public void addProcessors(Collection<Processor<?>> pProcessors);
 
 	/**
+	 * Adds a capture listener to this renderer.
+	 * 
+	 * @param pVolumeCaptureListener
+	 *          capture listener
+	 */
+	public void addVolumeCaptureListener(VolumeCaptureListener pVolumeCaptureListener);
+
+	/**
+	 * Requests capture of the current displayed volume (Preferably of all layers
+	 * but possibly just of the current layer.)
+	 */
+	void requestVolumeCapture();
+
+	/**
 	 * Returns the list of overlays in this renderer.
 	 *
 	 * @return
@@ -691,6 +704,5 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
-
 
 }
