@@ -850,7 +850,7 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 256;
+		final int lResolutionX = 512;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
@@ -903,7 +903,7 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 256;
+		final int lResolutionX = 512;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
@@ -955,7 +955,7 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 256;
+		final int lResolutionX = 512;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
@@ -1119,16 +1119,16 @@ public class ClearVolumeDemo
 																							IOException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					768,
-																																																					768,
+																																																					512,
+																																																					512,
 																																																					2,
 																																																					false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 256;
-		final int lResolutionY = 256;
-		final int lResolutionZ = 256;
+		final int lResolutionX = 512;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
 
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ
@@ -1343,7 +1343,7 @@ public class ClearVolumeDemo
 
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 256;
+		final int lResolutionX = 512;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 

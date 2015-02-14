@@ -1,6 +1,8 @@
 package clearvolume.renderer;
 
 import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.sqrt;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -29,8 +31,8 @@ import clearvolume.volume.VolumeManager;
  *
  */
 public abstract class ClearVolumeRendererBase	implements
-ClearVolumeRendererInterface,
-ClearVolumeCloseable
+																							ClearVolumeRendererInterface,
+																							ClearVolumeCloseable
 {
 
 	/**
@@ -76,6 +78,8 @@ ClearVolumeCloseable
 	private volatile float[] mTransferFunctionRangeMin;
 	private volatile float[] mTransferFunctionRangeMax;
 	private volatile float[] mGamma;
+	private volatile float[] mQuality;
+	private volatile float[] mDithering;
 
 	private volatile boolean mUpdateVolumeRenderingParameters = true;
 
@@ -115,6 +119,8 @@ ClearVolumeCloseable
 		mTransferFunctionRangeMin = new float[pNumberOfRenderLayers];
 		mTransferFunctionRangeMax = new float[pNumberOfRenderLayers];
 		mGamma = new float[pNumberOfRenderLayers];
+		mQuality = new float[pNumberOfRenderLayers];
+		mDithering = new float[pNumberOfRenderLayers];
 
 		for (int i = 0; i < pNumberOfRenderLayers; i++)
 		{
@@ -126,8 +132,9 @@ ClearVolumeCloseable
 			mTransferFunctionRangeMin[i] = 0f;
 			mTransferFunctionRangeMax[i] = 1f;
 			mGamma[i] = 1.0f;
+			mQuality[i] = 0.1f;
+			mDithering[i] = 1f;
 		}
-
 
 	}
 
@@ -193,12 +200,12 @@ ClearVolumeCloseable
 	 * @param pVolumeSizeZ
 	 */
 	public void setVolumeSize(final double pVolumeSizeX,
-	                          final double pVolumeSizeY,
-	                          final double pVolumeSizeZ)
+														final double pVolumeSizeY,
+														final double pVolumeSizeZ)
 	{
 		final double lMaxXYZ = Math.max(Math.max(	pVolumeSizeX,
-		                                         	pVolumeSizeY),
-		                                         	pVolumeSizeZ);
+																							pVolumeSizeY),
+																		pVolumeSizeZ);
 
 		setScaleX(pVolumeSizeX / lMaxXYZ);
 		setScaleY(pVolumeSizeY / lMaxXYZ);
@@ -352,6 +359,8 @@ ClearVolumeCloseable
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
+
+
 	/**
 	 * Interface method implementation
 	 *
@@ -390,14 +399,14 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void addBrightness(final int pRenderLayerIndex,
-	                          final double pBrightnessDelta)
+														final double pBrightnessDelta)
 	{
 		setBrightness(pRenderLayerIndex,
-		              getBrightness() + pBrightnessDelta);
+									getBrightness() + pBrightnessDelta);
 	}
 
 	/**
-
+	 * 
 	 * Returns the brightness level of the current render layer.
 	 *
 	 * @return brightness level.
@@ -444,9 +453,9 @@ ClearVolumeCloseable
 														final double pBrightness)
 	{
 		mBrightness[pRenderLayerIndex] = (float) clamp(	pBrightness,
-																															0,
-																															getBytesPerVoxel() == 1	? 16
-																																											: 256);
+																										0,
+																										getBytesPerVoxel() == 1	? 16
+																																						: 256);
 
 		notifyUpdateOfVolumeRenderingParameters();
 	}
@@ -501,6 +510,75 @@ ClearVolumeCloseable
 	}
 
 	/**
+	 * @param pRenderLayerIndex
+	 * @param pDithering
+	 *          new dithering level for render layer
+	 */
+	@Override
+	public void setDithering(int pRenderLayerIndex, double pDithering)
+	{
+		mDithering[pRenderLayerIndex] = (float) pDithering;
+		notifyUpdateOfVolumeRenderingParameters();
+	};
+
+	/**
+	 * Returns samount of dithering [0,1] for a given render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 * @return dithering
+	 */
+	@Override
+	public float getDithering(int pRenderLayerIndex)
+	{
+		return mDithering[pRenderLayerIndex];
+	};
+
+	/**
+	 * Sets the amount of dithering [0,1] for a given render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 * 
+	 * @param pRenderLayerIndex
+	 * @param pQuality
+	 *          new quality level for render layer
+	 */
+	@Override
+	public void setQuality(int pRenderLayerIndex, double pQuality)
+	{
+		pQuality = max(min(pQuality, 1), 0);
+		mQuality[pRenderLayerIndex] = (float) pQuality;
+		notifyUpdateOfVolumeRenderingParameters();
+	};
+
+	/**
+	 * Returns the quality level [0,1] for a given render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 * @return quality level
+	 */
+	@Override
+	public float getQuality(int pRenderLayerIndex)
+	{
+		return mQuality[pRenderLayerIndex];
+	};
+
+	/**
+	 * Returns the maximal number of steps during ray casting forna given layer.
+	 * This value depends on the volume dimension and quality.
+	 * 
+	 * @param pRenderLayerIndex
+	 * @return maximal number of steps
+	 */
+	public int getMaxSteps(final int pRenderLayerIndex)
+	{
+		return (int) (sqrt(getVolumeSizeX() * getVolumeSizeX()
+												+ getVolumeSizeY()
+												* getVolumeSizeY()
+												+ getVolumeSizeZ()
+												* getVolumeSizeZ()) * getQuality(pRenderLayerIndex));
+	}
+
+	/**
 	 * Returns the minimum of the transfer function range for the current render
 	 * layer.
 	 *
@@ -526,7 +604,7 @@ ClearVolumeCloseable
 	}
 
 	/**
-
+	 * 
 	 * Returns the maximum of the transfer function range for the current render
 	 * layer index.
 	 *
@@ -560,11 +638,11 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setTransferFunctionRange(	final double pTransferRangeMin,
-	                                     	final double pTransferRangeMax)
+																				final double pTransferRangeMax)
 	{
 		setTransferFunctionRange(	getCurrentRenderLayerIndex(),
-		                         	pTransferRangeMin,
-		                         	pTransferRangeMax);
+															pTransferRangeMin,
+															pTransferRangeMax);
 	}
 
 	/**
@@ -888,7 +966,6 @@ ClearVolumeCloseable
 	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setTransferFunction(int,
 	 *      clearvolume.transferf.TransferFunction)
-
 	 */
 	@Override
 	public void setTransferFunction(final int pRenderLayerIndex,
@@ -1032,9 +1109,9 @@ ClearVolumeCloseable
 	 */
 	@Override
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
-	                                final long pSizeX,
-	                                final long pSizeY,
-	                                final long pSizeZ)
+																	final long pSizeX,
+																	final long pSizeY,
+																	final long pSizeZ)
 	{
 		setVolumeDataBuffer(pByteBuffer, pSizeX, pSizeY, pSizeZ, 1, 1, 1);
 	}
@@ -1107,12 +1184,12 @@ ClearVolumeCloseable
 		synchronized (getSetVolumeDataBufferLock(getCurrentRenderLayerIndex()))
 		{
 			setVolumeDataBuffer(pVolume.getDataBuffer(),
-			                    pVolume.getWidthInVoxels(),
-			                    pVolume.getHeightInVoxels(),
-			                    pVolume.getDepthInVoxels(),
-			                    pVolume.getVoxelWidthInRealUnits(),
-			                    pVolume.getVoxelHeightInRealUnits(),
-			                    pVolume.getVoxelDepthInRealUnits());
+													pVolume.getWidthInVoxels(),
+													pVolume.getHeightInVoxels(),
+													pVolume.getDepthInVoxels(),
+													pVolume.getVoxelWidthInRealUnits(),
+													pVolume.getVoxelHeightInRealUnits(),
+													pVolume.getVoxelDepthInRealUnits());
 		}
 	}
 
@@ -1219,7 +1296,7 @@ ClearVolumeCloseable
 	public boolean hasRotationController()
 	{
 		return mRotationController != null ? mRotationController.isActive()
-		                                   : false;
+																			: false;
 	}
 
 	/**
@@ -1273,8 +1350,8 @@ ClearVolumeCloseable
 	 * @return clamped value
 	 */
 	public static double clamp(	final double pValue,
-	                           	final double pMin,
-	                           	final double pMax)
+															final double pMin,
+															final double pMax)
 	{
 		return Math.min(Math.max(pValue, pMin), pMax);
 	}

@@ -21,8 +21,6 @@
 // Simple 3D volume renderer
 // calculates the eye coordinate from user provided projection matrix 
 
-#ifndef _VOLUMERENDER_KERNEL_CU_
-#define _VOLUMERENDER_KERNEL_CU_
 
 #include <helper_cuda.h>
 #include <helper_math.h>
@@ -52,9 +50,9 @@ float random(uint x, uint y)
         a = (1664525 * a + 1013904223) % 79197919;
     }
 
-    float rnd = (a*1.0)/(79197919);
+    float rnd = (a*1.0)/(79197919.f);
     
-    return rnd-0.5;
+    return rnd-0.5f;
 }
 
 
@@ -222,14 +220,17 @@ bool algo(float4 &acc, float4 &col )
 //Render function:
 
 extern "C" __global__ void
-volumerender(uint *d_output, uint imageW, uint imageH,
-         	float brightness, float trangemin, float trangemax, float gamma)
+volumerender(	uint *d_output, 
+							uint imageW, 
+							uint imageH,
+							float brightness, 
+							float trangemin, 
+							float trangemax, 
+							float gamma, 
+							int   maxsteps,
+							float dithering)
 {
-		
-    const int maxSteps = 512;
-    const float tstep = 0.02f;
-     
-    const float ta = 1.0/(trangemax-trangemin);
+    const float ta = 1.0f/(trangemax-trangemin);
     const float tb = trangemin/(trangemin-trangemax); 
     
    
@@ -248,12 +249,11 @@ volumerender(uint *d_output, uint imageW, uint imageH,
     // calculate eye ray in world space
     float4 orig0, orig;
     float4 direc0, direc;
-    float4 temp;
     float4 back,front;
 
 		// Back and front before all transformations.
-   	front = make_float4(u,v,-1,1);
-		back = make_float4(u,v,1,1);
+   	front = make_float4(u,v,-1.f,1.f);
+		back = make_float4(u,v,1.f,1.f);
   
   	// Origin point
     orig0 = mul(c_invProjectionMatrix,front);
@@ -266,7 +266,7 @@ volumerender(uint *d_output, uint imageW, uint imageH,
 		direc0 *= 1.f/direc0.w;
 		direc0 = normalize(direc0-orig0);
 		direc = mul(c_invViewMatrix,direc0);
-		direc.w = 0;
+		direc.w = 0.0f;
 
     // calculate eye ray in world space
     Ray eyeRay;
@@ -277,44 +277,61 @@ volumerender(uint *d_output, uint imageW, uint imageH,
     float tnear, tfar;
     int hit = intersectBox(eyeRay, boxMin, boxMax, &tnear, &tfar);
 
-    if (!hit) return;
+    if (!hit) 
+    {
+	    if ((x < imageW) && (y < imageH)) 
+	    {
+	  	  d_output[x+imageW*y] = 0.f;
+	  	}
+	    return;
+    }
 
-    if (tnear < 0.0f) tnear = 0.0f;     // clamp to near plane
+		if (tnear < 0.0f) tnear = 0.0f;     // clamp to near plane
 
-    // march along ray from front to back, accumulating color
-    float4 acc = make_float4(0.0f);
+		const float tstep = abs(tnear-tfar)/maxsteps;
 
+	  //if ((u == 0f) && (v == 0f))
+    //  printf("tnear=%f tfar=%f diff=%f tstep=%f ratio=%f \n",tnear,tfar, abs(tnear-tfar),tstep, abs(tnear-tfar)/tstep);
+
+		
 		// randomize origin point a bit:
 		uint entropy = (uint)( 6779514*length(orig) + 6257327*length(direc) );
-		orig += tstep*random(entropy+x,entropy+y)*direc;
+		orig += dithering*tstep*random(entropy+x,entropy+y)*direc;
+		const float4 vecstep = 0.5f*tstep*direc;
+		float4 pos = orig*0.5f+0.5f + tnear*0.5f*direc;
 
-		float t = tnear;
-		float4 pos;
-		uint i;
-		for(i=0; i<maxSteps; i++) 
-		{		
-		  pos = orig + t*direc;
-		  pos = pos*0.5f+0.5f;    // map position to [0, 1] coordinates
-		  float sample = tex3D(tex, pos.x,pos.y,pos.z);
-	 
-		  // Mapping to transfert function range and gamma correction: 
-		  float mappedsample = powf(ta*sample+tb,gamma);
-	 
-		  // lookup in transfer function texture
-		  float4 col = tex1D(transferTex,mappedsample);
-	        
-		  algo/*ProjectionAlgorithm*/(acc,col);
-	
-		  t += tstep;
-		  if (t > tfar) break;
+    float maxp = 0.0f;
+    maxsteps = (maxsteps/8)+1;
+		for(int i=0; i<maxsteps; i++) 
+		{
+		  maxp = fmaxf(maxp,tex3D(tex, pos.x,pos.y,pos.z));
+		  pos+=vecstep;
+		 	maxp = fmaxf(maxp,tex3D(tex, pos.x,pos.y,pos.z));
+		  pos+=vecstep;
+		 	maxp = fmaxf(maxp,tex3D(tex, pos.x,pos.y,pos.z));
+		  pos+=vecstep;
+		 	maxp = fmaxf(maxp,tex3D(tex, pos.x,pos.y,pos.z));
+		  pos+=vecstep;
+		  maxp = fmaxf(maxp,tex3D(tex, pos.x,pos.y,pos.z));
+		  pos+=vecstep;
+		  maxp = fmaxf(maxp,tex3D(tex, pos.x,pos.y,pos.z));
+		  pos+=vecstep;
+		  maxp = fmaxf(maxp,tex3D(tex, pos.x,pos.y,pos.z));
+		  pos+=vecstep;
+		  maxp = fmaxf(maxp,tex3D(tex, pos.x,pos.y,pos.z));
+		  pos+=vecstep;
 		}
-    
-    acc *= brightness;
+	
+		
+		// Mapping to transfert function range and gamma correction: 
+		float mappedsample = __saturatef(powf(ta*maxp+tb,gamma));
+	 
+		// lookup in transfer function texture
+		float4 col = tex1D(transferTex,mappedsample);
+	        
+    col *= brightness;
     
     // write output color
-    d_output[y*imageW + x] = rgbaFloatToInt(acc);
+    d_output[y*imageW + x] = rgbaFloatToInt(col);
 }
 
-
-
-#endif // #ifndef _VOLUMERENDER_KERNEL_CU_

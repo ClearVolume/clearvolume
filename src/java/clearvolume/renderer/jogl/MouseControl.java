@@ -1,5 +1,7 @@
 package clearvolume.renderer.jogl;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 
 import com.jogamp.newt.event.MouseAdapter;
@@ -55,7 +57,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 		final int dy = pMouseEvent.getY() - mPreviousMouseY;
 
 		// If the left button is held down, move the object
-		if (!pMouseEvent.isShiftDown() && !pMouseEvent.isControlDown()
+		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
+				&& !pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
 		{
 			mRenderer.addRotationX(dx);
@@ -64,7 +67,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 		}
 
 		// If the right button is held down, rotate the object
-		else if (!pMouseEvent.isControlDown() && (pMouseEvent.isButtonDown(3)))
+		else if (!pMouseEvent.isMetaDown() && !pMouseEvent.isControlDown()
+							&& (pMouseEvent.isButtonDown(3)))
 		{
 
 			mRenderer.addTranslationX(dx / 100.0f);
@@ -82,7 +86,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 	 */
 	public void handleGammaMinMax(final MouseEvent pMouseEvent)
 	{
-		if (!pMouseEvent.isShiftDown() && pMouseEvent.isControlDown()
+		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
+				&& pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
 		{
 
@@ -94,7 +99,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		}
 
-		if (pMouseEvent.isShiftDown() && !pMouseEvent.isControlDown()
+		if (!pMouseEvent.isMetaDown() && pMouseEvent.isShiftDown()
+				&& !pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
 		{
 
@@ -104,7 +110,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		}
 
-		if (pMouseEvent.isShiftDown() && pMouseEvent.isControlDown()
+		if (!pMouseEvent.isMetaDown() && pMouseEvent.isShiftDown()
+				&& pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
 		{
 
@@ -113,6 +120,28 @@ class MouseControl extends MouseAdapter implements MouseListener
 			mRenderer.setBrightness(Math.tan(Math.PI * nx / 2));
 
 		}
+
+		if (pMouseEvent.isMetaDown() && pMouseEvent.isButtonDown(1))
+		{
+
+			double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+
+			nx = (max(min(nx, 1), 0));
+			nx = nx * nx;
+
+			System.out.println("nx=" + nx);
+
+			mRenderer.setQuality(mRenderer.getCurrentRenderLayerIndex(), nx);
+
+		}
+
+		/*
+		System.out.println("isAltDown" + pMouseEvent.isAltDown());
+		System.out.println("isAltGraphDown" + pMouseEvent.isAltGraphDown());
+		System.out.println("isControlDown" + pMouseEvent.isControlDown());
+		System.out.println("isMetaDown" + pMouseEvent.isMetaDown());
+		System.out.println("isShiftDown" + pMouseEvent.isShiftDown());/**/
+
 	}
 
 	/**
