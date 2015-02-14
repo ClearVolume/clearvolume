@@ -31,8 +31,8 @@ import com.jogamp.newt.awt.NewtCanvasAWT;
  *
  */
 public interface ClearVolumeRendererInterface	extends
-DisplayRequestInterface,
-ClearVolumeCloseable
+																							DisplayRequestInterface,
+																							ClearVolumeCloseable
 {
 
 	/**
@@ -118,11 +118,7 @@ ClearVolumeCloseable
 
 	/**
 	 * Sets visibility of a given layer.
-<<<<<<< HEAD
-	 *
-=======
 	 * 
->>>>>>> MultiLayerImprovements
 	 * @param pRenderLayerIndex
 	 * @param pVisble
 	 */
@@ -183,22 +179,21 @@ ClearVolumeCloseable
 	 */
 	void setTransferFunctionRange(int pRenderLayerIndex,
 
-	                              double pTransferRangeMin,
-	                              double pTransferRangeMax);
+	double pTransferRangeMin, double pTransferRangeMax);
 
 	/**
 	 * @param pRenderLayerIndex
 	 * @param pTransferRangeMin
 	 */
 	void setTransferFunctionRangeMin(	int pRenderLayerIndex,
-	                                 	double pTransferRangeMin);
+																		double pTransferRangeMin);
 
 	/**
 	 * @param pRenderLayerIndex
 	 * @param pTransferRangeMax
 	 */
 	void setTransferFunctionRangeMax(	int pRenderLayerIndex,
-	                                 	double pTransferRangeMax);
+																		double pTransferRangeMax);
 
 	/**
 	 * @param pDelta
@@ -210,7 +205,7 @@ ClearVolumeCloseable
 	 * @param pDelta
 	 */
 	void addTransferFunctionRangeMin(	int pRenderLayerIndex,
-	                                 	double pDelta);
+																		double pDelta);
 
 	/**
 	 * @param pDelta
@@ -222,7 +217,7 @@ ClearVolumeCloseable
 	 * @param pDelta
 	 */
 	void addTransferFunctionRangeMax(	int pRenderLayerIndex,
-	                                 	double pDelta);
+																		double pDelta);
 
 	/**
 	 * @param pTransferRangePositionDelta
@@ -333,6 +328,42 @@ ClearVolumeCloseable
 	void resetBrightnessAndGammaAndTransferFunctionRanges();
 
 	/**
+	 * Sets the amount of dithering [0,1] for a given render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 * @param pDithering
+	 *          new dithering level for render layer
+	 */
+	void setDithering(int pRenderLayerIndex, double pDithering);
+
+	/**
+	 * Returns samount of dithering [0,1] for a given render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 * @return dithering
+	 */
+	float getDithering(int pRenderLayerIndex);
+
+	/**
+	 * Sets the amount of dithering [0,1] for a given render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 * 
+	 * @param pRenderLayerIndex
+	 * @param pQuality
+	 *          new quality level for render layer
+	 */
+	void setQuality(int pRenderLayerIndex, double pQuality);
+
+	/**
+	 * Returns the quality level [0,1] for a given render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 * @return quality level
+	 */
+	float getQuality(int pRenderLayerIndex);
+
+	/**
 	 * Sets the mProjectionMatrix algorithm used.
 	 *
 	 * @param pProjectionAlgorithm
@@ -384,9 +415,9 @@ ClearVolumeCloseable
 	 * @param pSizeZ
 	 */
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
-	                         	long pSizeX,
-	                         	long pSizeY,
-	                         	long pSizeZ);
+														long pSizeX,
+														long pSizeY,
+														long pSizeZ);
 
 	/**
 	 * Updates the voxel size of subsequently rendered volumes
@@ -396,8 +427,8 @@ ClearVolumeCloseable
 	 * @param pVoxelSizeZ
 	 */
 	public void setVoxelSize(	double pVoxelSizeX,
-	                         	double pVoxelSizeY,
-	                         	double pVoxelSizeZ);
+														double pVoxelSizeY,
+														double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -412,12 +443,12 @@ ClearVolumeCloseable
 	 * @param pVoxelSizeZ
 	 */
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
-	                         	long pSizeX,
-	                         	long pSizeY,
-	                         	long pSizeZ,
-	                         	double pVoxelSizeX,
-	                         	double pVoxelSizeY,
-	                         	double pVoxelSizeZ);
+														long pSizeX,
+														long pSizeY,
+														long pSizeZ,
+														double pVoxelSizeX,
+														double pVoxelSizeY,
+														double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -445,7 +476,7 @@ ClearVolumeCloseable
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishAllDataBufferCopy(	long pTimeOut,
-	                                             	TimeUnit pTimeUnit);
+																								TimeUnit pTimeUnit);
 
 	/**
 	 * Waits until volume data copy completes for current layer.
@@ -453,7 +484,7 @@ ClearVolumeCloseable
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishDataBufferCopy(long pTimeOut,
-	                                          TimeUnit pTimeUnit);
+																						TimeUnit pTimeUnit);
 
 	/**
 	 * Waits until volume data copy completes for a given layer.
@@ -461,8 +492,8 @@ ClearVolumeCloseable
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
-	                                          long pTimeOut,
-	                                          TimeUnit pTimeUnit);
+																						long pTimeOut,
+																						TimeUnit pTimeUnit);
 
 	/**
 	 * Resets rotation and translation parameters.
@@ -618,7 +649,5 @@ ClearVolumeCloseable
 	 */
 	@Override
 	void close();
-
-
 
 }

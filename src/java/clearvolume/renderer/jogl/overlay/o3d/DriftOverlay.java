@@ -76,7 +76,7 @@ public class DriftOverlay extends PathOverlay	implements
 		Font font = null;
 		stats = new SynchronizedDescriptiveStatistics();
 
-		final String fontPath = "fonts/SourceCodeProLight.ttf";
+		final String fontPath = "/clearvolume/fonts/SourceCodeProLight.ttf";
 
 		try
 		{

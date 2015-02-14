@@ -25,7 +25,7 @@ import clearvolume.audio.synthesizer.sources.Guitar;
  * @author Loic Royer (2015)
  *
  */
-public class AudioPlot
+public class AudioPlot implements AutoCloseable
 {
 
 	private double mSlowPeriod;
@@ -34,13 +34,18 @@ public class AudioPlot
 	private double mHighFreq;
 	private boolean mInvertRange;
 
+	private volatile SoundOut mSoundOut;
+
 	private Runnable mDeamonThreadRunnable;
 	private volatile boolean mStopSignal = false;
+	private volatile boolean mThreadStoppedSignal = true;
 	private ReentrantLock mReentrantLock = new ReentrantLock();
 
 	private Guitar mGuitar;
 
 	private volatile double mPeriodInSeconds = 1;
+	private volatile Thread mThread;
+	private Object mStartStopLock = new Object();
 
 	/**
 	 * Default constructor.
@@ -116,10 +121,10 @@ public class AudioPlot
 
 		mGuitar.setAmplitude(0.5f);
 
-		final SoundOut lSoundOut = new SoundOut();
+		mSoundOut = new SoundOut();
 
 		final Synthesizer lSynthesizer = new Synthesizer(	lLowPassFilter,
-																											lSoundOut);
+																											mSoundOut);
 
 		mDeamonThreadRunnable = new Runnable()
 		{
@@ -130,7 +135,9 @@ public class AudioPlot
 			{
 				try
 				{
-					lSoundOut.start();
+					mStopSignal = false;
+					mThreadStoppedSignal = false;
+					mSoundOut.start();
 					while (!mStopSignal)
 					{
 						long lTimeNow;
@@ -169,7 +176,10 @@ public class AudioPlot
 						Thread.yield();
 
 					}
-					lSoundOut.stop();
+
+					mSoundOut.stop();
+					mThreadStoppedSignal = true;
+
 				}
 				catch (Throwable e)
 				{
@@ -186,10 +196,28 @@ public class AudioPlot
 	 */
 	public void start()
 	{
-		Thread lThread = new Thread(mDeamonThreadRunnable,
-																AudioPlot.class.getSimpleName() + ".PlayThread");
-		lThread.setDaemon(true);
-		lThread.start();
+		synchronized (mStartStopLock)
+		{
+			waitForStop();
+
+			mThread = new Thread(	mDeamonThreadRunnable,
+														AudioPlot.class.getSimpleName() + ".PlayThread");
+			mThread.setDaemon(true);
+			mThread.start();
+		}
+
+	}
+
+	public void waitForStop()
+	{
+		while (!mThreadStoppedSignal)
+			try
+			{
+				Thread.sleep(10);
+			}
+			catch (InterruptedException e)
+			{
+			}
 	};
 
 	/**
@@ -197,7 +225,11 @@ public class AudioPlot
 	 */
 	public void stop()
 	{
-		mStopSignal = true;
+		synchronized (mStartStopLock)
+		{
+			mStopSignal = true;
+			mThread = null;
+		}
 	}
 
 	/**
@@ -258,6 +290,13 @@ public class AudioPlot
 	public void setInvertRange(boolean pInvertRange)
 	{
 		mInvertRange = pInvertRange;
+	}
+
+	public void close()
+	{
+		stop();
+		waitForStop();
+		mSoundOut.close();
 	}
 
 }

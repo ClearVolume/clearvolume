@@ -10,9 +10,6 @@
 
 
 
-#define maxSteps 200
-#define tstep 0.04f
-
 
 inline
 float random(uint x, uint y)
@@ -24,9 +21,9 @@ float random(uint x, uint y)
         a = (1664525 * a + 1013904223) % 79197919;
     }
 
-    float rnd = (a*1.0f)/(79197919);
+    float rnd = (a*1.0f)/(79197919.f);
     
-    return rnd-0.5;
+    return rnd-0.5f;
 }
 
 
@@ -92,23 +89,21 @@ volumerender(__global uint *d_output,
 			float trangemin, 
 			float trangemax, 
 			float gamma,
+			int   maxsteps,
+			float dithering,
 			__read_only image2d_t transferColor4,
 			__constant float* invP,
 			__constant float* invM,
 			__read_only image3d_t volume)
 {
   const sampler_t volumeSampler =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR ;
-
 	const sampler_t transferSampler =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR ;
-
-
-
-  uint x = get_global_id(0);
-  uint y = get_global_id(1);
 
   float ta = 1.f/(trangemax-trangemin);
   float tb = trangemin/(trangemin-trangemax); 
-  //float4 color = (float4)(transferColor4[0],transferColor4[1],transferColor4[2],transferColor4[3]);
+
+  uint x = get_global_id(0);
+  uint y = get_global_id(1);
   
   float u = (x / (float) Nx)*2.0f-1.0f;
   float v = (y / (float) Ny)*2.0f-1.0f;
@@ -119,12 +114,11 @@ volumerender(__global uint *d_output,
   // calculate eye ray in world space
   float4 orig0, orig;
   float4 direc0, direc;
-  float4 temp;
   float4 back,front;
   
   
-  front = (float4)(u,v,-1,1);
-  back = (float4)(u,v,1,1);
+  front = (float4)(u,v,-1.f,1.f);
+  back = (float4)(u,v,1.f,1.f);
   
   orig0.x = dot(front, ((float4)(invP[0],invP[1],invP[2],invP[3])));
   orig0.y = dot(front, ((float4)(invP[4],invP[5],invP[6],invP[7])));
@@ -158,44 +152,52 @@ volumerender(__global uint *d_output,
   // find intersection with box
   float tnear, tfar;
   int hit = intersectBox(orig,direc, boxMin, boxMax, &tnear, &tfar);
-  if (!hit) {
-  	if ((x < Nx) && (y < Ny)) {
+  if (!hit) 
+  {
+  	if ((x < Nx) && (y < Ny)) 
+  	{
   	  d_output[x+Nx*y] = 0.f;
   	}
   	return;
   }
   if (tnear < 0.0f) tnear = 0.0f;     // clamp to near plane
 
-
+	const float tstep = fabs(tnear-tfar)/maxsteps;
+  
+	// randomize origin point a bit:
 	uint entropy = (uint)( 6779514*fast_length(orig) + 6257327*fast_length(direc) );
-	orig += tstep*random(entropy+x,entropy+y)*direc;
-	
-	//printf("kernel: %.5f  %.5f  %.5f  %.5f\n",orig.x,orig.y,orig.z,orig.w); 
+	orig += dithering*tstep*random(entropy+x,entropy+y)*direc;
+	const float4 vecstep = 0.5f*tstep*direc;
+	float4 pos = orig*0.5f+0.5f + tnear*0.5f*direc;
 
-  float4 colVal = 0.f;
-  float t = tnear;
-  float4 pos;
-  for(uint i=0; i<maxSteps && t < tfar; i++) 
-  {
-   	pos = orig + t*direc;
-	  pos = pos*0.5f+0.5f;    // map position to [0, 1] coordinates
-
-  	// read from 3D texture        
-  	float newVal = read_imagef(volume, volumeSampler, pos).x;
-		float mappedVal = pow(ta*newVal+tb,gamma);
-
-    float4 color = read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
-		colVal = max(colVal, color);
-
-	  t += tstep; 	
-  }
-
-  colVal = brightness * colVal;
+  float maxp = 0.0f;
+  maxsteps = (maxsteps/8)+1;
+	for(int i=0; i<maxsteps; i++) 
+	{
+	  maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	  pos+=vecstep;
+	  maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	  pos+=vecstep;
+	  maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	  pos+=vecstep;
+	  maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	  pos+=vecstep;
+	  maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	  pos+=vecstep;
+	  maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	  pos+=vecstep;
+	  maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	  pos+=vecstep;
+	  maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	  pos+=vecstep;
+	}
   
-  
-  d_output[x+Nx*y] = rgbaFloatToInt(colVal);
-	
-	
+  float mappedVal = clamp(pow(mad(ta,maxp,tb),gamma),0.f,1.f);
 
+  float4 color = read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
+
+  color *= brightness;
+ 
+  d_output[x+Nx*y] = rgbaFloatToInt(color);
 }
 
