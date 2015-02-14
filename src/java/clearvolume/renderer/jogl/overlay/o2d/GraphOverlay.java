@@ -55,8 +55,8 @@ public class GraphOverlay extends OverlayBase	implements
 
 	private volatile float mOffsetX = -1, mOffsetY = 2f / 3;
 	private volatile float mScaleX = 1, mScaleY = 1f / 3;
-	private volatile float mMin = 0;
-	private volatile float mMax = 1;
+	private volatile float mMin;
+	private volatile float mMax;
 	private final float mAlpha = 0.04f;
 
 	private final AudioPlot mAudioPlot = new AudioPlot();
@@ -68,6 +68,7 @@ public class GraphOverlay extends OverlayBase	implements
 		super();
 		setMaxNumberOfDataPoints(pMaxNumberOfDataPoints);
 
+		clearMinMax();
 		final Runnable lRunnable = new Runnable()
 		{
 
@@ -99,7 +100,7 @@ public class GraphOverlay extends OverlayBase	implements
 		lMinMaxCalculationThread.setPriority(Thread.MIN_PRIORITY);
 		lMinMaxCalculationThread.start();
 
-		mAudioPlot.setInvertRange(true);
+		mAudioPlot.setInvertRange(false);
 	}
 
 	@Override
@@ -207,8 +208,11 @@ public class GraphOverlay extends OverlayBase	implements
 				final float lMin = mDataY.min();
 				final float lMax = mDataY.max();
 
-				mMin = pAlpha * lMin + (1 - pAlpha) * mMin;
-				mMax = pAlpha * lMax + (1 - pAlpha) * mMax;
+				if (lMin < mMin)
+					mMin = pAlpha * lMin + (1 - pAlpha) * mMin;
+
+				if (lMax > mMax)
+					mMax = pAlpha * lMax + (1 - pAlpha) * mMax;
 
 			}
 		}
@@ -232,7 +236,7 @@ public class GraphOverlay extends OverlayBase	implements
 			if (lIsLocked)
 			{
 				mMin = 0;
-				mMax = 1;
+				mMax = 0;
 			}
 		}
 		catch (final InterruptedException e)
@@ -329,8 +333,6 @@ public class GraphOverlay extends OverlayBase	implements
 					int i = 0;
 					for (i = 0; i < mDataY.size(); i++)
 					{
-						if (mMax == mMin)
-							mMax = mMin + 0.01f;
 						final float lNormalizedValue = normalizeAndClamp(mDataY.get(i));
 
 						final float x = transformX(i * lStepX);
@@ -399,6 +401,8 @@ public class GraphOverlay extends OverlayBase	implements
 
 	private float normalizeAndClamp(float pValue)
 	{
+		if (mMax == mMin)
+			return 0;
 		float lValue = (pValue - mMin) / (mMax - mMin);
 		lValue = min(max(lValue, 0), 1);
 		return lValue;
