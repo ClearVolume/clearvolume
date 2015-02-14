@@ -68,7 +68,9 @@ public class PathOverlay extends OverlayBase implements Overlay3D
               GLProgram.buildProgram(	pGL4,
                       PathOverlay.class,
                       new String[]{"shaders/path_vert.glsl",
-                      "shaders/path_frag.glsl"});
+                                   "shaders/path_geom.glsl",
+                                   "shaders/path_frag.glsl"});
+
       mPath = new ClearGeometryObject(mBoxGLProgram,
               3, GL4.GL_LINE_STRIP );
       mPath.setDynamic(true);
