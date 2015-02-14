@@ -102,6 +102,25 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 		}
 
+		if (pE.getKeyCode() >= KeyEvent.VK_0 && pE.getKeyCode() <= KeyEvent.VK_9)
+		{
+			int lRenderLayerIndex = pE.getKeyCode() - KeyEvent.VK_0;
+
+			if (lRenderLayerIndex == 0)
+				lRenderLayerIndex = 10;
+			else
+				lRenderLayerIndex--;
+
+			if (lRenderLayerIndex < mClearVolumeRenderer.getNumberOfRenderLayers())
+			{
+				if (lIsShiftPressed)
+					mClearVolumeRenderer.setLayerVisible(	lRenderLayerIndex,
+																								!mClearVolumeRenderer.isLayerVisible(lRenderLayerIndex));
+				else
+					mClearVolumeRenderer.setCurrentRenderLayer(lRenderLayerIndex);
+			}
+		}
+
 		processOverlayRelatedEvents(pE);
 
 	}

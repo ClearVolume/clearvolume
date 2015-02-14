@@ -1405,8 +1405,8 @@ public class ClearVolumeDemo
 		{
 			Thread.sleep(500);
 
-			lClearVolumeRenderer.setLayerVisible(	i % 2,
-																						!lClearVolumeRenderer.isLayerVisible(i % 2));
+			/*lClearVolumeRenderer.setLayerVisible(	i % 2,
+																						!lClearVolumeRenderer.isLayerVisible(i % 2));/**/
 
 			lClearVolumeRenderer.requestDisplay();
 			i++;

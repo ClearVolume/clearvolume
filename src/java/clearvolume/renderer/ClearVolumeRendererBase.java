@@ -359,8 +359,6 @@ public abstract class ClearVolumeRendererBase	implements
 		notifyUpdateOfVolumeRenderingParameters();
 	}
 
-
-
 	/**
 	 * Interface method implementation
 	 *
@@ -1076,14 +1074,12 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	@Override
-	@Deprecated
 	public void setCurrentRenderLayer(final int pLayerIndex)
 	{
 		mCurrentRenderLayerIndex = pLayerIndex;
 	}
 
 	@Override
-	@Deprecated
 	public int getCurrentRenderLayerIndex()
 	{
 		return mCurrentRenderLayerIndex;
@@ -1101,6 +1097,23 @@ public abstract class ClearVolumeRendererBase	implements
 		return mNumberOfRenderLayers;
 	}
 
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer, long, long, long)
+	 */
+	@Override
+	@Deprecated
+	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
+																	final long pSizeX,
+																	final long pSizeY,
+																	final long pSizeZ)
+	{
+		setVolumeDataBuffer(getCurrentRenderLayerIndex(),
+												pByteBuffer,
+												pSizeX,
+												pSizeY,
+												pSizeZ);
+	}
+
 	/**
 	 * Interface method implementation
 	 *
@@ -1108,12 +1121,20 @@ public abstract class ClearVolumeRendererBase	implements
 	 *      long, long, long)
 	 */
 	@Override
-	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
+	public void setVolumeDataBuffer(final int pRenderLayerIndex,
+																	final ByteBuffer pByteBuffer,
 																	final long pSizeX,
 																	final long pSizeY,
 																	final long pSizeZ)
 	{
-		setVolumeDataBuffer(pByteBuffer, pSizeX, pSizeY, pSizeZ, 1, 1, 1);
+		setVolumeDataBuffer(pRenderLayerIndex,
+												pByteBuffer,
+												pSizeX,
+												pSizeY,
+												pSizeZ,
+												1,
+												1,
+												1);
 	}
 
 	/**
@@ -1139,6 +1160,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 *      long, long, long, double, double, double)
 	 */
 	@Override
+	@Deprecated
 	public void setVolumeDataBuffer(final ByteBuffer pByteBuffer,
 																	final long pSizeX,
 																	final long pSizeY,
@@ -1147,7 +1169,33 @@ public abstract class ClearVolumeRendererBase	implements
 																	final double pVoxelSizeY,
 																	final double pVoxelSizeZ)
 	{
-		synchronized (getSetVolumeDataBufferLock(getCurrentRenderLayerIndex()))
+		setVolumeDataBuffer(getCurrentRenderLayerIndex(),
+												pByteBuffer,
+												pSizeX,
+												pSizeY,
+												pSizeZ,
+												pVoxelSizeX,
+												pVoxelSizeY,
+												pVoxelSizeZ);
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
+	 *      long, long, long, double, double, double)
+	 */
+	@Override
+	public void setVolumeDataBuffer(final int pRenderLayerIndex,
+																	final ByteBuffer pByteBuffer,
+																	final long pSizeX,
+																	final long pSizeY,
+																	final long pSizeZ,
+																	final double pVoxelSizeX,
+																	final double pVoxelSizeY,
+																	final double pVoxelSizeZ)
+	{
+		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
 
 			if (mVolumeSizeX != pSizeX || mVolumeSizeY != pSizeY
@@ -1171,19 +1219,28 @@ public abstract class ClearVolumeRendererBase	implements
 			mScaleY = (float) (pVoxelSizeY * mVolumeSizeY / lMaxSize);
 			mScaleZ = (float) (pVoxelSizeZ * mVolumeSizeZ / lMaxSize);
 
-			mVolumeDataByteBuffers[getCurrentRenderLayerIndex()] = pByteBuffer;
+			mVolumeDataByteBuffers[pRenderLayerIndex] = pByteBuffer;
 
-			clearCompletionOfDataBufferCopy(getCurrentRenderLayerIndex());
+			clearCompletionOfDataBufferCopy(pRenderLayerIndex);
 			notifyUpdateOfVolumeRenderingParameters();
 		}
 	}
 
 	@Override
+	@Deprecated
 	public void setVolumeDataBuffer(final Volume<?> pVolume)
 	{
-		synchronized (getSetVolumeDataBufferLock(getCurrentRenderLayerIndex()))
+		setVolumeDataBuffer(getCurrentRenderLayerIndex(), pVolume);
+	}
+
+	@Override
+	public void setVolumeDataBuffer(final int pRenderLayerIndex,
+																	final Volume<?> pVolume)
+	{
+		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
-			setVolumeDataBuffer(pVolume.getDataBuffer(),
+			setVolumeDataBuffer(pRenderLayerIndex,
+													pVolume.getDataBuffer(),
 													pVolume.getWidthInVoxels(),
 													pVolume.getHeightInVoxels(),
 													pVolume.getDepthInVoxels(),
@@ -1221,6 +1278,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @return true is completed, false if it timed-out.
 	 */
 	@Override
+	@Deprecated
 	public boolean waitToFinishAllDataBufferCopy(	final long pTimeOut,
 																								final TimeUnit pTimeUnit)
 	{
@@ -1239,6 +1297,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @return true is completed, false if it timed-out.
 	 */
 	@Override
+	@Deprecated
 	public boolean waitToFinishDataBufferCopy(final long pTimeOut,
 																						final TimeUnit pTimeUnit)
 	{

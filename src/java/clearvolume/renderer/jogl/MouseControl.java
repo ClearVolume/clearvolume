@@ -129,8 +129,6 @@ class MouseControl extends MouseAdapter implements MouseListener
 			nx = (max(min(nx, 1), 0));
 			nx = nx * nx;
 
-			System.out.println("nx=" + nx);
-
 			mRenderer.setQuality(mRenderer.getCurrentRenderLayerIndex(), nx);
 
 		}
