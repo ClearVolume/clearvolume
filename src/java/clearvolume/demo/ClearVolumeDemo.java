@@ -46,7 +46,7 @@ public class ClearVolumeDemo
 
 	private static ClearVolumeRendererInterface mClearVolumeRenderer;
 
-	public static void main(String[] argv) throws ClassNotFoundException
+	public static void main(final String[] argv) throws ClassNotFoundException
 	{
 		if (argv.length == 0)
 		{
@@ -116,8 +116,8 @@ public class ClearVolumeDemo
 		{
 
 			@Override
-			public void notifyResult(	Processor<Double> pSource,
-																Double pResult)
+			public void notifyResult(	final Processor<Double> pSource,
+																final Double pResult)
 			{
 				System.out.println(pResult);
 			}
@@ -185,8 +185,8 @@ public class ClearVolumeDemo
 		lOpenCLTenengrad.addResultListener(new ProcessorResultListener<Double>()
 		{
 			@Override
-			public void notifyResult(	Processor<Double> pSource,
-																Double pResult)
+			public void notifyResult(	final Processor<Double> pSource,
+																final Double pResult)
 			{
 				System.out.println("tenengrad = " + pResult);
 			}
@@ -359,8 +359,8 @@ public class ClearVolumeDemo
 		lOpenCLCenterMass.addResultListener(new ProcessorResultListener<float[]>()
 		{
 			@Override
-			public void notifyResult(	Processor<float[]> pSource,
-																float[] pResult)
+			public void notifyResult(	final Processor<float[]> pSource,
+																final float[] pResult)
 			{
 
 				System.out.println("center of mass [x,y,z,mass]: " + Arrays.toString(pResult));
@@ -459,8 +459,8 @@ public class ClearVolumeDemo
 		{
 
 			@Override
-			public void notifyResult(	Processor<IntBuffer> pSource,
-																IntBuffer pResult)
+			public void notifyResult(	final Processor<IntBuffer> pSource,
+																final IntBuffer pResult)
 			{
 				System.out.println("histogram: " + Arrays.toString(pResult.array()));
 			}
@@ -1421,6 +1421,120 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.close();
 	}
 
+	@Test
+	public void demoWith8BitGeneratedDataset3LayersOpenCL() throws InterruptedException,
+			IOException
+	{
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer =
+				new OpenCLVolumeRenderer( "ClearVolumeTest",
+//				new JCudaClearVolumeRenderer( "ClearVolumeTest",
+						512,
+						512,
+						1,
+						512,
+						512,
+						3,
+						false );
+
+		lClearVolumeRenderer.setVisible( true );
+
+		final int lResolutionX = 512;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		final byte[] lVolumeDataArray0 = new byte[ lResolutionX * lResolutionY
+				* lResolutionZ ];
+
+		for ( int z = 0; z < lResolutionZ; z++ )
+			for ( int y = 0; y < lResolutionY; y++ )
+				for ( int x = 0; x < lResolutionX; x++ )
+				{
+					final int lIndex = x + lResolutionX
+							* y
+							+ lResolutionX
+							* lResolutionY
+							* z;
+					int lCharValue = ( ( ( byte ) x ^ ( byte ) y ^ ( byte ) z ) );
+					if ( lCharValue < 12 )
+						lCharValue = 0;
+					lVolumeDataArray0[ lIndex ] = ( byte ) lCharValue;
+				}
+
+		lClearVolumeRenderer.setVolumeDataBuffer( 0,
+				ByteBuffer.wrap( lVolumeDataArray0 ),
+				lResolutionX,
+				lResolutionY,
+				lResolutionZ );
+
+		lClearVolumeRenderer.requestDisplay();
+		Thread.sleep( 2000 );
+
+		final byte[] lVolumeDataArray1 = new byte[ lResolutionX * lResolutionY
+				* lResolutionZ ];
+
+		for ( int z = 0; z < lResolutionZ / 2; z++ )
+			for ( int y = 0; y < lResolutionY / 2; y++ )
+				for ( int x = 0; x < lResolutionX / 2; x++ )
+				{
+					final int lIndex = x + lResolutionX
+							* y
+							+ lResolutionX
+							* lResolutionY
+							* z;
+					int lCharValue = 255 - ( ( ( byte ) ( x ) ^ ( byte ) ( y ) ^ ( byte ) z ) );
+					if ( lCharValue < 12 )
+						lCharValue = 0;
+					lVolumeDataArray1[ lIndex ] = ( byte ) ( lCharValue );
+				}
+
+		lClearVolumeRenderer.setVolumeDataBuffer( 1,
+				ByteBuffer.wrap( lVolumeDataArray1 ),
+				lResolutionX,
+				lResolutionY,
+				lResolutionZ );/**/
+
+		lClearVolumeRenderer.requestDisplay();
+
+		final byte[] lVolumeDataArray2 = new byte[ lResolutionX * lResolutionY
+				* lResolutionZ ];
+
+		for ( int z = 0; z < lResolutionZ / 2; z++ )
+			for ( int y = 0; y < lResolutionY / 2; y++ )
+				for ( int x = 0; x < lResolutionX / 2; x++ )
+				{
+					final int lIndex = lResolutionX / 2 + x +
+							lResolutionX * ( lResolutionY / 2 + y ) +
+							lResolutionX * lResolutionY * ( lResolutionZ / 2 + z );
+					int lCharValue = 255 - ( ( ( byte ) ( x ) ^ ( byte ) ( y ) ^ ( byte ) z ) );
+					if ( lCharValue < 12 )
+						lCharValue = 0;
+					lVolumeDataArray1[ lIndex ] = ( byte ) ( lCharValue );
+				}
+
+		lClearVolumeRenderer.setVolumeDataBuffer( 2,
+				ByteBuffer.wrap( lVolumeDataArray2 ),
+				lResolutionX,
+				lResolutionY,
+				lResolutionZ );/**/
+
+		lClearVolumeRenderer.requestDisplay();
+
+		int i = 0;
+		while ( lClearVolumeRenderer.isShowing() )
+		{
+			Thread.sleep( 500 );
+
+			lClearVolumeRenderer.setLayerVisible( i % 3,
+					!lClearVolumeRenderer.isLayerVisible( i % 3 ) );/**/
+
+			lClearVolumeRenderer.requestDisplay();
+			i++;
+		}
+
+		lClearVolumeRenderer.close();
+	}
+
 	private static void startSample(final String pRessourceName,
 																	final int pBytesPerVoxel,
 																	final int pSizeX,
@@ -1657,15 +1771,15 @@ public class ClearVolumeDemo
 		{
 
 			@Override
-			public void capturedVolume(	ByteBuffer[] pCaptureBuffers,
-																	boolean pFloatType,
-																	int pBytesPerVoxel,
-																	long pVolumeWidth,
-																	long pVolumeHeight,
-																	long pVolumeDepth,
-																	double pVoxelWidth,
-																	double pVoxelHeight,
-																	double pVoxelDepth)
+			public void capturedVolume(	final ByteBuffer[] pCaptureBuffers,
+																	final boolean pFloatType,
+																	final int pBytesPerVoxel,
+																	final long pVolumeWidth,
+																	final long pVolumeHeight,
+																	final long pVolumeDepth,
+																	final double pVoxelWidth,
+																	final double pVoxelHeight,
+																	final double pVoxelDepth)
 			{
 				System.out.format("Captured %d volume %s bpv=%d (%d, %d, %d) (%g, %g, %g) %s\n",
 													pCaptureBuffers.length,
