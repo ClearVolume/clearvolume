@@ -1091,7 +1091,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
 	 */
 	@Override
-	public void requestDisplay()
+	public void requestDisplayInternal()
 	{
 		final long lRequestTime = System.nanoTime();
 		if (lRequestTime < mLastRequestTime + 15 * 1000 * 1000)
