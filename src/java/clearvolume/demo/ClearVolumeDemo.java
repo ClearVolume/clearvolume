@@ -150,8 +150,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -225,8 +225,8 @@ public class ClearVolumeDemo
 
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -249,7 +249,8 @@ public class ClearVolumeDemo
 			for (int i = 1; i < lVolumeDataArray.length - 1; i++)
 				lVolumeDataArray[i] = (byte) (.99 * lVolumeDataArray[i]);
 
-			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
@@ -307,8 +308,8 @@ public class ClearVolumeDemo
 
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -327,7 +328,8 @@ public class ClearVolumeDemo
 				lVolumeDataArray[i] = (byte) ((lVolumeDataArray[i - 1] + 2
 																				* lVolumeDataArray[i] + lVolumeDataArray[i + 1]) / 4);
 
-			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
@@ -393,8 +395,8 @@ public class ClearVolumeDemo
 
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -422,7 +424,8 @@ public class ClearVolumeDemo
 
 					}/**/
 
-			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);/**/
@@ -495,8 +498,8 @@ public class ClearVolumeDemo
 
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -505,7 +508,8 @@ public class ClearVolumeDemo
 		while (lClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(1000);
-			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
@@ -567,8 +571,8 @@ public class ClearVolumeDemo
 
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -577,7 +581,8 @@ public class ClearVolumeDemo
 		while (lClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(1000);
-			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
@@ -629,8 +634,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -686,8 +691,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -746,8 +751,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -817,8 +822,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -871,8 +876,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -923,8 +928,8 @@ public class ClearVolumeDemo
 																																						/ 2))));
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -987,8 +992,8 @@ public class ClearVolumeDemo
 																																						/ 2))));/**/
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -1040,8 +1045,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -1094,8 +1099,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -1142,7 +1147,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray[lIndex + 1] = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 				}
 
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -1203,7 +1209,8 @@ public class ClearVolumeDemo
 				}
 
 		final ByteBuffer lWrappedArray = ByteBuffer.wrap(lVolumeDataArray);
-		lClearVolumeRenderer.setVolumeDataBuffer(	lWrappedArray,
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							lWrappedArray,
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -1276,8 +1283,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray0[lIndex] = (byte) lCharValue;
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray0),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray0),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -1303,8 +1310,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray1[lIndex] = (byte) (lCharValue);
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(1);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray1),
+		lClearVolumeRenderer.setVolumeDataBuffer(	1,
+																							ByteBuffer.wrap(lVolumeDataArray1),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);/**/
@@ -1364,8 +1371,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray0[lIndex] = (byte) lCharValue;
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(0);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray0),
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray0),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);
@@ -1391,8 +1398,8 @@ public class ClearVolumeDemo
 					lVolumeDataArray1[lIndex] = (byte) (lCharValue);
 				}
 
-		lClearVolumeRenderer.setCurrentRenderLayer(1);
-		lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray1),
+		lClearVolumeRenderer.setVolumeDataBuffer(	1,
+																							ByteBuffer.wrap(lVolumeDataArray1),
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);/**/
@@ -1404,7 +1411,7 @@ public class ClearVolumeDemo
 		{
 			Thread.sleep(500);
 
-			/*lClearVolumeRenderer.setLayerVisible(	i % 2,
+			lClearVolumeRenderer.setLayerVisible(	i % 2,
 																						!lClearVolumeRenderer.isLayerVisible(i % 2));/**/
 
 			lClearVolumeRenderer.requestDisplay();
@@ -1452,7 +1459,8 @@ public class ClearVolumeDemo
 		mClearVolumeRenderer.setTransferFunction(TransferFunctions.getRainbow());
 		mClearVolumeRenderer.setVisible(true);
 
-		mClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(data),
+		mClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(data),
 																							pSizeX,
 																							pSizeY,
 																							pSizeZ);
@@ -1500,7 +1508,8 @@ public class ClearVolumeDemo
 						lVolumeDataArray[lIndex + 1] = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 					}
 
-			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
@@ -1597,7 +1606,8 @@ public class ClearVolumeDemo
 						}
 
 				lClearVolumeRenderer.setCurrentRenderLayer(0);
-				lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+				lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																									ByteBuffer.wrap(lVolumeDataArray),
 																									lResolutionX,
 																									lResolutionY,
 																									lResolutionZ);
