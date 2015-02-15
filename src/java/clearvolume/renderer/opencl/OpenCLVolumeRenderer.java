@@ -378,7 +378,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			final int lMaxSteps = getMaxSteps(pRenderLayerIndex);
 			final float lPhase = 0;
-			final int lClear = 1;
+			final int lClear = 0;
 
 			mCLDevice.setArgs(mRenderKernel,
 												mCLRenderBuffers[pRenderLayerIndex],
