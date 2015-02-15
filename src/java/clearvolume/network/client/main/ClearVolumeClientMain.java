@@ -30,10 +30,11 @@ public class ClearVolumeClientMain
 	 */
 	public static void main(String[] args)
 	{
-		launchClientGUI(null);
+		launchClientGUI(null, true);
 	}
 
-	public static void launchClientGUI(final VolumeCaptureListener pVolumeCaptureListener)
+	public static void launchClientGUI(	final VolumeCaptureListener pVolumeCaptureListener,
+																			final boolean pExitOnClose)
 	{
 		try
 		{
@@ -45,7 +46,8 @@ public class ClearVolumeClientMain
 					try
 					{
 						CheckRequirements.check();
-						final ClearVolumeClientMain lClearVolumeMain = new ClearVolumeClientMain(pVolumeCaptureListener);
+						final ClearVolumeClientMain lClearVolumeMain = new ClearVolumeClientMain(	pVolumeCaptureListener,
+																																											pExitOnClose);
 						lClearVolumeMain.mApplicationJFrame.setVisible(true);
 					}
 					catch (final Exception e)
@@ -105,10 +107,11 @@ public class ClearVolumeClientMain
 	 * 
 	 * @param pVolumeCaptureListener
 	 */
-	public ClearVolumeClientMain(VolumeCaptureListener pVolumeCaptureListener)
+	public ClearVolumeClientMain(	VolumeCaptureListener pVolumeCaptureListener,
+																boolean pExitOnClose)
 	{
 		super();
-		initialize(pVolumeCaptureListener);
+		initialize(pVolumeCaptureListener, pExitOnClose);
 	}
 
 	/**
@@ -116,13 +119,15 @@ public class ClearVolumeClientMain
 	 * 
 	 * @param pVolumeCaptureListener
 	 */
-	private void initialize(VolumeCaptureListener pVolumeCaptureListener)
+	private void initialize(VolumeCaptureListener pVolumeCaptureListener,
+													boolean pExitOnClose)
 	{
 		mApplicationJFrame = new ClearVolumeJFrame();
 		mApplicationJFrame.setResizable(false);
 		mApplicationJFrame.getContentPane().setBackground(Color.WHITE);
 		mApplicationJFrame.setBounds(100, 100, 529, 529);
-		mApplicationJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		if (pExitOnClose)
+			mApplicationJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		final JMenuBar lMenuBar = new JMenuBar();
 		mApplicationJFrame.setJMenuBar(lMenuBar);

@@ -1380,7 +1380,8 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void toggleControlPanelDisplay()
 	{
-		mControlFrame.setVisible(!mControlFrame.isVisible());
+		if (mControlFrame != null)
+			mControlFrame.setVisible(!mControlFrame.isVisible());
 	}
 
 	/**

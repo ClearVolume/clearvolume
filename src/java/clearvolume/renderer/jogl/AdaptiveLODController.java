@@ -19,6 +19,5 @@ public class AdaptiveLODController
 		if (mMultiPassRenderingInProgress)
 			mDisplayRequestReceived = true;
 	}
-	
 
 }

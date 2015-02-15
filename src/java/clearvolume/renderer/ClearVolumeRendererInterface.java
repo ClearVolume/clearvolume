@@ -111,7 +111,7 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Sets visibility of a given layer.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @param pVisble
 	 */
@@ -322,7 +322,7 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Sets the amount of dithering [0,1] for a given render layer.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @param pDithering
 	 *          new dithering level for render layer
@@ -331,26 +331,24 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Returns samount of dithering [0,1] for a given render layer.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @return dithering
 	 */
 	float getDithering(int pRenderLayerIndex);
 
 	/**
-	 * Sets the amount of dithering [0,1] for a given render layer.
-	 * 
-	 * @param pRenderLayerIndex
-	 * 
+	 * Sets the quality level [0,1] for a given render layer.
+	 *
 	 * @param pRenderLayerIndex
 	 * @param pQuality
-	 *          new quality level for render layer
+	 *            new quality level for render layer
 	 */
 	void setQuality(int pRenderLayerIndex, double pQuality);
 
 	/**
 	 * Returns the quality level [0,1] for a given render layer.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @return quality level
 	 */
@@ -671,7 +669,7 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Adds a capture listener to this renderer.
-	 * 
+	 *
 	 * @param pVolumeCaptureListener
 	 *          capture listener
 	 */

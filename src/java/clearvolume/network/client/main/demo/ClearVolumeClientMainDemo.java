@@ -39,7 +39,8 @@ public class ClearVolumeClientMainDemo
 													pVoxelDepth,
 													pCaptureBuffers[0].toString());
 			}
-		});
+		},
+																					true);
 
 		Thread.sleep(1000100);
 	}
