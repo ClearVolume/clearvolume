@@ -115,6 +115,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 	protected boolean mUsePBOs = true;
 
+	protected AdaptiveLODController mAdaptiveLODController;
+
 	// Recorder:
 	private final GLVideoRecorder mGLVideoRecorder = new GLVideoRecorder(new File(SystemUtils.USER_HOME,
 																																								"Videos/ClearVolume"));
@@ -326,6 +328,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 				super.windowDestroyNotify(pE);
 			};
 		});
+
+		mAdaptiveLODController = new AdaptiveLODController(this);
 	}
 
 	@Override
@@ -1060,48 +1064,14 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
 	 */
 	@Override
-	public void requestDisplayUnfairly()
+	public void requestDisplay()
 	{
-
-		if (mNewtCanvasAWT != null)
-			requestDisplay();
-
-		final boolean lLocked = mDisplayReentrantLock.tryLock();
-
-		if (lLocked)
-		{
-			try
-			{
-				requestDisplay();
-			}
-			finally
-			{
-				if (mDisplayReentrantLock.isHeldByCurrentThread())
-					mDisplayReentrantLock.unlock();
-			}
-		}
-
+		mAdaptiveLODController.requestDisplay();
 	}
 
-	long mLastRequestTime = Long.MIN_VALUE;
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
-	 */
-	@Override
-	public void requestDisplayInternal()
+	protected void requestDisplayInternal()
 	{
-		final long lRequestTime = System.nanoTime();
-		if (lRequestTime < mLastRequestTime + 15 * 1000 * 1000)
-		{
-			// System.out.println("FAIR too soon!");
-			return;
-		}
-		else
-			// System.out.println("FAIR PASS!");
-		mLastRequestTime = lRequestTime;
+
 
 		if (mNewtCanvasAWT != null)
 		{

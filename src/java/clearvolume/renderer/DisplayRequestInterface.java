@@ -20,5 +20,5 @@ public interface DisplayRequestInterface
 	 * Requests the update of the display in an unfair manner - it will pass the
 	 * line of waiting threads.
 	 */
-	void requestDisplayUnfairly();
+	// void requestDisplayUnfairly();
 }
