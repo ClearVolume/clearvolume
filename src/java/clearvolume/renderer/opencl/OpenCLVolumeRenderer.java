@@ -1,7 +1,5 @@
 package clearvolume.renderer.opencl;
 
-import static java.lang.Math.toIntExact;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -244,7 +242,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
-				lCaptureBuffers[i] = ByteBuffer.allocateDirect(toIntExact(getBytesPerVoxel() * getVolumeSizeX()
+				lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (getBytesPerVoxel() * getVolumeSizeX()
 																																	* getVolumeSizeY()
 																																	* getVolumeSizeZ()))
 																				.order(ByteOrder.nativeOrder());
