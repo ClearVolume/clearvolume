@@ -765,23 +765,15 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private void runKernel(final int pRenderLayerIndex)
 	{
 
-		// if (mOpenGLBufferDevicePointers[pRenderLayerIndex] == null)
-		// return;
-
-		copyTransferFunctionArray(pRenderLayerIndex);
-
-		pointTransferFunctionTextureToArray(pRenderLayerIndex);
-		pointTextureToArray(pRenderLayerIndex);
-
-		// mOpenGLBufferDevicePointers[pRenderLayerIndex].map();
-		// mOpenGLBufferDevicePointers[pRenderLayerIndex].set(0, true);
-
 		final CudaDevicePointer lCudaDevicePointer = mCudaBufferDevicePointer[pRenderLayerIndex];
-
-		lCudaDevicePointer.fillByte((byte) 0, false);
 
 		if (isLayerVisible(pRenderLayerIndex))
 		{
+			copyTransferFunctionArray(pRenderLayerIndex);
+
+			pointTransferFunctionTextureToArray(pRenderLayerIndex);
+			pointTextureToArray(pRenderLayerIndex);
+
 			mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
 																									cBlockSize),
 																					iDivUp(	getTextureHeight(),
@@ -791,6 +783,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
 
 			final int lMaxSteps = getMaxSteps(pRenderLayerIndex);
+			final float lPhase = 0;
+			final int lClear = 0;
 
 			mVolumeRenderingFunction.launch(lCudaDevicePointer,
 																			getTextureWidth(),
@@ -800,8 +794,12 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																			(float) getTransferRangeMax(pRenderLayerIndex),
 																			(float) getGamma(pRenderLayerIndex),
 																			lMaxSteps,
-																			getDithering(pRenderLayerIndex));
+																			getDithering(pRenderLayerIndex),
+																			lPhase,
+																			lClear);
 		}
+		else
+			lCudaDevicePointer.fillByte((byte) 0, false);
 
 		if (mTemporaryTransfertBuffer == null || mTemporaryTransfertBuffer.capacity() != lCudaDevicePointer.getSizeInBytes())
 			mTemporaryTransfertBuffer = ByteBuffer.allocateDirect((int) lCudaDevicePointer.getSizeInBytes())
@@ -819,8 +817,11 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	/**
 	 * Runs 3D to 2D rendering kernel and store the result in a PBO.
 	 */
+	@Deprecated
 	private void runKernelWithPBOs(final int pRenderLayerIndex)
 	{
+		// This code is depreacted and out of sync with the no=PBO approach.
+		assert (false);
 
 		if (mOpenGLBufferDevicePointers[pRenderLayerIndex] == null)
 			return;

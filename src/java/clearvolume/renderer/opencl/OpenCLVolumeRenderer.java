@@ -36,6 +36,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	private CLBuffer<Float>[] mCLTransferColorBuffers;
 
 	private CLKernel mRenderKernel;
+	private CLKernel mClearKernel;
 
 	public OpenCLVolumeRenderer(final String pWindowName,
 															final int pWindowWidth,
@@ -113,6 +114,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mCLDevice.printInfo();
 		mRenderKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRenderPerspective.cl"),
 																						"volumerender");
+		mClearKernel = mCLDevice.compileKernel(	OpenCLVolumeRenderer.class.getResource("kernels/VolumeRenderPerspective.cl"),
+																						"clearbuffer");
 
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
@@ -369,49 +372,52 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	{
 		// System.out.println("kernel");
 		// System.out.println(mCLVolumeImages[i].getHeight());
-
-		prepareTransferFunctionArray(pRenderLayerIndex);
-
-		final int lMaxSteps = getMaxSteps(pRenderLayerIndex);
-
-		mCLDevice.setArgs(mRenderKernel,
-											mCLRenderBuffers[pRenderLayerIndex],
-											getTextureWidth(),
-											getTextureHeight(),
-											(float) getBrightness(pRenderLayerIndex),
-											(float) getTransferRangeMin(pRenderLayerIndex),
-											(float) getTransferRangeMax(pRenderLayerIndex),
-											(float) getGamma(pRenderLayerIndex),
-											lMaxSteps,
-											getDithering(pRenderLayerIndex),
-											mCLTransferFunctionImages[pRenderLayerIndex],
-											mCLInvProjectionBuffer,
-											mCLInvModelViewBuffer,
-											mCLVolumeImages[pRenderLayerIndex]);
-
-		// long startTime = System.nanoTime();
-
-		mCLDevice.run(mRenderKernel,
-									getTextureWidth(),
-									getTextureHeight());
-
 		if (isLayerVisible(pRenderLayerIndex))
 		{
-			// System.out.println("render layer:" + pRenderLayerIndex);
-			final ByteBuffer lRenderedImageBuffer = mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]);
-			copyBufferToTexture(pRenderLayerIndex, lRenderedImageBuffer);
+			prepareTransferFunctionArray(pRenderLayerIndex);
+
+			final int lMaxSteps = getMaxSteps(pRenderLayerIndex);
+			final float lPhase = 0;
+			final int lClear = 1;
+
+			mCLDevice.setArgs(mRenderKernel,
+												mCLRenderBuffers[pRenderLayerIndex],
+												getTextureWidth(),
+												getTextureHeight(),
+												(float) getBrightness(pRenderLayerIndex),
+												(float) getTransferRangeMin(pRenderLayerIndex),
+												(float) getTransferRangeMax(pRenderLayerIndex),
+												(float) getGamma(pRenderLayerIndex),
+												lMaxSteps,
+												getDithering(pRenderLayerIndex),
+												lPhase,
+												lClear,
+												mCLTransferFunctionImages[pRenderLayerIndex],
+												mCLInvProjectionBuffer,
+												mCLInvModelViewBuffer,
+												mCLVolumeImages[pRenderLayerIndex]);
+
+
+			mCLDevice.run(mRenderKernel,
+										getTextureWidth(),
+										getTextureHeight());
+
 		}
 		else
 		{
-			// System.out.println("CLEAR layer:" + pRenderLayerIndex);
-			clearTexture(pRenderLayerIndex);
+			mCLDevice.setArgs(mRenderKernel,
+												mCLRenderBuffers[pRenderLayerIndex],
+												getTextureWidth(),
+												getTextureHeight());
+
+			mCLDevice.run(mRenderKernel,
+										getTextureWidth(),
+										getTextureHeight());
+
 		}
 
-		// long endTime = System.nanoTime();
-
-		// System.out.println("time to render: " + (endTime - startTime)
-		// / 1000000.
-		// + " ms");
+		final ByteBuffer lRenderedImageBuffer = mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]);
+		copyBufferToTexture(pRenderLayerIndex, lRenderedImageBuffer);
 
 	}
 
