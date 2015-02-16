@@ -23,15 +23,15 @@ ClearVolumeCloseable
 	private volatile ClearVolumeRendererInterface mClearVolumeRendererInterface;
 	private volatile boolean mSwitchingRenderers;
 	private volatile VolumeManager mVolumeManager;
-	private long mWaitForCopyTimeout;
-	private TimeUnit mTimeUnit;
+	private final long mWaitForCopyTimeout;
+	private final TimeUnit mTimeUnit;
 
 	private String mRequestedWindowTitle;
 	private int mRequestedWindowWidth, mRequestedWindowHeight;
 	private int mMaxNumberOfAvailableVolumes;
 	private int mNumberOfLayers;
 
-	private TreeMap<Integer, String> mSeenChannelIdToNameMap = new TreeMap<Integer, String>();
+	private final TreeMap<Integer, String> mSeenChannelIdToNameMap = new TreeMap<Integer, String>();
 
 	public ClearVolumeRendererSink(	ClearVolumeRendererInterface pClearVolumeRendererInterface,
 			VolumeManager pVolumeManager,
@@ -76,7 +76,7 @@ ClearVolumeCloseable
 		mSeenChannelIdToNameMap.put(lChannelID, lChannelName);
 
 		final int lBytesPerVoxel = pVolume.getBytesPerVoxel();
-		int lNumberOfChannelsSeen = mSeenChannelIdToNameMap.keySet()
+		final int lNumberOfChannelsSeen = mSeenChannelIdToNameMap.keySet()
 				.size();
 		final int lNumberOfLayersNeeded = lNumberOfChannelsSeen;
 
@@ -130,7 +130,7 @@ ClearVolumeCloseable
 			if (mClearVolumeRendererInterface != null)
 				mClearVolumeRendererInterface.close();
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 		}
 
@@ -149,7 +149,7 @@ ClearVolumeCloseable
 			if (mVolumeManager != null)
 				mVolumeManager.close();
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 		}
 
@@ -180,7 +180,7 @@ ClearVolumeCloseable
 			while (mSwitchingRenderers)
 				Thread.sleep(1);
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 		}
 		if (mClearVolumeRendererInterface != null)
@@ -198,6 +198,11 @@ ClearVolumeCloseable
 	{
 		if (mClearVolumeRendererInterface != null)
 			mClearVolumeRendererInterface.close();
+	}
+
+	public ClearVolumeRendererInterface getClearVolumeRenderer()
+	{
+		return mClearVolumeRendererInterface;
 	}
 
 }

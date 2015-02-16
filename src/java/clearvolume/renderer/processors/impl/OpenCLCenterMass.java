@@ -19,7 +19,7 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 	private int mLocalShapeX, mLocalShapeY, mLocalShapeZ;
 
 	private final int mLocalSize = 8;
-	private final int mDownSample = 4;
+	private final int mDownSample = 2;
 
 	@Override
 	public String getName() {
@@ -83,9 +83,21 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 		mKernel.setArgs(getVolumeBuffers()[0], mBufX, mBufY, mBufZ, mBufSum,
 				mDownSample);
 
-		getDevice().run(mKernel, mPaddedShapeX, mPaddedShapeY,
-				mPaddedShapeZ, mLocalSize, mLocalSize,
-				mLocalSize);
+		boolean isdebug = true;
+
+		long start = System.nanoTime();
+
+		getDevice().run(mKernel, mPaddedShapeX, mPaddedShapeY, mPaddedShapeZ,
+				mLocalSize, mLocalSize, mLocalSize);
+
+		if (isdebug) {
+			getDevice().mCLQueue.finish();
+			long end = System.nanoTime();
+			System.out.println("time to compute center of mass " + 1.e-6
+					* (end - start) + " ms");
+			// System.out.printf("time to compute center of mass: %.2f ms\n",
+			// 1000000 * (start - end));
+		}
 
 		final FloatBuffer outX = getDevice().readFloatBuffer(mBufX);
 		final FloatBuffer outY = getDevice().readFloatBuffer(mBufY);

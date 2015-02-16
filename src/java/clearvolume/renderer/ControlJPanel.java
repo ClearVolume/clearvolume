@@ -1,7 +1,5 @@
 package clearvolume.renderer;
 
-import java.awt.Dimension;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -30,7 +28,7 @@ public class ControlJPanel extends JPanel
 		this.layerId = layerToBeControlled;
 		this.mClearVolumeRendererInterface = pClearVolumeRendererInterface;
 
-		setLayout(new MigLayout("", "[][225px,grow]", "[][][]"));
+		setLayout( new MigLayout( "", "[min!,right][:1200:][min!,right][:1200:]", "[][][]" ) );
 
 		final JSlider lGammaSlider =
 				new JSlider( 0, cPrecision, ( int ) ( cPrecision * .5 * mClearVolumeRendererInterface.getGamma( layerId ) ) );
@@ -46,22 +44,21 @@ public class ControlJPanel extends JPanel
 			}
 		});
 
-		final JLabel lblGamma = new JLabel( String.format( "Ch.%d: gamma", layerId ) );
-		add(lblGamma, "cell 0 0");
+		final JLabel lblGamma = new JLabel( String.format( "Ch.%d:   gamma", layerId ) );
+		add( lblGamma );
 
-		add(lGammaSlider, "cell 1 0,grow");
+		add( lGammaSlider, "span,grow,wrap" );
 
-		final JSlider lMaxSlider =
-				new JSlider( 0, cPrecision, ( int ) ( cPrecision * mClearVolumeRendererInterface.getTransferRangeMax( layerId ) ) );
 		final JSlider lMinSlider =
 				new JSlider( 0, cPrecision, ( int ) ( cPrecision * mClearVolumeRendererInterface.getTransferRangeMin( layerId ) ) );
-		lMinSlider.setPreferredSize(new Dimension(0, 0));
+		final JSlider lMaxSlider =
+				new JSlider( 0, cPrecision, ( int ) ( cPrecision * mClearVolumeRendererInterface.getTransferRangeMax( layerId ) ) );
 
-		final JLabel lblMinMax = new JLabel( String.format( "Ch.%d: max", layerId ) );
-		add(lblMinMax, "cell 0 1");
+		final JLabel lblMin = new JLabel( String.format( "min" ) );
+		add( lblMin );
 
-		add(lMaxSlider, "cell 1 1,grow");
-		lMaxSlider.addChangeListener(new ChangeListener()
+		add( lMinSlider, "grow" );
+		lMinSlider.addChangeListener( new ChangeListener()
 		{
 			@Override
 			public void stateChanged(final ChangeEvent e)
@@ -69,28 +66,7 @@ public class ControlJPanel extends JPanel
 				final JSlider source = (JSlider) e.getSource();
 				if (lMinSlider.getValue() > lMaxSlider.getValue())
 				{
-					lMinSlider.setValue(lMaxSlider.getValue() - 1);
-					// lMinSlider.repaint();
-				}
-				final float lMax = 1f * source.getValue() / cPrecision;
-				getClearVolumeRendererInterface().setTransferFunctionRangeMax( layerId, lMax );
-				getClearVolumeRendererInterface().requestDisplay();
-			}
-		});
-
-		final JLabel lblMax = new JLabel( String.format( "Ch.%d: min", layerId ) );
-		add(lblMax, "cell 0 2");
-
-		add(lMinSlider, "cell 1 2,grow");
-		lMinSlider.addChangeListener(new ChangeListener()
-		{
-			@Override
-			public void stateChanged(final ChangeEvent e)
-			{
-				final JSlider source = (JSlider) e.getSource();
-				if (lMinSlider.getValue() > lMaxSlider.getValue())
-				{
-					lMaxSlider.setValue(lMinSlider.getValue() + 1);
+					lMaxSlider.setValue( lMinSlider.getValue() + 1 );
 					// lMaxSlider.repaint();
 				}
 				final float lMin = 1f * source.getValue() / cPrecision;
@@ -99,6 +75,66 @@ public class ControlJPanel extends JPanel
 			}
 		});
 
+		final JLabel lblMax = new JLabel( String.format( "max" ) );
+		add( lblMax );
+
+		add( lMaxSlider, "grow,wrap" );
+		lMaxSlider.addChangeListener( new ChangeListener()
+		{
+			@Override
+			public void stateChanged(final ChangeEvent e)
+			{
+				final JSlider source = (JSlider) e.getSource();
+				if (lMinSlider.getValue() > lMaxSlider.getValue())
+				{
+					lMinSlider.setValue( lMaxSlider.getValue() - 1 );
+					// lMinSlider.repaint();
+				}
+				final float lMax = 1f * source.getValue() / cPrecision;
+				getClearVolumeRendererInterface().setTransferFunctionRangeMax( layerId, lMax );
+				getClearVolumeRendererInterface().requestDisplay();
+			}
+		});
+
+		final JSlider lQuality =
+				new JSlider( 0, cPrecision, ( int ) ( cPrecision * mClearVolumeRendererInterface.getQuality( layerId ) ) );
+
+		final JLabel lblQuality = new JLabel( String.format( "quality" ) );
+		add( lblQuality );
+
+		add( lQuality, "grow" );
+		lQuality.addChangeListener( new ChangeListener()
+		{
+
+			@Override
+			public void stateChanged( final ChangeEvent e )
+			{
+				final JSlider source = ( JSlider ) e.getSource();
+				final float lQ = 1f * source.getValue() / cPrecision;
+				mClearVolumeRendererInterface.setQuality( layerId, lQ );
+				mClearVolumeRendererInterface.requestDisplay();
+			}
+		} );
+
+		final JSlider lDithering =
+				new JSlider( 0, cPrecision, ( int ) ( cPrecision * mClearVolumeRendererInterface.getDithering( layerId ) ) );
+
+		final JLabel lblDithering = new JLabel( String.format( "dithering" ) );
+		add( lblDithering );
+
+		add( lDithering, "grow" );
+		lDithering.addChangeListener( new ChangeListener()
+		{
+
+			@Override
+			public void stateChanged( final ChangeEvent e )
+			{
+				final JSlider source = ( JSlider ) e.getSource();
+				final float lDit = 1f * source.getValue() / cPrecision;
+				mClearVolumeRendererInterface.setDithering( layerId, lDit );
+				mClearVolumeRendererInterface.requestDisplay();
+			}
+		} );
 	}
 
 	public ClearVolumeRendererInterface getClearVolumeRendererInterface()

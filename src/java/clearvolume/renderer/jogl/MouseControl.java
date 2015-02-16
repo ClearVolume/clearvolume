@@ -123,16 +123,12 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		if (pMouseEvent.isMetaDown() && pMouseEvent.isButtonDown(1))
 		{
-
 			double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
 
 			nx = (max(min(nx, 1), 0));
 			nx = nx * nx;
 
-			System.out.println("nx=" + nx);
-
 			mRenderer.setQuality(mRenderer.getCurrentRenderLayerIndex(), nx);
-
 		}
 
 		/*

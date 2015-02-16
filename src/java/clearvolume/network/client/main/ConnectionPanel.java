@@ -20,33 +20,37 @@ import javax.swing.border.EmptyBorder;
 import net.miginfocom.swing.MigLayout;
 import clearvolume.network.client.ClearVolumeTCPClientHelper;
 import clearvolume.network.serialization.ClearVolumeSerialization;
+import clearvolume.renderer.VolumeCaptureListener;
 
 public class ConnectionPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;
 
-	private JTextArea mErrorTextArea;
-	private JTextField mWindowSizeField;
+	private final JTextArea mErrorTextArea;
+	private final JTextField mWindowSizeField;
 
-	private ClearVolumeTCPClientHelper mClearVolumeTCPClientHelper;
-	private JTextField mBytesPerVoxelTextField;
+	private final ClearVolumeTCPClientHelper mClearVolumeTCPClientHelper;
+	private final JTextField mBytesPerVoxelTextField;
 
-	private JCheckBox mTimeShiftAndMultiChannelCheckBox;
+	private final JCheckBox mTimeShiftAndMultiChannelCheckBox;
 
-	private JCheckBox mChannelFilterCheckBox;
+	private final JCheckBox mChannelFilterCheckBox;
 
-	private JTextField mNumberOfColorsField;
-	private JTextField mTCPPortTextField;
+	private final JTextField mNumberOfColorsField;
+	private final JTextField mTCPPortTextField;
 
-	public ConnectionPanel()
+	private final VolumeCaptureListener mVolumeCaptureListener;
+
+	public ConnectionPanel(VolumeCaptureListener pVolumeCaptureListener)
 	{
+		mVolumeCaptureListener = pVolumeCaptureListener;
 		setBackground(Color.WHITE);
 		final ConnectionPanel lThis = this;
 		setLayout(new MigLayout("",
 														"[435.00px,grow][435.00px]",
 														"[16px][16px][29px][50.00px:n,grow][10px:n,grow]"));
-		JLabel lblNewLabel = new JLabel("Enter IP address or hostname of ClearVolume server:");
+		final JLabel lblNewLabel = new JLabel("Enter IP address or hostname of ClearVolume server:");
 		add(lblNewLabel, "cell 0 0 2 1,alignx left,aligny top");
 
 		final JTextField lServerAddressTextField = new JTextField();
@@ -63,7 +67,7 @@ public class ConnectionPanel extends JPanel
 		lServerAddressTextField.setBackground(new Color(220, 220, 220));
 		add(lServerAddressTextField, "cell 0 1 2 1,growx,aligny top");
 
-		JButton lConnectButton = new JButton("connect");
+		final JButton lConnectButton = new JButton("connect");
 		lConnectButton.setBorder(null);
 		lConnectButton.addActionListener(new ActionListener()
 		{
@@ -74,7 +78,7 @@ public class ConnectionPanel extends JPanel
 			}
 		});
 
-		JButton lAdvancedButton = new JButton("advanced...");
+		final JButton lAdvancedButton = new JButton("advanced...");
 		lAdvancedButton.setForeground(Color.GRAY);
 		lAdvancedButton.setFont(new Font("Lucida Grande", Font.ITALIC, 13));
 		lAdvancedButton.setVerticalAlignment(SwingConstants.TOP);
@@ -98,7 +102,7 @@ public class ConnectionPanel extends JPanel
 		});
 		lOptionsPanel.setLayout(null);
 
-		JLabel lWindowSizeLabel = new JLabel("Window size");
+		final JLabel lWindowSizeLabel = new JLabel("Window size");
 		lWindowSizeLabel.setHorizontalAlignment(SwingConstants.TRAILING);
 		lWindowSizeLabel.setBounds(6, 6, 119, 16);
 		lOptionsPanel.add(lWindowSizeLabel);
@@ -112,7 +116,7 @@ public class ConnectionPanel extends JPanel
 		lOptionsPanel.add(mWindowSizeField);
 		mWindowSizeField.setColumns(10);
 
-		JLabel lBytesPerVoxelLabel = new JLabel("Bytes-per-voxel");
+		final JLabel lBytesPerVoxelLabel = new JLabel("Bytes-per-voxel");
 		lBytesPerVoxelLabel.setHorizontalAlignment(SwingConstants.TRAILING);
 		lBytesPerVoxelLabel.setBounds(6, 32, 119, 16);
 		lOptionsPanel.add(lBytesPerVoxelLabel);
@@ -126,7 +130,7 @@ public class ConnectionPanel extends JPanel
 		mBytesPerVoxelTextField.setBounds(148, 32, 45, 16);
 		lOptionsPanel.add(mBytesPerVoxelTextField);
 
-		JLabel lTimeShiftAndMultiChannelLabel = new JLabel("TimeShift");
+		final JLabel lTimeShiftAndMultiChannelLabel = new JLabel("TimeShift");
 		lTimeShiftAndMultiChannelLabel.setHorizontalAlignment(SwingConstants.TRAILING);
 		lTimeShiftAndMultiChannelLabel.setBounds(205, 32, 171, 16);
 		lOptionsPanel.add(lTimeShiftAndMultiChannelLabel);
@@ -140,7 +144,7 @@ public class ConnectionPanel extends JPanel
 		mTimeShiftAndMultiChannelCheckBox.setBounds(382, 29, 28, 20);
 		lOptionsPanel.add(mTimeShiftAndMultiChannelCheckBox);
 
-		JLabel lMultiColorLabel = new JLabel("ChannelFilter");
+		final JLabel lMultiColorLabel = new JLabel("ChannelFilter");
 		lMultiColorLabel.setHorizontalAlignment(SwingConstants.TRAILING);
 		lMultiColorLabel.setBounds(217, 58, 159, 16);
 		lOptionsPanel.add(lMultiColorLabel);
@@ -152,7 +156,7 @@ public class ConnectionPanel extends JPanel
 		mChannelFilterCheckBox.setBounds(382, 56, 28, 20);
 		lOptionsPanel.add(mChannelFilterCheckBox);
 
-		JLabel lNumberOfColorsLabel = new JLabel("Number of colors");
+		final JLabel lNumberOfColorsLabel = new JLabel("Number of colors");
 		lNumberOfColorsLabel.setHorizontalAlignment(SwingConstants.TRAILING);
 		lNumberOfColorsLabel.setBounds(6, 60, 119, 16);
 		lOptionsPanel.add(lNumberOfColorsLabel);
@@ -175,7 +179,7 @@ public class ConnectionPanel extends JPanel
 		mTCPPortTextField.setBounds(359, 6, 45, 16);
 		lOptionsPanel.add(mTCPPortTextField);
 
-		JLabel lTCPPortLabel = new JLabel("port");
+		final JLabel lTCPPortLabel = new JLabel("port");
 		lTCPPortLabel.setHorizontalAlignment(SwingConstants.TRAILING);
 		lTCPPortLabel.setBounds(228, 6, 119, 16);
 		lOptionsPanel.add(lTCPPortLabel);
@@ -224,12 +228,13 @@ public class ConnectionPanel extends JPanel
 			final boolean lTimeShiftMultiChannel = mTimeShiftAndMultiChannelCheckBox.isSelected();
 			final boolean lChannelFilter = mChannelFilterCheckBox.isSelected();
 			final int lNumberOfLayers = Integer.parseInt(mNumberOfColorsField.getText());
-			Runnable lStartClientRunnable = new Runnable()
+			final Runnable lStartClientRunnable = new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					mClearVolumeTCPClientHelper.startClient(lServerAddress,
+					mClearVolumeTCPClientHelper.startClient(mVolumeCaptureListener,
+																									lServerAddress,
 																									lTCPPort,
 																									lWindowSize,
 																									lBytesPerVoxel,
@@ -239,15 +244,15 @@ public class ConnectionPanel extends JPanel
 				}
 			};
 
-			Thread lStartClientThread = new Thread(	lStartClientRunnable,
-																							"StartClientThread" + lServerAddressTextField.getText());
+			final Thread lStartClientThread = new Thread(	lStartClientRunnable,
+																										"StartClientThread" + lServerAddressTextField.getText());
 			lStartClientThread.setDaemon(true);
 			lStartClientThread.start();
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
-			mClearVolumeTCPClientHelper.reportErrorWithPopUp(e,
-																											e.getLocalizedMessage());
+			mClearVolumeTCPClientHelper.reportErrorWithPopUp(	e,
+																												e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 	}

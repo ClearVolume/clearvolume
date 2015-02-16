@@ -640,6 +640,34 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			return null;
 		mCudaContext.setCurrent();
 
+		if (mVolumeCaptureFlag)
+		{
+			final ByteBuffer[] lCaptureBuffers = new ByteBuffer[getNumberOfRenderLayers()];
+
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (getBytesPerVoxel() * getVolumeSizeX()
+																																	* getVolumeSizeY()
+																																	* getVolumeSizeZ()))
+																				.order(ByteOrder.nativeOrder());
+
+				mVolumeDataCudaArrays[getCurrentRenderLayerIndex()].copyTo(	lCaptureBuffers[i],
+																																		true);
+			}
+
+			notifyVolumeCaptureListeners(	lCaptureBuffers,
+																		false,
+																		getBytesPerVoxel(),
+																		getVolumeSizeX(),
+																		getVolumeSizeY(),
+																		getVolumeSizeZ(),
+																		getVoxelSizeX(),
+																		getVoxelSizeY(),
+																		getVoxelSizeZ());
+
+			mVolumeCaptureFlag = false;
+		}
+
 		try
 		{
 			mInvertedViewMatrix.copyFrom(invModelView, true);
@@ -786,8 +814,6 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mTemporaryTransfertBuffer.rewind();
 		copyBufferToTexture(pRenderLayerIndex, mTemporaryTransfertBuffer);
 	}
-
-
 
 	/**
 	 * Runs 3D to 2D rendering kernel and store the result in a PBO.

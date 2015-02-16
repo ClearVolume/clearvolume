@@ -118,7 +118,7 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Sets visibility of a given layer.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @param pVisble
 	 */
@@ -329,7 +329,7 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Sets the amount of dithering [0,1] for a given render layer.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @param pDithering
 	 *          new dithering level for render layer
@@ -338,26 +338,24 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Returns samount of dithering [0,1] for a given render layer.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @return dithering
 	 */
 	float getDithering(int pRenderLayerIndex);
 
 	/**
-	 * Sets the amount of dithering [0,1] for a given render layer.
-	 * 
-	 * @param pRenderLayerIndex
-	 * 
+	 * Sets the quality level [0,1] for a given render layer.
+	 *
 	 * @param pRenderLayerIndex
 	 * @param pQuality
-	 *          new quality level for render layer
+	 *            new quality level for render layer
 	 */
 	void setQuality(int pRenderLayerIndex, double pQuality);
 
 	/**
 	 * Returns the quality level [0,1] for a given render layer.
-	 * 
+	 *
 	 * @param pRenderLayerIndex
 	 * @return quality level
 	 */
@@ -407,6 +405,22 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
+	 * layer.
+	 *
+	 * @param pByteBuffer
+	 * @param pSizeX
+	 * @param pSizeY
+	 * @param pSizeZ
+	 */
+	void setVolumeDataBuffer(	int pRenderLayerIndex,
+														ByteBuffer pByteBuffer,
+														long pSizeX,
+														long pSizeY,
+														long pSizeZ);
+
+	/**
+	 * Updates the displayed volume with the provided volume data of voxel
 	 * dimensions (pSizeX,pSizeY,pSizeZ).
 	 *
 	 * @param pByteBuffer
@@ -414,6 +428,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pSizeY
 	 * @param pSizeZ
 	 */
+	@Deprecated
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
 														long pSizeX,
 														long pSizeY,
@@ -442,6 +457,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pVoxelSizeY
 	 * @param pVoxelSizeZ
 	 */
+	@Deprecated
 	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
 														long pSizeX,
 														long pSizeY,
@@ -454,10 +470,40 @@ public interface ClearVolumeRendererInterface	extends
 	 * Updates the displayed volume with the provided volume data of voxel
 	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are provided.
 	 *
+	 * @param pRenderLayerIndex
+	 * @param pByteBuffer
+	 * @param pSizeX
+	 * @param pSizeY
+	 * @param pSizeZ
+	 * @param pVoxelSizeX
+	 * @param pVoxelSizeY
+	 * @param pVoxelSizeZ
+	 */
+	void setVolumeDataBuffer(	final int pRenderLayerIndex,
+														ByteBuffer pByteBuffer,
+														long pSizeX,
+														long pSizeY,
+														long pSizeZ,
+														double pVoxelSizeX,
+														double pVoxelSizeY,
+														double pVoxelSizeZ);
+
+	/**
+	 * Updates the displayed volume with the provided volume.
+	 *
 	 * @param pVolume
 	 *          Volume data to use for updating display.
 	 */
+	@Deprecated
 	void setVolumeDataBuffer(Volume<?> pVolume);
+
+	/**
+	 * Updates the displayed volume with the provided Volume for a given layer.
+	 *
+	 * @param pVolume
+	 *          Volume data to use for updating display.
+	 */
+	void setVolumeDataBuffer(int pRenderLayerIndex, Volume<?> pVolume);
 
 	/**
 	 * Creates a compatible VolumeManager - possibly capable of allocating pinned
@@ -627,6 +673,20 @@ public interface ClearVolumeRendererInterface	extends
 	 *          Processors to add.
 	 */
 	public void addProcessors(Collection<Processor<?>> pProcessors);
+
+	/**
+	 * Adds a capture listener to this renderer.
+	 *
+	 * @param pVolumeCaptureListener
+	 *          capture listener
+	 */
+	public void addVolumeCaptureListener(VolumeCaptureListener pVolumeCaptureListener);
+
+	/**
+	 * Requests capture of the current displayed volume (Preferably of all layers
+	 * but possibly just of the current layer.)
+	 */
+	void requestVolumeCapture();
 
 	/**
 	 * Returns the list of overlays in this renderer.

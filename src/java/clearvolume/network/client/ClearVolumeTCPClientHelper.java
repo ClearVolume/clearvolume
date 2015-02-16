@@ -13,6 +13,7 @@ import javax.swing.JTextArea;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
+import clearvolume.renderer.VolumeCaptureListener;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.filter.ChannelFilterSink;
@@ -31,7 +32,8 @@ public abstract class ClearVolumeTCPClientHelper
 	private static final long cSoftHoryzon = 50;
 	private static final long cHardHoryzon = 100;
 
-	public void startClient(String pServerAddress,
+	public void startClient(VolumeCaptureListener pVolumeCaptureListener,
+													String pServerAddress,
 													int pPortNumber,
 													int pWindowSize,
 													int pBytesPerVoxel,
@@ -39,7 +41,7 @@ public abstract class ClearVolumeTCPClientHelper
 													boolean pTimeShift,
 													boolean pChannelFilter)
 	{
-		String lWindowTitle = "ClearVolume[" + pServerAddress
+		final String lWindowTitle = "ClearVolume[" + pServerAddress
 													+ ":"
 													+ pPortNumber
 													+ "]";
@@ -56,6 +58,9 @@ public abstract class ClearVolumeTCPClientHelper
 																																													TimeUnit.MILLISECONDS,
 																																													cMaxAvailableVolumes);)
 			{
+
+				lClearVolumeRendererSink.getClearVolumeRenderer()
+																.addVolumeCaptureListener(pVolumeCaptureListener);
 
 				RelaySinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
 
@@ -92,14 +97,14 @@ public abstract class ClearVolumeTCPClientHelper
 					lSinkAfterAsynchronousVolumeSinkAdapter = lTimeShiftingSink;
 				}
 
-				AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
+				final AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
 																																																					cMaxQueueLength,
 																																																					cMaxMillisecondsToWait,
 																																																					TimeUnit.MILLISECONDS);
 
-				ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
+				final ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
 
-				SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
+				final SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
 																																		pPortNumber);
 				assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
 
@@ -115,7 +120,7 @@ public abstract class ClearVolumeTCPClientHelper
 					{
 						Thread.sleep(10);
 					}
-					catch (InterruptedException e)
+					catch (final InterruptedException e)
 					{
 						e.printStackTrace();
 					}
@@ -139,13 +144,13 @@ public abstract class ClearVolumeTCPClientHelper
 				lClearVolumeTCPClient.close();
 			}
 		}
-		catch (UnresolvedAddressException uae)
+		catch (final UnresolvedAddressException uae)
 		{
 			reportErrorWithPopUp(	uae,
 														"Cannot find host: '" + pServerAddress
 																+ "'");
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			reportErrorWithPopUp(e, e.getLocalizedMessage());
 			e.printStackTrace();
@@ -201,7 +206,7 @@ public abstract class ClearVolumeTCPClientHelper
 																"Unknown error, please copy and send to royer@mpi-cbg.de",
 																JOptionPane.ERROR_MESSAGE);
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			try
 			{
@@ -211,7 +216,7 @@ public abstract class ClearVolumeTCPClientHelper
 																JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
 			}
-			catch (Throwable e1)
+			catch (final Throwable e1)
 			{
 				e1.printStackTrace();
 			}
@@ -223,7 +228,7 @@ public abstract class ClearVolumeTCPClientHelper
 																			String pTitle,
 																			int pMessageType)
 	{
-		JTextArea ta = new JTextArea(48, 100);
+		final JTextArea ta = new JTextArea(48, 100);
 		ta.setText(pText);
 		ta.setWrapStyleWord(true);
 		ta.setLineWrap(false);

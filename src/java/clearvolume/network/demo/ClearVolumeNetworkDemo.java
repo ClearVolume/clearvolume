@@ -49,12 +49,12 @@ public class ClearVolumeNetworkDemo
 	{
 		try
 		{
-			VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
+			final VolumeManager lVolumeManager = new VolumeManager(cNumberOfAvailableVolumes);
 
-			ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(cNumberOfAvailableVolumes);
+			final ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(cNumberOfAvailableVolumes);
 			lClearVolumeTCPServerSink.setRelaySink(new NullVolumeSink(lVolumeManager));
 
-			SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
+			final SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
 			assertTrue(lClearVolumeTCPServerSink.open(lServerSocketAddress));
 			assertTrue(lClearVolumeTCPServerSink.start());
 
@@ -64,13 +64,13 @@ public class ClearVolumeNetworkDemo
 				{
 					if (i % 1000 == 0)
 						System.out.println("sending volume with index=" + i);
-					Volume<Character> lVolume = lVolumeManager.requestAndWaitForVolume(	1,
-							TimeUnit.MILLISECONDS,
-							Character.class,
-							1,
-							cWidth,
-							cHeight,
-							cDepth);
+					final Volume<Character> lVolume = lVolumeManager.requestAndWaitForVolume(	1,
+																																										TimeUnit.MILLISECONDS,
+																																										Character.class,
+																																										1,
+																																										cWidth,
+																																										cHeight,
+																																										cDepth);
 
 					final long lTimePoint = i / pNumberOfChannels;
 					final int lChannleID = (int) (i % pNumberOfChannels);
@@ -80,7 +80,7 @@ public class ClearVolumeNetworkDemo
 					lVolume.setChannelID(lChannleID);
 					lVolume.setChannelName("channel " + lChannleID);
 
-					ByteBuffer lVolumeData = lVolume.getDataBuffer();
+					final ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
 					lVolumeData.rewind();
 					for (int j = 0; j < cDepth * cHeight * cWidth * 2; j++)
@@ -91,7 +91,7 @@ public class ClearVolumeNetworkDemo
 						for (int y = 0; y < cHeight / (1 + lChannleID); y++)
 							for (int x = cWidth / 2 * (lChannleID); x < cWidth; x++)
 							{
-								char lValue = (char) (512 * ((char) x ^ (char) y ^ (char) z));
+								final char lValue = (char) (512 * ((char) x ^ (char) y ^ (char) z));
 
 								lVolumeData.putChar(lValue);
 							}
@@ -99,7 +99,7 @@ public class ClearVolumeNetworkDemo
 					lClearVolumeTCPServerSink.sendVolume(lVolume);
 					Thread.sleep(100);
 				}
-				catch (Throwable e)
+				catch (final Throwable e)
 				{
 					e.printStackTrace();
 				}
@@ -109,7 +109,7 @@ public class ClearVolumeNetworkDemo
 			assertTrue(lClearVolumeTCPServerSink.stop());
 			lClearVolumeTCPServerSink.close();
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 		}
@@ -120,25 +120,25 @@ public class ClearVolumeNetworkDemo
 	public void startClient() throws IOException, InterruptedException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
-				256,
-				256,
-				2,
-				256,
-				256,
-				2,
-				false);
+																																														256,
+																																														256,
+																																														2,
+																																														256,
+																																														256,
+																																														2,
+																																														false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-				lClearVolumeRenderer.createCompatibleVolumeManager(cNumberOfAvailableVolumes),
-				10,
-				TimeUnit.MILLISECONDS);
+		final ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
+																																													lClearVolumeRenderer.createCompatibleVolumeManager(cNumberOfAvailableVolumes),
+																																													10,
+																																													TimeUnit.MILLISECONDS);
 
-		ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lClearVolumeRendererSink);
+		final ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lClearVolumeRendererSink);
 
-		SocketAddress lClientSocketAddress = new InetSocketAddress(	"localhost",
-				ClearVolumeSerialization.cStandardTCPPort);
+		final SocketAddress lClientSocketAddress = new InetSocketAddress(	"localhost",
+																																			ClearVolumeSerialization.cStandardTCPPort);
 		assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
 
 		assertTrue(lClearVolumeTCPClient.start());
@@ -153,4 +153,6 @@ public class ClearVolumeNetworkDemo
 		lClearVolumeRenderer.close();
 
 	}
+
+
 }
