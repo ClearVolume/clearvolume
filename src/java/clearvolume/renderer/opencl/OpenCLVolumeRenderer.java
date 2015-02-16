@@ -239,6 +239,30 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																		final float[] pInvProjectionMatrix)
 	{
 
+		doCaptureBuffersIfNeeded();
+
+		// System.out.println("render");
+		try
+		{
+
+			mCLDevice.writeFloatBuffer(	mCLInvModelViewBuffer,
+																	FloatBuffer.wrap(pInvModelViewMatrix));
+
+			mCLDevice.writeFloatBuffer(	mCLInvProjectionBuffer,
+																	FloatBuffer.wrap(pInvProjectionMatrix));
+
+			return updateBufferAndRunKernel();
+		}
+		catch (final CudaException e)
+		{
+			System.err.println(e.getLocalizedMessage());
+			return null;
+		}
+
+	}
+
+	private void doCaptureBuffersIfNeeded()
+	{
 		if (mVolumeCaptureFlag)
 		{
 			final ByteBuffer[] lCaptureBuffers = new ByteBuffer[getNumberOfRenderLayers()];
@@ -246,8 +270,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
 				lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (getBytesPerVoxel() * getVolumeSizeX()
-																																	* getVolumeSizeY()
-																																	* getVolumeSizeZ()))
+																															* getVolumeSizeY() * getVolumeSizeZ()))
 																				.order(ByteOrder.nativeOrder());
 
 				mCLVolumeImages[getCurrentRenderLayerIndex()].read(	mCLDevice.getQueue(),
@@ -275,25 +298,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			mVolumeCaptureFlag = false;
 		}
-
-		// System.out.println("render");
-		try
-		{
-
-			mCLDevice.writeFloatBuffer(	mCLInvModelViewBuffer,
-																	FloatBuffer.wrap(pInvModelViewMatrix));
-
-			mCLDevice.writeFloatBuffer(	mCLInvProjectionBuffer,
-																	FloatBuffer.wrap(pInvProjectionMatrix));
-
-			return updateBufferAndRunKernel();
-		}
-		catch (final CudaException e)
-		{
-			System.err.println(e.getLocalizedMessage());
-			return null;
-		}
-
 	}
 
 	private boolean[] updateBufferAndRunKernel()
@@ -342,7 +346,8 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 		}
 
-		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters())
+		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters()
+				|| getAdaptiveLODController().isKernelRunNeeded())
 		{
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
@@ -375,8 +380,9 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			prepareTransferFunctionArray(pRenderLayerIndex);
 
 			final int lMaxSteps = getMaxSteps(pRenderLayerIndex);
-			final float lPhase = 0;
-			final int lClear = 0;
+			final float lPhase = getAdaptiveLODController().getPhase();
+			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
+																																						: 1;
 
 			mCLDevice.setArgs(mRenderKernel,
 												mCLRenderBuffers[pRenderLayerIndex],
@@ -394,7 +400,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 												mCLInvProjectionBuffer,
 												mCLInvModelViewBuffer,
 												mCLVolumeImages[pRenderLayerIndex]);
-
 
 			mCLDevice.run(mRenderKernel,
 										getTextureWidth(),

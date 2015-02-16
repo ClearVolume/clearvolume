@@ -18,6 +18,28 @@ public class AdaptiveLODController
 	{
 		if (mMultiPassRenderingInProgress)
 			mDisplayRequestReceived = true;
+		else
+			mJoglClearVolumeRenderer.requestDisplayInternal();
+	}
+
+	public boolean isKernelRunNeeded()
+	{
+		return false;
+	}
+
+	public float getPhase()
+	{
+		return 0;
+	}
+
+	public boolean isBufferClearingNeeded()
+	{
+		return true;
+	}
+
+	public boolean isRedrawNeeded()
+	{
+		return false;
 	}
 
 }

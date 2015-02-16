@@ -47,8 +47,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 	{
 		handleRotationAndTranslation(pMouseEvent);
 		handleGammaMinMax(pMouseEvent);
-		// mRenderer.requestDisplayUnfairly();
-
+		mRenderer.requestDisplay();
 	}
 
 	private void handleRotationAndTranslation(final MouseEvent pMouseEvent)

@@ -640,6 +640,23 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			return null;
 		mCudaContext.setCurrent();
 
+		doCaptureBuffersIfNeeded();
+
+		try
+		{
+			mInvertedViewMatrix.copyFrom(invModelView, true);
+			mInvertedProjectionMatrix.copyFrom(invProjection, true);
+			return updateBufferAndRunKernel();
+		}
+		catch (final CudaException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private void doCaptureBuffersIfNeeded()
+	{
 		if (mVolumeCaptureFlag)
 		{
 			final ByteBuffer[] lCaptureBuffers = new ByteBuffer[getNumberOfRenderLayers()];
@@ -647,8 +664,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
 				lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (getBytesPerVoxel() * getVolumeSizeX()
-																																	* getVolumeSizeY()
-																																	* getVolumeSizeZ()))
+																															* getVolumeSizeY() * getVolumeSizeZ()))
 																				.order(ByteOrder.nativeOrder());
 
 				mVolumeDataCudaArrays[getCurrentRenderLayerIndex()].copyTo(	lCaptureBuffers[i],
@@ -667,24 +683,10 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			mVolumeCaptureFlag = false;
 		}
-
-		try
-		{
-			mInvertedViewMatrix.copyFrom(invModelView, true);
-
-			mInvertedProjectionMatrix.copyFrom(invProjection, true);
-
-			return updateBufferAndRunKernel();
-		}
-		catch (final CudaException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
 	}
 
 	/**
-	 * Call the kernel function, rendering the 3D volume data image into PBOs
+	 * Call the kernel function, rendering the 3D volume data image
 	 *
 	 * @return boolean array indicating which layer was updated.
 	 */
@@ -734,7 +736,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		final long startTime = System.nanoTime();
 
-		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters())
+		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters()
+				|| getAdaptiveLODController().isKernelRunNeeded())
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
 				if (mVolumeDataCudaArrays[i] != null)
@@ -782,8 +785,9 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
 
 			final int lMaxSteps = getMaxSteps(pRenderLayerIndex);
-			final float lPhase = 0;
-			final int lClear = 0;
+			final float lPhase = getAdaptiveLODController().getPhase();
+			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
+																																						: 1;
 
 			mVolumeRenderingFunction.launch(lCudaDevicePointer,
 																			getTextureWidth(),

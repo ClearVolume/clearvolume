@@ -768,7 +768,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 				final boolean lOverlay3DChanged = isOverlay3DChanged();
 
 				if (lUpdatedLayersArray != null || lOverlay2DChanged
-						|| lOverlay3DChanged)
+						|| lOverlay3DChanged
+						|| getAdaptiveLODController().isRedrawNeeded())
 				{
 					if (mUsePBOs)
 						for (int i = 0; i < getNumberOfRenderLayers(); i++)
@@ -900,6 +901,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	 *          Model-mViewMatrix matrix as float array
 	 * @param pProjectionMatrix
 	 *          Projection matrix as float array
+	 * @param pPhase
+	 * @param pClearBuffer
 	 * @return boolean array indicating for each layer if it was updated.
 	 */
 	protected abstract boolean[] renderVolume(final float[] pModelViewMatrix,
@@ -1072,7 +1075,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	protected void requestDisplayInternal()
 	{
 
-
 		if (mNewtCanvasAWT != null)
 		{
 			SwingUtilities.invokeLater(new Runnable()
@@ -1094,43 +1096,26 @@ public abstract class JOGLClearVolumeRenderer	extends
 			return;
 		}
 
-		boolean lLocked;
 		try
 		{
-			lLocked = mDisplayReentrantLock.tryLock(0,
-																							TimeUnit.MILLISECONDS);
 
-			if (lLocked)
-			{
-				try
-				{
-
-					if (mClearGLWindow == null)
-						return;
-					mClearGLWindow.requestDisplay();
-					// setVisible(true);
-				}
-				catch (final NullPointerException e)
-				{
-				}
-				catch (final Throwable e)
-				{
-					System.err.println("REQUESTED DISPLAY AFTER EDT SHUTDOWN (Warning = it's ok): " + e.getClass()
-																																															.getSimpleName()
-															+ "->"
-															+ e.getLocalizedMessage());
-					e.printStackTrace();
-				}
-				finally
-				{
-					if (mDisplayReentrantLock.isHeldByCurrentThread())
-						mDisplayReentrantLock.unlock();
-				}
-			}
+			if (mClearGLWindow == null)
+				return;
+			mClearGLWindow.requestDisplay();
+			// setVisible(true);
 		}
-		catch (final InterruptedException e1)
+		catch (final NullPointerException e)
 		{
 		}
+		catch (final Throwable e)
+		{
+			System.err.println("REQUESTED DISPLAY AFTER EDT SHUTDOWN (Warning = it's ok): " + e.getClass()
+																																													.getSimpleName()
+													+ "->"
+													+ e.getLocalizedMessage());
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override
@@ -1143,6 +1128,11 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public Collection<Overlay> getOverlays()
 	{
 		return mOverlayMap.values();
+	}
+
+	public AdaptiveLODController getAdaptiveLODController()
+	{
+		return mAdaptiveLODController;
 	}
 
 	@Override
