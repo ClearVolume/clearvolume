@@ -9,7 +9,6 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
@@ -696,15 +695,11 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void display(final GLAutoDrawable pDrawable)
 	{
-		boolean lTryLock = false;
-		try
-		{
-			lTryLock = mDisplayReentrantLock.tryLock(	cMaxWaitingTimeForAcquiringDisplayLockInMs,
-																								TimeUnit.MILLISECONDS);
-		}
-		catch (final InterruptedException e)
-		{
-		}
+		final boolean lTryLock = true;
+
+		mDisplayReentrantLock.lock(); /*tryLock(	cMaxWaitingTimeForAcquiringDisplayLockInMs,
+																							TimeUnit.MILLISECONDS);/**/
+
 		if (lTryLock)
 			try
 			{
@@ -759,8 +754,17 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				GLError.printGLErrors(lGL4, "BEFORE RENDER VOLUME");
 
+				if (getIsUpdateVolumeRenderingParameters() || isNewVolumeDataAvailable())
+					getAdaptiveLODController().renderingParametersOrVolumeDataChanged();
+
+				System.out.println("JOGL.rendervolume");
 				final boolean[] lUpdatedLayersArray = renderVolume(	lInvVolumeMatrix.getFloatArray(),
 																														lInvProjection.getFloatArray());
+
+				getAdaptiveLODController().renderingFinished();
+
+				clearIsUpdateVolumeParameters();
+				clearVolumeDimensionsChanged();
 
 				GLError.printGLErrors(lGL4, "AFTER RENDER VOLUME");
 
@@ -1072,9 +1076,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 		mAdaptiveLODController.requestDisplay();
 	}
 
-	protected void requestDisplayInternal()
+	protected void display()
 	{
-
+		System.out.println("JOGL.requestDisplayInternal");
 		if (mNewtCanvasAWT != null)
 		{
 			SwingUtilities.invokeLater(new Runnable()
@@ -1095,25 +1099,27 @@ public abstract class JOGLClearVolumeRenderer	extends
 			});
 			return;
 		}
+		else
+		{
+			try
+			{
 
-		try
-		{
-
-			if (mClearGLWindow == null)
-				return;
-			mClearGLWindow.requestDisplay();
-			// setVisible(true);
-		}
-		catch (final NullPointerException e)
-		{
-		}
-		catch (final Throwable e)
-		{
-			System.err.println("REQUESTED DISPLAY AFTER EDT SHUTDOWN (Warning = it's ok): " + e.getClass()
-																																													.getSimpleName()
-													+ "->"
-													+ e.getLocalizedMessage());
-			e.printStackTrace();
+				if (mClearGLWindow == null)
+					return;
+				mClearGLWindow.display();
+				// setVisible(true);
+			}
+			catch (final NullPointerException e)
+			{
+			}
+			catch (final Throwable e)
+			{
+				System.err.println("REQUESTED DISPLAY AFTER EDT SHUTDOWN (Warning = it's ok): " + e.getClass()
+																																														.getSimpleName()
+														+ "->"
+														+ e.getLocalizedMessage());
+				e.printStackTrace();
+			}
 		}
 
 	}

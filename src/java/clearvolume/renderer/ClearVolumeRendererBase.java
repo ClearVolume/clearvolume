@@ -137,7 +137,7 @@ public abstract class ClearVolumeRendererBase	implements
 			mTransferFunctionRangeMin[i] = 0f;
 			mTransferFunctionRangeMax[i] = 1f;
 			mGamma[i] = 1.0f;
-			mQuality[i] = 0.1f;
+			mQuality[i] = 0.75f;
 			mDithering[i] = 1f;
 		}
 
@@ -1027,9 +1027,23 @@ public abstract class ClearVolumeRendererBase	implements
 	 *
 	 * @return current data buffer.
 	 */
+	@Deprecated
 	public ByteBuffer getVolumeDataBuffer()
 	{
 		return getVolumeDataBuffer(getCurrentRenderLayerIndex());
+	}
+
+	/**
+	 * Returns for a given index the corresponding volume data buffer.
+	 *
+	 * @return data buffer for a given render layer.
+	 */
+	public boolean isNewVolumeDataAvailable()
+	{
+		for (final ByteBuffer lByteBuffer : mVolumeDataByteBuffers)
+			if (lByteBuffer != null)
+				return true;
+		return false;
 	}
 
 	/**

@@ -358,8 +358,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 				}
 			}
 		}
-		clearIsUpdateVolumeParameters();
-		clearVolumeDimensionsChanged();
+
 
 		return lUpdated;
 	}
@@ -379,7 +378,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		{
 			prepareTransferFunctionArray(pRenderLayerIndex);
 
-			final int lMaxSteps = getMaxSteps(pRenderLayerIndex);
+			final int lMaxSteps = getMaxSteps(pRenderLayerIndex) / getAdaptiveLODController().getNumberOfPasses();
 			final float lPhase = getAdaptiveLODController().getPhase();
 			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
 																																						: 1;

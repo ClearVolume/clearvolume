@@ -749,8 +749,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 					lUpdatedLayer[i] = true;
 				}
 			}
-		clearIsUpdateVolumeParameters();
-		clearVolumeDimensionsChanged();
+
 
 		final long endTime = System.nanoTime();
 
@@ -784,7 +783,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
 
-			final int lMaxSteps = getMaxSteps(pRenderLayerIndex);
+			final int lMaxSteps = getMaxSteps(pRenderLayerIndex) / getAdaptiveLODController().getNumberOfPasses();
 			final float lPhase = getAdaptiveLODController().getPhase();
 			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
 																																						: 1;
