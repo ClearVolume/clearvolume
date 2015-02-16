@@ -16,6 +16,7 @@ import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.*;
 import clearvolume.transferf.TransferFunctions;
 import com.jogamp.newt.awt.NewtCanvasAWT;
+import io.scif.FormatException;
 import org.junit.Test;
 
 import javax.swing.*;
@@ -482,6 +483,58 @@ public class ClearVolumeDemo {
 		lClearVolumeRenderer.close();
 	}
 
+  @Test
+  public void demoFauxScopeDrift() throws InterruptedException,
+          IOException {
+
+    final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer("ClearVolumeTest",
+            1024,
+            1024,
+            1,
+            1024,
+            1024,
+            1,
+            false);
+    final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
+    final DriftOverlay lDriftOverlay = new DriftOverlay();
+    final Fauxscope fs = new Fauxscope(true, lClearVolumeRenderer, new LevyFlightRandomizer(0.5f, 0.5f));
+
+    fs.use4DStacksFromDirectory();
+
+    lClearVolumeRenderer.addOverlay(lDriftOverlay);
+    lOpenCLCenterMass.addResultListener(lDriftOverlay);
+
+    lClearVolumeRenderer.addProcessor(lOpenCLCenterMass);
+
+    lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+    lClearVolumeRenderer.setVisible(true);
+
+    float[] res = fs.getResolution();
+
+    lClearVolumeRenderer.setCurrentRenderLayer(0);
+    try {
+      lClearVolumeRenderer.setBytesPerVoxel(fs.queryBytesPerPixel());
+      lClearVolumeRenderer.setVolumeDataBuffer(0, fs.queryNextVolume(), (int)res[0], (int)res[1], (int)res[2]);
+      lClearVolumeRenderer.setVoxelSize(1.0f, 1.0f, 5.0f);
+
+      lClearVolumeRenderer.requestDisplay();
+
+      while (lClearVolumeRenderer.isShowing()) {
+        lClearVolumeRenderer.setVolumeDataBuffer(0, fs.queryNextVolume(), (int)res[0], (int)res[1], (int)res[2]);
+        lClearVolumeRenderer.setVoxelSize(1.0f, 1.0f, 5.0f);
+
+        lClearVolumeRenderer.requestDisplay();
+
+        Thread.sleep(1000);
+      }
+    } catch (IOException | FormatException e) {
+      System.err.println("Exception during volume reading: ");
+      e.printStackTrace();
+    }
+
+    lClearVolumeRenderer.close();
+  }
+
 	@Test
 	public void demoCudaProcessors() throws InterruptedException, IOException {
 
@@ -583,6 +636,8 @@ public class ClearVolumeDemo {
 		final PathOverlay lPathOverlay = new PathOverlay();
 		lClearVolumeRenderer.addOverlay(lPathOverlay);
 
+    final LevyFlightRandomizer lfr = new LevyFlightRandomizer(0.5f, 0.5f);
+
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions
 				.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
@@ -612,6 +667,9 @@ public class ClearVolumeDemo {
 
 		while (lClearVolumeRenderer.isShowing()) {
 			Thread.sleep(500);
+      float[] point = lfr.getNextPoint();
+      lPathOverlay.addPathPoint(point[0], point[1], point[2]);
+      lClearVolumeRenderer.requestDisplay();
 		}
 
 		lClearVolumeRenderer.close();
