@@ -754,6 +754,8 @@ public class ClearVolumeDemo
 		final PathOverlay lPathOverlay = new PathOverlay();
 		lClearVolumeRenderer.addOverlay(lPathOverlay);
 
+    final LevyFlightRandomizer l = new LevyFlightRandomizer(0.2f, 0.2f);
+
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -787,7 +789,9 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.requestDisplay();
 
 		while (lClearVolumeRenderer.isShowing()) {
-      Thread.sleep(500);
+      Thread.sleep(1000);
+      float[] pt = l.getNextPoint();
+      lPathOverlay.addPathPoint(pt[0], pt[1], pt[2]);
 		}
 
 		lClearVolumeRenderer.close();

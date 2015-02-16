@@ -27,7 +27,7 @@ void main()
    VertexOut.Position = vec3(modelview*vec4(vertexPosition, 1.0));
    VertexOut.TexCoord = vertexTexCoord;
 
-    gl_Position = (projection*modelview)*vec4(vertexPosition , 1.0);
+    gl_Position = projection*modelview*vec4(vertexPosition , 1.0);
 
    if(gl_VertexID == 0 || gl_VertexID == 1) {
         color = startColor;
@@ -36,7 +36,7 @@ void main()
         color = endColor;
         return;
    } else {
-        color = vec4(1.0, 0.0, 0.0, 0.5);
+        color = vec4(1.0, 0.0, 0.0, 1.0);
         return;
    }
 

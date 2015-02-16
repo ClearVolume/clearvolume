@@ -9,8 +9,8 @@ in VertexData {
     vec2 TexCoord;
 } VertexIn[];
 
-uniform float EdgeWidth = 10.0;
-uniform float PctExtend = 1.0;
+uniform float EdgeWidth = 0.05;
+uniform float PctExtend = 0.05;
 
 /*bool isFrontFacing(vec3 a, vec3 b, vec3 c) {
     return(( a.x * b.y - b.x * a.y ) +
