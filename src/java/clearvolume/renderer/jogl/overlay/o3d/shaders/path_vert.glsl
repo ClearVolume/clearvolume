@@ -35,7 +35,7 @@ void main()
         VertexOut.Color = endColor;
         return;
    } else {
-        VertexOut.Color = vec4(0.0, 0.0, 1.0, 1.0);
+        VertexOut.Color = vec4(0.0, 0.0, 1.0, 0.7);
         return;
    }
 

@@ -12,6 +12,8 @@ in VertexData {
     vec4 Color;
 } VertexIn[];
 
+out vec4 color;
+
 void emitCenteredEdgeQuad(vec3 p1, vec3 p2) {
     vec2 v = normalize(p1.xy - p2.xy);
     vec2 n = vec2(-v.y, v.x) * EdgeWidth;
@@ -28,11 +30,13 @@ void emitCenteredEdgeQuad(vec3 p1, vec3 p2) {
     gl_Position = vec4( p2.xy - 0.5*n, p2.z, 1.0);
     EmitVertex();
 
+
     EndPrimitive();
 }
 
 void main() {
     vec3 p0 = gl_in[0].gl_Position.xyz / gl_in[0].gl_Position.w;
     vec3 p1 = gl_in[1].gl_Position.xyz / gl_in[1].gl_Position.w;
+    color = VertexIn[0].Color;
     emitCenteredEdgeQuad(p0, p1);
 }
