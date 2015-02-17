@@ -747,7 +747,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 				if (haveVolumeRenderingParametersChanged() || isNewVolumeDataAvailable())
 					getAdaptiveLODController().renderingParametersOrVolumeDataChanged();
 
-				getAdaptiveLODController().beforeRendering();
+				final boolean lLastRenderPass = getAdaptiveLODController().beforeRendering();
 
 				renderVolume(	lInvVolumeMatrix.getFloatArray(),
 											lInvProjection.getFloatArray());
@@ -782,7 +782,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				updateFrameRateDisplay();
 
-				mGLVideoRecorder.screenshot(pDrawable);
+
+				if (lLastRenderPass)
+					mGLVideoRecorder.screenshot(pDrawable);
 
 				pDrawable.swapBuffers();
 

@@ -76,6 +76,12 @@ public class AdaptiveLODController
 		return mMultiPassRenderingInProgress;
 	}
 
+	public boolean isLastMultiPassRender()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	public void renderingParametersOrVolumeDataChanged()
 	{
 		println(this.getClass().getSimpleName() + ".renderingParametersOrVolumeDataChanged");
@@ -92,7 +98,7 @@ public class AdaptiveLODController
 		mCurrentMaxNumberOfSteps = pMaxNumberSteps;
 	}
 
-	public void beforeRendering()
+	public boolean beforeRendering()
 	{
 		println(this.getClass().getSimpleName() + ".beforeRendering");
 		if (mMultiPassRenderingInProgress)
@@ -103,16 +109,17 @@ public class AdaptiveLODController
 				// multipass rendering needs to restart from scratch:
 				println(this.getClass().getSimpleName() + ".beforeRendering -> multi-pass needs to be restarted");
 				resetMultiPassRendering();
-
+				return true;
 			}
 			else
 			{
-				proceedWithMultiPass();
+				return proceedWithMultiPass();
 			}
 		}
 		else
 		{
 			println(this.getClass().getSimpleName() + ".beforeRendering -> multi-pass not active");
+			return false;
 		}
 	}
 
@@ -121,7 +128,7 @@ public class AdaptiveLODController
 
 	}
 
-	private void proceedWithMultiPass()
+	private boolean proceedWithMultiPass()
 	{
 		// multi-pass continues:
 		println(this.getClass().getSimpleName() + ".proceedWithMultiPass -> continues with pass #"
@@ -132,6 +139,7 @@ public class AdaptiveLODController
 			// still need torender more passes:
 			println(this.getClass().getSimpleName() + ".proceedWithMultiPass -> more passes to do");
 			// triggerDeamonThreadToRequestRender();
+			return false;
 		}
 		else
 		{
@@ -140,6 +148,7 @@ public class AdaptiveLODController
 			mMultiPassRenderingInProgress = false;
 			setFibonacciPassNumberFromCurrentMaxNumberOfSteps();
 			resetMultiPassRendering();
+			return true;
 		}
 	}
 
@@ -172,5 +181,6 @@ public class AdaptiveLODController
 	{
 		// System.out.println(pString);
 	}
+
 
 }
