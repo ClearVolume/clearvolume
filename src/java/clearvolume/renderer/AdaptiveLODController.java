@@ -170,6 +170,11 @@ public class AdaptiveLODController
 		mLastUserInputTime = Long.MIN_VALUE;
 	}
 
+	public void requestDisplay()
+	{
+		notifyUserInteractionInProgress();
+	}
+
 	public boolean isUserInteractionInProgress()
 	{
 		if (System.nanoTime() > mLastUserInputTime + cMarginTime)
@@ -181,6 +186,5 @@ public class AdaptiveLODController
 	{
 		// System.out.println(pString);
 	}
-
 
 }

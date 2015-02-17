@@ -1041,7 +1041,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void requestDisplay()
 	{
-		// not needed anymore!
+		// NOT NEEDED ANYMORE
+		// getAdaptiveLODController().requestDisplay();
+		// notifyChangeOfVolumeRenderingParameters();
 	}
 
 	@Override
