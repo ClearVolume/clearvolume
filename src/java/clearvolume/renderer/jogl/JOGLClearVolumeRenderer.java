@@ -527,7 +527,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				for (int i = 1; i < getNumberOfRenderLayers(); i++)
 				{
-					final String lStringToInsert1 = String.format("uniform sampler2D texUnit%d; \n//insertpoin1t",
+					final String lStringToInsert1 = String.format("uniform sampler2D texUnit%d; \n//insertpoint1",
 																												i);
 					final String lStringToInsert2 = String.format("tempOutColor = max(tempOutColor,texture(texUnit%d, ftexcoord));\n//insertpoint2",
 																												i);
