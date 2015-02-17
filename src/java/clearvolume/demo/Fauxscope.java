@@ -1,6 +1,7 @@
 package clearvolume.demo;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
+import clearvolume.renderer.processors.Processor;
 import io.scif.FormatException;
 import io.scif.Plane;
 import io.scif.Reader;
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 /**
  * Created by ulrik on 12/02/15.
  */
-public class Fauxscope {
+public class Fauxscope implements ScopeControl {
 
   protected final ClearVolumeRendererInterface mRenderer;
   protected final SCIFIO scifio;
@@ -229,5 +230,10 @@ public class Fauxscope {
     }
 
     return newBuffer;
+  }
+
+  @Override
+  public void notifyResult(Processor<float[]> pSource, float[] pResult) {
+
   }
 }
