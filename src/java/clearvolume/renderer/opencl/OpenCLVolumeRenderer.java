@@ -129,7 +129,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		// setting up the OpenCL Renderbuffer we will write the render result into
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
-			mCLRenderBuffers[i] = mCLDevice.createOutputIntBuffer(lRenderBufferSize);
+			mCLRenderBuffers[i] = mCLDevice.createInputOutputIntBuffer(lRenderBufferSize);
 		}
 
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
@@ -140,7 +140,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		return true;
 	}
-
 
 	private void prepareVolumeDataArray(final int pRenderLayerIndex,
 																			final ByteBuffer pByteBuffer)
@@ -344,7 +343,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 		}
 
-
 		return lUpdated;
 	}
 
@@ -368,7 +366,13 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			final int lMaxSteps = lMaxNumberSteps / getAdaptiveLODController().getNumberOfPasses();
 			final float lPhase = getAdaptiveLODController().getPhase();
 			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
-																																						: 1;
+																																						: 1;/**/
+
+			/*System.out.format("mns=%d, ms=%d, phase=%g, clear=%d \n ",
+												lMaxNumberSteps,
+												lMaxSteps,
+												lPhase,
+												lClear);/**/
 
 			mCLDevice.setArgs(mRenderKernel,
 												mCLRenderBuffers[pRenderLayerIndex],

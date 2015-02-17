@@ -268,9 +268,6 @@ volumerender(       uint *d_output,
 		// compute stape size:		
 		const float tstep = abs(tnear-tfar)/maxsteps;
 
-	  //if ((u == 0f) && (v == 0f))
-    //  printf("tnear=%f tfar=%f diff=%f tstep=%f ratio=%f \n",tnear,tfar, abs(tnear-tfar),tstep, abs(tnear-tfar)/tstep);
-
 		// apply phase:
 		orig += phase*tstep*direc;
 

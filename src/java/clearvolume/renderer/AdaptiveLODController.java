@@ -170,6 +170,7 @@ public class AdaptiveLODController
 
 	private void println(String pString)
 	{
+		// System.out.println(pString);
 	}
 
 }

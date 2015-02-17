@@ -181,6 +181,9 @@ volumerender(								 __global uint *d_output,
 	// compute step size:
 	const float tstep = fabs(tnear-tfar)/maxsteps;
   
+  // apply phase:
+	orig += phase*tstep*direc;
+  
 	// randomize origin point a bit:
 	const uint entropy = (uint)( 6779514*fast_length(orig) + 6257327*fast_length(direc) );
 	orig += dithering*tstep*random(entropy+x,entropy+y)*direc;
@@ -210,7 +213,7 @@ volumerender(								 __global uint *d_output,
   const float4 color = brightness*read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
   
   // write output color:
-  d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color);
+  d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color); //d_output[x + y*imageW]
 
 }
 
@@ -227,6 +230,7 @@ clearbuffer(__global uint *buffer,
   const uint x = get_global_id(0);
   const uint y = get_global_id(1);
   
-  // clears buffer:
-  buffer[x + y*imageW] = 0;
+   // clears buffer:
+  if ((x < imageW) || (y < imageH))
+  	buffer[x + y*imageW] = 0;
 }

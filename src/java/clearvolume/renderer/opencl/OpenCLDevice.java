@@ -424,13 +424,22 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	public CLBuffer<Integer> createOutputIntBuffer(final long N)
 	{
-
 		return mCLContext.createIntBuffer(Usage.Output, N);
+	}
+
+	public CLBuffer<Integer> createInputOutputIntBuffer(final long N)
+	{
+		return mCLContext.createIntBuffer(Usage.InputOutput, N);
 	}
 
 	public CLBuffer<Byte> createOutputByteBuffer(final long N)
 	{
 		return mCLContext.createByteBuffer(Usage.Output, N);
+	}
+
+	public CLBuffer<Byte> createInputOutputByteBuffer(final long N)
+	{
+		return mCLContext.createByteBuffer(Usage.InputOutput, N);
 	}
 
 	public CLEvent writeFloatBuffer(final CLBuffer<Float> pCLBuffer,
@@ -607,6 +616,5 @@ public class OpenCLDevice implements ClearVolumeCloseable
 			e.printStackTrace();
 		}
 	}
-
 
 }
