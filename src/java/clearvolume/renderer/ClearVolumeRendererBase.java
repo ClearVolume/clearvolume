@@ -82,7 +82,7 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile float[] mQuality;
 	private volatile float[] mDithering;
 
-	private volatile boolean mUpdateVolumeRenderingParameters = true;
+	private volatile boolean mVolumeRenderingParametersChanged = true;
 
 	// volume dimensions settings
 	private volatile long mVolumeSizeX;
@@ -109,6 +109,9 @@ public abstract class ClearVolumeRendererBase	implements
 	// List of Capture Listeners
 	protected ArrayList<VolumeCaptureListener> mVolumeCaptureListenerList = new ArrayList<VolumeCaptureListener>();
 	protected volatile boolean mVolumeCaptureFlag = false;
+
+	// Adaptive LOD controller:
+	protected AdaptiveLODController mAdaptiveLODController;
 
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
@@ -137,9 +140,11 @@ public abstract class ClearVolumeRendererBase	implements
 			mTransferFunctionRangeMin[i] = 0f;
 			mTransferFunctionRangeMax[i] = 1f;
 			mGamma[i] = 1.0f;
-			mQuality[i] = 0.1f;
+			mQuality[i] = 0.75f;
 			mDithering[i] = 1f;
 		}
+
+		mAdaptiveLODController = new AdaptiveLODController();
 
 	}
 
@@ -172,28 +177,29 @@ public abstract class ClearVolumeRendererBase	implements
 	 *
 	 * @return true if rednering parameters up-to-date.
 	 */
-	public boolean getIsUpdateVolumeRenderingParameters()
+	public boolean haveVolumeRenderingParametersChanged()
 	{
-		return mUpdateVolumeRenderingParameters;
+		return mVolumeRenderingParametersChanged;
 	}
 
 	/**
 	 * Interface method implementation
 	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#notifyUpdateOfVolumeRenderingParameters()
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#notifyChangeOfVolumeRenderingParameters()
 	 */
 	@Override
-	public void notifyUpdateOfVolumeRenderingParameters()
+	public void notifyChangeOfVolumeRenderingParameters()
 	{
-		mUpdateVolumeRenderingParameters = true;
+		mVolumeRenderingParametersChanged = true;
+		getAdaptiveLODController().notifyUserInteractionInProgress();
 	}
 
 	/**
 	 * Clears the state of the update-volume-parameters flag
 	 */
-	public void clearIsUpdateVolumeParameters()
+	public void clearChangeOfVolumeParametersFlag()
 	{
-		mUpdateVolumeRenderingParameters = false;
+		mVolumeRenderingParametersChanged = false;
 	}
 
 	/**
@@ -290,7 +296,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setScaleX(final double pScaleX)
 	{
 		mScaleX = (float) pScaleX;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -302,7 +308,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setScaleY(final double pScaleY)
 	{
 		mScaleY = (float) pScaleY;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -314,7 +320,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setScaleZ(final double pScaleZ)
 	{
 		mScaleZ = (float) pScaleZ;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -361,7 +367,7 @@ public abstract class ClearVolumeRendererBase	implements
 															final boolean pVisble)
 	{
 		mLayerVisiblityFlagArray[pRenderLayerIndex] = pVisble;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -379,7 +385,7 @@ public abstract class ClearVolumeRendererBase	implements
 			mTransferFunctionRangeMin[i] = 0.0f;
 			mTransferFunctionRangeMax[i] = 1.0f;
 		}
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -460,7 +466,7 @@ public abstract class ClearVolumeRendererBase	implements
 																										getBytesPerVoxel() == 1	? 16
 																																						: 256);
 
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -509,7 +515,7 @@ public abstract class ClearVolumeRendererBase	implements
 
 	{
 		mGamma[pRenderLayerIndex] = (float) pGamma;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -521,7 +527,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setDithering(int pRenderLayerIndex, double pDithering)
 	{
 		mDithering[pRenderLayerIndex] = (float) pDithering;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	};
 
 	/**
@@ -550,7 +556,7 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		pQuality = max(min(pQuality, 1), 0);
 		mQuality[pRenderLayerIndex] = (float) pQuality;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	};
 
 	/**
@@ -667,7 +673,7 @@ public abstract class ClearVolumeRendererBase	implements
 		mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
 																																	0,
 																																	1);
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -697,7 +703,7 @@ public abstract class ClearVolumeRendererBase	implements
 																																	0,
 																																	1);
 
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -726,7 +732,7 @@ public abstract class ClearVolumeRendererBase	implements
 		mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
 																																	0,
 																																	1);
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -816,7 +822,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void addTranslationX(final double pDX)
 	{
 		mTranslationX += pDX;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -828,7 +834,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void addTranslationY(final double pDY)
 	{
 		mTranslationY += pDY;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -840,7 +846,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void addTranslationZ(final double pDZ)
 	{
 		mTranslationZ += pDZ;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -852,7 +858,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void addRotationX(final int pDRX)
 	{
 		mRotationX += pDRX;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -864,7 +870,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void addRotationY(final int pDRY)
 	{
 		mRotationY += pDRY;
-		notifyUpdateOfVolumeRenderingParameters();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -1027,9 +1033,23 @@ public abstract class ClearVolumeRendererBase	implements
 	 *
 	 * @return current data buffer.
 	 */
+	@Deprecated
 	public ByteBuffer getVolumeDataBuffer()
 	{
 		return getVolumeDataBuffer(getCurrentRenderLayerIndex());
+	}
+
+	/**
+	 * Returns for a given index the corresponding volume data buffer.
+	 *
+	 * @return data buffer for a given render layer.
+	 */
+	public boolean isNewVolumeDataAvailable()
+	{
+		for (final ByteBuffer lByteBuffer : mVolumeDataByteBuffers)
+			if (lByteBuffer != null)
+				return true;
+		return false;
 	}
 
 	/**
@@ -1227,7 +1247,7 @@ public abstract class ClearVolumeRendererBase	implements
 			mVolumeDataByteBuffers[pRenderLayerIndex] = pByteBuffer;
 
 			clearCompletionOfDataBufferCopy(pRenderLayerIndex);
-			notifyUpdateOfVolumeRenderingParameters();
+			notifyChangeOfVolumeRenderingParameters();
 		}
 	}
 
@@ -1447,6 +1467,17 @@ public abstract class ClearVolumeRendererBase	implements
 		mVolumeCaptureFlag = true;
 		requestDisplay();
 	};
+
+	/**
+	 * Returns the Adaptive level-of-detail(LOD) controller.
+	 * 
+	 * @return LOD controller
+	 */
+	@Override
+	public AdaptiveLODController getAdaptiveLODController()
+	{
+		return mAdaptiveLODController;
+	}
 
 	/**
 	 * Clamps the value pValue to e interval [pMin,pMax]

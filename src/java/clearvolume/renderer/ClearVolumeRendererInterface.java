@@ -349,7 +349,7 @@ public interface ClearVolumeRendererInterface	extends
 	 *
 	 * @param pRenderLayerIndex
 	 * @param pQuality
-	 *            new quality level for render layer
+	 *          new quality level for render layer
 	 */
 	void setQuality(int pRenderLayerIndex, double pQuality);
 
@@ -625,7 +625,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Notifies renderer that display/volume parameters have changed and a display
 	 * update is needed.
 	 */
-	void notifyUpdateOfVolumeRenderingParameters();
+	void notifyChangeOfVolumeRenderingParameters();
 
 	/**
 	 * Toggles the display of the Control Frame;
@@ -703,11 +703,19 @@ public interface ClearVolumeRendererInterface	extends
 	public NewtCanvasAWT getNewtCanvasAWT();
 
 	/**
+	 * Returns the adaptive level-of-detail (LOD) controller.
+	 * 
+	 * @return
+	 */
+	AdaptiveLODController getAdaptiveLODController();
+
+	/**
 	 * Interface method implementation
 	 *
 	 * @see java.io.Closeable#close()
 	 */
 	@Override
 	void close();
+
 
 }
