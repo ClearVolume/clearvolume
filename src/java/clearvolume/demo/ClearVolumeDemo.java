@@ -854,7 +854,7 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 512;
+		final int lResolutionX = 768;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 

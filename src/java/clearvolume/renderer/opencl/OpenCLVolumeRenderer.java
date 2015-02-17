@@ -101,8 +101,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	@Override
 	protected boolean initVolumeRenderer()
 	{
-		mUsePBOs = false;
-
 		mCLDevice = new OpenCLDevice();
 
 		// FIXME using existing OpenGL context does not work yet
@@ -143,19 +141,6 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		return true;
 	}
 
-	@Override
-	protected void registerPBO(	final int pRenderLayerIndex,
-															final int pPixelBufferObjectId)
-	{
-		// no need to do anything here, as we're not using PBOs
-	}
-
-	@Override
-	protected void unregisterPBO(	final int pRenderLayerIndex,
-																final int pPixelBufferObjectId)
-	{
-		// no need to do anything here, as we're not using PBOs
-	}
 
 	private void prepareVolumeDataArray(final int pRenderLayerIndex,
 																			final ByteBuffer pByteBuffer)
@@ -346,7 +331,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 		}
 
-		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters()
+		if (lAnyVolumeDataUpdated || haveVolumeRenderingParametersChanged()
 				|| getAdaptiveLODController().isKernelRunNeeded())
 		{
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
@@ -378,7 +363,9 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		{
 			prepareTransferFunctionArray(pRenderLayerIndex);
 
-			final int lMaxSteps = getMaxSteps(pRenderLayerIndex) / getAdaptiveLODController().getNumberOfPasses();
+			final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
+			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
+			final int lMaxSteps = lMaxNumberSteps / getAdaptiveLODController().getNumberOfPasses();
 			final float lPhase = getAdaptiveLODController().getPhase();
 			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
 																																						: 1;
