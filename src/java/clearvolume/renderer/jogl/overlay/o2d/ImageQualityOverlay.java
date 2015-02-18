@@ -35,7 +35,7 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 	@SuppressWarnings("unchecked")
 	public ImageQualityOverlay(int pNumberOfPointsInGraph)
 	{
-		super(new GraphOverlay(pNumberOfPointsInGraph));
+		super(new PlainGraphOverlay(pNumberOfPointsInGraph));
 
 		mOpenCLTenengrad = new OpenCLTenengrad();
 
@@ -65,9 +65,9 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 		return lToggleDisplay;
 	}
 
-	public GraphOverlay getGraphOverlay()
+	public PlainGraphOverlay getGraphOverlay()
 	{
-		return (GraphOverlay) getDelegatedOverlay();
+		return (PlainGraphOverlay) getDelegatedOverlay();
 	}
 
 	@Override
