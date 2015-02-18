@@ -76,6 +76,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 	// ClearGL Window.
 	private volatile ClearGLWindow mClearGLWindow;
+	private FPSAnimator mAnimator;
 	private NewtCanvasAWT mNewtCanvasAWT;
 	private volatile int mLastWindowWidth, mLastWindowHeight;
 	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
@@ -292,10 +293,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 																				pWindowHeight,
 																				this);
 
-		final FPSAnimator lAnimator = new FPSAnimator(mClearGLWindow.getGLAutoDrawable(),
-																									60);
+		mAnimator = new FPSAnimator(mClearGLWindow.getGLAutoDrawable(),
+																60);
 		// lAnimator.add(mClearGLWindow.getGLAutoDrawable());
-		lAnimator.start();
+		mAnimator.start();
 
 		if (pUseInCanvas)
 		{
@@ -345,29 +346,17 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void close()
 	{
+
 		if (mNewtCanvasAWT != null)
 		{
 			mNewtCanvasAWT = null;
-			/*try
-			{
-				mNewtCanvasAWT.destroy();
-				mNewtCanvasAWT = null;
-			}
-			catch (final Throwable e)
-			{
-				e.printStackTrace();
-			}/**/
+
 			return;
 		}
 
 		try
 		{
-
-			if (mClearGLWindow != null)
-			{
-				mClearGLWindow.close();
-				mClearGLWindow = null;
-			}
+			mClearGLWindow.close();
 		}
 		catch (final NullPointerException e)
 		{
@@ -636,10 +625,11 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 	private void setDefaultProjectionMatrix()
 	{
-		getClearGLWindow().setPerspectiveProjectionMatrix(.785f,
-																											1,
-																											.1f,
-																											1000);
+		if (getClearGLWindow() != null)
+			getClearGLWindow().setPerspectiveProjectionMatrix(.785f,
+																												1,
+																												.1f,
+																												1000);
 	}
 
 	/**
@@ -690,8 +680,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 						&& !getAdaptiveLODController().isRedrawNeeded()
 						&& !pForceRedraw)
 					return;
-
-
 
 				final GL4 lGL4 = pDrawable.getGL().getGL4();
 				lGL4.glClearColor(0, 0, 0, 1);
@@ -781,7 +769,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 				renderOverlays2D(lGL4, cOverlay2dProjectionMatrix);
 
 				updateFrameRateDisplay();
-
 
 				if (lLastRenderPass)
 					mGLVideoRecorder.screenshot(pDrawable);
@@ -970,7 +957,11 @@ public abstract class JOGLClearVolumeRenderer	extends
 	@Override
 	public void dispose(final GLAutoDrawable arg0)
 	{
-
+		mAnimator.setIgnoreExceptions(true);
+		mAnimator.pause();
+		// mAnimator.stop();
+		while (mAnimator.isAnimating())
+			Thread.yield();
 	}
 
 	/**

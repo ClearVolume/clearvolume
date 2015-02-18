@@ -115,7 +115,7 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 	{
 		super.render2D(pGL4, pProjectionMatrix);
 
-		/*mClearTextRenderer.drawTextAtPosition(String.format("image quality metric: %g",
+		/* mClearTextRenderer.drawTextAtPosition(String.format("image quality metric: %g",
 																												mMeasure),
 																					10,
 																					15,

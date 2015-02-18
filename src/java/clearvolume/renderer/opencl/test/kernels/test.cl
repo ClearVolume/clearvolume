@@ -63,6 +63,6 @@ test_float(__global float *output,
     
     output[i] = 1.f*i;
     
-    if (i==0)
-    printf("kernel!  %d \n", N);
+    //if (i==0)
+    //printf("kernel!  %d \n", N);
 }
