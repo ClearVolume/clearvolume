@@ -12,6 +12,10 @@
 // Loop unrolling length:
 #define LOOPUNROLL 16
 
+// Typedefs:
+typedef unsigned int  uint;
+typedef unsigned char uchar;
+
 // random number generator for dithering
 inline
 float random(uint x, uint y)
@@ -69,10 +73,10 @@ uint rgbaFloatToIntAndMax(uint existing, float4 rgba)
 {
     rgba = clamp(rgba,(float4)(0.f,0.f,0.f,0.f),(float4)(1.f,1.f,1.f,1.f));
     
-    const uint nr = uint(rgba.x*255);
-    const uint ng = uint(rgba.y*255);
-    const uint nb = uint(rgba.z*255);
-    const uint na = uint(rgba.w*255);
+    const uint nr = (uint)(rgba.x*255);
+    const uint ng = (uint)(rgba.y*255);
+    const uint nb = (uint)(rgba.z*255);
+    const uint na = (uint)(rgba.w*255);
     
     const uint er = existing&0xFF;
     const uint eg = (existing>>8)&0xFF;
@@ -91,21 +95,21 @@ uint rgbaFloatToIntAndMax(uint existing, float4 rgba)
 // Render function,
 // performs max projection and then uses the transfert function to obtain a color per pixel:
 __kernel void
-volumerender(								 __global uint *d_output, 
-																const uint  imageW, 
-																const	uint  imageH,
-																const	float brightness,
-																const	float trangemin, 
-																const float trangemax, 
-																const float gamma,
-																const	int   maxsteps,
-																const	float dithering,
-																const	float phase,
-																const	int   clear,
-											__read_only image2d_t transferColor4,
-											__constant float* 		invP,
-											__constant float* 		invM,
-											__read_only image3d_t volume)
+volumerender(								__global uint	*d_output, 
+													const	uint  imageW, 
+													const	uint  imageH,
+													const	float brightness,
+													const	float trangemin, 
+													const	float trangemax, 
+													const	float gamma,
+													const	int   maxsteps,
+													const	float dithering,
+													const	float phase,
+													const	int   clear,
+									__read_only image2d_t 	transferColor4,
+									__constant float* 		invP,
+									__constant float* 		invM,
+									__read_only image3d_t 	volume)
 {
 	// samplers:
   const sampler_t volumeSampler   =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR ;

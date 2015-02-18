@@ -1,5 +1,15 @@
 package clearvolume.network.test;
 
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.Test;
+
 import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.network.server.ClearVolumeTCPServerSink;
@@ -12,15 +22,6 @@ import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.VolumeSinkAdapter;
 import clearvolume.volume.sink.VolumeSinkInterface;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
-import org.junit.Test;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.nio.ByteBuffer;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertTrue;
 
 public class ClearVolumeNetworkTests
 {
@@ -125,7 +126,7 @@ public class ClearVolumeNetworkTests
 			lClearVolumeTCPServerSink.sendVolume(lVolume);
 			Thread.sleep(10);
 		}
-		Thread.sleep(500);
+		Thread.sleep(2000);
 		if (pClose)
 		{
 			lClearVolumeTCPClient.stop();

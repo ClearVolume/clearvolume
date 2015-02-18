@@ -12,6 +12,7 @@
 #include <windows.h>
 #include "jvmlib/jni.h"       /* where everything is defined */
 #include <iostream>
+#include <stdio.h>
 #include <string.h>
 
 using namespace std;
@@ -56,15 +57,29 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
 		clearError();
 
 		const char* JAVAHOME  =getEnvWin("JAVA_HOME");
+		cout << "JAVAHOME=" << JAVAHOME << "\n" ;
+
 		char JREFolderPath[1024];
+
 		strcpy(JREFolderPath,JAVAHOME);
 		strcat(JREFolderPath,"\\bin\\server\\jvm.dll");
+		cout << "trying to load from a JRE path: " << JREFolderPath << "\n" ;
+
 
 		HINSTANCE lDLLInstance = LoadLibraryA(JREFolderPath);
 		if( lDLLInstance == 0)
 		{
-			sJavaLastError = "Cannot load Jvm.dll (wrong path given, should be jre folder inside of autopilot folder)";
-			return 1;
+			cout << "JAVAHOME=" << JAVAHOME << "\n" ;
+			strcpy(JREFolderPath,JAVAHOME);
+			strcat(JREFolderPath,"\\jre\\bin\\server\\jvm.dll");
+			cout << "trying to load from a JDK path: " << JREFolderPath << "\n" ;
+
+			lDLLInstance = LoadLibraryA(JREFolderPath);
+			if( lDLLInstance == 0)
+			{
+				sJavaLastError = "Cannot load Jvm.dll (wrong path given)";
+				return 1;
+			}
 		}
 		CreateJavaVM lCreateJavaVM = (CreateJavaVM)GetProcAddress(lDLLInstance, "JNI_CreateJavaVM");
 		if (lCreateJavaVM == NULL )

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -42,8 +43,12 @@ public class ConnectionPanel extends JPanel
 
 	private final VolumeCaptureListener mVolumeCaptureListener;
 
-	public ConnectionPanel(VolumeCaptureListener pVolumeCaptureListener)
+	private final Image appicon; // if set, this icon will set as application icon (to prevent jogl icon steal!)
+
+	public ConnectionPanel( final VolumeCaptureListener pVolumeCaptureListener, final Image appicon )
 	{
+		this.appicon = appicon;
+
 		mVolumeCaptureListener = pVolumeCaptureListener;
 		setBackground(Color.WHITE);
 		final ConnectionPanel lThis = this;
@@ -57,7 +62,7 @@ public class ConnectionPanel extends JPanel
 		lServerAddressTextField.addActionListener(new ActionListener()
 		{
 			@Override
-			public void actionPerformed(ActionEvent e)
+			public void actionPerformed(final ActionEvent e)
 			{
 				startClientAsync(lServerAddressTextField);
 			}
@@ -72,7 +77,7 @@ public class ConnectionPanel extends JPanel
 		lConnectButton.addActionListener(new ActionListener()
 		{
 			@Override
-			public void actionPerformed(ActionEvent e)
+			public void actionPerformed(final ActionEvent e)
 			{
 				startClientAsync(lServerAddressTextField);
 			}
@@ -95,7 +100,7 @@ public class ConnectionPanel extends JPanel
 		lAdvancedButton.addActionListener(new ActionListener()
 		{
 			@Override
-			public void actionPerformed(ActionEvent e)
+			public void actionPerformed(final ActionEvent e)
 			{
 				lOptionsPanel.setVisible(!lOptionsPanel.isVisible());
 			}
@@ -216,7 +221,7 @@ public class ConnectionPanel extends JPanel
 
 	}
 
-	private void startClientAsync(JTextField lServerAddressTextField)
+	private void startClientAsync(final JTextField lServerAddressTextField)
 	{
 		try
 		{
@@ -240,7 +245,8 @@ public class ConnectionPanel extends JPanel
 																									lBytesPerVoxel,
 																									lNumberOfLayers,
 																									lTimeShiftMultiChannel,
-																									lChannelFilter);
+							lChannelFilter,
+							appicon );
 				}
 			};
 
