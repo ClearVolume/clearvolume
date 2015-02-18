@@ -165,7 +165,7 @@ public class ClearVolumeDemo {
 				.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 256;
+		final int lResolutionX = 400;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
@@ -177,14 +177,8 @@ public class ClearVolumeDemo {
 				for (int x = 0; x < lResolutionX; x++) {
 					final int lIndex = x + lResolutionX * y + lResolutionX
 							* lResolutionY * z;
-					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
-					if (lCharValue < 12)
-						lCharValue = 0;
-
-					lVolumeDataArray[lIndex] = (byte) lCharValue;
-					// lVolumeDataArray[lIndex] = (byte) (255 * x
-					// * x
-					// / lResolutionX / lResolutionX);
+					lVolumeDataArray[lIndex] = (byte) (255 * (x % 10)
+							* (y % 10) * (z % 10) / 1000.f);
 
 				}
 
@@ -193,19 +187,28 @@ public class ClearVolumeDemo {
 				lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-		final double s = 1.;
+		int s = 10;
+
 		while (lClearVolumeRenderer.isShowing()) {
 
 			Thread.sleep(100);
+			int scubed = s * s * s;
+			for (int z = 0; z < lResolutionZ; z++)
+				for (int y = 0; y < lResolutionY; y++)
+					for (int x = 0; x < lResolutionX; x++) {
+						final int lIndex = x + lResolutionX * y + lResolutionX
+								* lResolutionY * z;
+						lVolumeDataArray[lIndex] = (byte) (255 * (x % s)
+								* (y % s) * (z % s) / scubed);
 
-			for (int i = 1; i < lVolumeDataArray.length - 1; i++)
-				lVolumeDataArray[i] = (byte) (((lVolumeDataArray[i - 1] + s
-						* lVolumeDataArray[i] + lVolumeDataArray[i + 1]) / (s + 2)));
+					}
 
 			lClearVolumeRenderer.setVolumeDataBuffer(0,
 					ByteBuffer.wrap(lVolumeDataArray), lResolutionX,
 					lResolutionY, lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
+
+			s = (5 + (s + 1) % 100);
 
 		}
 

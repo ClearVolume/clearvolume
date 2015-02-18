@@ -88,8 +88,7 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 		};
 
 		final Thread lMinMaxCalculationThread = new Thread(lRunnable,
-				PlainGraphOverlay.class.getSimpleName()
-						+ ".MinMaxCalculationThread");
+				GraphOverlay.class.getSimpleName() + ".MinMaxCalculationThread");
 		lMinMaxCalculationThread.setDaemon(true);
 		lMinMaxCalculationThread.setPriority(Thread.MIN_PRIORITY);
 		lMinMaxCalculationThread.start();
@@ -222,7 +221,7 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 		// box display: construct the program and related objects
 		mReentrantLock.lock();
 		try {
-			mGLProgram = GLProgram.buildProgram(pGL4, PlainGraphOverlay.class,
+			mGLProgram = GLProgram.buildProgram(pGL4, GraphOverlay.class,
 					"shaders/fancygraph_vert.glsl",
 					"shaders/fancygraph_frag.glsl");
 
@@ -254,9 +253,8 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 
 			GLError.printGLErrors(pGL4, "AFTER GRAPH OVERLAY INIT");
 
-			mGLProgramLines = GLProgram.buildProgram(pGL4,
-					PlainGraphOverlay.class, new String[] {
-							"shaders/fancylines_vert.glsl",
+			mGLProgramLines = GLProgram.buildProgram(pGL4, GraphOverlay.class,
+					new String[] { "shaders/fancylines_vert.glsl",
 							"shaders/fancylines_geom.glsl",
 							"shaders/fancylines_frag.glsl" });
 
