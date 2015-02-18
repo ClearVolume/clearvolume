@@ -53,34 +53,27 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 		{
 		case KeyEvent.VK_DOWN:
 			mClearVolumeRenderer.addTranslationZ(-speed);
-			mClearVolumeRenderer.requestDisplay();
 			break;
 		case KeyEvent.VK_UP:
 			mClearVolumeRenderer.addTranslationZ(+speed);
-			mClearVolumeRenderer.requestDisplay();
 			break;
 
 		case KeyEvent.VK_LEFT:
 			mClearVolumeRenderer.addTranslationX(-speed);
-			mClearVolumeRenderer.requestDisplay();
 			break;
 		case KeyEvent.VK_RIGHT:
 			mClearVolumeRenderer.addTranslationX(+speed);
-			mClearVolumeRenderer.requestDisplay();
 			break;
 
 		case KeyEvent.VK_PAGE_DOWN:
 			mClearVolumeRenderer.addTranslationY(-speed);
-			mClearVolumeRenderer.requestDisplay();
 			break;
 		case KeyEvent.VK_PAGE_UP:
 			mClearVolumeRenderer.addTranslationY(+speed);
-			mClearVolumeRenderer.requestDisplay();
 			break;
 		case KeyEvent.VK_ESCAPE:
 			if (mClearVolumeRenderer.isFullScreen())
 				mClearVolumeRenderer.toggleFullScreen();
-			mClearVolumeRenderer.requestDisplay();
 			break;
 		case KeyEvent.VK_R:
 			if (lIsCtrlPressed)
@@ -91,13 +84,11 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			{
 				mClearVolumeRenderer.resetBrightnessAndGammaAndTransferFunctionRanges();
 				mClearVolumeRenderer.resetRotationTranslation();
-				mClearVolumeRenderer.requestDisplay();
 			}
 			break;
 
 		case KeyEvent.VK_A:
 			mClearVolumeRenderer.toggleControlPanelDisplay();
-			mClearVolumeRenderer.requestDisplay();
 			break;
 
 		case KeyEvent.VK_C:

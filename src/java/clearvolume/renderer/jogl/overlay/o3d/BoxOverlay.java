@@ -29,6 +29,7 @@ public class BoxOverlay extends OverlayBase	implements
 {
 	protected GLProgram mBoxGLProgram;
 	protected ClearGeometryObject mClearGeometryObject;
+	private volatile boolean mHasChanged;
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.jogl.overlay.Overlay#getName()
@@ -45,7 +46,7 @@ public class BoxOverlay extends OverlayBase	implements
 	@Override
 	public boolean hasChanged3D()
 	{
-		return false;
+		return mHasChanged;
 	}
 
 	/* (non-Javadoc)
@@ -64,6 +65,14 @@ public class BoxOverlay extends OverlayBase	implements
 	public int toggleKeyModifierMask()
 	{
 		return 0;
+	}
+
+	@Override
+	public boolean toggleDisplay()
+	{
+		final boolean lToggleDisplay = super.toggleDisplay();
+		mHasChanged = true;
+		return lToggleDisplay;
 	}
 
 	/* (non-Javadoc)
@@ -257,7 +266,7 @@ public class BoxOverlay extends OverlayBase	implements
 			pGL4.glFrontFace(GL4.GL_CW);
 			mBoxGLProgram.use(pGL4);
 			mClearGeometryObject.draw();
-
+			mHasChanged = false;
 		}
 	}
 
