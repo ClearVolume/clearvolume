@@ -2,6 +2,7 @@ package clearvolume.network.client;
 
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Image;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.UnresolvedAddressException;
@@ -10,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
@@ -23,6 +25,8 @@ import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 
+import com.apple.eawt.Application;
+
 public abstract class ClearVolumeTCPClientHelper
 {
 	private static final int cMaxAvailableVolumes = 20;
@@ -32,14 +36,15 @@ public abstract class ClearVolumeTCPClientHelper
 	private static final long cSoftHoryzon = 50;
 	private static final long cHardHoryzon = 100;
 
-	public void startClient(VolumeCaptureListener pVolumeCaptureListener,
-													String pServerAddress,
-													int pPortNumber,
-													int pWindowSize,
-													int pBytesPerVoxel,
-													int pNumberOfLayers,
-													boolean pTimeShift,
-													boolean pChannelFilter)
+	public void startClient(final VolumeCaptureListener pVolumeCaptureListener,
+													final String pServerAddress,
+													final int pPortNumber,
+													final int pWindowSize,
+													final int pBytesPerVoxel,
+													final int pNumberOfLayers,
+													final boolean pTimeShift,
+			final boolean pChannelFilter,
+			final Image appicon )
 	{
 		final String lWindowTitle = "ClearVolume[" + pServerAddress
 													+ ":"
@@ -114,6 +119,9 @@ public abstract class ClearVolumeTCPClientHelper
 
 				lClearVolumeRendererSink.setVisible(true);
 
+				// Resteal app icon after JOGL stole it!
+				setCurrentAppIcon( appicon );
+
 				while (lClearVolumeRendererSink.isShowing())
 				{
 					try
@@ -157,8 +165,8 @@ public abstract class ClearVolumeTCPClientHelper
 		}
 	}
 
-	public void reportErrorWithPopUp(	Throwable pThrowable,
-																		String pErrorMessage)
+	public void reportErrorWithPopUp(	final Throwable pThrowable,
+																		final String pErrorMessage)
 	{
 		reportError(pThrowable, pErrorMessage);
 
@@ -224,9 +232,9 @@ public abstract class ClearVolumeTCPClientHelper
 
 	}
 
-	private void showEditableOptionPane(String pText,
-																			String pTitle,
-																			int pMessageType)
+	private void showEditableOptionPane(final String pText,
+																			final String pTitle,
+																			final int pMessageType)
 	{
 		final JTextArea ta = new JTextArea(48, 100);
 		ta.setText(pText);
@@ -243,4 +251,29 @@ public abstract class ClearVolumeTCPClientHelper
 
 	public abstract void reportError(Throwable e, String pErrorMessage);
 
+	/**
+	 * Use this method to set the icon for this app.
+	 * Best used after JOGL stole the application icon. Bad JOGL!
+	 * 
+	 * @param finalicon
+	 */
+	public static void setCurrentAppIcon( final Image finalicon ) {
+		if ( finalicon == null ) return;
+
+		final String os = System.getProperty( "os.name" ).toLowerCase();
+
+		SwingUtilities.invokeLater( new Runnable() {
+
+			@Override
+			public void run() {
+				if ( os.indexOf( "mac" ) >= 0 ) {
+					Application.getApplication().setDockIconImage( finalicon );
+				} else if ( os.indexOf( "win" ) >= 0 ) {
+//					not yet clear
+				} else {
+//					not yet clear
+				}
+			}
+		} );
+	}
 }
