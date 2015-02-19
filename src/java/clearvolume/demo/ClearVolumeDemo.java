@@ -899,13 +899,15 @@ public class ClearVolumeDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-		while (lClearVolumeRenderer.isShowing())
+		while (lClearVolumeRenderer.isShowing() && lJFrame.isVisible())
 		{
 			Thread.sleep(100);
 			lJFrame.setTitle("BRAVO! THIS IS A JFRAME! It WORKS!");
 		}
 
 		lClearVolumeRenderer.close();
+		lJFrame.dispose();
+
 	}
 
 	@Test
