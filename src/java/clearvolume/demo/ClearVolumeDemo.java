@@ -612,7 +612,7 @@ public class ClearVolumeDemo
 		final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
 		final DriftOverlay lDriftOverlay = new DriftOverlay();
 		final Fauxscope lFauxscope = new Fauxscope();
-		lFauxscope.setCorrectionActive(false);
+		lFauxscope.setCorrectionActive(true);
 
 		lFauxscope.use4DStacksFromDirectory("/Volumes/watson/StacksForUlrik/no_padding/uint8");
 
@@ -644,7 +644,7 @@ public class ClearVolumeDemo
 
 				lClearVolumeRenderer.requestDisplay();
 
-				Thread.sleep(10);
+				Thread.sleep(200);
 			}
 		}
 		catch (IOException | FormatException e)
