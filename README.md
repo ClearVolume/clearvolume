@@ -9,4 +9,4 @@ ClearVolume can easily be integrated into existing Java, C/C++, Python, or LabVI
 ### WIKI AND WEBSITE
 
 For up to date information about the project,
-please go to the [website](http://clearvolume.bitbucket.org) and consult the [website](http://bitbucket.org/clearvolume/clearvolume/wiki/Home)
+please go to the [website](http://clearvolume.github.io) or have a look at the [wiki](http://github.com/clearvolume/clearvolume/wiki/Home)
