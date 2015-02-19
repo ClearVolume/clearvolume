@@ -1,5 +1,7 @@
 package clearvolume.renderer.factory;
 
+import java.util.Properties;
+
 import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
@@ -11,7 +13,7 @@ public class ClearVolumeRendererFactory
 	/**
 	 * Constructs an ClearVolumeRenderer class given a window name, width and
 	 * height.
-	 * 
+	 *
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
@@ -19,18 +21,23 @@ public class ClearVolumeRendererFactory
 	 *          must be set true if you will use ClearVolume embedded in an AWT or
 	 *          Swing container.
 	 */
-	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
-																																		final int pWindowWidth,
-																																		final int pWindowHeight,
-																																		final boolean useInCanvas)
+	public static final ClearVolumeRendererInterface newBestRenderer8Bit(	final String pWindowName,
+																																				final int pWindowWidth,
+																																				final int pWindowHeight,
+																																				final boolean useInCanvas)
 	{
-		return newBestRenderer(pWindowName, 1024, 1024, 1, useInCanvas);
+		return newBestRenderer(	pWindowName,
+														pWindowWidth,
+														pWindowHeight,
+														1,
+														useInCanvas);
 	}
 
 	/**
 	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
-	 * name, width, height, and bytes=per-voxel.
-	 * 
+	 * name, width, height, and bytes=per-voxel. The texture dimensions are set to
+	 * a default of 768x768.
+	 *
 	 * @param pWindowName
 	 * @param pWindowWidth
 	 * @param pWindowHeight
@@ -52,6 +59,34 @@ public class ClearVolumeRendererFactory
 														768,
 														768,
 														useInCanvas);
+	}
+
+	/**
+	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
+	 * name, width, height, bytes=per-voxel, max window width and height.
+	 *
+	 * @param pWindowName
+	 * @param pWindowWidth
+	 * @param pWindowHeight
+	 * @param pBytesPerVoxel
+	 * @param pMaxTextureWidth
+	 * @param pMaxTextureHeight
+	 */
+	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
+																																		final int pWindowWidth,
+																																		final int pWindowHeight,
+																																		final int pBytesPerVoxel,
+																																		final int pMaxTextureWidth,
+																																		final int pMaxTextureHeight)
+	{
+		return newBestRenderer(	pWindowName,
+														pWindowWidth,
+														pWindowHeight,
+														pBytesPerVoxel,
+														pMaxTextureWidth,
+														pMaxTextureHeight,
+														1,
+														false);
 	}
 
 	/**
@@ -110,27 +145,45 @@ public class ClearVolumeRendererFactory
 																																		final int pNumberOfRenderLayers,
 																																		final boolean pUseInCanvas)
 	{
-		ClearVolumeRendererInterface lNewCudaRenderer = newCudaRenderer(pWindowName,
-																																		pWindowWidth,
-																																		pWindowHeight,
-																																		pBytesPerVoxel,
-																																		pMaxTextureWidth,
-																																		pMaxTextureHeight,
-																																		pNumberOfRenderLayers,
-																																		pUseInCanvas);
+		final Properties p = new Properties(System.getProperties());
 
-		if (lNewCudaRenderer != null)
-			return lNewCudaRenderer;
+		if (p.getProperty("ClearVolume.disableCUDA") == null)
+		{
+			final ClearVolumeRendererInterface lNewCudaRenderer = newCudaRenderer(pWindowName,
+																																						pWindowWidth,
+																																						pWindowHeight,
+																																						pBytesPerVoxel,
+																																						pMaxTextureWidth,
+																																						pMaxTextureHeight,
+																																						pNumberOfRenderLayers,
+																																						pUseInCanvas);
 
-		return new OpenCLVolumeRenderer(pWindowName,
-																		pWindowWidth,
-																		pWindowHeight,
-																		pBytesPerVoxel,
-																		pMaxTextureWidth,
-																		pMaxTextureHeight,
-																		pNumberOfRenderLayers,
-																		pUseInCanvas);
+			if (lNewCudaRenderer != null)
+				return lNewCudaRenderer;
+		}
+		else
+		{
+			System.err.println("Caution: Use of CUDA has been explicitly disabled!");
+		}
 
+		if (p.getProperty("ClearVolume.disableOpenCL") == null)
+		{
+			return new OpenCLVolumeRenderer(pWindowName,
+																			pWindowWidth,
+																			pWindowHeight,
+																			pBytesPerVoxel,
+																			pMaxTextureWidth,
+																			pMaxTextureHeight,
+																			pNumberOfRenderLayers,
+																			pUseInCanvas);
+		}
+		else
+		{
+			System.err.println("Caution: Use of OpenCL has been explicitly disabled!");
+		}
+
+		System.err.println("Your system cannot run ClearVolume because it does not support CUDA or OpenCL.");
+		return null;
 	}
 
 	public static final ClearVolumeRendererInterface newCudaRenderer(	final String pWindowName,

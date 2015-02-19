@@ -21,26 +21,20 @@
 // Simple 3D volume renderer
 // calculates the eye coordinate from user provided projection matrix 
 
-#ifndef _VOLUMERENDER_KERNEL_CU_
-#define _VOLUMERENDER_KERNEL_CU_
 
 #include <helper_cuda.h>
 #include <helper_math.h>
 
+
+// Loop unrolling length:
+#define LOOPUNROLL 16
+
+// Typedefs:
 typedef unsigned int  uint;
 typedef unsigned char uchar;
-
-cudaArray *d_volumeArray = 0;
-cudaArray *d_transferFuncArray;
-
 typedef unsigned char VolumeType;
 typedef unsigned char VolumeType1;
 typedef unsigned short VolumeType2;
-
-texture<VolumeType/*BytesPerVoxel*/, 3, cudaReadModeNormalizedFloat> tex;         // 3D texture
-texture<float4, 1, cudaReadModeElementType>         transferTex; // 1D transfer function texture
-
-__constant__ float c_sizeOfTransfertFunction;
 
 typedef struct
 {
@@ -52,21 +46,45 @@ typedef struct
     float4 m[4];
 } float4x4;
 
+// Arrays:
+cudaArray *d_volumeArray = 0;
+cudaArray *d_transferFuncArray;
 
+// Textures:
+texture<VolumeType/*BytesPerVoxel*/, 3, cudaReadModeNormalizedFloat> tex;         // 3D texture
+texture<float4, 1, cudaReadModeElementType>         transferTex; // 1D transfer function texture
+
+// Constants holding matrices:
+__constant__ float c_sizeOfTransfertFunction;
 __constant__ float4x4 c_invViewMatrix;  // inverse view matrix
-
-
 __constant__ float4x4 c_invProjectionMatrix;  //  inverse projection matrix
 
+// Ray structure:
 struct Ray
 {
     float3 o;   // origin
     float3 d;   // direction
 };
 
+
+// random number generator for dithering
+__forceinline__
+__device__
+float random(uint x, uint y)
+{   
+    uint a = 4421 +(1+x)*(1+y) +x +y;
+    for(int i=0; i < 10; i++)
+    {
+        a = (uint(1664525) * a + uint(1013904223)) % uint(79197919);
+    }
+    float rnd = (a*1.0)/(79197919.f);
+    return rnd-0.5f;
+}
+
+
 // intersect ray with a box
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm
-
+__forceinline__
 __device__
 int intersectBox(Ray r, float3 boxmin, float3 boxmax, float *tnear, float *tfar)
 {
@@ -91,8 +109,8 @@ int intersectBox(Ray r, float3 boxmin, float3 boxmax, float *tnear, float *tfar)
 }
 
 
-
 // transform vector by matrix (no translation)
+__forceinline__
 __device__
 float3 mul(const float3x4 &M, const float3 &v)
 {
@@ -104,6 +122,7 @@ float3 mul(const float3x4 &M, const float3 &v)
 }
 
 // transform vector by matrix with translation
+__forceinline__
 __device__
 float4 mul(const float3x4 &M, const float4 &v)
 {
@@ -115,7 +134,8 @@ float4 mul(const float3x4 &M, const float4 &v)
     return r;
 }
 
-
+// transform vector by matrix with translation:
+__forceinline__
 __device__
 float4 mul(const float4x4 &M, const float4 &v)
 {
@@ -128,14 +148,11 @@ float4 mul(const float4x4 &M, const float4 &v)
     return r;
 }
 
-__device__
-void printf4(const float4 &v)
-{
-  printf("kernel: %.2f  %.2f  %.2f  %.2f\n",v.x,v.y,v.z,v.w); 
-}
 
-
-__device__ uint rgbaFloatToInt(float4 rgba)
+// convert float4 into uint:
+__forceinline__ 
+__device__ 
+uint rgbaFloatToInt(float4 rgba)
 {
     rgba.x = __saturatef(rgba.x);   // clamp to [0.0, 1.0]
     rgba.y = __saturatef(rgba.y);
@@ -144,81 +161,78 @@ __device__ uint rgbaFloatToInt(float4 rgba)
     return (uint(rgba.w*255)<<24) | (uint(rgba.z*255)<<16) | (uint(rgba.y*255)<<8) | uint(rgba.x*255);
 }
 
-inline __device__ bool algoMaxProjection(float4 &acc, float4 &col )
+
+// convert float4 into uint and take the max with an existing RGBA value in uint form:
+__forceinline__ 
+__device__ 
+uint rgbaFloatToIntAndMax(uint existing, float4 rgba)
 {
-       	acc = fmaxf(acc,col);
-        
-        return false ;
-}
-
-inline __device__ bool algoSumProjection(float4 &acc, float4 &col )
-{
-       	acc = fmaxf(acc,col);
-        
-        return false ;
-}
-
-
-inline __device__ bool algoBlendFrontToBack( float4 &acc, float4 &col )
-{
-        col *= col.w;
-        // "over" operator for front-to-back blending
-        acc = acc + col*(1.0f - acc.w);
-        
-        return false;
-}
-
-inline __device__ bool algoBlendBackToFront(float4 &acc, float4 &col )
-{
-
-        // "under" operator for back-to-front blending
-        acc = lerp(acc, col, col.w);
-        return false;
-}
-
-inline __device__ bool algo(float4 &acc, float4 &col )
-{
-		return algoMaxProjection(acc,col);
+    rgba.x = __saturatef(rgba.x);   // clamp to [0.0, 1.0]
+    rgba.y = __saturatef(rgba.y);
+    rgba.z = __saturatef(rgba.z);
+    rgba.w = __saturatef(rgba.w);
+    
+    const uint nr = uint(rgba.x*255);
+    const uint ng = uint(rgba.y*255);
+    const uint nb = uint(rgba.z*255);
+    const uint na = uint(rgba.w*255);
+    
+    const uint er = existing&0xFF;
+    const uint eg = (existing>>8)&0xFF;
+    const uint eb = (existing>>16)&0xFF;
+    const uint ea = (existing>>24)&0xFF;
+    
+    const uint  r = max(nr,er);
+    const uint  g = max(ng,eg);
+    const uint  b = max(nb,eb);
+    const uint  a = max(na,ea);
+    
+    return a<<24|b<<16|g<<8|r ;
 }
 
 
 
-
-//Render function:
-
+// Render function,
+// performs max projection and then uses the transfert function to obtain a color per pixel:
 extern "C" __global__ void
-volumerender(uint *d_output, uint imageW, uint imageH,
-         	float brightness, float trangemin, float trangemax, float gamma)
+volumerender(       uint *d_output, 
+							const uint imageW, 
+							const uint imageH,
+							const float brightness, 
+							const float trangemin, 
+							const float trangemax, 
+							const float gamma, 
+							const int   maxsteps,
+							const float dithering,
+							const float phase,
+							const int   clear)
 {
 		
-    const int maxSteps = 512;
-    const float tstep = 0.02f;
-     
-    const float ta = 1.0/(trangemax-trangemin);
+		// convert range bounds to linear map:
+    const float ta = 1.0f/(trangemax-trangemin);
     const float tb = trangemin/(trangemin-trangemax); 
     
-   
+   	// box bounds:
     const float3 boxMin = make_float3(-1.f, -1.f, -1.f);
     const float3 boxMax = make_float3(1.f,1.f,1.f);
 
+		// thread int coordinates:
     const uint x = blockIdx.x*blockDim.x + threadIdx.x;
     const uint y = blockIdx.y*blockDim.y + threadIdx.y;
 
-	  	
     if ((x >= imageW) || (y >= imageH)) return;
 
+		// thread float coordinates:
     const float u = (x / (float) imageW)*2.0f-1.0f;
     const float v = (y / (float) imageH)*2.0f-1.0f;
+
+		// Back and front before all transformations.
+   	const float4 front = make_float4(u,v,-1.f,1.f);
+		const float4 back = make_float4(u,v,1.f,1.f);
 
     // calculate eye ray in world space
     float4 orig0, orig;
     float4 direc0, direc;
-    float4 temp;
-    float4 back,front;
-
-		// Back and front before all transformations.
-   	front = make_float4(u,v,-1,1);
-		back = make_float4(u,v,1,1);
   
   	// Origin point
     orig0 = mul(c_invProjectionMatrix,front);
@@ -231,7 +245,7 @@ volumerender(uint *d_output, uint imageW, uint imageH,
 		direc0 *= 1.f/direc0.w;
 		direc0 = normalize(direc0-orig0);
 		direc = mul(c_invViewMatrix,direc0);
-		direc.w = 0;
+		direc.w = 0.0f;
 
     // calculate eye ray in world space
     Ray eyeRay;
@@ -240,43 +254,53 @@ volumerender(uint *d_output, uint imageW, uint imageH,
 	
     // find intersection with box
     float tnear, tfar;
-    int hit = intersectBox(eyeRay, boxMin, boxMax, &tnear, &tfar);
+    const int hit = intersectBox(eyeRay, boxMin, boxMax, &tnear, &tfar);
 
-    if (!hit) return;
+    if (!hit) 
+    {
+	  	d_output[x+imageW*y] = 0.f;
+	    return;
+    }
 
-    if (tnear < 0.0f) tnear = 0.0f;     // clamp to near plane
+    // clamp to near plane:
+		if (tnear < 0.0f) tnear = 0.0f;     
 
-    // march along ray from front to back, accumulating color
-    float4 acc = make_float4(0.0f);
+		// compute stape size:		
+		const float tstep = abs(tnear-tfar)/maxsteps;
 
-		float t = tnear;
+		// apply phase:
+		orig += phase*tstep*direc;
 
-		float4 pos;
-		uint i;
-		for(i=0; i<maxSteps; i++) 
-		{		
-		  pos = orig + t*direc;
-		  pos = pos*0.5f+0.5f;    // map position to [0, 1] coordinates
-		  float sample = tex3D(tex, pos.x,pos.y,pos.z);
-	 
-		  // Mapping to transfert function range and gamma correction: 
-		  float mappedsample = powf(ta*sample+tb,gamma);
-	 
-		  // lookup in transfer function texture
-		  float4 col = tex1D(transferTex,mappedsample);
-	        
-		  algo/*ProjectionAlgorithm*/(acc,col);
-	
-		  t += tstep;
-		  if (t > tfar) break;
+		// randomize origin point a bit:
+		const uint entropy = (uint)( 6779514*length(orig) + 6257327*length(direc) );
+		orig += dithering*tstep*random(entropy+x,entropy+y)*direc;
+		
+		// precompute vectors: 
+		const float4 vecstep = 0.5f*tstep*direc;
+		float4 pos = orig*0.5f+0.5f + tnear*0.5f*direc;
+
+		// Loop unrolling setup: 
+    const uint unrolledmaxsteps = (maxsteps/LOOPUNROLL)+1;
+		
+		// raycasting loop:
+		float maxp = 0.0f;
+		for(int i=0; i<unrolledmaxsteps; i++) 
+		{
+			for(int j=1; j<LOOPUNROLL; j++)
+			{
+		  	maxp = fmaxf(maxp,tex3D(tex, pos.x,pos.y,pos.z));
+		  	pos+=vecstep;
+		  }
 		}
+		
+		// Mapping to transfert function range and gamma correction: 
+		const float mappedsample = __saturatef(powf(ta*maxp+tb,gamma));
+	 
+		// lookup in transfer function texture:
+		const float4 color = brightness * tex1D(transferTex,mappedsample);
+
     
-    acc *= brightness;
-    
-    // write output color
-    d_output[y*imageW + x] = rgbaFloatToInt(acc);
+    // write output color:
+    d_output[y*imageW + x] = rgbaFloatToIntAndMax(clear*d_output[y*imageW + x],color);
 }
 
-
-
-#endif // #ifndef _VOLUMERENDER_KERNEL_CU_

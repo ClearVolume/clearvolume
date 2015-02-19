@@ -1,4 +1,4 @@
-package clearvolume.renderer.jogl.overlay.std;
+package clearvolume.renderer.jogl.overlay.o3d;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -14,10 +14,16 @@ import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
 import clearvolume.renderer.DisplayRequestInterface;
-import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
-import clearvolume.renderer.jogl.overlay.JOGLOverlay;
+import clearvolume.renderer.jogl.overlay.Overlay3D;
+import clearvolume.renderer.jogl.overlay.OverlayBase;
 
-public class BoxOverlay extends JOGLOverlay
+/**
+ * OldBoxOverlay - old style 3D box overlay.
+ *
+ * @author Loic Royer (2015)
+ *
+ */
+public class OldBoxOverlay extends OverlayBase implements Overlay3D
 {
 	private static final float cBoxLineWidth = 1.f; // only cBoxLineWidth = 1.f
 	// seems to be supported
@@ -35,18 +41,28 @@ public class BoxOverlay extends JOGLOverlay
 	private GLUniform mOverlayModelViewMatrixUniform;
 	private GLUniform mOverlayProjectionMatrixUniform;
 
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.jogl.overlay.Overlay#getName()
+	 */
 	@Override
 	public String getName()
 	{
 		return "box";
 	}
 
+
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.jogl.overlay.Overlay3D#hasChanged3D()
+	 */
 	@Override
-	public boolean hasChanged()
+	public boolean hasChanged3D()
 	{
 		return false;
 	}
 
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.jogl.overlay.Overlay#init(javax.media.opengl.GL4, clearvolume.renderer.DisplayRequestInterface)
+	 */
 	@Override
 	public void init(	GL4 pGL4,
 										DisplayRequestInterface pDisplayRequestInterface)
@@ -55,9 +71,9 @@ public class BoxOverlay extends JOGLOverlay
 		try
 		{
 			mBoxGLProgram = GLProgram.buildProgram(	pGL4,
-																							JOGLClearVolumeRenderer.class,
-																							"shaders/box_vert.glsl",
-																							"shaders/box_frag.glsl");
+																							OldBoxOverlay.class,
+																							"shaders/oldbox_vert.glsl",
+																							"shaders/oldbox_frag.glsl");
 
 			mOverlayModelViewMatrixUniform = mBoxGLProgram.getUniform("modelview");
 			mOverlayProjectionMatrixUniform = mBoxGLProgram.getUniform("projection");
@@ -121,17 +137,20 @@ public class BoxOverlay extends JOGLOverlay
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.jogl.overlay.Overlay3D#render3D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
+	 */
 	@Override
-	public void render(	GL4 pGL4,
-											GLMatrix pProjectionMatrix,
-											GLMatrix pInvVolumeMatrix)
+	public void render3D(	GL4 pGL4,
+												GLMatrix pProjectionMatrix,
+												GLMatrix pInvVolumeMatrix)
 	{
 		if (isDisplayed())
 		{
 			mBoxGLProgram.use(pGL4);
 
-			// invert Matrix is the modelview used by renderer which is actually the
-			// inverted modelview Matrix
+			// invert Matrix is the mModelViewMatrix used by renderer which is actually the
+			// inverted mModelViewMatrix Matrix
 			final GLMatrix lInvBoxMatrix = new GLMatrix();
 			lInvBoxMatrix.copy(pInvVolumeMatrix);
 			lInvBoxMatrix.transpose();
@@ -149,7 +168,6 @@ public class BoxOverlay extends JOGLOverlay
 
 		}
 	}
-
 
 
 }

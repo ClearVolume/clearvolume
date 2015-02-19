@@ -14,9 +14,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
 import jcuda.CudaException;
@@ -44,7 +46,7 @@ import clearvolume.renderer.processors.Processor;
  * Class JCudaClearVolumeRenderer
  *
  * Implements a JOGLPBOClearVolumeRenderer usin a CUDA kernel for rendering the
- * 2D projection.
+ * 2D mProjectionMatrix.
  *
  * @author Loic Royer 2014
  *
@@ -75,11 +77,24 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	private CudaFunction mVolumeRenderingFunction;
 
-	private volatile CudaOpenGLBufferObject[] mOpenGLBufferDevicePointers = new CudaOpenGLBufferObject[1];
+	/**
+	 * We use these buffers when rendering to PBO...
+	 */
+	private volatile CudaOpenGLBufferObject[] mOpenGLBufferDevicePointers;
+
+	/**
+	 * We use these buffers when rendering to standard CUDA buffers.
+	 */
+	private volatile CudaDevicePointer[] mCudaBufferDevicePointer;
+
+	/**
+	 * And use this temporary buffer on the CPU ram:
+	 */
+	private volatile ByteBuffer mTemporaryTransfertBuffer;
 
 	/**
 	 * CUDA Device pointers to the device itself, which are in constant memory:
-	 * inverted view-matrix, projection matrix, transfer function.
+	 * inverted mViewMatrix-matrix, mProjectionMatrix matrix, transfer function.
 	 */
 
 	private CudaDevicePointer mInvertedViewMatrix,
@@ -192,24 +207,10 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 					pMaxTextureHeight,
 					pNumberOfRenderLayers,
 					pUseInCanvas);
+
 		mTransferFunctionCudaArrays = new CudaArray[pNumberOfRenderLayers];
 		mVolumeDataCudaArrays = new CudaArray[pNumberOfRenderLayers];
-		mOpenGLBufferDevicePointers = new CudaOpenGLBufferObject[pNumberOfRenderLayers];
-	}
 
-	@Override
-	protected void registerPBO(	final int pRenderLayerIndex,
-															final int pPixelBufferObjectId)
-	{
-		mOpenGLBufferDevicePointers[pRenderLayerIndex] = new CudaOpenGLBufferObject(pPixelBufferObjectId);
-	}
-
-	@Override
-	protected void unregisterPBO(	final int pRenderLayerIndex,
-																final int pPixelBufferObjectId)
-	{
-		mOpenGLBufferDevicePointers[pRenderLayerIndex].close();
-		mOpenGLBufferDevicePointers[pRenderLayerIndex] = null;
 	}
 
 	/**
@@ -222,8 +223,11 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	{
 		try
 		{
-			mCudaDevice = new CudaDevice(0);
+			mCudaDevice = CudaDevice.getBestCudaDevice();
 
+			printMemoryState();
+
+			assert (mCudaContext == null);
 			mCudaContext = new CudaContext(mCudaDevice, true);
 
 			final Class<?> lRootClass = JCudaClearVolumeRenderer.class;
@@ -251,13 +255,23 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 			prepareTransferFunctionTexture();
 
-			for (Processor<?> lProcessor : mProcessorsMap.values())
-				if (lProcessor.isCompatibleRenderer(getClass()))
-				{
-					CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
-					lCUDAProcessor.setDeviceAndContext(	mCudaDevice,
-																							mCudaContext);
-				}
+			mCudaBufferDevicePointer = new CudaDevicePointer[getNumberOfRenderLayers()];
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				final long lBufferSize = 4 * getTextureWidth()
+																	* getTextureHeight();
+				assert (mCudaBufferDevicePointer[i] == null);
+				mCudaBufferDevicePointer[i] = CudaDevicePointer.malloc(lBufferSize);
+			}
+
+			for (final Processor<?> lProcessor : mProcessorsMap.values())
+				if (lProcessor.isCompatibleProcessor(getClass()))
+					if (lProcessor instanceof CUDAProcessor)
+					{
+						final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
+						lCUDAProcessor.setDeviceAndContext(	mCudaDevice,
+																								mCudaContext);
+					}
 
 			return true;
 		}
@@ -266,6 +280,16 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	private void printMemoryState()
+	{
+		final long lTotalMem = mCudaDevice.getTotalMem();
+		final long lAvailableMem = mCudaDevice.getAvailableMem();
+		System.out.format("CUDA memory:  %d / %d (free/total) ratio=%g \n",
+											lAvailableMem,
+											lTotalMem,
+											(1.0 * lAvailableMem) / lTotalMem);
 	}
 
 	private File compileCUDA(final Class<?> lRootClass) throws IOException
@@ -331,6 +355,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			final long lHeight = getVolumeSizeY();
 			final long lDepth = getVolumeSizeZ();
 
+			assert (mVolumeDataCudaArrays[pRenderLayerIndex] == null);
 			mVolumeDataCudaArrays[pRenderLayerIndex] = new CudaArray(	1,
 																																lWidth,
 																																lHeight,
@@ -340,6 +365,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																																false,
 																																false);
 			lVolumeDataBuffer.rewind();
+
+			assert (lVolumeDataBuffer.capacity() == mVolumeDataCudaArrays[pRenderLayerIndex].getSizeInBytes());
 
 			mVolumeDataCudaArrays[pRenderLayerIndex].copyFrom(lVolumeDataBuffer,
 																												true);
@@ -369,9 +396,10 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	private void prepareTransferFunctionArray(final int pRenderLayerIndex)
 	{
-		final float[] lTransferFunctionArray = getTransfertFunction(pRenderLayerIndex).getArray();
+		final float[] lTransferFunctionArray = getTransferFunction(pRenderLayerIndex).getArray();
 		final int lTransferFunctionArrayLength = lTransferFunctionArray.length;
 
+		assert (mTransferFunctionCudaArrays[pRenderLayerIndex] == null);
 		mTransferFunctionCudaArrays[pRenderLayerIndex] = new CudaArray(	4,
 																																		lTransferFunctionArrayLength / 4,
 																																		1,
@@ -391,7 +419,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	private void copyTransferFunctionArray(final int pRenderLayerIndex)
 	{
-		final float[] lTransferFunctionArray = getTransfertFunction(pRenderLayerIndex).getArray();
+		final float[] lTransferFunctionArray = getTransferFunction(pRenderLayerIndex).getArray();
 
 		mTransferFunctionCudaArrays[pRenderLayerIndex].copyFrom(lTransferFunctionArray,
 																														true);
@@ -413,9 +441,143 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 	private void pointTransferFunctionTextureToArray(final int pRenderLayerIndex)
 	{
-		mSizeOfTransferFunction.setFloat(getTransfertFunction(pRenderLayerIndex).getArray().length);
+		mSizeOfTransferFunction.setSingleFloat(getTransferFunction(pRenderLayerIndex).getArray().length);
 		mTransferFunctionTexture.setTo(mTransferFunctionCudaArrays[pRenderLayerIndex]);
 		mVolumeRenderingFunction.setTexture(mTransferFunctionTexture);
+	}
+
+	@Override
+	public void dispose(final GLAutoDrawable pArg0)
+	{
+		printMemoryState();
+
+		System.out.println("BEFORE CALLING disposeVolumeRenderer()");
+		disposeVolumeRenderer();
+		System.out.println("AFTER CALLING disposeVolumeRenderer()");
+
+		super.dispose(pArg0);
+	}
+
+	private void disposeVolumeRenderer()
+	{
+		mDisplayReentrantLock.lock();
+		try
+		{
+
+			try
+			{
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+
+					mInvertedViewMatrix.close();
+				mInvertedProjectionMatrix.close();
+				mSizeOfTransferFunction.close();
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+			try
+			{
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					if (mVolumeDataCudaArrays[i] != null)
+					{
+						System.out.println("closing VolumeDataCudaArrays !");
+						mVolumeDataCudaArrays[i].close();
+						mVolumeDataCudaArrays[i] = null;
+					}
+				}
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+			try
+			{
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					if (mTransferFunctionCudaArrays[i] != null)
+					{
+						System.out.println("closing TransferFunctionCudaArrays !");
+						mTransferFunctionCudaArrays[i].close();
+						mTransferFunctionCudaArrays[i] = null;
+					}
+				}
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+			try
+			{
+				if (mCudaModule != null)
+				{
+					System.out.println("closing CudaModule !");
+					mCudaModule.close();
+					mCudaModule = null;
+				}
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+			try
+			{
+				if (mCudaContext != null)
+				{
+					System.out.println("closing CudaContext !");
+					mCudaContext.close();
+					mCudaContext = null;
+				}
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+			try
+			{
+				if (mCudaDevice != null)
+				{
+					printMemoryState();
+					mCudaDevice.close();
+					mCudaDevice = null;
+				}
+
+			}
+			catch (final Throwable e)
+			{
+				e.printStackTrace();
+				throw new RuntimeException(	"Exception while closing " + this.getClass()
+																																			.getSimpleName(),
+																		e);
+			}
+
+		}
+		finally
+		{
+			if (mDisplayReentrantLock.isHeldByCurrentThread())
+				mDisplayReentrantLock.unlock();
+		}
 	}
 
 	/**
@@ -446,23 +608,53 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			return null;
 		mCudaContext.setCurrent();
 
+		doCaptureBuffersIfNeeded();
+
 		try
 		{
 			mInvertedViewMatrix.copyFrom(invModelView, true);
-
 			mInvertedProjectionMatrix.copyFrom(invProjection, true);
-
 			return updateBufferAndRunKernel();
 		}
 		catch (final CudaException e)
 		{
-			System.err.println(e.getLocalizedMessage());
+			e.printStackTrace();
 			return null;
 		}
 	}
 
+	private void doCaptureBuffersIfNeeded()
+	{
+		if (mVolumeCaptureFlag)
+		{
+			final ByteBuffer[] lCaptureBuffers = new ByteBuffer[getNumberOfRenderLayers()];
+
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (getBytesPerVoxel() * getVolumeSizeX()
+																															* getVolumeSizeY() * getVolumeSizeZ()))
+																				.order(ByteOrder.nativeOrder());
+
+				mVolumeDataCudaArrays[getCurrentRenderLayerIndex()].copyTo(	lCaptureBuffers[i],
+																																		true);
+			}
+
+			notifyVolumeCaptureListeners(	lCaptureBuffers,
+																		false,
+																		getBytesPerVoxel(),
+																		getVolumeSizeX(),
+																		getVolumeSizeY(),
+																		getVolumeSizeZ(),
+																		getVoxelSizeX(),
+																		getVoxelSizeY(),
+																		getVoxelSizeZ());
+
+			mVolumeCaptureFlag = false;
+		}
+	}
+
 	/**
-	 * Call the kernel function, rendering the 3D volume data image into PBOs
+	 * Call the kernel function, rendering the 3D volume data image
 	 *
 	 * @return boolean array indicating which layer was updated.
 	 */
@@ -472,34 +664,39 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		boolean lAnyVolumeDataUpdated = false;
 
-		for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++)
+		for (int lRenderLayerIndex = 0; lRenderLayerIndex < getNumberOfRenderLayers(); lRenderLayerIndex++)
 		{
-			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(lLayerIndex);
+			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(lRenderLayerIndex);
 
 			if (lVolumeDataBuffer != null)
 			{
-				synchronized (getSetVolumeDataBufferLock(lLayerIndex))
+				synchronized (getSetVolumeDataBufferLock(lRenderLayerIndex))
 				{
-					clearVolumeDataBufferReference(lLayerIndex);
+					clearVolumeDataBufferReference(lRenderLayerIndex);
 
-					if (haveVolumeDimensionsChanged() || mVolumeDataCudaArrays[lLayerIndex] == null)
+					if (haveVolumeDimensionsChanged() || mVolumeDataCudaArrays[lRenderLayerIndex] == null)
 					{
-						if (mVolumeDataCudaArrays[lLayerIndex] != null)
-							mVolumeDataCudaArrays[lLayerIndex].close();
+						if (mVolumeDataCudaArrays[lRenderLayerIndex] != null)
+						{
+							mVolumeDataCudaArrays[lRenderLayerIndex].close();
+							mVolumeDataCudaArrays[lRenderLayerIndex] = null;
+						}
 
-						prepareVolumeDataArray(lLayerIndex, lVolumeDataBuffer);
+						prepareVolumeDataArray(	lRenderLayerIndex,
+																		lVolumeDataBuffer);
 					}
 					else
 					{
+						assert (lVolumeDataBuffer.capacity() == mVolumeDataCudaArrays[lRenderLayerIndex].getSizeInBytes());
 						lVolumeDataBuffer.rewind();
-						mVolumeDataCudaArrays[lLayerIndex].copyFrom(lVolumeDataBuffer,
-																												true);
+						mVolumeDataCudaArrays[lRenderLayerIndex].copyFrom(lVolumeDataBuffer,
+																															true);
 					}
 
-					notifyCompletionOfDataBufferCopy(lLayerIndex);
+					notifyCompletionOfDataBufferCopy(lRenderLayerIndex);
 					lAnyVolumeDataUpdated |= true;
 
-					runProcessorsHook(lLayerIndex);
+					runProcessorsHook(lRenderLayerIndex);
 				}
 
 			}
@@ -507,7 +704,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		final long startTime = System.nanoTime();
 
-		if (lAnyVolumeDataUpdated || getIsUpdateVolumeRenderingParameters())
+		if (lAnyVolumeDataUpdated || haveVolumeRenderingParametersChanged()
+				|| getAdaptiveLODController().isKernelRunNeeded())
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
 				if (mVolumeDataCudaArrays[i] != null)
@@ -516,8 +714,6 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 					lUpdatedLayer[i] = true;
 				}
 			}
-		clearIsUpdateVolumeParameters();
-		clearVolumeDimensionsChanged();
 
 		final long endTime = System.nanoTime();
 
@@ -533,48 +729,73 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 */
 	private void runKernel(final int pRenderLayerIndex)
 	{
-		if (mOpenGLBufferDevicePointers[pRenderLayerIndex] == null)
-			return;
 
-		copyTransferFunctionArray(pRenderLayerIndex);
+		final CudaDevicePointer lCudaDevicePointer = mCudaBufferDevicePointer[pRenderLayerIndex];
 
-		pointTransferFunctionTextureToArray(pRenderLayerIndex);
-		pointTextureToArray(pRenderLayerIndex);
+		if (isLayerVisible(pRenderLayerIndex))
+		{
+			copyTransferFunctionArray(pRenderLayerIndex);
 
-		mOpenGLBufferDevicePointers[pRenderLayerIndex].map();
-		mOpenGLBufferDevicePointers[pRenderLayerIndex].set(0, true);
+			pointTransferFunctionTextureToArray(pRenderLayerIndex);
+			pointTextureToArray(pRenderLayerIndex);
 
-		mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
-																								cBlockSize),
-																				iDivUp(	getTextureHeight(),
-																								cBlockSize),
-																				1);
+			mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
+																									cBlockSize),
+																					iDivUp(	getTextureHeight(),
+																									cBlockSize),
+																					1);
 
-		mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
+			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
 
-		mVolumeRenderingFunction.launch(mOpenGLBufferDevicePointers[pRenderLayerIndex],
-																		getTextureWidth(),
-																		getTextureHeight(),
-																		(float) getBrightness(),
-																		(float) getTransferRangeMin(),
-																		(float) getTransferRangeMax(),
-																		(float) getGamma());
-		mCudaContext.synchronize();
-		mOpenGLBufferDevicePointers[pRenderLayerIndex].unmap();
+			final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
+			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
+			final int lMaxSteps = lMaxNumberSteps / getAdaptiveLODController().getNumberOfPasses();
+			final float lPhase = getAdaptiveLODController().getPhase();
+			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
+																																						: 1;
 
+			mVolumeRenderingFunction.launch(lCudaDevicePointer,
+																			getTextureWidth(),
+																			getTextureHeight(),
+																			(float) getBrightness(pRenderLayerIndex),
+																			(float) getTransferRangeMin(pRenderLayerIndex),
+																			(float) getTransferRangeMax(pRenderLayerIndex),
+																			(float) getGamma(pRenderLayerIndex),
+																			lMaxSteps,
+																			getDithering(pRenderLayerIndex),
+																			lPhase,
+																			lClear);
+		}
+		else
+			lCudaDevicePointer.fillByte((byte) 0, false);
+
+		if (mTemporaryTransfertBuffer == null || mTemporaryTransfertBuffer.capacity() != lCudaDevicePointer.getSizeInBytes())
+			mTemporaryTransfertBuffer = ByteBuffer.allocateDirect((int) lCudaDevicePointer.getSizeInBytes())
+																						.order(ByteOrder.nativeOrder());
+
+		mTemporaryTransfertBuffer.clear();
+
+		mCudaBufferDevicePointer[pRenderLayerIndex].copyTo(	mTemporaryTransfertBuffer,
+																												true);
+
+		mTemporaryTransfertBuffer.rewind();
+		copyBufferToTexture(pRenderLayerIndex, mTemporaryTransfertBuffer);
 	}
 
-	private void runProcessorsHook(int pRenderLayerIndex)
+	private void runProcessorsHook(final int pRenderLayerIndex)
 	{
-		for (Processor<?> lProcessor : mProcessorsMap.values())
-			if (lProcessor.isCompatibleRenderer(getClass()))
+		for (final Processor<?> lProcessor : mProcessorsMap.values())
+			if (lProcessor.isCompatibleProcessor(getClass()))
 			{
-				CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
-				lCUDAProcessor.applyToArray(mVolumeDataCudaArrays[pRenderLayerIndex]);
-				lCUDAProcessor.process(	pRenderLayerIndex,
-																getVolumeSizeX(),
-																getVolumeSizeY(),
-																getVolumeSizeZ());
+				if (lProcessor instanceof CUDAProcessor)
+				{
+					final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
+					lCUDAProcessor.applyToArray(mVolumeDataCudaArrays[pRenderLayerIndex]);
+				}
+				lProcessor.process(	pRenderLayerIndex,
+														getVolumeSizeX(),
+														getVolumeSizeY(),
+														getVolumeSizeZ());
 			}
 	}
 
@@ -586,80 +807,6 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	@Override
 	public void close()
 	{
-		final CudaContext lCudaContext = mCudaContext;
-		mCudaContext = null;
-
-		try
-		{
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
-			{
-				if (mVolumeDataCudaArrays[i] != null)
-					mVolumeDataCudaArrays[i].close();
-			}
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
-		}
-
-		try
-		{
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
-			{
-				if (mTransferFunctionCudaArrays[i] != null)
-					mTransferFunctionCudaArrays[i].close();
-			}
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
-		}
-
-		try
-		{
-			if (mCudaModule != null)
-				mCudaModule.close();
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
-		}
-
-		try
-		{
-			if (mCudaContext != null)
-				lCudaContext.close();
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
-		}
-
-		try
-		{
-			if (mCudaDevice != null)
-				mCudaDevice.close();
-			super.close();
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(	"Exception while closing " + this.getClass()
-																																		.getSimpleName(),
-																	e);
-		}
+		super.close();
 	}
-
 }

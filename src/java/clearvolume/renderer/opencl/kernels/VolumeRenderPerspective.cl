@@ -9,13 +9,33 @@
 */
 
 
+// Loop unrolling length:
+#define LOOPUNROLL 16
 
-#define maxSteps 200
-#define tstep 0.04f
+// Typedefs:
+typedef unsigned int  uint;
+typedef unsigned char uchar;
+
+// random number generator for dithering
+inline
+float random(uint x, uint y)
+{   
+    uint a = 4421 +(1+x)*(1+y) +x +y;
+
+    for(int i=0; i < 10; i++)
+    {
+        a = ((uint)1664525 * a + (uint)1013904223) % (uint)79197919;
+    }
+
+    float rnd = (a*1.0f)/(79197919.f);
+    
+    return rnd-0.5f;
+}
+
 
 // intersect ray with a box
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm
-
+inline
 int intersectBox(float4 r_o, float4 r_d, float4 boxmin, float4 boxmax, float *tnear, float *tfar)
 {
     // compute intersection of ray with all six bbox planes
@@ -37,28 +57,9 @@ int intersectBox(float4 r_o, float4 r_d, float4 boxmin, float4 boxmax, float *tn
 	return smallest_tmax > largest_tmin;
 }
 
-void printf4(const float4 v)
-{
-  printf("kernel: %.5f  %.5f  %.5f  %.5f\n",v.x,v.y,v.z,v.w); 
-}
 
-__kernel void
-max_project_Short2(__global short *d_output, 
-			uint Nx, uint Ny,
-			__constant float* invP,
-			__constant float* invM,
-			__read_only image3d_t volume)
-{
-  uint x = get_global_id(0);
-  uint y = get_global_id(1);
-
-	d_output[x+Nx*y] = 1000+x+Nx*y;
-			
-			
-}
-			
-
-
+// convert float4 into uint:
+inline
 uint rgbaFloatToInt(float4 rgba)
 {
     rgba = clamp(rgba,(float4)(0.f,0.f,0.f,0.f),(float4)(1.f,1.f,1.f,1.f));
@@ -66,53 +67,79 @@ uint rgbaFloatToInt(float4 rgba)
     return ((uint)(rgba.w*255)<<24) | ((uint)(rgba.z*255)<<16) | ((uint)(rgba.y*255)<<8) | (uint)(rgba.x*255);
 }
 
-
-
-__kernel void
-volumerender(__global uint *d_output, 
-			uint Nx, uint Ny,
-			float brightness,
-			float trangemin, 
-			float trangemax, 
-			float gamma,
-			__constant float* transferColor4,
-			__constant float* invP,
-			__constant float* invM,
-			__read_only image3d_t volume)
+// convert float4 into uint and take the max with an existing RGBA value in uint form:
+inline
+uint rgbaFloatToIntAndMax(uint existing, float4 rgba)
 {
-  const sampler_t volumeSampler =   CLK_NORMALIZED_COORDS_TRUE |
-	CLK_ADDRESS_CLAMP_TO_EDGE |
-	// CLK_FILTER_NEAREST ;
-	CLK_FILTER_LINEAR ;
+    rgba = clamp(rgba,(float4)(0.f,0.f,0.f,0.f),(float4)(1.f,1.f,1.f,1.f));
+    
+    const uint nr = (uint)(rgba.x*255);
+    const uint ng = (uint)(rgba.y*255);
+    const uint nb = (uint)(rgba.z*255);
+    const uint na = (uint)(rgba.w*255);
+    
+    const uint er = existing&0xFF;
+    const uint eg = (existing>>8)&0xFF;
+    const uint eb = (existing>>16)&0xFF;
+    const uint ea = (existing>>24)&0xFF;
+    
+    const uint  r = max(nr,er);
+    const uint  g = max(ng,eg);
+    const uint  b = max(nb,eb);
+    const uint  a = max(na,ea);
+    
+    return a<<24|b<<16|g<<8|r ;
+}
 
-	const sampler_t transferSampler =   CLK_NORMALIZED_COORDS_TRUE |
-	CLK_ADDRESS_CLAMP_TO_EDGE |
-	CLK_FILTER_LINEAR ;
 
+// Render function,
+// performs max projection and then uses the transfert function to obtain a color per pixel:
+__kernel void
+volumerender(								__global uint	*d_output, 
+													const	uint  imageW, 
+													const	uint  imageH,
+													const	float brightness,
+													const	float trangemin, 
+													const	float trangemax, 
+													const	float gamma,
+													const	int   maxsteps,
+													const	float dithering,
+													const	float phase,
+													const	int   clear,
+									__read_only image2d_t 	transferColor4,
+									__constant float* 		invP,
+									__constant float* 		invM,
+									__read_only image3d_t 	volume)
+{
+	// samplers:
+  const sampler_t volumeSampler   =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR ;
+	const sampler_t transferSampler =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR ;
 
+	// convert range bounds to linear map:
+  const float ta = 1.f/(trangemax-trangemin);
+  const float tb = trangemin/(trangemin-trangemax); 
 
-  uint x = get_global_id(0);
-  uint y = get_global_id(1);
+  // box bounds:
+  const float4 boxMin = (float4)(-1.0f, -1.0f, -1.0f,-1.0f);
+  const float4 boxMax = (float4)(1.0f, 1.0f, 1.0f,1.0f);
 
-  float ta = 1.f/(trangemax-trangemin);
-  float tb = trangemin/(trangemin-trangemax); 
-  float4 color = (float4)(transferColor4[0],transferColor4[1],transferColor4[2],transferColor4[3]);
+	// thread int coordinates:
+  const uint x = get_global_id(0);
+  const uint y = get_global_id(1);
   
-  float u = (x / (float) Nx)*2.0f-1.0f;
-  float v = (y / (float) Ny)*2.0f-1.0f;
+  if ((x >= imageW) || (y >= imageH)) return;
+  
+  // thread float coordinates:
+  const float u = (x / (float) imageW)*2.0f-1.0f;
+  const float v = (y / (float) imageH)*2.0f-1.0f;
 
-  float4 boxMin = (float4)(-1.0f, -1.0f, -1.0f,-1.0f);
-  float4 boxMax = (float4)(1.0f, 1.0f, 1.0f,1.0f);
-
+  // front and back:
+  const float4 front = (float4)(u,v,-1.f,1.f);
+  const float4 back = (float4)(u,v,1.f,1.f);
+  
   // calculate eye ray in world space
   float4 orig0, orig;
   float4 direc0, direc;
-  float4 temp;
-  float4 back,front;
-
-  
-  front = (float4)(u,v,-1,1);
-  back = (float4)(u,v,1,1);
   
   orig0.x = dot(front, ((float4)(invP[0],invP[1],invP[2],invP[3])));
   orig0.y = dot(front, ((float4)(invP[4],invP[5],invP[6],invP[7])));
@@ -145,54 +172,69 @@ volumerender(__global uint *d_output,
  
   // find intersection with box
   float tnear, tfar;
-  int hit = intersectBox(orig,direc, boxMin, boxMax, &tnear, &tfar);
-  if (!hit) {
-  	if ((x < Nx) && (y < Ny)) {
-  	  d_output[x+Nx*y] = 0.f;
-  	}
+  const int hit = intersectBox(orig,direc, boxMin, boxMax, &tnear, &tfar);
+  if (!hit) 
+  {
+  	d_output[x+imageW*y] = 0.f;
   	return;
   }
-  if (tnear < 0.0f) tnear = 0.0f;     // clamp to near plane
-
-
-  float colVal = 0.f;
   
-  float t = tnear;
+  // clamp to near plane:
+  if (tnear < 0.0f) tnear = 0.0f;     
 
-  float4 pos;
-  uint i;
-  for(i=0; i<maxSteps; i++) {		
-  	pos = orig + t*direc;
-
-
-	  pos = pos*0.5f+0.5f;    // map position to [0, 1] coordinates
-
-  	// read from 3D texture        
-  	float newVal = read_imagef(volume, volumeSampler, pos).x;
-		float mappedVal = pow(ta*newVal+tb,gamma);
-		
-  	colVal = max(colVal, mappedVal);
-
-	  t += tstep;
-  	if (t > tfar) break;
-  }
-
-  float4 colVal4 = brightness * colVal * color;
+	// compute step size:
+	const float tstep = fabs(tnear-tfar)/maxsteps;
   
+  // apply phase:
+	orig += phase*tstep*direc;
   
-  if ((x < Nx) && (y < Ny))
-		d_output[x+Nx*y] = rgbaFloatToInt(colVal4);
+	// randomize origin point a bit:
+	const uint entropy = (uint)( 6779514*fast_length(orig) + 6257327*fast_length(direc) );
+	orig += dithering*tstep*random(entropy+x,entropy+y)*direc;
 	
-	
- 	//if ((x==Nx/2) &&(y==Ny/2));
-	//	printf4((float4)(brightness, ta,tb,gamma));
-		//printf4(colVal4);
-	//	printf4((float4)(trangemin,trangemax, gamma,colVal));
-	
-	//printf4(read_imagef(volume, volumeSampler, (float4)(.51f,.5f,.5f,0.5f)));
- 
+	// precompute vectors: 
+	const float4 vecstep = 0.5f*tstep*direc;
+	float4 pos = orig*0.5f+0.5f + tnear*0.5f*direc;
+
+  // Loop unrolling setup: 
+  const uint unrolledmaxsteps = (maxsteps/LOOPUNROLL)+1;
   
+  // raycasting loop:
+  float maxp = 0.0f;
+	for(int i=0; i<unrolledmaxsteps; i++) 
+	{
+		for(int j=1; j<LOOPUNROLL; j++)
+		{
+	  	maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	  	pos+=vecstep;
+		}
+	}
+	
+  // Mapping to transfert function range and gamma correction: 
+  const float mappedVal = clamp(pow(mad(ta,maxp,tb),gamma),0.f,1.f);
+
+	// lookup in transfer function texture:
+  const float4 color = brightness*read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
   
+  // write output color:
+  d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color); //d_output[x + y*imageW]
 
 }
 
+
+
+// clears a buffer
+__kernel void
+clearbuffer(__global uint *buffer, 
+                     uint imageW, 
+                     uint imageH)
+{
+
+	// thread int coordinates:
+  const uint x = get_global_id(0);
+  const uint y = get_global_id(1);
+  
+   // clears buffer:
+  if ((x < imageW) || (y < imageH))
+  	buffer[x + y*imageW] = 0;
+}

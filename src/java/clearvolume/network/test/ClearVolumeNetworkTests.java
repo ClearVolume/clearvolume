@@ -14,7 +14,7 @@ import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.network.server.ClearVolumeTCPServerSink;
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
+import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
@@ -52,9 +52,15 @@ public class ClearVolumeNetworkTests
 	@Test
 	public void testLive() throws IOException, InterruptedException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
-																																														256,
-																																														256);
+    final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer("ClearVolumeTest",
+            256,
+            256,
+            1,
+            256,
+            256,
+            1,
+            false);
+
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -120,7 +126,7 @@ public class ClearVolumeNetworkTests
 			lClearVolumeTCPServerSink.sendVolume(lVolume);
 			Thread.sleep(10);
 		}
-		Thread.sleep(500);
+		Thread.sleep(2000);
 		if (pClose)
 		{
 			lClearVolumeTCPClient.stop();

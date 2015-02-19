@@ -15,12 +15,14 @@ import javax.sound.sampled.SourceDataLine;
  * @author Loic Royer (2015)
  *
  */
-public class SoundOut
+public class SoundOut implements AutoCloseable
 {
 
 	private AudioFormat mAudioFormat;
 
 	private SourceDataLine mSourceDataLine;
+
+	private Object mLock = new Object();
 
 	/**
 	 * Default constructor with 44100f samples per second, 16 bit samples, and 1
@@ -58,9 +60,12 @@ public class SoundOut
 	 */
 	public void start() throws LineUnavailableException
 	{
-		mSourceDataLine = AudioSystem.getSourceDataLine(mAudioFormat);
-		mSourceDataLine.open(mAudioFormat);
-		mSourceDataLine.start();
+		synchronized (mLock)
+		{
+			mSourceDataLine = AudioSystem.getSourceDataLine(mAudioFormat);
+			mSourceDataLine.open(mAudioFormat);
+			mSourceDataLine.start();
+		}
 	}
 
 	/**
@@ -68,9 +73,11 @@ public class SoundOut
 	 */
 	public void stop()
 	{
-		mSourceDataLine.flush();
-		mSourceDataLine.stop();
-		mSourceDataLine.close();
+		synchronized (mLock)
+		{
+			mSourceDataLine.flush();
+			mSourceDataLine.stop();
+		}
 	}
 
 	TByteArrayList mTemporaryBuffer = new TByteArrayList();
@@ -199,7 +206,10 @@ public class SoundOut
 
 		if (pReentrantLock != null && pReentrantLock.isHeldByCurrentThread())
 			pReentrantLock.unlock();
-		mSourceDataLine.write(pBuffer, 0, lLength);
+		synchronized (mLock)
+		{
+			mSourceDataLine.write(pBuffer, 0, lLength);
+		}
 	}
 
 	public static byte[] intArrayToByte(final int[] pIntArray,
@@ -221,6 +231,12 @@ public class SoundOut
 	public float getSampleRate()
 	{
 		return mAudioFormat.getSampleRate();
+	}
+
+	@Override
+	public void close()
+	{
+		mSourceDataLine.close();
 	}
 
 }

@@ -1,6 +1,6 @@
 
 plugins {
-  id "us.kirchmeier.capsule" version "0.9.0"
+  id "us.kirchmeier.capsule" version "0.10.0"
 }
 
 
@@ -10,6 +10,7 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'c'
 apply plugin: 'cpp'
+apply plugin: 'idea'
 
 [ compileJava, compileTestJava ]*.options*.encoding = 'UTF-8'
 
@@ -161,12 +162,17 @@ test
 }
 
 
+def versionOverrides = [
+    "org.jdom:jdom2": "2.0.5"
+]
 
 configurations.all 
 {
   // check for updates every build
   resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+  resolutionStrategy.force("org.jdom:jdom2:2.0.5")
 }
+
 
 dependencies 
 {
@@ -182,6 +188,7 @@ dependencies
     compile 'args4j:args4j:2.0.29'
     compile 'com.nativelibs4java:bridj:0.7-SNAPSHOT'
     compile 'com.nativelibs4java:javacl:1.0-SNAPSHOT'
+    compile 'com.apple:AppleJavaExtensions:1.4'
 
     def clearGLDir = null
     def clearCUDADir = null
@@ -207,7 +214,6 @@ dependencies
         compile group: "royer", name: "ClearGL", version: "1.0-SNAPSHOT", changing: true, transitive: true 
         compile group: "royer", name: "ClearCuda", version: "1.0-SNAPSHOT", changing: true, transitive: true 
     }
-    compile fileTree(dir: 'libs/jcuda', include: '*.jar')
 
     compile group: 'junit', name: 'junit', version: '4.12'
 
@@ -225,7 +231,14 @@ repositories
     {
         url "http://oss.sonatype.org/content/groups/public"
     } 
-
+    maven 
+    {
+        url "https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/"
+    }
+    maven
+    {
+        url "http://maven.imagej.net/content/repositories/releases/"
+    }
 }
 
 jar {

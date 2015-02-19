@@ -12,7 +12,7 @@ public abstract class CUDAProcessor<R> extends ProcessorBase<R>	implements
 	private CudaContext mCudaContext;
 
 	@Override
-	public boolean isCompatibleRenderer(Class<?> pRendererClass)
+	public boolean isCompatibleProcessor(Class<?> pRendererClass)
 	{
 		return pRendererClass == JCudaClearVolumeRenderer.class;
 	}

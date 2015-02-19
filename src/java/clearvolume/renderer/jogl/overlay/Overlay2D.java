@@ -3,23 +3,29 @@ package clearvolume.renderer.jogl.overlay;
 import javax.media.opengl.GL4;
 
 import cleargl.GLMatrix;
-import clearvolume.renderer.DisplayRequestInterface;
 
+/**
+ * Overlay2D interface - methods specific for 2D overlays.
+ *
+ * @author Loic Royer (2015)
+ *
+ */
 public interface Overlay2D
 {
-	public String getName();
+	/**
+	 * Returns true when the overlay has changed.
+	 * 
+	 * @return true if the overlay contents have changed and must be redrawn.
+	 */
+	public boolean hasChanged2D();
 
-	public boolean toggleDisplay();
-
-	public boolean isDisplayed();
-
-	public void init(	GL4 pGL4,
-										DisplayRequestInterface pDisplayRequestInterface);
-
-	public void render(	GL4 pGL4,
-											GLMatrix pProjectionMatrix,
-											GLMatrix pInvVolumeMatrix);
-
-	public boolean hasChanged();
+	/**
+	 * OpenGl code to render the 2D overlay.
+	 * 
+	 * @param pGL4
+	 * @param pProjectionMatrix
+	 * @param pInvVolumeMatrix
+	 */
+	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix);
 
 }

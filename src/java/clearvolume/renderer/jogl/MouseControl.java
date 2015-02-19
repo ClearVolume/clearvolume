@@ -1,6 +1,7 @@
 package clearvolume.renderer.jogl;
 
-import clearvolume.renderer.ClearVolumeRendererInterface;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
@@ -20,12 +21,12 @@ class MouseControl extends MouseAdapter implements MouseListener
 	/**
 	 * Reference of the renderer
 	 */
-	private final ClearVolumeRendererInterface mRenderer;
+	private final JOGLClearVolumeRenderer mRenderer;
 
 	/**
 	 * @param pJoglVolumeRenderer
 	 */
-	MouseControl(final ClearVolumeRendererInterface pClearVolumeRenderer)
+	MouseControl(final JOGLClearVolumeRenderer pClearVolumeRenderer)
 	{
 		mRenderer = pClearVolumeRenderer;
 	}
@@ -45,8 +46,9 @@ class MouseControl extends MouseAdapter implements MouseListener
 	{
 		handleRotationAndTranslation(pMouseEvent);
 		handleGammaMinMax(pMouseEvent);
-		mRenderer.requestDisplay();
-
+		mRenderer.notifyChangeOfVolumeRenderingParameters();
+		mRenderer.getAdaptiveLODController()
+							.notifyUserInteractionInProgress();
 	}
 
 	private void handleRotationAndTranslation(final MouseEvent pMouseEvent)
@@ -55,54 +57,24 @@ class MouseControl extends MouseAdapter implements MouseListener
 		final int dy = pMouseEvent.getY() - mPreviousMouseY;
 
 		// If the left button is held down, move the object
-		if (!pMouseEvent.isShiftDown() && !pMouseEvent.isControlDown()
+		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
+				&& !pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
 		{
 			mRenderer.addRotationX(dx);
 			mRenderer.addRotationY(dy);
-			mRenderer.notifyUpdateOfVolumeRenderingParameters();
 		}
 
 		// If the right button is held down, rotate the object
-		else if (!pMouseEvent.isControlDown() && (pMouseEvent.isButtonDown(3)))
+		else if (!pMouseEvent.isMetaDown() && !pMouseEvent.isControlDown()
+							&& (pMouseEvent.isButtonDown(3)))
 		{
 
 			mRenderer.addTranslationX(dx / 100.0f);
 			mRenderer.addTranslationY(-dy / 100.0f);
-			mRenderer.notifyUpdateOfVolumeRenderingParameters();
 		}
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
-	}
-
-	/**
-	 * Sets the transfer function range.
-	 * 
-	 * @param pMouseEvent
-	 */
-	public void handleGammaMinMax(final MouseEvent pMouseEvent)
-	{
-		if (!pMouseEvent.isShiftDown() && pMouseEvent.isControlDown()
-				&& pMouseEvent.isButtonDown(1))
-		{
-
-			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
-			final double ny = ((double) mRenderer.getWindowHeight() - (double) pMouseEvent.getY()) / mRenderer.getWindowHeight();
-
-			mRenderer.setTransferFunctionRange(	Math.abs(Math.pow(nx, 3)),
-																					Math.abs(Math.pow(ny, 3)));
-
-		}
-
-		if (pMouseEvent.isShiftDown() && !pMouseEvent.isControlDown()
-				&& pMouseEvent.isButtonDown(1))
-		{
-
-			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
-
-			mRenderer.setGamma(Math.tan(Math.PI * nx / 2));
-
-		}
 	}
 
 	/**
@@ -126,7 +98,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 	public void mouseWheelMoved(final MouseEvent pMouseEvent)
 	{
 
-		float[] lWheelRotation = pMouseEvent.getRotation();
+		final float[] lWheelRotation = pMouseEvent.getRotation();
 
 		final double lZoomWheelFactor = 0.0125f;
 
@@ -136,8 +108,10 @@ class MouseControl extends MouseAdapter implements MouseListener
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
 
-		mRenderer.notifyUpdateOfVolumeRenderingParameters();
-		mRenderer.requestDisplay();
+		mRenderer.notifyChangeOfVolumeRenderingParameters();
+		mRenderer.getAdaptiveLODController()
+							.notifyUserInteractionInProgress();
+
 	}
 
 	/**
@@ -155,8 +129,85 @@ class MouseControl extends MouseAdapter implements MouseListener
 		else if (pMouseEvent.getClickCount() == 2)
 		{
 			mRenderer.toggleFullScreen();
-			mRenderer.requestDisplay();
+			mRenderer.notifyChangeOfVolumeRenderingParameters();
 		}
+	}
+
+	@Override
+	public void mousePressed(MouseEvent pE)
+	{
+		super.mousePressed(pE);
+		mRenderer.getAdaptiveLODController()
+							.notifyUserInteractionInProgress();
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent pE)
+	{
+		mRenderer.getAdaptiveLODController().notifyUserInteractionEnded();
+		super.mouseReleased(pE);
 
 	}
+
+	/**
+	 * Sets the transfer function range.
+	 * 
+	 * @param pMouseEvent
+	 */
+	public void handleGammaMinMax(final MouseEvent pMouseEvent)
+	{
+		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
+				&& pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
+
+			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+			final double ny = ((double) mRenderer.getWindowHeight() - (double) pMouseEvent.getY()) / mRenderer.getWindowHeight();
+
+			mRenderer.setTransferFunctionRange(	Math.abs(Math.pow(nx, 3)),
+																					Math.abs(Math.pow(ny, 3)));
+
+		}
+
+		if (!pMouseEvent.isMetaDown() && pMouseEvent.isShiftDown()
+				&& !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
+
+			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+
+			mRenderer.setGamma(Math.tan(Math.PI * nx / 2));
+
+		}
+
+		if (!pMouseEvent.isMetaDown() && pMouseEvent.isShiftDown()
+				&& pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
+
+			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+
+			mRenderer.setBrightness(Math.tan(Math.PI * nx / 2));
+
+		}
+
+		if (pMouseEvent.isMetaDown() && pMouseEvent.isButtonDown(1))
+		{
+			double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+
+			nx = (max(min(nx, 1), 0));
+			nx = nx * nx;
+
+			mRenderer.setQuality(mRenderer.getCurrentRenderLayerIndex(), nx);
+		}
+
+		/*
+		System.out.println("isAltDown" + pMouseEvent.isAltDown());
+		System.out.println("isAltGraphDown" + pMouseEvent.isAltGraphDown());
+		System.out.println("isControlDown" + pMouseEvent.isControlDown());
+		System.out.println("isMetaDown" + pMouseEvent.isMetaDown());
+		System.out.println("isShiftDown" + pMouseEvent.isShiftDown());/**/
+
+	}
+
 }

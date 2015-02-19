@@ -5,11 +5,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class RingBuffer<T>
 {
-	private int mRingBufferMaxLength;
+	private final int mRingBufferMaxLength;
 	private volatile int mPointer;
-	private ArrayList<T> mArrayList;
+	private final ArrayList<T> mArrayList;
 
-	private ReentrantLock mLock = new ReentrantLock();
+	private final ReentrantLock mLock = new ReentrantLock();
 
 	public RingBuffer(final int pRingBufferMaxLength)
 	{
@@ -22,10 +22,18 @@ public class RingBuffer<T>
 	public int advance()
 	{
 		mLock.lock();
-		mPointer = normalizePointer(mPointer + 1);
-		final int lPointer = mPointer;
-		mLock.unlock();
-		return lPointer;
+		try
+		{
+			mPointer = normalizePointer(mPointer + 1);
+			final int lPointer = mPointer;
+			return lPointer;
+		}
+		finally
+		{
+			if (mLock.isHeldByCurrentThread())
+				mLock.unlock();
+		}
+
 	}
 
 	public void set(T pNewEntry)
@@ -38,7 +46,7 @@ public class RingBuffer<T>
 	public T get()
 	{
 		mLock.lock();
-		T lEntry = mArrayList.get(mPointer);
+		final T lEntry = mArrayList.get(mPointer);
 		mLock.unlock();
 		return lEntry;
 	}

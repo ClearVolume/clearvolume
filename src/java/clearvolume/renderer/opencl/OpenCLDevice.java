@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 import org.bridj.Pointer;
 
+import clearvolume.ClearVolumeCloseable;
+
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLContext;
 import com.nativelibs4java.opencl.CLDevice;
@@ -20,12 +22,13 @@ import com.nativelibs4java.opencl.CLImageFormat.ChannelDataType;
 import com.nativelibs4java.opencl.CLImageFormat.ChannelOrder;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
+import com.nativelibs4java.opencl.CLPlatform;
 import com.nativelibs4java.opencl.CLProgram;
 import com.nativelibs4java.opencl.CLQueue;
 import com.nativelibs4java.opencl.JavaCL;
 import com.nativelibs4java.util.IOUtils;
 
-public class OpenCLDevice
+public class OpenCLDevice implements ClearVolumeCloseable
 {
 
 	public CLContext mCLContext;
@@ -45,8 +48,11 @@ public class OpenCLDevice
 	{
 		// initialize the platform and devices OpenCL will use
 		// usually chooses the best, i.e. fastest, platform/device/context
+		CLPlatform bestPlatform = null;
+		CLDevice bestDevice = null;
 		try
 		{
+
 			if (useExistingOpenGLContext)
 			{
 				// FIXME using existing OpenGL context does not work yet
@@ -55,11 +61,35 @@ public class OpenCLDevice
 			}
 			else
 			{
-				mCLContext = JavaCL.createBestContext();
+				final CLPlatform[] platforms = JavaCL.listPlatforms();
+
+				long maxMemory = 0;
+
+				for (final CLPlatform p : platforms)
+				{
+					final CLDevice bestDeviceInPlatform = getDeviceWithMostMemory(p.listGPUDevices(true));
+
+					if (bestDeviceInPlatform.getGlobalMemSize() > maxMemory)
+					{
+						maxMemory = bestDeviceInPlatform.getGlobalMemSize();
+						bestDevice = bestDeviceInPlatform;
+						bestPlatform = p;
+					}
+				}
+
+				// final CLDevice bestDeviceInPlatform = JavaCL.getBestDevice();//
+				// bestPlatform.listGPUDevices(true)[1];
+				// bestDevice = bestDeviceInPlatform;
+
+				System.out.println("Using " + bestDevice.getName()
+														+ " from platform "
+														+ bestPlatform.getName());
+
+				mCLContext = JavaCL.createContext(null, bestDevice);
 
 			}
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			System.err.println("failed to create OpenCL context");
 			return false;
@@ -70,7 +100,7 @@ public class OpenCLDevice
 			mCLQueue = mCLContext.createDefaultQueue();
 
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			System.err.println("failed to create OpenCL context");
 			return false;
@@ -78,9 +108,9 @@ public class OpenCLDevice
 
 		try
 		{
-			mCLDevice = getBestDevice();
+			mCLDevice = bestDevice;
 		}
-		catch (Exception e)
+		catch (final Exception e)
 		{
 			System.err.println("could not get opencl device from context");
 			e.printStackTrace();
@@ -93,14 +123,56 @@ public class OpenCLDevice
 
 	}
 
-	private CLDevice getBestDevice()
+	private CLDevice getDeviceWithMostMemory(CLDevice[] devices)
 	{
-		CLDevice[] lDevices = mCLContext.getDevices();
+		long globalMemSize = 0;
+		CLDevice bestDevice = null;
 
-		for (CLDevice lCLDevice : lDevices)
-			System.out.println(lCLDevice);
+		for (final CLDevice lCLDevice : devices)
+		{
+			final long tmp = lCLDevice.getGlobalMemSize();
 
-		return lDevices[0];
+			System.out.println(lCLDevice.getPlatform().getName() + "."
+													+ lCLDevice.getName()
+													+ " L"
+													+ lCLDevice.getLocalMemSize()
+													/ 1024
+													+ "k/G"
+													+ lCLDevice.getGlobalMemSize()
+													/ 1024
+													/ 1024
+													+ "M mem with "
+													+ lCLDevice.getMaxComputeUnits()
+													+ " compute units");
+
+			final boolean lIsKnownHighPerfCard = lCLDevice.getName()
+																										.toLowerCase()
+																										.contains("geforce") || lCLDevice.getName()
+																																											.toLowerCase()
+																																											.contains("nvidia")
+																						|| lCLDevice.getName()
+																												.toLowerCase()
+																												.contains("quadro")
+																						|| lCLDevice.getName()
+																												.toLowerCase()
+																												.contains("firepro");
+
+			if (tmp > globalMemSize || (tmp == globalMemSize && lIsKnownHighPerfCard))
+			{
+				bestDevice = lCLDevice;
+				globalMemSize = tmp;
+			}
+
+		}
+
+		if (bestDevice == null)
+		{
+			bestDevice = devices[0];
+		}
+
+		System.out.println(bestDevice.getName() + " is best in platform "
+												+ bestDevice.getPlatform().getName());
+		return bestDevice;
 	}
 
 	public CLContext getContext()
@@ -108,10 +180,15 @@ public class OpenCLDevice
 		return mCLContext;
 	}
 
+	public CLQueue getQueue()
+	{
+		return mCLQueue;
+	}
+
 	public void printInfo()
 	{
 
-		System.out.printf("Device name:    \t %s \n", mCLDevice);
+		System.out.printf("Device name: \t %s \n", mCLDevice);
 
 	}
 
@@ -139,6 +216,18 @@ public class OpenCLDevice
 		try
 		{
 			mCLProgram = mCLContext.createProgram(src);
+			mCLProgram.setFastRelaxedMath();
+			mCLProgram.setFiniteMathOnly();
+			mCLProgram.setMadEnable();
+			// mCLProgram.setNoSignedZero();
+			mCLProgram.setUnsafeMathOptimizations();/**/
+			try
+			{
+				// mCLProgram.setNVOptimizationLevel(3);
+			}
+			catch (final Throwable e)
+			{
+			}
 		}
 		catch (final Exception e)
 		{
@@ -198,6 +287,35 @@ public class OpenCLDevice
 		return evt;
 	}
 
+	public CLEvent run(	final int pKernelIndex,
+											final int mNx,
+											final int mNy,
+											final int mNz,
+											final int mNxLoc,
+											final int mNyLoc,
+											final int mNzLoc)
+
+	{
+		final CLEvent evt = mCLKernelList.get(pKernelIndex)
+																			.enqueueNDRange(mCLQueue,
+																											new int[]
+																											{ mNx, mNy, mNz },
+																											new int[]
+																											{ mNxLoc,
+																												mNyLoc,
+																												mNzLoc });
+		evt.waitFor();
+		return evt;
+	}
+
+	public CLEvent run(final CLKernel pCLKernel, final int mNx)
+	{
+		final CLEvent evt = pCLKernel.enqueueNDRange(mCLQueue, new int[]
+		{ mNx });
+		evt.waitFor();
+		return evt;
+	}
+
 	public CLEvent run(	final CLKernel pCLKernel,
 											final int mNx,
 											final int mNy)
@@ -215,6 +333,22 @@ public class OpenCLDevice
 	{
 		final CLEvent evt = pCLKernel.enqueueNDRange(mCLQueue, new int[]
 		{ mNx, mNy, mNz });
+		evt.waitFor();
+		return evt;
+	}
+
+	public CLEvent run(	final CLKernel pCLKernel,
+											final int mNx,
+											final int mNy,
+											final int mNz,
+											final int mNxLoc,
+											final int mNyLoc,
+											final int mNzLoc)
+
+	{
+		final CLEvent evt = pCLKernel.enqueueNDRange(mCLQueue, new int[]
+		{ mNx, mNy, mNz }, new int[]
+		{ mNxLoc, mNyLoc, mNzLoc });
 		evt.waitFor();
 		return evt;
 	}
@@ -290,8 +424,12 @@ public class OpenCLDevice
 
 	public CLBuffer<Integer> createOutputIntBuffer(final long N)
 	{
-
 		return mCLContext.createIntBuffer(Usage.Output, N);
+	}
+
+	public CLBuffer<Integer> createInputOutputIntBuffer(final long N)
+	{
+		return mCLContext.createIntBuffer(Usage.InputOutput, N);
 	}
 
 	public CLBuffer<Byte> createOutputByteBuffer(final long N)
@@ -299,11 +437,16 @@ public class OpenCLDevice
 		return mCLContext.createByteBuffer(Usage.Output, N);
 	}
 
+	public CLBuffer<Byte> createInputOutputByteBuffer(final long N)
+	{
+		return mCLContext.createByteBuffer(Usage.InputOutput, N);
+	}
+
 	public CLEvent writeFloatBuffer(final CLBuffer<Float> pCLBuffer,
 																	final FloatBuffer pBuffer)
 	{
 
-		Pointer<Float> ptr = Pointer.pointerToFloats(pBuffer);
+		final Pointer<Float> ptr = Pointer.pointerToFloats(pBuffer);
 
 		return pCLBuffer.write(mCLQueue, ptr, true);
 
@@ -313,7 +456,7 @@ public class OpenCLDevice
 																	final ShortBuffer pBuffer)
 	{
 
-		Pointer<Short> ptr = Pointer.pointerToShorts(pBuffer);
+		final Pointer<Short> ptr = Pointer.pointerToShorts(pBuffer);
 
 		return pCLBuffer.write(mCLQueue, ptr, true);
 
@@ -323,7 +466,7 @@ public class OpenCLDevice
 																	final ByteBuffer pBuffer)
 	{
 
-		Pointer<Byte> ptr = Pointer.pointerToBytes(pBuffer);
+		final Pointer<Byte> ptr = Pointer.pointerToBytes(pBuffer);
 
 		return pCLBuffer.write(mCLQueue, ptr, true);
 
@@ -401,6 +544,19 @@ public class OpenCLDevice
 											true);
 	}
 
+	public CLEvent writeImage(final CLImage2D img,
+														final ByteBuffer pByteBuffer)
+	{
+		return img.write(	mCLQueue,
+											0,
+											0,
+											img.getWidth(),
+											img.getHeight(),
+											0,
+											pByteBuffer,
+											true);
+	}
+
 	public CLEvent writeFloatImage2D(	final CLImage2D img,
 																		final FloatBuffer pFloatBuffer)
 
@@ -416,4 +572,49 @@ public class OpenCLDevice
 											true);
 
 	}
+
+	@Override
+	public void close()
+	{
+		try
+		{
+
+			if (mCLKernelList != null)
+				for (CLKernel lCLKernel : mCLKernelList)
+				{
+					lCLKernel.release();
+					lCLKernel = null;
+				}
+
+			if (mCLProgram != null)
+			{
+				mCLProgram.release();
+				mCLProgram = null;
+			}
+
+			if (mCLQueue != null)
+			{
+				mCLQueue.release();
+				mCLQueue = null;
+			}
+
+			if (mCLContext != null)
+			{
+				mCLContext.release();
+				mCLContext = null;
+			}
+
+			if (mCLDevice != null)
+			{
+				mCLDevice.release();
+				mCLDevice = null;
+			}
+
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+		}
+	}
+
 }

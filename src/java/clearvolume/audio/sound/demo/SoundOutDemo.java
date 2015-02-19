@@ -1,4 +1,4 @@
-package clearvolume.audio.demo;
+package clearvolume.audio.sound.demo;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.sin;
@@ -17,6 +17,39 @@ import clearvolume.audio.sound.SoundOut;
  */
 public class SoundOutDemo
 {
+
+	@Test
+	public void testStartStop()	throws LineUnavailableException,
+															InterruptedException
+	{
+		int Period = 200;
+
+		double[] lNoise = new double[Period];
+		for (int j = 1; j < lNoise.length - 1; j++)
+			lNoise[j] += 1 * (Math.random() - 0.5);
+
+		for (int r = 0; r < 2; r++)
+			for (int j = 1; j < lNoise.length - 1; j++)
+				lNoise[j] = 0.5 * (lNoise[j - 1] + 2 * lNoise[j] + lNoise[j + 1]) / 4;/**/
+
+		SoundOut lSoundOut = new SoundOut();
+
+
+		for (int i = 0; i < 10; i++)
+		{
+			System.out.println("i=" + i);
+
+			lSoundOut.start();
+			for (int j = 0; j < 200; j++)
+				lSoundOut.play(lNoise, lNoise.length);
+			lSoundOut.stop();
+
+			Thread.sleep(100);
+		}
+
+
+		lSoundOut.close();
+	}
 
 	@Test
 	public void testGuitarSound() throws LineUnavailableException

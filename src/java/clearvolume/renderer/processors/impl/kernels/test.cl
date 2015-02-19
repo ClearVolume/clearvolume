@@ -11,7 +11,7 @@ test(__read_only image3d_t volume)
 	if(x==0 && y==0)
 	{
 	  float4 value = read_imagef(volume, volumeSampler, (float4)(.51f,.5f,.5f,0.5f));
-		printf("value: %.5f\n",value.r); 
+	//	printf("value: %.5f\n",value.r); 
   }
  
 }
