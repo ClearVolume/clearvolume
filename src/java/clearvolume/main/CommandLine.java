@@ -23,7 +23,7 @@ public class CommandLine
 	@Argument(required = true, index = 1, metaVar = "FILE", usage = "the config file for the experiment")
 	public String configFileName;
 
-	@Option(name = "-r", aliases =
+	@Option(name = "-mFauxscopeRandomizer", aliases =
 	{ "--resultsDir" }, metaVar = "DIR", usage = "directory to place the results file")
 	public String resultsDir = "results/";
 
