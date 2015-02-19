@@ -162,12 +162,17 @@ test
 }
 
 
+def versionOverrides = [
+    "org.jdom:jdom2": "2.0.5"
+]
 
 configurations.all 
 {
   // check for updates every build
   resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+  resolutionStrategy.force("org.jdom:jdom2:2.0.5")
 }
+
 
 dependencies 
 {
@@ -177,6 +182,8 @@ dependencies
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.4.1'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.1'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.1'
+    compile group: 'io.scif', name: 'pom-scifio', version: '5.3.0'
+    compile group: 'io.scif', name: 'scifio', version: '0.21.0'
     
     compile 'net.sf.trove4j:trove4j:3.0.3'
     compile 'com.miglayout:miglayout:3.7.4'
@@ -225,7 +232,14 @@ repositories
     {
         url "http://oss.sonatype.org/content/groups/public"
     } 
-
+    maven 
+    {
+        url "https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/"
+    }
+    maven
+    {
+        url "http://maven.imagej.net/content/repositories/releases/"
+    }
 }
 
 jar {

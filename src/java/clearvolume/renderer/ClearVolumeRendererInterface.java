@@ -42,6 +42,13 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	int getBytesPerVoxel();
 
+  /**
+   * Sets the number of bytes per voxels for the volume data.
+   *
+   * @return bytes-per-voxel
+   */
+  void setBytesPerVoxel(int bytesPerVoxel);
+
 	/**
 	 * Sets the display used by the renderer visible.
 	 *

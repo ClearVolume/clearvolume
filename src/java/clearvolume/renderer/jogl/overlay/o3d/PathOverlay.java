@@ -68,7 +68,9 @@ public class PathOverlay extends OverlayBase implements Overlay3D
               GLProgram.buildProgram(	pGL4,
                       PathOverlay.class,
                       new String[]{"shaders/path_vert.glsl",
-                      "shaders/path_frag.glsl"});
+                                   "shaders/path_geom.glsl",
+                                   "shaders/path_frag.glsl"});
+
       mPath = new ClearGeometryObject(mBoxGLProgram,
               3, GL4.GL_LINE_STRIP );
       mPath.setDynamic(true);
@@ -117,11 +119,14 @@ public class PathOverlay extends OverlayBase implements Overlay3D
       mPath.setModelView(lInvBoxMatrix);
       mPath.setProjection(pProjectionMatrix);
 
-      pGL4.glEnable(GL4.GL_BLEND);
+      pGL4.glDisable(GL4.GL_BLEND);
+      pGL4.glDisable(GL4.GL_CULL_FACE);
       pGL4.glBlendFunc(GL4.GL_SRC_ALPHA, GL4.GL_ONE_MINUS_SRC_ALPHA);
       pGL4.glBlendEquation(GL4.GL_FUNC_ADD);
 
       mPath.draw();
+
+      pGL4.glEnable(GL4.GL_BLEND);
 
       //mPathPoints.add(-0.2f + (float) Math.random() * ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f));
       mPath.updateVertices(mPathPoints.getFloatBuffer());
@@ -130,5 +135,9 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 
   public FloatBuffer getPathPoints() {
     return mPathPoints.getFloatBuffer();
+  }
+
+  public void addPathPoint(float x, float y, float z) {
+    mPathPoints.add(x, y, z);
   }
 }

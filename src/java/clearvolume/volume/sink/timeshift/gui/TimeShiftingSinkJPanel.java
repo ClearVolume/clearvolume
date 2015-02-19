@@ -71,7 +71,7 @@ public class TimeShiftingSinkJPanel extends JPanel {
 		lPastPresentPanel.setLayout(new BorderLayout(0, 0));
 
 		mPastLabel = new JLabel(" " + pTimeShiftingSink.getHardMemoryHorizon()
-				+ " timepoints past");
+				+ " mTotalNumberOfTimePoints past");
 		lPastPresentPanel.add(mPastLabel, BorderLayout.WEST);
 
 		mPresentLabel = new JLabel("present: timepoint "

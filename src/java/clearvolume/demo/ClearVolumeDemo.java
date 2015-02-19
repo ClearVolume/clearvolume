@@ -1,6 +1,7 @@
 package clearvolume.demo;
 
 import static java.lang.Math.abs;
+import io.scif.FormatException;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -20,6 +21,8 @@ import javax.swing.SwingUtilities;
 import org.junit.Test;
 
 import clearvolume.controller.ExternalRotationController;
+import clearvolume.demo.fauxscope.Fauxscope;
+import clearvolume.demo.fauxscope.LevyFlightRandomizer;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.VolumeCaptureListener;
@@ -219,7 +222,7 @@ public class ClearVolumeDemo
 						lCharValue = 0;
 
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
-					// lVolumeDataArray[lIndex] = (byte) (255 * x
+					// mVolumeDataArray[lIndex] = (byte) (255 * x
 					// * x
 					// / lResolutionX / lResolutionX);
 
@@ -242,9 +245,9 @@ public class ClearVolumeDemo
 			// s += .5;
 
 			/*
-			 * for (int i = 1; i < lVolumeDataArray.length - 1; i++)
-			 * lVolumeDataArray[i] = (byte) (((lVolumeDataArray[i - 1] + s
-			 * lVolumeDataArray[i] + lVolumeDataArray[i + 1]) / (s + 2)));
+			 * for (int i = 1; i < mVolumeDataArray.length - 1; i++)
+			 * mVolumeDataArray[i] = (byte) (((mVolumeDataArray[i - 1] + s
+			 * mVolumeDataArray[i] + mVolumeDataArray[i + 1]) / (s + 2)));
 			 */
 			for (int i = 1; i < lVolumeDataArray.length - 1; i++)
 				lVolumeDataArray[i] = (byte) (.99 * lVolumeDataArray[i]);
@@ -302,7 +305,7 @@ public class ClearVolumeDemo
 						lCharValue = 0;
 
 					lVolumeDataArray[lIndex] = (byte) lCharValue;
-					// lVolumeDataArray[lIndex] = (byte) (255 * x
+					// mVolumeDataArray[lIndex] = (byte) (255 * x
 					// * x
 					// / lResolutionX / lResolutionX);
 
@@ -491,7 +494,7 @@ public class ClearVolumeDemo
 					if (lCharValue < 12)
 						lCharValue = 0;
 
-					// lVolumeDataArray[lIndex] = (byte) lCharValue;
+					// mVolumeDataArray[lIndex] = (byte) lCharValue;
 					lVolumeDataArray[lIndex] = (byte) (255 * x * x
 
 					/ lResolutionX / lResolutionX);
@@ -564,7 +567,7 @@ public class ClearVolumeDemo
 					if (lCharValue < 12)
 						lCharValue = 0;
 
-					// lVolumeDataArray[lIndex] = (byte) lCharValue;
+					// mVolumeDataArray[lIndex] = (byte) lCharValue;
 					lVolumeDataArray[lIndex] = (byte) (255 * x * x
 
 					/ lResolutionX / lResolutionX);
@@ -587,6 +590,67 @@ public class ClearVolumeDemo
 																								lResolutionY,
 																								lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
+		}
+
+		lClearVolumeRenderer.close();
+	}
+
+	@Test
+	public void demoFauxScopeDrift() throws InterruptedException,
+																	IOException
+	{
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+																																																						1024,
+																																																						1024,
+																																																						1,
+																																																						1024,
+																																																						1024,
+																																																						1,
+																																																						false);
+
+		final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
+		final DriftOverlay lDriftOverlay = new DriftOverlay();
+		final Fauxscope lFauxscope = new Fauxscope();
+		lFauxscope.setCorrectionActive(false);
+
+		lFauxscope.use4DStacksFromDirectory("/Volumes/watson/StacksForUlrik/no_padding/uint8");
+
+		lClearVolumeRenderer.addOverlay(lDriftOverlay);
+		lOpenCLCenterMass.addResultListener(lDriftOverlay);
+		lOpenCLCenterMass.addResultListener(lFauxscope);
+
+		lClearVolumeRenderer.addProcessor(lOpenCLCenterMass);
+
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
+
+		final float[] res = lFauxscope.getResolution();
+
+		try
+		{
+
+			while (lClearVolumeRenderer.isShowing())
+			{
+
+				final ByteBuffer lQueryNextVolume = lFauxscope.queryNextVolume();
+
+				lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																									lQueryNextVolume,
+																									(int) res[0],
+																									(int) res[1],
+																									(int) res[2]);
+				lClearVolumeRenderer.setVoxelSize(1.0f, 1.0f, 3.0f);
+
+				lClearVolumeRenderer.requestDisplay();
+
+				Thread.sleep(10);
+			}
+		}
+		catch (IOException | FormatException e)
+		{
+			System.err.println("Exception during volume reading: ");
+			e.printStackTrace();
 		}
 
 		lClearVolumeRenderer.close();
@@ -726,6 +790,9 @@ public class ClearVolumeDemo
 		final PathOverlay lPathOverlay = new PathOverlay();
 		lClearVolumeRenderer.addOverlay(lPathOverlay);
 
+		final LevyFlightRandomizer lfr = new LevyFlightRandomizer(0.5f,
+																															0.5f);
+
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -761,6 +828,9 @@ public class ClearVolumeDemo
 		while (lClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(500);
+			final float[] point = lfr.getNextPoint();
+			lPathOverlay.addPathPoint(point[0], point[1], point[2]);
+			lClearVolumeRenderer.requestDisplay();
 		}
 
 		lClearVolumeRenderer.close();
@@ -1042,7 +1112,7 @@ public class ClearVolumeDemo
 																																				/ 5)));
 
 					/*
-					 * lVolumeDataArray[lIndex] = (byte) (255 * (1.0 / (1.0 +
+					 * mVolumeDataArray[lIndex] = (byte) (255 * (1.0 / (1.0 +
 					 * 0.5 * abs(z - lResolutionZ / 2))));/*
 					 */
 				}
