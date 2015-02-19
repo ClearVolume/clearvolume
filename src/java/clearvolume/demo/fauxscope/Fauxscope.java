@@ -1,24 +1,20 @@
 package clearvolume.demo.fauxscope;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.random;
-import static java.lang.Math.round;
+import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorResultListener;
 import io.scif.FormatException;
 import io.scif.Plane;
 import io.scif.Reader;
 import io.scif.SCIFIO;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-import javax.swing.JFileChooser;
-
-import clearvolume.renderer.processors.Processor;
-import clearvolume.renderer.processors.ProcessorResultListener;
+import static java.lang.Math.*;
 
 /**
  * Created by ulrik on 12/02/15.
@@ -111,10 +107,18 @@ public class Fauxscope implements ProcessorResultListener<float[]>
 		mCorrectionActive = pCorrectionActive;
 	}
 
-	public void use4DStacksFromDirectory(String pImagesFirectory)
+	public void use4DStacksFromDirectory(String pImagesDirectory)
 	{
+    File pImageDir;
 
-		if (pImagesFirectory == null)
+    if(pImagesDirectory != null) {
+      pImageDir = new File(pImagesDirectory);
+      if(!pImageDir.exists() || !pImageDir.isDirectory()) {
+        pImagesDirectory = null;
+      }
+    }
+
+    if (pImagesDirectory == null)
 		{
 			final JFileChooser chooser = new JFileChooser();
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -129,10 +133,10 @@ public class Fauxscope implements ProcessorResultListener<float[]>
 			{
 				return;
 			}
-			pImagesFirectory = chooser.getSelectedFile().getAbsolutePath();
+			pImagesDirectory = chooser.getSelectedFile().getAbsolutePath();
 		}
 
-		final File folder = new File(pImagesFirectory);
+		final File folder = new File(pImagesDirectory);
 		final File[] filesInFolder = folder.listFiles();
 		final ArrayList<String> tiffFiles = new ArrayList<>();
 
