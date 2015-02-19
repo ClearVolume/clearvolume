@@ -93,8 +93,8 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 		if (isdebug) {
 			getDevice().mCLQueue.finish();
 			long end = System.nanoTime();
-			System.out.println("time to compute center of mass " + 1.e-6
-					* (end - start) + " ms");
+			//System.out.println("time to compute center of mass " + 1.e-6
+			//		* (end - start) + " ms");
 			// System.out.printf("time to compute center of mass: %.2f ms\n",
 			// 1000000 * (start - end));
 		}
@@ -113,12 +113,14 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]> {
 			resZ += outZ.get(i);
 			resSum += outSum.get(i);
 		}
-    float[] result = rescaleToLocalVoxelInterval(resX/resSum, resY/resSum, resZ/resSum);
+    float[] tmp = rescaleToLocalVoxelInterval(resX/resSum, resY/resSum, resZ/resSum);
+    float[] result = new float[]{tmp[0], tmp[1], tmp[2], resX/resSum, resY/resSum, resZ/resSum};
 
     notifyListenersOfResult(result);
 	}
 
   private float[] rescaleToLocalVoxelInterval(float x, float y, float z) {
+    System.err.format("com: %g,%g,%g\n", x, y, z);
     float new_x = ((1.0f - (-1.0f)) * (x - 0) / (mCurrentWidthInVoxels - 0)) + -1.0f;
     float new_y = ((1.0f - (-1.0f)) * (y - 0) / (mCurrentHeightInVoxels - 0)) + -1.0f;
     float new_z = ((1.0f - (-1.0f)) * (z - 0) / (mCurrentDepthInVoxels - 0)) + -1.0f;

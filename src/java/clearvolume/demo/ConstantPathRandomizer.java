@@ -22,6 +22,10 @@ public class ConstantPathRandomizer implements FauxscopeRandomizer {
     result[1] = y.get(step) + dirY;
     result[2] = z.get(step) + dirZ;
 
+//    result[0] = dirX;
+//    result[1] = dirY;
+//    result[2] = dirZ;
+
     x.add(result[0]);
     y.add(result[1]);
     z.add(result[2]);

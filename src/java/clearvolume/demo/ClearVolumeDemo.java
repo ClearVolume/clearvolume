@@ -591,7 +591,7 @@ public class ClearVolumeDemo
             false);
     final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
     final DriftOverlay lDriftOverlay = new DriftOverlay();
-    final Fauxscope fs = new Fauxscope(true, lClearVolumeRenderer, new LevyFlightRandomizer(0.5f, 0.5f));
+    final Fauxscope fs = new Fauxscope(true, false, lClearVolumeRenderer, new LevyFlightRandomizer(0.5f, 0.5f));
 
     fs.use4DStacksFromDirectory();
 
@@ -643,12 +643,13 @@ public class ClearVolumeDemo
             false);
     final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
     final DriftOverlay lDriftOverlay = new DriftOverlay();
-    final Fauxscope fs = new Fauxscope(true, lClearVolumeRenderer, new ConstantPathRandomizer(0.0f, 0.1f, 0.1f));
+    final Fauxscope fs = new Fauxscope(true, true, lClearVolumeRenderer, new ConstantPathRandomizer(0.05f, 0.05f, 0.05f));
 
     fs.use4DStacksFromDirectory();
 
     lClearVolumeRenderer.addOverlay(lDriftOverlay);
     lOpenCLCenterMass.addResultListener(lDriftOverlay);
+    lOpenCLCenterMass.addResultListener(fs);
 
     lClearVolumeRenderer.addProcessor(lOpenCLCenterMass);
 
