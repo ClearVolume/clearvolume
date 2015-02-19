@@ -190,6 +190,7 @@ dependencies
     compile 'args4j:args4j:2.0.29'
     compile 'com.nativelibs4java:bridj:0.7-SNAPSHOT'
     compile 'com.nativelibs4java:javacl:1.0-SNAPSHOT'
+    compile 'com.apple:AppleJavaExtensions:1.4'
 
     def clearGLDir = null
     def clearCUDADir = null
