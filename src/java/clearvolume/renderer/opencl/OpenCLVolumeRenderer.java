@@ -106,7 +106,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		// FIXME using existing OpenGL context does not work yet
 		// mCLDevice.initCL(true);
 
-		mCLDevice.initCL(false);
+		mCLDevice.initCL();
 		mCLDevice.printInfo();
 		mRenderKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRenderPerspective.cl"),
 																						"volumerender");

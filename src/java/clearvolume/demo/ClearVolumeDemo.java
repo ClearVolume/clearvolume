@@ -1,7 +1,7 @@
 package clearvolume.demo;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.random;
+import io.scif.FormatException;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -21,6 +21,8 @@ import javax.swing.SwingUtilities;
 import org.junit.Test;
 
 import clearvolume.controller.ExternalRotationController;
+import clearvolume.demo.fauxscope.Fauxscope;
+import clearvolume.demo.fauxscope.LevyFlightRandomizer;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.VolumeCaptureListener;
@@ -593,7 +595,66 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.close();
 	}
 
+	@Test
+	public void demoFauxScopeDrift() throws InterruptedException,
+																	IOException
+	{
 
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+																																																						1024,
+																																																						1024,
+																																																						1,
+																																																						1024,
+																																																						1024,
+																																																						1,
+																																																						false);
+
+		final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
+		final DriftOverlay lDriftOverlay = new DriftOverlay();
+		final Fauxscope lFauxscope = new Fauxscope();
+		lFauxscope.setCorrectionActive(false);
+
+		lFauxscope.use4DStacksFromDirectory("/Volumes/watson/StacksForUlrik/no_padding/uint8");
+
+		lClearVolumeRenderer.addOverlay(lDriftOverlay);
+		lOpenCLCenterMass.addResultListener(lDriftOverlay);
+		lOpenCLCenterMass.addResultListener(lFauxscope);
+
+		lClearVolumeRenderer.addProcessor(lOpenCLCenterMass);
+
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
+
+		final float[] res = lFauxscope.getResolution();
+
+		try
+		{
+
+			while (lClearVolumeRenderer.isShowing())
+			{
+
+				final ByteBuffer lQueryNextVolume = lFauxscope.queryNextVolume();
+
+				lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																									lQueryNextVolume,
+																									(int) res[0],
+																									(int) res[1],
+																									(int) res[2]);
+				lClearVolumeRenderer.setVoxelSize(1.0f, 1.0f, 3.0f);
+
+				lClearVolumeRenderer.requestDisplay();
+
+				Thread.sleep(3000);
+			}
+		}
+		catch (IOException | FormatException e)
+		{
+			System.err.println("Exception during volume reading: ");
+			e.printStackTrace();
+		}
+
+		lClearVolumeRenderer.close();
+	}
 
 	@Test
 	public void demoCudaProcessors() throws InterruptedException,
@@ -729,6 +790,9 @@ public class ClearVolumeDemo
 		final PathOverlay lPathOverlay = new PathOverlay();
 		lClearVolumeRenderer.addOverlay(lPathOverlay);
 
+		final LevyFlightRandomizer lfr = new LevyFlightRandomizer(0.5f,
+																															0.5f);
+
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -761,15 +825,12 @@ public class ClearVolumeDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-		float x = 0, y = 0, z = 0;
-
 		while (lClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(500);
-			lPathOverlay.addPathPoint(x, y, z);
-			x += 0.01 * (random() - 0.5);
-			y += 0.01 * (random() - 0.5);
-			z += 0.01 * (random() - 0.5);
+			final float[] point = lfr.getNextPoint();
+			lPathOverlay.addPathPoint(point[0], point[1], point[2]);
+			lClearVolumeRenderer.requestDisplay();
 		}
 
 		lClearVolumeRenderer.close();
@@ -865,7 +926,7 @@ public class ClearVolumeDemo
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 768;
+		final int lResolutionX = 256;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
@@ -1424,10 +1485,10 @@ public class ClearVolumeDemo
 		{
 			Thread.sleep(500);
 
-			lClearVolumeRenderer.setLayerVisible(	i % 2,
+			/*lClearVolumeRenderer.setLayerVisible(	i % 2,
 																						!lClearVolumeRenderer.isLayerVisible(i % 2));/**/
 
-			lClearVolumeRenderer.requestDisplay();
+			// lClearVolumeRenderer.requestDisplay();
 			i++;
 		}
 

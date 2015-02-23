@@ -61,19 +61,71 @@ public class OpenCLDevice implements ClearVolumeCloseable
 			}
 			else
 			{
-				final CLPlatform[] platforms = JavaCL.listPlatforms();
+				final CLPlatform[] lCLPlatforms = JavaCL.listPlatforms();
+
+				for (final CLPlatform lCLPlatform : lCLPlatforms)
+				{
+					System.out.format("Platform: %s \n", lCLPlatform);
+					for (final CLDevice lCLDevice : lCLPlatform.listAllDevices(true))
+					{
+						try
+						{
+							System.out.format("	#device: %s \n",
+																lCLDevice.toString());
+							System.out.format("		*opencl version: %s \n",
+																lCLDevice.getOpenCLCVersion());
+
+							System.out.format("		*driver version: %s \n",
+																lCLDevice.getDriverVersion());
+
+							System.out.format("		*max mem alloc size: %d \n",
+																lCLDevice.getMaxMemAllocSize());
+							System.out.format("		*global mem size: %d \n",
+																lCLDevice.getGlobalMemSize());
+
+							System.out.format("		*max compute units: %d \n",
+																lCLDevice.getMaxComputeUnits());
+							System.out.format("		*max clock freq: %d \n",
+																lCLDevice.getMaxClockFrequency());
+
+							System.out.format("		*3d volume max depth: %d \n",
+																lCLDevice.getImage3DMaxWidth());
+							System.out.format("		*3d volume max depth: %d \n",
+																lCLDevice.getImage3DMaxHeight());
+							System.out.format("		*3d volume max depth: %d \n",
+																lCLDevice.getImage3DMaxDepth());
+
+
+							System.out.format(" 	isHostUnifiedMemory: %s \n",
+																lCLDevice.isHostUnifiedMemory()	? "true"
+																																: "false");
+						}
+						catch (final Throwable e)
+						{
+							e.printStackTrace();
+						}
+
+					}
+				}
 
 				long maxMemory = 0;
 
-				for (final CLPlatform p : platforms)
+				for (final CLPlatform p : lCLPlatforms)
 				{
 					final CLDevice bestDeviceInPlatform = getDeviceWithMostMemory(p.listGPUDevices(true));
 
 					if (bestDeviceInPlatform.getGlobalMemSize() > maxMemory)
 					{
-						maxMemory = bestDeviceInPlatform.getGlobalMemSize();
-						bestDevice = bestDeviceInPlatform;
-						bestPlatform = p;
+						try
+						{
+							maxMemory = bestDeviceInPlatform.getGlobalMemSize();
+							bestDevice = bestDeviceInPlatform;
+							bestPlatform = p;
+						}
+						catch (final Throwable e)
+						{
+							e.printStackTrace();
+						}
 					}
 				}
 

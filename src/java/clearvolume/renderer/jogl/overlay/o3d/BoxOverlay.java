@@ -1,6 +1,5 @@
 package clearvolume.renderer.jogl.overlay.o3d;
 
-
 import java.io.IOException;
 
 import javax.media.opengl.GL4;
@@ -29,6 +28,7 @@ public class BoxOverlay extends OverlayBase	implements
 {
 	protected GLProgram mBoxGLProgram;
 	protected ClearGeometryObject mClearGeometryObject;
+	private volatile boolean mHasChanged = true;
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.jogl.overlay.Overlay#getName()
@@ -45,7 +45,14 @@ public class BoxOverlay extends OverlayBase	implements
 	@Override
 	public boolean hasChanged3D()
 	{
-		return false;
+		return mHasChanged;
+	}
+
+	@Override
+	public boolean toggleDisplay()
+	{
+		mHasChanged = true;
+		return super.toggleDisplay();
 	}
 
 	/* (non-Javadoc)
@@ -258,6 +265,7 @@ public class BoxOverlay extends OverlayBase	implements
 			mBoxGLProgram.use(pGL4);
 			mClearGeometryObject.draw();
 
+			mHasChanged = false;
 		}
 	}
 
