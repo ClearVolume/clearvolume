@@ -1468,6 +1468,14 @@ public abstract class ClearVolumeRendererBase	implements
 		requestDisplay();
 	};
 
+	@Override
+	public void setMultiPass(boolean pMultiPassOn)
+	{
+		if (mAdaptiveLODController != null)
+			mAdaptiveLODController.setActive(pMultiPassOn);
+
+	}
+
 	/**
 	 * Returns the Adaptive level-of-detail(LOD) controller.
 	 * 

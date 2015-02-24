@@ -9,6 +9,7 @@ public class AdaptiveLODController
 	private final int[] cFibonacci = new int[]
 	{ 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144 };
 
+	private volatile boolean mActive;
 	private volatile boolean mMultiPassRenderingInProgress;
 	private volatile boolean mRenderingParametersOrVolumeDataChanged = true;
 
@@ -23,6 +24,16 @@ public class AdaptiveLODController
 	{
 		setFibonacciPassNumber(6);
 		resetMultiPassRendering();
+	}
+
+	public void setActive(boolean pActive)
+	{
+		mActive = pActive;
+	}
+
+	public boolean isActive()
+	{
+		return mActive;
 	}
 
 	private void setFibonacciPassNumber(final int pFibonacciPassNumber)
@@ -54,6 +65,9 @@ public class AdaptiveLODController
 
 	public float getPhase()
 	{
+		if (!mActive)
+			return 0;
+
 		final float lPhase = computePhase(getNumberOfPasses(),
 																			mGenerator,
 																			mPassIndex);
@@ -63,11 +77,16 @@ public class AdaptiveLODController
 
 	public int getNumberOfPasses()
 	{
+		if (!mActive)
+			return 1;
 		return cFibonacci[mFibonacciPassNumber];
 	}
 
 	public boolean isBufferClearingNeeded()
 	{
+		if (!mActive)
+			return true;
+
 		return mPassIndex == 0;
 	}
 
@@ -100,6 +119,9 @@ public class AdaptiveLODController
 
 	public boolean beforeRendering()
 	{
+		if (!mActive)
+			return true;
+
 		println(this.getClass().getSimpleName() + ".beforeRendering");
 		if (mMultiPassRenderingInProgress)
 		{
@@ -130,6 +152,7 @@ public class AdaptiveLODController
 
 	private boolean proceedWithMultiPass()
 	{
+
 		// multi-pass continues:
 		println(this.getClass().getSimpleName() + ".proceedWithMultiPass -> continues with pass #"
 						+ mPassIndex);

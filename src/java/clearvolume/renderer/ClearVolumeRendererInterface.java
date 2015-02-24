@@ -702,6 +702,15 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	public NewtCanvasAWT getNewtCanvasAWT();
 
+
+	/**
+	 * Sets the Multi-pass algorithm active or inactive.
+	 * 
+	 * @param pMultiPassOn
+	 *          true iof on, false if off
+	 */
+	void setMultiPass(boolean pMultiPassOn);
+
 	/**
 	 * Returns the adaptive level-of-detail (LOD) controller.
 	 * 
@@ -716,6 +725,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
+
 
 
 }
