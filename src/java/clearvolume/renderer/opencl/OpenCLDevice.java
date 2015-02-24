@@ -48,58 +48,16 @@ public class OpenCLDevice implements ClearVolumeCloseable
 	{
 		// initialize the platform and devices OpenCL will use
 		// usually chooses the best, i.e. fastest, platform/device/context
-		CLPlatform lBestPlatform = null;
-		CLDevice lBestDevice = JavaCL.getBestDevice();
-		try
+
+		CLDevice lBestDevice = getBestDevice(true);
+		if (lBestDevice == null)
+			lBestDevice = getBestDevice(false);
+		if (lBestDevice == null)
+			lBestDevice = JavaCL.getBestDevice();
+
+		if (lBestDevice == null)
 		{
-
-			if (useExistingOpenGLContext)
-			{
-				// FIXME using existing OpenGL context does not work yet
-				mCLContext = JavaCL.createContextFromCurrentGL();
-			}
-			else
-			{
-				final CLPlatform[] lCLPlatforms = JavaCL.listPlatforms();
-
-				printDevicesInfo(lCLPlatforms);
-
-				long lMaxMemory = 0;
-
-				for (final CLPlatform lCLPlatform : lCLPlatforms)
-				{
-					final CLDevice lBestCLDeviceForPlateform = getDeviceWithMostMemory(lCLPlatform.listGPUDevices(true));
-
-					if (lBestCLDeviceForPlateform != null)
-						if (lBestCLDeviceForPlateform.getGlobalMemSize() > lMaxMemory)
-						{
-							try
-							{
-								lMaxMemory = lBestCLDeviceForPlateform.getGlobalMemSize();
-								lBestDevice = lBestCLDeviceForPlateform;
-								lBestPlatform = lCLPlatform;
-							}
-							catch (final Throwable e)
-							{
-								e.printStackTrace();
-							}
-						}
-				}
-
-				// final CLDevice bestDeviceInPlatform = JavaCL.getBestDevice();//
-				// bestPlatform.listGPUDevices(true)[1];
-				// bestDevice = bestDeviceInPlatform;
-
-				System.out.println("Using " + lBestDevice.getName()
-														+ " from platform "
-														+ lBestPlatform.getName());
-
-			}
-		}
-		catch (final Throwable e)
-		{
-			System.err.println("failed to create OpenCL context");
-			e.printStackTrace();
+			System.err.println("Could not find best OpenCL device!");
 			return false;
 		}
 
@@ -112,6 +70,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
 		catch (final Throwable e)
 		{
 			System.err.println("failed to create OpenCL context");
+			e.printStackTrace();
 			return false;
 		}
 
@@ -121,7 +80,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 		}
 		catch (final Throwable e)
 		{
-			System.err.println("failed to create OpenCL context");
+			System.err.println("failed to create default queue");
+			e.printStackTrace();
 			return false;
 		}
 
@@ -129,6 +89,54 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 		return (mCLContext != null && mCLContext != null && mCLQueue != null);
 
+	}
+
+	private CLDevice getBestDevice(boolean pGPUOnly)
+	{
+		CLDevice lBestDevice = null;
+		try
+		{
+			final CLPlatform[] lCLPlatforms = JavaCL.listPlatforms();
+
+			printDevicesInfo(lCLPlatforms);
+
+			long lMaxMemory = 0;
+
+			CLPlatform lBestPlatform = null;
+			for (final CLPlatform lCLPlatform : lCLPlatforms)
+			{
+				final CLDevice lBestCLDeviceForPlateform = getDeviceWithMostMemory(	pGPUOnly,
+																																						lCLPlatform);
+
+				if (lBestCLDeviceForPlateform != null)
+					if (lBestCLDeviceForPlateform.getGlobalMemSize() > lMaxMemory)
+					{
+						try
+						{
+							lMaxMemory = lBestCLDeviceForPlateform.getGlobalMemSize();
+							lBestDevice = lBestCLDeviceForPlateform;
+							lBestPlatform = lCLPlatform;
+						}
+						catch (final Throwable e)
+						{
+							e.printStackTrace();
+						}
+					}
+			}
+
+			if (lBestPlatform != null && lBestDevice != null)
+				System.out.println("Found best device to be: " + lBestDevice.getName()
+														+ " from platform "
+														+ lBestPlatform.getName());
+
+		}
+		catch (final Throwable e)
+		{
+			System.err.println("failed to find best device");
+			e.printStackTrace();
+			return null;
+		}
+		return lBestDevice;
 	}
 
 	private void printDevicesInfo(final CLPlatform[] lCLPlatforms)
@@ -177,14 +185,19 @@ public class OpenCLDevice implements ClearVolumeCloseable
 		}
 	}
 
-	private CLDevice getDeviceWithMostMemory(CLDevice[] pDevices)
+	private CLDevice getDeviceWithMostMemory(	boolean pGPUOnly,
+																						CLPlatform pCLPlatform)
 	{
+
+		final CLDevice[] lDevices = pGPUOnly ? pCLPlatform.listGPUDevices(true)
+																				: pCLPlatform.listCPUDevices(true);
+
 		long lBestDeviceGlobalMemSize = 0;
 		CLDevice lBestDevice = null;
 
 		try
 		{
-			for (final CLDevice lCLDevice : pDevices)
+			for (final CLDevice lCLDevice : lDevices)
 			{
 				final long lDeviceGlobalMemSize = lCLDevice.getGlobalMemSize();
 
@@ -226,9 +239,9 @@ public class OpenCLDevice implements ClearVolumeCloseable
 			e.printStackTrace();
 		}
 
-		if (lBestDevice == null)
+		if (lBestDevice == null && lDevices.length >= 1)
 		{
-			lBestDevice = pDevices[0];
+			lBestDevice = lDevices[0];
 		}
 
 		System.out.println(lBestDevice.getName() + " is best in platform "
