@@ -48,8 +48,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 	{
 		// initialize the platform and devices OpenCL will use
 		// usually chooses the best, i.e. fastest, platform/device/context
-		CLPlatform bestPlatform = null;
-		CLDevice bestDevice = null;
+		CLPlatform lBestPlatform = null;
+		CLDevice lBestDevice = JavaCL.getBestDevice();
 		try
 		{
 
@@ -57,91 +57,59 @@ public class OpenCLDevice implements ClearVolumeCloseable
 			{
 				// FIXME using existing OpenGL context does not work yet
 				mCLContext = JavaCL.createContextFromCurrentGL();
-
 			}
 			else
 			{
 				final CLPlatform[] lCLPlatforms = JavaCL.listPlatforms();
 
+				printDevicesInfo(lCLPlatforms);
+
+				long lMaxMemory = 0;
+
 				for (final CLPlatform lCLPlatform : lCLPlatforms)
 				{
-					System.out.format("Platform: %s \n", lCLPlatform);
-					for (final CLDevice lCLDevice : lCLPlatform.listAllDevices(true))
-					{
-						try
+					final CLDevice lBestCLDeviceForPlateform = getDeviceWithMostMemory(lCLPlatform.listGPUDevices(true));
+
+					if (lBestCLDeviceForPlateform != null)
+						if (lBestCLDeviceForPlateform.getGlobalMemSize() > lMaxMemory)
 						{
-							System.out.format("	#device: %s \n",
-																lCLDevice.toString());
-							System.out.format("		*opencl version: %s \n",
-																lCLDevice.getOpenCLCVersion());
-
-							System.out.format("		*driver version: %s \n",
-																lCLDevice.getDriverVersion());
-
-							System.out.format("		*max mem alloc size: %d \n",
-																lCLDevice.getMaxMemAllocSize());
-							System.out.format("		*global mem size: %d \n",
-																lCLDevice.getGlobalMemSize());
-
-							System.out.format("		*max compute units: %d \n",
-																lCLDevice.getMaxComputeUnits());
-							System.out.format("		*max clock freq: %d \n",
-																lCLDevice.getMaxClockFrequency());
-
-							System.out.format("		*3d volume max depth: %d \n",
-																lCLDevice.getImage3DMaxWidth());
-							System.out.format("		*3d volume max depth: %d \n",
-																lCLDevice.getImage3DMaxHeight());
-							System.out.format("		*3d volume max depth: %d \n",
-																lCLDevice.getImage3DMaxDepth());
-
-
-							System.out.format(" 	isHostUnifiedMemory: %s \n",
-																lCLDevice.isHostUnifiedMemory()	? "true"
-																																: "false");
+							try
+							{
+								lMaxMemory = lBestCLDeviceForPlateform.getGlobalMemSize();
+								lBestDevice = lBestCLDeviceForPlateform;
+								lBestPlatform = lCLPlatform;
+							}
+							catch (final Throwable e)
+							{
+								e.printStackTrace();
+							}
 						}
-						catch (final Throwable e)
-						{
-							e.printStackTrace();
-						}
-
-					}
-				}
-
-				long maxMemory = 0;
-
-				for (final CLPlatform p : lCLPlatforms)
-				{
-					final CLDevice bestDeviceInPlatform = getDeviceWithMostMemory(p.listGPUDevices(true));
-
-					if (bestDeviceInPlatform.getGlobalMemSize() > maxMemory)
-					{
-						try
-						{
-							maxMemory = bestDeviceInPlatform.getGlobalMemSize();
-							bestDevice = bestDeviceInPlatform;
-							bestPlatform = p;
-						}
-						catch (final Throwable e)
-						{
-							e.printStackTrace();
-						}
-					}
 				}
 
 				// final CLDevice bestDeviceInPlatform = JavaCL.getBestDevice();//
 				// bestPlatform.listGPUDevices(true)[1];
 				// bestDevice = bestDeviceInPlatform;
 
-				System.out.println("Using " + bestDevice.getName()
+				System.out.println("Using " + lBestDevice.getName()
 														+ " from platform "
-														+ bestPlatform.getName());
-
-				mCLContext = JavaCL.createContext(null, bestDevice);
+														+ lBestPlatform.getName());
 
 			}
 		}
-		catch (final Exception e)
+		catch (final Throwable e)
+		{
+			System.err.println("failed to create OpenCL context");
+			e.printStackTrace();
+			return false;
+		}
+
+		mCLDevice = lBestDevice;
+
+		try
+		{
+			mCLContext = JavaCL.createContext(null, lBestDevice);
+		}
+		catch (final Throwable e)
 		{
 			System.err.println("failed to create OpenCL context");
 			return false;
@@ -150,22 +118,10 @@ public class OpenCLDevice implements ClearVolumeCloseable
 		try
 		{
 			mCLQueue = mCLContext.createDefaultQueue();
-
 		}
-		catch (final Exception e)
+		catch (final Throwable e)
 		{
 			System.err.println("failed to create OpenCL context");
-			return false;
-		}
-
-		try
-		{
-			mCLDevice = bestDevice;
-		}
-		catch (final Exception e)
-		{
-			System.err.println("could not get opencl device from context");
-			e.printStackTrace();
 			return false;
 		}
 
@@ -175,56 +131,109 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	}
 
-	private CLDevice getDeviceWithMostMemory(CLDevice[] devices)
+	private void printDevicesInfo(final CLPlatform[] lCLPlatforms)
 	{
-		long globalMemSize = 0;
-		CLDevice bestDevice = null;
-
-		for (final CLDevice lCLDevice : devices)
+		for (final CLPlatform lCLPlatform : lCLPlatforms)
 		{
-			final long tmp = lCLDevice.getGlobalMemSize();
-
-			System.out.println(lCLDevice.getPlatform().getName() + "."
-													+ lCLDevice.getName()
-													+ " L"
-													+ lCLDevice.getLocalMemSize()
-													/ 1024
-													+ "k/G"
-													+ lCLDevice.getGlobalMemSize()
-													/ 1024
-													/ 1024
-													+ "M mem with "
-													+ lCLDevice.getMaxComputeUnits()
-													+ " compute units");
-
-			final boolean lIsKnownHighPerfCard = lCLDevice.getName()
-																										.toLowerCase()
-																										.contains("geforce") || lCLDevice.getName()
-																																											.toLowerCase()
-																																											.contains("nvidia")
-																						|| lCLDevice.getName()
-																												.toLowerCase()
-																												.contains("quadro")
-																						|| lCLDevice.getName()
-																												.toLowerCase()
-																												.contains("firepro");
-
-			if (tmp > globalMemSize || (tmp == globalMemSize && lIsKnownHighPerfCard))
+			System.out.format("Platform: %s \n", lCLPlatform);
+			for (final CLDevice lCLDevice : lCLPlatform.listAllDevices(true))
 			{
-				bestDevice = lCLDevice;
-				globalMemSize = tmp;
+				try
+				{
+					System.out.format("	#device: %s \n", lCLDevice.toString());
+					System.out.format("		*opencl version: %s \n",
+														lCLDevice.getOpenCLCVersion());
+
+					System.out.format("		*driver version: %s \n",
+														lCLDevice.getDriverVersion());
+
+					System.out.format("		*max mem alloc size: %d \n",
+														lCLDevice.getMaxMemAllocSize());
+					System.out.format("		*global mem size: %d \n",
+														lCLDevice.getGlobalMemSize());
+
+					System.out.format("		*max compute units: %d \n",
+														lCLDevice.getMaxComputeUnits());
+					System.out.format("		*max clock freq: %d \n",
+														lCLDevice.getMaxClockFrequency());
+
+					System.out.format("		*3d volume max depth: %d \n",
+														lCLDevice.getImage3DMaxWidth());
+					System.out.format("		*3d volume max depth: %d \n",
+														lCLDevice.getImage3DMaxHeight());
+					System.out.format("		*3d volume max depth: %d \n",
+														lCLDevice.getImage3DMaxDepth());
+
+					System.out.format("		*isHostUnifiedMemory: %s \n",
+														lCLDevice.isHostUnifiedMemory()	? "true"
+																														: "false");
+				}
+				catch (final Throwable e)
+				{
+					e.printStackTrace();
+				}
+
 			}
-
 		}
+	}
 
-		if (bestDevice == null)
+	private CLDevice getDeviceWithMostMemory(CLDevice[] pDevices)
+	{
+		long lBestDeviceGlobalMemSize = 0;
+		CLDevice lBestDevice = null;
+
+		try
 		{
-			bestDevice = devices[0];
+			for (final CLDevice lCLDevice : pDevices)
+			{
+				final long lDeviceGlobalMemSize = lCLDevice.getGlobalMemSize();
+
+				System.out.println(lCLDevice.getPlatform().getName() + "."
+														+ lCLDevice.getName()
+														+ " L"
+														+ lCLDevice.getLocalMemSize()
+														/ 1024
+														+ "k/G "
+														+ lCLDevice.getGlobalMemSize()
+														/ 1024
+														/ 1024
+														+ "M mem with "
+														+ lCLDevice.getMaxComputeUnits()
+														+ " compute units");
+
+				final boolean lIsKnownHighPerfCard = lCLDevice.getName()
+																											.toLowerCase()
+																											.contains("geforce") || lCLDevice.getName()
+																																												.toLowerCase()
+																																												.contains("nvidia")
+																							|| lCLDevice.getName()
+																													.toLowerCase()
+																													.contains("quadro")
+																							|| lCLDevice.getName()
+																													.toLowerCase()
+																													.contains("firepro");
+
+				if (lDeviceGlobalMemSize > lBestDeviceGlobalMemSize || (lDeviceGlobalMemSize >= lBestDeviceGlobalMemSize && lIsKnownHighPerfCard))
+				{
+					lBestDevice = lCLDevice;
+					lBestDeviceGlobalMemSize = lDeviceGlobalMemSize;
+				}
+
+			}
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
 		}
 
-		System.out.println(bestDevice.getName() + " is best in platform "
-												+ bestDevice.getPlatform().getName());
-		return bestDevice;
+		if (lBestDevice == null)
+		{
+			lBestDevice = pDevices[0];
+		}
+
+		System.out.println(lBestDevice.getName() + " is best in platform "
+												+ lBestDevice.getPlatform().getName());
+		return lBestDevice;
 	}
 
 	public CLContext getContext()
