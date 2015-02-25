@@ -192,6 +192,9 @@ public class OpenCLDevice implements ClearVolumeCloseable
 		final CLDevice[] lDevices = pGPUOnly ? pCLPlatform.listGPUDevices(true)
 																				: pCLPlatform.listCPUDevices(true);
 
+		if (lDevices.length == 0)
+			return null;
+
 		long lBestDeviceGlobalMemSize = 0;
 		CLDevice lBestDevice = null;
 
@@ -233,15 +236,16 @@ public class OpenCLDevice implements ClearVolumeCloseable
 				}
 
 			}
+
+			if (lBestDevice == null && lDevices.length >= 1)
+			{
+				lBestDevice = lDevices[0];
+			}
+
 		}
 		catch (final Throwable e)
 		{
 			e.printStackTrace();
-		}
-
-		if (lBestDevice == null && lDevices.length >= 1)
-		{
-			lBestDevice = lDevices[0];
 		}
 
 		System.out.println(lBestDevice.getName() + " is best in platform "
