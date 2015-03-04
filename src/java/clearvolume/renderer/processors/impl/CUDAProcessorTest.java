@@ -14,6 +14,12 @@ import clearcuda.CudaModule;
 import clearcuda.CudaTextureReference;
 import clearvolume.renderer.processors.CUDAProcessor;
 
+/**
+ * 
+ *
+ * @author Loic Royer (2015)
+ *
+ */
 public class CUDAProcessorTest extends CUDAProcessor<Double>
 {
 	private static final int cBlockSize = 32;
@@ -55,9 +61,9 @@ public class CUDAProcessorTest extends CUDAProcessor<Double>
 																"includes/helper_math.h",
 																"includes/helper_string.h");
 
-				File lPTXFile = lCudaCompiler.compile(lCUFile);
+				final File lPTXFile = lCudaCompiler.compile(lCUFile);
 
-				CudaModule lCudaModule = CudaModule.moduleFromPTX(lPTXFile);
+				final CudaModule lCudaModule = CudaModule.moduleFromPTX(lPTXFile);
 
 				mVolumeDataCudaTexture = lCudaModule.getTexture("tex");
 				mVolumeDataCudaTexture.setFilterMode(CUfilter_mode.CU_TR_FILTER_MODE_LINEAR);
@@ -69,7 +75,7 @@ public class CUDAProcessorTest extends CUDAProcessor<Double>
 
 				mSumFunction = lCudaModule.getFunction("test");
 			}
-			catch (IOException e)
+			catch (final IOException e)
 			{
 				e.printStackTrace();
 			}
@@ -96,7 +102,7 @@ public class CUDAProcessorTest extends CUDAProcessor<Double>
 		mSumFunction.launch();
 		getContext().synchronize();
 
-		double lThisValueShouldMakeSenseSomehow = 0;
+		final double lThisValueShouldMakeSenseSomehow = 0;
 
 		notifyListenersOfResult(lThisValueShouldMakeSenseSomehow);
 	}
