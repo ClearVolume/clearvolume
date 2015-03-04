@@ -1,9 +1,9 @@
 
 
 plugins {
-  id "us.kirchmeier.capsule" version "0.9.0" //  VERSION 0.10.0 of Cpasule has a bug!! staying with 0.9.0
-  id "com.jfrog.bintray" version "1.0"
-  id "com.github.hierynomus.license" version "0.11.0"
+	id "us.kirchmeier.capsule" version "0.9.0" //  VERSION 0.10.0 of Cpasule has a bug!! staying with 0.9.0
+	id "com.jfrog.bintray" version "1.0"
+	id "com.github.hierynomus.license" version "0.11.0"
 }
 
 
@@ -16,257 +16,237 @@ apply plugin: 'cpp'
 apply plugin: 'idea'
 apply plugin: 'idea'
 
-[ compileJava, compileTestJava ]*.options*.encoding = 'UTF-8'
+[
+	compileJava,
+	compileTestJava
+]*.options*.encoding = 'UTF-8'
 
 
 //***********************************************************************************
 // NATIVE CODE BUILDING
 
-ext { 
-    javaHome = System.getenv('JAVA_HOME')
-    javaHomeInclude = javaHome + '/include'
-    if (System.properties['os.name'].toLowerCase().contains('linux'))
-    {
-        javaHomeIncludeOs = javaHomeInclude + '/linux'
-    }
-    else
-    {
-        javaHomeIncludeOs = javaHomeInclude + '/win32'
-    }
+ext {
+	javaHome = System.getenv('JAVA_HOME')
+	javaHomeInclude = javaHome + '/include'
+	if (System.properties['os.name'].toLowerCase().contains('linux'))
+	{
+		javaHomeIncludeOs = javaHomeInclude + '/linux'
+	}
+	else
+	{
+		javaHomeIncludeOs = javaHomeInclude + '/win32'
+	}
 }
 dependencies {
-    if (! javaHome) {
-        logger.error('JAVA_HOME is not set.')
-    }
-    println 'JAVA_HOME: ' + javaHome
+	if (! javaHome) {
+		logger.error('JAVA_HOME is not set.')
+	}
+	println 'JAVA_HOME: ' + javaHome
 }
 
 model {
-    platforms {
-        x64 {
-            architecture "x86_64"
-        }
-    }
+	platforms {
+		x64 { architecture "x86_64" }
+	}
 
-    repositories {
-        libs(PrebuiltLibraries) {
-            jvm {
-                binaries.withType(SharedLibraryBinary) {
-                    sharedLibraryFile = file(javaHome + "/lib/jvm.lib")
-                }
-            }
-        }
-    }
+	repositories {
+		libs(PrebuiltLibraries) {
+			jvm {
+				binaries.withType(SharedLibraryBinary) {
+					sharedLibraryFile = file(javaHome + "/lib/jvm.lib")
+				}
+			}
+		}
+	}
 
-    toolChains {
-        visualCpp(VisualCpp) {
-            // Specify the installDir if Visual Studio cannot be located
-            // installDir "C:/Apps/Microsoft Visual Studio 10.0"
-        }
-    }
+	toolChains {
+		visualCpp(VisualCpp) {
+			// Specify the installDir if Visual Studio cannot be located
+			// installDir "C:/Apps/Microsoft Visual Studio 10.0"
+		}
+	}
 }
 
 binaries.all {
-    if (toolChain in VisualCpp) {
-        cppCompiler.args "/EHsc"
-    }
+	if (toolChain in VisualCpp) {
+		cppCompiler.args "/EHsc"
+	}
 }
 
 libraries {
-   cvlib {
-        targetPlatforms "x64"
-   }
+	cvlib { targetPlatforms "x64" }
 }
 
 sources {
-    cvlib {
-        cpp {
-            source {
-                srcDirs "src/cpp"
-                include "**/*.cpp"
-            }
-            exportedHeaders {
-                srcDirs "src/cpp","src/cpp/lib"
-                include "**/*.h"
-            } 
-        }
-    }
+	cvlib {
+		cpp {
+			source {
+				srcDirs "src/cpp"
+				include "**/*.cpp"
+			}
+			exportedHeaders {
+				srcDirs "src/cpp","src/cpp/lib"
+				include "**/*.h"
+			}
+		}
+	}
 }
 
 executables {
-    cvlib_test {
-        targetPlatforms "x64"
-        binaries.all {
-            lib libraries.cvlib.shared 
-        }
-    }
+	cvlib_test {
+		targetPlatforms "x64"
+		binaries.all { lib libraries.cvlib.shared  }
+	}
 }
 
 sources {
-    cvlib_test {
-        cpp {
-            source {
-                srcDir "src/cpp"
-                include "cvlib_test.cpp"
-            }
-            lib library: 'jvm'
-        }
-    }
-    
+	cvlib_test {
+		cpp {
+			source {
+				srcDir "src/cpp"
+				include "cvlib_test.cpp"
+			}
+			lib library: 'jvm'
+		}
+	}
+
 }
 
 //***********************************************************************************
 // JAVA CODE BUILDING
 
-sourceSets 
+sourceSets
 {
-  main 
-  {
-    java 
-    {
-      srcDir 'src/java'
-    }
-    resources 
-    { 
-      srcDir 'src/java'
-    }
-  }
-  test
-  {
-    java 
-    {
-      srcDir 'src/java'
-    }
-    resources 
-    { 
-      srcDir 'src/java'
-    }
-  }
+	main
+	{
+		java
+		{ srcDir 'src/java' }
+		resources
+		{  srcDir 'src/java' }
+	}
+	test
+	{
+		java
+		{ srcDir 'src/java' }
+		resources
+		{  srcDir 'src/java' }
+	}
 }
 
-javadoc {
-    options.charSet = 'UTF-8'
-}
+javadoc { options.charSet = 'UTF-8' }
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
-test 
+test
 {
-    testLogging.showStandardStreams = true 
-    testLogging 
-    {
-        events "passed", "skipped", "failed"
-    }
+	testLogging.showStandardStreams = true
+	testLogging
+	{ events "passed", "skipped", "failed" }
 
-    exclude '**/demo/**'
-    exclude '**/run/**'
+	exclude '**/demo/**'
+	exclude '**/run/**'
 
-    maxHeapSize = "4G"
+	maxHeapSize = "4G"
 }
 
 
 def versionOverrides = [
-    "org.jdom:jdom2": "2.0.5"
+	"org.jdom:jdom2": "2.0.5"
 ]
 
-configurations.all 
+configurations.all
 {
-  // check for updates every build
-  resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-  resolutionStrategy.force("org.jdom:jdom2:2.0.5")
+	// check for updates every build
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+	resolutionStrategy.force("org.jdom:jdom2:2.0.5")
 }
 
 
-dependencies 
+dependencies
 {
-    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
-    compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
-    compile group: 'commons-io', name: 'commons-io', version: '2.4'
-    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.4.1'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.1'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.1'
-    
-    compile 'net.sf.trove4j:trove4j:3.0.3'
-    compile 'com.miglayout:miglayout:3.7.4'
-    compile 'args4j:args4j:2.0.29'
-    compile 'com.nativelibs4java:bridj:0.7-SNAPSHOT'
-    compile 'com.nativelibs4java:javacl:1.0-SNAPSHOT'
-    compile 'com.apple:AppleJavaExtensions:1.4'
+	compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
+	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+	compile group: 'commons-io', name: 'commons-io', version: '2.4'
+	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.4.1'
+	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.1'
+	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.1'
 
-    def clearGLDir = null
-    def clearCUDADir = null
+	compile 'net.sf.trove4j:trove4j:3.0.3'
+	compile 'com.miglayout:miglayout:3.7.4'
+	compile 'args4j:args4j:2.0.29'
+	compile 'com.nativelibs4java:bridj:0.7-SNAPSHOT'
+	compile 'com.nativelibs4java:javacl:1.0-SNAPSHOT'
+	compile 'com.apple:AppleJavaExtensions:1.4'
 
-    
-		// usage: gradle .... -Plocal=true
-    if (hasProperty('local') && local.contains('true')) {
-        println 'Using local clearCUDA and clearGL sources'
-        compile project(':cleargl')
-        compile project(':clearcuda')
-    } 
-    else {
-        println 'Using clearCUDA and clearGL from Maven repository'/**/
-        compile group: "net.clearvolume", name: "cleargl", version: "1.0", changing: true, transitive: true 
-        compile group: "net.clearvolume", name: "clearcuda", version: "1.0", changing: true, transitive: true 
-    }
+	def clearGLDir = null
+	def clearCUDADir = null
 
-    compile group: 'junit', name: 'junit', version: '4.12'
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+	// usage: gradle .... -Plocal=true
+	if (hasProperty('local') && local.contains('true')) {
+		println 'Using local clearCUDA and clearGL sources'
+		compile project(':cleargl')
+		compile project(':clearcuda')
+	}
+	else {
+		println 'Using clearCUDA and clearGL from Maven repository'/**/
+		compile group: "net.clearvolume", name: "cleargl", version: "1.0", changing: true, transitive: true
+		compile group: "net.clearvolume", name: "clearcuda", version: "1.0", changing: true, transitive: true
+	}
+
+	compile group: 'junit', name: 'junit', version: '4.12'
+
+	testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
-repositories 
+repositories
 {
-    mavenCentral()
-    maven 
-    {
-        url  "http://dl.bintray.com/clearvolume/ClearVolume" 
-    } 
-    maven 
-    {
-        url "http://oss.sonatype.org/content/groups/public"
-    } 
+	mavenCentral()
+	maven
+	{ url  "http://dl.bintray.com/clearvolume/ClearVolume"  }
+	maven
+	{ url "http://oss.sonatype.org/content/groups/public" }
 }
 
 
 
 /*jar {
-    def classpath  = configurations.compile.collect { it.directory&&{println it; true} ? it : zipTree(it) } 
-    from(classpath)
-    
-    manifest {
-        attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')
-    }
-}/**/
+ def classpath  = configurations.compile.collect { it.directory&&{println it; true} ? it : zipTree(it) } 
+ from(classpath)
+ manifest {
+ attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')
+ }
+ }/**/
 
 task cvFatJar(type:Jar) {
-    archiveName = "ClearVolume.fat.jar"
-    def classpath  = configurations.compile.collect { it.directory&&{println it; true} ? it : zipTree(it) } 
-    from(classpath)
-    
-    manifest {
-        attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')
-    }
+	archiveName = "ClearVolume.fat.jar"
+	def classpath  = configurations.compile.collect { it.directory&&{println it; true} ? it : zipTree(it) }
+	from(classpath)
+
+	manifest {
+		attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')
+	}
 }
 
 
 task sourcesJar(type: Jar, dependsOn:classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+	classifier = 'sources'
+	from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn:javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+	classifier = 'javadoc'
+	from javadoc.destinationDir
 }
 
 if (JavaVersion.current().isJava8Compatible()) {
-    allprojects {
-      tasks.withType(Javadoc) {
-        options.addStringOption('Xdoclint:none', '-quiet')
-      }
-    }
-  }
+	allprojects {
+		tasks.withType(Javadoc) {
+			options.addStringOption('Xdoclint:none', '-quiet')
+		}
+	}
+}
 
 
 
@@ -275,20 +255,20 @@ if (JavaVersion.current().isJava8Compatible()) {
 // FAT CAPSULE TASKS
 
 task fatCapsule(type: FatCapsule) {
-  applicationClass 'clearvolume.main.ClearVolumeMain'
-  reallyExecutable
+	applicationClass 'clearvolume.main.ClearVolumeMain'
+	reallyExecutable
 }
 
 
 task copyCapsule{
-  doLast {
-      copy{
-        from('./build/libs/')
-        into('./build/executable')
-        include('*-capsule.jar')
-        rename('.+-capsule.jar','ClearVolume.exe.jar')
-        }
-    }
+	doLast {
+		copy{
+			from('./build/libs/')
+			into('./build/executable')
+			include('*-capsule.jar')
+			rename('.+-capsule.jar','ClearVolume.exe.jar')
+		}
+	}
 }
 
 copyCapsule.dependsOn build
@@ -298,129 +278,129 @@ copyCapsule.dependsOn build
 // CVLIB PACKAGING TASKS
 
 task packagecvlib {
-  doLast {
-    def os = System.getProperty("os.name").toLowerCase() 
-    if (os.contains("windows"))
-    {
-        copy
-        {
-            from('./build/binaries/cvlibSharedLibrary/')
-            into('./build/cvlib/')
-            include('cvlib.dll')
-        }
+	doLast {
+		def os = System.getProperty("os.name").toLowerCase()
+		if (os.contains("windows"))
+		{
+			copy
+			{
+				from('./build/binaries/cvlibSharedLibrary/')
+				into('./build/cvlib/')
+				include('cvlib.dll')
+			}
 
-        copy
-        {
-            from('./src/cpp/')
-            into('./build/cvlib/')
-            include('cvlib.h','cvlib_test.cpp')
-        }
+			copy
+			{
+				from('./src/cpp/')
+				into('./build/cvlib/')
+				include('cvlib.h','cvlib_test.cpp')
+			}
 
-        copy
-        {
-            from('./build/binaries/cvlib_testExecutable/')
-            into('./build/cvlib/')
-            include('cvlib_test.exe')
-        }
+			copy
+			{
+				from('./build/binaries/cvlib_testExecutable/')
+				into('./build/cvlib/')
+				include('cvlib_test.exe')
+			}
 
-        copy
-        {
-            from('./build/libs/')
-            into('./build/cvlib/')
-            include('ClearVolume.fat.jar')
-            rename('ClearVolume.fat.jar','ClearVolume.jar')
-        }
-    }
-  }
+			copy
+			{
+				from('./build/libs/')
+				into('./build/cvlib/')
+				include('ClearVolume.fat.jar')
+				rename('ClearVolume.fat.jar','ClearVolume.jar')
+			}
+		}
+	}
 }
 
 task packagelvcvlib {
-  doLast {
-    def os = System.getProperty("os.name").toLowerCase() 
-    if (os.contains("windows"))
-    {
-        copy
-        {
-            from('./src/labview/')
-            into('./build/labview/')
-            include('*')
-        }
+	doLast {
+		def os = System.getProperty("os.name").toLowerCase()
+		if (os.contains("windows"))
+		{
+			copy
+			{
+				from('./src/labview/')
+				into('./build/labview/')
+				include('*')
+			}
 
-        copy
-        {
-            from('./src/labview/lvcvlib')
-            into('./build/labview/lvcvlib/')
-            include('*')
-        }
+			copy
+			{
+				from('./src/labview/lvcvlib')
+				into('./build/labview/lvcvlib/')
+				include('*')
+			}
 
-        copy
-        {
-            from('./src/labview/lvcvlib/VIs')
-            into('./build/labview/lvcvlib/VIs')
-            include('*')
-        }
+			copy
+			{
+				from('./src/labview/lvcvlib/VIs')
+				into('./build/labview/lvcvlib/VIs')
+				include('*')
+			}
 
-        copy
-        {
-            from('./build/binaries/cvlibSharedLibrary/')
-            into('./build/labview/lvcvlib/')
-            include('cvlib.dll')
-        }
+			copy
+			{
+				from('./build/binaries/cvlibSharedLibrary/')
+				into('./build/labview/lvcvlib/')
+				include('cvlib.dll')
+			}
 
-        copy
-        {
-            from('./build/libs/')
-            into('./build/labview/')
-            include('ClearVolume.fat.jar')
-            rename('ClearVolume.fat.jar','ClearVolume.jar')
-        }
-    }
-  }
+			copy
+			{
+				from('./build/libs/')
+				into('./build/labview/')
+				include('ClearVolume.fat.jar')
+				rename('ClearVolume.fat.jar','ClearVolume.jar')
+			}
+		}
+	}
 }
 
 //***********************************************************************************
 // OSX APP PACKAGING TASKS
 
 task packageosxapp {
-  
-    copy
-    {
-        from('./deploy/osx/ClearVolume.app/')
-        into('./build/executable/ClearVolume.app/')
-        include "*.*"
-        include '**/**'
-        include '**/**/**'
-        include '**/**/**/**/'    
-        include '**/**/**/**/**/'  
-        include '**/**/**/**/**/**/'    
-        include '**/**/**/**/**/**/**/'
-        include '**/**/**/**/**/**/**/**/'      
-    }
 
-    def javahome = System.getenv('JAVA_HOME')
+	copy
+	{
+		from('./deploy/osx/ClearVolume.app/')
+		into('./build/executable/ClearVolume.app/')
+		include "*.*"
+		include '**/**'
+		include '**/**/**'
+		include '**/**/**/**/'
+		include '**/**/**/**/**/'
+		include '**/**/**/**/**/**/'
+		include '**/**/**/**/**/**/**/'
+		include '**/**/**/**/**/**/**/**/'
+	}
 
-    copy
-    {
-        from(javahome+'/jre/')
-        into('./build/executable/ClearVolume.app/Contents/Resources/jre')
-        include "*.*"
-        include '**/**'
-        include '**/**/**'
-        include '**/**/**/**/'    
-        include '**/**/**/**/**/'  
-        include '**/**/**/**/**/**/'    
-        include '**/**/**/**/**/**/**/'
-        include '**/**/**/**/**/**/**/**/'  
-        exclude 'libjfxwebkit.dylib'
-        exclude 'jfxrt.jar'
-    }
+	def javahome = System.getenv('JAVA_HOME')
 
-    copy
-    {
-        from('./build/executable/')
-        into('./build/executable/ClearVolume.app/Contents/Resources')
-        include('ClearVolume.exe.jar')
-    }
+	copy
+	{
+		from(javahome+'/jre/')
+		into('./build/executable/ClearVolume.app/Contents/Resources/jre')
+		include "*.*"
+		include '**/**'
+		include '**/**/**'
+		include '**/**/**/**/'
+		include '**/**/**/**/**/'
+		include '**/**/**/**/**/**/'
+		include '**/**/**/**/**/**/**/'
+		include '**/**/**/**/**/**/**/**/'
+		exclude 'libjfxwebkit.dylib'
+		exclude 'jfxrt.jar'
+	}
+
+	copy
+	{
+		from('./build/executable/')
+		into('./build/executable/ClearVolume.app/Contents/Resources')
+		include('ClearVolume.exe.jar')
+	}
 }
 
 packageosxapp.dependsOn copyCapsule
@@ -430,38 +410,38 @@ packageosxapp.dependsOn copyCapsule
 // WIN EXE  TASKS
 
 task packagewinapp(type:Exec) {
-  
-    def userhome = System.getenv('HOME')
 
-    copy
-    {
-        from(userhome+'/.winjre/')
-        into('./build/executable/ClearVolumeWin/jre')
-        include "*.*"
-        include '**/**'
-        include '**/**/**'
-        include '**/**/**/**/'    
-        include '**/**/**/**/**/'  
-        include '**/**/**/**/**/**/'    
-        include '**/**/**/**/**/**/**/'
-        include '**/**/**/**/**/**/**/**/'  
-        exclude 'libjfxwebkit.dll'
-        exclude 'jfxrt.jar'
-    }
+	def userhome = System.getenv('HOME')
 
-    copy
-    {
-        from('./deploy/win/libs/')
-        into('./build/executable/ClearVolumeWin/dlls/')
-        include "*.dll"
-    }
+	copy
+	{
+		from(userhome+'/.winjre/')
+		into('./build/executable/ClearVolumeWin/jre')
+		include "*.*"
+		include '**/**'
+		include '**/**/**'
+		include '**/**/**/**/'
+		include '**/**/**/**/**/'
+		include '**/**/**/**/**/**/'
+		include '**/**/**/**/**/**/**/'
+		include '**/**/**/**/**/**/**/**/'
+		exclude 'libjfxwebkit.dll'
+		exclude 'jfxrt.jar'
+	}
 
-    workingDir '.'
-    commandLine './packagewinapp.sh'
+	copy
+	{
+		from('./deploy/win/libs/')
+		into('./build/executable/ClearVolumeWin/dlls/')
+		include "*.dll"
+	}
 
-    standardOutput = new ByteArrayOutputStream()
+	workingDir '.'
+	commandLine './packagewinapp.sh'
 
-    ext.output = {return standardOutput.toString()}
+	standardOutput = new ByteArrayOutputStream()
+
+	ext.output = {return standardOutput.toString()}
 }
 
 packagewinapp.dependsOn copyCapsule
@@ -469,47 +449,47 @@ packagewinapp.dependsOn copyCapsule
 //***********************************************************************************
 // DISTRIBUTION PACKAGING TASKS
 
-task collectdistribution(dependsOn:[packageosxapp,packagewinapp]) {
-  
-    copy
-    {
-        from('./build/executable/')
-        into('./build/distribution/')
-        include "*.*"
-        include '**/**'
-        include '**/**/**'
-        include '**/**/**/**/'    
-        include '**/**/**/**/**/'  
-        include '**/**/**/**/**/**/'    
-        include '**/**/**/**/**/**/**/'
-        include '**/**/**/**/**/**/**/**/'      
-    }
+task collectdistribution(dependsOn:[packageosxapp, packagewinapp]) {
 
-    copy
-    {
-        from('./build/libs/')
-        into('./build/distribution/javalibs')
-        include "*.*"
-        include '**/**'
-    }
+	copy
+	{
+		from('./build/executable/')
+		into('./build/distribution/')
+		include "*.*"
+		include '**/**'
+		include '**/**/**'
+		include '**/**/**/**/'
+		include '**/**/**/**/**/'
+		include '**/**/**/**/**/**/'
+		include '**/**/**/**/**/**/**/'
+		include '**/**/**/**/**/**/**/**/'
+	}
+
+	copy
+	{
+		from('./build/libs/')
+		into('./build/distribution/javalibs')
+		include "*.*"
+		include '**/**'
+	}
 }
 
 
 task packagedmg(type:Exec,dependsOn:collectdistribution ) {
-  
-    workingDir '.'
-    commandLine './packagedmg.sh'
-    standardOutput = new ByteArrayOutputStream()
-    ext.output = {return standardOutput.toString()}
+
+	workingDir '.'
+	commandLine './packagedmg.sh'
+	standardOutput = new ByteArrayOutputStream()
+	ext.output = {return standardOutput.toString()}
 }
 
 
 task packagezip(type:Exec,dependsOn:collectdistribution) {
-  
-    workingDir '.'
-    commandLine './packagezip.sh'
-    standardOutput = new ByteArrayOutputStream()
-    ext.output = {return standardOutput.toString()}
+
+	workingDir '.'
+	commandLine './packagezip.sh'
+	standardOutput = new ByteArrayOutputStream()
+	ext.output = {return standardOutput.toString()}
 }
 
 
@@ -520,70 +500,72 @@ task packagezip(type:Exec,dependsOn:collectdistribution) {
 group = 'net.clearvolume'
 version = '1.0'
 
-artifacts 
+artifacts
 {
-    archives sourcesJar
-    archives javadocJar
+	archives sourcesJar
+	archives javadocJar
 }
 
 publishing {
-  publications {
-    maven(MavenPublication) {
-      from components.java
-      artifact sourcesJar {
-        classifier "sources"
-      }
-    }
-  }
+	publications {
+		maven(MavenPublication) {
+			from components.java
+			artifact sourcesJar { classifier "sources" }
+		}
+	}
 }
 
+if(hasProperty('bintray_user') && hasProperty('bintray_key') )
+{
+	bintray {
 
-bintray {
+		// property must be set in ~/.gradle/gradle.properties
+		user = bintray_user
+		key =  bintray_key
 
-		if(hasProperty('bintray_user') && hasProperty('bintray_key') )
-		{
-		
-	    // property must be set in ~/.gradle/gradle.properties
-	    user = bintray_user 
-	    key =  bintray_key
-	
-	    publications = ['maven'] //When uploading configuration files
-	    
-	    dryRun = false //Whether to run this as dry-run, without deploying
-	    publish = true //If version should be auto published after an upload
-	    pkg {
-	        repo = 'ClearVolume'
-	        userOrg = 'clearvolume' //An optional organization name when the repo belongs to one of the user's orgs
-	        name = 'ClearVolume'
-	        desc = 'ClearVolume'
-	        websiteUrl = 'https://clearvolume.github.io/ClearVolume/'
-	        issueTrackerUrl = 'https://github.com/ClearVolume/ClearVolume/issues'
-	        vcsUrl = 'https://github.com/ClearVolume/ClearVolume.git'
-	        //licenses = ['Apache-2.0']
-	        labels = ['ClearVolume', 'Visualization', '3D', 'Microscopy', 'Real-time']
-	        publicDownloadNumbers = true
-	        //attributes= ['a': ['ay1', 'ay2'], 'b': ['bee'], c: 'cee'] //Optional package-level attributes
-	        //Optional version descriptor
-	        version {
-	            name = '1.0' //Bintray logical version name
-	            desc = '.'
-	            released  = new java.util.Date()
-	            vcsTag = '1.0.0'
-	            /*attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin'] //Optional version-level attributes
-	            gpg {
-	                sign = false //Determines whether to GPG sign the files. The default is false
-	                passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
-	            }
-	            mavenCentralSync {
-	                sync = false //Optional (true by default). Determines whether to sync the version to Maven Central.
-	                user = 'userToken' //OSS user token
-	                password = 'paasword' //OSS user password
-	                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
-	            }  /**/          
-	        }
-	    }
-    }
-    /**/
+		publications = [
+			'maven'] //When uploading configuration files
+		dryRun = false //Whether to run this as dry-run, without deploying
+		publish = true //If version should be auto published after an upload
+		pkg {
+			repo = 'ClearVolume'
+			userOrg = 'clearvolume' //An optional organization name when the repo belongs to one of the user's orgs
+			name = 'ClearVolume'
+			desc = 'ClearVolume'
+			websiteUrl = 'https://clearvolume.github.io/ClearVolume/'
+			issueTrackerUrl = 'https://github.com/ClearVolume/ClearVolume/issues'
+			vcsUrl = 'https://github.com/ClearVolume/ClearVolume.git'
+			//licenses = ['Apache-2.0']
+			labels = [
+				'ClearVolume',
+				'Visualization',
+				'3D',
+				'Microscopy',
+				'Real-time'
+			]
+			publicDownloadNumbers = true
+			//attributes= ['a': ['ay1', 'ay2'], 'b': ['bee'], c: 'cee'] //Optional package-level attributes
+			//Optional version descriptor
+			version {
+				name = '1.0' //Bintray logical version name
+				desc = '.'
+				released  = new java.util.Date()
+				vcsTag = '1.0.0'
+				/*attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin'] //Optional version-level attributes
+				 gpg {
+				 sign = false //Determines whether to GPG sign the files. The default is false
+				 passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
+				 }
+				 mavenCentralSync {
+				 sync = false //Optional (true by default). Determines whether to sync the version to Maven Central.
+				 user = 'userToken' //OSS user token
+				 password = 'paasword' //OSS user password
+				 close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+				 }  /**/          
+			}
+		}
+	}
+	/**/
 }
 
 
