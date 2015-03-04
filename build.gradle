@@ -1,6 +1,9 @@
 
+
 plugins {
-  id "us.kirchmeier.capsule" version "0.10.0"
+  id "us.kirchmeier.capsule" version "0.9.0" //  VERSION 0.10.0 of Cpasule has a bug!! staying with 0.9.0
+  id "com.jfrog.bintray" version "1.0"
+  id "com.github.hierynomus.license" version "0.11.0"
 }
 
 
@@ -11,8 +14,13 @@ apply plugin: 'maven-publish'
 apply plugin: 'c'
 apply plugin: 'cpp'
 apply plugin: 'idea'
+apply plugin: 'idea'
 
 [ compileJava, compileTestJava ]*.options*.encoding = 'UTF-8'
+
+
+//***********************************************************************************
+// NATIVE CODE BUILDING
 
 ext { 
     javaHome = System.getenv('JAVA_HOME')
@@ -107,10 +115,8 @@ sources {
     
 }
 
-
-
-
-
+//***********************************************************************************
+// JAVA CODE BUILDING
 
 sourceSets 
 {
@@ -144,8 +150,6 @@ javadoc {
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-group = 'royer'
-version = '1.0-SNAPSHOT'
 
 test 
 {
@@ -211,8 +215,8 @@ dependencies
     } 
     else {
         println 'Using clearCUDA and clearGL from Maven repository'
-        compile group: "royer", name: "ClearGL", version: "1.0-SNAPSHOT", changing: true, transitive: true 
-        compile group: "royer", name: "ClearCuda", version: "1.0-SNAPSHOT", changing: true, transitive: true 
+        compile group: "net.clearvolume", name: "ClearGL", version: "1.0", changing: true, transitive: true 
+        compile group: "net.clearvolume", name: "ClearCuda", version: "1.0", changing: true, transitive: true 
     }
 
     compile group: 'junit', name: 'junit', version: '4.12'
@@ -241,7 +245,19 @@ repositories
     }
 }
 
-jar {
+
+
+/*jar {
+    def classpath  = configurations.compile.collect { it.directory&&{println it; true} ? it : zipTree(it) } 
+    from(classpath)
+    
+    manifest {
+        attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')
+    }
+}/**/
+
+task cvFatJar(type:Jar) {
+    archiveName = "ClearVolume.fat.jar"
     def classpath  = configurations.compile.collect { it.directory&&{println it; true} ? it : zipTree(it) } 
     from(classpath)
     
@@ -269,22 +285,11 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
   }
 
-artifacts 
-{
-    archives sourcesJar
-    archives javadocJar
-}
 
-uploadArchives 
-{
-    repositories 
-    {
-        mavenDeployer 
-        {
-            repository(url: "file:../../Repos/ClearVolumeMavenRepo")
-        }
-    }
-}
+
+
+//***********************************************************************************
+// FAT CAPSULE TASKS
 
 task fatCapsule(type: FatCapsule) {
   applicationClass 'clearvolume.main.ClearVolumeMain'
@@ -305,6 +310,9 @@ task copyCapsule{
 
 copyCapsule.dependsOn build
 
+
+//***********************************************************************************
+// CVLIB PACKAGING TASKS
 
 task packagecvlib {
   doLast {
@@ -336,8 +344,8 @@ task packagecvlib {
         {
             from('./build/libs/')
             into('./build/cvlib/')
-            include('ClearVolume-???-SNAPSHOT.jar')
-            rename('ClearVolume-.+-SNAPSHOT.jar','ClearVolume.jar')
+            include('ClearVolume.fat.jar')
+            rename('ClearVolume.fat.jar','ClearVolume.jar')
         }
     }
   }
@@ -380,12 +388,15 @@ task packagelvcvlib {
         {
             from('./build/libs/')
             into('./build/labview/')
-            include('ClearVolume-???-SNAPSHOT.jar')
-            rename('ClearVolume-.+-SNAPSHOT.jar','ClearVolume.jar')
+            include('ClearVolume.fat.jar')
+            rename('ClearVolume.fat.jar','ClearVolume.jar')
         }
     }
   }
 }
+
+//***********************************************************************************
+// OSX APP PACKAGING TASKS
 
 task packageosxapp {
   
@@ -431,6 +442,10 @@ task packageosxapp {
 
 packageosxapp.dependsOn copyCapsule
 
+
+//***********************************************************************************
+// WIN EXE  TASKS
+
 task packagewinapp(type:Exec) {
   
     def userhome = System.getenv('HOME')
@@ -468,6 +483,8 @@ task packagewinapp(type:Exec) {
 
 packagewinapp.dependsOn copyCapsule
 
+//***********************************************************************************
+// DISTRIBUTION PACKAGING TASKS
 
 task collectdistribution(dependsOn:[packageosxapp,packagewinapp]) {
   
@@ -512,6 +529,20 @@ task packagezip(type:Exec,dependsOn:collectdistribution) {
     ext.output = {return standardOutput.toString()}
 }
 
+
+//***********************************************************************************
+// PUBLISHING
+
+
+group = 'net.clearvolume'
+version = '1.0'
+
+artifacts 
+{
+    archives sourcesJar
+    archives javadocJar
+}
+
 publishing {
   publications {
     maven(MavenPublication) {
@@ -522,3 +553,53 @@ publishing {
     }
   }
 }
+
+
+bintray {
+
+    // property must be set in ~/.gradle/gradle.properties
+    user = bintray_user 
+    key =  bintray_key
+
+    publications = ['maven'] //When uploading configuration files
+
+
+    
+    dryRun = false //Whether to run this as dry-run, without deploying
+    publish = true //If version should be auto published after an upload
+    pkg {
+        repo = 'ClearVolume'
+        userOrg = 'clearvolume' //An optional organization name when the repo belongs to one of the user's orgs
+        name = 'ClearVolume'
+        desc = 'ClearVolume'
+        websiteUrl = 'https://clearvolume.github.io/ClearVolume/'
+        issueTrackerUrl = 'https://github.com/ClearVolume/ClearVolume/issues'
+        vcsUrl = 'https://github.com/ClearVolume/ClearVolume.git'
+        //licenses = ['Apache-2.0']
+        labels = ['ClearVolume', 'Visualization', '3D', 'Microscopy', 'Real-time']
+        publicDownloadNumbers = true
+        //attributes= ['a': ['ay1', 'ay2'], 'b': ['bee'], c: 'cee'] //Optional package-level attributes
+        //Optional version descriptor
+        version {
+            name = '1.0' //Bintray logical version name
+            desc = '.'
+            released  = new java.util.Date()
+            vcsTag = '1.0.0'
+            /*attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin'] //Optional version-level attributes
+            gpg {
+                sign = false //Determines whether to GPG sign the files. The default is false
+                passphrase = 'passphrase' //Optional. The passphrase for GPG signing'
+            }
+            mavenCentralSync {
+                sync = false //Optional (true by default). Determines whether to sync the version to Maven Central.
+                user = 'userToken' //OSS user token
+                password = 'paasword' //OSS user password
+                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+            }  /**/          
+        }
+    }
+    /**/
+}
+
+
+
