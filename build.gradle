@@ -197,26 +197,17 @@ dependencies
     def clearGLDir = null
     def clearCUDADir = null
 
-    if (!(new File('build.gradle').exists()) && (new File('settings.gradle').exists())) {
-        // we're in the root path, clearGL and clearCUDA are in the same dir
-        clearGLDir = new File('cleargl')
-        clearCUDADir = new File('clearcuda')
-    }
-    else {
-        // we're in clearvolume directory, clearGL and clearCUDA are one level below
-        clearGLDir = new File('../cleargl')
-        clearCUDADir = new File('../clearcuda')
-    }
     
-    if (clearGLDir.isDirectory() && clearCUDADir.isDirectory()) {
+		// usage: gradle .... -Plocal=true
+    if (hasProperty('local') && local.contains('true')) {
         println 'Using local clearCUDA and clearGL sources'
         compile project(':cleargl')
         compile project(':clearcuda')
     } 
     else {
-        println 'Using clearCUDA and clearGL from Maven repository'
-        compile group: "net.clearvolume", name: "ClearGL", version: "1.0", changing: true, transitive: true 
-        compile group: "net.clearvolume", name: "ClearCuda", version: "1.0", changing: true, transitive: true 
+        println 'Using clearCUDA and clearGL from Maven repository'/**/
+        compile group: "net.clearvolume", name: "cleargl", version: "1.0", changing: true, transitive: true 
+        compile group: "net.clearvolume", name: "clearcuda", version: "1.0", changing: true, transitive: true 
     }
 
     compile group: 'junit', name: 'junit', version: '4.12'
@@ -229,20 +220,12 @@ repositories
     mavenCentral()
     maven 
     {
-        url "http://bitbucket.org/api/1.0/repositories/clearvolume/clearvolumemavenrepo/raw/master/"
+        url  "http://dl.bintray.com/clearvolume/ClearVolume" 
     } 
     maven 
     {
         url "http://oss.sonatype.org/content/groups/public"
     } 
-    maven 
-    {
-        url "https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/"
-    }
-    maven
-    {
-        url "http://maven.imagej.net/content/repositories/releases/"
-    }
 }
 
 
