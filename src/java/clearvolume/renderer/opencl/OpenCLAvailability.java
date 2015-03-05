@@ -1,16 +1,14 @@
 package clearvolume.renderer.opencl;
 
-import com.nativelibs4java.opencl.JavaCL;
-
 public class OpenCLAvailability
 {
 	public static final boolean isOpenCLAvailable()
 	{
 		try
 		{
-			return JavaCL.getBestDevice() != null;
+			return com.nativelibs4java.opencl.JavaCL.getBestDevice() != null;
 		}
-		catch (final Exception e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			return false;
