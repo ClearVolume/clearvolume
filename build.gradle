@@ -44,9 +44,7 @@ dependencies {
 }
 
 model {
-	platforms {
-		x64 { architecture "x86_64" }
-	}
+	platforms { x64 { architecture "x86_64" } }
 
 	repositories {
 		libs(PrebuiltLibraries) {
@@ -72,9 +70,7 @@ binaries.all {
 	}
 }
 
-libraries {
-	cvlib { targetPlatforms "x64" }
-}
+libraries { cvlib { targetPlatforms "x64" } }
 
 sources {
 	cvlib {
@@ -277,83 +273,83 @@ copyCapsule.dependsOn build
 // CVLIB PACKAGING TASKS
 
 task packagecvlib {
-	doLast {
-		def os = System.getProperty("os.name").toLowerCase()
-		if (os.contains("windows"))
+
+	def os = System.getProperty("os.name").toLowerCase()
+	if (os.contains("windows"))
+	{
+		copy
 		{
-			copy
-			{
-				from('./build/binaries/cvlibSharedLibrary/')
-				into('./build/cvlib/')
-				include('cvlib.dll')
-			}
+			from('./build/binaries/cvlibSharedLibrary/')
+			into('./build/cvlib/')
+			include('cvlib.dll')
+		}
 
-			copy
-			{
-				from('./src/cpp/')
-				into('./build/cvlib/')
-				include('cvlib.h','cvlib_test.cpp')
-			}
+		copy
+		{
+			from('./src/cpp/')
+			into('./build/cvlib/')
+			include('cvlib.h','cvlib_test.cpp')
+		}
 
-			copy
-			{
-				from('./build/binaries/cvlib_testExecutable/')
-				into('./build/cvlib/')
-				include('cvlib_test.exe')
-			}
+		copy
+		{
+			from('./build/binaries/cvlib_testExecutable/')
+			into('./build/cvlib/')
+			include('cvlib_test.exe')
+		}
 
-			copy
-			{
-				from('./build/libs/')
-				into('./build/cvlib/')
-				include('ClearVolume.fat.jar')
-				rename('ClearVolume.fat.jar','ClearVolume.jar')
-			}
+		copy
+		{
+			from('./build/libs/')
+			into('./build/cvlib/')
+			include('ClearVolume.fat.jar')
+			rename('ClearVolume.fat.jar','ClearVolume.jar')
 		}
 	}
+
 }
 
 task packagelvcvlib {
-	doLast {
-		def os = System.getProperty("os.name").toLowerCase()
-		if (os.contains("windows"))
+
+	def os = System.getProperty("os.name").toLowerCase()
+	if (os.contains("windows"))
+	{
+		copy
 		{
-			copy
-			{
-				from('./src/labview/')
-				into('./build/labview/')
-				include('*')
-			}
-
-			copy
-			{
-				from('./src/labview/lvcvlib')
-				into('./build/labview/lvcvlib/')
-				include('*')
-			}
-
-			copy
-			{
-				from('./src/labview/lvcvlib/VIs')
-				into('./build/labview/lvcvlib/VIs')
-				include('*')
-			}
-
-			copy
-			{
-				from('./build/binaries/cvlibSharedLibrary/')
-				into('./build/labview/lvcvlib/')
-				include('cvlib.dll')
-			}
-
-			copy
-			{
-				from('./build/libs/')
-				into('./build/labview/')
-				include('ClearVolume.fat.jar')
-				rename('ClearVolume.fat.jar','ClearVolume.jar')
-			}
+			from('./src/labview/')
+			into('./build/labview/')
+			include('*')
 		}
+
+		copy
+		{
+			from('./src/labview/lvcvlib')
+			into('./build/labview/lvcvlib/')
+			include('*')
+		}
+
+		copy
+		{
+			from('./src/labview/lvcvlib/VIs')
+			into('./build/labview/lvcvlib/VIs')
+			include('*')
+		}
+
+		copy
+		{
+			from('./build/binaries/cvlibSharedLibrary/')
+			into('./build/labview/lvcvlib/')
+			include('cvlib.dll')
+		}
+
+		copy
+		{
+			from('./build/libs/')
+			into('./build/labview/')
+			include('ClearVolume.fat.jar')
+			rename('ClearVolume.fat.jar','ClearVolume.jar')
+		}
+
 	}
 }
 
