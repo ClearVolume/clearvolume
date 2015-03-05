@@ -16,27 +16,27 @@ import clearvolume.volume.sink.relay.RelaySinkAdapter;
 import clearvolume.volume.sink.relay.RelaySinkInterface;
 
 public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
-																															RelaySinkInterface,
-																															ClearVolumeCloseable
+RelaySinkInterface,
+ClearVolumeCloseable
 {
 
 	private volatile ClearVolumeRendererInterface mClearVolumeRendererInterface;
 	private volatile boolean mSwitchingRenderers;
 	private volatile VolumeManager mVolumeManager;
-	private long mWaitForCopyTimeout;
-	private TimeUnit mTimeUnit;
+	private final long mWaitForCopyTimeout;
+	private final TimeUnit mTimeUnit;
 
 	private String mRequestedWindowTitle;
 	private int mRequestedWindowWidth, mRequestedWindowHeight;
 	private int mMaxNumberOfAvailableVolumes;
 	private int mNumberOfLayers;
 
-	private TreeMap<Integer, String> mSeenChannelIdToNameMap = new TreeMap<Integer, String>();
+	private final TreeMap<Integer, String> mSeenChannelIdToNameMap = new TreeMap<Integer, String>();
 
 	public ClearVolumeRendererSink(	ClearVolumeRendererInterface pClearVolumeRendererInterface,
-																	VolumeManager pVolumeManager,
-																	long pWaitForCopyTimeout,
-																	TimeUnit pTimeUnit)
+			VolumeManager pVolumeManager,
+			long pWaitForCopyTimeout,
+			TimeUnit pTimeUnit)
 	{
 		super();
 		mClearVolumeRendererInterface = pClearVolumeRendererInterface;
@@ -47,13 +47,13 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 	}
 
 	public ClearVolumeRendererSink(	final String pRequestedWindowTitle,
-																	final int pRequestedWindowWidth,
-																	final int pRequestedWindowHeight,
-																	final int pBytesPerVoxel,
-																	final int pNumberOfLayers,
-																	final long pWaitForCopyTimeout,
-																	final TimeUnit pTimeUnit,
-																	final int pMaxNumberOfAvailableVolumes)
+			final int pRequestedWindowWidth,
+			final int pRequestedWindowHeight,
+			final int pBytesPerVoxel,
+			final int pNumberOfLayers,
+			final long pWaitForCopyTimeout,
+			final TimeUnit pTimeUnit,
+			final int pMaxNumberOfAvailableVolumes)
 	{
 		super();
 		mRequestedWindowTitle = pRequestedWindowTitle;
@@ -76,8 +76,8 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		mSeenChannelIdToNameMap.put(lChannelID, lChannelName);
 
 		final int lBytesPerVoxel = pVolume.getBytesPerVoxel();
-		int lNumberOfChannelsSeen = mSeenChannelIdToNameMap.keySet()
-																												.size();
+		final int lNumberOfChannelsSeen = mSeenChannelIdToNameMap.keySet()
+				.size();
 		final int lNumberOfLayersNeeded = lNumberOfChannelsSeen;
 
 		if (mClearVolumeRendererInterface == null || mClearVolumeRendererInterface.getNumberOfRenderLayers() < lNumberOfLayersNeeded
@@ -85,13 +85,13 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		{
 			System.out.println("Creating new Renderer!");
 			System.out.format("Volume: nb channels seen: %d \n",
-												lNumberOfChannelsSeen);
+					lNumberOfChannelsSeen);
 			System.out.format("Volume: bytes per voxel: %d \n",
-												lBytesPerVoxel);
+					lBytesPerVoxel);
 			System.out.format("Renderer: nb of layers: %d \n",
-												mClearVolumeRendererInterface.getNumberOfRenderLayers());
+					mClearVolumeRendererInterface.getNumberOfRenderLayers());
 			System.out.format("Renderer: bytes per voxel: %d \n",
-												mClearVolumeRendererInterface.getBytesPerVoxel());
+					mClearVolumeRendererInterface.getBytesPerVoxel());
 			createRenderer(lBytesPerVoxel, lNumberOfLayersNeeded);
 		}
 
@@ -113,7 +113,7 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		mClearVolumeRendererInterface.requestDisplay();
 
 		mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	mWaitForCopyTimeout,
-																															mTimeUnit);
+				mTimeUnit);
 
 		if (getRelaySink() != null)
 			getRelaySink().sendVolume(pVolume);
@@ -130,17 +130,18 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 			if (mClearVolumeRendererInterface != null)
 				mClearVolumeRendererInterface.close();
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 		}
 
 		mClearVolumeRendererInterface = ClearVolumeRendererFactory.newBestRenderer(	mRequestedWindowTitle,
-																																								mRequestedWindowWidth,
-																																								mRequestedWindowHeight,
-																																								pBytesPerVoxel,
-																																								mRequestedWindowWidth,
-																																								mRequestedWindowHeight,
-																																								pNumberOfLayers);
+				mRequestedWindowWidth,
+				mRequestedWindowHeight,
+				pBytesPerVoxel,
+				mRequestedWindowWidth,
+				mRequestedWindowHeight,
+				pNumberOfLayers,
+				false);
 		mClearVolumeRendererInterface.setVisible(true);
 
 		try
@@ -148,7 +149,7 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 			if (mVolumeManager != null)
 				mVolumeManager.close();
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 		}
 
@@ -179,7 +180,7 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 			while (mSwitchingRenderers)
 				Thread.sleep(1);
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 		}
 		if (mClearVolumeRendererInterface != null)
@@ -197,6 +198,11 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 	{
 		if (mClearVolumeRendererInterface != null)
 			mClearVolumeRendererInterface.close();
+	}
+
+	public ClearVolumeRendererInterface getClearVolumeRenderer()
+	{
+		return mClearVolumeRendererInterface;
 	}
 
 }

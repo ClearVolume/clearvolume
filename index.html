@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Clearvolume by ClearVolume</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <img src="./images/ClearVolumeLogo.png" alt="ClearVolume" >
+        
+        <p><em>ClearVolume</em> is a real-time live 3D visualization library designed for high-end volumetric microscopes such as SPIM and DLSM microscopes. With <em>ClearVolume</em> you can see live on your screen the stacks acquired by your microscope instead of waiting for offline post-processing to give you an intuitive and comprehensive view on your data. The biologists can immediately decide whether a sample is worth imaging. </p>
+
+        <p class="view">
+          <a href="http://github.com/ClearVolume/ClearVolume/wiki">
+            <em>ClearVolume</em> WIKI 
+          </a> 
+        </p>
+
+        <p class="view">
+          <a href="https://github.com/ClearVolume/ClearVolume">
+            View the Project on GitHub <small>ClearVolume/ClearVolume</small>
+          </a>
+        </p>
+
+        <ul>
+          <li><a href="https://github.com/ClearVolume/ClearVolume/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/ClearVolume/ClearVolume/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/ClearVolume/ClearVolume">View On <strong>GitHub</strong></a></li>
+        </ul>
+
+        <p>
+          <b>master branch:</b><br>
+          <img src="http://travis-ci.org/ClearVolume/ClearVolume.svg?branch=master" alt="ClearVolume Master Status" >  ClearVolume<br>
+          <img src="http://travis-ci.org/ClearVolume/ClearCUDA.svg?branch=master" alt="ClearCUDA Master Status" >  ClearCUDA <br>
+          <img src="http://travis-ci.org/ClearVolume/ClearGL.svg?branch=master" alt="ClearGL Master Status" >  ClearGL <br>
+          <br>
+          <b>develop branch:</b><br>
+          <img src="http://travis-ci.org/ClearVolume/ClearVolume.svg?branch=develop" alt="ClearVolume Developp Status" >  ClearVolume <br>
+          <img src="http://travis-ci.org/ClearVolume/ClearCUDA.svg?branch=develop" alt="ClearCUDA Developp Status" >  ClearCUDA <br>
+          <img src="http://travis-ci.org/ClearVolume/ClearGL.svg?branch=develop" alt="ClearGL Developp Status" >  ClearGL <br>
+        </p>
+ 
+        
+      </header>
+      <section>
+        <h3>
+<a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Welcome to ClearVolume.</h3>
+
+<p><em>ClearVolume</em> is a real-time live 3D visualization library designed for high-end volumetric microscopes such as SPIM and DLSM microscopes. With <em>ClearVolume</em> you can see live on your screen the stacks acquired by your microscope instead of waiting for offline post-processing to give you an intuitive and comprehensive view on your data. The biologists can immediately decide whether a sample is worth imaging. 
+
+<em>ClearVolume</em> can easily be integrated into existing Java, C/C++, Python, or LabVIEW based microscope software. It has a dedicated interface to MicroManager/OpenSpim/OpenSpin control software. <em>ClearVolume</em> supports multi-channels, live 3D data streaming from remote microscopes, and uses a multi-pass Fibonacci rendering algorithm that can handle large volumes. Moreover, <em>ClearVolume</em> is integrated into the Fiji/ImageJ2/KNIME ecosystem. You can now open your stacks with <em>ClearVolume</em> from within these popular frameworks for offline viewing.</p>
+
+<h3>
+<a id="start" class="anchor" href="#start" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting started</h3>
+
+<p>The main <a href="http://github.com/ClearVolume/ClearVolume/wiki
+"><em>ClearVolume</em> wiki </a> is the place to start for in-depth installation instructions, documentation, examples, building guide, and more... </p>
+
+
+<h3>
+<a id="repos" class="anchor" href="#repos" aria-hidden="true"><span class="octicon octicon-link"></span></a>Repositories</h3>
+
+<p>
+  The <em>ClearVolume</em> project repositories are listed below:
+</p>
+
+<ul>
+  <li><a href="http://github.com/ClearVolume/ClearVolume">ClearVolume Main Project repository.</a> </li>
+  <li><a href="http://github.com/ClearVolume/ClearGL">ClearGL - Object Oriented facade API on top of OpenGL.</a> </li>
+  <li><a href="http://github.com/ClearVolume/ClearCUDA">ClearCUDA - Object Oriented facade API on top of CUDA.</a> </li>
+  <li><a href="http://github.com/ClearVolume/imglib2-clearvolume">ClearVolume Fiji plugin and imglib2 bridge interface.</a> </li>
+  <li><a href="http://github.com/ClearVolume/openspim-clearvolume">ClearVolume plugin to OpenSPIM.</a> </li>
+  <li><a href="http://github.com/ClearVolume/pyclearvolume">ClearVolume Python bindings and toolset.</a> </li>
+</ul>
+
+
+<h3>
+<a id="authors" class="anchor" href="#authors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>The <em>ClearVolume</em> project was initiated by Loic Royer (<a href="https://github.com/royerloic" class="user-mention">@royerloic</a>) who wrote the first version, designed the core real-time rendering and streaming algorithms and wrote the bindings to C++/LabVIEW. Martin Weigert (<a href="https://github.com/maweigert" class="user-mention">@maweigert</a>) helps to maintain and improve the core rendering algorithms and wrote the OpenCL pipeline. Martin also contributed the Python bindings and tools, OpenCL and CUDA real-time 3D data processors for image quality estimation and center of mass calculation. Ulrik Guenther (<a href="https://github.com/skalarproduktraum" class="user-mention">@skalarproduktraum</a>) developed and maintains the OpenSPIM integration, and greatly contributed to the OpenGL backend. Florian Jug (<a href="https://github.com/fjug" class="user-mention">@fjug</a>) contributed the imagelib2 bridge, and wrote the <a href="http://fiji.sc/Fiji">Fiji</a>  and <a href="http://www.knime.org">KNIME</a> plugins.</p>
+
+<h3>
+<a id="cite" class="anchor" href="#authors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cite us...</h3>
+
+<p>
+  <b><em>ClearVolume</em> – An open source real time 3D visualisation toolkit for light sheet microscopy.</b>
+  <i>Loic A. Royer, Martin Weigert, Ulrik Gunther, Nicola Maghelli, Florian Jug, Ivo F. Sbalzarini, Eugene W. Myers </i>, 
+  in preparation...
+</p>
+
+
+
+<h3>
+<a id="Acknowledgements" class="anchor" href="#ack" aria-hidden="true"><span class="octicon octicon-link"></span></a>Affiliations</h3>
+
+<p>The <em>ClearVolume</em> team brings together members of the <a href="http://www.mpi-cbg.de/research/research-groups/gene-myers.html">Myers</a>, 
+  <a href="http://www.mpi-cbg.de/research/research-groups/ivo-sbalzarini/group-leader.html">Sbalzarini</a> and <a href="http://www.mpi-cbg.de/research/research-groups/pavel-tomancak.html">Tomancak</a>  labs at <a href="http://www.mpi-cbg.de">Max Planck Institute of Molecular Cell Biology and Genetics (MPI-CBG)</a>. </p>
+
+
+<h3>
+<a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contact</h3>
+
+<p>Want to contact us? <a href="mailto:royerloic@gmail.com">Send us an email</a> and we will come back to you.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by the <a href="https://github.com/ClearVolume">ClearVolume Team</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-57038369-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>

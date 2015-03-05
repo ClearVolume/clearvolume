@@ -11,7 +11,7 @@ public interface RotationControllerInterface
 {
 
 	/**
-	 * Performs the model-view transform.
+	 * Performs the mModelMatrix-mViewMatrix transform.
 	 * 
 	 * @param pVolumeViewMatrix
 	 */

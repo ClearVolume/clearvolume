@@ -12,29 +12,36 @@ public class ClearVolumeJFrame extends JFrame
 
 	private static final String cClearVolumeWindowIconRessourcePath = "/clearvolume/icon/ClearVolumeIcon256.png";
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
 	public ClearVolumeJFrame()
 	{
-		super();
-		setClearVolumeIcon();
+		this( true );
 	}
 
-	public ClearVolumeJFrame(GraphicsConfiguration pGc)
+	public ClearVolumeJFrame( final boolean pSetClearVolumeIcon )
+	{
+		super();
+		if ( pSetClearVolumeIcon ) {
+			setClearVolumeIcon();
+		}
+	}
+
+	public ClearVolumeJFrame(final GraphicsConfiguration pGc)
 	{
 		super(pGc);
 		setClearVolumeIcon();
 	}
 
-	public ClearVolumeJFrame(String pTitle, GraphicsConfiguration pGc)
+	public ClearVolumeJFrame(final String pTitle, final GraphicsConfiguration pGc)
 	{
 		super(pTitle, pGc);
 		setClearVolumeIcon();
 	}
 
-	public ClearVolumeJFrame(String pTitle) throws HeadlessException
+	public ClearVolumeJFrame(final String pTitle) throws HeadlessException
 	{
 		super(pTitle);
 		setClearVolumeIcon();
@@ -44,18 +51,18 @@ public class ClearVolumeJFrame extends JFrame
 	{
 		try
 		{
-			URL lImageURL = getClass().getResource(cClearVolumeWindowIconRessourcePath);
-			ImageIcon lImageIcon = new ImageIcon(lImageURL);
+			final URL lImageURL = getClass().getResource(cClearVolumeWindowIconRessourcePath);
+			final ImageIcon lImageIcon = new ImageIcon(lImageURL);
 
 			if(AppleMac.isMac())
 			{
 				AppleMac.setApplicationIcon(lImageIcon.getImage());
 				AppleMac.setApplicationName("ClearVolume");
 			}
-			
+
 			this.setIconImage(lImageIcon.getImage());
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 		}

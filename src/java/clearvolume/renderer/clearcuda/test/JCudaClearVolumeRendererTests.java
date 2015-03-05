@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
+import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
@@ -15,6 +16,9 @@ public class JCudaClearVolumeRendererTests
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,
 																						IOException
 	{
+		if (!CudaAvailability.isClearCudaOperational())
+			return;
+
 		try
 		{
 			final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
@@ -42,7 +46,8 @@ public class JCudaClearVolumeRendererTests
 						lVolumeDataArray[lIndex] = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 					}
 
-			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
@@ -53,7 +58,7 @@ public class JCudaClearVolumeRendererTests
 
 			lClearVolumeRenderer.close();
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			System.err.println("IT SEEMS THAT CUDA IS NOT AVAILABLE!!");
@@ -64,6 +69,9 @@ public class JCudaClearVolumeRendererTests
 	public void demoWith16BitGeneratedDataset()	throws InterruptedException,
 																							IOException
 	{
+		if (!CudaAvailability.isClearCudaOperational())
+			return;
+
 		try
 		{
 			final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
@@ -90,7 +98,8 @@ public class JCudaClearVolumeRendererTests
 						lVolumeDataArray[lIndex + 1] = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 					}
 
-			lClearVolumeRenderer.setVolumeDataBuffer(	ByteBuffer.wrap(lVolumeDataArray),
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
@@ -100,7 +109,7 @@ public class JCudaClearVolumeRendererTests
 
 			lClearVolumeRenderer.close();
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			System.err.println("IT SEEMS THAT CUDA IS NOT AVAILABLE!!");

@@ -25,18 +25,19 @@ public class TimeShiftingSinkDemo
 	public void demo() throws InterruptedException
 	{
 		ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"TimeShift Demo",
-																																																		512,
-																																																		512,
-																																																		1,
-																																																		512,
-																																																		512,
-																																																		2);
+				512,
+				512,
+				1,
+				512,
+				512,
+				2,
+				false);
 		lClearVolumeRenderer.setVisible(true);
 
 		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																										lClearVolumeRenderer.createCompatibleVolumeManager(200),
-																																										100,
-																																										TimeUnit.MILLISECONDS);
+				lClearVolumeRenderer.createCompatibleVolumeManager(200),
+				100,
+				TimeUnit.MILLISECONDS);
 		lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
 		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50, 100);
@@ -54,12 +55,12 @@ public class TimeShiftingSinkDemo
 			final int lChannel = i % 2;
 
 			Volume<Byte> lVolume = lManager.requestAndWaitForVolume(1,
-																															TimeUnit.MILLISECONDS,
-																															Byte.class,
-																															1,
-																															cWidth,
-																															cHeight,
-																															cDepth);
+					TimeUnit.MILLISECONDS,
+					Byte.class,
+					1,
+					cWidth,
+					cHeight,
+					cDepth);
 
 			ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
@@ -82,12 +83,12 @@ public class TimeShiftingSinkDemo
 						lVolumeData.put(lIndex, lByteValue);
 					}/**/
 
-			lVolume.setTimeIndex(lTimePoint);
-			lVolume.setChannelID(lChannel);
+					lVolume.setTimeIndex(lTimePoint);
+					lVolume.setChannelID(lChannel);
 
-			lTimeShiftingSink.sendVolume(lVolume);
+					lTimeShiftingSink.sendVolume(lVolume);
 
-			Thread.sleep(50);
+					Thread.sleep(50);
 		}
 	}
 }

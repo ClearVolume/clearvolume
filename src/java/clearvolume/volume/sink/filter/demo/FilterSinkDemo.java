@@ -25,18 +25,19 @@ public class FilterSinkDemo
 	public void demo() throws InterruptedException
 	{
 		ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"TimeShift Demo",
-																																																		512,
-																																																		512,
-																																																		1,
-																																																		512,
-																																																		512,
-																																																		2);
+				512,
+				512,
+				1,
+				512,
+				512,
+				2,
+				false);
 		lClearVolumeRenderer.setVisible(true);
 
 		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																										lClearVolumeRenderer.createCompatibleVolumeManager(200),
-																																										100,
-																																										TimeUnit.MILLISECONDS);
+				lClearVolumeRenderer.createCompatibleVolumeManager(200),
+				100,
+				TimeUnit.MILLISECONDS);
 		lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
 		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
@@ -55,12 +56,12 @@ public class FilterSinkDemo
 			final int lChannel = i % lNumberOfChannels;
 
 			Volume<Byte> lVolume = lManager.requestAndWaitForVolume(1,
-																															TimeUnit.MILLISECONDS,
-																															Byte.class,
-																															1,
-																															cWidth,
-																															cHeight,
-																															cDepth);
+					TimeUnit.MILLISECONDS,
+					Byte.class,
+					1,
+					cWidth,
+					cHeight,
+					cDepth);
 
 			ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
@@ -83,13 +84,13 @@ public class FilterSinkDemo
 						lVolumeData.put(lIndex, lByteValue);
 					}/**/
 
-			lVolume.setTimeIndex(lTimePoint);
-			lVolume.setChannelID(lChannel);
-			lVolume.setChannelName("Channel " + lChannel);
+					lVolume.setTimeIndex(lTimePoint);
+					lVolume.setChannelID(lChannel);
+					lVolume.setChannelName("Channel " + lChannel);
 
-			lChannelFilterSink.sendVolume(lVolume);
+					lChannelFilterSink.sendVolume(lVolume);
 
-			Thread.sleep(20);
+					Thread.sleep(20);
 		}
 	}
 }

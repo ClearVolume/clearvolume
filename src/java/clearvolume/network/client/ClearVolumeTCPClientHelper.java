@@ -2,6 +2,7 @@ package clearvolume.network.client;
 
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Image;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.UnresolvedAddressException;
@@ -10,9 +11,11 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
+import clearvolume.renderer.VolumeCaptureListener;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.filter.ChannelFilterSink;
@@ -21,6 +24,8 @@ import clearvolume.volume.sink.relay.RelaySinkInterface;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
+
+import com.apple.eawt.Application;
 
 public abstract class ClearVolumeTCPClientHelper
 {
@@ -31,15 +36,17 @@ public abstract class ClearVolumeTCPClientHelper
 	private static final long cSoftHoryzon = 50;
 	private static final long cHardHoryzon = 100;
 
-	public void startClient(String pServerAddress,
-													int pPortNumber,
-													int pWindowSize,
-													int pBytesPerVoxel,
-													int pNumberOfLayers,
-													boolean pTimeShift,
-													boolean pChannelFilter)
+	public void startClient(final VolumeCaptureListener pVolumeCaptureListener,
+													final String pServerAddress,
+													final int pPortNumber,
+													final int pWindowSize,
+													final int pBytesPerVoxel,
+													final int pNumberOfLayers,
+													final boolean pTimeShift,
+			final boolean pChannelFilter,
+			final Image appicon )
 	{
-		String lWindowTitle = "ClearVolume[" + pServerAddress
+		final String lWindowTitle = "ClearVolume[" + pServerAddress
 													+ ":"
 													+ pPortNumber
 													+ "]";
@@ -56,6 +63,9 @@ public abstract class ClearVolumeTCPClientHelper
 																																													TimeUnit.MILLISECONDS,
 																																													cMaxAvailableVolumes);)
 			{
+
+				lClearVolumeRendererSink.getClearVolumeRenderer()
+																.addVolumeCaptureListener(pVolumeCaptureListener);
 
 				RelaySinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
 
@@ -92,14 +102,14 @@ public abstract class ClearVolumeTCPClientHelper
 					lSinkAfterAsynchronousVolumeSinkAdapter = lTimeShiftingSink;
 				}
 
-				AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
+				final AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
 																																																					cMaxQueueLength,
 																																																					cMaxMillisecondsToWait,
 																																																					TimeUnit.MILLISECONDS);
 
-				ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
+				final ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
 
-				SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
+				final SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
 																																		pPortNumber);
 				assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
 
@@ -109,13 +119,16 @@ public abstract class ClearVolumeTCPClientHelper
 
 				lClearVolumeRendererSink.setVisible(true);
 
+				// Resteal app icon after JOGL stole it!
+				setCurrentAppIcon( appicon );
+
 				while (lClearVolumeRendererSink.isShowing())
 				{
 					try
 					{
 						Thread.sleep(10);
 					}
-					catch (InterruptedException e)
+					catch (final InterruptedException e)
 					{
 						e.printStackTrace();
 					}
@@ -139,21 +152,21 @@ public abstract class ClearVolumeTCPClientHelper
 				lClearVolumeTCPClient.close();
 			}
 		}
-		catch (UnresolvedAddressException uae)
+		catch (final UnresolvedAddressException uae)
 		{
 			reportErrorWithPopUp(	uae,
 														"Cannot find host: '" + pServerAddress
 																+ "'");
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			reportErrorWithPopUp(e, e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 	}
 
-	public void reportErrorWithPopUp(	Throwable pThrowable,
-																		String pErrorMessage)
+	public void reportErrorWithPopUp(	final Throwable pThrowable,
+																		final String pErrorMessage)
 	{
 		reportError(pThrowable, pErrorMessage);
 
@@ -201,7 +214,7 @@ public abstract class ClearVolumeTCPClientHelper
 																"Unknown error, please copy and send to royer@mpi-cbg.de",
 																JOptionPane.ERROR_MESSAGE);
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			try
 			{
@@ -211,7 +224,7 @@ public abstract class ClearVolumeTCPClientHelper
 																JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
 			}
-			catch (Throwable e1)
+			catch (final Throwable e1)
 			{
 				e1.printStackTrace();
 			}
@@ -219,11 +232,11 @@ public abstract class ClearVolumeTCPClientHelper
 
 	}
 
-	private void showEditableOptionPane(String pText,
-																			String pTitle,
-																			int pMessageType)
+	private void showEditableOptionPane(final String pText,
+																			final String pTitle,
+																			final int pMessageType)
 	{
-		JTextArea ta = new JTextArea(48, 100);
+		final JTextArea ta = new JTextArea(48, 100);
 		ta.setText(pText);
 		ta.setWrapStyleWord(true);
 		ta.setLineWrap(false);
@@ -238,4 +251,29 @@ public abstract class ClearVolumeTCPClientHelper
 
 	public abstract void reportError(Throwable e, String pErrorMessage);
 
+	/**
+	 * Use this method to set the icon for this app.
+	 * Best used after JOGL stole the application icon. Bad JOGL!
+	 * 
+	 * @param finalicon
+	 */
+	public static void setCurrentAppIcon( final Image finalicon ) {
+		if ( finalicon == null ) return;
+
+		final String os = System.getProperty( "os.name" ).toLowerCase();
+
+		SwingUtilities.invokeLater( new Runnable() {
+
+			@Override
+			public void run() {
+				if ( os.indexOf( "mac" ) >= 0 ) {
+					Application.getApplication().setDockIconImage( finalicon );
+				} else if ( os.indexOf( "win" ) >= 0 ) {
+//					not yet clear
+				} else {
+//					not yet clear
+				}
+			}
+		} );
+	}
 }
