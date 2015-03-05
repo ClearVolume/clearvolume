@@ -1,5 +1,5 @@
 language: java
-script: "gradle build"
+script: "gradle build -x packageosxapp -x packagewinapp"
 jdk:
   - oraclejdk8
   - oraclejdk7
