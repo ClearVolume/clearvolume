@@ -13,7 +13,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'c'
 apply plugin: 'cpp'
 apply plugin: 'idea'
-apply plugin: 'idea'
+
 
 [
 	compileJava,
@@ -174,10 +174,6 @@ dependencies
 	compile 'com.nativelibs4java:javacl:1.0-SNAPSHOT'
 	compile 'com.apple:AppleJavaExtensions:1.4'
 
-	def clearGLDir = null
-	def clearCUDADir = null
-
-
 	// usage: gradle .... -Plocal=true
 	if (hasProperty('local') && local.contains('true')) {
 		println 'Using local clearCUDA and clearGL sources'
@@ -275,7 +271,7 @@ copyCapsule.dependsOn build
 task packagecvlib {
 
 	def os = System.getProperty("os.name").toLowerCase()
-	if (os.contains("windows"))
+	if (os.contains("win"))
 	{
 		copy
 		{
@@ -312,7 +308,7 @@ task packagecvlib {
 task packagelvcvlib {
 
 	def os = System.getProperty("os.name").toLowerCase()
-	if (os.contains("windows"))
+	if (os.contains("win"))
 	{
 		copy
 		{
@@ -358,43 +354,47 @@ task packagelvcvlib {
 
 task packageosxapp {
 
-	copy
+	def os = System.getProperty("os.name").toLowerCase()
+	if (os.contains("mac"))
 	{
-		from('./deploy/osx/ClearVolume.app/')
-		into('./build/executable/ClearVolume.app/')
-		include "*.*"
-		include '**/**'
-		include '**/**/**'
-		include '**/**/**/**/'
-		include '**/**/**/**/**/'
-		include '**/**/**/**/**/**/'
-		include '**/**/**/**/**/**/**/'
-		include '**/**/**/**/**/**/**/**/'
-	}
+		copy
+		{
+			from('./deploy/osx/ClearVolume.app/')
+			into('./build/executable/ClearVolume.app/')
+			include "*.*"
+			include '**/**'
+			include '**/**/**'
+			include '**/**/**/**/'
+			include '**/**/**/**/**/'
+			include '**/**/**/**/**/**/'
+			include '**/**/**/**/**/**/**/'
+			include '**/**/**/**/**/**/**/**/'
+		}
 
-	def javahome = System.getenv('JAVA_HOME')
+		def javahome = System.getenv('JAVA_HOME')
 
-	copy
-	{
-		from(javahome+'/jre/')
-		into('./build/executable/ClearVolume.app/Contents/Resources/jre')
-		include "*.*"
-		include '**/**'
-		include '**/**/**'
-		include '**/**/**/**/'
-		include '**/**/**/**/**/'
-		include '**/**/**/**/**/**/'
-		include '**/**/**/**/**/**/**/'
-		include '**/**/**/**/**/**/**/**/'
-		exclude 'libjfxwebkit.dylib'
-		exclude 'jfxrt.jar'
-	}
+		copy
+		{
+			from(javahome+'/jre/')
+			into('./build/executable/ClearVolume.app/Contents/Resources/jre')
+			include "*.*"
+			include '**/**'
+			include '**/**/**'
+			include '**/**/**/**/'
+			include '**/**/**/**/**/'
+			include '**/**/**/**/**/**/'
+			include '**/**/**/**/**/**/**/'
+			include '**/**/**/**/**/**/**/**/'
+			exclude 'libjfxwebkit.dylib'
+			exclude 'jfxrt.jar'
+		}
 
-	copy
-	{
-		from('./build/executable/')
-		into('./build/executable/ClearVolume.app/Contents/Resources')
-		include('ClearVolume.exe.jar')
+		copy
+		{
+			from('./build/executable/')
+			into('./build/executable/ClearVolume.app/Contents/Resources')
+			include('ClearVolume.exe.jar')
+		}
 	}
 }
 
@@ -406,37 +406,42 @@ packageosxapp.dependsOn copyCapsule
 
 task packagewinapp(type:Exec) {
 
-	def userhome = System.getenv('HOME')
-
-	copy
+	def os = System.getProperty("os.name").toLowerCase()
+	if (os.contains("win"))
 	{
-		from(userhome+'/.winjre/')
-		into('./build/executable/ClearVolumeWin/jre')
-		include "*.*"
-		include '**/**'
-		include '**/**/**'
-		include '**/**/**/**/'
-		include '**/**/**/**/**/'
-		include '**/**/**/**/**/**/'
-		include '**/**/**/**/**/**/**/'
-		include '**/**/**/**/**/**/**/**/'
-		exclude 'libjfxwebkit.dll'
-		exclude 'jfxrt.jar'
+
+		def userhome = System.getenv('HOME')
+
+		copy
+		{
+			from(userhome+'/.winjre/')
+			into('./build/executable/ClearVolumeWin/jre')
+			include "*.*"
+			include '**/**'
+			include '**/**/**'
+			include '**/**/**/**/'
+			include '**/**/**/**/**/'
+			include '**/**/**/**/**/**/'
+			include '**/**/**/**/**/**/**/'
+			include '**/**/**/**/**/**/**/**/'
+			exclude 'libjfxwebkit.dll'
+			exclude 'jfxrt.jar'
+		}
+
+		copy
+		{
+			from('./deploy/win/libs/')
+			into('./build/executable/ClearVolumeWin/dlls/')
+			include "*.dll"
+		}
+
+		workingDir '.'
+		commandLine './packagewinapp.sh'
+
+		standardOutput = new ByteArrayOutputStream()
+
+		ext.output = {return standardOutput.toString()}
 	}
-
-	copy
-	{
-		from('./deploy/win/libs/')
-		into('./build/executable/ClearVolumeWin/dlls/')
-		include "*.dll"
-	}
-
-	workingDir '.'
-	commandLine './packagewinapp.sh'
-
-	standardOutput = new ByteArrayOutputStream()
-
-	ext.output = {return standardOutput.toString()}
 }
 
 packagewinapp.dependsOn copyCapsule
@@ -472,19 +477,27 @@ task collectdistribution(dependsOn:[packageosxapp, packagewinapp]) {
 
 task packagedmg(type:Exec,dependsOn:collectdistribution ) {
 
-	workingDir '.'
-	commandLine './packagedmg.sh'
-	standardOutput = new ByteArrayOutputStream()
-	ext.output = {return standardOutput.toString()}
+	def os = System.getProperty("os.name").toLowerCase()
+	if (os.contains("nix") || os.contains("mac"))
+	{
+		workingDir '.'
+		commandLine './packagedmg.sh'
+		standardOutput = new ByteArrayOutputStream()
+		ext.output = {return standardOutput.toString()}
+	}
 }
 
 
 task packagezip(type:Exec,dependsOn:collectdistribution) {
 
-	workingDir '.'
-	commandLine './packagezip.sh'
-	standardOutput = new ByteArrayOutputStream()
-	ext.output = {return standardOutput.toString()}
+	def os = System.getProperty("os.name").toLowerCase()
+	if (os.contains("nix") || os.contains("mac"))
+	{
+		workingDir '.'
+		commandLine './packagezip.sh'
+		standardOutput = new ByteArrayOutputStream()
+		ext.output = {return standardOutput.toString()}
+	}
 }
 
 
