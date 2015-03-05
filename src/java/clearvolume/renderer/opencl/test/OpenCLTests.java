@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import clearvolume.renderer.opencl.OpenCLAvailability;
 import clearvolume.renderer.opencl.OpenCLDevice;
 
 import com.nativelibs4java.opencl.CLBuffer;
@@ -17,9 +18,12 @@ public class OpenCLTests
 	@Test
 	public void test_creation()
 	{
+		if (!OpenCLAvailability.isOpenCLAvailable())
+			return;
+
 		try
 		{
-			OpenCLDevice dev = new OpenCLDevice();
+			final OpenCLDevice dev = new OpenCLDevice();
 			dev.initCL();
 			dev.printInfo();
 
@@ -27,16 +31,16 @@ public class OpenCLTests
 
 			// create the buffer/image type we would need for the renderer
 
-			CLBuffer<Float> clBufIn = dev.createInputFloatBuffer(N);
-			CLBuffer<Integer> clBufOut = dev.createOutputIntBuffer(N);
+			final CLBuffer<Float> clBufIn = dev.createInputFloatBuffer(N);
+			final CLBuffer<Integer> clBufOut = dev.createOutputIntBuffer(N);
 
-			CLImage3D img = dev.createGenericImage3D(	N,
+			final CLImage3D img = dev.createGenericImage3D(	N,
 																								N,
 																								N,
 																								CLImageFormat.ChannelOrder.R,
 																								CLImageFormat.ChannelDataType.SignedInt16);
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 
 			fail();
@@ -48,16 +52,19 @@ public class OpenCLTests
 	@Test
 	public void test_compile()
 	{
+		if (!OpenCLAvailability.isOpenCLAvailable())
+			return;
+
 		try
 		{
-			OpenCLDevice lOpenCLDevice = new OpenCLDevice();
+			final OpenCLDevice lOpenCLDevice = new OpenCLDevice();
 			lOpenCLDevice.initCL();
 			lOpenCLDevice.printInfo();
 
-			CLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
+			final CLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
 																												"test_char");
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			fail();
@@ -68,24 +75,27 @@ public class OpenCLTests
 	@Test
 	public void test_run()
 	{
+		if (!OpenCLAvailability.isOpenCLAvailable())
+			return;
+
 		try
 		{
-			OpenCLDevice lOpenCLDevice = new OpenCLDevice();
+			final OpenCLDevice lOpenCLDevice = new OpenCLDevice();
 			lOpenCLDevice.initCL();
 			lOpenCLDevice.printInfo();
 			final int N = 100;
 
-			CLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
+			final CLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
 																												"test_float");
 
-			CLBuffer<Float> clBufIn = lOpenCLDevice.createOutputFloatBuffer(N);
+			final CLBuffer<Float> clBufIn = lOpenCLDevice.createOutputFloatBuffer(N);
 
 			lCLKernel.setArgs(clBufIn, N);
 
 			lOpenCLDevice.run(lCLKernel, N);
 
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			fail();

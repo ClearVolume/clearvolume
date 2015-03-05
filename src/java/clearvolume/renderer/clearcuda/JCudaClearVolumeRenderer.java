@@ -7,7 +7,6 @@ package clearvolume.renderer.clearcuda;
  * Copyright 2009-2011 Marco Hutter - http://www.jcuda.org
  */
 
-import static jcuda.driver.JCudaDriver.CU_TRSF_NORMALIZED_COORDINATES;
 
 import java.io.File;
 import java.io.IOException;
@@ -382,7 +381,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																					CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
 		mVolumeDataCudaTexture.setAddressMode(1,
 																					CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
-		mVolumeDataCudaTexture.setFlags(CU_TRSF_NORMALIZED_COORDINATES);
+		mVolumeDataCudaTexture.setFlags(jcuda.driver.JCudaDriver.CU_TRSF_NORMALIZED_COORDINATES);
 	}
 
 	private void pointTextureToArray(final int pRenderLayerIndex)
@@ -435,7 +434,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 																						CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
 		mTransferFunctionTexture.setAddressMode(1,
 																						CUaddress_mode.CU_TR_ADDRESS_MODE_CLAMP);
-		mTransferFunctionTexture.setFlags(CU_TRSF_NORMALIZED_COORDINATES);
+		mTransferFunctionTexture.setFlags(jcuda.driver.JCudaDriver.CU_TRSF_NORMALIZED_COORDINATES);
 
 	}
 

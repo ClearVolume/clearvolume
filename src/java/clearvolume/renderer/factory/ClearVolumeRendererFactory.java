@@ -4,8 +4,7 @@ import java.util.Properties;
 
 import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
-import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
+import clearvolume.renderer.opencl.OpenCLAvailability;
 
 public class ClearVolumeRendererFactory
 {
@@ -145,9 +144,9 @@ public class ClearVolumeRendererFactory
 																																		final int pNumberOfRenderLayers,
 																																		final boolean pUseInCanvas)
 	{
-		final Properties p = new Properties(System.getProperties());
+		final Properties lProperties = new Properties(System.getProperties());
 
-		if (p.getProperty("ClearVolume.disableCUDA") == null)
+		if (lProperties.getProperty("ClearVolume.disableCUDA") == null)
 		{
 			final ClearVolumeRendererInterface lNewCudaRenderer = newCudaRenderer(pWindowName,
 																																						pWindowWidth,
@@ -166,16 +165,17 @@ public class ClearVolumeRendererFactory
 			System.err.println("Caution: Use of CUDA has been explicitly disabled!");
 		}
 
-		if (p.getProperty("ClearVolume.disableOpenCL") == null)
+		if (lProperties.getProperty("ClearVolume.disableOpenCL") == null)
 		{
-			return new OpenCLVolumeRenderer(pWindowName,
-																			pWindowWidth,
-																			pWindowHeight,
-																			pBytesPerVoxel,
-																			pMaxTextureWidth,
-																			pMaxTextureHeight,
-																			pNumberOfRenderLayers,
-																			pUseInCanvas);
+			final ClearVolumeRendererInterface lNewOpenCLRenderer = newOpenCLRenderer(pWindowName,
+																																								pWindowWidth,
+																																								pWindowHeight,
+																																								pBytesPerVoxel,
+																																								pMaxTextureWidth,
+																																								pMaxTextureHeight,
+																																								pNumberOfRenderLayers,
+																																								pUseInCanvas);
+			return lNewOpenCLRenderer;
 		}
 		else
 		{
@@ -208,14 +208,14 @@ public class ClearVolumeRendererFactory
 		if (!lCUDAOperational)
 			return null;
 
-		return new JCudaClearVolumeRenderer(pWindowName,
-																				pWindowWidth,
-																				pWindowHeight,
-																				pBytesPerVoxel,
-																				pMaxTextureWidth,
-																				pMaxTextureHeight,
-																				pNumberOfRenderLayers,
-																				pUseInCanvas);
+		return new clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer(	pWindowName,
+																																				pWindowWidth,
+																																				pWindowHeight,
+																																				pBytesPerVoxel,
+																																				pMaxTextureWidth,
+																																				pMaxTextureHeight,
+																																				pNumberOfRenderLayers,
+																																				pUseInCanvas);
 	}
 
 	public static final ClearVolumeRendererInterface newOpenCLRenderer(	final String pWindowName,
@@ -227,13 +227,26 @@ public class ClearVolumeRendererFactory
 																																			final int pNumberOfRenderLayers,
 																																			final boolean pUseInCanvas)
 	{
-		return new OpenCLVolumeRenderer(pWindowName,
-																		pWindowWidth,
-																		pWindowHeight,
-																		pBytesPerVoxel,
-																		pMaxTextureWidth,
-																		pMaxTextureHeight,
-																		pNumberOfRenderLayers,
-																		pUseInCanvas);
+		boolean lOpenCLOperational = false;
+		try
+		{
+			lOpenCLOperational = OpenCLAvailability.isOpenCLAvailable();
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+		}
+
+		if (!lOpenCLOperational)
+			return null;
+
+		return new clearvolume.renderer.opencl.OpenCLVolumeRenderer(pWindowName,
+																																pWindowWidth,
+																																pWindowHeight,
+																																pBytesPerVoxel,
+																																pMaxTextureWidth,
+																																pMaxTextureHeight,
+																																pNumberOfRenderLayers,
+																																pUseInCanvas);
 	}
 }
