@@ -533,8 +533,7 @@ if(hasProperty('bintray_user') && hasProperty('bintray_key') )
 		user = bintray_user
 		key =  bintray_key
 
-		publications = [
-			'maven'] //When uploading configuration files
+		publications = ['maven'] //When uploading configuration files
 		dryRun = false //Whether to run this as dry-run, without deploying
 		publish = true //If version should be auto published after an upload
 		pkg {
