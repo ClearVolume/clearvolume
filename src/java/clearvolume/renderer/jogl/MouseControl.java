@@ -49,6 +49,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 		mRenderer.notifyChangeOfVolumeRenderingParameters();
 		mRenderer.getAdaptiveLODController()
 							.notifyUserInteractionInProgress();
+
+		mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent);
 	}
 
 	private void handleRotationAndTranslation(final MouseEvent pMouseEvent)
@@ -61,8 +63,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 				&& !pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
 		{
-			mRenderer.addRotationX(dx);
-			mRenderer.addRotationY(dy);
+			mRenderer.rotate(dx, dy);
 		}
 
 		// If the right button is held down, rotate the object
@@ -112,6 +113,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 		mRenderer.getAdaptiveLODController()
 							.notifyUserInteractionInProgress();
 
+		mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent);
+
 	}
 
 	/**
@@ -131,22 +134,27 @@ class MouseControl extends MouseAdapter implements MouseListener
 			mRenderer.toggleFullScreen();
 			mRenderer.notifyChangeOfVolumeRenderingParameters();
 		}
+
+		mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent);
 	}
 
 	@Override
-	public void mousePressed(MouseEvent pE)
+	public void mousePressed(MouseEvent pMouseEvent)
 	{
-		super.mousePressed(pE);
+		super.mousePressed(pMouseEvent);
 		mRenderer.getAdaptiveLODController()
 							.notifyUserInteractionInProgress();
+
+		mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent);
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent pE)
+	public void mouseReleased(MouseEvent pMouseEvent)
 	{
 		mRenderer.getAdaptiveLODController().notifyUserInteractionEnded();
-		super.mouseReleased(pE);
+		super.mouseReleased(pMouseEvent);
 
+		mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent);
 	}
 
 	/**

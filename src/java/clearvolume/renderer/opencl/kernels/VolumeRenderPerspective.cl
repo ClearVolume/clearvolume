@@ -183,7 +183,7 @@ volumerender(								__global uint	*d_output,
   if (tnear < 0.0f) tnear = 0.0f;     
 
 	// compute step size:
-	const float tstep = fabs(tnear-tfar)/maxsteps;
+	const float tstep = fabs(tnear-tfar)/((maxsteps/LOOPUNROLL)*LOOPUNROLL);
   
   // apply phase:
 	orig += phase*tstep*direc;
@@ -197,7 +197,7 @@ volumerender(								__global uint	*d_output,
 	float4 pos = orig*0.5f+0.5f + tnear*0.5f*direc;
 
   // Loop unrolling setup: 
-  const uint unrolledmaxsteps = (maxsteps/LOOPUNROLL)+1;
+  const uint unrolledmaxsteps = (maxsteps/LOOPUNROLL);
   
   // raycasting loop:
   float maxp = 0.0f;

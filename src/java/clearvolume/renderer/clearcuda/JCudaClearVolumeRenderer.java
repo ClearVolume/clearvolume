@@ -96,7 +96,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 * inverted mViewMatrix-matrix, mProjectionMatrix matrix, transfer function.
 	 */
 
-	private CudaDevicePointer mInvertedViewMatrix,
+	private CudaDevicePointer mInvertedModelViewMatrix,
 			mInvertedProjectionMatrix, mSizeOfTransferFunction;
 
 	/**
@@ -235,7 +235,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 			mCudaModule = CudaModule.moduleFromPTX(lPTXFile);
 
-			mInvertedViewMatrix = mCudaModule.getGlobal("c_invViewMatrix");
+			mInvertedModelViewMatrix = mCudaModule.getGlobal("c_invViewMatrix");
 
 			mInvertedProjectionMatrix = mCudaModule.getGlobal("c_invProjectionMatrix");
 			mSizeOfTransferFunction = mCudaModule.getGlobal("c_sizeOfTransfertFunction");
@@ -467,7 +467,7 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			{
 				for (int i = 0; i < getNumberOfRenderLayers(); i++)
 
-					mInvertedViewMatrix.close();
+					mInvertedModelViewMatrix.close();
 				mInvertedProjectionMatrix.close();
 				mSizeOfTransferFunction.close();
 			}
@@ -600,8 +600,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	 *      float[])
 	 */
 	@Override
-	protected boolean[] renderVolume(	final float[] invModelView,
-																		final float[] invProjection)
+	protected boolean[] renderVolume(	final float[] pInverseModelViewMatrix,
+																		final float[] pInverseProjectionMatrix)
 	{
 		if (mCudaContext == null)
 			return null;
@@ -611,8 +611,8 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		try
 		{
-			mInvertedViewMatrix.copyFrom(invModelView, true);
-			mInvertedProjectionMatrix.copyFrom(invProjection, true);
+			mInvertedModelViewMatrix.copyFrom(pInverseModelViewMatrix, true);
+			mInvertedProjectionMatrix.copyFrom(pInverseProjectionMatrix, true);
 			return updateBufferAndRunKernel();
 		}
 		catch (final CudaException e)

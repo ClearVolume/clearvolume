@@ -21,7 +21,7 @@ import javax.swing.border.EmptyBorder;
 import net.miginfocom.swing.MigLayout;
 import clearvolume.network.client.ClearVolumeTCPClientHelper;
 import clearvolume.network.serialization.ClearVolumeSerialization;
-import clearvolume.renderer.VolumeCaptureListener;
+import clearvolume.renderer.listeners.VolumeCaptureListener;
 
 public class ConnectionPanel extends JPanel
 {

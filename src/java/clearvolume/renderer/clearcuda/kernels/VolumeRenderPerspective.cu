@@ -46,6 +46,7 @@ typedef struct
     float4 m[4];
 } float4x4;
 
+
 // Arrays:
 cudaArray *d_volumeArray = 0;
 cudaArray *d_transferFuncArray;
@@ -247,7 +248,7 @@ volumerender(       uint *d_output,
 		direc = mul(c_invViewMatrix,direc0);
 		direc.w = 0.0f;
 
-    // calculate eye ray in world space
+    // eye ray in world space:
     Ray eyeRay;
 		eyeRay.o = make_float3(orig);
 		eyeRay.d = make_float3(direc);	
@@ -265,8 +266,8 @@ volumerender(       uint *d_output,
     // clamp to near plane:
 		if (tnear < 0.0f) tnear = 0.0f;     
 
-		// compute stape size:		
-		const float tstep = abs(tnear-tfar)/maxsteps;
+		// compute step size:		
+		const float tstep = abs(tnear-tfar)/((maxsteps/LOOPUNROLL)*LOOPUNROLL);
 
 		// apply phase:
 		orig += phase*tstep*direc;
@@ -280,7 +281,7 @@ volumerender(       uint *d_output,
 		float4 pos = orig*0.5f+0.5f + tnear*0.5f*direc;
 
 		// Loop unrolling setup: 
-    const uint unrolledmaxsteps = (maxsteps/LOOPUNROLL)+1;
+    const uint unrolledmaxsteps = (maxsteps/LOOPUNROLL);
 		
 		// raycasting loop:
 		float maxp = 0.0f;

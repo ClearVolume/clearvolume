@@ -1,4 +1,4 @@
-package clearvolume.renderer;
+package clearvolume.renderer.listeners;
 
 import java.nio.ByteBuffer;
 

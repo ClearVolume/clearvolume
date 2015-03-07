@@ -8,12 +8,15 @@ import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.jogl.overlay.Overlay;
+import clearvolume.renderer.listeners.EyeRayListener;
+import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
+import com.jogamp.opengl.math.Quaternion;
 
 /**
  * Interface ClearVolumeRenderer
@@ -570,21 +573,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	void addTranslationZ(double pDZ);
 
-	/**
-	 * Rotates along x axis by pDRX.
-	 *
-	 * @param pDRX
-	 *          amount of rotation
-	 */
-	void addRotationX(int pDRX);
-
-	/**
-	 * Rotates along y axis by pDRY.
-	 *
-	 * @param pDRY
-	 *          amount of rotation
-	 */
-	void addRotationY(int pDRY);
 
 	/**
 	 * Returns the translation vector x component.
@@ -608,18 +596,11 @@ public interface ClearVolumeRendererInterface	extends
 	public float getTranslationZ();
 
 	/**
-	 * Returns the rotation vector x component.
+	 * Returns the Quaternion.
 	 *
-	 * @return x component
+	 * @return Quaternion
 	 */
-	public float getRotationY();
-
-	/**
-	 * Returns the rotation vector y component.
-	 *
-	 * @return y component
-	 */
-	public float getRotationX();
+	public Quaternion getQuaternion();
 
 	/**
 	 * Notifies renderer that display/volume parameters have changed and a display
@@ -717,6 +698,22 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return
 	 */
 	AdaptiveLODController getAdaptiveLODController();
+
+	/**
+	 * Adds a eye ray listener to this renderer.
+	 *
+	 * @param pEyeRayListener
+	 *          eye ray listener
+	 */
+	public void addEyeRayListener(EyeRayListener pEyeRayListener);
+
+	/**
+	 * Removes a eye ray listener to this renderer.
+	 *
+	 * @param pEyeRayListener
+	 *          eye ray listener
+	 */
+	public void removeEyeRayListener(EyeRayListener pEyeRayListener);
 
 	/**
 	 * Interface method implementation

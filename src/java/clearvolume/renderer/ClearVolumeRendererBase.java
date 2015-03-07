@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
@@ -17,11 +18,15 @@ import javax.swing.SwingUtilities;
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.projections.ProjectionAlgorithm;
+import clearvolume.renderer.listeners.EyeRayListener;
+import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
+
+import com.jogamp.opengl.math.Quaternion;
 
 /**
  * Class ClearVolumeRendererBase
@@ -65,11 +70,10 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile boolean[] mLayerVisiblityFlagArray;
 
 	// geometric, brigthness an contrast settings.
+	private final Quaternion mRotationQuaternion = new Quaternion();
 	private volatile float mTranslationX = 0;
 	private volatile float mTranslationY = 0;
 	private volatile float mTranslationZ = 0;
-	private volatile float mRotationX = 0;
-	private volatile float mRotationY = 0;
 	private volatile float mScaleX = 1.0f;
 	private volatile float mScaleY = 1.0f;
 	private volatile float mScaleZ = 1.0f;
@@ -113,6 +117,10 @@ public abstract class ClearVolumeRendererBase	implements
 	// Adaptive LOD controller:
 	protected AdaptiveLODController mAdaptiveLODController;
 
+	// Eye ray listeners:
+	protected CopyOnWriteArrayList<EyeRayListener> mEyeRayListenerList = new CopyOnWriteArrayList<EyeRayListener>();
+
+
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
 		super();
@@ -155,6 +163,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @param pBytesPerVoxel
 	 *          bytes-per-voxel
 	 */
+	@Override
 	public void setBytesPerVoxel(final int pBytesPerVoxel)
 	{
 		mBytesPerVoxel = pBytesPerVoxel;
@@ -849,28 +858,10 @@ public abstract class ClearVolumeRendererBase	implements
 		notifyChangeOfVolumeRenderingParameters();
 	}
 
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addRotationX(int)
-	 */
 	@Override
-	public void addRotationX(final int pDRX)
+	public Quaternion getQuaternion()
 	{
-		mRotationX += pDRX;
-		notifyChangeOfVolumeRenderingParameters();
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addRotationY(int)
-	 */
-	@Override
-	public void addRotationY(final int pDRY)
-	{
-		mRotationY += pDRY;
-		notifyChangeOfVolumeRenderingParameters();
+		return mRotationQuaternion;
 	}
 
 	/**
@@ -936,27 +927,6 @@ public abstract class ClearVolumeRendererBase	implements
 		return mTranslationZ;
 	}
 
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getRotationY()
-	 */
-	@Override
-	public float getRotationY()
-	{
-		return mRotationX;
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getRotationX()
-	 */
-	@Override
-	public float getRotationX()
-	{
-		return mRotationY;
-	}
 
 	/**
 	 * Interface method implementation
@@ -1091,8 +1061,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void resetRotationTranslation()
 	{
-		mRotationX = 0;
-		mRotationY = 0;
+		mRotationQuaternion.setIdentity();
 		mTranslationX = 0;
 		mTranslationY = 0;
 		mTranslationZ = -4;
@@ -1284,7 +1253,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Notifies the volume data copy completion.
 	 */
-	public void notifyCompletionOfDataBufferCopy(final int pRenderLayerIndex)
+	protected void notifyCompletionOfDataBufferCopy(final int pRenderLayerIndex)
 	{
 		mDataBufferCopyIsFinished.set(pRenderLayerIndex, 1);
 	}
@@ -1292,7 +1261,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Clears data copy buffer flag.
 	 */
-	public void clearCompletionOfDataBufferCopy(final int pRenderLayerIndex)
+	protected void clearCompletionOfDataBufferCopy(final int pRenderLayerIndex)
 	{
 		mDataBufferCopyIsFinished.set(pRenderLayerIndex, 0);
 	}
@@ -1485,6 +1454,30 @@ public abstract class ClearVolumeRendererBase	implements
 	public AdaptiveLODController getAdaptiveLODController()
 	{
 		return mAdaptiveLODController;
+	}
+
+	/**
+	 * Adds a eye ray listener to this renderer.
+	 *
+	 * @param pEyeRayListener
+	 *          eye ray listener
+	 */
+	@Override
+	public void addEyeRayListener(EyeRayListener pEyeRayListener)
+	{
+		mEyeRayListenerList.add(pEyeRayListener);
+	}
+
+	/**
+	 * Removes a eye ray listener to this renderer.
+	 *
+	 * @param pEyeRayListener
+	 *          eye ray listener
+	 */
+	@Override
+	public void removeEyeRayListener(EyeRayListener pEyeRayListener)
+	{
+		mEyeRayListenerList.remove(pEyeRayListener);
 	}
 
 	/**

@@ -17,7 +17,7 @@ import javax.swing.border.EmptyBorder;
 
 import clearvolume.main.CheckRequirements;
 import clearvolume.network.client.ClearVolumeTCPClientHelper;
-import clearvolume.renderer.VolumeCaptureListener;
+import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.utils.ClearVolumeJFrame;
 
 public class ClearVolumeClientMain

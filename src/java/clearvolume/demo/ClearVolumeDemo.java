@@ -23,13 +23,16 @@ import org.junit.Test;
 import clearvolume.controller.ExternalRotationController;
 import clearvolume.projections.ProjectionAlgorithm;
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.VolumeCaptureListener;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
+import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
 import clearvolume.renderer.jogl.overlay.o2d.GraphOverlay;
 import clearvolume.renderer.jogl.overlay.o2d.ImageQualityOverlay;
 import clearvolume.renderer.jogl.overlay.o3d.DriftOverlay;
 import clearvolume.renderer.jogl.overlay.o3d.PathOverlay;
+import clearvolume.renderer.jogl.utils.ScreenToEyeRay.EyeRay;
+import clearvolume.renderer.listeners.EyeRayListener;
+import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
@@ -41,6 +44,7 @@ import clearvolume.renderer.processors.impl.OpenCLTest;
 import clearvolume.transferf.TransferFunctions;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
+import com.jogamp.newt.event.MouseEvent;
 
 public class ClearVolumeDemo
 {
@@ -1852,6 +1856,105 @@ public class ClearVolumeDemo
 
 		lClearVolumeRenderer.close();
 	}
+
+	@Test
+	public void demoEyeRayListener() throws InterruptedException,
+																	IOException
+	{
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
+																																																					512,
+																																																					512,
+																																																					1,
+																																																					512,
+																																																					512,
+																																																					1,
+																																																					false);
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
+
+		final int lResolutionX = 256;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																							* lResolutionZ];
+
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
+
+		lClearVolumeRenderer.addEyeRayListener(new EyeRayListener()
+		{
+
+			@Override
+			public void notifyEyeRay(	JOGLClearVolumeRenderer pRenderer,
+																MouseEvent pMouseEvent,
+																EyeRay pEyeRay)
+			{
+				if (pMouseEvent.getButton() != 2)
+					return;
+
+				final int lX = pMouseEvent.getX();
+				final int lY = pMouseEvent.getY();
+
+				System.out.format("%d %d \n", lX, lY);
+
+				System.out.println(pMouseEvent);
+				System.out.println(pEyeRay);
+
+				float x = pEyeRay.org[0];
+				float y = pEyeRay.org[1];
+				float z = pEyeRay.org[2];
+
+				final float lStepSize = 0.001f;
+				for (float i = 0; i < 1000 * lStepSize; i += lStepSize)
+				{
+					x += lStepSize * pEyeRay.dir[0];
+					y += lStepSize * pEyeRay.dir[1];
+					z += lStepSize * pEyeRay.dir[2];
+
+					final int ix = (int) (lResolutionX * x);
+					final int iy = (int) (lResolutionY * y);
+					final int iz = (int) (lResolutionZ * z);
+
+					if (ix < 0 || ix >= lResolutionX
+							|| iy < 0
+							|| iy >= lResolutionY
+							|| iz < 0
+							|| iz >= lResolutionZ)
+						continue;
+
+					final int lIndex = ix + lResolutionX
+															* iy
+															+ lResolutionX
+															* lResolutionY
+															* iz;
+
+					lVolumeDataArray[lIndex] = (byte) 200;
+
+				}
+
+				lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																									ByteBuffer.wrap(lVolumeDataArray),
+																									lResolutionX,
+																									lResolutionY,
+																									lResolutionZ);
+
+			}
+		});
+
+		while (lClearVolumeRenderer.isShowing())
+		{
+			Thread.sleep(500);
+		}
+
+		lClearVolumeRenderer.close();
+	}
+
+	// **********************************************************************************************************
 
 	private static byte[] loadData(	final InputStream pInputStream,
 																	final int pBytesPerVoxel,

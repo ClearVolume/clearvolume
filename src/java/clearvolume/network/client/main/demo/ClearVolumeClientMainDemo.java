@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import clearvolume.network.client.main.ClearVolumeClientMain;
-import clearvolume.renderer.VolumeCaptureListener;
+import clearvolume.renderer.listeners.VolumeCaptureListener;
 
 public class ClearVolumeClientMainDemo
 {

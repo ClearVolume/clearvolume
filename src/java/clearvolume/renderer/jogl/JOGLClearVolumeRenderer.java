@@ -38,8 +38,12 @@ import clearvolume.renderer.jogl.overlay.Overlay;
 import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.jogl.overlay.Overlay3D;
 import clearvolume.renderer.jogl.overlay.o3d.BoxOverlay;
+import clearvolume.renderer.jogl.utils.ScreenToEyeRay;
+import clearvolume.renderer.jogl.utils.ScreenToEyeRay.EyeRay;
+import clearvolume.renderer.listeners.EyeRayListener;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
+import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.opengl.util.FPSAnimator;
@@ -76,7 +80,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 	// ClearGL Window.
 	private volatile ClearGLWindow mClearGLWindow;
-	private FPSAnimator mAnimator;
+	private final FPSAnimator mAnimator;
 	private NewtCanvasAWT mNewtCanvasAWT;
 	private volatile int mLastWindowWidth, mLastWindowHeight;
 	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
@@ -112,6 +116,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
 
 	private final int mTextureWidth, mTextureHeight;
+
+	private volatile int mViewportX, mViewportY, mViewportWidth = 128,
+			mViewportHeight = 128;
 
 	// Recorder:
 	private final GLVideoRecorder mGLVideoRecorder = new GLVideoRecorder(new File(SystemUtils.USER_HOME,
@@ -691,44 +698,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				setDefaultProjectionMatrix();
 
-				// scaling...
-
-				final double lScaleX = getVolumeSizeX() * getVoxelSizeX();
-				final double lScaleY = getVolumeSizeY() * getVoxelSizeY();
-				final double lScaleZ = getVolumeSizeZ() * getVoxelSizeZ();
-
-				final double maxScale = max(max(lScaleX, lScaleY), lScaleZ);
-
-				// building up the inverse Modelview
-
-				final GLMatrix lEulerMatrix = new GLMatrix();
-
-				lEulerMatrix.euler(	getRotationX() * 0.01,
-														getRotationY() * 0.01,
-														0.0f);
-				if (hasRotationController())
-				{
-					getRotationController().rotate(lEulerMatrix);
-					notifyChangeOfVolumeRenderingParameters();
-				}
-
-				final GLMatrix lInvVolumeMatrix = new GLMatrix();
-				lInvVolumeMatrix.setIdentity();
-				lInvVolumeMatrix.translate(	-getTranslationX(),
-																		-getTranslationY(),
-																		-getTranslationZ());
-				lInvVolumeMatrix.transpose();
-
-				lInvVolumeMatrix.mult(lEulerMatrix);
-
-				lInvVolumeMatrix.scale(	(float) (maxScale / lScaleX),
-																(float) (maxScale / lScaleY),
-																(float) (maxScale / lScaleZ));
-
-				final GLMatrix lInvProjection = new GLMatrix();
-				lInvProjection.copy(getClearGLWindow().getProjectionMatrix());
-				lInvProjection.transpose();
-				lInvProjection.invert();
+				final GLMatrix lInvModelViewMatrix = getInverseModelViewMatrix();
+				final GLMatrix lInvProjectionMatrix = getInverseProjectionMatrix();
 
 				GLError.printGLErrors(lGL4, "BEFORE RENDER VOLUME");
 
@@ -737,8 +708,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				final boolean lLastRenderPass = getAdaptiveLODController().beforeRendering();
 
-				renderVolume(	lInvVolumeMatrix.getFloatArray(),
-											lInvProjection.getFloatArray());
+				renderVolume(	lInvModelViewMatrix.getFloatArray(),
+											lInvProjectionMatrix.getFloatArray());
 
 				getAdaptiveLODController().afterRendering();
 
@@ -764,7 +735,7 @@ public abstract class JOGLClearVolumeRenderer	extends
 
 				renderOverlays3D(	lGL4,
 													getClearGLWindow().getProjectionMatrix(),
-													lInvVolumeMatrix);
+													lInvModelViewMatrix);
 
 				renderOverlays2D(lGL4, cOverlay2dProjectionMatrix);
 
@@ -781,6 +752,54 @@ public abstract class JOGLClearVolumeRenderer	extends
 				if (mDisplayReentrantLock.isHeldByCurrentThread())
 					mDisplayReentrantLock.unlock();
 			}
+	}
+
+	private GLMatrix getInverseProjectionMatrix()
+	{
+		final GLMatrix lInvProjection = new GLMatrix();
+		lInvProjection.copy(getClearGLWindow().getProjectionMatrix());
+		lInvProjection.transpose();
+		lInvProjection.invert();
+		return lInvProjection;
+	}
+
+	private GLMatrix getInverseModelViewMatrix()
+	{
+		// scaling...
+
+		final double lScaleX = getVolumeSizeX() * getVoxelSizeX();
+		final double lScaleY = getVolumeSizeY() * getVoxelSizeY();
+		final double lScaleZ = getVolumeSizeZ() * getVoxelSizeZ();
+
+		final double lMaxScale = max(max(lScaleX, lScaleY), lScaleZ);
+
+		// building up the inverse Modelview matrix
+
+		// final GLMatrix lEulerMatrix = new GLMatrix();
+
+		/*lEulerMatrix.euler(	getRotationX() * 0.01,
+												getRotationY() * 0.01,
+												0.0f);/**/
+		if (hasRotationController())
+		{
+			// getRotationController().rotate(lEulerMatrix);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+
+		final GLMatrix lInvVolumeMatrix = new GLMatrix();
+		lInvVolumeMatrix.setIdentity();
+		lInvVolumeMatrix.translate(	-getTranslationX(),
+																-getTranslationY(),
+																-getTranslationZ());
+		lInvVolumeMatrix.transpose();
+
+		lInvVolumeMatrix.mult(getQuaternion());
+		// lInvVolumeMatrix.mult(lEulerMatrix);
+
+		lInvVolumeMatrix.scale(	(float) (lMaxScale / lScaleX),
+														(float) (lMaxScale / lScaleY),
+														(float) (lMaxScale / lScaleZ));
+		return lInvVolumeMatrix;
 	}
 
 	private boolean isOverlay2DChanged()
@@ -923,6 +942,11 @@ public abstract class JOGLClearVolumeRenderer	extends
 	{
 		getAdaptiveLODController().notifyUserInteractionInProgress();
 
+		mViewportX = x;
+		mViewportY = y;
+		mViewportWidth = pWidth;
+		mViewportHeight = pHeight;
+
 		if (pHeight < 8)
 			pHeight = 8;
 
@@ -1047,6 +1071,48 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public Collection<Overlay> getOverlays()
 	{
 		return mOverlayMap.values();
+	}
+
+	/**
+	 * Notifies eye ray listeners.
+	 * 
+	 * @param pMouseEvent
+	 * @param pRenderer
+	 */
+	public void notifyEyeRayListeners(JOGLClearVolumeRenderer pRenderer,
+																		MouseEvent pMouseEvent)
+	{
+		if (mEyeRayListenerList.isEmpty())
+			return;
+
+		final int lX = pMouseEvent.getX();
+		final int lY = pMouseEvent.getY();
+
+		final GLMatrix lInverseModelViewMatrix = getInverseModelViewMatrix();
+		final GLMatrix lInverseProjectionMatrix = getInverseProjectionMatrix();
+		// lInverseModelViewMatrix.invert();
+		// lInverseProjectionMatrix.invert();
+		// lInverseProjectionMatrix.transpose();
+
+		final EyeRay lEyeRay = ScreenToEyeRay.convert(mViewportWidth,
+																									mViewportHeight,
+																									lX,
+																									lY,
+																									lInverseModelViewMatrix,
+																									lInverseProjectionMatrix);
+
+		for (final EyeRayListener lEyeRayListener : mEyeRayListenerList)
+		{
+			lEyeRayListener.notifyEyeRay(pRenderer, pMouseEvent, lEyeRay);
+		}
+	}
+
+	public void rotate(int pDx, int pDy)
+	{
+		// getQuaternion().invert();
+		getQuaternion().rotateByAngleX((float) (-pDy * 0.01));
+		getQuaternion().rotateByAngleY((float) (-pDx * 0.01));
+		// getQuaternion().invert();
 	}
 
 	@Override
