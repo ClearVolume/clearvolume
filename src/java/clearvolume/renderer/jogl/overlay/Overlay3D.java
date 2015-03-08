@@ -24,11 +24,11 @@ public interface Overlay3D
 	 * 
 	 * @param pGL4
 	 * @param pProjectionMatrix
-	 * @param pInvVolumeMatrix
+	 * @param pModelViewMatrix
 	 */
 	public void render3D(	GL4 pGL4,
 												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix);
+												GLMatrix pModelViewMatrix);
 
 
 }

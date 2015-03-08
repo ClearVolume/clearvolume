@@ -2,11 +2,7 @@ package clearvolume.renderer.jogl.utils;
 
 import java.util.Arrays;
 
-import javax.media.opengl.glu.GLU;
-
 import cleargl.GLMatrix;
-
-import com.jogamp.opengl.math.VectorUtil;
 
 public class ScreenToEyeRay
 {
@@ -26,8 +22,6 @@ public class ScreenToEyeRay
 
 	}
 
-	private static ThreadLocal<GLU> sThreadLocalGLU = new ThreadLocal<GLU>();
-
 	public static final EyeRay convert(	int width,
 																			int height,
 																			int mouseX,
@@ -36,11 +30,7 @@ public class ScreenToEyeRay
 																			GLMatrix pInverseProjectionMatrix)
 	{
 		final float u = (mouseX / (float) width) * 2.0f - 1.0f;
-		final float v = (mouseY / (float) height) * 2.0f - 1.0f;
-
-
-
-		System.out.format("U=%g, V=%g \n", u, v);
+		final float v = ((height - mouseY) / (float) height) * 2.0f - 1.0f;
 
 		final float[] front = new float[]
 		{ u, v, -1.f, 1.f };
@@ -70,96 +60,42 @@ public class ScreenToEyeRay
 		lEyeRay.dir = direc;
 
 		return lEyeRay;
-
-		/*	// thread float coordinates:
-		    const float u = (x / (float) imageW)*2.0f-1.0f;
-		    const float v = (y / (float) imageH)*2.0f-1.0f;
-
-				// Back and front before all transformations.
-		   	const float4 front = make_float4(u,v,-1.f,1.f);
-				const float4 back = make_float4(u,v,1.f,1.f);
-
-		    // calculate eye ray in world space
-		    float4 orig0, orig;
-		    float4 direc0, direc;
-		  
-		  	// Origin point
-		    orig0 = mul(c_invProjectionMatrix,front);
-				orig0 *= 1.f/orig0.w;
-		    orig = mul(c_invViewMatrix,orig0);
-				orig *= 1.f/orig.w;
-		  
-		  	// Direction:
-		    direc0 = mul(c_invProjectionMatrix,back);
-				direc0 *= 1.f/direc0.w;
-				direc0 = normalize(direc0-orig0);
-				direc = mul(c_invViewMatrix,direc0);
-				direc.w = 0.0f;
-
-		    // eye ray in world space:
-		    Ray eyeRay;
-				eyeRay.o = make_float3(orig);
-				eyeRay.d = make_float3(direc);	*/
-
 	}
 
-	public static final EyeRay convertOld(int mouseX,
-																				int mouseY,
-																				float[] model,
-																				float[] proj,
-																				int[] view)
+	/*
+	public static final int intersectBox(	EyeRay pEyeRay, float[] pBoxMin, float[] pBoxMax, )
 	{
-		final GLU lGLU = ensureGLUAllocated();
-
-		final float[] lFront = new float[3];
-		final float[] lBack = new float[3];
-
-		lGLU.gluUnProject(mouseX,
-											mouseY,
-											-1,
-											model,
-											0,
-											proj,
-											0,
-											view,
-											0,
-											lFront,
-											0);
-		lGLU.gluUnProject(mouseX,
-											mouseY,
-											1,
-											model,
-											0,
-											proj,
-											0,
-											view,
-											0,
-											lBack,
-											0);
-
-		final float[] lDirection = VectorUtil.subVec3(new float[3],
-																									lBack,
-																									lFront);
-		VectorUtil.normalizeVec3(lDirection);
-
-		final EyeRay lEyeRay = new EyeRay();
-		lEyeRay.org = lFront;
-		lEyeRay.dir = lDirection;
-
-		return lEyeRay;
+	
+		
 	}
-
-	private static GLU ensureGLUAllocated()
+	
+	//intersect ray with a box
+	//http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm
+	__forceinline__
+	__device__
+	int intersectBox(Ray r, float3 boxmin, float3 boxmax, float *tnear, float *tfar)
 	{
-		GLU lGLU = sThreadLocalGLU.get();
+	 // compute intersection of ray with all six bbox planes
+	 float3 invR = make_float3(1.0f) / r.d;
+	 float3 tbot = invR * (boxmin - r.o);
+	 float3 ttop = invR * (boxmax - r.o);
 
-		if (lGLU == null)
-		{
-			lGLU = new GLU();
-			sThreadLocalGLU.set(lGLU);
-		}
+	 // re-order intersections to find smallest and largest on each axis
+	 float3 tmin = fminf(ttop, tbot);
+	 float3 tmax = fmaxf(ttop, tbot);
 
-		return lGLU;
+	 // find the largest tmin and the smallest tmax
+	 float largest_tmin = fmaxf(fmaxf(tmin.x, tmin.y), fmaxf(tmin.x, tmin.z));
+	 float smallest_tmax = fminf(fminf(tmax.x, tmax.y), fminf(tmax.x, tmax.z));
+
+	 *tnear = largest_tmin;
+	 *tfar = smallest_tmax;
+
+
+	 return smallest_tmax > largest_tmin;
 	}
+
+	/**/
+
 
 }

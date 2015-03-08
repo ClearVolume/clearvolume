@@ -606,16 +606,16 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	}
 
-	public CLEvent writeImage(final CLImage3D img,
+	public CLEvent writeImage(final CLImage3D pCLImage3D,
 														final ByteBuffer pByteBuffer)
 	{
-		return img.write(	mCLQueue,
+		return pCLImage3D.write(	mCLQueue,
 											0,
 											0,
 											0,
-											img.getWidth(),
-											img.getHeight(),
-											img.getDepth(),
+											pCLImage3D.getWidth(),
+											pCLImage3D.getHeight(),
+											pCLImage3D.getDepth(),
 											0,
 											0,
 											pByteBuffer,

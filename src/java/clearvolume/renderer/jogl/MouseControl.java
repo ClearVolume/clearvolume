@@ -44,39 +44,16 @@ class MouseControl extends MouseAdapter implements MouseListener
 	@Override
 	public void mouseDragged(final MouseEvent pMouseEvent)
 	{
+		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
+			return;
+
 		handleRotationAndTranslation(pMouseEvent);
 		handleGammaMinMax(pMouseEvent);
 		mRenderer.notifyChangeOfVolumeRenderingParameters();
 		mRenderer.getAdaptiveLODController()
 							.notifyUserInteractionInProgress();
-
-		mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent);
 	}
 
-	private void handleRotationAndTranslation(final MouseEvent pMouseEvent)
-	{
-		final int dx = pMouseEvent.getX() - mPreviousMouseX;
-		final int dy = pMouseEvent.getY() - mPreviousMouseY;
-
-		// If the left button is held down, move the object
-		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
-				&& !pMouseEvent.isControlDown()
-				&& pMouseEvent.isButtonDown(1))
-		{
-			mRenderer.rotate(dx, dy);
-		}
-
-		// If the right button is held down, rotate the object
-		else if (!pMouseEvent.isMetaDown() && !pMouseEvent.isControlDown()
-							&& (pMouseEvent.isButtonDown(3)))
-		{
-
-			mRenderer.addTranslationX(dx / 100.0f);
-			mRenderer.addTranslationY(-dy / 100.0f);
-		}
-		mPreviousMouseX = pMouseEvent.getX();
-		mPreviousMouseY = pMouseEvent.getY();
-	}
 
 	/**
 	 * Interface method implementation
@@ -86,6 +63,9 @@ class MouseControl extends MouseAdapter implements MouseListener
 	@Override
 	public void mouseMoved(final MouseEvent pMouseEvent)
 	{
+		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
+			return;
+
 		mPreviousMouseX = pMouseEvent.getX();
 		mPreviousMouseY = pMouseEvent.getY();
 	}
@@ -98,6 +78,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 	@Override
 	public void mouseWheelMoved(final MouseEvent pMouseEvent)
 	{
+		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
+			return;
 
 		final float[] lWheelRotation = pMouseEvent.getRotation();
 
@@ -113,7 +95,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 		mRenderer.getAdaptiveLODController()
 							.notifyUserInteractionInProgress();
 
-		mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent);
+
 
 	}
 
@@ -125,6 +107,9 @@ class MouseControl extends MouseAdapter implements MouseListener
 	@Override
 	public void mouseClicked(final MouseEvent pMouseEvent)
 	{
+		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
+			return;
+
 		if (pMouseEvent.getClickCount() == 1)
 		{
 			handleGammaMinMax(pMouseEvent);
@@ -135,26 +120,53 @@ class MouseControl extends MouseAdapter implements MouseListener
 			mRenderer.notifyChangeOfVolumeRenderingParameters();
 		}
 
-		mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent);
 	}
 
 	@Override
 	public void mousePressed(MouseEvent pMouseEvent)
 	{
-		super.mousePressed(pMouseEvent);
+		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
+			return;
+
 		mRenderer.getAdaptiveLODController()
 							.notifyUserInteractionInProgress();
 
-		mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent);
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent pMouseEvent)
 	{
+		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
+			return;
+
 		mRenderer.getAdaptiveLODController().notifyUserInteractionEnded();
 		super.mouseReleased(pMouseEvent);
 
-		mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent);
+	}
+
+	private void handleRotationAndTranslation(final MouseEvent pMouseEvent)
+	{
+		final int dx = pMouseEvent.getX() - mPreviousMouseX;
+		final int dy = pMouseEvent.getY() - mPreviousMouseY;
+
+		// If the left button is held down, rotate the object
+		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
+				&& !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
+			mRenderer.rotate(dx, dy);
+		}
+
+		// If the right button is held down, translate the object
+		else if (!pMouseEvent.isMetaDown() && !pMouseEvent.isControlDown()
+							&& (pMouseEvent.isButtonDown(3)))
+		{
+
+			mRenderer.addTranslationX(dx / 100.0f);
+			mRenderer.addTranslationY(-dy / 100.0f);
+		}
+		mPreviousMouseX = pMouseEvent.getX();
+		mPreviousMouseY = pMouseEvent.getY();
 	}
 
 	/**

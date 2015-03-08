@@ -236,7 +236,6 @@ public class JCudaClearVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			mCudaModule = CudaModule.moduleFromPTX(lPTXFile);
 
 			mInvertedModelViewMatrix = mCudaModule.getGlobal("c_invViewMatrix");
-
 			mInvertedProjectionMatrix = mCudaModule.getGlobal("c_invProjectionMatrix");
 			mSizeOfTransferFunction = mCudaModule.getGlobal("c_sizeOfTransfertFunction");
 

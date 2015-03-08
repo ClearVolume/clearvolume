@@ -110,30 +110,6 @@ int intersectBox(Ray r, float3 boxmin, float3 boxmax, float *tnear, float *tfar)
 }
 
 
-// transform vector by matrix (no translation)
-__forceinline__
-__device__
-float3 mul(const float3x4 &M, const float3 &v)
-{
-    float3 r;
-    r.x = dot(v, make_float3(M.m[0]));
-    r.y = dot(v, make_float3(M.m[1]));
-    r.z = dot(v, make_float3(M.m[2]));
-    return r;
-}
-
-// transform vector by matrix with translation
-__forceinline__
-__device__
-float4 mul(const float3x4 &M, const float4 &v)
-{
-    float4 r;
-    r.x = dot(v, M.m[0]);
-    r.y = dot(v, M.m[1]);
-    r.z = dot(v, M.m[2]);
-    r.w = 1.0f;
-    return r;
-}
 
 // transform vector by matrix with translation:
 __forceinline__

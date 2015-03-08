@@ -114,7 +114,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 	@Override
 	public void render3D(	GL4 pGL4,
 												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
+												GLMatrix pModelViewMatrix)
 	{
 		if (isDisplayed())
 		{
@@ -131,15 +131,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 						.getUniform("endColor")
 						.setFloatVector4(mEndColor);
 
-			// invert Matrix is the mModelViewMatrix used by renderer which is
-			// actually the
-			// inverted mModelViewMatrix Matrix
-			final GLMatrix lInvBoxMatrix = new GLMatrix();
-			lInvBoxMatrix.copy(pInvVolumeMatrix);
-			lInvBoxMatrix.transpose();
-			lInvBoxMatrix.invert();
-
-			mPath.setModelView(lInvBoxMatrix);
+			mPath.setModelView(pModelViewMatrix);
 			mPath.setProjection(pProjectionMatrix);
 
 			pGL4.glDisable(GL4.GL_BLEND);

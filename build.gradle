@@ -175,7 +175,7 @@ dependencies
 	compile 'com.apple:AppleJavaExtensions:1.4'
 
 	// usage: gradle .... -Plocal=true
-	if (hasProperty('local') && local.contains('true')) {
+	if (project.hasProperty('local')) {
 		println 'Using local clearCUDA and clearGL sources'
 		compile project(':cleargl')
 		compile project(':clearcuda')
@@ -196,6 +196,8 @@ repositories
 	mavenCentral()
 	maven
 	{ url  "http://dl.bintray.com/clearvolume/ClearVolume"  }
+	maven
+	{ url  "http://dl.bintray.com/royerloic/maven" }
 	maven
 	{ url "http://oss.sonatype.org/content/groups/public" }
 }

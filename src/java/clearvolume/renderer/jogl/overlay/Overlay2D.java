@@ -24,7 +24,6 @@ public interface Overlay2D
 	 * 
 	 * @param pGL4
 	 * @param pProjectionMatrix
-	 * @param pInvVolumeMatrix
 	 */
 	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix);
 

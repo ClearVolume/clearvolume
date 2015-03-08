@@ -84,8 +84,8 @@ public class BoxOverlay extends OverlayBase	implements
 		{
 			mBoxGLProgram = GLProgram.buildProgram(	pGL4,
 																							BoxOverlay.class,
-																							"shaders/newbox_vert.glsl",
-																							"shaders/newbox_frag.glsl");
+																							"shaders/box_vert.glsl",
+																							"shaders/box_frag.glsl");
 
 			mClearGeometryObject = new ClearGeometryObject(	mBoxGLProgram,
 																											3,
@@ -244,16 +244,11 @@ public class BoxOverlay extends OverlayBase	implements
 	@Override
 	public void render3D(	GL4 pGL4,
 												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
+												GLMatrix pModelViewMatrix)
 	{
 		if (isDisplayed())
 		{
-			final GLMatrix lInvBoxMatrix = new GLMatrix();
-			lInvBoxMatrix.copy(pInvVolumeMatrix);
-			lInvBoxMatrix.transpose();
-			lInvBoxMatrix.invert();
-
-			mClearGeometryObject.setModelView(lInvBoxMatrix);
+			mClearGeometryObject.setModelView(pModelViewMatrix);
 			mClearGeometryObject.setProjection(pProjectionMatrix);
 
 			pGL4.glDisable(GL4.GL_DEPTH_TEST);

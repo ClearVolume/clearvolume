@@ -143,20 +143,14 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 	@Override
 	public void render3D(	GL4 pGL4,
 												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
+												GLMatrix pModelViewMatrix)
 	{
 		if (isDisplayed())
 		{
 			mBoxGLProgram.use(pGL4);
 
-			// invert Matrix is the mModelViewMatrix used by renderer which is actually the
-			// inverted mModelViewMatrix Matrix
-			final GLMatrix lInvBoxMatrix = new GLMatrix();
-			lInvBoxMatrix.copy(pInvVolumeMatrix);
-			lInvBoxMatrix.transpose();
-			lInvBoxMatrix.invert();
 
-			mOverlayModelViewMatrixUniform.setFloatMatrix(lInvBoxMatrix.getFloatArray(),
+			mOverlayModelViewMatrixUniform.setFloatMatrix(pModelViewMatrix.getFloatArray(),
 																										false);
 
 			mOverlayProjectionMatrixUniform.setFloatMatrix(	pProjectionMatrix.getFloatArray(),

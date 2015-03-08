@@ -8,7 +8,14 @@ import com.jogamp.newt.event.MouseEvent;
 public interface EyeRayListener
 {
 
-	void notifyEyeRay(JOGLClearVolumeRenderer pRenderer,
+	/**
+	 * @param pRenderer
+	 * @param pMouseEvent
+	 * @param pEyeRay
+	 * @return true if a listener wants to prevent any other display parameter
+	 *         change (rotation, translation, ...)
+	 */
+	boolean notifyEyeRay(	JOGLClearVolumeRenderer pRenderer,
 										MouseEvent pMouseEvent,
 										EyeRay pEyeRay);
 

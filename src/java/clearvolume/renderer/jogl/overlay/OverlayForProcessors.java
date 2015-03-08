@@ -86,12 +86,12 @@ public class OverlayForProcessors extends OverlayBase	implements
 	@Override
 	public void render3D(	GL4 pGL4,
 												GLMatrix pProjectionMatrix,
-												GLMatrix pInvVolumeMatrix)
+												GLMatrix pModelViewMatrix)
 	{
 		if (mOverlay instanceof Overlay3D)
 		{
 			final Overlay3D lOverlay3D = (Overlay3D) mOverlay;
-			lOverlay3D.render3D(pGL4, pProjectionMatrix, pInvVolumeMatrix);
+			lOverlay3D.render3D(pGL4, pProjectionMatrix, pModelViewMatrix);
 		}
 	}
 
