@@ -26,11 +26,11 @@ import clearvolume.renderer.processors.ProcessorResultListener;
 
 import com.jogamp.newt.event.KeyEvent;
 
-public class PlainGraphOverlay extends OverlayBase	implements
-																							Overlay2D,
-																							SingleKeyToggable,
-																							ProcessorResultListener<Double>,
-																							AutoCloseable
+public class PlainGraphOverlay extends OverlayBase implements
+																									Overlay2D,
+																									SingleKeyToggable,
+																									ProcessorResultListener<Double>,
+																									AutoCloseable
 {
 
 	private static final int cMaximalWaitTimeForLockInMilliseconds = 10;
@@ -313,7 +313,10 @@ public class PlainGraphOverlay extends OverlayBase	implements
 	}
 
 	@Override
-	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix)
+	public void render2D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
+												GLMatrix pProjectionMatrix)
 	{
 		if (isDisplayed())
 		{

@@ -243,6 +243,8 @@ public class BoxOverlay extends OverlayBase	implements
 	 */
 	@Override
 	public void render3D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
 												GLMatrix pProjectionMatrix,
 												GLMatrix pModelViewMatrix)
 	{

@@ -54,7 +54,6 @@ class MouseControl extends MouseAdapter implements MouseListener
 							.notifyUserInteractionInProgress();
 	}
 
-
 	/**
 	 * Interface method implementation
 	 * 
@@ -94,8 +93,6 @@ class MouseControl extends MouseAdapter implements MouseListener
 		mRenderer.notifyChangeOfVolumeRenderingParameters();
 		mRenderer.getAdaptiveLODController()
 							.notifyUserInteractionInProgress();
-
-
 
 	}
 
@@ -181,8 +178,11 @@ class MouseControl extends MouseAdapter implements MouseListener
 				&& pMouseEvent.isButtonDown(1))
 		{
 
-			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
-			final double ny = ((double) mRenderer.getWindowHeight() - (double) pMouseEvent.getY()) / mRenderer.getWindowHeight();
+			final double lWidth = mRenderer.getViewportWidth();
+			final double lHeight = mRenderer.getViewportHeight();
+
+			final double nx = (pMouseEvent.getX()) / lWidth;
+			final double ny = (lHeight - pMouseEvent.getY()) / lHeight;
 
 			mRenderer.setTransferFunctionRange(	Math.abs(Math.pow(nx, 3)),
 																					Math.abs(Math.pow(ny, 3)));
@@ -193,8 +193,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 				&& !pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
 		{
-
-			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+			final double lWidth = mRenderer.getViewportWidth();
+			final double nx = (pMouseEvent.getX()) / lWidth;
 
 			mRenderer.setGamma(Math.tan(Math.PI * nx / 2));
 
@@ -204,8 +204,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 				&& pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
 		{
-
-			final double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+			final double lWidth = mRenderer.getViewportWidth();
+			final double nx = (pMouseEvent.getX()) / lWidth;
 
 			mRenderer.setBrightness(Math.tan(Math.PI * nx / 2));
 
@@ -213,7 +213,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		if (pMouseEvent.isMetaDown() && pMouseEvent.isButtonDown(1))
 		{
-			double nx = ((double) pMouseEvent.getX()) / mRenderer.getWindowWidth();
+			final double lWidth = mRenderer.getViewportWidth();
+			double nx = (pMouseEvent.getX()) / lWidth;
 
 			nx = (max(min(nx, 1), 0));
 			nx = nx * nx;

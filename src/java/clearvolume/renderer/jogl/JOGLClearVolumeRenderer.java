@@ -83,6 +83,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private final FPSAnimator mAnimator;
 	private NewtCanvasAWT mNewtCanvasAWT;
 	private volatile int mLastWindowWidth, mLastWindowHeight;
+	private volatile int mViewportX, mViewportY, mViewportWidth,
+			mViewportHeight;
 	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
 
 	// pixelbuffer objects.
@@ -116,9 +118,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
 
 	private final int mTextureWidth, mTextureHeight;
-
-	private volatile int mViewportX, mViewportY, mViewportWidth = 128,
-			mViewportHeight = 128;
 
 	private volatile boolean mRequestDisplay = true;
 
@@ -280,6 +279,9 @@ public abstract class JOGLClearVolumeRenderer	extends
 																	final boolean pUseInCanvas)
 	{
 		super(pNumberOfRenderLayers);
+
+		mViewportWidth = pWindowWidth;
+		mViewportHeight = pWindowHeight;
 
 		mTextureWidth = Math.min(pMaxTextureWidth, pWindowWidth);
 		mTextureHeight = Math.min(pMaxTextureHeight, pWindowHeight);
@@ -670,7 +672,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 		if (lTryLock)
 			try
 			{
-
 				final boolean lOverlay2DChanged = isOverlay2DChanged();
 				final boolean lOverlay3DChanged = isOverlay3DChanged();
 
@@ -810,7 +811,6 @@ public abstract class JOGLClearVolumeRenderer	extends
 		final GLMatrix lModelViewMatrix = new GLMatrix();
 		lModelViewMatrix.setIdentity();
 
-
 		lModelViewMatrix.translate(	getTranslationX(),
 																getTranslationY(),
 																getTranslationZ());/**/
@@ -864,7 +864,10 @@ public abstract class JOGLClearVolumeRenderer	extends
 					final Overlay2D lOverlay2D = (Overlay2D) lOverlay;
 					try
 					{
-						lOverlay2D.render2D(lGL4, pProjectionMatrix);
+						lOverlay2D.render2D(lGL4,
+																getViewportWidth(),
+																getViewportHeight(),
+																pProjectionMatrix);
 					}
 					catch (final Throwable e)
 					{
@@ -893,6 +896,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 					try
 					{
 						lOverlay3D.render3D(lGL4,
+																getViewportWidth(),
+																getViewportHeight(),
 																pProjectionMatrix,
 																pModelViewMatrix);
 					}
@@ -1127,8 +1132,8 @@ public abstract class JOGLClearVolumeRenderer	extends
 		// lInverseProjectionMatrix.invert();
 		// lInverseProjectionMatrix.transpose();
 
-		final EyeRay lEyeRay = ScreenToEyeRay.convert(mViewportWidth,
-																									mViewportHeight,
+		final EyeRay lEyeRay = ScreenToEyeRay.convert(getViewportWidth(),
+																									getViewportHeight(),
 																									lX,
 																									lY,
 																									lInverseModelViewMatrix,
@@ -1176,6 +1181,21 @@ public abstract class JOGLClearVolumeRenderer	extends
 	public NewtCanvasAWT getNewtCanvasAWT()
 	{
 		return mNewtCanvasAWT;
+	}
+
+	public int getViewportHeight()
+	{
+		return mViewportHeight;
+	}
+
+	public int getViewportWidth()
+	{
+		return mViewportWidth;
+	}
+
+	public void setViewportWidth(int pViewportWidth)
+	{
+		mViewportWidth = pViewportWidth;
 	}
 
 }

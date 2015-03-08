@@ -17,79 +17,94 @@ import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 
 import com.jogamp.newt.event.KeyEvent;
 
-public class ImageQualityOverlay extends OverlayForProcessors implements
-		SingleKeyToggable {
+public class ImageQualityOverlay extends OverlayForProcessors	implements
+																															SingleKeyToggable
+{
 
-	private OpenCLTenengrad mOpenCLTenengrad;
+	private final OpenCLTenengrad mOpenCLTenengrad;
 
 	private Font mFont;
 	private ClearTextRenderer mClearTextRenderer;
 	private volatile double mMeasure;
 
-	public ImageQualityOverlay() {
+	public ImageQualityOverlay()
+	{
 		this(20);
 	}
 
 	@SuppressWarnings("unchecked")
-	public ImageQualityOverlay(int pNumberOfPointsInGraph) {
+	public ImageQualityOverlay(int pNumberOfPointsInGraph)
+	{
 		super(new GraphOverlay(pNumberOfPointsInGraph));
 
 		mOpenCLTenengrad = new OpenCLTenengrad();
 
-		mOpenCLTenengrad
-				.addResultListener((ProcessorResultListener<Double>) getDelegatedOverlay());
+		mOpenCLTenengrad.addResultListener((ProcessorResultListener<Double>) getDelegatedOverlay());
 
-		mOpenCLTenengrad
-				.addResultListener(new ProcessorResultListener<Double>() {
+		mOpenCLTenengrad.addResultListener(new ProcessorResultListener<Double>()
+		{
 
-					@Override
-					public void notifyResult(Processor<Double> pSource,
-							Double pResult) {
-						mMeasure = pResult;
-					}
-				});
+			@Override
+			public void notifyResult(	Processor<Double> pSource,
+																Double pResult)
+			{
+				mMeasure = pResult;
+			}
+		});
 
 		addProcessor(mOpenCLTenengrad);
 	}
 
 	@Override
-	public boolean toggleDisplay() {
-		boolean lToggleDisplay = super.toggleDisplay();
+	public boolean toggleDisplay()
+	{
+		final boolean lToggleDisplay = super.toggleDisplay();
 
 		if (lToggleDisplay)
 			getGraphOverlay().clear();
 		return lToggleDisplay;
 	}
 
-	public GraphOverlay getGraphOverlay() {
+	public GraphOverlay getGraphOverlay()
+	{
 		return (GraphOverlay) getDelegatedOverlay();
 	}
 
 	@Override
-	public short toggleKeyCode() {
+	public short toggleKeyCode()
+	{
 		return KeyEvent.VK_I;
 	}
 
 	@Override
-	public int toggleKeyModifierMask() {
+	public int toggleKeyModifierMask()
+	{
 		return 0; // KeyEvent.CTRL_MASK;
 	}
 
 	@Override
-	public void init(GL4 pGL4, DisplayRequestInterface pDisplayRequestInterface) {
+	public void init(	GL4 pGL4,
+										DisplayRequestInterface pDisplayRequestInterface)
+	{
 		super.init(pGL4, pDisplayRequestInterface);
 		final String lFontPath = "/clearvolume/fonts/SourceCodeProLight.ttf";
-		try {
+		try
+		{
 
 			mFont = Font.createFont(Font.TRUETYPE_FONT,
-					getClass().getResourceAsStream(lFontPath)).deriveFont(24.f);
-		} catch (final FontFormatException | IOException e) {
+															getClass().getResourceAsStream(lFontPath))
+									.deriveFont(24.f);
+		}
+		catch (final FontFormatException | IOException e)
+		{
 			// use a fallback font in case the original couldn't be found or
 			// there has
 			// been a problem
 			// with the font format
-			System.err.println("Could not use \"" + lFontPath + "\" ("
-					+ e.toString() + "), falling back to Sans.");
+			System.err.println("Could not use \"" + lFontPath
+													+ "\" ("
+													+ e.toString()
+													+ "), falling back to Sans.");
 			mFont = new Font("Sans", Font.PLAIN, 24);
 		}
 
@@ -97,8 +112,12 @@ public class ImageQualityOverlay extends OverlayForProcessors implements
 	}
 
 	@Override
-	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix) {
-		super.render2D(pGL4, pProjectionMatrix);
+	public void render2D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
+												GLMatrix pProjectionMatrix)
+	{
+		super.render2D(pGL4, pWidth, pHeight, pProjectionMatrix);
 
 		/*
 		 * mClearTextRenderer.drawTextAtPosition(String.format(

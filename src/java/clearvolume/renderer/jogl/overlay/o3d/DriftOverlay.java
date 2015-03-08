@@ -1,17 +1,20 @@
 package clearvolume.renderer.jogl.overlay.o3d;
 
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.io.IOException;
+import java.nio.FloatBuffer;
+
+import javax.media.opengl.GL4;
+
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
+
 import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.jogl.overlay.Overlay2D;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
-import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
-
-import javax.media.opengl.GL4;
-import java.awt.*;
-import java.io.IOException;
-import java.nio.FloatBuffer;
 
 /**
  * Drift Path Overlay.
@@ -71,7 +74,10 @@ public class DriftOverlay extends PathOverlay	implements
 	}
 
 	@Override
-	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix)
+	public void render2D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
+												GLMatrix pProjectionMatrix)
 	{
 		Font font = null;
 		stats = new SynchronizedDescriptiveStatistics();

@@ -2,6 +2,7 @@ package clearvolume.renderer.jogl.overlay.o3d;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.lang.Math.sqrt;
 
 import java.io.IOException;
 
@@ -40,12 +41,13 @@ public class CursorOverlay extends OverlayBase implements
 
 	private final String mName;
 	private volatile float x = 0.5f, y = 0.5f, z = 0.5f;
+	private volatile float px, py;
 	private volatile boolean mMovable = true;
-	private volatile float mDistanceThreshold = 0.05f;
+	private volatile float mDistanceThreshold = 30f;
 	private float[] mColor = new float[]
 	{ 0.8f, 0.8f, 1f, 1f };
 	private volatile float mAlpha = 1;
-	private volatile float mLinePeriod = 1;
+	private volatile float mLinePeriod = 0.5f;
 	private volatile float mLineThickness = 0.005f;
 	private volatile float mLineLength = 0.15f;
 	private volatile float mBoxLinesAlpha = 0.5f;
@@ -227,6 +229,8 @@ public class CursorOverlay extends OverlayBase implements
 	 */
 	@Override
 	public void render3D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
 												GLMatrix pProjectionMatrix,
 												GLMatrix pModelViewMatrix)
 	{
@@ -273,6 +277,18 @@ public class CursorOverlay extends OverlayBase implements
 			mPlaneZ.draw();
 
 			mHasChanged = false;
+
+			final float[] lProject = project(	new float[]
+																				{ 2 * x - 1,
+																					2 * y - 1,
+																					2 * z - 1,
+																					1 },
+																				pModelViewMatrix,
+																				pProjectionMatrix);
+			px = pWidth * (0.5f * lProject[0] + 0.5f);
+			py = pHeight * (1 - (0.5f * lProject[1] + 0.5f));
+
+			// System.out.format("px=%g py=%g \n", px, py);
 		}
 	}
 
@@ -286,10 +302,11 @@ public class CursorOverlay extends OverlayBase implements
 
 		// System.out.println(pMouseEvent);
 
-		final boolean lRightMouseButton = pMouseEvent.getButton() == 1;
-		final boolean lRightMouseEvent = (pMouseEvent.getEventType() == MouseEvent.EVENT_MOUSE_CLICKED || pMouseEvent.getEventType() == MouseEvent.EVENT_MOUSE_DRAGGED);
+		final boolean lCorrectModifier = true; // pMouseEvent.isShiftDown();
+		final boolean lCorrectMouseButton = pMouseEvent.getButton() == 1;
+		final boolean lCorrectMouseEvent = (pMouseEvent.getEventType() == MouseEvent.EVENT_MOUSE_CLICKED || pMouseEvent.getEventType() == MouseEvent.EVENT_MOUSE_DRAGGED);
 
-		if (!(lRightMouseButton && lRightMouseEvent))
+		if (!(lCorrectMouseButton && lCorrectMouseEvent && lCorrectModifier))
 			return false;
 
 		final float[] lX = new float[]
@@ -303,16 +320,25 @@ public class CursorOverlay extends OverlayBase implements
 		GLMatrix.mult(lClosestPoint, lProjectionLength);
 		GLMatrix.add(lClosestPoint, pEyeRay.org);
 
-		final float[] lCP2X = GLMatrix.clone(lX);
-		GLMatrix.sub(lCP2X, lClosestPoint);
-		final float lDistanceToClosestPoint = GLMatrix.norm(lCP2X);
+		final float mx = pMouseEvent.getX();
+		final float my = pMouseEvent.getY();
+
+		// System.out.format("MX=%g MY=%g \n", mx, my);
+
+		final double lDistance = sqrt((mx - px) * (mx - px)
+																	+ (my - py)
+																	* (my - py));
+
+		// final float[] lCP2X = GLMatrix.clone(lX);
+		// GLMatrix.distance(lCP2X, lClosestPoint);
+		// final float lDistanceToClosestPoint = GLMatrix.norm(lCP2X);
 
 		/*System.out.println(pEyeRay);
 		System.out.println(Arrays.toString(lClosestPoint));
 		System.out.println("lDistanceToClosestPoint=" + lDistanceToClosestPoint);
 		/**/
 
-		if (lDistanceToClosestPoint < getDistanceThreshold())
+		if (lDistance < getDistanceThreshold())
 		{
 			x = clamp(lClosestPoint[0]);
 			y = clamp(lClosestPoint[1]);
@@ -323,6 +349,16 @@ public class CursorOverlay extends OverlayBase implements
 
 		return false;
 
+	}
+
+	public static final float[] project(float[] pVector,
+																			GLMatrix pModelViewMatrix,
+																			GLMatrix pProjectionMatrix)
+	{
+		float[] lResult = pModelViewMatrix.mult(pVector);
+		lResult = pProjectionMatrix.mult(lResult);
+		GLMatrix.mult(lResult, 1.0f / lResult[3]);
+		return lResult;
 	}
 
 	private float clamp(float pValue)

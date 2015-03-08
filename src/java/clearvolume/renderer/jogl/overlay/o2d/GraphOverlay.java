@@ -26,8 +26,12 @@ import clearvolume.renderer.processors.ProcessorResultListener;
 
 import com.jogamp.newt.event.KeyEvent;
 
-public class GraphOverlay extends OverlayBase implements Overlay2D,
-		SingleKeyToggable, ProcessorResultListener<Double>, AutoCloseable {
+public class GraphOverlay extends OverlayBase	implements
+																							Overlay2D,
+																							SingleKeyToggable,
+																							ProcessorResultListener<Double>,
+																							AutoCloseable
+{
 
 	private static final int cMaximalWaitTimeForLockInMilliseconds = 10;
 
@@ -63,23 +67,30 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 
 	protected volatile boolean mStopSignal = false;
 
-	public GraphOverlay(int pMaxNumberOfDataPoints) {
+	public GraphOverlay(int pMaxNumberOfDataPoints)
+	{
 		super();
 		setMaxNumberOfDataPoints(pMaxNumberOfDataPoints);
 
 		clearMinMax();
-		final Runnable lRunnable = new Runnable() {
+		final Runnable lRunnable = new Runnable()
+		{
 
 			@Override
-			public void run() {
-				while (!mStopSignal) {
+			public void run()
+			{
+				while (!mStopSignal)
+				{
 					if (isDisplayed())
 						computeMinMax(mAlpha);
 					if (mDisplayRequestInterface != null)
 						mDisplayRequestInterface.requestDisplay();
-					try {
+					try
+					{
 						Thread.sleep(50);
-					} catch (final InterruptedException e) {
+					}
+					catch (final InterruptedException e)
+					{
 					}
 
 				}
@@ -87,8 +98,8 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 			}
 		};
 
-		final Thread lMinMaxCalculationThread = new Thread(lRunnable,
-				GraphOverlay.class.getSimpleName() + ".MinMaxCalculationThread");
+		final Thread lMinMaxCalculationThread = new Thread(	lRunnable,
+																												GraphOverlay.class.getSimpleName() + ".MinMaxCalculationThread");
 		lMinMaxCalculationThread.setDaemon(true);
 		lMinMaxCalculationThread.setPriority(Thread.MIN_PRIORITY);
 		lMinMaxCalculationThread.start();
@@ -97,7 +108,8 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 	}
 
 	@Override
-	public boolean toggleDisplay() {
+	public boolean toggleDisplay()
+	{
 		final boolean lNewState = super.toggleDisplay();
 		if (lNewState)
 			mAudioPlot.start();
@@ -107,75 +119,93 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 	}
 
 	@Override
-	public String getName() {
+	public String getName()
+	{
 		return "graph";
 	}
 
 	@Override
-	public short toggleKeyCode() {
+	public short toggleKeyCode()
+	{
 		return KeyEvent.VK_G;
 	}
 
 	@Override
-	public int toggleKeyModifierMask() {
+	public int toggleKeyModifierMask()
+	{
 		return 0;
 	}
 
 	@Override
-	public boolean hasChanged2D() {
+	public boolean hasChanged2D()
+	{
 		return mHasChanged;
 	}
 
-	public int getMaxNumberOfDataPoints() {
+	public int getMaxNumberOfDataPoints()
+	{
 		return mMaxNumberOfDataPoints;
 	}
 
-	public void setMaxNumberOfDataPoints(int pMaxNumberOfDataPoints) {
+	public void setMaxNumberOfDataPoints(int pMaxNumberOfDataPoints)
+	{
 		mMaxNumberOfDataPoints = pMaxNumberOfDataPoints;
 	}
 
 	@Override
-	public void notifyResult(Processor<Double> pSource, Double pResult) {
+	public void notifyResult(Processor<Double> pSource, Double pResult)
+	{
 		addPoint(pResult);
 	}
 
-	public void addPoint(double pY) {
+	public void addPoint(double pY)
+	{
 		mAudioPlot.setValue(normalizeAndClamp((float) pY));
 
 		mReentrantLock.lock();
-		try {
+		try
+		{
 			mDataY.add((float) pY);
 			if (mDataY.size() > getMaxNumberOfDataPoints())
 				mDataY.removeAt(0);
 			if (mDataY.size() < 20)
 				computeMinMax(0.5f);
 			mHasChanged = true;
-		} finally {
+		}
+		finally
+		{
 			if (mReentrantLock.isHeldByCurrentThread())
 				mReentrantLock.unlock();
 		}
 
 	}
 
-	public void clear() {
+	public void clear()
+	{
 		mReentrantLock.lock();
-		try {
+		try
+		{
 			mDataY.clear();
 			clearMinMax();
 			mHasChanged = true;
-		} finally {
+		}
+		finally
+		{
 			if (mReentrantLock.isHeldByCurrentThread())
 				mReentrantLock.unlock();
 		}
 
 	}
 
-	private void computeMinMax(float pAlpha) {
-		try {
-			final boolean lIsLocked = mReentrantLock.tryLock(0,
-					TimeUnit.MILLISECONDS);
+	private void computeMinMax(float pAlpha)
+	{
+		try
+		{
+			final boolean lIsLocked = mReentrantLock.tryLock(	0,
+																												TimeUnit.MILLISECONDS);
 
-			if (lIsLocked) {
+			if (lIsLocked)
+			{
 				if (mDataY.size() == 0)
 					return;
 
@@ -189,24 +219,35 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 					mMax = pAlpha * lMax + (1 - pAlpha) * mMax;
 
 			}
-		} catch (final InterruptedException e) {
-		} finally {
+		}
+		catch (final InterruptedException e)
+		{
+		}
+		finally
+		{
 			if (mReentrantLock.isHeldByCurrentThread())
 				mReentrantLock.unlock();
 		}
 
 	}
 
-	private void clearMinMax() {
-		try {
-			final boolean lIsLocked = mReentrantLock.tryLock(0,
-					TimeUnit.MILLISECONDS);
-			if (lIsLocked) {
+	private void clearMinMax()
+	{
+		try
+		{
+			final boolean lIsLocked = mReentrantLock.tryLock(	0,
+																												TimeUnit.MILLISECONDS);
+			if (lIsLocked)
+			{
 				mMin = 0;
 				mMax = 0;
 			}
-		} catch (final InterruptedException e) {
-		} finally {
+		}
+		catch (final InterruptedException e)
+		{
+		}
+		finally
+		{
 			if (mReentrantLock.isHeldByCurrentThread())
 				mReentrantLock.unlock();
 		}
@@ -214,19 +255,24 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 	}
 
 	@Override
-	public void init(GL4 pGL4, DisplayRequestInterface pDisplayRequestInterface) {
+	public void init(	GL4 pGL4,
+										DisplayRequestInterface pDisplayRequestInterface)
+	{
 		mAudioPlot.start();
 
 		mDisplayRequestInterface = pDisplayRequestInterface;
 		// box display: construct the program and related objects
 		mReentrantLock.lock();
-		try {
-			mGLProgram = GLProgram.buildProgram(pGL4, GraphOverlay.class,
-					"shaders/fancygraph_vert.glsl",
-					"shaders/fancygraph_frag.glsl");
+		try
+		{
+			mGLProgram = GLProgram.buildProgram(pGL4,
+																					GraphOverlay.class,
+																					"shaders/fancygraph_vert.glsl",
+																					"shaders/fancygraph_frag.glsl");
 
-			mClearGeometryObject = new ClearGeometryObject(mGLProgram, 3,
-					GL4.GL_TRIANGLE_STRIP);
+			mClearGeometryObject = new ClearGeometryObject(	mGLProgram,
+																											3,
+																											GL4.GL_TRIANGLE_STRIP);
 			mClearGeometryObject.setDynamic(true);
 
 			final int lNumberOfPointsToDraw = 2 * getMaxNumberOfDataPoints();
@@ -241,58 +287,62 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 			mIndexIntArray.fillZeros();
 			mTexCoordFloatArray.fillZeros();
 
-			mClearGeometryObject.setVerticesAndCreateBuffer(mVerticesFloatArray
-					.getFloatBuffer());
-			mClearGeometryObject.setNormalsAndCreateBuffer(mNormalArray
-					.getFloatBuffer());
-			mClearGeometryObject
-					.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray
-							.getFloatBuffer());
-			mClearGeometryObject.setIndicesAndCreateBuffer(mIndexIntArray
-					.getIntBuffer());
+			mClearGeometryObject.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
+			mClearGeometryObject.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
+			mClearGeometryObject.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
+			mClearGeometryObject.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
 
 			GLError.printGLErrors(pGL4, "AFTER GRAPH OVERLAY INIT");
 
-			mGLProgramLines = GLProgram.buildProgram(pGL4, GraphOverlay.class,
-					new String[] { "shaders/fancylines_vert.glsl",
-							"shaders/fancylines_geom.glsl",
-							"shaders/fancylines_frag.glsl" });
+			mGLProgramLines = GLProgram.buildProgram(	pGL4,
+																								GraphOverlay.class,
+																								new String[]
+																								{ "shaders/fancylines_vert.glsl",
+																									"shaders/fancylines_geom.glsl",
+																									"shaders/fancylines_frag.glsl" });
 
-			mClearGeometryObjectLines = new ClearGeometryObject(
-					mGLProgramLines, 3, GL4.GL_LINE_STRIP);
+			mClearGeometryObjectLines = new ClearGeometryObject(mGLProgramLines,
+																													3,
+																													GL4.GL_LINE_STRIP);
 			mClearGeometryObjectLines.setDynamic(true);
 
-			mClearGeometryObjectLines
-					.setVerticesAndCreateBuffer(mVerticesFloatArray
-							.getFloatBuffer());
-			mClearGeometryObjectLines.setNormalsAndCreateBuffer(mNormalArray
-					.getFloatBuffer());
-			mClearGeometryObjectLines
-					.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray
-							.getFloatBuffer());
-			mClearGeometryObjectLines.setIndicesAndCreateBuffer(mIndexIntArray
-					.getIntBuffer());
+			mClearGeometryObjectLines.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
+			mClearGeometryObjectLines.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
+			mClearGeometryObjectLines.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
+			mClearGeometryObjectLines.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
 
-		} catch (final IOException e) {
+		}
+		catch (final IOException e)
+		{
 			e.printStackTrace();
-		} finally {
+		}
+		finally
+		{
 			if (mReentrantLock.isHeldByCurrentThread())
 				mReentrantLock.unlock();
 		}
 	}
 
-	private final float transformX(float pX) {
+	private final float transformX(float pX)
+	{
 		return mOffsetX + mScaleX * pX;
 	}
 
-	private final float transformY(float pY) {
+	private final float transformY(float pY)
+	{
 		return mOffsetY + mScaleY * pY;
 	}
 
 	@Override
-	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix) {
-		if (isDisplayed()) {
-			try {
+	public void render2D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
+												GLMatrix pProjectionMatrix)
+	{
+		if (isDisplayed())
+		{
+			try
+			{
 				mReentrantLock.lock();
 				{
 
@@ -305,9 +355,9 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 
 					final float lStepX = 1f / mDataY.size();
 					int i = 0;
-					for (i = 0; i < mDataY.size(); i++) {
-						final float lNormalizedValue = normalizeAndClamp(mDataY
-								.get(i));
+					for (i = 0; i < mDataY.size(); i++)
+					{
+						final float lNormalizedValue = normalizeAndClamp(mDataY.get(i));
 
 						final float x = transformX(i * lStepX);
 						final float y = transformY(lNormalizedValue);
@@ -326,26 +376,22 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 					mTexCoordFloatArray.padZeros();
 					mIndexIntArray.padZeros();
 
-					mClearGeometryObject.updateVertices(mVerticesFloatArray
-							.getFloatBuffer());
+					mClearGeometryObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
 					GLError.printGLErrors(pGL4,
-							"AFTER mClearGeometryObject.updateVertices");
-					mClearGeometryObject
-							.updateTextureCoords(mTexCoordFloatArray
-									.getFloatBuffer());
+																"AFTER mClearGeometryObject.updateVertices");
+					mClearGeometryObject.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
 					GLError.printGLErrors(pGL4,
-							"AFTER mClearGeometryObject.updateTextureCoords");
-					mClearGeometryObject.updateIndices(mIndexIntArray
-							.getIntBuffer());
+																"AFTER mClearGeometryObject.updateTextureCoords");
+					mClearGeometryObject.updateIndices(mIndexIntArray.getIntBuffer());
 					GLError.printGLErrors(pGL4,
-							"AFTER mClearGeometryObject.updateIndices");
+																"AFTER mClearGeometryObject.updateIndices");
 
 					mClearGeometryObject.setProjection(pProjectionMatrix);
 
 					pGL4.glDisable(GL4.GL_DEPTH_TEST);
 					pGL4.glEnable(GL4.GL_BLEND);
-					pGL4.glBlendFunc(GL4.GL_SRC_ALPHA,
-							GL4.GL_ONE_MINUS_SRC_ALPHA);
+					pGL4.glBlendFunc(	GL4.GL_SRC_ALPHA,
+														GL4.GL_ONE_MINUS_SRC_ALPHA);
 					pGL4.glBlendEquation(GL4.GL_FUNC_ADD);/**/
 
 					mClearGeometryObject.draw(0, mDataY.size() * 2);
@@ -356,9 +402,9 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 					mVerticesFloatArray.clear();
 					mTexCoordFloatArray.clear();
 
-					for (i = 0; i < mDataY.size(); i++) {
-						final float lNormalizedValue = normalizeAndClamp(mDataY
-								.get(i));
+					for (i = 0; i < mDataY.size(); i++)
+					{
+						final float lNormalizedValue = normalizeAndClamp(mDataY.get(i));
 
 						final float x = transformX(i * lStepX);
 						final float y = transformY(lNormalizedValue);
@@ -373,27 +419,22 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 					mTexCoordFloatArray.padZeros();
 					mIndexIntArray.padZeros();
 
-					mClearGeometryObjectLines
-							.updateVertices(mVerticesFloatArray
-									.getFloatBuffer());
+					mClearGeometryObjectLines.updateVertices(mVerticesFloatArray.getFloatBuffer());
 					// GLError.printGLErrors(pGL4,
 					// "AFTER mClearGeometryObject.updateVertices");
-					mClearGeometryObjectLines
-							.updateTextureCoords(mTexCoordFloatArray
-									.getFloatBuffer());
+					mClearGeometryObjectLines.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
 					GLError.printGLErrors(pGL4,
-							"AFTER mClearGeometryObject.updateTextureCoords");
-					mClearGeometryObjectLines.updateIndices(mIndexIntArray
-							.getIntBuffer());
+																"AFTER mClearGeometryObject.updateTextureCoords");
+					mClearGeometryObjectLines.updateIndices(mIndexIntArray.getIntBuffer());
 					GLError.printGLErrors(pGL4,
-							"AFTER mClearGeometryObject.updateIndices");
+																"AFTER mClearGeometryObject.updateIndices");
 
 					mClearGeometryObjectLines.setProjection(pProjectionMatrix);
 
 					pGL4.glDisable(GL4.GL_DEPTH_TEST);
 					pGL4.glEnable(GL4.GL_BLEND);
-					pGL4.glBlendFunc(GL4.GL_SRC_ALPHA,
-							GL4.GL_ONE_MINUS_SRC_ALPHA);
+					pGL4.glBlendFunc(	GL4.GL_SRC_ALPHA,
+														GL4.GL_ONE_MINUS_SRC_ALPHA);
 					pGL4.glBlendEquation(GL4.GL_MAX);/**/
 					//
 					mClearGeometryObjectLines.draw(0, mDataY.size());
@@ -401,14 +442,17 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 					mHasChanged = false;
 				}
 
-			} finally {
+			}
+			finally
+			{
 				if (mReentrantLock.isHeldByCurrentThread())
 					mReentrantLock.unlock();
 			}
 		}
 	}
 
-	private float normalizeAndClamp(float pValue) {
+	private float normalizeAndClamp(float pValue)
+	{
 		if (mMax == mMin)
 			return 0;
 		float lValue = (pValue - mMin) / (mMax - mMin);
@@ -417,7 +461,8 @@ public class GraphOverlay extends OverlayBase implements Overlay2D,
 	}
 
 	@Override
-	public void close() {
+	public void close()
+	{
 		mAudioPlot.close();
 		mStopSignal = true;
 	}

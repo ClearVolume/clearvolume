@@ -27,6 +27,8 @@ public interface Overlay3D
 	 * @param pModelViewMatrix
 	 */
 	public void render3D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
 												GLMatrix pProjectionMatrix,
 												GLMatrix pModelViewMatrix);
 

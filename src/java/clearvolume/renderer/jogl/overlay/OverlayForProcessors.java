@@ -85,13 +85,19 @@ public class OverlayForProcessors extends OverlayBase	implements
 
 	@Override
 	public void render3D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
 												GLMatrix pProjectionMatrix,
 												GLMatrix pModelViewMatrix)
 	{
 		if (mOverlay instanceof Overlay3D)
 		{
 			final Overlay3D lOverlay3D = (Overlay3D) mOverlay;
-			lOverlay3D.render3D(pGL4, pProjectionMatrix, pModelViewMatrix);
+			lOverlay3D.render3D(pGL4,
+													pWidth,
+													pHeight,
+													pProjectionMatrix,
+													pModelViewMatrix);
 		}
 	}
 
@@ -107,12 +113,15 @@ public class OverlayForProcessors extends OverlayBase	implements
 	}
 
 	@Override
-	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix)
+	public void render2D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
+												GLMatrix pProjectionMatrix)
 	{
 		if (mOverlay instanceof Overlay2D)
 		{
 			final Overlay2D lOverlay2D = (Overlay2D) mOverlay;
-			lOverlay2D.render2D(pGL4, pProjectionMatrix);
+			lOverlay2D.render2D(pGL4, pWidth, pHeight, pProjectionMatrix);
 		}
 	}
 

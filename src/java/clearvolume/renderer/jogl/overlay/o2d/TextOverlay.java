@@ -37,7 +37,10 @@ public class TextOverlay extends OverlayBase implements Overlay2D
 	}
 
 	@Override
-	public void render2D(GL4 pGL4, GLMatrix pProjectionMatrix)
+	public void render2D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
+												GLMatrix pProjectionMatrix)
 	{
 		if (isDisplayed())
 		{

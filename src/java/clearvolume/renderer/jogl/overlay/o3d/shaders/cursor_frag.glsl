@@ -6,14 +6,14 @@ in VertexData {
     vec2 TexCoord;
 } VertexIn;
 
-uniform vec2  linepos 		=	vec2(0.5,0.5); 
-uniform float linelength	=	10;
-uniform float linethick		=	100;
-uniform float lineperiod	=	1;
-uniform float boxlinesalpha	=	1;
-uniform float alpha			=	1;
+uniform vec2  linepos 		; 
+uniform float linelength	;
+uniform float linethick		;
+uniform float lineperiod	;
+uniform float boxlinesalpha	;
+uniform float alpha			;
 
-uniform vec4  color 		=	vec4(0.8, 0.8, 1, 1.0);
+uniform vec4  color 		=	vec4(1, 1, 1, 1.0);
 out vec4 outColor;
 
  

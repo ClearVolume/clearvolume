@@ -50,7 +50,6 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 		return "box";
 	}
 
-
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.jogl.overlay.Overlay3D#hasChanged3D()
 	 */
@@ -142,13 +141,14 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 	 */
 	@Override
 	public void render3D(	GL4 pGL4,
+												int pWidth,
+												int pHeight,
 												GLMatrix pProjectionMatrix,
 												GLMatrix pModelViewMatrix)
 	{
 		if (isDisplayed())
 		{
 			mBoxGLProgram.use(pGL4);
-
 
 			mOverlayModelViewMatrixUniform.setFloatMatrix(pModelViewMatrix.getFloatArray(),
 																										false);
@@ -162,6 +162,5 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 
 		}
 	}
-
 
 }
