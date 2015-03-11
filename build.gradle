@@ -24,7 +24,8 @@ apply plugin: 'idea'
 //***********************************************************************************
 // NATIVE CODE BUILDING
 
-if (System.properties['os.name'].toLowerCase().contains('win')){
+if (System.properties['os.name'].toLowerCase().contains('win'))
+{
 
 	ext {
 		javaHome = System.getenv('JAVA_HOME')
