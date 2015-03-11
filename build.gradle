@@ -24,87 +24,90 @@ apply plugin: 'idea'
 //***********************************************************************************
 // NATIVE CODE BUILDING
 
-ext {
-	javaHome = System.getenv('JAVA_HOME')
-	javaHomeInclude = javaHome + '/include'
-	if (System.properties['os.name'].toLowerCase().contains('linux'))
-	{
-		javaHomeIncludeOs = javaHomeInclude + '/linux'
-	}
-	else
-	{
-		javaHomeIncludeOs = javaHomeInclude + '/win32'
-	}
-}
-dependencies {
-	if (! javaHome) {
-		logger.error('JAVA_HOME is not set.')
-	}
-	println 'JAVA_HOME: ' + javaHome
-}
+if (System.properties['os.name'].toLowerCase().contains('win')){
 
-model {
-	platforms { x64 { architecture "x86_64" } }
+	ext {
+		javaHome = System.getenv('JAVA_HOME')
+		javaHomeInclude = javaHome + '/include'
+		if (System.properties['os.name'].toLowerCase().contains('linux'))
+		{
+			javaHomeIncludeOs = javaHomeInclude + '/linux'
+		}
+		else
+		{
+			javaHomeIncludeOs = javaHomeInclude + '/win32'
+		}
+	}
+	dependencies {
+		if (! javaHome) {
+			logger.error('JAVA_HOME is not set.')
+		}
+		println 'JAVA_HOME: ' + javaHome
+	}
 
-	repositories {
-		libs(PrebuiltLibraries) {
-			jvm {
-				binaries.withType(SharedLibraryBinary) {
-					sharedLibraryFile = file(javaHome + "/lib/jvm.lib")
+	model {
+		platforms { x64 { architecture "x86_64" } }
+
+		repositories {
+			libs(PrebuiltLibraries) {
+				jvm {
+					binaries.withType(SharedLibraryBinary) {
+						sharedLibraryFile = file(javaHome + "/lib/jvm.lib")
+					}
+				}
+			}
+		}
+	
+		toolChains {
+			visualCpp(VisualCpp) {
+				// Specify the installDir if Visual Studio cannot be located
+				// installDir "C:/Apps/Microsoft Visual Studio 10.0"
+			}
+		}
+	}
+
+	binaries.all {
+		if (toolChain in VisualCpp) {
+			cppCompiler.args "/EHsc"
+		}
+	}
+
+	libraries { cvlib { targetPlatforms "x64" } }
+
+	sources {
+		cvlib {
+			cpp {
+				source {
+					srcDirs "src/cpp"
+					include "**/*.cpp"
+				}
+				exportedHeaders {
+					srcDirs "src/cpp","src/cpp/lib"
+					include "**/*.h"
 				}
 			}
 		}
 	}
 
-	toolChains {
-		visualCpp(VisualCpp) {
-			// Specify the installDir if Visual Studio cannot be located
-			// installDir "C:/Apps/Microsoft Visual Studio 10.0"
-		}
-	}
-}
-
-binaries.all {
-	if (toolChain in VisualCpp) {
-		cppCompiler.args "/EHsc"
-	}
-}
-
-libraries { cvlib { targetPlatforms "x64" } }
-
-sources {
-	cvlib {
-		cpp {
-			source {
-				srcDirs "src/cpp"
-				include "**/*.cpp"
-			}
-			exportedHeaders {
-				srcDirs "src/cpp","src/cpp/lib"
-				include "**/*.h"
-			}
-		}
-	}
-}
-
-executables {
-	cvlib_test {
-		targetPlatforms "x64"
-		binaries.all { lib libraries.cvlib.shared  }
-	}
-}
-
-sources {
-	cvlib_test {
-		cpp {
-			source {
-				srcDir "src/cpp"
-				include "cvlib_test.cpp"
-			}
-			lib library: 'jvm'
+	executables {
+		cvlib_test {
+			targetPlatforms "x64"
+			binaries.all { lib libraries.cvlib.shared  }
 		}
 	}
 
+	sources {
+		cvlib_test {
+			cpp {
+				source {
+					srcDir "src/cpp"
+					include "cvlib_test.cpp"
+				}
+				lib library: 'jvm'
+			}
+		}
+	
+	}
 }
 
 //***********************************************************************************
@@ -177,8 +180,8 @@ dependencies
 	// usage: gradle .... -Plocal=true
 	if (project.hasProperty('local')) {
 		println 'Using local clearCUDA and clearGL sources'
-		compile project(':cleargl')
-		compile project(':clearcuda')
+		compile project(':ClearGL')
+		compile project(':ClearCUDA')
 	}
 	else {
 		println 'Using clearCUDA and clearGL from Maven repository'/**/

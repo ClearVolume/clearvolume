@@ -1,3 +1,3 @@
-include 'cleargl'
-include 'clearcuda'
-include 'clearvolume'
+include 'ClearGL'
+include 'ClearCUDA'
+include 'ClearVolume'
