@@ -7,7 +7,7 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.GLEventListener;
 
 import jcuda.CudaException;
-import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.processors.OpenCLProcessor;
 import clearvolume.renderer.processors.Processor;
 
@@ -17,7 +17,11 @@ import com.nativelibs4java.opencl.CLImage3D;
 import com.nativelibs4java.opencl.CLImageFormat;
 import com.nativelibs4java.opencl.CLKernel;
 
-public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
+import coremem.ContiguousMemoryInterface;
+import coremem.fragmented.FragmentedMemoryInterface;
+import coremem.types.NativeTypeEnum;
+
+public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 																																	GLEventListener
 {
 	private OpenCLDevice mCLDevice;
@@ -47,26 +51,26 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	public OpenCLVolumeRenderer(final String pWindowName,
 															final int pWindowWidth,
 															final int pWindowHeight,
-															final int pBytesPerVoxel)
+															final NativeTypeEnum pNativeTypeEnum)
 	{
 		super("[OpenCL] " + pWindowName,
 					pWindowWidth,
 					pWindowHeight,
-					pBytesPerVoxel);
+					pNativeTypeEnum);
 
 	}
 
 	public OpenCLVolumeRenderer(final String pWindowName,
 															final int pWindowWidth,
 															final int pWindowHeight,
-															final int pBytesPerVoxel,
+															final NativeTypeEnum pNativeTypeEnum,
 															final int pMaxTextureWidth,
 															final int pMaxTextureHeight)
 	{
 		super("[OpenCL] " + pWindowName,
 					pWindowWidth,
 					pWindowHeight,
-					pBytesPerVoxel,
+					pNativeTypeEnum,
 					pMaxTextureWidth,
 					pMaxTextureHeight);
 
@@ -76,7 +80,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	public OpenCLVolumeRenderer(final String pWindowName,
 															final int pWindowWidth,
 															final int pWindowHeight,
-															final int pBytesPerVoxel,
+															final NativeTypeEnum pNativeTypeEnum,
 															final int pMaxTextureWidth,
 															final int pMaxTextureHeight,
 															final int pNumberOfRenderLayers,
@@ -86,7 +90,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		super("[OpenCL] " + pWindowName,
 					pWindowWidth,
 					pWindowHeight,
-					pBytesPerVoxel,
+					pNativeTypeEnum,
 					pMaxTextureWidth,
 					pMaxTextureHeight,
 					pNumberOfRenderLayers,
@@ -142,12 +146,12 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 	}
 
 	private void prepareVolumeDataArray(final int pRenderLayerIndex,
-																			final ByteBuffer pByteBuffer)
+																			final FragmentedMemoryInterface pVolumeDataBuffer)
 	{
 		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
 
-			ByteBuffer lVolumeDataBuffer = pByteBuffer;
+			FragmentedMemoryInterface lVolumeDataBuffer = pVolumeDataBuffer;
 			if (lVolumeDataBuffer == null)
 				lVolumeDataBuffer = getVolumeDataBuffer(pRenderLayerIndex);
 			if (lVolumeDataBuffer == null)
@@ -157,22 +161,21 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			final long lHeight = getVolumeSizeY();
 			final long lDepth = getVolumeSizeZ();
 
-			if (getBytesPerVoxel() == 1)
+			if (getNativeType() == NativeTypeEnum.UnsignedByte)
 				mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
 																																						lHeight,
 																																						lDepth,
 																																						CLImageFormat.ChannelOrder.R,
 																																						CLImageFormat.ChannelDataType.UNormInt8);
-			else if (getBytesPerVoxel() == 2)
+			else if (getNativeType() == NativeTypeEnum.UnsignedShort)
 				mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
 																																						lHeight,
 																																						lDepth,
 																																						CLImageFormat.ChannelOrder.R,
 																																						CLImageFormat.ChannelDataType.UNormInt16);
 
-			lVolumeDataBuffer.rewind();
 
-			fillWithByteBufferAsShort(mCLVolumeImages[pRenderLayerIndex],
+			fillWithByteBuffer(mCLVolumeImages[pRenderLayerIndex],
 																lVolumeDataBuffer);
 
 		}
@@ -213,7 +216,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		mCLDevice.writeFloatBuffer(	mCLTransferColorBuffers[pRenderLayerIndex],
 																FloatBuffer.wrap(color4));/**/
 
-		mCLDevice.writeFloatImage2D(mCLTransferFunctionImages[pRenderLayerIndex],
+		mCLDevice.writeImage(	mCLTransferFunctionImages[pRenderLayerIndex],
 																FloatBuffer.wrap(lTransferFunctionArray));
 
 	}
@@ -271,8 +274,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 			}
 
 			notifyVolumeCaptureListeners(	lCaptureBuffers,
-																		false,
-																		getBytesPerVoxel(),
+																		getNativeType(),
 																		getVolumeSizeX(),
 																		getVolumeSizeY(),
 																		getVolumeSizeZ(),
@@ -294,7 +296,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 
 		for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++)
 		{
-			final ByteBuffer lVolumeDataBuffer = getVolumeDataBuffer(lLayerIndex);
+			final FragmentedMemoryInterface lVolumeDataBuffer = getVolumeDataBuffer(lLayerIndex);
 
 			if (lVolumeDataBuffer != null)
 			{
@@ -314,9 +316,7 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 					}
 					else
 					{
-						lVolumeDataBuffer.rewind();
-
-						fillWithByteBufferAsShort(mCLVolumeImages[lLayerIndex],
+						fillWithByteBuffer(mCLVolumeImages[lLayerIndex],
 																			lVolumeDataBuffer);
 
 					}
@@ -346,11 +346,18 @@ public class OpenCLVolumeRenderer extends JOGLClearVolumeRenderer	implements
 		return lUpdated;
 	}
 
-	private void fillWithByteBufferAsShort(	final CLImage3D clImage3D,
-																					final ByteBuffer lVolumeDataBuffer)
+	private void fillWithByteBuffer(	final CLImage3D clImage3D,
+																					final FragmentedMemoryInterface pVolumeDataBuffer)
 	{
-		lVolumeDataBuffer.rewind();
-		mCLDevice.writeImage(clImage3D, lVolumeDataBuffer);
+		if (pVolumeDataBuffer.getNumberOfFragments() == 1)
+		{
+			final ContiguousMemoryInterface lContiguousBuffer = pVolumeDataBuffer.get(0);
+			mCLDevice.writeImage(clImage3D, lContiguousBuffer);
+		}
+		else
+		{
+			mCLDevice.writeImagePerPlane(clImage3D, pVolumeDataBuffer);
+		}
 	}
 
 	private void runKernel(final int pRenderLayerIndex)

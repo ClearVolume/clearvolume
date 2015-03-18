@@ -5,7 +5,7 @@ import org.kohsuke.args4j.CmdLineParser;
 
 import clearvolume.network.client.main.ClearVolumeClientMain;
 import clearvolume.network.server.main.ClearVolumeDemoServerMain;
-import clearvolume.renderer.jogl.ClearVolumeIcon;
+import clearvolume.renderer.cleargl.ClearVolumeIcon;
 
 public class ClearVolumeMain
 {

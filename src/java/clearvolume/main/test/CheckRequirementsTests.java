@@ -2,8 +2,8 @@ package clearvolume.main.test;
 
 import org.junit.Test;
 
+import clearvolume.exceptions.UnsupportedArchitectureException;
 import clearvolume.main.CheckRequirements;
-import clearvolume.utils.UnsupportedArchitectureException;
 
 public class CheckRequirementsTests
 {

@@ -4,7 +4,7 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import clearvolume.ClearVolumeCloseable;
-import clearvolume.ClearVolumeException;
+import clearvolume.exceptions.ClearVolumeException;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunction;
@@ -14,10 +14,12 @@ import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.relay.RelaySinkAdapter;
 import clearvolume.volume.sink.relay.RelaySinkInterface;
+import coremem.types.NativeTypeEnum;
+import coremem.util.Size;
 
 public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
-RelaySinkInterface,
-ClearVolumeCloseable
+																															RelaySinkInterface,
+																															ClearVolumeCloseable
 {
 
 	private volatile ClearVolumeRendererInterface mClearVolumeRendererInterface;
@@ -34,9 +36,9 @@ ClearVolumeCloseable
 	private final TreeMap<Integer, String> mSeenChannelIdToNameMap = new TreeMap<Integer, String>();
 
 	public ClearVolumeRendererSink(	ClearVolumeRendererInterface pClearVolumeRendererInterface,
-			VolumeManager pVolumeManager,
-			long pWaitForCopyTimeout,
-			TimeUnit pTimeUnit)
+																	VolumeManager pVolumeManager,
+																	long pWaitForCopyTimeout,
+																	TimeUnit pTimeUnit)
 	{
 		super();
 		mClearVolumeRendererInterface = pClearVolumeRendererInterface;
@@ -47,13 +49,13 @@ ClearVolumeCloseable
 	}
 
 	public ClearVolumeRendererSink(	final String pRequestedWindowTitle,
-			final int pRequestedWindowWidth,
-			final int pRequestedWindowHeight,
-			final int pBytesPerVoxel,
-			final int pNumberOfLayers,
-			final long pWaitForCopyTimeout,
-			final TimeUnit pTimeUnit,
-			final int pMaxNumberOfAvailableVolumes)
+																	final int pRequestedWindowWidth,
+																	final int pRequestedWindowHeight,
+																	final NativeTypeEnum pNativeTypeEnum,
+																	final int pNumberOfLayers,
+																	final long pWaitForCopyTimeout,
+																	final TimeUnit pTimeUnit,
+																	final int pMaxNumberOfAvailableVolumes)
 	{
 		super();
 		mRequestedWindowTitle = pRequestedWindowTitle;
@@ -64,35 +66,36 @@ ClearVolumeCloseable
 		mNumberOfLayers = pNumberOfLayers;
 		mMaxNumberOfAvailableVolumes = pMaxNumberOfAvailableVolumes;
 
-		createRenderer(pBytesPerVoxel, pNumberOfLayers);
+		createRenderer(pNativeTypeEnum, pNumberOfLayers);
 	}
 
 	@Override
-	public void sendVolume(Volume<?> pVolume)
+	public void sendVolume(Volume pVolume)
 	{
 		final long lTimePointIndex = pVolume.getTimeIndex();
 		final int lChannelID = pVolume.getChannelID();
 		final String lChannelName = pVolume.getChannelName();
 		mSeenChannelIdToNameMap.put(lChannelID, lChannelName);
 
-		final int lBytesPerVoxel = pVolume.getBytesPerVoxel();
+		final NativeTypeEnum lNativeType = pVolume.getNativeType();
 		final int lNumberOfChannelsSeen = mSeenChannelIdToNameMap.keySet()
-				.size();
+																															.size();
 		final int lNumberOfLayersNeeded = lNumberOfChannelsSeen;
 
 		if (mClearVolumeRendererInterface == null || mClearVolumeRendererInterface.getNumberOfRenderLayers() < lNumberOfLayersNeeded
-				|| mClearVolumeRendererInterface.getBytesPerVoxel() != lBytesPerVoxel)
+				|| mClearVolumeRendererInterface.getNativeType() != lNativeType)
 		{
 			System.out.println("Creating new Renderer!");
 			System.out.format("Volume: nb channels seen: %d \n",
-					lNumberOfChannelsSeen);
+												lNumberOfChannelsSeen);
+			System.out.format("Volume: type: %s \n", lNativeType);
 			System.out.format("Volume: bytes per voxel: %d \n",
-					lBytesPerVoxel);
+												Size.of(lNativeType));
 			System.out.format("Renderer: nb of layers: %d \n",
-					mClearVolumeRendererInterface.getNumberOfRenderLayers());
-			System.out.format("Renderer: bytes per voxel: %d \n",
-					mClearVolumeRendererInterface.getBytesPerVoxel());
-			createRenderer(lBytesPerVoxel, lNumberOfLayersNeeded);
+												mClearVolumeRendererInterface.getNumberOfRenderLayers());
+			System.out.format("Renderer: type: %s \n",
+												mClearVolumeRendererInterface.getNativeType());
+			createRenderer(lNativeType, lNumberOfLayersNeeded);
 		}
 
 		final int lNumberOfRenderLayers = mClearVolumeRendererInterface.getNumberOfRenderLayers();
@@ -108,12 +111,13 @@ ClearVolumeCloseable
 			lTransferFunction = TransferFunctions.getGradientForColor(lRenderLayer);
 
 		mClearVolumeRendererInterface.setTransferFunction(lTransferFunction);
-		mClearVolumeRendererInterface.setVolumeDataBuffer(pVolume);
+		mClearVolumeRendererInterface.setVolumeDataBuffer(lRenderLayer,
+																											pVolume);
 
 		mClearVolumeRendererInterface.requestDisplay();
 
-		mClearVolumeRendererInterface.waitToFinishDataBufferCopy(	mWaitForCopyTimeout,
-				mTimeUnit);
+		mClearVolumeRendererInterface.waitToFinishAllDataBufferCopy(mWaitForCopyTimeout,
+																															mTimeUnit);
 
 		if (getRelaySink() != null)
 			getRelaySink().sendVolume(pVolume);
@@ -122,7 +126,8 @@ ClearVolumeCloseable
 
 	}
 
-	private void createRenderer(int pBytesPerVoxel, int pNumberOfLayers)
+	private void createRenderer(NativeTypeEnum pNativeTypeEnum,
+															int pNumberOfLayers)
 	{
 		mSwitchingRenderers = true;
 		try
@@ -135,13 +140,13 @@ ClearVolumeCloseable
 		}
 
 		mClearVolumeRendererInterface = ClearVolumeRendererFactory.newBestRenderer(	mRequestedWindowTitle,
-				mRequestedWindowWidth,
-				mRequestedWindowHeight,
-				pBytesPerVoxel,
-				mRequestedWindowWidth,
-				mRequestedWindowHeight,
-				pNumberOfLayers,
-				false);
+																																								mRequestedWindowWidth,
+																																								mRequestedWindowHeight,
+																																								pNativeTypeEnum,
+																																								mRequestedWindowWidth,
+																																								mRequestedWindowHeight,
+																																								pNumberOfLayers,
+																																								false);
 		mClearVolumeRendererInterface.setVisible(true);
 
 		try

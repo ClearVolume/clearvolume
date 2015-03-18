@@ -20,6 +20,7 @@ import clearvolume.volume.sink.filter.gui.ChannelFilterSinkJFrame;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
+import coremem.types.NativeTypeEnum;
 
 public class TimeShiftingAndChannelFilterSinksDemo
 {
@@ -32,28 +33,29 @@ public class TimeShiftingAndChannelFilterSinksDemo
 	@Test
 	public void demo() throws InterruptedException, IOException
 	{
-		ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"TimeShift Demo",
-				512,
-				512,
-				1,
-				512,
-				512,
-				2,
-				false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"TimeShift Demo",
+																																																					512,
+																																																					512,
+																																																					NativeTypeEnum.UnsignedByte,
+																																																					512,
+																																																					512,
+																																																					2,
+																																																					false);
 		lClearVolumeRenderer.setVisible(true);
 
-		VolumeManager lVolumeManager = lClearVolumeRenderer.createCompatibleVolumeManager(200);
+		final VolumeManager lVolumeManager = lClearVolumeRenderer.createCompatibleVolumeManager(200);
 
-		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-				lVolumeManager,
-				100,
-				TimeUnit.MILLISECONDS);
-		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50, 100);
-		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
+		final ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
+																																													lVolumeManager,
+																																													100,
+																																													TimeUnit.MILLISECONDS);
+		final TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
+																																		100);
+		final ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
 
-		ClearVolumeTCPServerSink lClearVolumeTCPServer = new ClearVolumeTCPServerSink(cNumberOfAvailableVolumes);
+		final ClearVolumeTCPServerSink lClearVolumeTCPServer = new ClearVolumeTCPServerSink(cNumberOfAvailableVolumes);
 
-		SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
+		final SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
 		lClearVolumeTCPServer.open(lServerSocketAddress);
 		lClearVolumeTCPServer.start();
 
@@ -65,7 +67,7 @@ public class TimeShiftingAndChannelFilterSinksDemo
 		lClearVolumeRendererSink.setRelaySink(lClearVolumeTCPServer);
 		lClearVolumeTCPServer.setRelaySink(new NullVolumeSink(lVolumeManager));
 
-		VolumeManager lManager = lTimeShiftingSink.getManager();
+		final VolumeManager lManager = lTimeShiftingSink.getManager();
 
 		final int lMaxVolumesSent = 2000;
 		for (int i = 0; i < lMaxVolumesSent; i++)
@@ -73,15 +75,15 @@ public class TimeShiftingAndChannelFilterSinksDemo
 			final int lTimePoint = i / 2;
 			final int lChannel = i % 2;
 
-			Volume<Byte> lVolume = lManager.requestAndWaitForVolume(1,
-					TimeUnit.MILLISECONDS,
-					Byte.class,
-					1,
-					cWidth,
-					cHeight,
-					cDepth);
+			final Volume lVolume = lManager.requestAndWaitForVolume(1,
+																															TimeUnit.MILLISECONDS,
+																															NativeTypeEnum.UnsignedByte,
+																															1,
+																															cWidth,
+																															cHeight,
+																															cDepth);
 
-			ByteBuffer lVolumeData = lVolume.getDataBuffer();
+			final ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
 			lVolumeData.rewind();
 			for (int j = 0; j < cWidth * cHeight * cDepth; j++)
@@ -97,17 +99,17 @@ public class TimeShiftingAndChannelFilterSinksDemo
 					{
 						final int lIndex = x + cWidth * y + cWidth * cHeight * z;
 
-						byte lByteValue = (byte) (((byte) x ^ (byte) y ^ (byte) z));
+						final byte lByteValue = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 
 						lVolumeData.put(lIndex, lByteValue);
 					}/**/
 
-					lVolume.setTimeIndex(lTimePoint);
-					lVolume.setChannelID(lChannel);
+			lVolume.setTimeIndex(lTimePoint);
+			lVolume.setChannelID(lChannel);
 
-					lTimeShiftingSink.sendVolume(lVolume);
+			lTimeShiftingSink.sendVolume(lVolume);
 
-					Thread.sleep(100);
+			Thread.sleep(100);
 		}
 
 		lClearVolumeTCPServer.stop();

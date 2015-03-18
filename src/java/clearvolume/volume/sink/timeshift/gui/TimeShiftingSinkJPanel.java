@@ -24,11 +24,11 @@ import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 
 public class TimeShiftingSinkJPanel extends JPanel {
 
-	private JSlider mTimeShiftSlider;
-	private JProgressBar mPlayBar;
-	private Thread mGUIUpdateThread;
-	private JLabel mPresentLabel;
-	private JLabel mPastLabel;
+	private final JSlider mTimeShiftSlider;
+	private final JProgressBar mPlayBar;
+	private final Thread mGUIUpdateThread;
+	private final JLabel mPresentLabel;
+	private final JLabel mPastLabel;
 
 	public static final void createJFrame(
 			final TimeShiftingSink pTimeShiftingSink) {
@@ -36,14 +36,14 @@ public class TimeShiftingSinkJPanel extends JPanel {
 			@Override
 			public void run() {
 				try {
-					JFrame lJFrame = new JFrame();
+					final JFrame lJFrame = new JFrame();
 
-					TimeShiftingSinkJPanel lMultiChannelTimeShiftingSinkPanel = new TimeShiftingSinkJPanel(
+					final TimeShiftingSinkJPanel lMultiChannelTimeShiftingSinkPanel = new TimeShiftingSinkJPanel(
 							pTimeShiftingSink);
 					lJFrame.getContentPane().add(
 							lMultiChannelTimeShiftingSinkPanel);
 					lJFrame.setVisible(true);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -64,21 +64,21 @@ public class TimeShiftingSinkJPanel extends JPanel {
 				"[14.00,grow,fill][grow][grow,fill][grow,fill][grow][grow,fill]",
 				"[][26px:26px,center][grow]"));
 
-		JPanel lPastPresentPanel = new JPanel();
+		final JPanel lPastPresentPanel = new JPanel();
 		lPastPresentPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		lPastPresentPanel.setBackground(Color.WHITE);
 		add(lPastPresentPanel, "cell 0 0 6 1,grow");
 		lPastPresentPanel.setLayout(new BorderLayout(0, 0));
 
 		mPastLabel = new JLabel(" " + pTimeShiftingSink.getHardMemoryHorizon()
-				+ " mTotalNumberOfTimePoints past");
+														+ " time points past");
 		lPastPresentPanel.add(mPastLabel, BorderLayout.WEST);
 
 		mPresentLabel = new JLabel("present: timepoint "
 				+ pTimeShiftingSink.getNumberOfTimepoints() + "   ");
 		lPastPresentPanel.add(mPresentLabel, BorderLayout.EAST);
 
-		JLayeredPane lJLayeredPane = new JLayeredPane();
+		final JLayeredPane lJLayeredPane = new JLayeredPane();
 		lJLayeredPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		add(lJLayeredPane, "cell 0 1 6 1,grow");
 		lJLayeredPane.setLayout(null);
@@ -114,7 +114,7 @@ public class TimeShiftingSinkJPanel extends JPanel {
 			});
 		lJLayeredPane.add(mTimeShiftSlider);
 
-		JPanel lPlayPausePanel = new JPanel();
+		final JPanel lPlayPausePanel = new JPanel();
 		lPlayPausePanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		lPlayPausePanel.setBackground(Color.WHITE);
 		add(lPlayPausePanel, "cell 2 2 2 1,grow");
@@ -122,14 +122,14 @@ public class TimeShiftingSinkJPanel extends JPanel {
 				"[grow,center][grow,center][grow,center][grow,center]",
 				"[grow,fill]"));
 
-		String lIconsPath = "/clearvolume/volume/sink/timeshift/gui/icons/";
-		ImageIcon lBeginningIcon = createScaledImageIcon(lIconsPath
+		final String lIconsPath = "/clearvolume/volume/sink/timeshift/gui/icons/";
+		final ImageIcon lBeginningIcon = createScaledImageIcon(lIconsPath
 				+ "beginning.png");
-		ImageIcon lPauseIcon = createScaledImageIcon(lIconsPath + "pause.png");
-		ImageIcon lPlayIcon = createScaledImageIcon(lIconsPath + "play.png");
-		ImageIcon lEndIcon = createScaledImageIcon(lIconsPath + "end.png");
+		final ImageIcon lPauseIcon = createScaledImageIcon(lIconsPath + "pause.png");
+		final ImageIcon lPlayIcon = createScaledImageIcon(lIconsPath + "play.png");
+		final ImageIcon lEndIcon = createScaledImageIcon(lIconsPath + "end.png");
 
-		JButton lGoToBeginButton = new JButton(lBeginningIcon);
+		final JButton lGoToBeginButton = new JButton(lBeginningIcon);
 		lGoToBeginButton.setBorder(new EmptyBorder(0, 0, 0, 0));
 		if (pTimeShiftingSink != null)
 			lGoToBeginButton.addActionListener(new ActionListener() {
@@ -141,7 +141,7 @@ public class TimeShiftingSinkJPanel extends JPanel {
 			});
 		lPlayPausePanel.add(lGoToBeginButton, "cell 0 0");
 
-		JButton lPauseButton = new JButton(lPauseIcon);
+		final JButton lPauseButton = new JButton(lPauseIcon);
 		lPauseButton.setBorder(new EmptyBorder(0, 0, 0, 0));
 		if (pTimeShiftingSink != null)
 			lPauseButton.addActionListener(new ActionListener() {
@@ -154,7 +154,7 @@ public class TimeShiftingSinkJPanel extends JPanel {
 			});
 		lPlayPausePanel.add(lPauseButton, "cell 1 0");
 
-		JButton lPlayButton = new JButton(lPlayIcon);
+		final JButton lPlayButton = new JButton(lPlayIcon);
 		lPlayButton.setBorder(new EmptyBorder(0, 0, 0, 0));
 		if (pTimeShiftingSink != null)
 			lPlayButton.addActionListener(new ActionListener() {
@@ -167,7 +167,7 @@ public class TimeShiftingSinkJPanel extends JPanel {
 			});
 		lPlayPausePanel.add(lPlayButton, "cell 2 0");
 
-		JButton lGoToEndButton = new JButton(lEndIcon);
+		final JButton lGoToEndButton = new JButton(lEndIcon);
 		lGoToEndButton.setBorder(new EmptyBorder(0, 0, 0, 0));
 		if (pTimeShiftingSink != null)
 			lGoToEndButton.addActionListener(new ActionListener() {
@@ -191,7 +191,7 @@ public class TimeShiftingSinkJPanel extends JPanel {
 
 					try {
 						Thread.sleep(2000);
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -221,18 +221,18 @@ public class TimeShiftingSinkJPanel extends JPanel {
 
 	protected ImageIcon createScaledImageIcon(String path) {
 		final int lDownScaling = 16;
-		ImageIcon lCreatedImageIcon = createImageIcon(path);
-		Image lImage = lCreatedImageIcon.getImage().getScaledInstance(
+		final ImageIcon lCreatedImageIcon = createImageIcon(path);
+		final Image lImage = lCreatedImageIcon.getImage().getScaledInstance(
 				lCreatedImageIcon.getIconWidth() / lDownScaling,
 				lCreatedImageIcon.getIconHeight() / lDownScaling,
 				java.awt.Image.SCALE_SMOOTH);
 
-		ImageIcon lImageIcon = new ImageIcon(lImage);
+		final ImageIcon lImageIcon = new ImageIcon(lImage);
 		return lImageIcon;
 	}
 
 	protected ImageIcon createImageIcon(String path) {
-		java.net.URL imgURL = this.getClass().getResource(path);
+		final java.net.URL imgURL = this.getClass().getResource(path);
 		if (imgURL != null) {
 			return new ImageIcon(imgURL, path);
 		} else {

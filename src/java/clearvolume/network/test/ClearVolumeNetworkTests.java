@@ -24,6 +24,7 @@ import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.VolumeSinkAdapter;
 import clearvolume.volume.sink.VolumeSinkInterface;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
+import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeNetworkTests
 {
@@ -46,9 +47,9 @@ public class ClearVolumeNetworkTests
 		final VolumeSinkInterface lVolumeSink = new VolumeSinkAdapter(cNumberOfAvailableVolumes)
 		{
 			@Override
-			public void sendVolume(final Volume<?> pVolume)
+			public void sendVolume(final Volume pVolume)
 			{
-				// System.out.println("Received volume:" + pVolume);
+				System.out.println("Received volume:" + pVolume);
 			}
 		};
 		networkConduit(lVolumeSink, cNumberOfVolumesToSend, true);
@@ -63,7 +64,7 @@ public class ClearVolumeNetworkTests
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
             256,
             256,
-            1,
+																																																					NativeTypeEnum.UnsignedByte,
             256,
             256,
             1,
@@ -107,10 +108,10 @@ public class ClearVolumeNetworkTests
 
 		assertTrue(lClearVolumeTCPClient.start());
 
-		final Volume<Byte> lVolume = lClearVolumeTCPServerSink.getManager()
+		final Volume lVolume = lClearVolumeTCPServerSink.getManager()
 																													.requestAndWaitForVolume(	1,
 																																										TimeUnit.MILLISECONDS,
-																																										Byte.class,
+																																										NativeTypeEnum.UnsignedByte,
 																																										1,
 																																										cWidth,
 																																										cHeight,

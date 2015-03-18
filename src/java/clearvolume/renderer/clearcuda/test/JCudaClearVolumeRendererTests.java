@@ -9,6 +9,8 @@ import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
+import coremem.offheap.OffHeapMemory;
+import coremem.types.NativeTypeEnum;
 
 public class JCudaClearVolumeRendererTests
 {
@@ -24,7 +26,7 @@ public class JCudaClearVolumeRendererTests
 			final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																																															768,
 																																															768,
-																																															1);
+																																															NativeTypeEnum.UnsignedByte);
 
 			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 
@@ -33,9 +35,9 @@ public class JCudaClearVolumeRendererTests
 			final int lResolutionX = 256;
 			final int lResolutionY = lResolutionX;
 			final int lResolutionZ = lResolutionX;
+			final int lLength = lResolutionX * lResolutionY * lResolutionZ;
 
-			final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-																								* lResolutionZ];
+			final byte[] lVolumeDataArray = new byte[lLength];
 
 			for (int z = 0; z < lResolutionZ; z++)
 				for (int y = 0; y < lResolutionY; y++)
@@ -52,7 +54,25 @@ public class JCudaClearVolumeRendererTests
 																								lResolutionY,
 																								lResolutionZ);
 
-			lClearVolumeRenderer.requestDisplay();
+			Thread.sleep(1000);
+
+			final OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateBytes(lLength);
+
+			for (int z = 0; z < lResolutionZ; z++)
+				for (int y = 0; y < lResolutionY; y++)
+					for (int x = 0; x < lResolutionX; x++)
+					{
+						final int lIndex = (x + lResolutionX * y + lResolutionX * lResolutionY
+																												* z);
+						lOffHeapMemory.setByte(	lIndex,
+																		(byte) (256 - (((byte) x ^ (byte) y ^ (byte) z))));
+					}
+
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								lOffHeapMemory,
+																								lResolutionX,
+																								lResolutionY,
+																								lResolutionZ);
 
 			Thread.sleep(1000);
 
@@ -77,7 +97,7 @@ public class JCudaClearVolumeRendererTests
 			final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																																															768,
 																																															768,
-																																															2);
+																																															NativeTypeEnum.UnsignedShort);
 			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 			lClearVolumeRenderer.setVisible(true);
 
@@ -85,8 +105,9 @@ public class JCudaClearVolumeRendererTests
 			final int lResolutionY = 256;
 			final int lResolutionZ = 256;
 
-			final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-																								* lResolutionZ
+			final int lLength = lResolutionX * lResolutionY * lResolutionZ;
+
+			final byte[] lVolumeDataArray = new byte[lLength
 																								* 2];
 
 			for (int z = 0; z < lResolutionZ; z++)
@@ -103,7 +124,26 @@ public class JCudaClearVolumeRendererTests
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
-			lClearVolumeRenderer.requestDisplay();
+
+			Thread.sleep(1000);
+
+			final OffHeapMemory lOffHeapMemory = OffHeapMemory.allocateShorts(lLength);
+
+			for (int z = 0; z < lResolutionZ; z++)
+				for (int y = 0; y < lResolutionY; y++)
+					for (int x = 0; x < lResolutionX; x++)
+					{
+						final int lIndex = (x + lResolutionX * y + lResolutionX * lResolutionY
+																												* z);
+						lOffHeapMemory.setShort(lIndex,
+																		(short) (256 - (((byte) x ^ (byte) y ^ (byte) z))));
+					}
+
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								lOffHeapMemory,
+																								lResolutionX,
+																								lResolutionY,
+																								lResolutionZ);
 
 			Thread.sleep(1000);
 

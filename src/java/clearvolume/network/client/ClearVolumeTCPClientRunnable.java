@@ -13,13 +13,13 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 {
 	private static final int cMaxpreAllocatedVolumes = 10;
 
-	private SocketChannel mSocketChannel;
-	private VolumeSinkInterface mVolumeSink;
+	private final SocketChannel mSocketChannel;
+	private final VolumeSinkInterface mVolumeSink;
 
 	private volatile boolean mStopSignal = false;
 	private volatile boolean mStoppedSignal = false;
 
-	private VolumeManager mVolumeManager;
+	private final VolumeManager mVolumeManager;
 
 	public ClearVolumeTCPClientRunnable(SocketChannel pSocketChannel,
 																			VolumeSinkInterface pVolumeSink,
@@ -45,7 +45,7 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 			{
 				try
 				{
-					Volume<?> lVolume = mVolumeManager.requestAndWaitForNextAvailableVolume(1,
+					Volume lVolume = mVolumeManager.requestAndWaitForNextAvailableVolume(	1,
 																																									TimeUnit.MILLISECONDS);
 
 					lVolume = ClearVolumeSerialization.deserialize(	mSocketChannel,
@@ -55,7 +55,7 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 
 					mVolumeSink.sendVolume(lVolume);
 				}
-				catch (OutOfMemoryError e)
+				catch (final OutOfMemoryError e)
 				{
 					System.gc();
 					e.printStackTrace();
@@ -64,7 +64,7 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 			}
 
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			handleError(e);
 		}
@@ -93,7 +93,7 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 			{
 				Thread.sleep(10);
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				e.printStackTrace();
 			}

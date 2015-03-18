@@ -17,16 +17,16 @@ public class ClearVolumeSerialization
 	public static final int cStandardTCPPort = 9140;
 	private static final int cLongSizeInBytes = 8;
 
-	public static final ByteBuffer serialize(	Volume<?> pVolume,
+	public static final ByteBuffer serialize(	Volume pVolume,
 																						ByteBuffer pByteBuffer)
 	{
-		StringBuilder lStringBuilder = new StringBuilder();
+		final StringBuilder lStringBuilder = new StringBuilder();
 		writeVolumeHeader(pVolume, lStringBuilder);
 
 		final int lHeaderLength = lStringBuilder.length();
 
 		final long lDataLength = pVolume.getDataSizeInBytes();
-		int lNeededBufferLength = ToIntExact.toIntExact(3 * cLongSizeInBytes
+		final int lNeededBufferLength = ToIntExact.toIntExact(3 * cLongSizeInBytes
 																					+ lHeaderLength
 																					+ lDataLength);
 		if (pByteBuffer == null || pByteBuffer.capacity() != lNeededBufferLength)
@@ -45,11 +45,11 @@ public class ClearVolumeSerialization
 		return pByteBuffer;
 	};
 
-	private static void writeVolumeHeader(Volume<?> pVolume,
+	private static void writeVolumeHeader(Volume pVolume,
 																				StringBuilder pStringBuilder)
 	{
 
-		LinkedHashMap<String, String> lHeaderMap = new LinkedHashMap<String, String>();
+		final LinkedHashMap<String, String> lHeaderMap = new LinkedHashMap<String, String>();
 		lHeaderMap.put("index", "" + pVolume.getTimeIndex());
 		lHeaderMap.put("time", "" + pVolume.getTimeInSeconds());
 		lHeaderMap.put("channel", "" + pVolume.getChannelID());
@@ -77,10 +77,10 @@ public class ClearVolumeSerialization
 
 	static void readVolumeHeader(	ByteBuffer pByteBuffer,
 																int pHeaderLength,
-																Volume<?> pVolume)
+																Volume pVolume)
 	{
 
-		Map<String, String> lHeaderMap = KeyValueMaps.readMapFromBuffer(pByteBuffer,
+		final Map<String, String> lHeaderMap = KeyValueMaps.readMapFromBuffer(pByteBuffer,
 																																		pHeaderLength,
 																																		null);
 		final long lIndex = parseLong(lHeaderMap.get("index"), 0);
@@ -217,7 +217,7 @@ public class ClearVolumeSerialization
 	{
 		if (pFloatArray == null)
 			return "";
-		StringBuilder lStringBuilder = new StringBuilder();
+		final StringBuilder lStringBuilder = new StringBuilder();
 		for (int i = 0; i < pFloatArray.length; i++)
 		{
 			final float lValue = pFloatArray[i];
@@ -236,13 +236,13 @@ public class ClearVolumeSerialization
 		try
 		{
 			pString = pString.trim();
-			String[] lSplittedString = pString.split(" ", -1);
+			final String[] lSplittedString = pString.split(" ", -1);
 			lFloatArray = new float[lSplittedString.length];
 			for (int i = 0; i < lFloatArray.length; i++)
 				lFloatArray[i] = Float.parseFloat(lSplittedString[i]);
 			return lFloatArray;
 		}
-		catch (NumberFormatException e)
+		catch (final NumberFormatException e)
 		{
 			e.printStackTrace();
 			return null;
@@ -251,12 +251,12 @@ public class ClearVolumeSerialization
 
 	private static ThreadLocal<ByteBuffer> sScratchBufferThreadLocal = new ThreadLocal<ByteBuffer>();
 
-	public static final <T> Volume<T> deserialize(SocketChannel pSocketChannel,
-																								Volume<T> pVolume) throws IOException
+	public static final Volume deserialize(	SocketChannel pSocketChannel,
+																					Volume pVolume) throws IOException
 	{
 		if (pVolume == null)
 		{
-			pVolume = new Volume<T>();
+			pVolume = new Volume();
 		}
 
 		ByteBuffer pScratchBuffer = sScratchBufferThreadLocal.get();
@@ -338,8 +338,8 @@ public class ClearVolumeSerialization
 
 
 
-	public static final <T> Volume<T> deserialize(ByteBuffer pByteBuffer,
-																								Volume<T> pVolume)
+	public static final Volume deserialize(	ByteBuffer pByteBuffer,
+																					Volume pVolume)
 	{
 		pByteBuffer.rewind();
 		final int lWholeLength = ToIntExact.toIntExact(pByteBuffer.getLong());
@@ -352,13 +352,13 @@ public class ClearVolumeSerialization
 
 	static void readVolumeData(	ByteBuffer pByteBuffer,
 															long pDataLength,
-															Volume<?> pVolume)
+															Volume pVolume)
 	{
 
 		if (pVolume.getDataBuffer() == null || pVolume.getDataBuffer()
 																									.capacity() != pDataLength)
 		{
-			ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(ToIntExact.toIntExact(pDataLength));
+			final ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(ToIntExact.toIntExact(pDataLength));
 			lByteBuffer.order(ByteOrder.nativeOrder());
 			lByteBuffer.clear();
 			pVolume.setDataBuffer(lByteBuffer);
@@ -375,7 +375,7 @@ public class ClearVolumeSerialization
 		{
 			Thread.sleep(1);
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			e.printStackTrace();
 		}

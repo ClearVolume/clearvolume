@@ -20,7 +20,7 @@ public class NullVolumeSink implements VolumeSinkInterface
 	}
 
 	@Override
-	public void sendVolume(Volume<?> pVolume)
+	public void sendVolume(Volume pVolume)
 	{
 		if (mVolumeManager != null)
 			pVolume.makeAvailableToManager();

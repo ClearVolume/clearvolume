@@ -6,14 +6,17 @@ import java.util.concurrent.TimeUnit;
 
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.RotationControllerInterface;
-import clearvolume.projections.ProjectionAlgorithm;
-import clearvolume.renderer.jogl.overlay.Overlay;
+import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
+
+import coremem.ContiguousMemoryInterface;
+import coremem.fragmented.FragmentedMemoryInterface;
+import coremem.types.NativeTypeEnum;
 
 /**
  * Interface ClearVolumeRenderer
@@ -36,18 +39,25 @@ public interface ClearVolumeRendererInterface	extends
 {
 
 	/**
-	 * Returns the number of bytes per voxels for the volume data.
+	 * Returns the native type of this renderer.
 	 *
-	 * @return bytes-per-voxel
+	 * @return native type.
 	 */
-	int getBytesPerVoxel();
+	NativeTypeEnum getNativeType();
 
   /**
-   * Sets the number of bytes per voxels for the volume data.
-   *
-   * @return bytes-per-voxel
-   */
-  void setBytesPerVoxel(int bytesPerVoxel);
+	 * Sets the native type for this renderer.
+	 *
+	 * @return native type
+	 */
+	void setNativeType(NativeTypeEnum pNativeType);
+
+	/**
+	 * Returns the number of bytes per voxel for this renderer.
+	 * 
+	 * @return bytes per voxel
+	 */
+	long getBytesPerVoxel();
 
 	/**
 	 * Sets the display used by the renderer visible.
@@ -408,6 +418,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
 	 * layer.
 	 *
+	 * @param pRenderLayerIndex
 	 * @param pByteBuffer
 	 * @param pSizeX
 	 * @param pSizeY
@@ -421,18 +432,39 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
-	 * dimensions (pSizeX,pSizeY,pSizeZ).
+	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
+	 * layer.
 	 *
-	 * @param pByteBuffer
+	 * @param pRenderLayerIndex
+	 * @param pFragmentedMemoryInterface
 	 * @param pSizeX
 	 * @param pSizeY
 	 * @param pSizeZ
 	 */
-	@Deprecated
-	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
+	void setVolumeDataBuffer(	int pRenderLayerIndex,
+														FragmentedMemoryInterface pFragmentedMemoryInterface,
 														long pSizeX,
 														long pSizeY,
 														long pSizeZ);
+
+	/**
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
+	 * layer.
+	 *
+	 * @param pRenderLayerIndex
+	 * @param pContiguousMemoryInterface
+	 * @param pSizeX
+	 * @param pSizeY
+	 * @param pSizeZ
+	 */
+	void setVolumeDataBuffer(	int pRenderLayerIndex,
+														ContiguousMemoryInterface pContiguousMemoryInterface,
+														long pSizeX,
+														long pSizeY,
+														long pSizeZ);
+
+
 
 	/**
 	 * Updates the voxel size of subsequently rendered volumes
@@ -445,26 +477,7 @@ public interface ClearVolumeRendererInterface	extends
 														double pVoxelSizeY,
 														double pVoxelSizeZ);
 
-	/**
-	 * Updates the displayed volume with the provided volume data of voxel
-	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are provided.
-	 *
-	 * @param pByteBuffer
-	 * @param pSizeX
-	 * @param pSizeY
-	 * @param pSizeZ
-	 * @param pVoxelSizeX
-	 * @param pVoxelSizeY
-	 * @param pVoxelSizeZ
-	 */
-	@Deprecated
-	void setVolumeDataBuffer(	ByteBuffer pByteBuffer,
-														long pSizeX,
-														long pSizeY,
-														long pSizeZ,
-														double pVoxelSizeX,
-														double pVoxelSizeY,
-														double pVoxelSizeZ);
+
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -489,13 +502,50 @@ public interface ClearVolumeRendererInterface	extends
 														double pVoxelSizeZ);
 
 	/**
-	 * Updates the displayed volume with the provided volume.
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are provided.
 	 *
-	 * @param pVolume
-	 *          Volume data to use for updating display.
+	 * @param pRenderLayerIndex
+	 * @param pFragmentedMemoryInterface
+	 * @param pSizeX
+	 * @param pSizeY
+	 * @param pSizeZ
+	 * @param pVoxelSizeX
+	 * @param pVoxelSizeY
+	 * @param pVoxelSizeZ
 	 */
-	@Deprecated
-	void setVolumeDataBuffer(Volume<?> pVolume);
+	void setVolumeDataBuffer(	int pRenderLayerIndex,
+														FragmentedMemoryInterface pFragmentedMemoryInterface,
+														long pSizeX,
+														long pSizeY,
+														long pSizeZ,
+														double pVoxelSizeX,
+														double pVoxelSizeY,
+														double pVoxelSizeZ);
+
+	/**
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are provided.
+	 *
+	 * @param pRenderLayerIndex
+	 * @param pContiguousMemoryInterface
+	 * @param pSizeX
+	 * @param pSizeY
+	 * @param pSizeZ
+	 * @param pVoxelSizeX
+	 * @param pVoxelSizeY
+	 * @param pVoxelSizeZ
+	 */
+	void setVolumeDataBuffer(	int pRenderLayerIndex,
+														ContiguousMemoryInterface pContiguousMemoryInterface,
+														long pSizeX,
+														long pSizeY,
+														long pSizeZ,
+														double pVoxelSizeX,
+														double pVoxelSizeY,
+														double pVoxelSizeZ);
+
+
 
 	/**
 	 * Updates the displayed volume with the provided Volume for a given layer.
@@ -503,7 +553,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pVolume
 	 *          Volume data to use for updating display.
 	 */
-	void setVolumeDataBuffer(int pRenderLayerIndex, Volume<?> pVolume);
+	void setVolumeDataBuffer(int pRenderLayerIndex, Volume pVolume);
 
 	/**
 	 * Creates a compatible VolumeManager - possibly capable of allocating pinned
@@ -524,13 +574,6 @@ public interface ClearVolumeRendererInterface	extends
 	public boolean waitToFinishAllDataBufferCopy(	long pTimeOut,
 																								TimeUnit pTimeUnit);
 
-	/**
-	 * Waits until volume data copy completes for current layer.
-	 *
-	 * @return true is completed, false if it timed-out.
-	 */
-	public boolean waitToFinishDataBufferCopy(long pTimeOut,
-																						TimeUnit pTimeUnit);
 
 	/**
 	 * Waits until volume data copy completes for a given layer.
@@ -725,6 +768,8 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	void close();
+
+
 
 
 

@@ -23,10 +23,10 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 	private ClearVolumeTCPServerSinkRunnable lRunnable;
 	private Thread mRunnableThread;
 
-	private SourceToSinkBufferedAdapter mSourceToSinkBufferedAdapter;
+	private final SourceToSinkBufferedAdapter mSourceToSinkBufferedAdapter;
 
-	private VolumeManager mManager = new VolumeManager(2);
-	private volatile Volume<?> mLastVolumeSeen;
+	private final VolumeManager mManager = new VolumeManager(2);
+	private volatile Volume mLastVolumeSeen;
 
 
 	public ClearVolumeTCPServerSink(int pBufferMaxCapacity)
@@ -80,11 +80,11 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 	}
 
 	@Override
-	public void sendVolume(Volume<?> pVolume)
+	public void sendVolume(Volume pVolume)
 	{
 		if (pVolume != null)
 		{
-			Volume<?> lNewLastSeenVolume;
+			Volume lNewLastSeenVolume;
 			if (mLastVolumeSeen == null)
 			{
 				lNewLastSeenVolume = mManager.requestAndWaitForVolumeLike(1,
@@ -101,7 +101,7 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 			// System.out.println(mLastVolumeSeen);
 		}
 
-		boolean lSucceededInSending = mSourceToSinkBufferedAdapter.sendVolumeWithFeedback(pVolume);
+		final boolean lSucceededInSending = mSourceToSinkBufferedAdapter.sendVolumeWithFeedback(pVolume);
 		if (!lSucceededInSending)
 			if (getRelaySink() != null)
 				getRelaySink().sendVolume(pVolume);
@@ -118,7 +118,7 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 		return null;
 	}
 
-	public Volume<?> getLastVolumeSeen()
+	public Volume getLastVolumeSeen()
 	{
 		return mLastVolumeSeen;
 	}

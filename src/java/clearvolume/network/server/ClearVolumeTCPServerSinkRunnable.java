@@ -14,9 +14,9 @@ import clearvolume.volume.source.SourceToSinkBufferedAdapter;
 
 public class ClearVolumeTCPServerSinkRunnable implements Runnable
 {
-	private ClearVolumeTCPServerSink mClearVolumeTCPServerSink;
-	private ServerSocketChannel mServerSocketChannel;
-	private SourceToSinkBufferedAdapter mVolumeSource;
+	private final ClearVolumeTCPServerSink mClearVolumeTCPServerSink;
+	private final ServerSocketChannel mServerSocketChannel;
+	private final SourceToSinkBufferedAdapter mVolumeSource;
 
 	private volatile boolean mStopSignal = false;
 	private volatile boolean mStoppedSignal = false;
@@ -43,7 +43,7 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 		{
 			while (!mStopSignal)
 			{
-				SocketChannel lSocketChannel = mServerSocketChannel.accept();
+				final SocketChannel lSocketChannel = mServerSocketChannel.accept();
 				// System.out.println("connection accepted");
 				lSocketChannel.setOption(	StandardSocketOptions.SO_SNDBUF,
 																	ClearVolumeTCPClient.cSocketBufferLength);
@@ -63,18 +63,18 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 					while (lSocketChannel.isOpen() && lSocketChannel.isConnected()
 									&& !mStopSignal)
 					{
-						Volume<?> lVolumeToSend = mVolumeSource.requestVolumeAndWait(	10,
+						final Volume lVolumeToSend = mVolumeSource.requestVolumeAndWait(10,
 																																					TimeUnit.MILLISECONDS);
 						if (lVolumeToSend != null)
 							sendVolumeToClient(lSocketChannel, lVolumeToSend, true);
 
 					}
 				}
-				catch (java.io.IOException e1)
+				catch (final java.io.IOException e1)
 				{
 					continue;
 				}
-				catch (Throwable e)
+				catch (final Throwable e)
 				{
 					e.printStackTrace();
 				}
@@ -82,7 +82,7 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 			}
 
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			handleError(e);
 		}
@@ -93,7 +93,7 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 	}
 
 	private void sendVolumeToClient(SocketChannel lSocketChannel,
-																	Volume<?> lVolumeToSend,
+																	Volume lVolumeToSend,
 																	boolean pReleaseOrForward) throws IOException
 	{
 		mByteBuffer = ClearVolumeSerialization.serialize(	lVolumeToSend,
@@ -128,7 +128,7 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 			{
 				Thread.sleep(10);
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				e.printStackTrace();
 			}

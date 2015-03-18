@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.lang.SystemUtils;
 
-import clearvolume.utils.UnsupportedArchitectureException;
+import clearvolume.exceptions.UnsupportedArchitectureException;
 
 public class CheckRequirements
 {
