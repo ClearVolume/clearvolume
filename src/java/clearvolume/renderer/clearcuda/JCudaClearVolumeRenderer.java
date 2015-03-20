@@ -14,6 +14,7 @@ import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.media.opengl.GLAutoDrawable;
@@ -484,6 +485,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 	private void disposeVolumeRenderer()
 	{
+		waitToFinishAllDataBufferCopy(1, TimeUnit.SECONDS);
+
 		mDisplayReentrantLock.lock();
 		try
 		{

@@ -173,7 +173,7 @@ dependencies
 	compile 'args4j:args4j:2.0.29'
 	compile 'com.apple:AppleJavaExtensions:1.4'
 
-	compile group: "net.coremem", name: "coremem", version: "0.1", changing: true, transitive:true
+	compile group: "net.coremem", name: "CoreMem", version: "0.1", changing: true, transitive:true
 	compile 'com.nativelibs4java:javacl:1.0.0-RC4'
 	
 
@@ -201,7 +201,7 @@ repositories
 	{ url  "http://dl.bintray.com/clearvolume/ClearVolume"  }
 	maven
 	{ url "http://oss.sonatype.org/content/groups/public" }
-	maven { url  "http://dl.bintray.com/royerloic/maven" }
+	maven { url  "http://dl.bintray.com/rtlib/CoreMem" }
 
 }
 

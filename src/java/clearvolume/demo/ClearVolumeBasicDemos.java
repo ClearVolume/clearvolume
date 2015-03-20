@@ -66,8 +66,6 @@ public class ClearVolumeBasicDemos
 
 	}
 
-
-
 	@Test
 	public void demoWith8BitGeneratedDataset() throws InterruptedException,
 																						IOException
@@ -121,7 +119,61 @@ public class ClearVolumeBasicDemos
 		lClearVolumeRenderer.close();
 	}
 
+	@Test
+	public void demoWith8BitGeneratedDatasetTestReentrance() throws InterruptedException,
+																													IOException
+	{
 
+		for (int r = 0; r < 3; r++)
+		{
+			final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
+																																																						1024,
+																																																						1024,
+																																																						NativeTypeEnum.UnsignedByte,
+																																																						1024,
+																																																						1024,
+																																																						1,
+																																																						false);
+			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+			lClearVolumeRenderer.setVisible(true);
+
+			final int lResolutionX = 256;
+			final int lResolutionY = lResolutionX;
+			final int lResolutionZ = lResolutionX;
+
+			final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																								* lResolutionZ];
+
+			for (int z = 0; z < lResolutionZ; z++)
+				for (int y = 0; y < lResolutionY; y++)
+					for (int x = 0; x < lResolutionX; x++)
+					{
+						final int lIndex = x + lResolutionX
+																* y
+																+ lResolutionX
+																* lResolutionY
+																* z;
+						int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
+						if (lCharValue < 12)
+							lCharValue = 0;
+						lVolumeDataArray[lIndex] = (byte) lCharValue;
+					}
+
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
+																								lResolutionX,
+																								lResolutionY,
+																								lResolutionZ);
+			lClearVolumeRenderer.requestDisplay();
+
+			while (lClearVolumeRenderer.isShowing())
+			{
+				Thread.sleep(500);
+			}
+
+			lClearVolumeRenderer.close();
+		}
+	}
 
 	@Test
 	public void demoWith16BitGeneratedDataset()	throws InterruptedException,
@@ -168,7 +220,6 @@ public class ClearVolumeBasicDemos
 
 	}
 
-
 	@Test
 	public void demoWithFileDatasets()
 	{
@@ -187,8 +238,6 @@ public class ClearVolumeBasicDemos
 		}
 
 	}
-
-
 
 	private static void startSample(final String pRessourceName,
 																	final NativeTypeEnum pNativeTypeEnum,
@@ -220,10 +269,10 @@ public class ClearVolumeBasicDemos
 																	pSizeZ);
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																			512,
-																																			512,
-																																			pNativeTypeEnum,
-																																			false);
+																																																					512,
+																																																					512,
+																																																					pNativeTypeEnum,
+																																																					false);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getRainbow());
 		lClearVolumeRenderer.setVisible(true);
@@ -243,8 +292,6 @@ public class ClearVolumeBasicDemos
 
 	}
 
-
-
 	private static byte[] loadData(	final InputStream pInputStream,
 																	final NativeTypeEnum pNativeTypeEnum,
 																	final int sizeX,
@@ -257,7 +304,8 @@ public class ClearVolumeBasicDemos
 		try
 		{
 			final int size = Size.of(pNativeTypeEnum) * sizeX
-															* sizeY * sizeZ;
+												* sizeY
+												* sizeZ;
 			data = new byte[size];
 			fis.read(data);
 		}
