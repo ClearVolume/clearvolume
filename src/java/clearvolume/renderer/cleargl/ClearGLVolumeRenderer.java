@@ -959,7 +959,6 @@ public abstract class ClearGLVolumeRenderer	extends
 	public void dispose(final GLAutoDrawable arg0)
 	{
 		mClearGLWindow.stop();
-		mClearGLWindow.waitForAnimationToStop();
 	}
 
 	/**
