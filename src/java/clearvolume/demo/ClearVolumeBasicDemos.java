@@ -11,6 +11,9 @@ import org.junit.Test;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
+import coremem.ContiguousMemoryInterface;
+import coremem.buffers.ContiguousBuffer;
+import coremem.offheap.OffHeapMemory;
 import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
 
@@ -173,6 +176,63 @@ public class ClearVolumeBasicDemos
 
 			lClearVolumeRenderer.close();
 		}
+	}
+
+	@Test
+	public void demoWith8BitGeneratedDatasetRandomStackSizesContiguousMemory() throws InterruptedException,
+																																						IOException
+	{
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+																																																					1024,
+																																																					1024,
+																																																					NativeTypeEnum.UnsignedByte,
+																																																					1024,
+																																																					1024,
+																																																					1,
+																																																					false);
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setVisible(true);
+		// lClearVolumeRenderer.setMultiPass(false);
+
+		while (lClearVolumeRenderer.isShowing())
+		{
+			{
+				final int lResolutionX = (int) (128 + Math.random() * 320);
+				final int lResolutionY = (int) (128 + Math.random() * 320);
+				final int lResolutionZ = (int) (128 + Math.random() * 320);/**/
+
+				/*final int lResolutionX = 2 * 256;
+				final int lResolutionY = lResolutionX;
+				final int lResolutionZ = lResolutionX;/**/
+
+				final ContiguousMemoryInterface lBuffer = OffHeapMemory.allocateBytes(lResolutionX * lResolutionY
+																																							* lResolutionZ);
+				final ContiguousBuffer lContiguousBuffer = new ContiguousBuffer(lBuffer);
+
+				for (int z = 0; z < lResolutionZ; z++)
+					for (int y = 0; y < lResolutionY; y++)
+						for (int x = 0; x < lResolutionX; x++)
+						{
+							int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
+							if (lCharValue < 12)
+								lCharValue = 0;
+							lContiguousBuffer.writeByte((byte) lCharValue);
+						}
+
+				lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																									lBuffer,
+																									lResolutionX,
+																									lResolutionY,
+																									lResolutionZ);
+			}
+			System.gc();
+
+			Thread.sleep((long) (1000 * Math.random()));
+		}
+
+		lClearVolumeRenderer.close();
+
 	}
 
 	@Test

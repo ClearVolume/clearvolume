@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import javax.swing.SwingUtilities;
 
@@ -103,7 +103,7 @@ public abstract class ClearVolumeRendererBase	implements
 	// data copy locking and waiting
 	private final Object[] mSetVolumeDataBufferLocks;
 	private volatile FragmentedMemoryInterface[] mVolumeDataByteBuffers;
-	private final AtomicIntegerArray mDataBufferCopyIsFinished;
+	private final CountDownLatch[] mDataBufferCopyIsFinishedArray;
 
 	// Control frame:
 	private ControlPanelJFrame mControlFrame;
@@ -125,7 +125,7 @@ public abstract class ClearVolumeRendererBase	implements
 		mNumberOfRenderLayers = pNumberOfRenderLayers;
 		mSetVolumeDataBufferLocks = new Object[pNumberOfRenderLayers];
 		mVolumeDataByteBuffers = new FragmentedMemoryInterface[pNumberOfRenderLayers];
-		mDataBufferCopyIsFinished = new AtomicIntegerArray(pNumberOfRenderLayers);
+		mDataBufferCopyIsFinishedArray = new CountDownLatch[pNumberOfRenderLayers];
 		mTransferFunctions = new TransferFunction[pNumberOfRenderLayers];
 		mLayerVisiblityFlagArray = new boolean[pNumberOfRenderLayers];
 		mBrightness = new float[pNumberOfRenderLayers];
@@ -138,7 +138,6 @@ public abstract class ClearVolumeRendererBase	implements
 		for (int i = 0; i < pNumberOfRenderLayers; i++)
 		{
 			mSetVolumeDataBufferLocks[i] = new Object();
-			mDataBufferCopyIsFinished.set(i, 0);
 			mTransferFunctions[i] = TransferFunctions.getGradientForColor(i);
 			mLayerVisiblityFlagArray[i] = true;
 			mBrightness[i] = 1;
@@ -192,7 +191,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Returns the state of the flag indicating whether current/new rendering
 	 * parameters have been used for last rendering.
 	 *
-	 * @return true if rednering parameters up-to-date.
+	 * @return true if rendering parameters up-to-date.
 	 */
 	public boolean haveVolumeRenderingParametersChanged()
 	{
@@ -487,9 +486,9 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Returns the Gamma value.
+	 * Returns the Gamma size.
 	 *
-	 * @return gamma value
+	 * @return gamma size
 	 */
 	@Override
 	public double getGamma()
@@ -498,7 +497,7 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Returns the Gamma value.
+	 * Returns the Gamma size.
 	 *
 	 * @param pRenderLayerIndex
 	 * @return
@@ -590,7 +589,7 @@ public abstract class ClearVolumeRendererBase	implements
 
 	/**
 	 * Returns the maximal number of steps during ray casting forna given layer.
-	 * This value depends on the volume dimension and quality.
+	 * This size depends on the volume dimension and quality.
 	 * 
 	 * @param pRenderLayerIndex
 	 * @return maximal number of steps
@@ -821,7 +820,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * function range.
 	 *
 	 * @param pTransferRangeWidthDelta
-	 *          value added to the width
+	 *          size added to the width
 	 */
 	@Override
 	public void addTransferFunctionRangeWidth(final double pTransferRangeWidthDelta)
@@ -1128,77 +1127,6 @@ public abstract class ClearVolumeRendererBase	implements
 		return mNumberOfRenderLayers;
 	}
 
-
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long)
-	 */
-	@Override
-	public void setVolumeDataBuffer(final int pRenderLayerIndex,
-																	final ByteBuffer pByteBuffer,
-																	final long pSizeX,
-																	final long pSizeY,
-																	final long pSizeZ)
-	{
-		setVolumeDataBuffer(pRenderLayerIndex,
-												pByteBuffer,
-												pSizeX,
-												pSizeY,
-												pSizeZ,
-												1,
-												1,
-												1);
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long)
-	 */
-	@Override
-	public void setVolumeDataBuffer(final int pRenderLayerIndex,
-																	final FragmentedMemoryInterface pFragmentedMemoryInterface,
-																	final long pSizeX,
-																	final long pSizeY,
-																	final long pSizeZ)
-	{
-		setVolumeDataBuffer(pRenderLayerIndex,
-												pFragmentedMemoryInterface,
-												pSizeX,
-												pSizeY,
-												pSizeZ,
-												1,
-												1,
-												1);
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long)
-	 */
-	@Override
-	public void setVolumeDataBuffer(final int pRenderLayerIndex,
-																	final ContiguousMemoryInterface pContiguousMemoryInterface,
-																	final long pSizeX,
-																	final long pSizeY,
-																	final long pSizeZ)
-	{
-		setVolumeDataBuffer(pRenderLayerIndex,
-												FragmentedMemory.wrap(pContiguousMemoryInterface),
-												pSizeX,
-												pSizeY,
-												pSizeZ,
-												1,
-												1,
-												1);
-	}
-
 	/**
 	 * Interface method implementation
 	 *
@@ -1215,32 +1143,73 @@ public abstract class ClearVolumeRendererBase	implements
 		mVoxelSizeZ = pVoxelSizeZ;
 	}
 
-
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
+	 *      long, long, long)
+	 */
+	@Override
+	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
+																			final ByteBuffer pByteBuffer,
+																			final long pSizeX,
+																			final long pSizeY,
+																			final long pSizeZ)
+	{
+		return setVolumeDataBuffer(	pRenderLayerIndex,
+																pByteBuffer,
+																pSizeX,
+																pSizeY,
+																pSizeZ,
+																1,
+																1,
+																1);
+	}
 
 	/**
 	 * Interface method implementation
 	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long, double, double, double)
+	 *      long, long, long)
 	 */
 	@Override
-	public void setVolumeDataBuffer(final int pRenderLayerIndex,
-																	final ContiguousMemoryInterface pContiguousMemoryInterface,
-																	final long pSizeX,
-																	final long pSizeY,
-																	final long pSizeZ,
-																	final double pVoxelSizeX,
-																	final double pVoxelSizeY,
-																	final double pVoxelSizeZ)
+	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
+																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
+																			final long pSizeX,
+																			final long pSizeY,
+																			final long pSizeZ)
 	{
-		setVolumeDataBuffer(pRenderLayerIndex,
-												FragmentedMemory.wrap(pContiguousMemoryInterface),
-												pSizeX,
-												pSizeY,
-												pSizeZ,
-												pVoxelSizeX,
-												pVoxelSizeY,
-												pVoxelSizeZ);
+		return setVolumeDataBuffer(	pRenderLayerIndex,
+																pFragmentedMemoryInterface,
+																pSizeX,
+																pSizeY,
+																pSizeZ,
+																1,
+																1,
+																1);
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
+	 *      long, long, long)
+	 */
+	@Override
+	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
+																			final ContiguousMemoryInterface pContiguousMemoryInterface,
+																			final long pSizeX,
+																			final long pSizeY,
+																			final long pSizeZ)
+	{
+		return setVolumeDataBuffer(	pRenderLayerIndex,
+																FragmentedMemory.wrap(pContiguousMemoryInterface),
+																pSizeX,
+																pSizeY,
+																pSizeZ,
+																1,
+																1,
+																1);
 	}
 
 	/**
@@ -1250,14 +1219,125 @@ public abstract class ClearVolumeRendererBase	implements
 	 *      long, long, long, double, double, double)
 	 */
 	@Override
-	public void setVolumeDataBuffer(final int pRenderLayerIndex,
-																	final FragmentedMemoryInterface pFragmentedMemoryInterface,
-																	final long pSizeX,
-																	final long pSizeY,
-																	final long pSizeZ,
-																	final double pVoxelSizeX,
-																	final double pVoxelSizeY,
-																	final double pVoxelSizeZ)
+	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
+																			final ContiguousMemoryInterface pContiguousMemoryInterface,
+																			final long pSizeX,
+																			final long pSizeY,
+																			final long pSizeZ,
+																			final double pVoxelSizeX,
+																			final double pVoxelSizeY,
+																			final double pVoxelSizeZ)
+	{
+		return setVolumeDataBuffer(	pRenderLayerIndex,
+																FragmentedMemory.wrap(pContiguousMemoryInterface),
+																pSizeX,
+																pSizeY,
+																pSizeZ,
+																pVoxelSizeX,
+																pVoxelSizeY,
+																pVoxelSizeZ);
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
+	 *      long, long, long, double, double, double)
+	 */
+	@Override
+	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
+																			final ByteBuffer pByteBuffer,
+																			final long pSizeX,
+																			final long pSizeY,
+																			final long pSizeZ,
+																			final double pVoxelSizeX,
+																			final double pVoxelSizeY,
+																			final double pVoxelSizeZ)
+	{
+
+		FragmentedMemoryInterface lFragmentedMemoryInterface;
+		if (!pByteBuffer.isDirect())
+		{
+			final OffHeapMemory lOffHeapMemory = new OffHeapMemory(pByteBuffer.capacity());
+			lOffHeapMemory.copyFrom(pByteBuffer);
+			lFragmentedMemoryInterface = FragmentedMemory.wrap(lOffHeapMemory);
+		}
+		else
+		{
+			final OffHeapMemory lOffHeapMemory = OffHeapMemory.wrapBuffer(pByteBuffer);
+			lFragmentedMemoryInterface = FragmentedMemory.wrap(lOffHeapMemory);
+		}
+
+		return setVolumeDataBuffer(	pRenderLayerIndex,
+																lFragmentedMemoryInterface,
+																pSizeX,
+																pSizeY,
+																pSizeZ,
+																pVoxelSizeX,
+																pVoxelSizeY,
+																pVoxelSizeZ);
+
+	}
+
+	@Override
+	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
+																			final Volume pVolume)
+	{
+		return setVolumeDataBuffer(	pRenderLayerIndex,
+																pVolume.getDataBuffer(),
+																pVolume.getWidthInVoxels(),
+																pVolume.getHeightInVoxels(),
+																pVolume.getDepthInVoxels(),
+																pVolume.getVoxelWidthInRealUnits(),
+																pVolume.getVoxelHeightInRealUnits(),
+																pVolume.getVoxelDepthInRealUnits());
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
+	 *      long, long, long, double, double, double)
+	 */
+	@Override
+	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
+																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
+																			final long pSizeX,
+																			final long pSizeY,
+																			final long pSizeZ,
+																			final double pVoxelSizeX,
+																			final double pVoxelSizeY,
+																			final double pVoxelSizeZ)
+	{
+		return setVolumeDataBuffer(	10,
+																TimeUnit.SECONDS,
+																pRenderLayerIndex,
+																pFragmentedMemoryInterface,
+																pSizeX,
+																pSizeY,
+																pSizeZ,
+																pVoxelSizeX,
+																pVoxelSizeY,
+																pVoxelSizeZ);
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
+	 *      long, long, long, double, double, double)
+	 */
+	@Override
+	public boolean setVolumeDataBuffer(	long pTimeOut,
+																			TimeUnit pTimeUnit,
+																			final int pRenderLayerIndex,
+																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
+																			final long pSizeX,
+																			final long pSizeY,
+																			final long pSizeZ,
+																			final double pVoxelSizeX,
+																			final double pVoxelSizeY,
+																			final double pVoxelSizeZ)
 	{
 		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
@@ -1283,71 +1363,21 @@ public abstract class ClearVolumeRendererBase	implements
 			mScaleY = (float) (pVoxelSizeY * mVolumeSizeY / lMaxSize);
 			mScaleZ = (float) (pVoxelSizeZ * mVolumeSizeZ / lMaxSize);
 
+			clearCompletionOfDataBufferCopy(pRenderLayerIndex);
 			mVolumeDataByteBuffers[pRenderLayerIndex] = pFragmentedMemoryInterface;
 
-			clearCompletionOfDataBufferCopy(pRenderLayerIndex);
 			notifyChangeOfVolumeRenderingParameters();
 		}
-	}
 
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long, double, double, double)
-	 */
-	@Override
-	public void setVolumeDataBuffer(final int pRenderLayerIndex,
-																	final ByteBuffer pByteBuffer,
-																	final long pSizeX,
-																	final long pSizeY,
-																	final long pSizeZ,
-																	final double pVoxelSizeX,
-																	final double pVoxelSizeY,
-																	final double pVoxelSizeZ)
-	{
+		// System.out.print("Waiting...");
+		final boolean lWaitResult = waitToFinishDataBufferCopy(	pRenderLayerIndex,
+																														pTimeOut,
+																														pTimeUnit);
+		// if (!lWaitResult)
+		// System.err.println("TIMEOUT!");
+		// System.out.println(" finished!");
 
-		FragmentedMemoryInterface lFragmentedMemoryInterface;
-		if (!pByteBuffer.isDirect())
-		{
-			final OffHeapMemory lOffHeapMemory = new OffHeapMemory(pByteBuffer.capacity());
-			lOffHeapMemory.copyFrom(pByteBuffer);
-			lFragmentedMemoryInterface = FragmentedMemory.wrap(lOffHeapMemory);
-		}
-		else
-		{
-			final OffHeapMemory lOffHeapMemory = OffHeapMemory.wrapBuffer(pByteBuffer);
-			lFragmentedMemoryInterface = FragmentedMemory.wrap(lOffHeapMemory);
-		}
-
-		setVolumeDataBuffer(pRenderLayerIndex,
-												lFragmentedMemoryInterface,
-												pSizeX,
-												pSizeY,
-												pSizeZ,
-												pVoxelSizeX,
-												pVoxelSizeY,
-												pVoxelSizeZ);
-
-	}
-
-
-
-	@Override
-	public void setVolumeDataBuffer(final int pRenderLayerIndex,
-																	final Volume pVolume)
-	{
-		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
-		{
-			setVolumeDataBuffer(pRenderLayerIndex,
-													pVolume.getDataBuffer(),
-													pVolume.getWidthInVoxels(),
-													pVolume.getHeightInVoxels(),
-													pVolume.getDepthInVoxels(),
-													pVolume.getVoxelWidthInRealUnits(),
-													pVolume.getVoxelHeightInRealUnits(),
-													pVolume.getVoxelDepthInRealUnits());
-		}
+		return lWaitResult;
 	}
 
 	@Override
@@ -1361,7 +1391,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	public void notifyCompletionOfDataBufferCopy(final int pRenderLayerIndex)
 	{
-		mDataBufferCopyIsFinished.set(pRenderLayerIndex, 1);
+		mDataBufferCopyIsFinishedArray[pRenderLayerIndex].countDown();
 	}
 
 	/**
@@ -1369,7 +1399,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	public void clearCompletionOfDataBufferCopy(final int pRenderLayerIndex)
 	{
-		mDataBufferCopyIsFinished.set(pRenderLayerIndex, 0);
+		mDataBufferCopyIsFinishedArray[pRenderLayerIndex] = new CountDownLatch(1);
 	}
 
 	/**
@@ -1390,8 +1420,6 @@ public abstract class ClearVolumeRendererBase	implements
 		return lNoTimeOut;
 	}
 
-
-
 	/**
 	 * Waits until volume data copy completes for a given layer
 	 *
@@ -1403,22 +1431,21 @@ public abstract class ClearVolumeRendererBase	implements
 																						final TimeUnit pTimeUnit)
 
 	{
-		boolean lNoTimeOut = true;
-		final long lStartTimeInNanoseconds = System.nanoTime();
-		final long lTimeOutTimeInNanoseconds = lStartTimeInNanoseconds + TimeUnit.NANOSECONDS.convert(pTimeOut,
-																																																	pTimeUnit);
-		while ((lNoTimeOut = System.nanoTime() < lTimeOutTimeInNanoseconds) && mDataBufferCopyIsFinished.get(pRenderLayerIndex) == 0)
+		try
 		{
-			try
-			{
-				Thread.sleep(1);
-			}
-			catch (final InterruptedException e)
-			{
-				e.printStackTrace();
-			}
+			// final long lStartNs = System.nanoTime();
+			final boolean lAwaitResult = mDataBufferCopyIsFinishedArray[pRenderLayerIndex].await(	pTimeOut,
+																																														pTimeUnit);
+			// final long lStopNs = System.nanoTime();
+			// System.out.println("ELPASED:" + (lStopNs - lStartNs) / 1.0e6);
+			return lAwaitResult;
 		}
-		return !lNoTimeOut;
+		catch (final InterruptedException e)
+		{
+			return waitToFinishDataBufferCopy(pRenderLayerIndex,
+																				pTimeOut,
+																				pTimeUnit);
+		}
 	}
 
 	/**
@@ -1546,7 +1573,7 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Clamps the value pValue to e interval [pMin,pMax]
+	 * Clamps the size pValue to e interval [pMin,pMax]
 	 *
 	 * @param pValue
 	 *          to be clamped
@@ -1554,7 +1581,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 *          minimum
 	 * @param pMax
 	 *          maximum
-	 * @return clamped value
+	 * @return clamped size
 	 */
 	public static double clamp(	final double pValue,
 															final double pMin,

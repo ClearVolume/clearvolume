@@ -682,6 +682,14 @@ public abstract class ClearGLVolumeRenderer	extends
 						&& !pForceRedraw)
 					return;
 
+				/*
+				System.out.println("isNewVolumeDataAvailable()=" + isNewVolumeDataAvailable());
+				System.out.println("lOverlay2DChanged=" + lOverlay2DChanged);
+				System.out.println("lOverlay3DChanged=" + lOverlay3DChanged);
+				System.out.println("haveVolumeRenderingParametersChanged()=" + haveVolumeRenderingParametersChanged());
+				System.out.println("getAdaptiveLODController().isRedrawNeeded()=" + getAdaptiveLODController().isRedrawNeeded());
+				System.out.println("pForceRedraw=" + pForceRedraw);/**/
+
 				final GL4 lGL4 = pDrawable.getGL().getGL4();
 				lGL4.glClearColor(0, 0, 0, 1);
 				lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
@@ -744,7 +752,7 @@ public abstract class ClearGLVolumeRenderer	extends
 				getAdaptiveLODController().afterRendering();
 
 				clearChangeOfVolumeParametersFlag();
-				clearVolumeDimensionsChanged();
+
 
 				GLError.printGLErrors(lGL4, "AFTER RENDER VOLUME");
 

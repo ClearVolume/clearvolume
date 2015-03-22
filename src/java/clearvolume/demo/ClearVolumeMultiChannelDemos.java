@@ -289,8 +289,6 @@ public class ClearVolumeMultiChannelDemos
 																							lResolutionY,
 																							lResolutionZ);
 
-		lClearVolumeRenderer.requestDisplay();
-		Thread.sleep(2000);
 
 		final byte[] lVolumeDataArray1 = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ];
@@ -315,8 +313,6 @@ public class ClearVolumeMultiChannelDemos
 																							lResolutionX,
 																							lResolutionY,
 																							lResolutionZ);/**/
-
-		lClearVolumeRenderer.requestDisplay();
 
 		final byte[] lVolumeDataArray2 = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ];
@@ -344,7 +340,6 @@ public class ClearVolumeMultiChannelDemos
 																							lResolutionY,
 																							lResolutionZ);/**/
 
-		lClearVolumeRenderer.requestDisplay();
 
 		int i = 0;
 		while (lClearVolumeRenderer.isShowing())
@@ -354,7 +349,6 @@ public class ClearVolumeMultiChannelDemos
 			lClearVolumeRenderer.setLayerVisible(	i % 3,
 																						!lClearVolumeRenderer.isLayerVisible(i % 3));/**/
 
-			lClearVolumeRenderer.requestDisplay();
 			i++;
 		}
 

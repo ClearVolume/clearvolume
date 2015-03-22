@@ -339,15 +339,6 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 		return lPTXFile;
 	}
 
-	private String getCUDANativeType()
-	{
-		if (getNativeType() == NativeTypeEnum.UnsignedByte)
-			return "unsigned char";
-		else if (getNativeType() == NativeTypeEnum.UnsignedShort)
-			return "unsigned short";
-		return null;
-	}
-
 	/**
 	 * Allocates, configures and copies 3D volume data.
 	 */
@@ -366,6 +357,15 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 			final long lWidth = getVolumeSizeX();
 			final long lHeight = getVolumeSizeY();
 			final long lDepth = getVolumeSizeZ();
+
+			final long lSizeInBytes = lVolumeDataBuffer.getSizeInBytes();
+
+			final boolean lConsistent = lSizeInBytes == getBytesPerVoxel() * lWidth
+																									* lHeight
+																									* lDepth;
+			if (!lConsistent)
+				throw new RuntimeException("Buffer size not consistent with sizes!");
+			assert (lConsistent);
 
 			assert (mVolumeDataCudaArrays[pRenderLayerIndex] == null);
 			mVolumeDataCudaArrays[pRenderLayerIndex] = new CudaArray(	1,
@@ -387,15 +387,19 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	private void copyVolumeData(final int pRenderLayerIndex,
 															FragmentedMemoryInterface lVolumeDataBuffer)
 	{
-		if (lVolumeDataBuffer.getNumberOfFragments() == 1)
+		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
-			final ContiguousMemoryInterface lContiguousMemoryInterface = lVolumeDataBuffer.get(0);
-			mVolumeDataCudaArrays[pRenderLayerIndex].copyFrom(lContiguousMemoryInterface,
-																												true);
-		}
-		else
-		{
-			throw new RuntimeException("ClearCuda renderer does not support Fragmented memory yet.");
+			if (lVolumeDataBuffer.getNumberOfFragments() == 1)
+			{
+				final ContiguousMemoryInterface lContiguousMemoryInterface = lVolumeDataBuffer.get(0);
+
+				mVolumeDataCudaArrays[pRenderLayerIndex].copyFrom(lContiguousMemoryInterface,
+																													true);
+			}
+			else
+			{
+				throw new RuntimeException("ClearCuda renderer does not support Fragmented memory yet.");
+			}
 		}
 	}
 
@@ -475,11 +479,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	public void dispose(final GLAutoDrawable pArg0)
 	{
 		printMemoryState();
-
-		System.out.println("BEFORE CALLING disposeVolumeRenderer()");
 		disposeVolumeRenderer();
-		System.out.println("AFTER CALLING disposeVolumeRenderer()");
-
 		super.dispose(pArg0);
 	}
 
@@ -511,11 +511,14 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 			{
 				for (int i = 0; i < getNumberOfRenderLayers(); i++)
 				{
-					if (mVolumeDataCudaArrays[i] != null)
+					synchronized (getSetVolumeDataBufferLock(i))
 					{
-						System.out.println("closing VolumeDataCudaArrays !");
-						mVolumeDataCudaArrays[i].close();
-						mVolumeDataCudaArrays[i] = null;
+						if (mVolumeDataCudaArrays[i] != null)
+						{
+							System.out.println("closing VolumeDataCudaArrays !");
+							mVolumeDataCudaArrays[i].close();
+							mVolumeDataCudaArrays[i] = null;
+						}
 					}
 				}
 			}
@@ -658,12 +661,15 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			{
-				lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (Size.of(getNativeType()) * getVolumeSizeX()
-																															* getVolumeSizeY() * getVolumeSizeZ()))
-																				.order(ByteOrder.nativeOrder());
+				synchronized (getSetVolumeDataBufferLock(i))
+				{
+					lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (Size.of(getNativeType()) * getVolumeSizeX()
+																																* getVolumeSizeY() * getVolumeSizeZ()))
+																					.order(ByteOrder.nativeOrder());
 
-				mVolumeDataCudaArrays[getCurrentRenderLayerIndex()].copyTo(	lCaptureBuffers[i],
-																																		true);
+					mVolumeDataCudaArrays[getCurrentRenderLayerIndex()].copyTo(	lCaptureBuffers[i],
+																																			true);
+				}
 			}
 
 			notifyVolumeCaptureListeners(	lCaptureBuffers,
@@ -692,12 +698,13 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 		for (int lRenderLayerIndex = 0; lRenderLayerIndex < getNumberOfRenderLayers(); lRenderLayerIndex++)
 		{
-			final FragmentedMemoryInterface lVolumeDataBuffer = getVolumeDataBuffer(lRenderLayerIndex);
-
-			if (lVolumeDataBuffer != null)
+			synchronized (getSetVolumeDataBufferLock(lRenderLayerIndex))
 			{
-				synchronized (getSetVolumeDataBufferLock(lRenderLayerIndex))
+				final FragmentedMemoryInterface lVolumeDataBuffer = getVolumeDataBuffer(lRenderLayerIndex);
+
+				if (lVolumeDataBuffer != null)
 				{
+
 					clearVolumeDataBufferReference(lRenderLayerIndex);
 
 					if (haveVolumeDimensionsChanged() || mVolumeDataCudaArrays[lRenderLayerIndex] == null)
@@ -710,6 +717,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 						prepareVolumeDataArray(	lRenderLayerIndex,
 																		lVolumeDataBuffer);
+
+						clearVolumeDimensionsChanged();
 					}
 					else
 					{
@@ -758,37 +767,42 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 		if (isLayerVisible(pRenderLayerIndex))
 		{
-			copyTransferFunctionArray(pRenderLayerIndex);
+			// synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
+			{
+				copyTransferFunctionArray(pRenderLayerIndex);
 
-			pointTransferFunctionTextureToArray(pRenderLayerIndex);
-			pointTextureToArray(pRenderLayerIndex);
+				pointTransferFunctionTextureToArray(pRenderLayerIndex);
+				pointTextureToArray(pRenderLayerIndex);
 
-			mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
-																									cBlockSize),
-																					iDivUp(	getTextureHeight(),
-																									cBlockSize),
-																					1);
+				mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
+																										cBlockSize),
+																						iDivUp(	getTextureHeight(),
+																										cBlockSize),
+																						1);
 
-			mVolumeRenderingFunction.setBlockDim(cBlockSize, cBlockSize, 1);
+				mVolumeRenderingFunction.setBlockDim(	cBlockSize,
+																							cBlockSize,
+																							1);
 
-			final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
-			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
-			final int lMaxSteps = lMaxNumberSteps / getAdaptiveLODController().getNumberOfPasses();
-			final float lPhase = getAdaptiveLODController().getPhase();
-			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
-																																						: 1;
+				final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
+				getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
+				final int lMaxSteps = lMaxNumberSteps / getAdaptiveLODController().getNumberOfPasses();
+				final float lPhase = getAdaptiveLODController().getPhase();
+				final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
+																																							: 1;
 
-			mVolumeRenderingFunction.launch(lCudaDevicePointer,
-																			getTextureWidth(),
-																			getTextureHeight(),
-																			(float) getBrightness(pRenderLayerIndex),
-																			(float) getTransferRangeMin(pRenderLayerIndex),
-																			(float) getTransferRangeMax(pRenderLayerIndex),
-																			(float) getGamma(pRenderLayerIndex),
-																			lMaxSteps,
-																			getDithering(pRenderLayerIndex),
-																			lPhase,
-																			lClear);
+				mVolumeRenderingFunction.launch(lCudaDevicePointer,
+																				getTextureWidth(),
+																				getTextureHeight(),
+																				(float) getBrightness(pRenderLayerIndex),
+																				(float) getTransferRangeMin(pRenderLayerIndex),
+																				(float) getTransferRangeMax(pRenderLayerIndex),
+																				(float) getGamma(pRenderLayerIndex),
+																				lMaxSteps,
+																				getDithering(pRenderLayerIndex),
+																				lPhase,
+																				lClear);
+			}
 		}
 		else
 			lCudaDevicePointer.fillByte((byte) 0, false);
@@ -811,15 +825,20 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
 			{
-				if (lProcessor instanceof CUDAProcessor)
+				synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 				{
-					final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
-					lCUDAProcessor.applyToArray(mVolumeDataCudaArrays[pRenderLayerIndex]);
+					if (lProcessor instanceof CUDAProcessor)
+					{
+
+						final CUDAProcessor<?> lCUDAProcessor = (CUDAProcessor<?>) lProcessor;
+						lCUDAProcessor.applyToArray(mVolumeDataCudaArrays[pRenderLayerIndex]);
+
+					}
+					lProcessor.process(	pRenderLayerIndex,
+															getVolumeSizeX(),
+															getVolumeSizeY(),
+															getVolumeSizeZ());
 				}
-				lProcessor.process(	pRenderLayerIndex,
-														getVolumeSizeX(),
-														getVolumeSizeY(),
-														getVolumeSizeZ());
 			}
 	}
 
