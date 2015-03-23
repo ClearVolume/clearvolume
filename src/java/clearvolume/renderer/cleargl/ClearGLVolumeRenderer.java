@@ -310,7 +310,6 @@ public abstract class ClearGLVolumeRenderer	extends
 			mNewtCanvasAWT = null;
 		}
 
-		mClearGLWindow.getGLAutoDrawable().setAutoSwapBufferMode(false);
 
 		// Initialize the mouse controls
 		final MouseControl lMouseControl = new MouseControl(this);
@@ -471,6 +470,7 @@ public abstract class ClearGLVolumeRenderer	extends
 	{
 		final GL4 lGL4 = drawable.getGL().getGL4();
 		lGL4.setSwapInterval(1);
+
 		lGL4.glDisable(GL4.GL_DEPTH_TEST);
 		lGL4.glEnable(GL4.GL_BLEND);
 		lGL4.glDisable(GL4.GL_STENCIL_TEST);
@@ -478,32 +478,10 @@ public abstract class ClearGLVolumeRenderer	extends
 		lGL4.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
-		// getClearGLWindow().setOrthoProjectionMatrix(0,
-		// drawable.getSurfaceWidth(),
-		// 0,
-		// drawable.getSurfaceHeight(),
-		// 0,
-		// 1);
 
-		// setDefaultProjectionMatrix();
 
 		if (initVolumeRenderer())
 		{
-			/*
-			 * if (mPixelBufferObject != null)
-			 * {
-			 * unregisterPBO(mPixelBufferObject.getId());
-			 * mPixelBufferObject.close();
-			 * mPixelBufferObject = null;
-			 * }
-			 *
-			 * /*
-			 * if (mTexture != null)
-			 * {
-			 * mTexture.close();
-			 * mTexture = null;
-			 * }/*
-			 */
 
 			// texture display: construct the program and related objects
 			try
@@ -675,14 +653,14 @@ public abstract class ClearGLVolumeRenderer	extends
 				final boolean lOverlay2DChanged = isOverlay2DChanged();
 				final boolean lOverlay3DChanged = isOverlay3DChanged();
 
-				if (!isNewVolumeDataAvailable() && !lOverlay2DChanged
+				/*if (!isNewVolumeDataAvailable() && !lOverlay2DChanged
 						&& !lOverlay3DChanged
 						&& !haveVolumeRenderingParametersChanged()
 						&& !getAdaptiveLODController().isRedrawNeeded()
 						&& !pForceRedraw)
 				{
 					return;
-				}
+				}/**/
 
 
 				/*
@@ -788,10 +766,12 @@ public abstract class ClearGLVolumeRenderer	extends
 			}
 			finally
 			{
-				pDrawable.swapBuffers();
+
 				if (mDisplayReentrantLock.isHeldByCurrentThread())
 					mDisplayReentrantLock.unlock();
 			}
+
+
 	}
 
 	private boolean isOverlay2DChanged()

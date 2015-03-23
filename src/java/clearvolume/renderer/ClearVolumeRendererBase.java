@@ -1434,6 +1434,8 @@ public abstract class ClearVolumeRendererBase	implements
 		try
 		{
 			// final long lStartNs = System.nanoTime();
+			if (mDataBufferCopyIsFinishedArray[pRenderLayerIndex] == null)
+				return true;
 			final boolean lAwaitResult = mDataBufferCopyIsFinishedArray[pRenderLayerIndex].await(	pTimeOut,
 																																														pTimeUnit);
 			// final long lStopNs = System.nanoTime();
