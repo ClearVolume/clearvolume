@@ -680,7 +680,10 @@ public abstract class ClearGLVolumeRenderer	extends
 						&& !haveVolumeRenderingParametersChanged()
 						&& !getAdaptiveLODController().isRedrawNeeded()
 						&& !pForceRedraw)
+				{
 					return;
+				}
+
 
 				/*
 				System.out.println("isNewVolumeDataAvailable()=" + isNewVolumeDataAvailable());
@@ -782,11 +785,10 @@ public abstract class ClearGLVolumeRenderer	extends
 				if (lLastRenderPass)
 					mGLVideoRecorder.screenshot(pDrawable);
 
-				pDrawable.swapBuffers();
-
 			}
 			finally
 			{
+				pDrawable.swapBuffers();
 				if (mDisplayReentrantLock.isHeldByCurrentThread())
 					mDisplayReentrantLock.unlock();
 			}
