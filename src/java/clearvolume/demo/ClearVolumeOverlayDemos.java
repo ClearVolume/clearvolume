@@ -158,7 +158,7 @@ public class ClearVolumeOverlayDemos
 																																																					1,
 																																																					false);
 
-		final GraphOverlay lGraphOverlay = new GraphOverlay(64);
+		final GraphOverlay lGraphOverlay = new GraphOverlay(256);
 		lClearVolumeRenderer.addOverlay(lGraphOverlay);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
