@@ -12,7 +12,6 @@ public class ClearVolumeException extends RuntimeException
 
 	public ClearVolumeException(String pString)
 	{
-		// TODO Auto-generated constructor stub
 	}
 
 }

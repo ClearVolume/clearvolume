@@ -100,7 +100,6 @@ public class AdaptiveLODController
 
 	public boolean isLastMultiPassRender()
 	{
-		// TODO Auto-generated method stub
 		return false;
 	}
 
