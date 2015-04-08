@@ -185,8 +185,8 @@ dependencies
 	}
 	else {
 		println 'Using clearCUDA and clearGL from Maven repository'/**/
-		compile group: "net.clearvolume", name: "cleargl", version: "(,1.0.0]", changing: true, transitive: true
-		compile group: "net.clearvolume", name: "clearcuda", version: "(,1.0.0]", changing: true, transitive: true
+		compile group: "net.clearvolume", name: "cleargl", version: "(,1.0]", changing: true, transitive: true
+		compile group: "net.clearvolume", name: "clearcuda", version: "(,1.0]", changing: true, transitive: true
 	}
 
 	compile group: 'junit', name: 'junit', version: '4.12'
@@ -560,10 +560,10 @@ if(hasProperty('bintray_user') && hasProperty('bintray_key') )
 			//attributes= ['a': ['ay1', 'ay2'], 'b': ['bee'], c: 'cee'] //Optional package-level attributes
 			//Optional version descriptor
 			version {
-				name = version //Bintray logical version name
+				name = project.version //Bintray logical version name
 				desc = '.'
 				released  = new java.util.Date()
-				vcsTag = version
+				vcsTag = project.version
 				/*attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin'] //Optional version-level attributes
 				 gpg {
 				 sign = false //Determines whether to GPG sign the files. The default is false
