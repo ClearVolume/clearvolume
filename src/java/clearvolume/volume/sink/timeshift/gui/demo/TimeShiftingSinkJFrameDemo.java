@@ -9,6 +9,7 @@ import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.VolumeSinkInterface;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
+import coremem.types.NativeTypeEnum;
 
 public class TimeShiftingSinkJFrameDemo
 {
@@ -16,11 +17,11 @@ public class TimeShiftingSinkJFrameDemo
 	@Test
 	public void demo() throws InterruptedException
 	{
-		VolumeSinkInterface lVolumeSinkInterface = new VolumeSinkInterface()
+		final VolumeSinkInterface lVolumeSinkInterface = new VolumeSinkInterface()
 		{
 
 			@Override
-			public void sendVolume(Volume<?> pVolume)
+			public void sendVolume(Volume pVolume)
 			{
 				System.out.format("---> Received timepoint=%d channel=%d \n",
 													pVolume.getTimeIndex(),
@@ -34,20 +35,20 @@ public class TimeShiftingSinkJFrameDemo
 			}
 		};
 
-		TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
+		final TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
 																																																	100);
 		TimeShiftingSinkJFrame.launch(lTimeShiftingSink);
 
 		lTimeShiftingSink.setRelaySink(lVolumeSinkInterface);
 
-		VolumeManager lManager = lTimeShiftingSink.getManager();
+		final VolumeManager lManager = lTimeShiftingSink.getManager();
 
 		for (int i = 0; i < 10000000; i++)
 		{
 
-			Volume<Byte> lVolume = lManager.requestAndWaitForVolume(1,
+			final Volume lVolume = lManager.requestAndWaitForVolume(1,
 																															TimeUnit.MILLISECONDS,
-																															Byte.class,
+																															NativeTypeEnum.UnsignedByte,
 																															1,
 																															10,
 																															10,

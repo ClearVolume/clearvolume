@@ -13,9 +13,9 @@ public class AsynchronousVolumeSinkAdapter implements
 
 	private final VolumeSinkInterface mDelegatedVolumeSink;
 
-	private final BlockingQueue<Volume<?>> mVolumeQueue;
-	private long mTimeOut;
-	private TimeUnit mTimeUnit;
+	private final BlockingQueue<Volume> mVolumeQueue;
+	private final long mTimeOut;
+	private final TimeUnit mTimeUnit;
 
 	private volatile boolean mStopSignal;
 	private volatile boolean mStoppedSignal;
@@ -29,18 +29,18 @@ public class AsynchronousVolumeSinkAdapter implements
 		mDelegatedVolumeSink = pDelegatedVolumeSink;
 		mTimeOut = pTimeOut;
 		mTimeUnit = pTimeUnit;
-		mVolumeQueue = new ArrayBlockingQueue<Volume<?>>(pMaxCapacity);
+		mVolumeQueue = new ArrayBlockingQueue<Volume>(pMaxCapacity);
 	}
 
 	@Override
-	public void sendVolume(Volume<?> pVolume)
+	public void sendVolume(Volume pVolume)
 	{
 		try
 		{
 			if (!mVolumeQueue.offer(pVolume, mTimeOut, mTimeUnit))
 				pVolume.makeAvailableToManager();
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			sendVolume(pVolume);
 		}
@@ -48,7 +48,7 @@ public class AsynchronousVolumeSinkAdapter implements
 
 	public boolean start()
 	{
-		Runnable lRunnable = new Runnable() {
+		final Runnable lRunnable = new Runnable() {
 			
 			@Override
 			public void run() 
@@ -58,10 +58,10 @@ public class AsynchronousVolumeSinkAdapter implements
 					try
 					{
 						// System.out.println(mVolumeQueue.size());
-						Volume<?> lVolume = mVolumeQueue.take();
+						final Volume lVolume = mVolumeQueue.take();
 						mDelegatedVolumeSink.sendVolume(lVolume);
 					}
-					catch (Throwable e)
+					catch (final Throwable e)
 					{
 						e.printStackTrace();
 					}
@@ -70,7 +70,7 @@ public class AsynchronousVolumeSinkAdapter implements
 			}
 		};
 
-		Thread lThread = new Thread(lRunnable, this.getClass()
+		final Thread lThread = new Thread(lRunnable, this.getClass()
 																								.getSimpleName());
 		lThread.setDaemon(true);
 		lThread.start();
@@ -91,7 +91,7 @@ public class AsynchronousVolumeSinkAdapter implements
 			{
 				Thread.sleep(10);
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 				e.printStackTrace();
 			}

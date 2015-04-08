@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import clearvolume.network.client.main.ClearVolumeClientMain;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
+import coremem.types.NativeTypeEnum;
+
 
 public class ClearVolumeClientMainDemo
 {
@@ -18,8 +20,7 @@ public class ClearVolumeClientMainDemo
 
 			@Override
 			public void capturedVolume(	ByteBuffer[] pCaptureBuffers,
-																	boolean pFloatType,
-																	int pBytesPerVoxel,
+																	NativeTypeEnum pNativeTypeEnum,
 																	long pVolumeWidth,
 																	long pVolumeHeight,
 																	long pVolumeDepth,
@@ -27,10 +28,9 @@ public class ClearVolumeClientMainDemo
 																	double pVoxelHeight,
 																	double pVoxelDepth)
 			{
-				System.out.format("Captured %d volume %s bpv=%d (%d, %d, %d) (%g, %g, %g) %s\n",
+				System.out.format("Captured %d volume of type=%s (%d, %d, %d) (%g, %g, %g) %s\n",
 													pCaptureBuffers.length,
-													pFloatType ? "float" : "int",
-													pBytesPerVoxel,
+													pNativeTypeEnum,
 													pVolumeWidth,
 													pVolumeHeight,
 													pVolumeDepth,

@@ -6,13 +6,15 @@ import java.util.Arrays;
 
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.utils.ToIntExact;
+import coremem.types.NativeTypeEnum;
+import coremem.util.Size;
 
-public class Volume<T> implements ClearVolumeCloseable
+public class Volume implements ClearVolumeCloseable
 {
 	private volatile VolumeManager mVolumeManager;
 
 	private ByteBuffer mDataBuffer;
-	private Class<T> mType;
+	private NativeTypeEnum mType;
 	private long[] mDimensionsInVoxels;
 	private double[] mVoxelSizeInRealUnits;
 	private volatile String mRealUnitName;
@@ -29,7 +31,7 @@ public class Volume<T> implements ClearVolumeCloseable
 	{
 	}
 
-	public Volume(Class<T> pType, long... pDimensions)
+	public Volume(NativeTypeEnum pType, long... pDimensions)
 	{
 		super();
 		mType = pType;
@@ -50,7 +52,7 @@ public class Volume<T> implements ClearVolumeCloseable
 		mVolumeManager.makeAvailable(this);
 	}
 
-	public <LT> boolean isCompatibleWith(	Class<LT> pType,
+	public <LT> boolean isCompatibleWith(	NativeTypeEnum pType,
 																				long... pDimensions)
 	{
 		return (mType == pType && Arrays.equals(pDimensions,
@@ -107,38 +109,51 @@ public class Volume<T> implements ClearVolumeCloseable
 	public void setType(String pType)
 	{
 		if (pType.equalsIgnoreCase("Byte"))
-			setType(Byte.class);
-		else if (pType.equalsIgnoreCase("Character"))
-			setType(Character.class);
-		else if (pType.equalsIgnoreCase("Char"))
-			setType(Character.class);
+			setType(NativeTypeEnum.Byte);
+
+		if (pType.equalsIgnoreCase("UnsignedByte"))
+			setType(NativeTypeEnum.UnsignedByte);
+
 		else if (pType.equalsIgnoreCase("Short"))
-			setType(Short.class);
-		else if (pType.equalsIgnoreCase("Integer"))
-			setType(Integer.class);
+			setType(NativeTypeEnum.Short);
+
+		else if (pType.equalsIgnoreCase("UnsignedShort"))
+			setType(NativeTypeEnum.UnsignedShort);
+
+		else if (pType.equalsIgnoreCase("Integer") || pType.equalsIgnoreCase("Int"))
+			setType(NativeTypeEnum.Int);
+
+		else if (pType.equalsIgnoreCase("UnsignedInteger") || pType.equalsIgnoreCase("UnsignedInt"))
+			setType(NativeTypeEnum.UnsignedInt);
+
 		else if (pType.equalsIgnoreCase("Long"))
-			setType(Long.class);
+			setType(NativeTypeEnum.Long);
+
+		else if (pType.equalsIgnoreCase("UnsignedLong"))
+			setType(NativeTypeEnum.UnsignedLong);
+
 		else if (pType.equalsIgnoreCase("Float"))
-			setType(Float.class);
+			setType(NativeTypeEnum.Float);
+
 		else if (pType.equalsIgnoreCase("Double"))
-			setType(Double.class);
+			setType(NativeTypeEnum.Double);
 
 	}
 
 	@SuppressWarnings("unchecked")
-	public void setType(Class<?> pType)
+	public void setType(NativeTypeEnum pType)
 	{
-		mType = (Class<T>) pType;
+		mType = pType;
 	}
 
-	public Class<T> getType()
+	public NativeTypeEnum getNativeType()
 	{
 		return mType;
 	}
 
-	public String getTypeName()
+	public NativeTypeEnum getTypeName()
 	{
-		return mType.getName().replaceAll("java.lang.", "");
+		return mType;
 	}
 
 	public void setDimension(int pDim)
@@ -159,35 +174,7 @@ public class Volume<T> implements ClearVolumeCloseable
 
 	public int getBytesPerVoxel()
 	{
-		if (mType == Byte.class || mType == byte.class)
-		{
-			return 1;
-		}
-		else if (mType == Short.class || mType == short.class)
-		{
-			return 2;
-		}
-		else if (mType == Character.class || mType == char.class)
-		{
-			return 2;
-		}
-		else if (mType == Integer.class || mType == int.class)
-		{
-			return 4;
-		}
-		else if (mType == Long.class || mType == long.class)
-		{
-			return 8;
-		}
-		else if (mType == Float.class || mType == float.class)
-		{
-			return 4;
-		}
-		else if (mType == Double.class || mType == double.class)
-		{
-			return 8;
-		}
-		return 0;
+		return Size.of(mType);
 	}
 
 	public long getElementSize()
@@ -315,7 +302,7 @@ public class Volume<T> implements ClearVolumeCloseable
 		mDataBuffer.put(pByteBuffer);
 	}
 
-	public void copyDataFrom(Volume<?> pVolume)
+	public void copyDataFrom(Volume pVolume)
 	{
 		if (mDataBuffer.capacity() != pVolume.mDataBuffer.capacity())
 			mDataBuffer = ByteBuffer.allocateDirect(pVolume.mDataBuffer.capacity())
@@ -327,7 +314,7 @@ public class Volume<T> implements ClearVolumeCloseable
 	}
 
 	@SuppressWarnings("unchecked")
-	public void copyMetaDataFrom(Volume<?> pVolume)
+	public void copyMetaDataFrom(Volume pVolume)
 	{
 		mChannelID = pVolume.mChannelID;
 		if (pVolume.mChannelName != null)
@@ -348,7 +335,7 @@ public class Volume<T> implements ClearVolumeCloseable
 			mRealUnitName = new String(pVolume.mRealUnitName);
 		mTimeIndex = pVolume.mTimeIndex;
 		mTimeInSeconds = pVolume.mTimeInSeconds;
-		mType = (Class<T>) pVolume.mType;
+		mType = pVolume.mType;
 		if (pVolume.mViewMatrix != null)
 			mViewMatrix = Arrays.copyOf(pVolume.mViewMatrix,
 																	pVolume.mViewMatrix.length);
@@ -387,6 +374,5 @@ public class Volume<T> implements ClearVolumeCloseable
 													mVolumeManager,
 													mDataBuffer);
 	}
-
 
 }

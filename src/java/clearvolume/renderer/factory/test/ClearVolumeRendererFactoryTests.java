@@ -16,7 +16,7 @@ public class ClearVolumeRendererFactoryTests
 	@Test
 	public void test()
 	{
-		if (!CudaAvailability.isClearCudaOperational() || !OpenCLAvailability.isOpenCLAvailable())
+		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
 			return;
 
 		try

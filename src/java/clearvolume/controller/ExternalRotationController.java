@@ -22,7 +22,7 @@ import com.jogamp.opengl.math.Quaternion;
  * 
  * where (qw,qx,qy,qz) is a quaternion with qw,qx,qy,qz are floats. and
  * (ax,ay,az) is an acceleration vector (if available), and b1,b2, b3 are
- * variable value buttons.
+ * variable size buttons.
  * 
  * typically, the data arrives from a Egg3D controller or similarly compatible
  * rotation controller. the default TCP port is 4444.

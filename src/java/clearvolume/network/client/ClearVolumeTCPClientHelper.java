@@ -27,6 +27,8 @@ import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 
 import com.apple.eawt.Application;
 
+import coremem.types.NativeTypeEnum;
+
 public abstract class ClearVolumeTCPClientHelper
 {
 	private static final int cMaxAvailableVolumes = 20;
@@ -53,11 +55,14 @@ public abstract class ClearVolumeTCPClientHelper
 
 		try
 		{
+			
+			final NativeTypeEnum lNativeType = pBytesPerVoxel == 1 ? NativeTypeEnum.UnsignedByte
+																														: NativeTypeEnum.UnsignedShort;
 
 			try (ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(lWindowTitle,
 																																													pWindowSize,
 																																													pWindowSize,
-																																													pBytesPerVoxel,
+																																													lNativeType,
 																																													pNumberOfLayers,
 																																													cMaxMillisecondsToWaitForCopy,
 																																													TimeUnit.MILLISECONDS,
@@ -252,28 +257,37 @@ public abstract class ClearVolumeTCPClientHelper
 	public abstract void reportError(Throwable e, String pErrorMessage);
 
 	/**
-	 * Use this method to set the icon for this app.
-	 * Best used after JOGL stole the application icon. Bad JOGL!
+	 * Use this method to set the icon for this app. Best used after JOGL stole
+	 * the application icon. Bad JOGL!
 	 * 
 	 * @param finalicon
 	 */
-	public static void setCurrentAppIcon( final Image finalicon ) {
-		if ( finalicon == null ) return;
+	public static void setCurrentAppIcon(final Image finalicon)
+	{
+		if (finalicon == null)
+			return;
 
-		final String os = System.getProperty( "os.name" ).toLowerCase();
+		final String os = System.getProperty("os.name").toLowerCase();
 
-		SwingUtilities.invokeLater( new Runnable() {
+		SwingUtilities.invokeLater(new Runnable()
+		{
 
 			@Override
-			public void run() {
-				if ( os.indexOf( "mac" ) >= 0 ) {
-					Application.getApplication().setDockIconImage( finalicon );
-				} else if ( os.indexOf( "win" ) >= 0 ) {
-//					not yet clear
-				} else {
-//					not yet clear
+			public void run()
+			{
+				if (os.indexOf("mac") >= 0)
+				{
+					Application.getApplication().setDockIconImage(finalicon);
+				}
+				else if (os.indexOf("win") >= 0)
+				{
+					// not yet clear
+				}
+				else
+				{
+					// not yet clear
 				}
 			}
-		} );
+		});
 	}
 }

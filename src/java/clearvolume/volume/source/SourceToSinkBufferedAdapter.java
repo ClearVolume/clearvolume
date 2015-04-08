@@ -13,59 +13,59 @@ public class SourceToSinkBufferedAdapter implements
 																				VolumeSourceInterface
 {
 
-	private final BlockingQueue<Volume<?>> mVolumeQueue;
-	private VolumeManager mVolumeManager;
+	private final BlockingQueue<Volume> mVolumeQueue;
+	private final VolumeManager mVolumeManager;
 
 	public SourceToSinkBufferedAdapter(	VolumeManager pVolumeManager,
 																			int pMaxCapacity)
 	{
 		super();
 		mVolumeManager = pVolumeManager;
-		mVolumeQueue = new ArrayBlockingQueue<Volume<?>>(pMaxCapacity);
+		mVolumeQueue = new ArrayBlockingQueue<Volume>(pMaxCapacity);
 	}
 
 	@Override
-	public void sendVolume(Volume<?> pVolume)
+	public void sendVolume(Volume pVolume)
 	{
 		sendVolumeWithFeedback(pVolume);
 	}
 
-	public boolean sendVolumeWithFeedback(Volume<?> pVolume)
+	public boolean sendVolumeWithFeedback(Volume pVolume)
 	{
 		return mVolumeQueue.offer(pVolume);
 	}
 
 	@Override
-	public Volume<?> requestVolume()
+	public Volume requestVolume()
 	{
 		try
 		{
-			Volume<?> lVolume = mVolumeQueue.take();
+			final Volume lVolume = mVolumeQueue.take();
 			return lVolume;
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			return requestVolume();
 		}
 	}
 
-	public Volume<?> requestVolumeAndWait(int pTimeOut,
+	public Volume requestVolumeAndWait(int pTimeOut,
 																				TimeUnit pTimeUnit)
 	{
 		try
 		{
-			Volume<?> lVolume = mVolumeQueue.poll(pTimeOut, pTimeUnit);
+			final Volume lVolume = mVolumeQueue.poll(pTimeOut, pTimeUnit);
 			return lVolume;
 		}
-		catch (InterruptedException e)
+		catch (final InterruptedException e)
 		{
 			return requestVolume();
 		}
 	}
 
-	public Volume<?> peekVolume()
+	public Volume peekVolume()
 	{
-		Volume<?> lVolume = mVolumeQueue.peek();
+		final Volume lVolume = mVolumeQueue.peek();
 		return lVolume;
 	}
 

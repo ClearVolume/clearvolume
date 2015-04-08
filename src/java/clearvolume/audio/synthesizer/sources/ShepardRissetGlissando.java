@@ -97,7 +97,7 @@ public class ShepardRissetGlissando extends SourceBase implements
 	}
 
 	/**
-	 * Computes the value of the amplitude envelop for a given frequency.
+	 * Computes the size of the amplitude envelop for a given frequency.
 	 * 
 	 * @param pFrequency
 	 *          frequency

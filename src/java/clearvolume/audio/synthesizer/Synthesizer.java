@@ -58,7 +58,7 @@ public class Synthesizer
 	 */
 	public long playSamples(ReentrantLock pReentrantLock)
 	{
-		// int lPreferredNumberOfSamples = mSource.getPeriodInSamples();
+		// int lPreferredNumberOfSamples = mAllocationStackTrace.getPeriodInSamples();
 		return playSamples(512, pReentrantLock);
 	}
 

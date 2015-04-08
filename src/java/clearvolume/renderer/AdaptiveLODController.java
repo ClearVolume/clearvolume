@@ -92,6 +92,9 @@ public class AdaptiveLODController
 
 	public boolean isRedrawNeeded()
 	{
+		if (!mActive)
+			return false;
+
 		return mMultiPassRenderingInProgress;
 	}
 

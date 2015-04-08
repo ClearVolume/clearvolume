@@ -1,7 +1,7 @@
 package clearvolume.renderer.listeners;
 
-import clearvolume.renderer.jogl.JOGLClearVolumeRenderer;
-import clearvolume.renderer.jogl.utils.ScreenToEyeRay.EyeRay;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
+import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
 
 import com.jogamp.newt.event.MouseEvent;
 
@@ -15,7 +15,7 @@ public interface EyeRayListener
 	 * @return true if a listener wants to prevent any other display parameter
 	 *         change (rotation, translation, ...)
 	 */
-	boolean notifyEyeRay(	JOGLClearVolumeRenderer pRenderer,
+	boolean notifyEyeRay(	ClearGLVolumeRenderer pRenderer,
 										MouseEvent pMouseEvent,
 										EyeRay pEyeRay);
 

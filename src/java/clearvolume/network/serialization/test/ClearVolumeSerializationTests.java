@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.volume.Volume;
+import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeSerializationTests
 {
@@ -15,7 +16,7 @@ public class ClearVolumeSerializationTests
 	@Test
 	public void test()
 	{
-		Volume<Byte> lVolume = new Volume<Byte>(Byte.class,
+		final Volume lVolume = new Volume(NativeTypeEnum.UnsignedByte,
 																						1,
 																						128,
 																						128,
@@ -29,15 +30,15 @@ public class ClearVolumeSerializationTests
 		{ 1 });
 		lVolume.setVoxelSizeInRealUnits("um", 10, 11, 12);
 
-		ByteBuffer lSerializedVolumeData = lVolume.getDataBuffer();
+		final ByteBuffer lSerializedVolumeData = lVolume.getDataBuffer();
 
 		lSerializedVolumeData.rewind();
 		lSerializedVolumeData.put((byte) 123);
 
-		ByteBuffer lBuffer = ClearVolumeSerialization.serialize(lVolume,
+		final ByteBuffer lBuffer = ClearVolumeSerialization.serialize(lVolume,
 																														null);
 
-		Volume<Byte> lDeserializedVolume = new Volume<Byte>();
+		final Volume lDeserializedVolume = new Volume();
 		ClearVolumeSerialization.deserialize(lBuffer, lDeserializedVolume);
 
 		System.out.println(lDeserializedVolume);
@@ -62,9 +63,9 @@ public class ClearVolumeSerializationTests
 									lDeserializedVolume.getVoxelDepthInRealUnits(),
 									0);
 
-		ByteBuffer lDeserializedVolumeData = lDeserializedVolume.getDataBuffer();
+		final ByteBuffer lDeserializedVolumeData = lDeserializedVolume.getDataBuffer();
 		lDeserializedVolumeData.rewind();
-		byte lByte = lDeserializedVolumeData.get();
+		final byte lByte = lDeserializedVolumeData.get();
 
 		assertEquals(lByte, 123);
 

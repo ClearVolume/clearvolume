@@ -20,6 +20,7 @@ import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
+import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeNetworkDemo
 {
@@ -64,9 +65,9 @@ public class ClearVolumeNetworkDemo
 				{
 					if (i % 1000 == 0)
 						System.out.println("sending volume with index=" + i);
-					final Volume<Character> lVolume = lVolumeManager.requestAndWaitForVolume(	1,
+					final Volume lVolume = lVolumeManager.requestAndWaitForVolume(1,
 																																										TimeUnit.MILLISECONDS,
-																																										Character.class,
+																																										NativeTypeEnum.UnsignedShort,
 																																										1,
 																																										cWidth,
 																																										cHeight,
@@ -122,7 +123,7 @@ public class ClearVolumeNetworkDemo
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
 																																														256,
 																																														256,
-																																														2,
+																																														NativeTypeEnum.UnsignedShort,
 																																														256,
 																																														256,
 																																														2,

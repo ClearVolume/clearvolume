@@ -5,7 +5,6 @@
 
   Author: Martin Weigert (mweigert@mpi-cbg.de)
     			Loic Royer		 (royer@mpi-cbg.de)
-  				Martin Weigert (mweigert@mpi-cbg.de)
 */
 
 

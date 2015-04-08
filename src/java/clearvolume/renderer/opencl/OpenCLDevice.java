@@ -1,6 +1,7 @@
 package clearvolume.renderer.opencl;
 
 import java.net.URL;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import org.bridj.Pointer;
 
 import clearvolume.ClearVolumeCloseable;
+import clearvolume.renderer.opencl.utils.JavaCLUtils;
 
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLContext;
@@ -27,6 +29,9 @@ import com.nativelibs4java.opencl.CLProgram;
 import com.nativelibs4java.opencl.CLQueue;
 import com.nativelibs4java.opencl.JavaCL;
 import com.nativelibs4java.util.IOUtils;
+
+import coremem.ContiguousMemoryInterface;
+import coremem.fragmented.FragmentedMemoryInterface;
 
 public class OpenCLDevice implements ClearVolumeCloseable
 {
@@ -165,9 +170,9 @@ public class OpenCLDevice implements ClearVolumeCloseable
 					System.out.format("		*max clock freq: %d \n",
 														lCLDevice.getMaxClockFrequency());
 
-					System.out.format("		*3d volume max depth: %d \n",
+					System.out.format("		*3d volume max width: %d \n",
 														lCLDevice.getImage3DMaxWidth());
-					System.out.format("		*3d volume max depth: %d \n",
+					System.out.format("		*3d volume max height: %d \n",
 														lCLDevice.getImage3DMaxHeight());
 					System.out.format("		*3d volume max depth: %d \n",
 														lCLDevice.getImage3DMaxDepth());
@@ -332,11 +337,17 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	public void setArgs(final CLKernel pCLKernel, Object... args)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return;
+
 		pCLKernel.setArgs(args);
 	}
 
 	public void setArgs(final int pKernelIndex, Object... args)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return;
+
 		mCLKernelList.get(pKernelIndex).setArgs(args);
 	}
 
@@ -344,6 +355,9 @@ public class OpenCLDevice implements ClearVolumeCloseable
 											final int mNx,
 											final int mNy)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		final CLEvent evt = mCLKernelList.get(pKernelIndex)
 																			.enqueueNDRange(mCLQueue,
 																											new int[]
@@ -357,6 +371,9 @@ public class OpenCLDevice implements ClearVolumeCloseable
 											final int mNy,
 											final int mNz)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		final CLEvent evt = mCLKernelList.get(pKernelIndex)
 																			.enqueueNDRange(mCLQueue,
 																											new int[]
@@ -374,6 +391,9 @@ public class OpenCLDevice implements ClearVolumeCloseable
 											final int mNzLoc)
 
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		final CLEvent evt = mCLKernelList.get(pKernelIndex)
 																			.enqueueNDRange(mCLQueue,
 																											new int[]
@@ -388,6 +408,10 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	public CLEvent run(final CLKernel pCLKernel, final int mNx)
 	{
+
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		final CLEvent evt = pCLKernel.enqueueNDRange(mCLQueue, new int[]
 		{ mNx });
 		evt.waitFor();
@@ -398,6 +422,10 @@ public class OpenCLDevice implements ClearVolumeCloseable
 											final int mNx,
 											final int mNy)
 	{
+
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		final CLEvent evt = pCLKernel.enqueueNDRange(mCLQueue, new int[]
 		{ mNx, mNy });
 		evt.waitFor();
@@ -409,6 +437,10 @@ public class OpenCLDevice implements ClearVolumeCloseable
 											final int mNy,
 											final int mNz)
 	{
+
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		final CLEvent evt = pCLKernel.enqueueNDRange(mCLQueue, new int[]
 		{ mNx, mNy, mNz });
 		evt.waitFor();
@@ -424,6 +456,10 @@ public class OpenCLDevice implements ClearVolumeCloseable
 											final int mNzLoc)
 
 	{
+
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		final CLEvent evt = pCLKernel.enqueueNDRange(mCLQueue, new int[]
 		{ mNx, mNy, mNz }, new int[]
 		{ mNxLoc, mNyLoc, mNzLoc });
@@ -436,6 +472,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 																				ChannelOrder pChannelOrder,
 																				ChannelDataType pChannelDataType)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		final CLImageFormat fmt = new CLImageFormat(pChannelOrder,
 																								pChannelDataType);
@@ -446,6 +484,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	public CLImage2D createImage2D(final int Nx, final int Ny)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		final CLImageFormat fmt = new CLImageFormat(CLImageFormat.ChannelOrder.R,
 																								CLImageFormat.ChannelDataType.SignedInt16);
@@ -458,6 +498,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 																			final long Ny,
 																			final long Nz)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		final CLImageFormat fmt = new CLImageFormat(CLImageFormat.ChannelOrder.R,
 																								CLImageFormat.ChannelDataType.SignedInt16);
@@ -472,6 +514,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 																				ChannelOrder pChannelOrder,
 																				ChannelDataType pChannelDataType)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		final CLImageFormat fmt = new CLImageFormat(pChannelOrder,
 																								pChannelDataType);
@@ -482,47 +526,74 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	public CLBuffer<Float> createInputFloatBuffer(final long N)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		return mCLContext.createFloatBuffer(Usage.Input, N);
 	}
 
 	public CLBuffer<Short> createInputShortBuffer(final long N)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		return mCLContext.createShortBuffer(Usage.Input, N);
 	}
 
 	public CLBuffer<Float> createOutputFloatBuffer(final long N)
 	{
+
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 		return mCLContext.createFloatBuffer(Usage.Output, N);
 	}
 
 	public CLBuffer<Short> createOutputShortBuffer(final long N)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		return mCLContext.createShortBuffer(Usage.Output, N);
 	}
 
 	public CLBuffer<Integer> createOutputIntBuffer(final long N)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		return mCLContext.createIntBuffer(Usage.Output, N);
 	}
 
 	public CLBuffer<Integer> createInputOutputIntBuffer(final long N)
 	{
+
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		return mCLContext.createIntBuffer(Usage.InputOutput, N);
 	}
 
 	public CLBuffer<Byte> createOutputByteBuffer(final long N)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		return mCLContext.createByteBuffer(Usage.Output, N);
 	}
 
 	public CLBuffer<Byte> createInputOutputByteBuffer(final long N)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		return mCLContext.createByteBuffer(Usage.InputOutput, N);
 	}
 
 	public CLEvent writeFloatBuffer(final CLBuffer<Float> pCLBuffer,
 																	final FloatBuffer pBuffer)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		final Pointer<Float> ptr = Pointer.pointerToFloats(pBuffer);
 
@@ -533,6 +604,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 	public CLEvent writeShortBuffer(final CLBuffer<Short> pCLBuffer,
 																	final ShortBuffer pBuffer)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		final Pointer<Short> ptr = Pointer.pointerToShorts(pBuffer);
 
@@ -543,6 +616,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 	public CLEvent writeByteBuffer(	final CLBuffer<Byte> pCLBuffer,
 																	final ByteBuffer pBuffer)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		final Pointer<Byte> ptr = Pointer.pointerToBytes(pBuffer);
 
@@ -552,6 +627,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	public FloatBuffer readFloatBuffer(final CLBuffer<Float> pCLBuffer)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		return pCLBuffer.read(mCLQueue, 0, pCLBuffer.getElementCount())
 										.getFloatBuffer();
@@ -560,6 +637,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	public ShortBuffer readShortBuffer(final CLBuffer<Short> pCLBuffer)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		return pCLBuffer.read(mCLQueue, 0, pCLBuffer.getElementCount())
 										.getShortBuffer();
@@ -568,6 +647,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	public ByteBuffer readByteBuffer(final CLBuffer<Byte> pCLBuffer)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		return pCLBuffer.read(mCLQueue, 0, pCLBuffer.getElementCount())
 										.getByteBuffer();
@@ -576,6 +657,8 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 	public ByteBuffer readIntBufferAsByte(final CLBuffer<Integer> pCLBuffer)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
 
 		return pCLBuffer.read(mCLQueue, 0, pCLBuffer.getElementCount())
 										.getByteBuffer();
@@ -585,6 +668,9 @@ public class OpenCLDevice implements ClearVolumeCloseable
 	public CLEvent writeShortImage(	final CLImage3D img,
 																	final ShortBuffer pShortBuffer)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
 		if (img.getWidth() * img.getHeight() * img.getDepth() != pShortBuffer.capacity())
 		{
 
@@ -609,46 +695,106 @@ public class OpenCLDevice implements ClearVolumeCloseable
 	public CLEvent writeImage(final CLImage3D pCLImage3D,
 														final ByteBuffer pByteBuffer)
 	{
-		return pCLImage3D.write(	mCLQueue,
+
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
+		return pCLImage3D.write(mCLQueue,
+
+														0,
+														0,
+														0,
+														pCLImage3D.getWidth(),
+														pCLImage3D.getHeight(),
+														pCLImage3D.getDepth(),
+														0,
+														0,
+														pByteBuffer,
+														true);
+	}
+
+	public ArrayList<CLEvent> writeImagePerPlane(	final CLImage3D img,
+																								final FragmentedMemoryInterface pFragmentedMemoryInterface)
+	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
+		final ArrayList<CLEvent> lEventList = new ArrayList<CLEvent>();
+
+		int i = 0;
+		for (final ContiguousMemoryInterface lMemory : pFragmentedMemoryInterface)
+		{
+			final Pointer<Byte> lBridJPointer = lMemory.getBridJPointer(Byte.class);
+			final CLEvent lEvent = JavaCLUtils.writeImage3D(img,
+																											mCLQueue,
+																											lBridJPointer,
+																											0,
+																											0,
+																											i++,
+																											img.getWidth(),
+																											img.getHeight(),
+																											1,
+																											false);
+			lEventList.add(lEvent);
+		}
+
+		for (final CLEvent lEvent : lEventList)
+			lEvent.waitFor();
+
+		return lEventList;
+	}
+
+	public CLEvent writeImage(final CLImage3D img,
+														final ContiguousMemoryInterface pContiguousMemoryInterface)
+	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
+		final Pointer<Byte> lBridJPointer = pContiguousMemoryInterface.getBridJPointer(Byte.class);
+		return JavaCLUtils.writeImage3D(img,
+																		mCLQueue,
+																		lBridJPointer,
+																		0,
+																		0,
+																		0,
+																		img.getWidth(),
+																		img.getHeight(),
+																		img.getDepth(),
+																		true);
+
+	}
+
+	public CLEvent writeImage(final CLImage2D img, final Buffer pBuffer)
+
+	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
+		return img.write(	mCLQueue,
 											0,
 											0,
+											img.getWidth(),
+											img.getHeight(),
 											0,
-											pCLImage3D.getWidth(),
-											pCLImage3D.getHeight(),
-											pCLImage3D.getDepth(),
-											0,
-											0,
-											pByteBuffer,
+											pBuffer,
 											true);
 	}
 
 	public CLEvent writeImage(final CLImage2D img,
-														final ByteBuffer pByteBuffer)
+														final ContiguousMemoryInterface pContiguousMemoryInterface)
 	{
+		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+			return null;
+
+		final Pointer<Byte> lBridJPointer = pContiguousMemoryInterface.getBridJPointer(Byte.class);
 		return img.write(	mCLQueue,
 											0,
 											0,
 											img.getWidth(),
 											img.getHeight(),
 											0,
-											pByteBuffer,
+											lBridJPointer,
 											true);
-	}
-
-	public CLEvent writeFloatImage2D(	final CLImage2D img,
-																		final FloatBuffer pFloatBuffer)
-
-	{
-
-		return img.write(	mCLQueue,
-											0,
-											0,
-											img.getWidth(),
-											img.getHeight(),
-											0,
-											pFloatBuffer,
-											true);
-
 	}
 
 	@Override

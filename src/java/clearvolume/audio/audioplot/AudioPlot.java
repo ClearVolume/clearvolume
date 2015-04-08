@@ -15,7 +15,7 @@ import clearvolume.audio.synthesizer.filters.WarmifyFilter;
 import clearvolume.audio.synthesizer.sources.Guitar;
 
 /**
- * AudioPlot - this class implements the mapping of a value in the range [0,1]
+ * AudioPlot - this class implements the mapping of a size in the range [0,1]
  * into an audio range represented by varying beats per second and tone
  * frequency.
  *
@@ -233,11 +233,11 @@ public class AudioPlot implements AutoCloseable
 	}
 
 	/**
-	 * Sets the new current value. The value must be normalized within the range
+	 * Sets the new current size. The size must be normalized within the range
 	 * [0,1].
 	 * 
 	 * @param pValue
-	 *          value within range [0,1]
+	 *          size within range [0,1]
 	 */
 	public void setValue(double pValue)
 	{
