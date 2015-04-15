@@ -468,7 +468,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Updates the displayed volume with the provided volume data of voxel
 	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
 	 * layer.
-	 *
+	 * 
 	 * @param pRenderLayerIndex
 	 * @param pContiguousMemoryInterface
 	 * @param pSizeX

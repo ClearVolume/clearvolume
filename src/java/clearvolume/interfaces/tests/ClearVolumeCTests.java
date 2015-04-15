@@ -7,7 +7,6 @@ import org.junit.Test;
 import clearcuda.CudaAvailability;
 import clearvolume.interfaces.ClearVolumeC;
 import clearvolume.renderer.opencl.OpenCLAvailability;
-import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeCTests
 {
@@ -20,12 +19,7 @@ public class ClearVolumeCTests
 
 		final int lRendererId = 1;
 		final int lChannelId = 1;
-		ClearVolumeC.createRenderer(lRendererId,
-																256,
-																256,
-																NativeTypeEnum.UnsignedByte,
-																512,
-																512);
+		ClearVolumeC.createRenderer(lRendererId, 256, 256, 1, 512, 512);
 
 		ClearVolumeC.setChannelColor(lChannelId, new float[]
 		{ 1, 1, 1, 1 });
@@ -76,12 +70,7 @@ public class ClearVolumeCTests
 
 		final int lRendererId = 1;
 		final int lChannelId = 1;
-		ClearVolumeC.createRenderer(lRendererId,
-																256,
-																256,
-																NativeTypeEnum.UnsignedShort,
-																512,
-																512);
+		ClearVolumeC.createRenderer(lRendererId, 256, 256, 2, 512, 512);
 
 		ClearVolumeC.setChannelColor(lChannelId, new float[]
 		{ 1, 1, 1, 1 });

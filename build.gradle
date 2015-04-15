@@ -233,8 +233,8 @@ repositories
 
 task cvFatJar(type:Jar) {
 	archiveName = "ClearVolume.fat.jar"
-	def classpath  = configurations.compile.collect { it.directory&&{println it; true} ? it : zipTree(it) }
-	from(classpath)
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 
 	manifest {
 		attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')

@@ -86,14 +86,14 @@ public class ClearVolumeC
 	public static int createRenderer(	final int pRendererId,
 																		final int pWindowWidth,
 																		final int pWindowHeight,
-																		final NativeTypeEnum pNativeTypeEnum,
+																		final int pBytePerVoxel,
 																		final int pMaxTextureWidth,
 																		final int pMaxTextureHeight)
 	{
 		return createRenderer(pRendererId,
 													pWindowWidth,
 													pWindowHeight,
-													pNativeTypeEnum,
+													pBytePerVoxel,
 													pMaxTextureWidth,
 													pMaxTextureHeight,
 													true,
@@ -103,7 +103,7 @@ public class ClearVolumeC
 	public static int createRenderer(	final int pRendererId,
 																		final int pWindowWidth,
 																		final int pWindowHeight,
-																		final NativeTypeEnum pNativeTypeEnum,
+																		final int pBytePerVoxel,
 																		final int pMaxTextureWidth,
 																		final int pMaxTextureHeight,
 																		final boolean pTimeShift,
@@ -111,11 +111,17 @@ public class ClearVolumeC
 	{
 		try
 		{
+			NativeTypeEnum lNativeTypeEnum = NativeTypeEnum.UnsignedShort;
+			switch(pBytePerVoxel)
+			{
+			case 1: lNativeTypeEnum = NativeTypeEnum.UnsignedByte; break;
+			case 2: lNativeTypeEnum = NativeTypeEnum.UnsignedShort; break;
+			}
 			final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolume[ID=" + pRendererId
 																																																								+ "]",
 																																																						pWindowWidth,
 																																																						pWindowHeight,
-																																																						pNativeTypeEnum,
+																																																						lNativeTypeEnum,
 																																																						pMaxTextureWidth,
 																																																						pMaxTextureHeight,
 																																																						false);
