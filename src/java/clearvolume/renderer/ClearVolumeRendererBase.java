@@ -80,9 +80,7 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile float mTranslationX = 0;
 	private volatile float mTranslationY = 0;
 	private volatile float mTranslationZ = 0;
-	private volatile float mScaleX = 1.0f;
-	private volatile float mScaleY = 1.0f;
-	private volatile float mScaleZ = 1.0f;
+
 
 	// private volatile float mDensity;
 	private volatile float[] mBrightness;
@@ -227,26 +225,7 @@ public abstract class ClearVolumeRendererBase	implements
 		mVolumeRenderingParametersChanged = false;
 	}
 
-	/**
-	 * Sets the volume size in 'real' units of the volume (um, cm, ...) The apsect
-	 * ratio for the volume is set accordingly.
-	 *
-	 * @param pVolumeSizeX
-	 * @param pVolumeSizeY
-	 * @param pVolumeSizeZ
-	 */
-	public void setVolumeSize(final double pVolumeSizeX,
-														final double pVolumeSizeY,
-														final double pVolumeSizeZ)
-	{
-		final double lMaxXYZ = Math.max(Math.max(	pVolumeSizeX,
-																							pVolumeSizeY),
-																		pVolumeSizeZ);
 
-		setScaleX(pVolumeSizeX / lMaxXYZ);
-		setScaleY(pVolumeSizeY / lMaxXYZ);
-		setScaleZ(pVolumeSizeZ / lMaxXYZ);
-	}
 
 	/**
 	 * Returns the volume size along x axis.
@@ -312,41 +291,7 @@ public abstract class ClearVolumeRendererBase	implements
 		mVolumeDimensionsChanged = false;
 	}
 
-	/**
-	 * Sets the scale factor for the volume along the x axis.
-	 *
-	 * @param pScaleX
-	 *          scale factor along x
-	 */
-	public void setScaleX(final double pScaleX)
-	{
-		mScaleX = (float) pScaleX;
-		notifyChangeOfVolumeRenderingParameters();
-	}
 
-	/**
-	 * Sets the scale factor for the volume along the y axis.
-	 *
-	 * @param pScaleY
-	 *          scale factor along y
-	 */
-	public void setScaleY(final double pScaleY)
-	{
-		mScaleY = (float) pScaleY;
-		notifyChangeOfVolumeRenderingParameters();
-	}
-
-	/**
-	 * Sets the scale factor for the volume along the z axis.
-	 *
-	 * @param pScaleZ
-	 *          scale factor along z
-	 */
-	public void setScaleZ(final double pScaleZ)
-	{
-		mScaleZ = (float) pScaleZ;
-		notifyChangeOfVolumeRenderingParameters();
-	}
 
 	/**
 	 * Gets active flag for the current render layer.
@@ -880,35 +825,7 @@ public abstract class ClearVolumeRendererBase	implements
 		return mRotationQuaternion;
 	}
 
-	/**
-	 * Returns volume scale along x.
-	 *
-	 * @return scale along x
-	 */
-	public double getScaleX()
-	{
-		return mScaleX;
-	}
 
-	/**
-	 * Returns volume scale along y.
-	 *
-	 * @return scale along y
-	 */
-	public double getScaleY()
-	{
-		return mScaleY;
-	}
-
-	/**
-	 * Returns volume scale along z.
-	 *
-	 * @return scale along z
-	 */
-	public double getScaleZ()
-	{
-		return mScaleZ;
-	}
 
 	/**
 	 * Interface method implementation
@@ -1324,12 +1241,6 @@ public abstract class ClearVolumeRendererBase	implements
 			mVoxelSizeY = pVoxelSizeY;
 			mVoxelSizeZ = pVoxelSizeZ;
 
-			final double lMaxSize = max(max(mVolumeSizeX, mVolumeSizeY),
-																	mVolumeSizeZ);
-
-			mScaleX = (float) (pVoxelSizeX * mVolumeSizeX / lMaxSize);
-			mScaleY = (float) (pVoxelSizeY * mVolumeSizeY / lMaxSize);
-			mScaleZ = (float) (pVoxelSizeZ * mVolumeSizeZ / lMaxSize);
 
 			clearCompletionOfDataBufferCopy(pRenderLayerIndex);
 			mVolumeDataByteBuffers[pRenderLayerIndex] = pFragmentedMemoryInterface;
