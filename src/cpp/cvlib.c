@@ -8,15 +8,7 @@
  */
 
 #include "cvlib.h"
-#ifdef __APPLE__
-// any includes needed?
-#define __cdecl __attribute__((__cdecl__))
-#define __declspec(dllexport)
-#define __int64 unsigned long long
-#elif __WINDOWS__
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
-#include <windows.h>
-#endif
+#include <stdbool.h>
 
 //#include "jvmlib/jni.h"       /* where everything is defined */
 #include <stdio.h>
@@ -114,7 +106,7 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
     sJVMArgs.version = JNI_VERSION_1_6;
     sJVMArgs.options = options;
     sJVMArgs.nOptions = 4;
-    sJVMArgs.ignoreUnrecognized = false;
+    sJVMArgs.ignoreUnrecognized = 0;
 
     JNIEnv *lJNIEnv;
 #ifdef __WINDOWS
@@ -126,22 +118,22 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
     {
         return 3;
     } else if (res == JNI_OK) {
-        cerr << "JVM created." << endl;
+        fprintf(stderr, "JVM created.\n");
     }
 
-    sClearVolumeClass = lJNIEnv->FindClass("clearvolume/interfaces/ClearVolumeC");
+    sClearVolumeClass = (*lJNIEnv)->FindClass(lJNIEnv, "clearvolume/interfaces/ClearVolumeC");
 
     if (sClearVolumeClass == 0)
     {
-        cerr << "Unable to locate class " << "clearvolume/interfaces/ClearVolumeC" << " in " << pClearVolumeJarPath << endl;
-        cerr << "Java class path was " << lClassPathString << endl;
+        fprintf(stderr, "Unable to locate class %s in %s\n", "clearvolume/interfaces/ClearVolumeC", pClearVolumeJarPath);
+        fprintf(stderr, "Java class path was %s\n", lClassPathString);
 
         jthrowable exc;
-        exc = lJNIEnv->ExceptionOccurred();
+        exc = (*lJNIEnv)->ExceptionOccurred(lJNIEnv);
         if (exc) {
             jclass newExcCls;
-            lJNIEnv->ExceptionDescribe();
-            lJNIEnv->ExceptionClear();
+            (*lJNIEnv)->ExceptionDescribe(lJNIEnv);
+            (*lJNIEnv)->ExceptionClear(lJNIEnv);
 
         }
 
@@ -164,18 +156,18 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
        If return type is void (or constructor) use (argument types)V.
        Observe that the ; is needed after the class name in all situations. 
        This won't work "(Ljava/lang/String)V" but this will "(Ljava/lang/String;)V". 
-    /**/
+    */
 
 
-    getLastExceptionMessageID		= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "getLastExceptionMessage", "()Ljava/lang/String;");
-    createRendererID 				= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "createRenderer", "(IIIIIIZZ)I");
-    destroyRendererID 				= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "destroyRenderer", "(I)I");
-    createServerID    				= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "createServer", "(I)I");
-    destroyServerID 				= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "destroyServer", "(I)I");
-    setVoxelDimensionsInRealUnitsID	= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "setVoxelDimensionsInRealUnits", "(IDDD)I");
-    setVolumeIndexAndTimeID 		= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "setVolumeIndexAndTime", "(IID)I");
-    send8bitUINTVolumeDataToSinkID 	= lJNIEnv->GetStaticMethodID(sClearVolumeClass, "send8bitUINTVolumeDataToSink", "(IIJJIII)I");
-    send16bitUINTVolumeDataToSinkID = lJNIEnv->GetStaticMethodID(sClearVolumeClass, "send16bitUINTVolumeDataToSink", "(IIJJIII)I");
+    getLastExceptionMessageID		= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "getLastExceptionMessage", "()Ljava/lang/String;");
+    createRendererID 				= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "createRenderer", "(IIIIIIZZ)I");
+    destroyRendererID 				= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "destroyRenderer", "(I)I");
+    createServerID    				= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "createServer", "(I)I");
+    destroyServerID 				= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "destroyServer", "(I)I");
+    setVoxelDimensionsInRealUnitsID	= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "setVoxelDimensionsInRealUnits", "(IDDD)I");
+    setVolumeIndexAndTimeID 		= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "setVolumeIndexAndTime", "(IID)I");
+    send8bitUINTVolumeDataToSinkID 	= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "send8bitUINTVolumeDataToSink", "(IIJJIII)I");
+    send16bitUINTVolumeDataToSinkID = (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "send16bitUINTVolumeDataToSink", "(IIJJIII)I");
 
     if (getLastExceptionMessageID == 0) return 101;
     if (createRendererID == 0) return 102;
@@ -213,19 +205,19 @@ __declspec(dllexport) char* __cdecl getLastJavaExceptionMessage()
 {
     clearError();
     JNIEnv *lJNIEnv;
-    sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
     if(sLastJavaExceptionMessageJString!=NULL && sLastJavaExceptionMessage != NULL)
     {
-        lJNIEnv->ReleaseStringUTFChars(sLastJavaExceptionMessageJString, sLastJavaExceptionMessage);
+        (*lJNIEnv)->ReleaseStringUTFChars(lJNIEnv, sLastJavaExceptionMessageJString, sLastJavaExceptionMessage);
     }
 
-    sLastJavaExceptionMessageJString = (jstring)lJNIEnv->CallStaticObjectMethod(sClearVolumeClass,getLastExceptionMessageID);
+    sLastJavaExceptionMessageJString = (jstring)(*lJNIEnv)->CallStaticObjectMethod(lJNIEnv, sClearVolumeClass,getLastExceptionMessageID);
     sLastJavaExceptionMessage = NULL;
 
     if(sLastJavaExceptionMessageJString!=NULL)
     {
-        sLastJavaExceptionMessage = (char*)lJNIEnv->GetStringUTFChars(sLastJavaExceptionMessageJString, NULL);
+        sLastJavaExceptionMessage = (char*)(*lJNIEnv)->GetStringUTFChars(lJNIEnv, sLastJavaExceptionMessageJString, NULL);
     }
     return sLastJavaExceptionMessage;
 }
@@ -237,7 +229,7 @@ __declspec(dllexport) char* __cdecl getLastError()
     else return sJavaLastError;
 }
 
-__declspec(dllexport) jint __cdecl createRenderer(				long pRendererId,
+__declspec(dllexport) long __cdecl createRenderer(				long pRendererId,
         long pWindowWidth,
         long pWindowHeight,
         long pBytesPerVoxel,
@@ -246,9 +238,9 @@ __declspec(dllexport) jint __cdecl createRenderer(				long pRendererId,
 {
     clearError();
     JNIEnv *lJNIEnv;
-    sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
-    return lJNIEnv->CallStaticIntMethod(sClearVolumeClass,
+    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
             createRendererID,
             pRendererId, 
             pWindowWidth, 
@@ -256,24 +248,24 @@ __declspec(dllexport) jint __cdecl createRenderer(				long pRendererId,
             pBytesPerVoxel,
             pMaxTextureWidth,
             pMaxTextureHeight,
-            false,
-            false);
+            0,
+            0);
 }
 
-__declspec(dllexport) jint __cdecl createRenderer(	jint pRendererId,
-        jint pWindowWidth,
-        jint pWindowHeight,
-        jint pBytesPerVoxel,
-        jint pMaxTextureWidth,
-        jint pMaxTextureHeight,
-        jboolean pTimeShift,
-        jboolean pChannelSelector)
+__declspec(dllexport) long __cdecl createRendererWithTimeShiftAndChannels(	long pRendererId,
+        long pWindowWidth,
+        long pWindowHeight,
+        long pBytesPerVoxel,
+        long pMaxTextureWidth,
+        long pMaxTextureHeight,
+        bool pTimeShift,
+        bool pChannelSelector)
 {
     clearError();
     JNIEnv *lJNIEnv;
-    sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
-    return lJNIEnv->CallStaticIntMethod(sClearVolumeClass,
+    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
             createRendererID,
             pRendererId, 
             pWindowWidth, 
@@ -286,50 +278,50 @@ __declspec(dllexport) jint __cdecl createRenderer(	jint pRendererId,
 
 }
 
-__declspec(dllexport) jint __cdecl destroyRenderer(jint pRendererId)
+__declspec(dllexport) long __cdecl destroyRenderer(long pRendererId)
 {
     clearError();
     JNIEnv *lJNIEnv;
-    sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
-    return lJNIEnv->CallStaticIntMethod(sClearVolumeClass,
+    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
             destroyRendererID,
             pRendererId);
 }
 
-__declspec(dllexport) jint __cdecl createServer(	jint pServerId)
+__declspec(dllexport) long __cdecl createServer(	long pServerId)
 {
     clearError();
     JNIEnv *lJNIEnv;
-    sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
-    return lJNIEnv->CallStaticIntMethod(sClearVolumeClass,
+    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
             createServerID,
             pServerId);
 }
 
-__declspec(dllexport) jint __cdecl destroyServer(jint pServerId)
+__declspec(dllexport) long __cdecl destroyServer(long pServerId)
 {
     clearError();
     JNIEnv *lJNIEnv;
-    sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
-    return lJNIEnv->CallStaticIntMethod(sClearVolumeClass,
+    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
             destroyServerID,
             pServerId);
 }
 
 
-__declspec(dllexport) long __cdecl setVoxelDimensionsInRealUnits( 	jint pSinkId,
-        jdouble pVoxelWidthInRealUnits,
-        jdouble pVoxelHeightInRealUnits,
-        jdouble pVoxelDepthInRealUnits)
+__declspec(dllexport) long __cdecl setVoxelDimensionsInRealUnits( 	long pSinkId,
+        double pVoxelWidthInRealUnits,
+        double pVoxelHeightInRealUnits,
+        double pVoxelDepthInRealUnits)
 {
     clearError();
     JNIEnv *lJNIEnv;
-    sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
-    return lJNIEnv->CallStaticIntMethod(sClearVolumeClass,
+    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
             setVoxelDimensionsInRealUnitsID,
             pSinkId,
             pVoxelWidthInRealUnits,
@@ -341,15 +333,15 @@ __declspec(dllexport) long __cdecl setVoxelDimensionsInRealUnits( 	jint pSinkId,
 
 
 
-__declspec(dllexport) jint __cdecl setVolumeIndexAndTime( 			jint pSinkId,
-        jint pVolumeIndex,
-        jdouble pVolumeTimeInSeconds)
+__declspec(dllexport) long __cdecl setVolumeIndexAndTime( 			long pSinkId,
+        long pVolumeIndex,
+        double pVolumeTimeInSeconds)
 {
     clearError();
     JNIEnv *lJNIEnv;
-    sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
-    return lJNIEnv->CallStaticIntMethod(sClearVolumeClass,
+    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
             setVolumeIndexAndTimeID,
             pSinkId,
             pVolumeIndex,
@@ -357,19 +349,19 @@ __declspec(dllexport) jint __cdecl setVolumeIndexAndTime( 			jint pSinkId,
 }
 
 
-__declspec(dllexport) jint __cdecl send8bitUINTVolumeDataToSink( 	jint pSinkId,
-        jint pChannelId,
+__declspec(dllexport) long __cdecl send8bitUINTVolumeDataToSink( 	long pSinkId,
+        long pChannelId,
         char *pBufferAddress,
         __int64 pBufferLength,																 	
-        jint pWidth,
-        jint pHeight,
-        jint pDepth)
+        long pWidth,
+        long pHeight,
+        long pDepth)
 {
     clearError();
     JNIEnv *lJNIEnv;
-    sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
-    return lJNIEnv->CallStaticIntMethod(sClearVolumeClass,
+    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
             send8bitUINTVolumeDataToSinkID,
             pSinkId,
             pChannelId,
@@ -380,19 +372,19 @@ __declspec(dllexport) jint __cdecl send8bitUINTVolumeDataToSink( 	jint pSinkId,
             pDepth);
 }
 
-__declspec(dllexport) jint __cdecl send16bitUINTVolumeDataToSink( 	jint pSinkId,
-        jint pChannelId,
+__declspec(dllexport) long __cdecl send16bitUINTVolumeDataToSink( 	long pSinkId,
+        long pChannelId,
         short *pBufferAddress,
         __int64 pBufferLength,
-        jint pWidth,
-        jint pHeight,
-        jint pDepth)
+        long pWidth,
+        long pHeight,
+        long pDepth)
 {
     clearError();
     JNIEnv *lJNIEnv;
-    sJVM->AttachCurrentThread((void**)&lJNIEnv, NULL);
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
-    return lJNIEnv->CallStaticIntMethod(sClearVolumeClass,
+    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
             send16bitUINTVolumeDataToSinkID,
             pSinkId,
             pChannelId,

@@ -17,7 +17,9 @@
 #endif
 #include <iostream>
 #include <stdio.h>
-#include "cvlib.h"
+extern "C" { 
+#include "cvlib.h" 
+}
 
 using namespace std;
 

@@ -17,6 +17,7 @@
 #endif
 
 #include <jni.h>
+#include <stdbool.h>
 
 /**
  * Initializes the libary which really means JVm initialization.
@@ -52,17 +53,27 @@
  * as a handle to identify this renderer. The window width, height, max texture width and height, as well
  * as format of the data in bytes per voxel must be provided. A sink of the same ID number is made available.
  */
- __declspec(dllexport) jint __cdecl createRenderer(				long pRendererId,
+ __declspec(dllexport) long __cdecl createRenderer(				long pRendererId,
 																			long pWindowWidth,
 																			long pWindowHeight,
 																			long pBytesPerVoxel,
 																			long pMaxTextureWidth,
 																			long pMaxTextureHeight);
 
+__declspec(dllexport) long __cdecl createRendererWithTimeShiftAndChannels(	long pRendererId,
+        long pWindowWidth,
+        long pWindowHeight,
+        long pBytesPerVoxel,
+        long pMaxTextureWidth,
+        long pMaxTextureHeight,
+        bool pTimeShift,
+        bool pChannelSelector);
+
+
 /**
  * Destroys a given renderer.
  */
- __declspec(dllexport) jint __cdecl destroyRenderer(jint pRendererId);
+ __declspec(dllexport) long __cdecl destroyRenderer(long pRendererId);
 
 /**
  * Creates a server with a given renderer ID. Any integer can be picked for an ID. This ID is used
