@@ -9,26 +9,32 @@
  *
  */
 
-#include <windows.h>
-#include <tchar.h>
+#ifdef __WINDOWS__
+    #include <windows.h>
+    #include <tchar.h>
+#elif __APPLE__
+
+#endif
 #include <iostream>
 #include <stdio.h>
-#include <tchar.h>
 #include "cvlib.h"
 
 using namespace std;
 
-
+#ifdef __WINDOWS__
 int _tmain(int argc, _TCHAR* argv[])
+#else
+int main(int argc, char** argv)
+#endif
 {
 	cout << "TEST BEGIN\n";
 
 	// First we initialize the library and provide the location of the ClearVolume jar file.
 	// the JVM location is determined automatically using the JAVA_HOME env var.
-	int lReturnCode = begincvlib(".\\ClearVolume.jar");
+	int lReturnCode = begincvlib("./ClearVolume.jar");
 	if(lReturnCode!=0) 
 	{
-		cout << "Begin failed, return code=" << lReturnCode;
+		cout << "Begin failed, return code=" << lReturnCode << endl;
 		return lReturnCode;
 	}
 
