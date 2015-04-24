@@ -9,7 +9,7 @@ LINKER_FLAGS="-L./ $JAVA_LIBS -lclearvolume $JAVA_INCLUDES -ljli"
 
 echo "Building shared library..."
 
-$CC $LIB_LINKER_FLAGS cvlib.cpp -o libclearvolume.dylib
+$CC $LIB_LINKER_FLAGS cvlib.c -o libclearvolume.dylib
 
 echo "Building example application... "
 $CXX $LINKER_FLAGS cvlib_test.cpp -o cvlib_test
