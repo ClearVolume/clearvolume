@@ -13,31 +13,29 @@
     #include <windows.h>
     #include <tchar.h>
 #elif __APPLE__
-
+    #include <CoreServices/CoreServices.h>
 #endif
 #include <iostream>
-#include <stdio.h>
+#include <thread>
 extern "C" { 
 #include "cvlib.h" 
 }
 
 using namespace std;
 
-#ifdef __WINDOWS__
-int _tmain(int argc, _TCHAR* argv[])
-#else
-int main(int argc, char** argv)
-#endif
+static string classpath;
+
+void run_clearvolume()
 {
 	cout << "TEST BEGIN\n";
 
 	// First we initialize the library and provide the location of the ClearVolume jar file.
 	// the JVM location is determined automatically using the JAVA_HOME env var.
-	int lReturnCode = begincvlib("./ClearVolume.jar");
+	int lReturnCode = begincvlib(const_cast<char*>(classpath.c_str()), CUDA);
 	if(lReturnCode!=0) 
 	{
 		cout << "Begin failed, return code=" << lReturnCode << endl;
-		return lReturnCode;
+        return;
 	}
 
 	cout << "Starting in-process and server ClearVolume\n";
@@ -46,18 +44,26 @@ int main(int argc, char** argv)
 	int lServerID = 2;
 
 	// Creates an in-process renderer:
-	if(createRenderer(lRendererID,512, 512, 1, 512, 512)!=0)
+    cout << "Creating renderer... " << endl;
+	if(createRenderer(lRendererID,256, 256, 1, 512, 512)!=0) {
 		cout << "ERROR while creating renderer \n";
+        return;
+    }
+    cout << " done." << endl;
 
 	// Creates a network server:
+    cout << "Creating server... ";
 	if(createServer(lServerID)!=0)
 		cout << "ERROR while creating server \n";
+    cout << " done." << endl;
 
 	// Sets the voxel dimensions in real units for in-process renderer
+    cout << "Setting up volume units for renderer ... " << endl;
 	if(setVoxelDimensionsInRealUnits(lRendererID,1,1,1)!=0)
 		cout << "ERROR while setting dimensions in real units(um)) \n";
 
 	// Sets the voxel dimensions in real units for in-process server
+    cout << "Setting up volume units for server ... " << endl;
 	if(setVoxelDimensionsInRealUnits(lServerID,  1,1,1)!=0)
 		cout << "ERROR while setting dimensions in real units(um)) \n";
 
@@ -68,6 +74,9 @@ int main(int argc, char** argv)
 	int depth = width+3;
 	size_t length =width*height*depth;
 	char* buffer = new char[length];
+
+
+    cout << "Starting sending volumes ... " << endl;
 
 	// We will repeatedly send 500 volumes:
 	for(int i=0; i<500; i++)
@@ -104,7 +113,33 @@ int main(int argc, char** argv)
 	// closes the library
 	endcvlib();
 	cout << "TEST END\n";
-	return 0;
 }
 
+static void dummyCallback(void * info) {}
+
+#ifdef __WINDOWS__
+int _tmain(int argc, _TCHAR* argv[])
+#else
+int main(int argc, char** argv)
+#endif
+{
+    classpath = argv[1];
+    thread cv_thread(run_clearvolume);
+
+    CFRunLoopRef loopRef = CFRunLoopGetCurrent();
+
+    CFRunLoopSourceContext sourceContext = { 
+        .version = 0, .info = NULL, .retain = NULL, .release = NULL,
+        .copyDescription = NULL, .equal = NULL, .hash = NULL, 
+        .schedule = NULL, .cancel = NULL, .perform = &dummyCallback };
+
+    CFRunLoopSourceRef sourceRef = CFRunLoopSourceCreate(NULL, 0, &sourceContext);
+    CFRunLoopAddSource(loopRef, sourceRef,  kCFRunLoopCommonModes);        
+    CFRunLoopRun();
+    CFRelease(sourceRef);
+
+    cv_thread.join();
+
+    return 0;
+}
 

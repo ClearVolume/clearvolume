@@ -19,12 +19,13 @@
 #include <jni.h>
 #include <stdbool.h>
 
+typedef enum {USEBEST, CUDA, OPENCL} backend_t;
 /**
  * Initializes the libary which really means JVm initialization.
  * the path to the ClearVolume jar must be provided. It must be 
  * the non-executable jar packaged together with the library.
  */
- __declspec(dllexport) unsigned long __cdecl begincvlib(char* ClearVolumeJarPath);
+ __declspec(dllexport) unsigned long __cdecl begincvlib(char* ClearVolumeJarPath, backend_t backend);
 
 /**
  * releases any ressource allocated during the utilization of cvlib.
@@ -53,12 +54,12 @@
  * as a handle to identify this renderer. The window width, height, max texture width and height, as well
  * as format of the data in bytes per voxel must be provided. A sink of the same ID number is made available.
  */
- __declspec(dllexport) long __cdecl createRenderer(				long pRendererId,
-																			long pWindowWidth,
-																			long pWindowHeight,
-																			long pBytesPerVoxel,
-																			long pMaxTextureWidth,
-																			long pMaxTextureHeight);
+ __declspec(dllexport) long __cdecl createRenderer(				int pRendererId,
+																			int pWindowWidth,
+																			int pWindowHeight,
+																			int pBytesPerVoxel,
+																			int pMaxTextureWidth,
+																			int pMaxTextureHeight);
 
 __declspec(dllexport) long __cdecl createRendererWithTimeShiftAndChannels(	long pRendererId,
         long pWindowWidth,

@@ -33,12 +33,12 @@ const char * getEnvWin(const char * name)
 #endif
 
 typedef jint (JNICALL *CreateJavaVM)(JavaVM **pvm, void **penv, void *args);
-JavaVM *sJVM; /* denotes a Java VM */
+static JavaVM *sJVM; /* denotes a Java VM */
 JavaVMInitArgs sJVMArgs; /* JDK/JRE 6 VM initialization arguments */
 char* sJavaLastError = cErrorNone;
 
 jclass sClearVolumeClass;
-jmethodID 	getLastExceptionMessageID,
+static jmethodID 	getLastExceptionMessageID,
             createRendererID,
             destroyRendererID,
             createServerID,
@@ -48,10 +48,36 @@ jmethodID 	getLastExceptionMessageID,
             send8bitUINTVolumeDataToSinkID,
             send16bitUINTVolumeDataToSinkID;
 
+#ifndef __WINDOWS__
+#include <signal.h>
 
-__declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath)
+static struct sigaction old_sa[NSIG];
+
+void cv_sigaction(int signal, siginfo_t *info, void *reserved)
+{
+    printf("Signal caught: %i\n", signal);
+
+    JNIEnv* lJNIEnv;
+    jthrowable exc;
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
+
+        exc = (*lJNIEnv)->ExceptionOccurred(lJNIEnv);
+        if (exc) {
+            jclass newExcCls;
+            (*lJNIEnv)->ExceptionDescribe(lJNIEnv);
+            (*lJNIEnv)->ExceptionClear(lJNIEnv);
+
+        }
+
+//	(*env)->CallVoidMethod(env, obj, nativeCrashed);
+	old_sa[signal].sa_handler(signal);
+}
+#endif
+
+__declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath, backend_t backend)
 {
     clearError();
+    JNIEnv* lJNIEnv;
 #ifdef __WINDOWS__
     const char* JAVAHOME  =getEnvWin("JAVA_HOME");
     printf("JAVAHOME=%s\n");
@@ -87,28 +113,41 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
     size_t lJREFolderPathLength= strlen(JREFolderPath);
 
 #endif
-    char lClassPathPrefix[] = "-Djava.class.path=./jars";
+    char lClassPathPrefix[] = "-Djava.class.path=";
     size_t lClassPathPrefixLength= strlen(lClassPathPrefix);
 
     char lClassPathString[1024];
 
     strcpy(lClassPathString,lClassPathPrefix);
-    //strcat(lClassPathString,pClearVolumeJarPath);
-
-
-    JavaVMOption options[4];
-    options[0].optionString = (char*)"-Xmx4G";
-    options[1].optionString = (char*)"-Djava.class.path=./jars;./jars/ClearVolume-0.9.0.jar;.";
-    options[2].optionString = (char*)"-verbose";
-    options[3].optionString = (char*)"-Xdebug";
+    strcat(lClassPathString,pClearVolumeJarPath);
 
     memset(&sJVMArgs, 0, sizeof(sJVMArgs));
+
+    JavaVMOption options[3];
+    options[0].optionString = (char*)"-Xmx4G";
+    options[1].optionString = (char*)lClassPathString;
+
+    switch(backend) {
+        case CUDA:
+            printf("Forcing CUDA backend.\n");
+            options[2].optionString = "-DClearVolume.disableOpenCL";
+            sJVMArgs.nOptions = 3;
+            break;
+        case OPENCL:
+            printf("Forcing OpenCL backend.\n");
+            options[2].optionString = "-DClearVolume.disableCUDA";
+            sJVMArgs.nOptions = 3;
+            break;
+        case USEBEST:
+        default:
+            printf("No backend preference selected.\n");
+            sJVMArgs.nOptions = 2;
+    }
+
     sJVMArgs.version = JNI_VERSION_1_6;
     sJVMArgs.options = options;
-    sJVMArgs.nOptions = 4;
     sJVMArgs.ignoreUnrecognized = 0;
 
-    JNIEnv *lJNIEnv;
 #ifdef __WINDOWS
     jint res = lCreateJavaVM(&sJVM, (void **)&lJNIEnv, &sJVMArgs);
 #else
@@ -126,7 +165,7 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
     if (sClearVolumeClass == 0)
     {
         fprintf(stderr, "Unable to locate class %s in %s\n", "clearvolume/interfaces/ClearVolumeC", pClearVolumeJarPath);
-        fprintf(stderr, "Java class path was %s\n", lClassPathString);
+        fprintf(stderr, "Java class path was %s\n", options[1].optionString);
 
         jthrowable exc;
         exc = (*lJNIEnv)->ExceptionOccurred(lJNIEnv);
@@ -156,7 +195,7 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
        If return type is void (or constructor) use (argument types)V.
        Observe that the ; is needed after the class name in all situations. 
        This won't work "(Ljava/lang/String)V" but this will "(Ljava/lang/String;)V". 
-    */
+       */
 
 
     getLastExceptionMessageID		= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "getLastExceptionMessage", "()Ljava/lang/String;");
@@ -178,6 +217,29 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
     if (setVolumeIndexAndTimeID == 0) return 107;
     if (send8bitUINTVolumeDataToSinkID == 0) return 108;
     if (send16bitUINTVolumeDataToSinkID == 0) return 109;
+
+    jthrowable exc;
+    exc = (*lJNIEnv)->ExceptionOccurred(lJNIEnv);
+    if (exc) {
+        jclass newExcCls;
+        (*lJNIEnv)->ExceptionDescribe(lJNIEnv);
+        (*lJNIEnv)->ExceptionClear(lJNIEnv);
+
+    }
+
+#ifndef WINDOWS
+       struct sigaction handler;
+	memset(&handler, 0, sizeof(sigaction));
+	handler.sa_sigaction = cv_sigaction;
+	handler.sa_flags = SA_RESETHAND;
+#define CATCHSIG(X) sigaction(X, &handler, &old_sa[X])
+	CATCHSIG(SIGILL);
+	CATCHSIG(SIGABRT);
+	CATCHSIG(SIGBUS);
+	CATCHSIG(SIGFPE);
+	CATCHSIG(SIGSEGV);
+	CATCHSIG(SIGPIPE);
+#endif
 
     return 0;
 }
@@ -203,8 +265,9 @@ char* sLastJavaExceptionMessage = NULL;
 
 __declspec(dllexport) char* __cdecl getLastJavaExceptionMessage()
 {
+    JNIEnv* lJNIEnv;
+
     clearError();
-    JNIEnv *lJNIEnv;
     (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
     if(sLastJavaExceptionMessageJString!=NULL && sLastJavaExceptionMessage != NULL)
@@ -229,18 +292,34 @@ __declspec(dllexport) char* __cdecl getLastError()
     else return sJavaLastError;
 }
 
-__declspec(dllexport) long __cdecl createRenderer(				long pRendererId,
-        long pWindowWidth,
-        long pWindowHeight,
-        long pBytesPerVoxel,
-        long pMaxTextureWidth,
-        long pMaxTextureHeight)
+__declspec(dllexport) long __cdecl createRenderer(				int pRendererId,
+        int pWindowWidth,
+        int pWindowHeight,
+        int pBytesPerVoxel,
+        int pMaxTextureWidth,
+        int pMaxTextureHeight)
 {
     clearError();
-    JNIEnv *lJNIEnv;
+    JNIEnv* lJNIEnv;
     (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
+    jint envRes = (*sJVM)->GetEnv(sJVM, (void**)&lJNIEnv, JNI_VERSION_1_6);
 
-    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
+    if(envRes != JNI_OK) {
+        fprintf(stderr, "Error attaching JRE to current thread! %d\n", envRes);
+        return 1;
+    }
+
+    jthrowable exc;
+    exc = (*lJNIEnv)->ExceptionOccurred(lJNIEnv);
+    if (exc) {
+        jclass newExcCls;
+        (*lJNIEnv)->ExceptionDescribe(lJNIEnv);
+        (*lJNIEnv)->ExceptionClear(lJNIEnv);
+
+    }
+
+    printf("Creating renderer now...\n");
+    int res = (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
             createRendererID,
             pRendererId, 
             pWindowWidth, 
@@ -250,6 +329,17 @@ __declspec(dllexport) long __cdecl createRenderer(				long pRendererId,
             pMaxTextureHeight,
             0,
             0);
+
+    printf("Checking for exceptions...\n");
+    exc = (*lJNIEnv)->ExceptionOccurred(lJNIEnv);
+    if (exc) {
+        jclass newExcCls;
+        (*lJNIEnv)->ExceptionDescribe(lJNIEnv);
+        (*lJNIEnv)->ExceptionClear(lJNIEnv);
+        return 0;
+    } else {
+        return res;
+    }
 }
 
 __declspec(dllexport) long __cdecl createRendererWithTimeShiftAndChannels(	long pRendererId,
@@ -262,7 +352,7 @@ __declspec(dllexport) long __cdecl createRendererWithTimeShiftAndChannels(	long 
         bool pChannelSelector)
 {
     clearError();
-    JNIEnv *lJNIEnv;
+    JNIEnv* lJNIEnv;
     (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
     return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
@@ -281,7 +371,7 @@ __declspec(dllexport) long __cdecl createRendererWithTimeShiftAndChannels(	long 
 __declspec(dllexport) long __cdecl destroyRenderer(long pRendererId)
 {
     clearError();
-    JNIEnv *lJNIEnv;
+    JNIEnv* lJNIEnv;
     (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
     return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
@@ -292,7 +382,7 @@ __declspec(dllexport) long __cdecl destroyRenderer(long pRendererId)
 __declspec(dllexport) long __cdecl createServer(	long pServerId)
 {
     clearError();
-    JNIEnv *lJNIEnv;
+    JNIEnv* lJNIEnv;
     (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
     return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
@@ -303,7 +393,7 @@ __declspec(dllexport) long __cdecl createServer(	long pServerId)
 __declspec(dllexport) long __cdecl destroyServer(long pServerId)
 {
     clearError();
-    JNIEnv *lJNIEnv;
+    JNIEnv* lJNIEnv;
     (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
     return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
@@ -318,7 +408,7 @@ __declspec(dllexport) long __cdecl setVoxelDimensionsInRealUnits( 	long pSinkId,
         double pVoxelDepthInRealUnits)
 {
     clearError();
-    JNIEnv *lJNIEnv;
+    JNIEnv* lJNIEnv;
     (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
     return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
@@ -338,7 +428,7 @@ __declspec(dllexport) long __cdecl setVolumeIndexAndTime( 			long pSinkId,
         double pVolumeTimeInSeconds)
 {
     clearError();
-    JNIEnv *lJNIEnv;
+    JNIEnv* lJNIEnv;
     (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
     return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
@@ -358,7 +448,7 @@ __declspec(dllexport) long __cdecl send8bitUINTVolumeDataToSink( 	long pSinkId,
         long pDepth)
 {
     clearError();
-    JNIEnv *lJNIEnv;
+    JNIEnv* lJNIEnv;
     (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
     return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
@@ -381,7 +471,7 @@ __declspec(dllexport) long __cdecl send16bitUINTVolumeDataToSink( 	long pSinkId,
         long pDepth)
 {
     clearError();
-    JNIEnv *lJNIEnv;
+    JNIEnv* lJNIEnv;
     (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
 
     return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
