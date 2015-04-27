@@ -31,7 +31,7 @@ void run_clearvolume()
 
 	// First we initialize the library and provide the location of the ClearVolume jar file.
 	// the JVM location is determined automatically using the JAVA_HOME env var.
-	int lReturnCode = begincvlib(const_cast<char*>(classpath.c_str()), CUDA);
+	int lReturnCode = begincvlib(const_cast<char*>(classpath.c_str()), OPENCL);
 	if(lReturnCode!=0) 
 	{
 		cout << "Begin failed, return code=" << lReturnCode << endl;
@@ -45,12 +45,13 @@ void run_clearvolume()
 
 	// Creates an in-process renderer:
     cout << "Creating renderer... " << endl;
-	if(createRenderer(lRendererID,256, 256, 1, 512, 512)!=0) {
+	if(createRenderer(lRendererID, 512, 512, 1, 512, 512)!=0) {
 		cout << "ERROR while creating renderer \n";
         return;
     }
     cout << " done." << endl;
 
+    sleep(2);
 	// Creates a network server:
     cout << "Creating server... ";
 	if(createServer(lServerID)!=0)
@@ -126,6 +127,7 @@ int main(int argc, char** argv)
     classpath = argv[1];
     thread cv_thread(run_clearvolume);
 
+#ifdef __APPLE__
     CFRunLoopRef loopRef = CFRunLoopGetCurrent();
 
     CFRunLoopSourceContext sourceContext = { 
@@ -137,6 +139,7 @@ int main(int argc, char** argv)
     CFRunLoopAddSource(loopRef, sourceRef,  kCFRunLoopCommonModes);        
     CFRunLoopRun();
     CFRelease(sourceRef);
+#endif
 
     cv_thread.join();
 
