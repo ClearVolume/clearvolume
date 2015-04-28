@@ -12,8 +12,9 @@
     #define __cdecl __attribute__((__cdecl__))
     #define __declspec(dllexport) __attribute__ ((visibility("default")))
     #define __int64 unsigned long long
-#elif __WINDOWS__
+#elif _WIN32
     #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+	#include <Windows.h>
 #endif
 
 #include <jni.h>

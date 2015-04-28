@@ -16,18 +16,18 @@
 
 #define cErrorNone "No Error"
 
-#ifdef __WINDOWS__
+#ifdef _WIN32
 const char * getEnvWin(const char * name)
 {
-    const DWORD buffSize = 65535;
-    static char buffer[buffSize];
-    if (GetEnvironmentVariableA(name, buffer, buffSize))
+    const DWORD buffSize = 1024;
+    static char buffer[1024];
+    if (GetEnvironmentVariableA(name, &buffer[0], buffSize))
     {
         return buffer;
     }
     else
     {
-        return 0;
+        return "";
     }
 }
 #endif
@@ -48,7 +48,7 @@ static jmethodID 	getLastExceptionMessageID,
             send8bitUINTVolumeDataToSinkID,
             send16bitUINTVolumeDataToSinkID;
 
-#ifndef __WINDOWS__
+#ifndef _WIN32
 #include <signal.h>
 
 static struct sigaction old_sa[NSIG];
@@ -78,9 +78,9 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
 {
     clearError();
     JNIEnv* lJNIEnv;
-#ifdef __WINDOWS__
-    const char* JAVAHOME  =getEnvWin("JAVA_HOME");
-    printf("JAVAHOME=%s\n");
+#ifdef _WIN32
+    const char* JAVAHOME = getEnvWin("JAVA_HOME");
+    printf("JAVAHOME=%s\n", JAVAHOME);
 
     char JREFolderPath[1024];
 
@@ -148,7 +148,7 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
     sJVMArgs.options = options;
     sJVMArgs.ignoreUnrecognized = 0;
 
-#ifdef __WINDOWS
+#ifdef _WIN32
     jint res = lCreateJavaVM(&sJVM, (void **)&lJNIEnv, &sJVMArgs);
 #else
     jint res = JNI_CreateJavaVM(&sJVM, (void**)&lJNIEnv, &sJVMArgs);
@@ -227,7 +227,7 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
 
     }
 
-#ifndef WINDOWS
+#ifndef _WIN32
        struct sigaction handler;
 	memset(&handler, 0, sizeof(sigaction));
 	handler.sa_sigaction = cv_sigaction;
