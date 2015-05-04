@@ -1,5 +1,6 @@
 package clearvolume.renderer;
 
+import static java.lang.Math.PI;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.sqrt;
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.SwingUtilities;
 
@@ -43,10 +45,19 @@ import coremem.util.Size;
  * @author Loic Royer (2014), Florian Jug (2015)
  *
  */
+
 public abstract class ClearVolumeRendererBase	implements
 																							ClearVolumeRendererInterface,
 																							ClearVolumeCloseable
 {
+
+	/**
+	 * Default FOV
+	 */
+	public static final float cDefaultFOV = .785f;
+	public static final float cOrthoLikeFOV = .01f;
+	public static final float cMinimalFOV = cOrthoLikeFOV;
+	public static final float cMaximalFOV = (float) (0.75 * PI);
 
 	/**
 	 * Number of render layers.
@@ -86,6 +97,8 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile float mTranslationX = 0;
 	private volatile float mTranslationY = 0;
 	private volatile float mTranslationZ = 0;
+
+	private volatile float mFOV = cDefaultFOV;
 
 
 	// private volatile float mDensity;
@@ -129,6 +142,9 @@ public abstract class ClearVolumeRendererBase	implements
 
 	// Eye ray listeners:
 	protected CopyOnWriteArrayList<EyeRayListener> mEyeRayListenerList = new CopyOnWriteArrayList<EyeRayListener>();
+
+	// Display lock:
+	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
 
 
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
@@ -835,7 +851,49 @@ public abstract class ClearVolumeRendererBase	implements
 		return mRotationQuaternion;
 	}
 
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationX()
+	 */
+	@Override
+	public void setTranslationX(double pTranslationX)
+	{
+		mTranslationX = (float) pTranslationX;
+	}
 
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationY()
+	 */
+	@Override
+	public void setTranslationY(double pTranslationY)
+	{
+		mTranslationY = (float) pTranslationY;
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationZ()
+	 */
+	@Override
+	public void setTranslationZ(double pTranslationZ)
+	{
+		mTranslationZ = (float) pTranslationZ;
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationZ()
+	 */
+	@Override
+	public void setDefaultTranslationZ()
+	{
+		mTranslationZ = -4 / getFOV();
+	}
 
 	/**
 	 * Interface method implementation
@@ -868,6 +926,60 @@ public abstract class ClearVolumeRendererBase	implements
 	public float getTranslationZ()
 	{
 		return mTranslationZ;
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationZ()
+	 */
+	@Override
+	public void setFOV(double pFOV)
+	{
+		getDisplayLock().lock();
+		try
+		{
+			final double lNewFOV = min(cMaximalFOV, max(cMinimalFOV, pFOV));
+			final double lFactor = mFOV / lNewFOV;
+			/*System.out.format("old:%f new%f factor=%f \n",
+												mFOV,
+												lNewFOV,
+												lFactor);/**/
+			mFOV = (float) lNewFOV;
+			setTranslationZ(lFactor * getTranslationZ());
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationZ()
+	 */
+	@Override
+	public float getFOV()
+	{
+		return mFOV;
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTranslationZ()
+	 */
+	@Override
+	public void addFOV(double pDelta)
+	{
+		setFOV(mFOV + pDelta);
 	}
 
 	/**
@@ -995,7 +1107,7 @@ public abstract class ClearVolumeRendererBase	implements
 		mRotationQuaternion.setIdentity();
 		mTranslationX = 0;
 		mTranslationY = 0;
-		mTranslationZ = -4;
+		setDefaultTranslationZ();
 	}
 
 	@Override
@@ -1511,9 +1623,14 @@ public abstract class ClearVolumeRendererBase	implements
 		mEyeRayListenerList.remove(pEyeRayListener);
 	}
 
+	@Override
+	public ReentrantLock getDisplayLock()
+	{
+		return mDisplayReentrantLock;
+	}
+
 	/**
-	 * Clamps the value pValue to e interval [pMin,pMax] ======= Clamps the size
-	 * pValue to e interval [pMin,pMax] >>>>>>> coremem
+	 * Clamps the value pValue to the interval [pMin,pMax]
 	 *
 	 * @param pValue
 	 *          to be clamped

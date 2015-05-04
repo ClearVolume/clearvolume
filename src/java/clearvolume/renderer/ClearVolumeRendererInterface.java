@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
@@ -643,6 +644,36 @@ public interface ClearVolumeRendererInterface	extends
 	public void addTranslationZ(double pDZ);
 
 	/**
+	 * Sets the translation vector x component.
+	 *
+	 * @param pTranslationX
+	 *          x component
+	 */
+	public void setTranslationX(double pTranslationX);
+
+	/**
+	 * Sets the translation vector y component.
+	 *
+	 * @param pTranslationY
+	 *          y component
+	 */
+	public void setTranslationY(double pTranslationY);
+
+	/**
+	 * Sets the translation vector z component.
+	 *
+	 * @param pTranslationZ
+	 *          z component
+	 */
+	public void setTranslationZ(double pTranslationZ);
+
+	/**
+	 * Sets default translation z component. (so that you can see all of the
+	 * volume)
+	 */
+	void setDefaultTranslationZ();
+
+	/**
 	 * Returns the translation vector x component.
 	 *
 	 * @return x component
@@ -650,7 +681,7 @@ public interface ClearVolumeRendererInterface	extends
 	public float getTranslationX();
 
 	/**
-	 * Returns the translation vector x component.
+	 * Returns the translation vector y component.
 	 *
 	 * @return y component
 	 */
@@ -662,6 +693,27 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return z component
 	 */
 	public float getTranslationZ();
+
+	/**
+	 * Sets the FOV
+	 * 
+	 * @param pFOV
+	 */
+	void setFOV(double pFOV);
+
+	/**
+	 * Returns FOV
+	 * 
+	 * @return
+	 */
+	float getFOV();
+
+	/**
+	 * Adds FOV.
+	 * 
+	 * @param pDelta
+	 */
+	void addFOV(double pDelta);
 
 	/**
 	 * Returns the Quaternion.
@@ -818,6 +870,14 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	public void removeEyeRayListener(EyeRayListener pEyeRayListener);
 
+
+	/**
+	 * Returns display lock;
+	 * 
+	 * @return reentrant display lock
+	 */
+	ReentrantLock getDisplayLock();
+
 	/**
 	 * Interface method implementation
 	 *
@@ -825,6 +885,9 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
+
+
+
 
 
 

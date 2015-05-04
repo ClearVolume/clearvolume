@@ -172,7 +172,7 @@ volumerender(								__global uint	*d_output,
   // find intersection with box
   float tnear, tfar;
   const int hit = intersectBox(orig,direc, boxMin, boxMax, &tnear, &tfar);
-  if (!hit) 
+  if (!hit || tfar<=0) 
   {
   	d_output[x+imageW*y] = 0.f;
   	return;

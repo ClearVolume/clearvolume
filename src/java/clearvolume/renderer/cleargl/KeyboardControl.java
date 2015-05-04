@@ -5,6 +5,7 @@ import static java.lang.Math.PI;
 import java.util.Collection;
 
 import clearvolume.controller.AutoRotationController;
+import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
@@ -155,7 +156,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 			}
 			else
-				mClearVolumeRenderer.addTranslationZ(-lTranslationSpeed);
+				mClearVolumeRenderer.addTranslationZ(-lTranslationSpeed / mClearVolumeRenderer.getFOV());
 
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 
@@ -173,7 +174,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 			}
 			else
-				mClearVolumeRenderer.addTranslationZ(+lTranslationSpeed);
+				mClearVolumeRenderer.addTranslationZ(+lTranslationSpeed / mClearVolumeRenderer.getFOV());
 
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 
@@ -201,11 +202,6 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			}
 			break;
 
-		case KeyEvent.VK_P:
-			if (lIsCtrlPressed)
-				mClearVolumeRenderer.toggleControlPanelDisplay();
-			break;
-
 		case KeyEvent.VK_A:
 			if (lIsCtrlPressed)
 				lAutoRotateController.setActive(!lAutoRotateController.isActive());
@@ -219,6 +215,14 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 		case KeyEvent.VK_M:
 			if (lIsCtrlPressed)
 				mClearVolumeRenderer.toggleAdaptiveLOD();
+			break;
+
+		case KeyEvent.VK_O:
+			mClearVolumeRenderer.setFOV(ClearVolumeRendererBase.cOrthoLikeFOV);
+			break;
+
+		case KeyEvent.VK_P:
+			mClearVolumeRenderer.setFOV(ClearVolumeRendererBase.cDefaultFOV);
 			break;
 
 		}

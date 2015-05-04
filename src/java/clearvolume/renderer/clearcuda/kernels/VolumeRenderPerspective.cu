@@ -233,14 +233,14 @@ volumerender(       uint *d_output,
     float tnear, tfar;
     const int hit = intersectBox(eyeRay, boxMin, boxMax, &tnear, &tfar);
 
-    if (!hit) 
+    if (!hit || tfar<=0) 
     {
 	  	d_output[x+imageW*y] = 0.f;
 	    return;
     }
 
     // clamp to near plane:
-		if (tnear < 0.0f) tnear = 0.0f;     
+		if (tnear < 0.0f) tnear = 0.0f;
 
 		// compute step size:		
 		const float tstep = abs(tnear-tfar)/((maxsteps/LOOPUNROLL)*LOOPUNROLL);

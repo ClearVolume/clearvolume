@@ -9,7 +9,6 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GL;
@@ -88,7 +87,7 @@ public abstract class ClearGLVolumeRenderer	extends
 	private volatile int mLastWindowWidth, mLastWindowHeight;
 	private volatile int mViewportX, mViewportY, mViewportWidth,
 			mViewportHeight;
-	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
+
 
 	// pixelbuffer objects.
 	protected GLPixelBufferObject[] mPixelBufferObjects;
@@ -119,6 +118,7 @@ public abstract class ClearGLVolumeRenderer	extends
 	private final GLMatrix mBoxModelViewMatrix = new GLMatrix();
 	private final GLMatrix mVolumeViewMatrix = new GLMatrix();
 	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
+
 
 	private final int mTextureWidth, mTextureHeight;
 
@@ -645,6 +645,8 @@ public abstract class ClearGLVolumeRenderer	extends
 	{
 		final boolean lTryLock = true;
 
+		pDrawable.getGL();
+
 		mDisplayReentrantLock.lock(); /*tryLock(	cMaxWaitingTimeForAcquiringDisplayLockInMs,
 																							TimeUnit.MILLISECONDS);/**/
 
@@ -732,7 +734,6 @@ public abstract class ClearGLVolumeRenderer	extends
 			}
 			finally
 			{
-
 				if (mDisplayReentrantLock.isHeldByCurrentThread())
 					mDisplayReentrantLock.unlock();
 			}
@@ -742,7 +743,7 @@ public abstract class ClearGLVolumeRenderer	extends
 	private void setDefaultProjectionMatrix()
 	{
 		if (getClearGLWindow() != null)
-			getClearGLWindow().setPerspectiveProjectionMatrix(.785f,
+			getClearGLWindow().setPerspectiveProjectionMatrix(getFOV(),
 																												1,
 																												.1f,
 																												1000);
@@ -751,7 +752,7 @@ public abstract class ClearGLVolumeRenderer	extends
 	private GLMatrix getDefaultProjectionMatrix()
 	{
 		final GLMatrix lProjectionMatrix = new GLMatrix();
-		lProjectionMatrix.setPerspectiveProjectionMatrix(	.785f,
+		lProjectionMatrix.setPerspectiveProjectionMatrix(	getFOV(),
 																											1,
 																											.1f,
 																											1000);
@@ -761,7 +762,7 @@ public abstract class ClearGLVolumeRenderer	extends
 	private GLMatrix getAspectRatioCorrectedProjectionMatrix()
 	{
 		final GLMatrix lProjectionMatrix = new GLMatrix();
-		lProjectionMatrix.setPerspectiveProjectionMatrix(	.785f,
+		lProjectionMatrix.setPerspectiveProjectionMatrix(	getFOV(),
 																											1,
 																											.1f,
 																											1000);
@@ -802,8 +803,6 @@ public abstract class ClearGLVolumeRenderer	extends
 					notifyChangeOfVolumeRenderingParameters();
 				}
 		}
-
-
 
 		final GLMatrix lModelViewMatrix = new GLMatrix();
 		lModelViewMatrix.setIdentity();
@@ -1085,6 +1084,8 @@ public abstract class ClearGLVolumeRenderer	extends
 		// getAdaptiveLODController().requestDisplay();
 		// notifyChangeOfVolumeRenderingParameters();
 	}
+
+
 
 	@Override
 	public void addOverlay(Overlay pOverlay)

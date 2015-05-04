@@ -138,13 +138,21 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		final float[] lWheelRotation = pMouseEvent.getRotation();
 
-		final double lZoomWheelFactor = 0.0125f * mMouseWheelFactor;
+		double lZoomWheelFactor = 0.0125f * mMouseWheelFactor;
 
-		mRenderer.addTranslationZ(lWheelRotation[1] * lZoomWheelFactor);
+		if (pMouseEvent.isMetaDown())
+		{
+			mRenderer.addFOV(lWheelRotation[1] * lZoomWheelFactor);
+		}
+		else
+		{
+			lZoomWheelFactor /= mRenderer.getFOV();
+			mRenderer.addTranslationZ(lWheelRotation[1] * lZoomWheelFactor);
+		}
+
 		setSavedMousePosition(pMouseEvent);
 
 		mRenderer.notifyChangeOfVolumeRenderingParameters();
-
 
 	}
 
