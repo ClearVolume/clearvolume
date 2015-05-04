@@ -1454,7 +1454,16 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * <<<<<<< HEAD Adds a eye ray listener to this renderer.
+	 * Toggle on/off the adaptive Level-Of-Detail engine
+	 */
+	@Override
+	public void toggleAdaptiveLOD()
+	{
+		mAdaptiveLODController.toggleActive();
+	}
+
+	/**
+	 * Adds a eye ray listener to this renderer.
 	 *
 	 * @param pEyeRayListener
 	 *          eye ray listener

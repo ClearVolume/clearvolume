@@ -36,6 +36,11 @@ public class AdaptiveLODController
 		return mActive;
 	}
 
+	public void toggleActive()
+	{
+		mActive = !mActive;
+	}
+
 	private void setFibonacciPassNumber(final int pFibonacciPassNumber)
 	{
 		mFibonacciPassNumber = pFibonacciPassNumber;
@@ -60,6 +65,9 @@ public class AdaptiveLODController
 
 	public boolean isKernelRunNeeded()
 	{
+		if (!mActive)
+			return false;
+		
 		return mMultiPassRenderingInProgress;
 	}
 
@@ -73,6 +81,13 @@ public class AdaptiveLODController
 																			mPassIndex);
 		println("lPhase=" + lPhase);
 		return lPhase;
+	}
+
+	public int getPassIndex()
+	{
+		if (!mActive)
+			return 0;
+		return mPassIndex;
 	}
 
 	public int getNumberOfPasses()
@@ -211,5 +226,7 @@ public class AdaptiveLODController
 	{
 		// System.out.println(pString);
 	}
+
+
 
 }

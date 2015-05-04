@@ -772,6 +772,11 @@ public interface ClearVolumeRendererInterface	extends
 	public AdaptiveLODController getAdaptiveLODController();
 
 	/**
+	 * Toggle on/off the adaptive Level-Of-Detail engine
+	 */
+	public void toggleAdaptiveLOD();
+
+	/**
 	 * Adds a eye ray listener to this renderer.
 	 *
 	 * @param pEyeRayListener
@@ -794,5 +799,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
+
+
 
 }

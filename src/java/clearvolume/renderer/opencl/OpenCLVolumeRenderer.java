@@ -365,18 +365,24 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		{
 			prepareTransferFunctionArray(pRenderLayerIndex);
 
-			final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
+			/*final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
 			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
 			final int lMaxSteps = lMaxNumberSteps / getAdaptiveLODController().getNumberOfPasses();
 			final float lPhase = getAdaptiveLODController().getPhase();
 			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
 																																						: 1;/**/
 
-			/*System.out.format("mns=%d, ms=%d, phase=%g, clear=%d \n ",
-												lMaxNumberSteps,
-												lMaxSteps,
-												lPhase,
-												lClear);/**/
+			final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
+			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
+			final int lNumberOfPasses = getAdaptiveLODController().getNumberOfPasses();
+			final int lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
+			final float lPhase = getAdaptiveLODController().getPhase();
+			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
+																																						: 1;
+			final int lPassIndex = getAdaptiveLODController().getPassIndex();
+			final boolean lActive = getAdaptiveLODController().isActive();
+
+			final float lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
 
 			mCLDevice.setArgs(mRenderKernel,
 												mCLRenderBuffers[pRenderLayerIndex],
@@ -387,7 +393,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 												(float) getTransferRangeMax(pRenderLayerIndex),
 												(float) getGamma(pRenderLayerIndex),
 												lMaxSteps,
-												getDithering(pRenderLayerIndex),
+												lDithering,
 												lPhase,
 												lClear,
 												mCLTransferFunctionImages[pRenderLayerIndex],

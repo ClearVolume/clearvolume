@@ -92,7 +92,13 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			break;
 
 		case KeyEvent.VK_C:
-			mClearVolumeRenderer.requestVolumeCapture();
+			if (lIsCtrlPressed)
+				mClearVolumeRenderer.requestVolumeCapture();
+			break;
+
+		case KeyEvent.VK_M:
+			if (lIsCtrlPressed)
+				mClearVolumeRenderer.toggleAdaptiveLOD();
 			break;
 
 		}

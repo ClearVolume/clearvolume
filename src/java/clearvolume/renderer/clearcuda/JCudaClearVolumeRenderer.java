@@ -642,7 +642,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 		try
 		{
 			mInvertedModelViewMatrix.copyFrom(pInverseModelViewMatrix, true);
-			mInvertedProjectionMatrix.copyFrom(pInverseProjectionMatrix, true);
+			mInvertedProjectionMatrix.copyFrom(	pInverseProjectionMatrix,
+																					true);
 			return updateBufferAndRunKernel();
 		}
 		catch (final CudaException e)
@@ -785,10 +786,16 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 				final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
 				getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
-				final int lMaxSteps = lMaxNumberSteps / getAdaptiveLODController().getNumberOfPasses();
+				final int lNumberOfPasses = getAdaptiveLODController().getNumberOfPasses();
+				final int lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
 				final float lPhase = getAdaptiveLODController().getPhase();
 				final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
 																																							: 1;
+				final int lPassIndex = getAdaptiveLODController().getPassIndex();
+				final boolean lActive = getAdaptiveLODController().isActive();
+
+				final float lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+
 
 				mVolumeRenderingFunction.launch(lCudaDevicePointer,
 																				getTextureWidth(),
@@ -798,7 +805,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 																				(float) getTransferRangeMax(pRenderLayerIndex),
 																				(float) getGamma(pRenderLayerIndex),
 																				lMaxSteps,
-																				getDithering(pRenderLayerIndex),
+																				lDithering,
 																				lPhase,
 																				lClear);
 			}
