@@ -1177,4 +1177,6 @@ public abstract class ClearGLVolumeRenderer	extends
 		mViewportWidth = pViewportWidth;
 	}
 
+
+
 }
