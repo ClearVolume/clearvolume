@@ -1,6 +1,6 @@
 package clearvolume.controller;
 
-import cleargl.GLMatrix;
+import com.jogamp.opengl.math.Quaternion;
 
 /**
  * Class RotationControllerInterface
@@ -11,11 +11,26 @@ public interface RotationControllerInterface
 {
 
 	/**
-	 * Performs the mModelMatrix-mViewMatrix transform.
+	 * Sets the current Quaternion
+	 * 
+	 * @param pQuaternion
+	 */
+	void setQuaternion(final Quaternion pQuaternion);
+
+	/**
+	 * Returns the current Quaternion
 	 * 
 	 * @param pVolumeViewMatrix
 	 */
-	void rotate(GLMatrix pVolumeViewMatrix);
+	Quaternion getQuaternion();
+
+	/**
+	 * Sets controller active flag
+	 * 
+	 * @param pActive
+	 *          true for active, false for inactive
+	 */
+	void setActive(boolean pActive);
 
 	/**
 	 * Is controller active?

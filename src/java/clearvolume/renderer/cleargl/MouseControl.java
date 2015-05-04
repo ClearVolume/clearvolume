@@ -2,6 +2,9 @@ package clearvolume.renderer.cleargl;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+
+import org.apache.commons.lang.SystemUtils;
+
 import cleargl.util.arcball.ArcBall;
 
 import com.jogamp.newt.event.MouseAdapter;
@@ -19,6 +22,10 @@ import com.jogamp.newt.event.MouseListener;
  */
 class MouseControl extends MouseAdapter implements MouseListener
 {
+
+	private final double mMouseWheelFactor = SystemUtils.IS_OS_WINDOWS ? 10
+																																		: 1;
+
 	/**
 	 * Reference of the renderer
 	 */
@@ -92,14 +99,15 @@ class MouseControl extends MouseAdapter implements MouseListener
 		{
 			final float lMouseX = pMouseEvent.getX();
 			final float lMouseY = pMouseEvent.getY();
+			mArcBall.setBounds(	mRenderer.getViewportWidth(),
+													mRenderer.getViewportHeight());
 			mArcBall.drag(lMouseX, lMouseY, mRenderer.getQuaternion());
 		}
 
 		handleTranslation(pMouseEvent);
 		handleGammaMinMax(pMouseEvent);
 		mRenderer.notifyChangeOfVolumeRenderingParameters();
-		mRenderer.getAdaptiveLODController()
-							.notifyUserInteractionInProgress();
+
 	}
 
 	/**
@@ -130,14 +138,13 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		final float[] lWheelRotation = pMouseEvent.getRotation();
 
-		final double lZoomWheelFactor = 0.0125f;
+		final double lZoomWheelFactor = 0.0125f * mMouseWheelFactor;
 
 		mRenderer.addTranslationZ(lWheelRotation[1] * lZoomWheelFactor);
 		setSavedMousePosition(pMouseEvent);
 
 		mRenderer.notifyChangeOfVolumeRenderingParameters();
-		mRenderer.getAdaptiveLODController()
-							.notifyUserInteractionInProgress();
+
 
 	}
 
@@ -155,6 +162,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 		{
 			final float lMouseX = pMouseEvent.getX();
 			final float lMouseY = pMouseEvent.getY();
+			mArcBall.setBounds(	mRenderer.getViewportWidth(),
+													mRenderer.getViewportHeight());
 			mArcBall.setCurrent(mRenderer.getQuaternion());
 			mArcBall.click(lMouseX, lMouseY);
 		}

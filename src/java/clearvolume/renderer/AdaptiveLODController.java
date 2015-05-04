@@ -22,7 +22,7 @@ public class AdaptiveLODController
 
 	public AdaptiveLODController()
 	{
-		setFibonacciPassNumber(6);
+		setFibonacciPassNumber(5);
 		resetMultiPassRendering();
 	}
 

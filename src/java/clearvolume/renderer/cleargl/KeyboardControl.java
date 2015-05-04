@@ -1,7 +1,10 @@
 package clearvolume.renderer.cleargl;
 
+import static java.lang.Math.PI;
+
 import java.util.Collection;
 
+import clearvolume.controller.AutoRotationController;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
@@ -21,6 +24,9 @@ import com.jogamp.newt.event.KeyListener;
  */
 class KeyboardControl extends KeyAdapter implements KeyListener
 {
+
+	volatile boolean mToggleRotationTranslation = true;
+
 	/**
 	 * Reference to renderer.
 	 */
@@ -45,31 +51,132 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 	@Override
 	public void keyPressed(final KeyEvent pE)
 	{
+		final AutoRotationController lAutoRotateController = mClearVolumeRenderer.getAutoRotateController();
+
 		final boolean lIsShiftPressed = pE.isShiftDown();
 		final boolean lIsCtrlPressed = pE.isControlDown();
-		final float speed = lIsShiftPressed ? 0.1f : 0.001f;
+		final boolean lIsMetaPressed = pE.isMetaDown();
+		final float lTranslationSpeed = lIsShiftPressed	? 0.1f
+																										: (lIsMetaPressed	? 0.001f
+																																			: 0.01f);
+		final float lRotationSpeed = (float) (2 * PI * (lIsShiftPressed	? 0.025f
+																																		: (lIsMetaPressed	? 0.0005f
+																																											: 0.005f)));
+		final float lAutoRotationSpeed = 0.01f * lRotationSpeed;
 
 		switch (pE.getKeyCode())
 		{
+		case KeyEvent.VK_SPACE:
+			mToggleRotationTranslation = !mToggleRotationTranslation;
+			break;
 		case KeyEvent.VK_DOWN:
-			mClearVolumeRenderer.addTranslationZ(-speed);
+			if (mToggleRotationTranslation)
+			{
+
+				if (lAutoRotateController.isActive())
+					lAutoRotateController.addRotationSpeedX(-lAutoRotationSpeed);
+				else
+					mClearVolumeRenderer.getQuaternion()
+															.invert()
+															.rotateByAngleX(-lRotationSpeed)
+															.invert();
+
+			}
+
+			else
+				mClearVolumeRenderer.addTranslationY(-lTranslationSpeed);
+			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 			break;
 		case KeyEvent.VK_UP:
-			mClearVolumeRenderer.addTranslationZ(+speed);
+			if (mToggleRotationTranslation)
+			{
+				if (lAutoRotateController.isActive())
+					lAutoRotateController.addRotationSpeedX(+lAutoRotationSpeed);
+				else
+					mClearVolumeRenderer.getQuaternion()
+															.invert()
+															.rotateByAngleX(+lRotationSpeed)
+															.invert();
+
+			}
+			else
+				mClearVolumeRenderer.addTranslationY(+lTranslationSpeed);
+
+			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
+
 			break;
 
 		case KeyEvent.VK_LEFT:
-			mClearVolumeRenderer.addTranslationX(-speed);
+			if (mToggleRotationTranslation)
+			{
+				if (lAutoRotateController.isActive())
+					lAutoRotateController.addRotationSpeedY(+lAutoRotationSpeed);
+				else
+					mClearVolumeRenderer.getQuaternion()
+															.invert()
+															.rotateByAngleY(+lRotationSpeed)
+															.invert();
+
+			}
+			else
+				mClearVolumeRenderer.addTranslationX(-lTranslationSpeed);
+			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
+
 			break;
 		case KeyEvent.VK_RIGHT:
-			mClearVolumeRenderer.addTranslationX(+speed);
+			if (mToggleRotationTranslation)
+			{
+				if (lAutoRotateController.isActive())
+					lAutoRotateController.addRotationSpeedY(-lAutoRotationSpeed);
+				else
+					mClearVolumeRenderer.getQuaternion()
+															.invert()
+															.rotateByAngleY(-lRotationSpeed)
+															.invert();
+
+			}
+			else
+				mClearVolumeRenderer.addTranslationX(+lTranslationSpeed);
+
+			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
+
 			break;
 
 		case KeyEvent.VK_PAGE_DOWN:
-			mClearVolumeRenderer.addTranslationY(-speed);
+			if (mToggleRotationTranslation)
+			{
+				if (lAutoRotateController.isActive())
+					lAutoRotateController.addRotationSpeedZ(-lAutoRotationSpeed);
+				else
+					mClearVolumeRenderer.getQuaternion()
+															.invert()
+															.rotateByAngleZ(-lRotationSpeed)
+															.invert();
+
+			}
+			else
+				mClearVolumeRenderer.addTranslationZ(-lTranslationSpeed);
+
+			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
+
 			break;
 		case KeyEvent.VK_PAGE_UP:
-			mClearVolumeRenderer.addTranslationY(+speed);
+			if (mToggleRotationTranslation)
+			{
+				if (lAutoRotateController.isActive())
+					lAutoRotateController.addRotationSpeedZ(+lAutoRotationSpeed);
+				else
+					mClearVolumeRenderer.getQuaternion()
+															.invert()
+															.rotateByAngleZ(+lRotationSpeed)
+															.invert();
+
+			}
+			else
+				mClearVolumeRenderer.addTranslationZ(+lTranslationSpeed);
+
+			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
+
 			break;
 		case KeyEvent.VK_ESCAPE:
 			if (mClearVolumeRenderer.isFullScreen())
@@ -82,13 +189,26 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			}
 			else
 			{
-				mClearVolumeRenderer.resetBrightnessAndGammaAndTransferFunctionRanges();
-				mClearVolumeRenderer.resetRotationTranslation();
+				if (lAutoRotateController.isActive())
+				{
+					lAutoRotateController.stop();
+				}
+				else
+				{
+					mClearVolumeRenderer.resetBrightnessAndGammaAndTransferFunctionRanges();
+					mClearVolumeRenderer.resetRotationTranslation();
+				}
 			}
 			break;
 
+		case KeyEvent.VK_P:
+			if (lIsCtrlPressed)
+				mClearVolumeRenderer.toggleControlPanelDisplay();
+			break;
+
 		case KeyEvent.VK_A:
-			mClearVolumeRenderer.toggleControlPanelDisplay();
+			if (lIsCtrlPressed)
+				lAutoRotateController.setActive(!lAutoRotateController.isActive());
 			break;
 
 		case KeyEvent.VK_C:

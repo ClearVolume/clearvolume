@@ -33,6 +33,8 @@ import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
 import cleargl.util.recorder.GLVideoRecorder;
+import clearvolume.controller.RotationControllerInterface;
+import clearvolume.controller.RotationControllerWithRenderNotification;
 import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
@@ -785,11 +787,23 @@ public abstract class ClearGLVolumeRenderer	extends
 		/*lEulerMatrix.euler(	getRotationX() * 0.01,
 												getRotationY() * 0.01,
 												0.0f);/**/
-		if (hasRotationController())
+		if (getRotationControllers().size() > 0)
 		{
-			// getRotationController().rotate(lEulerMatrix);
-			notifyChangeOfVolumeRenderingParameters();
+			for (final RotationControllerInterface lRotationController : getRotationControllers())
+				if (lRotationController.isActive())
+				{
+					if (lRotationController instanceof RotationControllerWithRenderNotification)
+					{
+						final RotationControllerWithRenderNotification lRenderNotification = (RotationControllerWithRenderNotification) lRotationController;
+						lRenderNotification.notifyRender(this);
+					}
+					getQuaternion().mult(lRotationController.getQuaternion());
+
+					notifyChangeOfVolumeRenderingParameters();
+				}
 		}
+
+
 
 		final GLMatrix lModelViewMatrix = new GLMatrix();
 		lModelViewMatrix.setIdentity();
@@ -1176,7 +1190,5 @@ public abstract class ClearGLVolumeRenderer	extends
 	{
 		mViewportWidth = pViewportWidth;
 	}
-
-
 
 }

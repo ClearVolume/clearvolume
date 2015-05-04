@@ -1,10 +1,12 @@
 package clearvolume.renderer;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import clearvolume.ClearVolumeCloseable;
+import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.listeners.EyeRayListener;
@@ -383,13 +385,6 @@ public interface ClearVolumeRendererInterface	extends
 	public void setProjectionAlgorithm(ProjectionAlgorithm pProjectionAlgorithm);
 
 	/**
-	 * Sets the rotation controller used (in addition to the mouse).
-	 *
-	 * @param pRotationControllerInterface
-	 */
-	public void setQuaternionController(RotationControllerInterface pRotationControllerInterface);
-
-	/**
 	 * Sets the current render layer.
 	 *
 	 * @param pLayerIndex
@@ -676,6 +671,37 @@ public interface ClearVolumeRendererInterface	extends
 	public Quaternion getQuaternion();
 
 	/**
+	 * Adds a rotation controller.
+	 *
+	 * @param pRotationControllerInterface
+	 *          rotation controller
+	 */
+	public void addRotationController(RotationControllerInterface pRotationControllerInterface);
+
+	/**
+	 * Removes a rotation controller.
+	 *
+	 * @param pRotationControllerInterface
+	 *          rotation controller
+	 */
+	public void removeRotationController(RotationControllerInterface pRotationControllerInterface);
+
+	/**
+	 * Returns the current list of rotation controllers.
+	 *
+	 * @return currently used rotation controller.
+	 */
+	public ArrayList<RotationControllerInterface> getRotationControllers();
+
+
+	/**
+	 * Returns the auto rotation controller.
+	 *
+	 * @return auto rotation controller
+	 */
+	AutoRotationController getAutoRotateController();
+
+	/**
 	 * Notifies renderer that display/volume parameters have changed and a display
 	 * update is needed.
 	 */
@@ -799,6 +825,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
+
 
 
 

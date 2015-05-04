@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.SwingUtilities;
 
 import clearvolume.ClearVolumeCloseable;
+import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
@@ -61,7 +62,12 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Rotation controller in addition to the mouse
 	 */
-	private RotationControllerInterface mRotationController;
+	private final ArrayList<RotationControllerInterface> mRotationControllerList = new ArrayList<RotationControllerInterface>();
+
+	/**
+	 * Auto rotation controller
+	 */
+	private final AutoRotationController mAutoRotationController;
 
 	/**
 	 * Projection algorithm used
@@ -124,6 +130,7 @@ public abstract class ClearVolumeRendererBase	implements
 	// Eye ray listeners:
 	protected CopyOnWriteArrayList<EyeRayListener> mEyeRayListenerList = new CopyOnWriteArrayList<EyeRayListener>();
 
+
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
 		super();
@@ -155,6 +162,9 @@ public abstract class ClearVolumeRendererBase	implements
 		}
 
 		mAdaptiveLODController = new AdaptiveLODController();
+
+		mAutoRotationController = new AutoRotationController();
+		mRotationControllerList.add(mAutoRotationController);
 
 	}
 
@@ -1330,37 +1340,52 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Returns the currently used rotation controller.
+	 * Adds a rotation controller.
+	 *
+	 * @param pRotationControllerInterface
+	 *          rotation controller
+	 */
+	@Override
+	public void addRotationController(RotationControllerInterface pRotationControllerInterface)
+	{
+		mRotationControllerList.add(pRotationControllerInterface);
+	}
+
+	/**
+	 * Removes a rotation controller.
+	 *
+	 * @param pRotationControllerInterface
+	 *          rotation controller
+	 */
+	@Override
+	public void removeRotationController(RotationControllerInterface pRotationControllerInterface)
+	{
+		mRotationControllerList.remove(pRotationControllerInterface);
+	}
+
+	/**
+	 * Returns the auto rotation controller.
+	 *
+	 * @return auto rotation controller
+	 */
+	@Override
+	public AutoRotationController getAutoRotateController()
+	{
+		return mAutoRotationController;
+	}
+
+	/**
+	 * Returns the current list of rotation controllers.
 	 *
 	 * @return currently used rotation controller.
 	 */
-	public RotationControllerInterface getRotationController()
-	{
-		return mRotationController;
-	}
-
-	/**
-	 * Checks whether there is a rotation controller used (in addition to the
-	 * mouse).
-	 *
-	 * @return true if it has a rotation controller
-	 */
-	public boolean hasRotationController()
-	{
-		return mRotationController != null ? mRotationController.isActive()
-																			: false;
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setQuaternionController(clearvolume.controller.RotationControllerInterface)
-	 */
 	@Override
-	public void setQuaternionController(final RotationControllerInterface quaternionController)
+	public ArrayList<RotationControllerInterface> getRotationControllers()
 	{
-		mRotationController = quaternionController;
+		return mRotationControllerList;
 	}
+
+
 
 	/**
 	 * Toggles the display of the Control Frame;

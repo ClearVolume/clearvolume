@@ -411,7 +411,7 @@ public class ClearVolumeOtherDemos
 		{
 			lEgg3DController = new ExternalRotationController(ExternalRotationController.cDefaultEgg3DTCPport,
 																												lClearVolumeRenderer);
-			lClearVolumeRenderer.setQuaternionController(lEgg3DController);
+			lClearVolumeRenderer.addRotationController(lEgg3DController);
 			lEgg3DController.connectAsynchronouslyOrWait();
 		}
 		catch (final Exception e)
