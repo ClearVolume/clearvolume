@@ -2,6 +2,7 @@ package clearvolume.renderer.cleargl;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import cleargl.util.arcball.ArcBall;
 
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
@@ -24,17 +25,55 @@ class MouseControl extends MouseAdapter implements MouseListener
 	private final ClearGLVolumeRenderer mRenderer;
 
 	/**
+	 * Previous mouse positions.
+	 */
+	private int mSavedMouseX, mSavedMouseY;
+
+	/**
+	 * ArcBall class for easier 3D control
+	 */
+	private final ArcBall mArcBall;
+
+	/**
 	 * @param pJoglVolumeRenderer
 	 */
 	MouseControl(final ClearGLVolumeRenderer pClearVolumeRenderer)
 	{
 		mRenderer = pClearVolumeRenderer;
+		mArcBall = new ArcBall();
+		mArcBall.setBounds(	mRenderer.getViewportWidth(),
+												mRenderer.getViewportHeight());
+	}
+
+	private void setSavedMousePosition(final MouseEvent pMouseEvent)
+	{
+		mSavedMouseX = pMouseEvent.getX();
+		mSavedMouseY = pMouseEvent.getY();
 	}
 
 	/**
-	 * Previous mouse positions.
+	 * Interface method implementation
+	 * 
+	 * @see com.jogamp.newt.event.MouseAdapter#mouseClicked(com.jogamp.newt.event.MouseEvent)
 	 */
-	private int mPreviousMouseX, mPreviousMouseY;
+	@Override
+	public void mouseClicked(final MouseEvent pMouseEvent)
+	{
+		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
+			return;
+
+		if (pMouseEvent.getClickCount() == 1)
+		{
+			handleGammaMinMax(pMouseEvent);
+
+		}
+		else if (pMouseEvent.getClickCount() == 2)
+		{
+			mRenderer.toggleFullScreen();
+			mRenderer.notifyChangeOfVolumeRenderingParameters();
+		}
+
+	}
 
 	/**
 	 * Interface method implementation
@@ -47,7 +86,16 @@ class MouseControl extends MouseAdapter implements MouseListener
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
 
-		handleRotationAndTranslation(pMouseEvent);
+		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
+				&& !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
+			final float lMouseX = pMouseEvent.getX();
+			final float lMouseY = pMouseEvent.getY();
+			mArcBall.drag(lMouseX, lMouseY, mRenderer.getQuaternion());
+		}
+
+		handleTranslation(pMouseEvent);
 		handleGammaMinMax(pMouseEvent);
 		mRenderer.notifyChangeOfVolumeRenderingParameters();
 		mRenderer.getAdaptiveLODController()
@@ -65,9 +113,9 @@ class MouseControl extends MouseAdapter implements MouseListener
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
 
-		mPreviousMouseX = pMouseEvent.getX();
-		mPreviousMouseY = pMouseEvent.getY();
+		setSavedMousePosition(pMouseEvent);
 	}
+
 
 	/**
 	 * Interface method implementation
@@ -84,11 +132,8 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		final double lZoomWheelFactor = 0.0125f;
 
-		// mRenderer.addTranslationX(lWheelRotation[2] * lZoomWheelFactor);
-		// mRenderer.addTranslationY(lWheelRotation[0] * lZoomWheelFactor);
 		mRenderer.addTranslationZ(lWheelRotation[1] * lZoomWheelFactor);
-		mPreviousMouseX = pMouseEvent.getX();
-		mPreviousMouseY = pMouseEvent.getY();
+		setSavedMousePosition(pMouseEvent);
 
 		mRenderer.notifyChangeOfVolumeRenderingParameters();
 		mRenderer.getAdaptiveLODController()
@@ -96,34 +141,23 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 	}
 
-	/**
-	 * Interface method implementation
-	 * 
-	 * @see com.jogamp.newt.event.MouseAdapter#mouseClicked(com.jogamp.newt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseClicked(final MouseEvent pMouseEvent)
-	{
-		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
-			return;
 
-		if (pMouseEvent.getClickCount() == 1)
-		{
-			handleGammaMinMax(pMouseEvent);
-		}
-		else if (pMouseEvent.getClickCount() == 2)
-		{
-			mRenderer.toggleFullScreen();
-			mRenderer.notifyChangeOfVolumeRenderingParameters();
-		}
-
-	}
 
 	@Override
 	public void mousePressed(MouseEvent pMouseEvent)
 	{
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
+
+		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
+				&& !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
+			final float lMouseX = pMouseEvent.getX();
+			final float lMouseY = pMouseEvent.getY();
+			mArcBall.setCurrent(mRenderer.getQuaternion());
+			mArcBall.click(lMouseX, lMouseY);
+		}
 
 		mRenderer.getAdaptiveLODController()
 							.notifyUserInteractionInProgress();
@@ -136,34 +170,26 @@ class MouseControl extends MouseAdapter implements MouseListener
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
 
+
 		mRenderer.getAdaptiveLODController().notifyUserInteractionEnded();
 		super.mouseReleased(pMouseEvent);
 
 	}
 
-	private void handleRotationAndTranslation(final MouseEvent pMouseEvent)
+	private void handleTranslation(final MouseEvent pMouseEvent)
 	{
-		final int dx = pMouseEvent.getX() - mPreviousMouseX;
-		final int dy = pMouseEvent.getY() - mPreviousMouseY;
-
-		// If the left button is held down, rotate the object
-		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
-				&& !pMouseEvent.isControlDown()
-				&& pMouseEvent.isButtonDown(1))
-		{
-			mRenderer.rotate(dx, dy);
-		}
+		final int dx = pMouseEvent.getX() - mSavedMouseX;
+		final int dy = pMouseEvent.getY() - mSavedMouseY;
 
 		// If the right button is held down, translate the object
-		else if (!pMouseEvent.isMetaDown() && !pMouseEvent.isControlDown()
+		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isControlDown()
 							&& (pMouseEvent.isButtonDown(3)))
 		{
 
 			mRenderer.addTranslationX(dx / 100.0f);
 			mRenderer.addTranslationY(-dy / 100.0f);
 		}
-		mPreviousMouseX = pMouseEvent.getX();
-		mPreviousMouseY = pMouseEvent.getY();
+		setSavedMousePosition(pMouseEvent);
 	}
 
 	/**
