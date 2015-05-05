@@ -1,6 +1,6 @@
 package clearvolume.renderer.cleargl.overlay;
 
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL;
 
 import clearvolume.renderer.DisplayRequestInterface;
 
@@ -45,7 +45,7 @@ public interface Overlay
 	 * @param pDisplayRequestInterface
 	 *          to request display.
 	 */
-	public void init(	GL4 pGL4,
+	public void init(	GL pGL,
 										DisplayRequestInterface pDisplayRequestInterface);
 
 }

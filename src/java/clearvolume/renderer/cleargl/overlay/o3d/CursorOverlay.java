@@ -6,6 +6,8 @@ import static java.lang.Math.sqrt;
 
 import java.io.IOException;
 
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GL4;
 
 import cleargl.ClearGeometryObject;
@@ -109,12 +111,12 @@ public class CursorOverlay extends OverlayBase implements
 	 * @see clearvolume.renderer.jogl.overlay.Overlay#init(javax.media.opengl.GL4, clearvolume.renderer.DisplayRequestInterface)
 	 */
 	@Override
-	public void init(	GL4 pGL4,
+	public void init(	GL pGL,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
 		try
 		{
-			mBoxGLProgram = GLProgram.buildProgram(	pGL4,
+			mBoxGLProgram = GLProgram.buildProgram(	pGL,
 																							CursorOverlay.class,
 																							"shaders/cursor_vert.glsl",
 																							"shaders/cursor_frag.glsl");
@@ -228,7 +230,7 @@ public class CursorOverlay extends OverlayBase implements
 	 * @see clearvolume.renderer.jogl.overlay.Overlay3D#render3D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
 	 */
 	@Override
-	public void render3D(	GL4 pGL4,
+	public void render3D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix,
@@ -244,13 +246,13 @@ public class CursorOverlay extends OverlayBase implements
 			mPlaneY.setProjection(pProjectionMatrix);
 			mPlaneZ.setProjection(pProjectionMatrix);
 
-			pGL4.glDisable(GL4.GL_DEPTH_TEST);
-			pGL4.glDisable(GL4.GL_CULL_FACE);
-			pGL4.glEnable(GL4.GL_BLEND);
-			pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
-			pGL4.glBlendEquation(GL4.GL_MAX);
+			pGL.glDisable(GL.GL_DEPTH_TEST);
+			pGL.glDisable(GL.GL_CULL_FACE);
+			pGL.glEnable(GL.GL_BLEND);
+			pGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
+			pGL.glBlendEquation(GL2.GL_MAX);
 
-			mBoxGLProgram.use(pGL4);
+			mBoxGLProgram.use(pGL);
 
 			setPlanesVertices();
 			mPlaneX.updateVertices(mVerticesFloatArrayPlaneX.getFloatBuffer());

@@ -2,6 +2,7 @@ package clearvolume.renderer.cleargl.overlay.o3d;
 
 import java.nio.FloatBuffer;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL4;
 
 import cleargl.ClearGeometryObject;
@@ -73,13 +74,13 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay#init(javax.media.opengl.GL4, clearvolume.renderer.DisplayRequestInterface)
 	 */
 	@Override
-	public void init(	GL4 pGL4,
+	public void init(	GL pGL,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
 		// box display: construct the program and related objects
 		try
 		{
-			mBoxGLProgram = GLProgram.buildProgram(	pGL4,
+			mBoxGLProgram = GLProgram.buildProgram(	pGL,
 																							PathOverlay.class,
 																							new String[]
 																							{ "shaders/path_vert.glsl",
@@ -112,7 +113,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
 	 */
 	@Override
-	public void render3D(	GL4 pGL4,
+	public void render3D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix,
@@ -121,7 +122,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 		if (isDisplayed())
 		{
 			// mPath.getProgram().use(pGL4);
-			mBoxGLProgram.use(pGL4);
+			mBoxGLProgram.use(pGL);
 
 			mPath.getProgram()
 						.getUniform("vertexCount")
@@ -136,14 +137,14 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 			mPath.setModelView(pModelViewMatrix);
 			mPath.setProjection(pProjectionMatrix);
 
-			pGL4.glDisable(GL4.GL_BLEND);
-			pGL4.glDisable(GL4.GL_CULL_FACE);
-			pGL4.glBlendFunc(GL4.GL_SRC_ALPHA, GL4.GL_ONE_MINUS_SRC_ALPHA);
-			pGL4.glBlendEquation(GL4.GL_FUNC_ADD);
+			pGL.glDisable(GL4.GL_BLEND);
+			pGL.glDisable(GL4.GL_CULL_FACE);
+			pGL.glBlendFunc(GL4.GL_SRC_ALPHA, GL4.GL_ONE_MINUS_SRC_ALPHA);
+			pGL.glBlendEquation(GL4.GL_FUNC_ADD);
 
 			mPath.draw();
 
-			pGL4.glEnable(GL4.GL_BLEND);
+			pGL.glEnable(GL4.GL_BLEND);
 
 			// mPathPoints.add(-0.2f + (float) Math.random() * ((0.2f - (-0.2f)) +
 			// 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f), -0.2f +
