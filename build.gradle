@@ -194,8 +194,8 @@ dependencies
 	// usage: gradle .... -Plocal=true
 	if (project.hasProperty('local')) {
 		println 'Using local clearCUDA and clearGL sources'
-		compile project(':ClearGL')
-		compile project(':ClearCUDA')
+		compile project(':cleargl')
+		compile project(':clearcuda')
 	}
 	else {
 		println 'Using clearCUDA and clearGL from Maven repository'/**/
