@@ -75,11 +75,11 @@ public class ClearVolumeBasicDemos
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					1024,
-																																																					1024,
+																																																					768,
+																																																					768,
 																																																					NativeTypeEnum.UnsignedByte,
-																																																					1024,
-																																																					1024,
+																																																					768,
+																																																					768,
 																																																					1,
 																																																					false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());

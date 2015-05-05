@@ -85,7 +85,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			}
 
 			else
-				mClearVolumeRenderer.addTranslationY(-lTranslationSpeed);
+				mClearVolumeRenderer.addTranslationY(+lTranslationSpeed);
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 			break;
 		case KeyEvent.VK_UP:
@@ -101,7 +101,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 			}
 			else
-				mClearVolumeRenderer.addTranslationY(+lTranslationSpeed);
+				mClearVolumeRenderer.addTranslationY(-lTranslationSpeed);
 
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 
@@ -120,7 +120,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 			}
 			else
-				mClearVolumeRenderer.addTranslationX(-lTranslationSpeed);
+				mClearVolumeRenderer.addTranslationX(+lTranslationSpeed);
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 
 			break;
@@ -137,7 +137,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 			}
 			else
-				mClearVolumeRenderer.addTranslationX(+lTranslationSpeed);
+				mClearVolumeRenderer.addTranslationX(-lTranslationSpeed);
 
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 
@@ -192,7 +192,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			{
 				if (lAutoRotateController.isActive())
 				{
-					lAutoRotateController.stop();
+					lAutoRotateController.stopRotation();
 				}
 				else
 				{
@@ -204,7 +204,15 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 		case KeyEvent.VK_A:
 			if (lIsCtrlPressed)
+			{
 				lAutoRotateController.setActive(!lAutoRotateController.isActive());
+				if (lAutoRotateController.isActive() && !lAutoRotateController.isModified())
+				{
+					lAutoRotateController.setDefaultRotation();
+				}
+
+				mToggleRotationTranslation = true;
+			}
 			break;
 
 		case KeyEvent.VK_C:
@@ -223,6 +231,11 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 		case KeyEvent.VK_P:
 			mClearVolumeRenderer.setFOV(ClearVolumeRendererBase.cDefaultFOV);
+			break;
+
+		case KeyEvent.VK_TAB:
+			mClearVolumeRenderer.resetRotationTranslation();
+			mClearVolumeRenderer.setTranslateFirstRotateSecond(!mClearVolumeRenderer.isTranslateFirstRotateSecond());
 			break;
 
 		}

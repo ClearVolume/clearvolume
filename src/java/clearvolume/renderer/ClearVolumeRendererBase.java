@@ -97,6 +97,7 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile float mTranslationX = 0;
 	private volatile float mTranslationY = 0;
 	private volatile float mTranslationZ = 0;
+	private volatile boolean mTranslateFirstRotateSecond = true;
 
 	private volatile float mFOV = cDefaultFOV;
 
@@ -810,6 +811,44 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
+	 * Returns true if translation are performed first and rotation second.
+	 * 
+	 * @return true if rotation is performed first
+	 */
+	@Override
+	public boolean isTranslateFirstRotateSecond()
+	{
+		return mTranslateFirstRotateSecond;
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#resetRotationTranslation()
+	 */
+	@Override
+	public void resetRotationTranslation()
+	{
+		mRotationQuaternion.setIdentity();
+		mTranslationX = 0;
+		mTranslationY = 0;
+		setDefaultTranslationZ();
+	}
+
+	/**
+	 * Sets the relative order between translation and rotation in model view
+	 * transform.
+	 * 
+	 * @param pTranslateFirstRotateSecond
+	 */
+	@Override
+	public void setTranslateFirstRotateSecond(boolean pTranslateFirstRotateSecond)
+	{
+		mTranslateFirstRotateSecond = pTranslateFirstRotateSecond;
+		notifyChangeOfVolumeRenderingParameters();
+	}
+
+	/**
 	 * Interface method implementation
 	 *
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#addTranslationX(double)
@@ -892,7 +931,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setDefaultTranslationZ()
 	{
-		mTranslationZ = -4 / getFOV();
+		mTranslationZ = -3.25f / getFOV();
 	}
 
 	/**
@@ -1096,19 +1135,7 @@ public abstract class ClearVolumeRendererBase	implements
 		return mSetVolumeDataBufferLocks[pRenderLayerIndex];
 	}
 
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#resetRotationTranslation()
-	 */
-	@Override
-	public void resetRotationTranslation()
-	{
-		mRotationQuaternion.setIdentity();
-		mTranslationX = 0;
-		mTranslationY = 0;
-		setDefaultTranslationZ();
-	}
+
 
 	@Override
 	public void setCurrentRenderLayer(final int pLayerIndex)
@@ -1678,5 +1705,6 @@ public abstract class ClearVolumeRendererBase	implements
 			}
 
 	}
+
 
 }

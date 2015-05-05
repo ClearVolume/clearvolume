@@ -615,6 +615,21 @@ public interface ClearVolumeRendererInterface	extends
 																						TimeUnit pTimeUnit);
 
 	/**
+	 * Returns true if translation are performed first and rotation second.
+	 * 
+	 * @return true if rotation is performed first
+	 */
+	boolean isTranslateFirstRotateSecond();
+
+	/**
+	 * Sets the relative order between translation and rotation in model view
+	 * transform.
+	 * 
+	 * @param pTranslateFirstRotateSecond
+	 */
+	void setTranslateFirstRotateSecond(boolean pTranslateFirstRotateSecond);
+
+	/**
 	 * Resets rotation and translation parameters.
 	 */
 	public void resetRotationTranslation();
@@ -745,7 +760,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	public ArrayList<RotationControllerInterface> getRotationControllers();
 
-
 	/**
 	 * Returns the auto rotation controller.
 	 *
@@ -870,7 +884,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	public void removeEyeRayListener(EyeRayListener pEyeRayListener);
 
-
 	/**
 	 * Returns display lock;
 	 * 
@@ -885,11 +898,5 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
-
-
-
-
-
-
 
 }

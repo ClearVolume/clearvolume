@@ -88,7 +88,6 @@ public abstract class ClearGLVolumeRenderer	extends
 	private volatile int mViewportX, mViewportY, mViewportWidth,
 			mViewportHeight;
 
-
 	// pixelbuffer objects.
 	protected GLPixelBufferObject[] mPixelBufferObjects;
 
@@ -118,7 +117,6 @@ public abstract class ClearGLVolumeRenderer	extends
 	private final GLMatrix mBoxModelViewMatrix = new GLMatrix();
 	private final GLMatrix mVolumeViewMatrix = new GLMatrix();
 	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
-
 
 	private final int mTextureWidth, mTextureHeight;
 
@@ -479,9 +477,9 @@ public abstract class ClearGLVolumeRenderer	extends
 	 * CUDA and the OpenGL PBO.
 	 */
 	@Override
-	public void init(final GLAutoDrawable drawable)
+	public void init(final GLAutoDrawable pDrawable)
 	{
-		final GL4 lGL4 = drawable.getGL().getGL4();
+		final GL4 lGL4 = pDrawable.getGL().getGL4();
 		lGL4.setSwapInterval(1);
 
 		lGL4.glDisable(GL4.GL_DEPTH_TEST);
@@ -538,8 +536,7 @@ public abstract class ClearGLVolumeRenderer	extends
 																															4);
 
 				final GLFloatArray lVerticesFloatArray = new GLFloatArray(6,
-
-				4);
+																																	4);
 
 				lVerticesFloatArray.add(-1, -1, 0, 1);
 				lVerticesFloatArray.add(1, -1, 0, 1);
@@ -579,6 +576,9 @@ public abstract class ClearGLVolumeRenderer	extends
 
 				}
 
+				setOrthoQuadProjectionMatrix(	getWindowWidth(),
+																			getWindowHeight());
+
 			}
 			catch (final IOException e)
 			{
@@ -597,17 +597,7 @@ public abstract class ClearGLVolumeRenderer	extends
 				}
 			}
 
-			/*
-			Runnable lDisplayRequestRunnable = new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					requestDisplay();
-				}
-			};
-			mGLVideoRecorder.startDisplayRequestDeamonThread(lDisplayRequestRunnable);
-			/**/
+			// displayInternal(pDrawable, true);
 
 		}
 
@@ -740,6 +730,32 @@ public abstract class ClearGLVolumeRenderer	extends
 
 	}
 
+	private void setOrthoQuadProjectionMatrix(final int pWidth,
+																						int pHeight)
+	{
+		if (pHeight < 8)
+			pHeight = 8;
+
+		// System.out.format("width=%d, height=%d \n", pWidth, pHeight);
+
+		final float lAspectRatio = (1.0f * pWidth) / pHeight;
+
+		if (lAspectRatio >= 1)
+			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
+																											1,
+																											-1	/ lAspectRatio,
+																											1 / lAspectRatio,
+																											0,
+																											1000);
+		else
+			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
+																											lAspectRatio,
+																											-1,
+																											1,
+																											0,
+																											1000);/**/
+	}
+
 	private void setDefaultProjectionMatrix()
 	{
 		if (getClearGLWindow() != null)
@@ -768,6 +784,7 @@ public abstract class ClearGLVolumeRenderer	extends
 																											1000);
 		lProjectionMatrix.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
 		lProjectionMatrix.mult(1, 1, mQuadProjectionMatrix.get(1, 1));/**/
+
 		return lProjectionMatrix;
 	}
 
@@ -781,13 +798,6 @@ public abstract class ClearGLVolumeRenderer	extends
 
 		final double lMaxScale = max(max(lScaleX, lScaleY), lScaleZ);
 
-		// building up the inverse Modelview matrix
-
-		// final GLMatrix lEulerMatrix = new GLMatrix();
-
-		/*lEulerMatrix.euler(	getRotationX() * 0.01,
-												getRotationY() * 0.01,
-												0.0f);/**/
 		if (getRotationControllers().size() > 0)
 		{
 			for (final RotationControllerInterface lRotationController : getRotationControllers())
@@ -807,19 +817,36 @@ public abstract class ClearGLVolumeRenderer	extends
 		final GLMatrix lModelViewMatrix = new GLMatrix();
 		lModelViewMatrix.setIdentity();
 
-		lModelViewMatrix.translate(	getTranslationX(),
-																getTranslationY(),
-																getTranslationZ());/**/
+		if (isTranslateFirstRotateSecond())
+		{
+			lModelViewMatrix.translate(	getTranslationX(),
+																	getTranslationY(),
+																	getTranslationZ());/**/
 
-		lModelViewMatrix.mult(getQuaternion());
+			lModelViewMatrix.mult(getQuaternion());
+		}
+		else
+		{
+
+			final float[] lTranslationVector = new float[]
+			{ getTranslationX(), getTranslationY(), getTranslationZ() };
+
+			getQuaternion().rotateVector(	lTranslationVector,
+																		0,
+																		lTranslationVector,
+																		0);
+
+			lModelViewMatrix.translate(	lTranslationVector[0],
+																	lTranslationVector[1],
+																	lTranslationVector[2]);
+
+			lModelViewMatrix.mult(getQuaternion());
+
+		}
 
 		lModelViewMatrix.scale(	(float) (lScaleX / lMaxScale),
 														(float) (lScaleY / lMaxScale),
-														(float) (lScaleZ / lMaxScale));/**/
-
-		// lInvVolumeMatrix.mult(lEulerMatrix);
-
-		// lInvVolumeMatrix.transpose();
+														(float) (lScaleZ / lMaxScale));
 
 		return lModelViewMatrix;
 	}
@@ -974,29 +1001,7 @@ public abstract class ClearGLVolumeRenderer	extends
 		mViewportWidth = pWidth;
 		mViewportHeight = pHeight;
 
-		if (pHeight < 8)
-			pHeight = 8;
-
-		final GL4 lGL4 = pDrawable.getGL().getGL4();
-
-		lGL4.glViewport(0, 0, pWidth, pHeight);/**/
-
-		final float lAspectRatio = (1.0f * pWidth) / pHeight;
-
-		if (lAspectRatio >= 1)
-			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
-																											1,
-																											-1	/ lAspectRatio,
-																											1 / lAspectRatio,
-																											0,
-																											1000);
-		else
-			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
-																											lAspectRatio,
-																											-1,
-																											1,
-																											0,
-																											1000);/**/
+		setOrthoQuadProjectionMatrix(pWidth, pHeight);
 
 		displayInternal(pDrawable, true);
 
@@ -1084,8 +1089,6 @@ public abstract class ClearGLVolumeRenderer	extends
 		// getAdaptiveLODController().requestDisplay();
 		// notifyChangeOfVolumeRenderingParameters();
 	}
-
-
 
 	@Override
 	public void addOverlay(Overlay pOverlay)

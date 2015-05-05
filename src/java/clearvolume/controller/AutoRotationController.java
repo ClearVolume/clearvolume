@@ -10,6 +10,8 @@ public class AutoRotationController	extends
 																																		RotationControllerWithRenderNotification
 {
 
+	private volatile boolean mModified;
+
 	public AutoRotationController()
 	{
 		super();
@@ -37,22 +39,36 @@ public class AutoRotationController	extends
 	public void addRotationSpeedX(float pDelta)
 	{
 		getQuaternion().rotateByAngleX(pDelta);
+		mModified = true;
 	}
 
 	public void addRotationSpeedY(float pDelta)
 	{
 		getQuaternion().rotateByAngleY(pDelta);
+		mModified = true;
 	}
 
 	public void addRotationSpeedZ(float pDelta)
 	{
 		getQuaternion().rotateByAngleZ(pDelta);
+		mModified = true;
 	}
 
-	public void stop()
+	public void stopRotation()
 	{
 		getQuaternion().setIdentity();
-
+		mModified = false;
 	}
+
+	public void setDefaultRotation()
+	{
+		addRotationSpeedY(0.01f);
+	}
+
+	public boolean isModified()
+	{
+		return mModified;
+	}
+
 
 }
