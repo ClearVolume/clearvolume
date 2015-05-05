@@ -379,11 +379,23 @@ public interface ClearVolumeRendererInterface	extends
 	public float getQuality(int pRenderLayerIndex);
 
 	/**
-	 * Sets the mProjectionMatrix algorithm used.
+	 * Sets the currently render algorithm used.
 	 *
-	 * @param pProjectionAlgorithm
+	 * @param pRenderAlgorithm
 	 */
-	public void setProjectionAlgorithm(ProjectionAlgorithm pProjectionAlgorithm);
+	public void setRenderAlgorithm(RenderAlgorithm pRenderAlgorithm);
+
+	/**
+	 * Gets the currently used render algorithm used.
+	 *
+	 * @return currently used render algorithm
+	 */
+	public RenderAlgorithm getRenderAlgorithm();
+
+	/**
+	 * Cycles through rendering algorithms
+	 */
+	public void cycleRenderAlgorithm();
 
 	/**
 	 * Sets the current render layer.
@@ -885,6 +897,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
+
 
 
 

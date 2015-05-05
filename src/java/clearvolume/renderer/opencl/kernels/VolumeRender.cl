@@ -251,22 +251,6 @@ __kernel void isosurface_render(
 								__constant float* 		invP,
 								__constant float* 		invM,
 								__read_only image3d_t 	volume
-									
-						  // __global float *d_output,
-						  // __global float *d_alpha_output, 
-						  // uint Nx, uint Ny,
-						  // float boxMin_x,
-						  // float boxMax_x,
-						  // float boxMin_y,
-						  // float boxMax_y,
-						  // float boxMin_z,
-						  // float boxMax_z,
-						  // float isoVal,
-						  // float gamma,
-						  // __constant float* invP,
-						  // __constant float* invM,
-						  // __read_only image3d_t volume,
-						  // int isShortType
 								)
 {
 
@@ -435,15 +419,17 @@ __kernel void isosurface_render(
   float diffuse = fmax(0.f,dot(light,normal));
   float specular = pow(fmax(0.f,dot(normalize(reflect),normalize(direc))),10);
 
-  float4 color = (float4)(0.f,0.f,0.f,0.f);
+  float mappedVal = 0.f;
   // phong shading
   if (hitIso){
-  	color = c_ambient
+  	mappedVal = c_ambient
   	  + c_diffuse*diffuse
   	  + (diffuse>0)*c_specular*specular;
 	
   }
-
+  
+  // lookup in transfer function texture:
+  const float4 color = brightness*read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
   
   d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
 

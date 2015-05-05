@@ -225,6 +225,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			mClearVolumeRenderer.setFOV(ClearVolumeRendererBase.cDefaultFOV);
 			break;
 
+		case KeyEvent.VK_I:
+			mClearVolumeRenderer.cycleRenderAlgorithm();
+			break;
+
 		}
 
 		if (pE.getKeyCode() >= KeyEvent.VK_0 && pE.getKeyCode() <= KeyEvent.VK_9)

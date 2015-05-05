@@ -303,8 +303,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 			final CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
 																													lRootClass.getSimpleName());
 
-			lCudaCompiler.setParameter(	Pattern.quote("/*ProjectionAlgorithm*/"),
-																	getProjectionAlgorithm().name());
+			lCudaCompiler.setParameter(	Pattern.quote("/*RenderAlgorithm*/"),
+																	getRenderAlgorithm().name());
 			lCudaCompiler.setParameter(	Pattern.quote("/*BytesPerVoxel*/"),
 																	"" + getBytesPerVoxel());
 

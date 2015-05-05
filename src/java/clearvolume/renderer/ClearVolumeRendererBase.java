@@ -83,7 +83,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Projection algorithm used
 	 */
-	private ProjectionAlgorithm mProjectionAlgorithm = ProjectionAlgorithm.MaxProjection;
+	private volatile RenderAlgorithm mRenderAlgorithm = RenderAlgorithm.MaxProjection;
 
 	/**
 	 * Transfer functions used
@@ -99,7 +99,6 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile float mTranslationZ = 0;
 
 	private volatile float mFOV = cDefaultFOV;
-
 
 	// private volatile float mDensity;
 	private volatile float[] mBrightness;
@@ -145,7 +144,6 @@ public abstract class ClearVolumeRendererBase	implements
 
 	// Display lock:
 	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
-
 
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
@@ -251,8 +249,6 @@ public abstract class ClearVolumeRendererBase	implements
 		mVolumeRenderingParametersChanged = false;
 	}
 
-
-
 	/**
 	 * Returns the volume size along x axis.
 	 *
@@ -316,8 +312,6 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		mVolumeDimensionsChanged = false;
 	}
-
-
 
 	/**
 	 * Gets active flag for the current render layer.
@@ -1036,20 +1030,31 @@ public abstract class ClearVolumeRendererBase	implements
 	 *
 	 * @return currently used mProjectionMatrix algorithm
 	 */
-	public ProjectionAlgorithm getProjectionAlgorithm()
+	@Override
+	public RenderAlgorithm getRenderAlgorithm()
 	{
-		return mProjectionAlgorithm;
+		return mRenderAlgorithm;
 	}
 
 	/**
 	 * Interface method implementation
 	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setProjectionAlgorithm(clearvolume.renderer.ProjectionAlgorithm)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setRenderAlgorithm(clearvolume.renderer.RenderAlgorithm)
 	 */
 	@Override
-	public void setProjectionAlgorithm(final ProjectionAlgorithm pProjectionAlgorithm)
+	public void setRenderAlgorithm(final RenderAlgorithm pRenderAlgorithm)
 	{
-		mProjectionAlgorithm = pProjectionAlgorithm;
+		mRenderAlgorithm = pRenderAlgorithm;
+		notifyChangeOfVolumeRenderingParameters();
+	}
+
+	/**
+	 * Cycles through rendering algorithms
+	 */
+	@Override
+	public void cycleRenderAlgorithm()
+	{
+		setRenderAlgorithm(getRenderAlgorithm().next());
 	}
 
 	/**
@@ -1363,7 +1368,6 @@ public abstract class ClearVolumeRendererBase	implements
 			mVoxelSizeY = pVoxelSizeY;
 			mVoxelSizeZ = pVoxelSizeZ;
 
-
 			clearCompletionOfDataBufferCopy(pRenderLayerIndex);
 			mVolumeDataByteBuffers[pRenderLayerIndex] = pFragmentedMemoryInterface;
 
@@ -1496,8 +1500,6 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		return mRotationControllerList;
 	}
-
-
 
 	/**
 	 * Toggles the display of the Control Frame;

@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import clearvolume.controller.ExternalRotationController;
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.ProjectionAlgorithm;
+import clearvolume.renderer.RenderAlgorithm;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
@@ -404,7 +404,7 @@ public class ClearVolumeOtherDemos
 																																																							false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
-		lClearVolumeRenderer.setProjectionAlgorithm(ProjectionAlgorithm.MaxProjection);
+		lClearVolumeRenderer.setRenderAlgorithm(RenderAlgorithm.MaxProjection);
 
 		ExternalRotationController lEgg3DController = null;
 		try
