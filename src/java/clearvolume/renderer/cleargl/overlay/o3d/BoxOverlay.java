@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL4;
 
 import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
@@ -76,7 +75,7 @@ public class BoxOverlay extends OverlayBase	implements
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.cleargl.overlay.Overlay#init(javax.media.opengl.GL4, clearvolume.renderer.DisplayRequestInterface)
+	 * @see clearvolume.renderer.cleargl.overlay.Overlay#init(javax.media.opengl.GL, clearvolume.renderer.DisplayRequestInterface)
 	 */
 	@Override
 	public void init(	GL pGL,
@@ -91,7 +90,7 @@ public class BoxOverlay extends OverlayBase	implements
 
 			mClearGeometryObject = new ClearGeometryObject(	mBoxGLProgram,
 																											3,
-																											GL4.GL_TRIANGLES);
+																											GL.GL_TRIANGLES);
 
 			final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 3);
 
@@ -241,7 +240,7 @@ public class BoxOverlay extends OverlayBase	implements
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
+	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL, cleargl.GLMatrix, cleargl.GLMatrix)
 	 */
 	@Override
 	public void render3D(	GL pGL,

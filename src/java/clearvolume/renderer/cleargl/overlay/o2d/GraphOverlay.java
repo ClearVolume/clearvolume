@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL2;
 
 import cleargl.ClearGeometryObject;
 import cleargl.GLError;
@@ -304,7 +304,7 @@ public class GraphOverlay extends OverlayBase	implements
 
 			mClearGeometryObjectLines = new ClearGeometryObject(mGLProgramLines,
 																													3,
-																													GL4.GL_LINE_STRIP);
+																													GL.GL_LINE_STRIP);
 			mClearGeometryObjectLines.setDynamic(true);
 
 			mClearGeometryObjectLines.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
@@ -389,11 +389,10 @@ public class GraphOverlay extends OverlayBase	implements
 
 					mClearGeometryObject.setProjection(pProjectionMatrix);
 
-					pGL.glDisable(GL4.GL_DEPTH_TEST);
-					pGL.glEnable(GL4.GL_BLEND);
-					pGL.glBlendFunc(GL4.GL_SRC_ALPHA,
-														GL4.GL_ONE_MINUS_SRC_ALPHA);
-					pGL.glBlendEquation(GL4.GL_FUNC_ADD);/**/
+					pGL.glDisable(GL.GL_DEPTH_TEST);
+					pGL.glEnable(GL.GL_BLEND);
+					pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+					pGL.glBlendEquation(GL.GL_FUNC_ADD);/**/
 
 					mClearGeometryObject.draw(0, mDataY.size() * 2);
 
@@ -421,7 +420,7 @@ public class GraphOverlay extends OverlayBase	implements
 					mIndexIntArray.padZeros();
 
 					mClearGeometryObjectLines.updateVertices(mVerticesFloatArray.getFloatBuffer());
-					// GLError.printGLErrors(pGL4,
+					// GLError.printGLErrors(pGL,
 					// "AFTER mClearGeometryObject.updateVertices");
 					mClearGeometryObjectLines.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
 					GLError.printGLErrors(pGL,
@@ -432,11 +431,10 @@ public class GraphOverlay extends OverlayBase	implements
 
 					mClearGeometryObjectLines.setProjection(pProjectionMatrix);
 
-					pGL.glDisable(GL4.GL_DEPTH_TEST);
-					pGL.glEnable(GL4.GL_BLEND);
-					pGL.glBlendFunc(GL4.GL_SRC_ALPHA,
-														GL4.GL_ONE_MINUS_SRC_ALPHA);
-					pGL.glBlendEquation(GL4.GL_MAX);/**/
+					pGL.glDisable(GL.GL_DEPTH_TEST);
+					pGL.glEnable(GL.GL_BLEND);
+					pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+					pGL.glBlendEquation(GL2.GL_MAX);/**/
 					//
 					mClearGeometryObjectLines.draw(0, mDataY.size());
 

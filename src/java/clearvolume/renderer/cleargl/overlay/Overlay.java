@@ -40,8 +40,8 @@ public interface Overlay
 	 * redrawing.
 	 * 
 	 * 
-	 * @param pGL4
-	 *          a GL4 object.
+	 * @param pGL
+	 *          a GL object.
 	 * @param pDisplayRequestInterface
 	 *          to request display.
 	 */

@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL4;
 
 import cleargl.ClearGeometryObject;
 import cleargl.GLError;
@@ -269,7 +268,7 @@ public class PlainGraphOverlay extends OverlayBase implements
 
 			mClearGeometryObject = new ClearGeometryObject(	mGLProgram,
 																											3,
-																											GL4.GL_TRIANGLE_STRIP);
+																											GL.GL_TRIANGLE_STRIP);
 			mClearGeometryObject.setDynamic(true);
 
 			final int lNumberOfPointsToDraw = 2 * getMaxNumberOfDataPoints();
@@ -378,16 +377,15 @@ public class PlainGraphOverlay extends OverlayBase implements
 					GLError.printGLErrors(pGL,
 																"AFTER mClearGeometryObject.updateIndices");
 
-					// mGLProgram.use(pGL4);
+					// mGLProgram.use(pGL);
 					mClearGeometryObject.setProjection(pProjectionMatrix);
 
 					// System.out.println(pProjectionMatrix.toString());
 
-					pGL.glDisable(GL4.GL_DEPTH_TEST);
-					pGL.glEnable(GL4.GL_BLEND);
-					pGL.glBlendFunc(GL4.GL_SRC_ALPHA,
-														GL4.GL_ONE_MINUS_SRC_ALPHA);
-					pGL.glBlendEquation(GL4.GL_FUNC_ADD);/**/
+					pGL.glDisable(GL.GL_DEPTH_TEST);
+					pGL.glEnable(GL.GL_BLEND);
+					pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+					pGL.glBlendEquation(GL.GL_FUNC_ADD);/**/
 
 					mClearGeometryObject.draw(0, mDataY.size() * 2);
 

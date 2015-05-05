@@ -4,7 +4,7 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.IOException;
 
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL;
 
 import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
@@ -83,10 +83,10 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 	}
 
 	@Override
-	public void init(	GL4 pGL4,
+	public void init(	GL pGL,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
-		super.init(pGL4, pDisplayRequestInterface);
+		super.init(pGL, pDisplayRequestInterface);
 		final String lFontPath = "/clearvolume/fonts/SourceCodeProLight.ttf";
 		try
 		{
@@ -108,16 +108,16 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 			mFont = new Font("Sans", Font.PLAIN, 24);
 		}
 
-		mClearTextRenderer = new ClearTextRenderer(pGL4, true);
+		mClearTextRenderer = new ClearTextRenderer(pGL, true);
 	}
 
 	@Override
-	public void render2D(	GL4 pGL4,
+	public void render2D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix)
 	{
-		super.render2D(pGL4, pWidth, pHeight, pProjectionMatrix);
+		super.render2D(pGL, pWidth, pHeight, pProjectionMatrix);
 
 		/*
 		 * mClearTextRenderer.drawTextAtPosition(String.format(

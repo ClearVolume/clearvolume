@@ -132,7 +132,7 @@ public class ClearVolumeOverlayDemos
 
 		while (lClearVolumeRenderer.isShowing())
 		{
-			Thread.sleep(1000);
+			Thread.sleep(250);
 			lClearVolumeRenderer.setVolumeDataBuffer(	0,
 																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,

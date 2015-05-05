@@ -59,7 +59,7 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.cleargl.overlay.Overlay#init(javax.media.opengl.GL4, clearvolume.renderer.DisplayRequestInterface)
+	 * @see clearvolume.renderer.cleargl.overlay.Overlay#init(javax.media.opengl.GL, clearvolume.renderer.DisplayRequestInterface)
 	 */
 	@Override
 	public void init(	GL pGL,
@@ -77,8 +77,8 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 			mOverlayProjectionMatrixUniform = mBoxGLProgram.getUniform("projection");
 
 			// Makes line anti-aliased:
-			// pGL4.glEnable(GL4.GL_BLEND);
-			// pGL4.glEnable(GL4.GL_LINE_SMOOTH);
+			// pGL.glEnable(GL.GL_BLEND);
+			// pGL.glEnable(GL.GL_LINE_SMOOTH);
 
 			// set the line with of the box
 			pGL.glLineWidth(cBoxLineWidth);
@@ -136,7 +136,7 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
+	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL, cleargl.GLMatrix, cleargl.GLMatrix)
 	 */
 	@Override
 	public void render3D(	GL pGL,

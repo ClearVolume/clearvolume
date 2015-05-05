@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL4;
 
 import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
@@ -108,7 +107,7 @@ public class CursorOverlay extends OverlayBase implements
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.jogl.overlay.Overlay#init(javax.media.opengl.GL4, clearvolume.renderer.DisplayRequestInterface)
+	 * @see clearvolume.renderer.jogl.overlay.Overlay#init(javax.media.opengl.GL, clearvolume.renderer.DisplayRequestInterface)
 	 */
 	@Override
 	public void init(	GL pGL,
@@ -123,17 +122,17 @@ public class CursorOverlay extends OverlayBase implements
 
 			mPlaneX = new ClearGeometryObject(mBoxGLProgram,
 																				3,
-																				GL4.GL_TRIANGLES);
+																				GL.GL_TRIANGLES);
 			mPlaneX.setDynamic(true);/**/
 
 			mPlaneY = new ClearGeometryObject(mBoxGLProgram,
 																				3,
-																				GL4.GL_TRIANGLES);
+																				GL.GL_TRIANGLES);
 			mPlaneY.setDynamic(true);
 
 			mPlaneZ = new ClearGeometryObject(mBoxGLProgram,
 																				3,
-																				GL4.GL_TRIANGLES);
+																				GL.GL_TRIANGLES);
 			mPlaneZ.setDynamic(true);/**/
 
 			mVerticesFloatArrayPlaneX = new GLFloatArray(4, 3);
@@ -227,7 +226,7 @@ public class CursorOverlay extends OverlayBase implements
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.jogl.overlay.Overlay3D#render3D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
+	 * @see clearvolume.renderer.jogl.overlay.Overlay3D#render3D(javax.media.opengl.GL, cleargl.GLMatrix, cleargl.GLMatrix)
 	 */
 	@Override
 	public void render3D(	GL pGL,

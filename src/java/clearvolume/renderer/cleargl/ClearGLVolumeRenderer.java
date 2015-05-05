@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GL;
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLProfile;
 
@@ -76,7 +76,7 @@ public abstract class ClearGLVolumeRenderer	extends
 	static
 	{
 		// attempt at solving Jug's Dreadlock bug:
-		final GLProfile lProfile = GLProfile.get(GLProfile.GL4);
+		final GLProfile lProfile = GLProfile.get(GLProfile.GL3);
 		// System.out.println( lProfile );
 	}
 
@@ -484,12 +484,12 @@ public abstract class ClearGLVolumeRenderer	extends
 		final GL lGL = drawable.getGL();
 		lGL.setSwapInterval(1);
 
-		lGL.glDisable(GL4.GL_DEPTH_TEST);
-		lGL.glEnable(GL4.GL_BLEND);
-		lGL.glDisable(GL4.GL_STENCIL_TEST);
+		lGL.glDisable(GL.GL_DEPTH_TEST);
+		lGL.glEnable(GL.GL_BLEND);
+		lGL.glDisable(GL.GL_STENCIL_TEST);
 
 		lGL.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		lGL.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+		lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
 		if (initVolumeRenderer())
 		{
@@ -675,11 +675,11 @@ public abstract class ClearGLVolumeRenderer	extends
 
 				final GL lGL = pDrawable.getGL();
 				lGL.glClearColor(0, 0, 0, 1);
-				lGL.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
-				lGL.glDisable(GL4.GL_CULL_FACE);
-				lGL.glEnable(GL4.GL_BLEND);
-				lGL.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
-				lGL.glBlendEquation(GL4.GL_MAX);
+				lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+				lGL.glDisable(GL.GL_CULL_FACE);
+				lGL.glEnable(GL.GL_BLEND);
+				lGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
+				lGL.glBlendEquation(GL2.GL_MAX);
 
 				setDefaultProjectionMatrix();
 
@@ -977,9 +977,9 @@ public abstract class ClearGLVolumeRenderer	extends
 		if (pHeight < 8)
 			pHeight = 8;
 
-		final GL4 lGL4 = pDrawable.getGL().getGL4();
+		final GL lGL = pDrawable.getGL().getGL();
 
-		lGL4.glViewport(0, 0, pWidth, pHeight);/**/
+		lGL.glViewport(0, 0, pWidth, pHeight);/**/
 
 		final float lAspectRatio = (1.0f * pWidth) / pHeight;
 

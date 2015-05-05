@@ -38,8 +38,8 @@ public class OneTriangleSwingGLJPanel {
 																		"[190px,grow,fill]",
 																		"[grow,fill][29px][29px][29px]"));
 
-		GLProfile glprofile = GLProfile.getDefault();
-		GLCapabilities glcapabilities = new GLCapabilities(glprofile);
+		final GLProfile glprofile = GLProfile.getDefault();
+		final GLCapabilities glcapabilities = new GLCapabilities(glprofile);
 		final GLJPanelWB gljpanel = new GLJPanelWB(glcapabilities);
 
 		gljpanel.addGLEventListener(new GLEventListener()
@@ -52,7 +52,7 @@ public class OneTriangleSwingGLJPanel {
 													int width,
 													int height)
 			{
-				OneTriangle.setup(glautodrawable.getGL().getGL2(),
+				OneTriangle.setup(glautodrawable.getGL(),
 													width,
 													height);
 			}
@@ -70,7 +70,7 @@ public class OneTriangleSwingGLJPanel {
 			@Override
 			public void display(GLAutoDrawable glautodrawable)
 			{
-				OneTriangle.render(	glautodrawable.getGL().getGL2(),
+				OneTriangle.render(	glautodrawable.getGL(),
 														glautodrawable.getSurfaceWidth(),
 														glautodrawable.getSurfaceHeight());
 			}
