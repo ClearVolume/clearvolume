@@ -1,10 +1,12 @@
 /*
-  adapted from the Nvidia sdk sample
-  http://developer.download.nvidia.com/compute/cuda/4_2/rel/sdk/website/OpenCL/html/samples.html
+volume and iso surface rendering
+
+		volume rendering adapted from the Nvidia sdk sample
+  		http://developer.download.nvidia.com/compute/cuda/4_2/rel/sdk/website/OpenCL/html/samples.html
  
 
   Author: Martin Weigert (mweigert@mpi-cbg.de)
-    			Loic Royer		 (royer@mpi-cbg.de)
+    	  Loic Royer		 (royer@mpi-cbg.de)
 */
 
 
@@ -389,9 +391,9 @@ __kernel void isosurface_render(
   float lam = (newVal - isoVal)/(newVal-oldVal);
   pos += lam*vecstep;
 
-  if ((x==256) &&(y==256))
-  	printf("kernel %.6f  %.6f %.6f \n",trangemin,isoVal, lam);
-	
+  
+  // getting the normals and do some nice phong shading
+  
   float4 light = (float4)(2,-1,-2,0);
 
   float c_ambient = .3;
@@ -442,15 +444,7 @@ __kernel void isosurface_render(
 	
   }
 
-  // // for depth test...
-  // alphaVal = tnear;
-
-  // float4 color = (float4)(.01f*x,0.f,0.f,1.f);
   
-  // write output color:
-  // d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color); 
-
-
   d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
 
 }

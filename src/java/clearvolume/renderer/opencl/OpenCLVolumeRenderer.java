@@ -82,15 +82,12 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer implements
 		mCLDevice.initCL();
 		mCLDevice.printInfo();
 		mRenderKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class
-				.getResource("kernels/VolumeRenderPerspective.cl"),
-				"volumerender");
+				.getResource("kernels/VolumeRender.cl"), "volumerender");
 		mClearKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class
-				.getResource("kernels/VolumeRenderPerspective.cl"),
-				"clearbuffer");
+				.getResource("kernels/VolumeRender.cl"), "clearbuffer");
 
 		mIsoRenderKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class
-				.getResource("kernels/IsosurfaceRender.cl"),
-				"isosurface_render");
+				.getResource("kernels/VolumeRender.cl"), "isosurface_render");
 
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
