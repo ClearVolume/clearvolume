@@ -82,7 +82,7 @@ public class ClearVolumeBasicDemos
 																																																					1024,
 																																																					1,
 																																																					false);
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -137,7 +137,7 @@ public class ClearVolumeBasicDemos
 																																																						1024,
 																																																						1,
 																																																						false);
-			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 			lClearVolumeRenderer.setVisible(true);
 
 			final int lResolutionX = 256;
@@ -191,7 +191,7 @@ public class ClearVolumeBasicDemos
 																																																					1024,
 																																																					1,
 																																																					false);
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 		// lClearVolumeRenderer.setMultiPass(false);
 
@@ -244,7 +244,7 @@ public class ClearVolumeBasicDemos
 																																																					512,
 																																																					NativeTypeEnum.UnsignedShort,
 																																																					false);
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 512;
@@ -334,7 +334,7 @@ public class ClearVolumeBasicDemos
 																																																					pNativeTypeEnum,
 																																																					false);
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getRainbow());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	0,

@@ -93,7 +93,7 @@ public class ClearVolumeOverlayDemos
 
 		lClearVolumeRenderer.addProcessor(RandomWalk);
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -162,7 +162,7 @@ public class ClearVolumeOverlayDemos
 		final GraphOverlay lGraphOverlay = new GraphOverlay(256);
 		lClearVolumeRenderer.addOverlay(lGraphOverlay);
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -222,7 +222,7 @@ public class ClearVolumeOverlayDemos
 		final PathOverlay lPathOverlay = new PathOverlay();
 		lClearVolumeRenderer.addOverlay(lPathOverlay);
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -282,7 +282,7 @@ public class ClearVolumeOverlayDemos
 																																																					512,
 																																																					1,
 																																																					false);
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final CursorOverlay lCursorOverlay1 = new CursorOverlay("1");

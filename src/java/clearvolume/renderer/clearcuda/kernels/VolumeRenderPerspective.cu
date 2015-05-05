@@ -274,8 +274,12 @@ volumerender(       uint *d_output,
 		const float mappedsample = __saturatef(powf(ta*maxp+tb,gamma));
 	 
 		// lookup in transfer function texture:
-		const float4 color = brightness * tex1D(transferTex,mappedsample);
+		float4 color = brightness * tex1D(transferTex,mappedsample);
 
+		// Alpha pre-multiply:
+		color.x = color.x*color.w;
+		color.y = color.y*color.w;
+		color.z = color.z*color.w;
     
     // write output color:
     d_output[y*imageW + x] = rgbaFloatToIntAndMax(clear*d_output[y*imageW + x],color);

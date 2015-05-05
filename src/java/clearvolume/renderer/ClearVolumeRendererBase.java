@@ -177,6 +177,9 @@ public abstract class ClearVolumeRendererBase	implements
 			mDithering[i] = 1f;
 		}
 
+		if (pNumberOfRenderLayers == 1)
+			mTransferFunctions[0] = TransferFunctions.getDefault();
+
 		mAdaptiveLODController = new AdaptiveLODController();
 
 		mAutoRotationController = new AutoRotationController();

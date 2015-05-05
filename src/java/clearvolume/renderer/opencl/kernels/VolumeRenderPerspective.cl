@@ -213,8 +213,13 @@ volumerender(								__global uint	*d_output,
   const float mappedVal = clamp(pow(mad(ta,maxp,tb),gamma),0.f,1.f);
 
 	// lookup in transfer function texture:
-  const float4 color = brightness*read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
+  float4 color = brightness*read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
   
+  // Alpha pre-multiply:
+  color.x = color.x*color.w;
+  color.y = color.y*color.w;
+  color.z = color.z*color.w;
+
   // write output color:
   d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color); //d_output[x + y*imageW]
 

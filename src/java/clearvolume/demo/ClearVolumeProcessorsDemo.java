@@ -108,7 +108,7 @@ public class ClearVolumeProcessorsDemo
 
 		lClearVolumeRenderer.addProcessor(myProc);
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -178,7 +178,7 @@ public class ClearVolumeProcessorsDemo
 		lClearVolumeRenderer.addProcessor(lOpenCLTenengrad);
 		lOpenCLTenengrad.addResultListener(lGraphOverlay);
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -261,7 +261,7 @@ public class ClearVolumeProcessorsDemo
 		lClearVolumeRenderer.addOverlay(lImageQualityOverlay);
 		lClearVolumeRenderer.addProcessors(lImageQualityOverlay.getProcessors());
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -354,7 +354,7 @@ public class ClearVolumeProcessorsDemo
 		// TODO: put that back:
 		// lOpenCLCenterMass.addResultListener(lDriftOverlay);
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -451,7 +451,7 @@ public class ClearVolumeProcessorsDemo
 
 		lClearVolumeRenderer.addProcessor(histoProcessor);
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -524,7 +524,7 @@ public class ClearVolumeProcessorsDemo
 
 		lClearVolumeRenderer.addProcessor(RandomWalk);
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -592,7 +592,7 @@ public class ClearVolumeProcessorsDemo
 		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
 		lClearVolumeRenderer.addProcessor(new OpenCLTest());
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
