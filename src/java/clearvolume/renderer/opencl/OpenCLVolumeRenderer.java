@@ -33,8 +33,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 	private CLBuffer<Float> mCLInvModelViewBuffer,
 			mCLInvProjectionBuffer;
 
-	private CLKernel mRenderKernel;
-	private CLKernel mClearKernel;
+	private CLKernel mCurrentRenderKernel, mMaxProjectionRenderKernel,
+			mIsoSurfaceRenderKernel, mClearKernel;
 
 	public OpenCLVolumeRenderer(final String pWindowName,
 															final int pWindowWidth,
@@ -104,10 +104,13 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 		mCLDevice.initCL();
 		mCLDevice.printInfo();
-		mRenderKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRenderPerspective.cl"),
-																						"volumerender");
-		mClearKernel = mCLDevice.compileKernel(	OpenCLVolumeRenderer.class.getResource("kernels/VolumeRenderPerspective.cl"),
+		mMaxProjectionRenderKernel = mCLDevice.compileKernel(	OpenCLVolumeRenderer.class.getResource("kernels/VolumeRender.cl"),
+																													"maxproj_render");
+		mClearKernel = mCLDevice.compileKernel(	OpenCLVolumeRenderer.class.getResource("kernels/VolumeRender.cl"),
 																						"clearbuffer");
+
+		mIsoSurfaceRenderKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRender.cl"),
+																											"isosurface_render");
 
 		for (final Processor<?> lProcessor : mProcessorsMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
@@ -122,7 +125,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 		final int lRenderBufferSize = getTextureHeight() * getTextureWidth();
 
-		// setting up the OpenCL Renderbuffer we will write the render result into
+		// setting up the OpenCL Renderbuffer we will write the render result
+		// into
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
 			mCLRenderBuffers[i] = mCLDevice.createInputOutputIntBuffer(lRenderBufferSize);
@@ -177,9 +181,10 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 		final float[] lTransferFunctionArray = getTransferFunction(pRenderLayerIndex).getArray();
 
-		/*System.out.println("render layer %" + pRenderLayerIndex
-												+ " -> "
-												+ Arrays.toString(lTransferFunctionArray));/**/
+		/*
+		 * System.out.println("render layer %" + pRenderLayerIndex + " -> " +
+		 * Arrays.toString(lTransferFunctionArray));/*
+		 */
 
 		final int lTransferFunctionArrayLength = lTransferFunctionArray.length;
 
@@ -195,17 +200,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 																																										CLImageFormat.ChannelDataType.Float);
 		}
 
-		/*final float[] color4 = new float[]
-		{ lTransferFunctionArray[lTransferFunctionArrayLength - 4],
-			lTransferFunctionArray[lTransferFunctionArrayLength - 3],
-			lTransferFunctionArray[lTransferFunctionArrayLength - 2],
-			lTransferFunctionArray[lTransferFunctionArrayLength - 1] };
-
-		// System.out.println("prepare+ " + pRenderLayerIndex
-		// + Arrays.toString(color4));
-
-		mCLDevice.writeFloatBuffer(	mCLTransferColorBuffers[pRenderLayerIndex],
-																FloatBuffer.wrap(color4));/**/
 
 		mCLDevice.writeImage(	mCLTransferFunctionImages[pRenderLayerIndex],
 													FloatBuffer.wrap(lTransferFunctionArray));
@@ -365,26 +359,39 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		{
 			prepareTransferFunctionArray(pRenderLayerIndex);
 
-			/*final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
-			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
-			final int lMaxSteps = lMaxNumberSteps / getAdaptiveLODController().getNumberOfPasses();
-			final float lPhase = getAdaptiveLODController().getPhase();
-			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
-																																						: 1;/**/
-
 			final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
 			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
 			final int lNumberOfPasses = getAdaptiveLODController().getNumberOfPasses();
-			final int lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
-			final float lPhase = getAdaptiveLODController().getPhase();
-			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
-																																						: 1;
+
 			final int lPassIndex = getAdaptiveLODController().getPassIndex();
 			final boolean lActive = getAdaptiveLODController().isActive();
 
-			final float lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+			int lMaxSteps = lMaxNumberSteps;
+			float lDithering = 0;
+			float lPhase = 0;
+			int lClear = 0;
 
-			mCLDevice.setArgs(mRenderKernel,
+			switch (getRenderAlgorithm(pRenderLayerIndex))
+			{
+			case MaxProjection:
+				mCurrentRenderKernel = mMaxProjectionRenderKernel;
+				lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
+				lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+				lPhase = getAdaptiveLODController().getPhase();
+				lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
+																																		: 1;
+				break;
+			case IsoSurface:
+				mCurrentRenderKernel = mIsoSurfaceRenderKernel;
+				lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses);
+				lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+				lClear = 0;
+				lPhase = 0;
+
+				break;
+			}
+
+			mCLDevice.setArgs(mCurrentRenderKernel,
 												mCLRenderBuffers[pRenderLayerIndex],
 												getTextureWidth(),
 												getTextureHeight(),
@@ -401,7 +408,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 												mCLInvModelViewBuffer,
 												mCLVolumeImages[pRenderLayerIndex]);
 
-			mCLDevice.run(mRenderKernel,
+			mCLDevice.run(mCurrentRenderKernel,
 										getTextureWidth(),
 										getTextureHeight());
 
@@ -445,9 +452,11 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 															getVolumeSizeZ());
 					final long lStopTimeNs = System.nanoTime();
 					final double lElapsedTimeInMilliseconds = 0.001 * 0.001 * (lStopTimeNs - lStartTimeNs);
-					/*System.out.format("Elapsedtime in '%s' is %g ms \n",
-														lOpenCLProcessor.getClass().getSimpleName(),
-														lElapsedTimeInMilliseconds);/**/
+					/*
+					 * System.out.format("Elapsedtime in '%s' is %g ms \n",
+					 * lOpenCLProcessor.getClass().getSimpleName(),
+					 * lElapsedTimeInMilliseconds);/*
+					 */
 				}
 			}
 	}

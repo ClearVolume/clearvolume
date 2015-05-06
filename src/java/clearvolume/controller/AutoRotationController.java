@@ -5,12 +5,10 @@ import clearvolume.renderer.ClearVolumeRendererInterface;
 import com.jogamp.opengl.math.Quaternion;
 
 public class AutoRotationController	extends
-																		QuaternionRotationControllerBase implements
+																		RotationControllerBase implements
 																																		RotationControllerInterface,
-																																		RotationControllerWithRenderNotification
+																																		ControllerWithRenderNotification
 {
-
-	private volatile boolean mModified;
 
 	public AutoRotationController()
 	{
@@ -35,29 +33,24 @@ public class AutoRotationController	extends
 		// in case we need to be notified at render time...
 	}
 
-
 	public void addRotationSpeedX(float pDelta)
 	{
 		getQuaternion().rotateByAngleX(pDelta);
-		mModified = true;
 	}
 
 	public void addRotationSpeedY(float pDelta)
 	{
 		getQuaternion().rotateByAngleY(pDelta);
-		mModified = true;
 	}
 
 	public void addRotationSpeedZ(float pDelta)
 	{
 		getQuaternion().rotateByAngleZ(pDelta);
-		mModified = true;
 	}
 
 	public void stopRotation()
 	{
 		getQuaternion().setIdentity();
-		mModified = false;
 	}
 
 	public void setDefaultRotation()
@@ -65,10 +58,9 @@ public class AutoRotationController	extends
 		addRotationSpeedY(0.01f);
 	}
 
-	public boolean isModified()
+	public boolean isRotating()
 	{
-		return mModified;
+		return !getQuaternion().isIdentity();
 	}
-
 
 }

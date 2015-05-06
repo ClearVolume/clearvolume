@@ -1,6 +1,6 @@
 package clearvolume.renderer.cleargl.overlay.o2d;
 
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL;
 
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
@@ -23,7 +23,7 @@ public class TextOverlay extends OverlayBase implements Overlay2D
 	}
 
 	@Override
-	public void init(	GL4 pGL4,
+	public void init(	GL pGL,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
 		try
@@ -37,7 +37,7 @@ public class TextOverlay extends OverlayBase implements Overlay2D
 	}
 
 	@Override
-	public void render2D(	GL4 pGL4,
+	public void render2D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix)

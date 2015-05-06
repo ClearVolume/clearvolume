@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import clearvolume.controller.ExternalRotationController;
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.ProjectionAlgorithm;
+import clearvolume.renderer.RenderAlgorithm;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
@@ -116,7 +116,7 @@ public class ClearVolumeOtherDemos
 			}
 		});
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 512;
@@ -174,7 +174,7 @@ public class ClearVolumeOtherDemos
 																																																					512,
 																																																					1,
 																																																					false);
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 512;
@@ -227,7 +227,7 @@ public class ClearVolumeOtherDemos
 																																																					1,
 																																																					false);
 
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 512;
@@ -292,7 +292,7 @@ public class ClearVolumeOtherDemos
 																																														512,
 																																														1,
 																																														false);
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 128;
@@ -346,7 +346,7 @@ public class ClearVolumeOtherDemos
 																																														512,
 																																														1,
 																																														false);
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 400;
@@ -402,16 +402,16 @@ public class ClearVolumeOtherDemos
 																																																							512,
 																																																							512,
 																																																							false);
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
-		lClearVolumeRenderer.setProjectionAlgorithm(ProjectionAlgorithm.MaxProjection);
+		lClearVolumeRenderer.setRenderAlgorithm(RenderAlgorithm.MaxProjection);
 
 		ExternalRotationController lEgg3DController = null;
 		try
 		{
 			lEgg3DController = new ExternalRotationController(ExternalRotationController.cDefaultEgg3DTCPport,
 																												lClearVolumeRenderer);
-			lClearVolumeRenderer.addRotationController(lEgg3DController);
+			lClearVolumeRenderer.addController(lEgg3DController);
 			lEgg3DController.connectAsynchronouslyOrWait();
 		}
 		catch (final Exception e)
@@ -473,7 +473,7 @@ public class ClearVolumeOtherDemos
 																																																						512,
 																																																						1,
 																																																						false);
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
 		lClearVolumeRenderer.addVolumeCaptureListener(new VolumeCaptureListener()
@@ -558,7 +558,7 @@ public class ClearVolumeOtherDemos
 																																																					512,
 																																																					1,
 																																																					false);
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 	
 		final int lResolutionX = 512;

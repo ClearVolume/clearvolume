@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import javax.media.opengl.GL;
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLProfile;
 
@@ -32,8 +32,10 @@ import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
 import cleargl.util.recorder.GLVideoRecorder;
+import clearvolume.controller.ControllerInterface;
+import clearvolume.controller.ControllerWithRenderNotification;
 import clearvolume.controller.RotationControllerInterface;
-import clearvolume.controller.RotationControllerWithRenderNotification;
+import clearvolume.controller.TranslationControllerInterface;
 import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
@@ -76,7 +78,7 @@ public abstract class ClearGLVolumeRenderer	extends
 	static
 	{
 		// attempt at solving Jug's Dreadlock bug:
-		final GLProfile lProfile = GLProfile.get(GLProfile.GL4);
+		final GLProfile lProfile = GLProfile.get(GLProfile.GL3);
 		// System.out.println( lProfile );
 	}
 
@@ -479,15 +481,16 @@ public abstract class ClearGLVolumeRenderer	extends
 	@Override
 	public void init(final GLAutoDrawable pDrawable)
 	{
-		final GL4 lGL4 = pDrawable.getGL().getGL4();
-		lGL4.setSwapInterval(1);
 
-		lGL4.glDisable(GL4.GL_DEPTH_TEST);
-		lGL4.glEnable(GL4.GL_BLEND);
-		lGL4.glDisable(GL4.GL_STENCIL_TEST);
+		final GL lGL = pDrawable.getGL();
+		lGL.setSwapInterval(1);
 
-		lGL4.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+		lGL.glDisable(GL.GL_DEPTH_TEST);
+		lGL.glEnable(GL.GL_BLEND);
+		lGL.glDisable(GL.GL_STENCIL_TEST);
+
+		lGL.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
 		if (initVolumeRenderer())
 		{
@@ -517,7 +520,7 @@ public abstract class ClearGLVolumeRenderer	extends
 				}
 				// System.out.println(lFragmentShaderSource);
 
-				mGLProgram = GLProgram.buildProgram(lGL4,
+				mGLProgram = GLProgram.buildProgram(lGL,
 																						lVertexShaderSource,
 																						lFragmentShaderSource);
 				mQuadProjectionMatrixUniform = mGLProgram.getUniform("projection");
@@ -589,7 +592,7 @@ public abstract class ClearGLVolumeRenderer	extends
 			{
 				try
 				{
-					lOverlay.init(lGL4, this);
+					lOverlay.init(lGL, this);
 				}
 				catch (final Throwable e)
 				{
@@ -663,20 +666,20 @@ public abstract class ClearGLVolumeRenderer	extends
 				System.out.println("getAdaptiveLODController().isRedrawNeeded()=" + getAdaptiveLODController().isRedrawNeeded());
 				System.out.println("pForceRedraw=" + pForceRedraw);/**/
 
-				final GL4 lGL4 = pDrawable.getGL().getGL4();
-				lGL4.glClearColor(0, 0, 0, 1);
-				lGL4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
-				lGL4.glDisable(GL4.GL_CULL_FACE);
-				lGL4.glEnable(GL4.GL_BLEND);
-				lGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
-				lGL4.glBlendEquation(GL4.GL_MAX);
+				final GL lGL = pDrawable.getGL();
+				lGL.glClearColor(0, 0, 0, 1);
+				lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+				lGL.glDisable(GL.GL_CULL_FACE);
+				lGL.glEnable(GL.GL_BLEND);
+				lGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
+				lGL.glBlendEquation(GL2.GL_MAX);
 
 				setDefaultProjectionMatrix();
 
 				final GLMatrix lModelViewMatrix = getModelViewMatrix();
 				final GLMatrix lProjectionMatrix = getDefaultProjectionMatrix();
 
-				GLError.printGLErrors(lGL4, "BEFORE RENDER VOLUME");
+				GLError.printGLErrors(lGL, "BEFORE RENDER VOLUME");
 
 				if (haveVolumeRenderingParametersChanged() || isNewVolumeDataAvailable())
 					getAdaptiveLODController().renderingParametersOrVolumeDataChanged();
@@ -696,9 +699,9 @@ public abstract class ClearGLVolumeRenderer	extends
 
 				clearChangeOfVolumeParametersFlag();
 
-				GLError.printGLErrors(lGL4, "AFTER RENDER VOLUME");
+				GLError.printGLErrors(lGL, "AFTER RENDER VOLUME");
 
-				mGLProgram.use(lGL4);
+				mGLProgram.use(lGL);
 
 				for (int i = 0; i < getNumberOfRenderLayers(); i++)
 					mLayerTextures[i].bind(i);
@@ -710,11 +713,11 @@ public abstract class ClearGLVolumeRenderer	extends
 
 				final GLMatrix lAspectRatioCorrectedProjectionMatrix = getAspectRatioCorrectedProjectionMatrix();
 
-				renderOverlays3D(	lGL4,
+				renderOverlays3D(	lGL,
 													lAspectRatioCorrectedProjectionMatrix,
 													lModelViewMatrix);
 
-				renderOverlays2D(lGL4, cOverlay2dProjectionMatrix);
+				renderOverlays2D(lGL, cOverlay2dProjectionMatrix);
 
 				updateFrameRateDisplay();
 
@@ -798,17 +801,29 @@ public abstract class ClearGLVolumeRenderer	extends
 
 		final double lMaxScale = max(max(lScaleX, lScaleY), lScaleZ);
 
-		if (getRotationControllers().size() > 0)
+		if (getControllers().size() > 0)
 		{
-			for (final RotationControllerInterface lRotationController : getRotationControllers())
-				if (lRotationController.isActive())
+			for (final ControllerInterface lController : getControllers())
+				if (lController.isActive())
 				{
-					if (lRotationController instanceof RotationControllerWithRenderNotification)
+					if (lController instanceof ControllerWithRenderNotification)
 					{
-						final RotationControllerWithRenderNotification lRenderNotification = (RotationControllerWithRenderNotification) lRotationController;
+						final ControllerWithRenderNotification lRenderNotification = (ControllerWithRenderNotification) lController;
 						lRenderNotification.notifyRender(this);
 					}
-					getQuaternion().mult(lRotationController.getQuaternion());
+
+					if (lController instanceof RotationControllerInterface)
+					{
+						final RotationControllerInterface lRotationController = (RotationControllerInterface) lController;
+						getQuaternion().mult(lRotationController.getQuaternion());
+					}
+
+					if (lController instanceof TranslationControllerInterface)
+					{
+						final TranslationControllerInterface lTranslationController = (TranslationControllerInterface) lController;
+						GLMatrix.add(	getTranslation(),
+													lTranslationController.getVector());
+					}
 
 					notifyChangeOfVolumeRenderingParameters();
 				}
@@ -875,7 +890,7 @@ public abstract class ClearGLVolumeRenderer	extends
 		return lHasAnyChanged;
 	}
 
-	private void renderOverlays2D(final GL4 lGL4,
+	private void renderOverlays2D(final GL lGL,
 																final GLMatrix pProjectionMatrix)
 	{
 		try
@@ -887,7 +902,7 @@ public abstract class ClearGLVolumeRenderer	extends
 					final Overlay2D lOverlay2D = (Overlay2D) lOverlay;
 					try
 					{
-						lOverlay2D.render2D(lGL4,
+						lOverlay2D.render2D(lGL,
 																getViewportWidth(),
 																getViewportHeight(),
 																pProjectionMatrix);
@@ -898,7 +913,7 @@ public abstract class ClearGLVolumeRenderer	extends
 					}
 				}
 
-			GLError.printGLErrors(lGL4, "AFTER OVERLAYS");
+			GLError.printGLErrors(lGL, "AFTER OVERLAYS");
 		}
 		catch (final Throwable e)
 		{
@@ -906,7 +921,7 @@ public abstract class ClearGLVolumeRenderer	extends
 		}
 	}
 
-	private void renderOverlays3D(final GL4 lGL4,
+	private void renderOverlays3D(final GL lGL,
 																final GLMatrix pProjectionMatrix,
 																final GLMatrix pModelViewMatrix)
 	{
@@ -918,7 +933,7 @@ public abstract class ClearGLVolumeRenderer	extends
 					final Overlay3D lOverlay3D = (Overlay3D) lOverlay;
 					try
 					{
-						lOverlay3D.render3D(lGL4,
+						lOverlay3D.render3D(lGL,
 																getViewportWidth(),
 																getViewportHeight(),
 																pProjectionMatrix,
@@ -930,7 +945,7 @@ public abstract class ClearGLVolumeRenderer	extends
 					}
 				}
 
-			GLError.printGLErrors(lGL4, "AFTER OVERLAYS");
+			GLError.printGLErrors(lGL, "AFTER OVERLAYS");
 		}
 		catch (final Throwable e)
 		{

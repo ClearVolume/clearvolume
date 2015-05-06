@@ -2,7 +2,8 @@ package clearvolume.renderer.cleargl.overlay.o3d;
 
 import java.io.IOException;
 
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
@@ -74,22 +75,22 @@ public class BoxOverlay extends OverlayBase	implements
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.cleargl.overlay.Overlay#init(javax.media.opengl.GL4, clearvolume.renderer.DisplayRequestInterface)
+	 * @see clearvolume.renderer.cleargl.overlay.Overlay#init(javax.media.opengl.GL, clearvolume.renderer.DisplayRequestInterface)
 	 */
 	@Override
-	public void init(	GL4 pGL4,
+	public void init(	GL pGL,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
 		try
 		{
-			mBoxGLProgram = GLProgram.buildProgram(	pGL4,
+			mBoxGLProgram = GLProgram.buildProgram(	pGL,
 																							BoxOverlay.class,
 																							"shaders/box_vert.glsl",
 																							"shaders/box_frag.glsl");
 
 			mClearGeometryObject = new ClearGeometryObject(	mBoxGLProgram,
 																											3,
-																											GL4.GL_TRIANGLES);
+																											GL.GL_TRIANGLES);
 
 			final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 3);
 
@@ -239,10 +240,10 @@ public class BoxOverlay extends OverlayBase	implements
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
+	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL, cleargl.GLMatrix, cleargl.GLMatrix)
 	 */
 	@Override
-	public void render3D(	GL4 pGL4,
+	public void render3D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix,
@@ -253,13 +254,13 @@ public class BoxOverlay extends OverlayBase	implements
 			mClearGeometryObject.setModelView(pModelViewMatrix);
 			mClearGeometryObject.setProjection(pProjectionMatrix);
 
-			pGL4.glDisable(GL4.GL_DEPTH_TEST);
-			pGL4.glEnable(GL4.GL_CULL_FACE);
-			pGL4.glEnable(GL4.GL_BLEND);
-			pGL4.glBlendFunc(GL4.GL_ONE, GL4.GL_ONE);
-			pGL4.glBlendEquation(GL4.GL_MAX);
-			pGL4.glFrontFace(GL4.GL_CW);
-			mBoxGLProgram.use(pGL4);
+			pGL.glDisable(GL.GL_DEPTH_TEST);
+			pGL.glEnable(GL.GL_CULL_FACE);
+			pGL.glEnable(GL.GL_BLEND);
+			pGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
+			pGL.glBlendEquation(GL2.GL_MAX);
+			pGL.glFrontFace(GL.GL_CW);
+			mBoxGLProgram.use(pGL);
 			mClearGeometryObject.draw();
 
 			mHasChanged = false;

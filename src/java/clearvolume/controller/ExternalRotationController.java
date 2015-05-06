@@ -46,7 +46,7 @@ import com.jogamp.opengl.math.Quaternion;
  *
  */
 public class ExternalRotationController	extends
-																				QuaternionRotationControllerBase implements
+																				RotationControllerBase implements
 																																				RotationControllerInterface,
 																																				Closeable,
 																																				Runnable

@@ -51,6 +51,12 @@ typedef struct
 cudaArray *d_volumeArray = 0;
 cudaArray *d_transferFuncArray;
 
+// 
+__constant__ int c_volumeArrayWidth;
+__constant__ int c_volumeArrayHeight;
+__constant__ int c_volumeArrayDepth;
+
+
 // Textures:
 texture<VolumeType/*BytesPerVoxel*/, 3, cudaReadModeNormalizedFloat> tex;         // 3D texture
 texture<float4, 1, cudaReadModeElementType>         transferTex; // 1D transfer function texture
@@ -114,7 +120,7 @@ int intersectBox(Ray r, float3 boxmin, float3 boxmax, float *tnear, float *tfar)
 // transform vector by matrix with translation:
 __forceinline__
 __device__
-float4 mul(const float4x4 &M, const float4 &v)
+float4 mult(const float4x4 &M, const float4 &v)
 {
     float4 r;
     r.x = dot(v, M.m[0]);
@@ -168,11 +174,11 @@ uint rgbaFloatToIntAndMax(uint existing, float4 rgba)
 }
 
 
-
+/****************************************************************************************************************/
 // Render function,
 // performs max projection and then uses the transfert function to obtain a color per pixel:
 extern "C" __global__ void
-volumerender(       uint *d_output, 
+maxproj_render(       uint *d_output, 
 							const uint imageW, 
 							const uint imageH,
 							const float brightness, 
@@ -212,16 +218,16 @@ volumerender(       uint *d_output,
     float4 direc0, direc;
   
   	// Origin point
-    orig0 = mul(c_invProjectionMatrix,front);
+    orig0 = mult(c_invProjectionMatrix,front);
 		orig0 *= 1.f/orig0.w;
-    orig = mul(c_invViewMatrix,orig0);
+    orig = mult(c_invViewMatrix,orig0);
 		orig *= 1.f/orig.w;
   
   	// Direction:
-    direc0 = mul(c_invProjectionMatrix,back);
+    direc0 = mult(c_invProjectionMatrix,back);
 		direc0 *= 1.f/direc0.w;
 		direc0 = normalize(direc0-orig0);
-		direc = mul(c_invViewMatrix,direc0);
+		direc = mult(c_invViewMatrix,direc0);
 		direc.w = 0.0f;
 
     // eye ray in world space:
@@ -257,7 +263,7 @@ volumerender(       uint *d_output,
 		float4 pos = orig*0.5f+0.5f + tnear*0.5f*direc;
 
 		// Loop unrolling setup: 
-    const uint unrolledmaxsteps = (maxsteps/LOOPUNROLL);
+    const int unrolledmaxsteps = (maxsteps/LOOPUNROLL);
 		
 		// raycasting loop:
 		float maxp = 0.0f;
@@ -274,10 +280,244 @@ volumerender(       uint *d_output,
 		const float mappedsample = __saturatef(powf(ta*maxp+tb,gamma));
 	 
 		// lookup in transfer function texture:
-		const float4 color = brightness * tex1D(transferTex,mappedsample);
+		float4 color = brightness * tex1D(transferTex,mappedsample);
 
+		// Alpha pre-multiply:
+		color.x = color.x*color.w;
+		color.y = color.y*color.w;
+		color.z = color.z*color.w;
     
     // write output color:
     d_output[y*imageW + x] = rgbaFloatToIntAndMax(clear*d_output[y*imageW + x],color);
+}
+
+
+/****************************************************************************************************************/
+extern "C" __global__ void
+isosurface_render(
+									uint *d_output, 
+									const uint imageW, 
+									const uint imageH,
+									const float brightness, 
+									const float trangemin, 
+									const float trangemax, 
+									const float gamma, 
+									const int   maxsteps,
+									const float dithering,
+									const float phase,
+									const int   clear
+									)
+{
+
+	// convert range bounds to linear map:
+  const float ta = 1.0f/(trangemax-trangemin);
+  const float tb = trangemin/(trangemin-trangemax); 
+  
+ 	// box bounds:
+  const float3 boxMin = make_float3(-1.f, -1.f, -1.f);
+  const float3 boxMax = make_float3(1.f,1.f,1.f);
+
+	// thread int coordinates:
+  const uint x = blockIdx.x*blockDim.x + threadIdx.x;
+  const uint y = blockIdx.y*blockDim.y + threadIdx.y;
+
+  
+  if ((x >= imageW) || (y >= imageH)) return;
+  
+  // thread float coordinates:
+  const float u = (x / (float) imageW)*2.0f-1.0f;
+  const float v = (y / (float) imageH)*2.0f-1.0f;
+
+  // front and back:
+  const float4 front = make_float4(u,v,-1.f,1.f);
+  const float4 back  = make_float4(u,v,1.f,1.f);
+  
+  
+  // calculate eye ray in world space
+  float4 orig0, orig;
+  float4 direc0, direc;
+
+	// Origin point
+  orig0 = mult(c_invProjectionMatrix,front);
+	orig0 *= 1.f/orig0.w;
+  orig = mult(c_invViewMatrix,orig0);
+	orig *= 1.f/orig.w;
+
+	// Direction:
+  direc0 = mult(c_invProjectionMatrix,back);
+	direc0 *= 1.f/direc0.w;
+	direc0 = normalize(direc0-orig0);
+	direc = mult(c_invViewMatrix,direc0);
+	direc.w = 0.0f;
+	
+	// eye ray in world space:
+  Ray eyeRay;
+	eyeRay.o = make_float3(orig);
+	eyeRay.d = make_float3(direc);	
+	
+  // find intersection with box
+  float tnear, tfar;
+  const int hit = intersectBox(eyeRay, boxMin, boxMax, &tnear, &tfar);
+
+  if (!hit || tfar<=0) 
+  {
+  	d_output[x+imageW*y] = 0.f;
+    return;
+  }
+
+  // clamp to near plane:
+	if (tnear < 0.0f) tnear = 0.0f;
+   
+
+  // compute step size:
+  const float tstep = fabs(tnear-tfar)/((maxsteps/LOOPUNROLL)*LOOPUNROLL);
+  
+  // apply phase:
+  orig += phase*tstep*direc;
+  
+	// randomize origin point a bit:
+	const uint entropy = (uint)( 6779514*length(orig) + 6257327*length(direc) );
+	orig += dithering*tstep*random(entropy+x,entropy+y)*direc;
+	
+  // precompute vectors: 
+  const float4 vecstep = 0.5f*tstep*direc;
+  float4 pos = orig*0.5f+0.5f + tnear*0.5f*direc;
+
+  // Loop unrolling setup: 
+  const int unrolledmaxsteps = (maxsteps/LOOPUNROLL);
+
+	// iso value:  
+  float isoVal = pow(0.5f,1.0f/gamma)/ta-tb;
+
+  // starting value:
+  float newVal = tex3D(tex, pos.x, pos.y, pos.z);
+
+	// is iso surface value greater or lower:
+  bool isGreater = newVal>isoVal;
+  
+  bool hitIso = false;
+
+  // first pass:
+  for(int i=0; i<unrolledmaxsteps; i++) 
+  	{
+  	  for(int j=1; j<LOOPUNROLL; j++)
+  		{
+  		  newVal = tex3D(tex, pos.x, pos.y, pos.z);
+  		  if ((newVal>isoVal) != isGreater)
+  		  {
+  				hitIso = true;
+  				break;
+  			}
+  		  
+  		  pos+=vecstep;
+  		}
+  	  if (hitIso)
+  			break;
+  	}
+ 
+  
+  //early termination if iso surface not hit:
+ 	if (!hitIso) 
+  {
+  	d_output[x+imageW*y] = 0.f;
+  	return;
+  }
+  
+  //second pass:
+  hitIso = false;
+  pos-=2*vecstep;
+  const float4 finevecstep = 3*vecstep/maxsteps;
+  for(int i=0; i<unrolledmaxsteps; i++) 
+  	{
+  	  for(int j=1; j<LOOPUNROLL; j++)
+  		{
+  		  newVal =  tex3D(tex, pos.x, pos.y, pos.z);
+  		  if ((newVal>isoVal) != isGreater)
+  		  {
+  				hitIso = true;
+  				break;
+  			}
+  		  pos+=finevecstep;
+  		}
+  	  if (hitIso)
+  		break;
+  	}
+  /**/
+  	
+
+  // find the real intersection point
+  float oldVal = tex3D(tex, pos.x-finevecstep.x, pos.y-finevecstep.y, pos.z-finevecstep.z);
+  float lam = (newVal - isoVal)/(newVal-oldVal);
+  pos += lam*vecstep;
+
+  
+  // getting the normals and do some nice phong shading
+  
+  float4 light = make_float4(2,-1,-2,0);
+
+  float c_diffuse = 0.2;
+  float c_specular = 0.4;
+
+  light = mult(c_invViewMatrix,light);
+  light = normalize(light);
+  
+  // compute lateral step for normal calculation:
+	const float latx = 1.0f/(c_volumeArrayWidth);
+	const float laty = 1.0f/(c_volumeArrayHeight);
+	const float latz = 1.0f/(c_volumeArrayDepth);
+  
+  
+  // robust 2nd order normal estimation:
+  float4 normal;
+  normal.x = 	2.f*tex3D(tex, 	pos.x+latx, pos.y, 	pos.z)-
+  						2.f*tex3D(tex,	pos.x-latx, pos.y, 	pos.z)+
+  								tex3D(tex,	pos.x+2.0f*latx, 		pos.y, pos.z)-
+  								tex3D(tex,	pos.x-2.0f*latx, 		pos.y, pos.z);
+
+  normal.y = 	2.f*tex3D(tex,	pos.x, pos.y+laty, pos.z)-
+  						2.f*tex3D(tex,	pos.x, pos.y-laty, pos.z)+
+  								tex3D(tex,	pos.x, pos.y+2.0f*laty, pos.z)-
+  								tex3D(tex,	pos.x, pos.y-2.0f*laty, pos.z);
+
+  normal.z = 	2.f*tex3D(tex,	pos.x, pos.y, pos.z+latz)-
+  						2.f*tex3D(tex,	pos.x, pos.y, pos.z-latz)+
+  								tex3D(tex,	pos.x, pos.y, pos.z+2.0f*latz)-
+  								tex3D(tex,	pos.x, pos.y, pos.z-2.0f*latz);
+
+  normal.w = 0;
+  
+
+  // flip normal if we are comming from values greater than isoVal... 
+  normal = (1.f-2*isGreater)*normalize(normal);
+
+	// Blinn-Phong specular reflection:
+  //float diffuse = fmax(0.f,dot(light,normal));
+  //float specular = pow(fmax(0.f,dot(normalize(light+normalize(direc)),normalize(normal))),45);
+  
+  // Phong specular reflection:
+  float diffuse = fmax(0.f,dot(light,normal));
+  float4 reflect = 2*dot(light,normal)*normal-light;
+  float specular = pow(fmax(0.f,dot(normalize(reflect),normalize(direc))),10);
+
+  // Mapping to transfert function range and gamma correction: 
+  const float mappedVal = gamma;
+
+	// lookup in transfer function texture:
+  float4 color =  tex1D(transferTex,mappedVal);
+
+  const float lighting  =  (		c_diffuse*diffuse
+										  	  							+ (diffuse>0)*c_specular*specular);
+	
+	// Apply lighting:
+	const float3 lightcolor = make_float3(1.0f,1.0f,1.0f);
+  color.x = lightcolor.x*lighting+color.x;
+  color.y = lightcolor.y*lighting+color.y;
+  color.z = lightcolor.z*lighting+color.z;
+  
+  color = brightness*color;
+  
+  d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
+  //d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color);
+
 }
 

@@ -35,7 +35,6 @@ import clearcuda.CudaDevice;
 import clearcuda.CudaDevicePointer;
 import clearcuda.CudaFunction;
 import clearcuda.CudaModule;
-import clearcuda.CudaOpenGLBufferObject;
 import clearcuda.CudaTextureReference;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.processors.CUDAProcessor;
@@ -78,12 +77,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	/**
 	 * Volume rendering CUDA function
 	 */
-	private CudaFunction mVolumeRenderingFunction;
-
-	/**
-	 * We use these buffers when rendering to PBO...
-	 */
-	private volatile CudaOpenGLBufferObject[] mOpenGLBufferDevicePointers;
+	private CudaFunction mCurrentRenderKernel, mMaxProjectionRenderKernel,
+			mIsoSurfaceRenderKernel;
 
 	/**
 	 * We use these buffers when rendering to standard CUDA buffers.
@@ -101,7 +96,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	 */
 
 	private CudaDevicePointer mInvertedModelViewMatrix,
-			mInvertedProjectionMatrix, mSizeOfTransferFunction;
+			mInvertedProjectionMatrix, mSizeOfTransferFunction,
+			mVolumeArrayWidth, mVolumeArrayHeight, mVolumeArrayDepth;
 
 	/**
 	 * CUDA arrays to the transfer function and volume data.
@@ -243,7 +239,12 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 			mInvertedProjectionMatrix = mCudaModule.getGlobal("c_invProjectionMatrix");
 			mSizeOfTransferFunction = mCudaModule.getGlobal("c_sizeOfTransfertFunction");
 
-			mVolumeRenderingFunction = mCudaModule.getFunction("volumerender");
+			mVolumeArrayWidth = mCudaModule.getGlobal("c_volumeArrayWidth");
+			mVolumeArrayHeight = mCudaModule.getGlobal("c_volumeArrayHeight");
+			mVolumeArrayDepth = mCudaModule.getGlobal("c_volumeArrayDepth");
+
+			mMaxProjectionRenderKernel = mCudaModule.getFunction("maxproj_render");
+			mIsoSurfaceRenderKernel = mCudaModule.getFunction("isosurface_render");
 
 			for (int i = 0; i < getNumberOfRenderLayers(); i++)
 				prepareVolumeDataArray(i, null);
@@ -303,13 +304,11 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 			final CudaCompiler lCudaCompiler = new CudaCompiler(mCudaDevice,
 																													lRootClass.getSimpleName());
 
-			lCudaCompiler.setParameter(	Pattern.quote("/*ProjectionAlgorithm*/"),
-																	getProjectionAlgorithm().name());
 			lCudaCompiler.setParameter(	Pattern.quote("/*BytesPerVoxel*/"),
 																	"" + getBytesPerVoxel());
 
 			final File lCUFile = lCudaCompiler.addFile(	lRootClass,
-																									"kernels/VolumeRenderPerspective.cu",
+																									"kernels/VolumeRender.cu",
 																									true);
 
 			lCudaCompiler.addFiles(	CudaCompiler.class,
@@ -356,6 +355,10 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 			final long lWidth = getVolumeSizeX();
 			final long lHeight = getVolumeSizeY();
 			final long lDepth = getVolumeSizeZ();
+
+			mVolumeArrayWidth.setSingleInt((int) lWidth);
+			mVolumeArrayHeight.setSingleInt((int) lHeight);
+			mVolumeArrayDepth.setSingleInt((int) lDepth);
 
 			final long lSizeInBytes = lVolumeDataBuffer.getSizeInBytes();
 
@@ -416,7 +419,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	private void pointTextureToArray(final int pRenderLayerIndex)
 	{
 		mVolumeDataCudaTexture.setTo(mVolumeDataCudaArrays[pRenderLayerIndex]);
-		// mVolumeRenderingFunction.setTexture(mVolumeDataCudaTexture);
+		// mCurrentRenderKernel.setTexture(mVolumeDataCudaTexture);
 	}
 
 	/**
@@ -471,7 +474,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	{
 		mSizeOfTransferFunction.setSingleFloat(getTransferFunction(pRenderLayerIndex).getArray().length);
 		mTransferFunctionTexture.setTo(mTransferFunctionCudaArrays[pRenderLayerIndex]);
-		mVolumeRenderingFunction.setTexture(mTransferFunctionTexture);
+		mCurrentRenderKernel.setTexture(mTransferFunctionTexture);
 	}
 
 	@Override
@@ -769,35 +772,65 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 		{
 			// synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 			{
+				switch (getRenderAlgorithm(pRenderLayerIndex))
+				{
+				case MaxProjection:
+					mCurrentRenderKernel = mMaxProjectionRenderKernel;
+					break;
+				case IsoSurface:
+					mCurrentRenderKernel = mIsoSurfaceRenderKernel;
+					break;
+				}
+
 				copyTransferFunctionArray(pRenderLayerIndex);
 
 				pointTransferFunctionTextureToArray(pRenderLayerIndex);
 				pointTextureToArray(pRenderLayerIndex);
 
-				mVolumeRenderingFunction.setGridDim(iDivUp(	getTextureWidth(),
+				mCurrentRenderKernel.setGridDim(iDivUp(	getTextureWidth(),
 																										cBlockSize),
 																						iDivUp(	getTextureHeight(),
 																										cBlockSize),
 																						1);
 
-				mVolumeRenderingFunction.setBlockDim(	cBlockSize,
+				mCurrentRenderKernel.setBlockDim(	cBlockSize,
 																							cBlockSize,
 																							1);
+
 
 				final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
 				getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
 				final int lNumberOfPasses = getAdaptiveLODController().getNumberOfPasses();
-				final int lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
-				final float lPhase = getAdaptiveLODController().getPhase();
-				final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
-																																							: 1;
+
 				final int lPassIndex = getAdaptiveLODController().getPassIndex();
 				final boolean lActive = getAdaptiveLODController().isActive();
 
-				final float lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+				int lMaxSteps = lMaxNumberSteps;
+				float lDithering = 0;
+				float lPhase = 0;
+				int lClear = 0;
+
+				switch (getRenderAlgorithm(pRenderLayerIndex))
+				{
+				case MaxProjection:
+					lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
+					lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+					lPhase = getAdaptiveLODController().getPhase();
+					lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
+																																			: 1;
+					break;
+				case IsoSurface:
+					lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses);
+					lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+					lClear = 0;
+					lPhase = 0;
+
+					break;
+				}
 
 
-				mVolumeRenderingFunction.launch(lCudaDevicePointer,
+
+				mCurrentRenderKernel.launch(lCudaDevicePointer,
 																				getTextureWidth(),
 																				getTextureHeight(),
 																				(float) getBrightness(pRenderLayerIndex),

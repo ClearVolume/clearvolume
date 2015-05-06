@@ -3,15 +3,14 @@ package clearvolume.controller;
 import com.jogamp.opengl.math.Quaternion;
 
 /**
- * Class QuaternionRotationControllerBase
+ * Class RotationControllerBase
  * 
- * Example implementation of a RotationControllerInterface using quaternions.
  *
  * @author Loic Royer 2014
  *
  */
-public class QuaternionRotationControllerBase	implements
-																					RotationControllerInterface
+public class RotationControllerBase extends ControllerBase implements
+																																		RotationControllerInterface
 {
 
 	private volatile boolean mActive = true;
@@ -19,24 +18,12 @@ public class QuaternionRotationControllerBase	implements
 	protected final Object mQuaternionUpdateLock = new Object();
 
 	/**
-	 * Constructs an instance of the QuaternionRotationControllerBase class
+	 * Constructs an instance of the RotationControllerBase class
 	 */
-	public QuaternionRotationControllerBase()
+	public RotationControllerBase()
 	{
 		super();
 		mQuaternion.setIdentity();
-	}
-
-	@Override
-	public void setActive(boolean pActive)
-	{
-		mActive = pActive;
-	}
-
-	@Override
-	public boolean isActive()
-	{
-		return mActive;
 	}
 
 	/**
@@ -66,9 +53,5 @@ public class QuaternionRotationControllerBase	implements
 	{
 		return mQuaternion;
 	}
-
-
-
-
 
 }

@@ -17,9 +17,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.SwingUtilities;
 
+import cleargl.GLMatrix;
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
-import clearvolume.controller.RotationControllerInterface;
+import clearvolume.controller.AutoTranslateController;
+import clearvolume.controller.ControllerInterface;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.processors.Processor;
@@ -73,7 +75,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Rotation controller in addition to the mouse
 	 */
-	private final ArrayList<RotationControllerInterface> mRotationControllerList = new ArrayList<RotationControllerInterface>();
+	private final ArrayList<ControllerInterface> mControllerList = new ArrayList<ControllerInterface>();
 
 	/**
 	 * Auto rotation controller
@@ -81,9 +83,9 @@ public abstract class ClearVolumeRendererBase	implements
 	private final AutoRotationController mAutoRotationController;
 
 	/**
-	 * Projection algorithm used
+	 * Auto translate controller
 	 */
-	private ProjectionAlgorithm mProjectionAlgorithm = ProjectionAlgorithm.MaxProjection;
+	private final AutoTranslateController mAutoTranslateController;
 
 	/**
 	 * Transfer functions used
@@ -94,21 +96,21 @@ public abstract class ClearVolumeRendererBase	implements
 
 	// geometric, brigthness an contrast settings.
 	private final Quaternion mRotationQuaternion = new Quaternion();
-	private volatile float mTranslationX = 0;
-	private volatile float mTranslationY = 0;
-	private volatile float mTranslationZ = 0;
+	private volatile float[] mTranslationVector = new float[3];
 	private volatile boolean mTranslateFirstRotateSecond = true;
 
 	private volatile float mFOV = cDefaultFOV;
 
+	// Render algorithm per layer:
+	private final RenderAlgorithm[] mRenderAlgorithm;
 
-	// private volatile float mDensity;
-	private volatile float[] mBrightness;
-	private volatile float[] mTransferFunctionRangeMin;
-	private volatile float[] mTransferFunctionRangeMax;
-	private volatile float[] mGamma;
-	private volatile float[] mQuality;
-	private volatile float[] mDithering;
+	// render parameters per layer;
+	private final float[] mBrightness;
+	private final float[] mTransferFunctionRangeMin;
+	private final float[] mTransferFunctionRangeMax;
+	private final float[] mGamma;
+	private final float[] mQuality;
+	private final float[] mDithering;
 
 	private volatile boolean mVolumeRenderingParametersChanged = true;
 
@@ -147,7 +149,6 @@ public abstract class ClearVolumeRendererBase	implements
 	// Display lock:
 	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
 
-
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
 		super();
@@ -158,6 +159,7 @@ public abstract class ClearVolumeRendererBase	implements
 		mDataBufferCopyIsFinishedArray = new CountDownLatch[pNumberOfRenderLayers];
 		mTransferFunctions = new TransferFunction[pNumberOfRenderLayers];
 		mLayerVisiblityFlagArray = new boolean[pNumberOfRenderLayers];
+		mRenderAlgorithm = new RenderAlgorithm[pNumberOfRenderLayers];
 		mBrightness = new float[pNumberOfRenderLayers];
 		mTransferFunctionRangeMin = new float[pNumberOfRenderLayers];
 		mTransferFunctionRangeMax = new float[pNumberOfRenderLayers];
@@ -170,6 +172,7 @@ public abstract class ClearVolumeRendererBase	implements
 			mSetVolumeDataBufferLocks[i] = new Object();
 			mTransferFunctions[i] = TransferFunctions.getGradientForColor(i);
 			mLayerVisiblityFlagArray[i] = true;
+			mRenderAlgorithm[i] = RenderAlgorithm.MaxProjection;
 			mBrightness[i] = 1;
 			mTransferFunctionRangeMin[i] = 0f;
 			mTransferFunctionRangeMax[i] = 1f;
@@ -178,10 +181,16 @@ public abstract class ClearVolumeRendererBase	implements
 			mDithering[i] = 1f;
 		}
 
+		if (pNumberOfRenderLayers == 1)
+			mTransferFunctions[0] = TransferFunctions.getDefault();
+
 		mAdaptiveLODController = new AdaptiveLODController();
 
 		mAutoRotationController = new AutoRotationController();
-		mRotationControllerList.add(mAutoRotationController);
+		mControllerList.add(mAutoRotationController);
+
+		mAutoTranslateController = new AutoTranslateController();
+		mControllerList.add(mAutoTranslateController);
 
 	}
 
@@ -252,8 +261,6 @@ public abstract class ClearVolumeRendererBase	implements
 		mVolumeRenderingParametersChanged = false;
 	}
 
-
-
 	/**
 	 * Returns the volume size along x axis.
 	 *
@@ -317,8 +324,6 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		mVolumeDimensionsChanged = false;
 	}
-
-
 
 	/**
 	 * Gets active flag for the current render layer.
@@ -821,6 +826,18 @@ public abstract class ClearVolumeRendererBase	implements
 		return mTranslateFirstRotateSecond;
 	}
 
+	@Override
+	public float[] getTranslation()
+	{
+		return mTranslationVector;
+	}
+
+	@Override
+	public Quaternion getQuaternion()
+	{
+		return mRotationQuaternion;
+	}
+
 	/**
 	 * Interface method implementation
 	 *
@@ -830,8 +847,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void resetRotationTranslation()
 	{
 		mRotationQuaternion.setIdentity();
-		mTranslationX = 0;
-		mTranslationY = 0;
+		GLMatrix.zero(mTranslationVector);
 		setDefaultTranslationZ();
 	}
 
@@ -856,7 +872,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void addTranslationX(final double pDX)
 	{
-		mTranslationX += pDX;
+		mTranslationVector[0] += pDX;
 		notifyChangeOfVolumeRenderingParameters();
 	}
 
@@ -868,7 +884,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void addTranslationY(final double pDY)
 	{
-		mTranslationY += pDY;
+		mTranslationVector[1] += pDY;
 		notifyChangeOfVolumeRenderingParameters();
 	}
 
@@ -880,15 +896,10 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void addTranslationZ(final double pDZ)
 	{
-		mTranslationZ += pDZ;
+		mTranslationVector[2] += pDZ;
 		notifyChangeOfVolumeRenderingParameters();
 	}
 
-	@Override
-	public Quaternion getQuaternion()
-	{
-		return mRotationQuaternion;
-	}
 
 	/**
 	 * Interface method implementation
@@ -898,7 +909,8 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setTranslationX(double pTranslationX)
 	{
-		mTranslationX = (float) pTranslationX;
+		mTranslationVector[0] = (float) pTranslationX;
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -909,7 +921,8 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setTranslationY(double pTranslationY)
 	{
-		mTranslationY = (float) pTranslationY;
+		mTranslationVector[1] = (float) pTranslationY;
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -920,7 +933,8 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setTranslationZ(double pTranslationZ)
 	{
-		mTranslationZ = (float) pTranslationZ;
+		mTranslationVector[2] = (float) pTranslationZ;
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -931,7 +945,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setDefaultTranslationZ()
 	{
-		mTranslationZ = -3.25f / getFOV();
+		setTranslationZ(-3.25f / getFOV());
 	}
 
 	/**
@@ -942,7 +956,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public float getTranslationX()
 	{
-		return mTranslationX;
+		return mTranslationVector[0];
 	}
 
 	/**
@@ -953,7 +967,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public float getTranslationY()
 	{
-		return mTranslationY;
+		return mTranslationVector[1];
 	}
 
 	/**
@@ -964,7 +978,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public float getTranslationZ()
 	{
-		return mTranslationZ;
+		return mTranslationVector[2];
 	}
 
 	/**
@@ -1075,20 +1089,44 @@ public abstract class ClearVolumeRendererBase	implements
 	 *
 	 * @return currently used mProjectionMatrix algorithm
 	 */
-	public ProjectionAlgorithm getProjectionAlgorithm()
+	@Override
+	public RenderAlgorithm getRenderAlgorithm(final int pRenderLayerIndex)
 	{
-		return mProjectionAlgorithm;
+		return mRenderAlgorithm[pRenderLayerIndex];
+	}
+
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setRenderAlgorithm(int, clearvolume.renderer.RenderAlgorithm)
+	 */
+	@Override
+	public void setRenderAlgorithm(	final int pRenderLayerIndex,
+																	final RenderAlgorithm pRenderAlgorithm)
+	{
+		mRenderAlgorithm[pRenderLayerIndex] = pRenderAlgorithm;
+		notifyChangeOfVolumeRenderingParameters();
+	}
+
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setRenderAlgorithm(int, clearvolume.renderer.RenderAlgorithm)
+	 */
+	@Override
+	public void setRenderAlgorithm(final RenderAlgorithm pRenderAlgorithm)
+	{
+		for (int i = 0; i < mRenderAlgorithm.length; i++)
+			mRenderAlgorithm[i] = pRenderAlgorithm;
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setProjectionAlgorithm(clearvolume.renderer.ProjectionAlgorithm)
+	 * Cycles through rendering algorithms
 	 */
 	@Override
-	public void setProjectionAlgorithm(final ProjectionAlgorithm pProjectionAlgorithm)
+	public void cycleRenderAlgorithm()
 	{
-		mProjectionAlgorithm = pProjectionAlgorithm;
+		int i = 0;
+		for (final RenderAlgorithm lRenderAlgorithm : mRenderAlgorithm)
+			mRenderAlgorithm[i++] = lRenderAlgorithm.next();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -1134,8 +1172,6 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		return mSetVolumeDataBufferLocks[pRenderLayerIndex];
 	}
-
-
 
 	@Override
 	public void setCurrentRenderLayer(final int pLayerIndex)
@@ -1390,7 +1426,6 @@ public abstract class ClearVolumeRendererBase	implements
 			mVoxelSizeY = pVoxelSizeY;
 			mVoxelSizeZ = pVoxelSizeZ;
 
-
 			clearCompletionOfDataBufferCopy(pRenderLayerIndex);
 			mVolumeDataByteBuffers[pRenderLayerIndex] = pFragmentedMemoryInterface;
 
@@ -1481,25 +1516,25 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Adds a rotation controller.
 	 *
-	 * @param pRotationControllerInterface
+	 * @param pControllerInterface
 	 *          rotation controller
 	 */
 	@Override
-	public void addRotationController(RotationControllerInterface pRotationControllerInterface)
+	public void addController(ControllerInterface pControllerInterface)
 	{
-		mRotationControllerList.add(pRotationControllerInterface);
+		mControllerList.add(pControllerInterface);
 	}
 
 	/**
 	 * Removes a rotation controller.
 	 *
-	 * @param pRotationControllerInterface
+	 * @param pControllerInterface
 	 *          rotation controller
 	 */
 	@Override
-	public void removeRotationController(RotationControllerInterface pRotationControllerInterface)
+	public void removeController(ControllerInterface pControllerInterface)
 	{
-		mRotationControllerList.remove(pRotationControllerInterface);
+		mControllerList.remove(pControllerInterface);
 	}
 
 	/**
@@ -1514,17 +1549,26 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
+	 * Returns the auto translate controller.
+	 *
+	 * @return auto translate controller
+	 */
+	@Override
+	public AutoTranslateController getAutoTranslateController()
+	{
+		return mAutoTranslateController;
+	}
+
+	/**
 	 * Returns the current list of rotation controllers.
 	 *
 	 * @return currently used rotation controller.
 	 */
 	@Override
-	public ArrayList<RotationControllerInterface> getRotationControllers()
+	public ArrayList<ControllerInterface> getControllers()
 	{
-		return mRotationControllerList;
+		return mControllerList;
 	}
-
-
 
 	/**
 	 * Toggles the display of the Control Frame;
@@ -1599,11 +1643,16 @@ public abstract class ClearVolumeRendererBase	implements
 	};
 
 	@Override
-	public void setMultiPass(boolean pMultiPassOn)
+	public void setAdaptiveLODActive(boolean pAdaptiveLOD)
 	{
 		if (mAdaptiveLODController != null)
-			mAdaptiveLODController.setActive(pMultiPassOn);
+			mAdaptiveLODController.setActive(pAdaptiveLOD);
+	}
 
+	@Override
+	public boolean getAdaptiveLODActive()
+	{
+		return getAdaptiveLODController().isActive();
 	}
 
 	/**
@@ -1623,7 +1672,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void toggleAdaptiveLOD()
 	{
-		mAdaptiveLODController.toggleActive();
+		setAdaptiveLODActive(!getAdaptiveLODActive());
 	}
 
 	/**
@@ -1705,6 +1754,5 @@ public abstract class ClearVolumeRendererBase	implements
 			}
 
 	}
-
 
 }

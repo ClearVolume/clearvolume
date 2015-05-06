@@ -8,7 +8,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
-import clearvolume.controller.RotationControllerInterface;
+import clearvolume.controller.AutoTranslateController;
+import clearvolume.controller.ControllerInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
@@ -379,11 +380,31 @@ public interface ClearVolumeRendererInterface	extends
 	public float getQuality(int pRenderLayerIndex);
 
 	/**
-	 * Sets the mProjectionMatrix algorithm used.
+	 * Sets the render algorithm for the given render layer.
 	 *
-	 * @param pProjectionAlgorithm
+	 * @param pRenderAlgorithm
 	 */
-	public void setProjectionAlgorithm(ProjectionAlgorithm pProjectionAlgorithm);
+	public void setRenderAlgorithm(	final int pRenderLayerIndex,
+																	RenderAlgorithm pRenderAlgorithm);
+
+	/**
+	 * Sets the current render algorithm for all render layers.
+	 *
+	 * @param pRenderAlgorithm
+	 */
+	public void setRenderAlgorithm(RenderAlgorithm pRenderAlgorithm);
+
+	/**
+	 * Gets the currently used render algorithm used.
+	 *
+	 * @return currently used render algorithm
+	 */
+	public RenderAlgorithm getRenderAlgorithm(final int pRenderLayerIndex);
+
+	/**
+	 * Cycles through rendering algorithms
+	 */
+	public void cycleRenderAlgorithm();
 
 	/**
 	 * Sets the current render layer.
@@ -738,27 +759,34 @@ public interface ClearVolumeRendererInterface	extends
 	public Quaternion getQuaternion();
 
 	/**
-	 * Adds a rotation controller.
-	 *
-	 * @param pRotationControllerInterface
-	 *          rotation controller
+	 * Returns the translation vector
+	 * 
+	 * @return translation vector
 	 */
-	public void addRotationController(RotationControllerInterface pRotationControllerInterface);
+	public float[] getTranslation();
 
 	/**
-	 * Removes a rotation controller.
+	 * Adds a controller.
 	 *
-	 * @param pRotationControllerInterface
-	 *          rotation controller
+	 * @param pControllerInterface
+	 *          controller
 	 */
-	public void removeRotationController(RotationControllerInterface pRotationControllerInterface);
+	public void addController(ControllerInterface pControllerInterface);
 
 	/**
-	 * Returns the current list of rotation controllers.
+	 * Removes a controller.
 	 *
-	 * @return currently used rotation controller.
+	 * @param pControllerInterface
+	 *          controller
 	 */
-	public ArrayList<RotationControllerInterface> getRotationControllers();
+	public void removeController(ControllerInterface pControllerInterface);
+
+	/**
+	 * Returns the current list of controllers (rotation and/or translation).
+	 *
+	 * @return currently list of controllers.
+	 */
+	public ArrayList<ControllerInterface> getControllers();
 
 	/**
 	 * Returns the auto rotation controller.
@@ -766,6 +794,13 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return auto rotation controller
 	 */
 	AutoRotationController getAutoRotateController();
+
+	/**
+	 * Returns the auto translation controller.
+	 *
+	 * @return auto translation controller
+	 */
+	AutoTranslateController getAutoTranslateController();
 
 	/**
 	 * Notifies renderer that display/volume parameters have changed and a display
@@ -854,7 +889,14 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pMultiPassOn
 	 *          true iof on, false if off
 	 */
-	public void setMultiPass(boolean pMultiPassOn);
+	public void setAdaptiveLODActive(boolean pMultiPassOn);
+
+	/**
+	 * Sets the adaptive LOD flag
+	 * 
+	 * @return true if adaptive LOD is active
+	 */
+	boolean getAdaptiveLODActive();
 
 	/**
 	 * Returns the adaptive level-of-detail (LOD) controller.

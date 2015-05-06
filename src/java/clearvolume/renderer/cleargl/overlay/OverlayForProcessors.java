@@ -2,7 +2,7 @@ package clearvolume.renderer.cleargl.overlay;
 
 import java.util.ArrayList;
 
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL;
 
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
@@ -66,10 +66,10 @@ public class OverlayForProcessors extends OverlayBase	implements
 	}
 
 	@Override
-	public void init(	GL4 pGL4,
+	public void init(	GL pGL,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
-		mOverlay.init(pGL4, pDisplayRequestInterface);
+		mOverlay.init(pGL, pDisplayRequestInterface);
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class OverlayForProcessors extends OverlayBase	implements
 	}
 
 	@Override
-	public void render3D(	GL4 pGL4,
+	public void render3D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix,
@@ -93,7 +93,7 @@ public class OverlayForProcessors extends OverlayBase	implements
 		if (mOverlay instanceof Overlay3D)
 		{
 			final Overlay3D lOverlay3D = (Overlay3D) mOverlay;
-			lOverlay3D.render3D(pGL4,
+			lOverlay3D.render3D(pGL,
 													pWidth,
 													pHeight,
 													pProjectionMatrix,
@@ -113,7 +113,7 @@ public class OverlayForProcessors extends OverlayBase	implements
 	}
 
 	@Override
-	public void render2D(	GL4 pGL4,
+	public void render2D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix)
@@ -121,7 +121,7 @@ public class OverlayForProcessors extends OverlayBase	implements
 		if (mOverlay instanceof Overlay2D)
 		{
 			final Overlay2D lOverlay2D = (Overlay2D) mOverlay;
-			lOverlay2D.render2D(pGL4, pWidth, pHeight, pProjectionMatrix);
+			lOverlay2D.render2D(pGL, pWidth, pHeight, pProjectionMatrix);
 		}
 	}
 

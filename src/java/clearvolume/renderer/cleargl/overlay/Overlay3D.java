@@ -1,6 +1,6 @@
 package clearvolume.renderer.cleargl.overlay;
 
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL;
 
 import cleargl.GLMatrix;
 
@@ -22,11 +22,11 @@ public interface Overlay3D
 	/**
 	 * OpenGl code to render the 3D overlay.
 	 * 
-	 * @param pGL4
+	 * @param pGL
 	 * @param pProjectionMatrix
 	 * @param pModelViewMatrix
 	 */
-	public void render3D(	GL4 pGL4,
+	public void render3D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix,

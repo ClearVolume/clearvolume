@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL4;
 
 import cleargl.GLAttribute;
 import cleargl.GLFloatArray;
@@ -60,16 +59,16 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.cleargl.overlay.Overlay#init(javax.media.opengl.GL4, clearvolume.renderer.DisplayRequestInterface)
+	 * @see clearvolume.renderer.cleargl.overlay.Overlay#init(javax.media.opengl.GL, clearvolume.renderer.DisplayRequestInterface)
 	 */
 	@Override
-	public void init(	GL4 pGL4,
+	public void init(	GL pGL,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
 		// box display: construct the program and related objects
 		try
 		{
-			mBoxGLProgram = GLProgram.buildProgram(	pGL4,
+			mBoxGLProgram = GLProgram.buildProgram(	pGL,
 																							OldBoxOverlay.class,
 																							"shaders/oldbox_vert.glsl",
 																							"shaders/oldbox_frag.glsl");
@@ -78,11 +77,11 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 			mOverlayProjectionMatrixUniform = mBoxGLProgram.getUniform("projection");
 
 			// Makes line anti-aliased:
-			// pGL4.glEnable(GL4.GL_BLEND);
-			// pGL4.glEnable(GL4.GL_LINE_SMOOTH);
+			// pGL.glEnable(GL.GL_BLEND);
+			// pGL.glEnable(GL.GL_LINE_SMOOTH);
 
 			// set the line with of the box
-			pGL4.glLineWidth(cBoxLineWidth);
+			pGL.glLineWidth(cBoxLineWidth);
 
 			// get all the shaders uniform locations
 			mBoxPositionAttribute = mBoxGLProgram.getAtribute("position");
@@ -137,10 +136,10 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL4, cleargl.GLMatrix, cleargl.GLMatrix)
+	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL, cleargl.GLMatrix, cleargl.GLMatrix)
 	 */
 	@Override
-	public void render3D(	GL4 pGL4,
+	public void render3D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix,
@@ -148,7 +147,7 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 	{
 		if (isDisplayed())
 		{
-			mBoxGLProgram.use(pGL4);
+			mBoxGLProgram.use(pGL);
 
 			mOverlayModelViewMatrixUniform.setFloatMatrix(pModelViewMatrix.getFloatArray(),
 																										false);
