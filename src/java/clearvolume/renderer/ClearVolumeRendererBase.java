@@ -59,6 +59,9 @@ public abstract class ClearVolumeRendererBase	implements
 	public static final float cMinimalFOV = cOrthoLikeFOV;
 	public static final float cMaximalFOV = (float) (0.75 * PI);
 
+	// Timeout:
+	private static final long cDefaultSetVolumeDataBufferTimeout = 5;
+
 	/**
 	 * Number of render layers.
 	 */
@@ -79,8 +82,6 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Auto rotation controller
 	 */
 	private final AutoRotationController mAutoRotationController;
-
-
 
 	/**
 	 * Transfer functions used
@@ -1196,6 +1197,49 @@ public abstract class ClearVolumeRendererBase	implements
 																1);
 	}
 
+	@Override
+	public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
+																			ByteBuffer pByteBuffer,
+																			long pSizeX,
+																			long pSizeY,
+																			long pSizeZ,
+																			double pVoxelSizeX,
+																			double pVoxelSizeY,
+																			double pVoxelSizeZ)
+	{
+		return setVolumeDataBuffer(	cDefaultSetVolumeDataBufferTimeout,
+																TimeUnit.SECONDS,
+																pRenderLayerIndex,
+																pByteBuffer,
+																pSizeX,
+																pSizeY,
+																pSizeZ,
+																1,
+																1,
+																1);
+	}
+
+	@Override
+	public boolean setVolumeDataBuffer(	long pTimeOut,
+																			TimeUnit pTimeUnit,
+																			final int pRenderLayerIndex,
+																			final ByteBuffer pByteBuffer,
+																			final long pSizeX,
+																			final long pSizeY,
+																			final long pSizeZ)
+	{
+		return setVolumeDataBuffer(	pTimeOut,
+																pTimeUnit,
+																pRenderLayerIndex,
+																pByteBuffer,
+																pSizeX,
+																pSizeY,
+																pSizeZ,
+																1,
+																1,
+																1);
+	}
+
 	/**
 	 * Interface method implementation
 	 *
@@ -1275,7 +1319,9 @@ public abstract class ClearVolumeRendererBase	implements
 	 *      long, long, long, double, double, double)
 	 */
 	@Override
-	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
+	public boolean setVolumeDataBuffer(	long pTimeOut,
+																			TimeUnit pTimeUnit,
+																			final int pRenderLayerIndex,
 																			final ByteBuffer pByteBuffer,
 																			final long pSizeX,
 																			final long pSizeY,
@@ -1298,7 +1344,9 @@ public abstract class ClearVolumeRendererBase	implements
 			lFragmentedMemoryInterface = FragmentedMemory.wrap(lOffHeapMemory);
 		}
 
-		return setVolumeDataBuffer(	pRenderLayerIndex,
+		return setVolumeDataBuffer(	pTimeOut,
+																pTimeUnit,
+																pRenderLayerIndex,
 																lFragmentedMemoryInterface,
 																pSizeX,
 																pSizeY,
@@ -1339,7 +1387,7 @@ public abstract class ClearVolumeRendererBase	implements
 																			final double pVoxelSizeY,
 																			final double pVoxelSizeZ)
 	{
-		return setVolumeDataBuffer(	10,
+		return setVolumeDataBuffer(	cDefaultSetVolumeDataBufferTimeout,
 																TimeUnit.SECONDS,
 																pRenderLayerIndex,
 																pFragmentedMemoryInterface,

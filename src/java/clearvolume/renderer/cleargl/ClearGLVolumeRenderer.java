@@ -315,7 +315,6 @@ public abstract class ClearGLVolumeRenderer	extends
 
 		if (pUseInCanvas)
 		{
-			System.out.println("new NewtCanvasAWT() ");
 			mNewtCanvasAWT = mClearGLWindow.getNewtCanvasAWT();
 			mNewtCanvasAWT.setShallUseOffscreenLayer(true);
 		}

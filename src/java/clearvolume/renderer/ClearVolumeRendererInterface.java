@@ -467,6 +467,28 @@ public interface ClearVolumeRendererInterface	extends
 	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
 	 * layer.
 	 *
+	 * @param pTimeOut
+	 * @param pTimeUnit
+	 * @param pRenderLayerIndex
+	 * @param pByteBuffer
+	 * @param pSizeX
+	 * @param pSizeY
+	 * @param pSizeZ
+	 * @return true if buffer fully copied
+	 */
+	public boolean setVolumeDataBuffer(	long pTimeOut,
+																			TimeUnit pTimeUnit,
+																			int pRenderLayerIndex,
+																			ByteBuffer pByteBuffer,
+																			long pSizeX,
+																			long pSizeY,
+																			long pSizeZ);
+
+	/**
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
+	 * layer.
+	 *
 	 * @param pRenderLayerIndex
 	 * @param pFragmentedMemoryInterface
 	 * @param pSizeX
@@ -520,6 +542,33 @@ public interface ClearVolumeRendererInterface	extends
 																			double pVoxelSizeX,
 																			double pVoxelSizeY,
 																			double pVoxelSizeZ);
+
+	/**
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are provided.
+	 * 
+	 * @param pTimeOut
+	 * @param pTimeUnit
+	 * @param pRenderLayerIndex
+	 * @param pByteBuffer
+	 * @param pSizeX
+	 * @param pSizeY
+	 * @param pSizeZ
+	 * @param pVoxelSizeX
+	 * @param pVoxelSizeY
+	 * @param pVoxelSizeZ
+	 * @return
+	 */
+	public boolean setVolumeDataBuffer(	long pTimeOut,
+																			TimeUnit pTimeUnit,
+																			final int pRenderLayerIndex,
+																			final ByteBuffer pByteBuffer,
+																			final long pSizeX,
+																			final long pSizeY,
+																			final long pSizeZ,
+																			final double pVoxelSizeX,
+																			final double pVoxelSizeY,
+																			final double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
