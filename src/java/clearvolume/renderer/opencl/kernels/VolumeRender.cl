@@ -352,12 +352,15 @@ __kernel void isosurface_render(
 	// iso value:  
   float isoVal = mad(1.0f/ta,pow(0.5f,1.0f/gamma),-tb);
 
-  // raycasting loop:
+  // starting value:
   float newVal = read_imagef(volume, volumeSampler, pos).x;
 
+	// is iso surface value greater or lower:
   bool isGreater = newVal>isoVal;
+  
   bool hitIso = false;
 
+  // first pass:
   for(int i=0; i<unrolledmaxsteps; i++) 
   	{
   	  for(int j=1; j<LOOPUNROLL; j++)
@@ -372,19 +375,41 @@ __kernel void isosurface_render(
   		  pos+=vecstep;
   		}
   	  if (hitIso)
-  		break;
+  			break;
   	}
-  	
-  //	
+ 
+  
+  //early termination if iso surface not hit:
  	if (!hitIso) 
   {
   	d_output[x+imageW*y] = 0.f;
   	return;
   }
-
+  
+  //second pass:
+  hitIso = false;
+  pos-=2*vecstep;
+  const float4 finevecstep = 3*vecstep/maxsteps;
+  for(int i=0; i<unrolledmaxsteps; i++) 
+  	{
+  	  for(int j=1; j<LOOPUNROLL; j++)
+  		{
+  		  newVal = read_imagef(volume, volumeSampler, pos).x;
+  		  if ((newVal>isoVal) != isGreater)
+  		  {
+  				hitIso = true;
+  				break;
+  			}
+  		  pos+=finevecstep;
+  		}
+  	  if (hitIso)
+  		break;
+  	}
+  /**/
+  	
 
   // find the real intersection point
-  float oldVal = read_imagef(volume, volumeSampler, pos-vecstep).x;
+  float oldVal = read_imagef(volume, volumeSampler, pos-finevecstep).x;
   float lam = (newVal - isoVal)/(newVal-oldVal);
   pos += lam*vecstep;
 
@@ -453,7 +478,8 @@ __kernel void isosurface_render(
   
   color = brightness*color;
   
-  d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
+  //d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
+  d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color);
 
 }
 

@@ -373,18 +373,17 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		{
 			prepareTransferFunctionArray(pRenderLayerIndex);
 
-
 			final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
 			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
 			final int lNumberOfPasses = getAdaptiveLODController().getNumberOfPasses();
-			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
-																																						: 1;
+
 			final int lPassIndex = getAdaptiveLODController().getPassIndex();
 			final boolean lActive = getAdaptiveLODController().isActive();
 
 			int lMaxSteps = lMaxNumberSteps;
 			float lDithering = 0;
 			float lPhase = 0;
+			int lClear = 0;
 
 			switch (getRenderAlgorithm(pRenderLayerIndex))
 			{
@@ -393,13 +392,18 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 				lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
 				lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
 				lPhase = getAdaptiveLODController().getPhase();
+				lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
+																																		: 1;
 				break;
 			case IsoSurface:
 				mCurrentRenderKernel = mIsoSurfaceRenderKernel;
-				lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex))
-										/ lNumberOfPasses;
+				lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses);
 				lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
-				lPhase = 0;
+				lClear = (lPassIndex == (lNumberOfPasses - 1) || lPassIndex == 0)	? 0
+																																					: 1;
+				lPhase = lClear == 0 ? 0
+														: getAdaptiveLODController().getPhase();
+
 				break;
 			}
 
