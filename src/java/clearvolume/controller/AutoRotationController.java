@@ -55,4 +55,9 @@ public class AutoRotationController	extends
 
 	}
 
+	public boolean isRotating()
+	{
+		return !getQuaternion().isIdentity();
+	}
+
 }

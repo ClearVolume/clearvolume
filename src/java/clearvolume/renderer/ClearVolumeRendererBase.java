@@ -80,10 +80,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	private final AutoRotationController mAutoRotationController;
 
-	/**
-	 * Projection algorithm used
-	 */
-	private volatile RenderAlgorithm mRenderAlgorithm = RenderAlgorithm.MaxProjection;
+
 
 	/**
 	 * Transfer functions used
@@ -100,13 +97,16 @@ public abstract class ClearVolumeRendererBase	implements
 
 	private volatile float mFOV = cDefaultFOV;
 
-	// private volatile float mDensity;
-	private volatile float[] mBrightness;
-	private volatile float[] mTransferFunctionRangeMin;
-	private volatile float[] mTransferFunctionRangeMax;
-	private volatile float[] mGamma;
-	private volatile float[] mQuality;
-	private volatile float[] mDithering;
+	// Render algorithm per layer:
+	private final RenderAlgorithm[] mRenderAlgorithm;
+
+	// render parameters per layer;
+	private final float[] mBrightness;
+	private final float[] mTransferFunctionRangeMin;
+	private final float[] mTransferFunctionRangeMax;
+	private final float[] mGamma;
+	private final float[] mQuality;
+	private final float[] mDithering;
 
 	private volatile boolean mVolumeRenderingParametersChanged = true;
 
@@ -155,6 +155,7 @@ public abstract class ClearVolumeRendererBase	implements
 		mDataBufferCopyIsFinishedArray = new CountDownLatch[pNumberOfRenderLayers];
 		mTransferFunctions = new TransferFunction[pNumberOfRenderLayers];
 		mLayerVisiblityFlagArray = new boolean[pNumberOfRenderLayers];
+		mRenderAlgorithm = new RenderAlgorithm[pNumberOfRenderLayers];
 		mBrightness = new float[pNumberOfRenderLayers];
 		mTransferFunctionRangeMin = new float[pNumberOfRenderLayers];
 		mTransferFunctionRangeMax = new float[pNumberOfRenderLayers];
@@ -167,6 +168,7 @@ public abstract class ClearVolumeRendererBase	implements
 			mSetVolumeDataBufferLocks[i] = new Object();
 			mTransferFunctions[i] = TransferFunctions.getGradientForColor(i);
 			mLayerVisiblityFlagArray[i] = true;
+			mRenderAlgorithm[i] = RenderAlgorithm.MaxProjection;
 			mBrightness[i] = 1;
 			mTransferFunctionRangeMin[i] = 0f;
 			mTransferFunctionRangeMax[i] = 1f;
@@ -174,6 +176,9 @@ public abstract class ClearVolumeRendererBase	implements
 			mQuality[i] = 0.75f;
 			mDithering[i] = 1f;
 		}
+
+		if (pNumberOfRenderLayers == 1)
+			mTransferFunctions[0] = TransferFunctions.getDefault();
 
 		mAdaptiveLODController = new AdaptiveLODController();
 
@@ -1031,20 +1036,30 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @return currently used mProjectionMatrix algorithm
 	 */
 	@Override
-	public RenderAlgorithm getRenderAlgorithm()
+	public RenderAlgorithm getRenderAlgorithm(final int pRenderLayerIndex)
 	{
-		return mRenderAlgorithm;
+		return mRenderAlgorithm[pRenderLayerIndex];
 	}
 
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setRenderAlgorithm(clearvolume.renderer.RenderAlgorithm)
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setRenderAlgorithm(int, clearvolume.renderer.RenderAlgorithm)
+	 */
+	@Override
+	public void setRenderAlgorithm(	final int pRenderLayerIndex,
+																	final RenderAlgorithm pRenderAlgorithm)
+	{
+		mRenderAlgorithm[pRenderLayerIndex] = pRenderAlgorithm;
+		notifyChangeOfVolumeRenderingParameters();
+	}
+
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setRenderAlgorithm(int, clearvolume.renderer.RenderAlgorithm)
 	 */
 	@Override
 	public void setRenderAlgorithm(final RenderAlgorithm pRenderAlgorithm)
 	{
-		mRenderAlgorithm = pRenderAlgorithm;
+		for (int i = 0; i < mRenderAlgorithm.length; i++)
+			mRenderAlgorithm[i] = pRenderAlgorithm;
 		notifyChangeOfVolumeRenderingParameters();
 	}
 
@@ -1054,7 +1069,10 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void cycleRenderAlgorithm()
 	{
-		setRenderAlgorithm(getRenderAlgorithm().next());
+		int i = 0;
+		for (final RenderAlgorithm lRenderAlgorithm : mRenderAlgorithm)
+			mRenderAlgorithm[i++] = lRenderAlgorithm.next();
+		notifyChangeOfVolumeRenderingParameters();
 	}
 
 	/**
@@ -1574,11 +1592,16 @@ public abstract class ClearVolumeRendererBase	implements
 	};
 
 	@Override
-	public void setMultiPass(boolean pMultiPassOn)
+	public void setAdaptiveLODActive(boolean pAdaptiveLOD)
 	{
 		if (mAdaptiveLODController != null)
-			mAdaptiveLODController.setActive(pMultiPassOn);
+			mAdaptiveLODController.setActive(pAdaptiveLOD);
+	}
 
+	@Override
+	public boolean getAdaptiveLODActive()
+	{
+		return getAdaptiveLODController().isActive();
 	}
 
 	/**
@@ -1598,7 +1621,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void toggleAdaptiveLOD()
 	{
-		mAdaptiveLODController.toggleActive();
+		setAdaptiveLODActive(!getAdaptiveLODActive());
 	}
 
 	/**

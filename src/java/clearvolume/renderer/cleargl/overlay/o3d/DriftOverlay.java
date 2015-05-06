@@ -5,7 +5,7 @@ import java.awt.FontFormatException;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL;
 
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
@@ -40,14 +40,14 @@ public class DriftOverlay extends PathOverlay	implements
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay#getName()
 	 */
 	@Override
-	public void init(	GL4 pGL4,
+	public void init(	GL pGL,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
-		super.init(pGL4, pDisplayRequestInterface);
+		super.init(pGL, pDisplayRequestInterface);
 
 		super.mStartColor = mStartColor;
 		super.mEndColor = mEndColor;
-		textRenderer = new ClearTextRenderer(pGL4, false);
+		textRenderer = new ClearTextRenderer(pGL, false);
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class DriftOverlay extends PathOverlay	implements
 	}
 
 	@Override
-	public void render2D(	GL4 pGL4,
+	public void render2D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix)

@@ -111,7 +111,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			if (mToggleRotationTranslation)
 			{
 				if (lAutoRotateController.isActive())
-					lAutoRotateController.addRotationSpeedY(+lAutoRotationSpeed);
+					lAutoRotateController.addRotationSpeedY(-lAutoRotationSpeed);
 				else
 					mClearVolumeRenderer.getQuaternion()
 															.invert()
@@ -128,7 +128,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			if (mToggleRotationTranslation)
 			{
 				if (lAutoRotateController.isActive())
-					lAutoRotateController.addRotationSpeedY(-lAutoRotationSpeed);
+					lAutoRotateController.addRotationSpeedY(+lAutoRotationSpeed);
 				else
 					mClearVolumeRenderer.getQuaternion()
 															.invert()
@@ -151,7 +151,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				else
 					mClearVolumeRenderer.getQuaternion()
 															.invert()
-															.rotateByAngleZ(-lRotationSpeed)
+															.rotateByAngleZ(+lRotationSpeed)
 															.invert();
 
 			}
@@ -169,7 +169,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				else
 					mClearVolumeRenderer.getQuaternion()
 															.invert()
-															.rotateByAngleZ(+lRotationSpeed)
+															.rotateByAngleZ(-lRotationSpeed)
 															.invert();
 
 			}
@@ -183,46 +183,43 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			if (mClearVolumeRenderer.isFullScreen())
 				mClearVolumeRenderer.toggleFullScreen();
 			break;
+
+		case KeyEvent.VK_S:
+			mClearVolumeRenderer.toggleRecording();
+
 		case KeyEvent.VK_R:
-			if (lIsCtrlPressed)
+			if (lAutoRotateController.isActive() && !lAutoRotateController.isRotating())
 			{
-				mClearVolumeRenderer.toggleRecording();
+				lAutoRotateController.setActive(false);
+			}
+			if (lAutoRotateController.isActive())
+			{
+				lAutoRotateController.stop();
 			}
 			else
 			{
-				if (lAutoRotateController.isActive())
-				{
-					lAutoRotateController.stop();
-				}
-				else
-				{
-					mClearVolumeRenderer.resetBrightnessAndGammaAndTransferFunctionRanges();
-					mClearVolumeRenderer.resetRotationTranslation();
-				}
+				mClearVolumeRenderer.resetBrightnessAndGammaAndTransferFunctionRanges();
+				mClearVolumeRenderer.resetRotationTranslation();
 			}
 			break;
 
 		case KeyEvent.VK_A:
-			if (lIsCtrlPressed)
-				lAutoRotateController.setActive(!lAutoRotateController.isActive());
+			lAutoRotateController.setActive(!lAutoRotateController.isActive());
 			break;
 
 		case KeyEvent.VK_C:
-			if (lIsCtrlPressed)
-				mClearVolumeRenderer.requestVolumeCapture();
+			mClearVolumeRenderer.requestVolumeCapture();
 			break;
 
 		case KeyEvent.VK_M:
-			if (lIsCtrlPressed)
-				mClearVolumeRenderer.toggleAdaptiveLOD();
+			mClearVolumeRenderer.toggleAdaptiveLOD();
 			break;
 
 		case KeyEvent.VK_O:
-			mClearVolumeRenderer.setFOV(ClearVolumeRendererBase.cOrthoLikeFOV);
-			break;
-
-		case KeyEvent.VK_P:
-			mClearVolumeRenderer.setFOV(ClearVolumeRendererBase.cDefaultFOV);
+			if (mClearVolumeRenderer.getFOV() == ClearVolumeRendererBase.cDefaultFOV)
+				mClearVolumeRenderer.setFOV(ClearVolumeRendererBase.cOrthoLikeFOV);
+			else
+				mClearVolumeRenderer.setFOV(ClearVolumeRendererBase.cDefaultFOV);
 			break;
 
 		case KeyEvent.VK_I:

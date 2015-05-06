@@ -194,8 +194,8 @@ dependencies
 	// usage: gradle .... -Plocal=true
 	if (project.hasProperty('local')) {
 		println 'Using local clearCUDA and clearGL sources'
-		compile project(':ClearGL')
-		compile project(':ClearCUDA')
+		compile project(':cleargl')
+		compile project(':clearcuda')
 	}
 	else {
 		println 'Using clearCUDA and clearGL from Maven repository'/**/
@@ -527,7 +527,7 @@ task packagezip(type:Exec,dependsOn:collectdistribution) {
 
 
 group = 'net.clearvolume'
-version = '0.9.0'
+version = '0.9.2'
 
 artifacts
 {

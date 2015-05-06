@@ -379,7 +379,15 @@ public interface ClearVolumeRendererInterface	extends
 	public float getQuality(int pRenderLayerIndex);
 
 	/**
-	 * Sets the currently render algorithm used.
+	 * Sets the render algorithm for the given render layer.
+	 *
+	 * @param pRenderAlgorithm
+	 */
+	public void setRenderAlgorithm(	final int pRenderLayerIndex,
+																	RenderAlgorithm pRenderAlgorithm);
+
+	/**
+	 * Sets the current render algorithm for all render layers.
 	 *
 	 * @param pRenderAlgorithm
 	 */
@@ -390,7 +398,7 @@ public interface ClearVolumeRendererInterface	extends
 	 *
 	 * @return currently used render algorithm
 	 */
-	public RenderAlgorithm getRenderAlgorithm();
+	public RenderAlgorithm getRenderAlgorithm(final int pRenderLayerIndex);
 
 	/**
 	 * Cycles through rendering algorithms
@@ -757,7 +765,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	public ArrayList<RotationControllerInterface> getRotationControllers();
 
-
 	/**
 	 * Returns the auto rotation controller.
 	 *
@@ -852,7 +859,14 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pMultiPassOn
 	 *          true iof on, false if off
 	 */
-	public void setMultiPass(boolean pMultiPassOn);
+	public void setAdaptiveLODActive(boolean pMultiPassOn);
+
+	/**
+	 * Sets the adaptive LOD flag
+	 * 
+	 * @return true if adaptive LOD is active
+	 */
+	boolean getAdaptiveLODActive();
 
 	/**
 	 * Returns the adaptive level-of-detail (LOD) controller.
@@ -882,7 +896,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	public void removeEyeRayListener(EyeRayListener pEyeRayListener);
 
-
 	/**
 	 * Returns display lock;
 	 * 
@@ -897,12 +910,5 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
-
-
-
-
-
-
-
 
 }

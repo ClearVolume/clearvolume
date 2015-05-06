@@ -1,6 +1,6 @@
 package clearvolume.renderer.cleargl.overlay;
 
-import javax.media.opengl.GL4;
+import javax.media.opengl.GL;
 
 import cleargl.GLMatrix;
 
@@ -22,10 +22,10 @@ public interface Overlay2D
 	/**
 	 * OpenGl code to render the 2D overlay.
 	 * 
-	 * @param pGL4
+	 * @param pGL
 	 * @param pProjectionMatrix
 	 */
-	public void render2D(	GL4 pGL4,
+	public void render2D(	GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix);

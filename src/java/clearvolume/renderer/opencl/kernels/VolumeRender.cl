@@ -23,7 +23,7 @@ float random(uint x, uint y)
 {   
     uint a = 4421 +(1+x)*(1+y) +x +y;
 
-    for(int i=0; i < 10; i++)
+    for(uint i=0; i < 10; i++)
     {
         a = ((uint)1664525 * a + (uint)1013904223) % (uint)79197919;
     }
@@ -108,7 +108,7 @@ float4 mult(__constant float* M, float4 v){
 // Render function,
 // performs max projection and then uses the transfert function to obtain a color per pixel:
 __kernel void
-volumerender(								__global uint	*d_output, 
+maxproj_render(								__global uint	*d_output, 
 													const	uint  imageW, 
 													const	uint  imageH,
 													const	float brightness,
@@ -210,7 +210,7 @@ volumerender(								__global uint	*d_output,
   float4 pos = orig*0.5f+0.5f + tnear*0.5f*direc;
 
   // Loop unrolling setup: 
-  const uint unrolledmaxsteps = (maxsteps/LOOPUNROLL);
+  const int unrolledmaxsteps = (maxsteps/LOOPUNROLL);
   
   // raycasting loop:
   float maxp = 0.0f;
@@ -229,12 +229,18 @@ volumerender(								__global uint	*d_output,
 	// lookup in transfer function texture:
   const float4 color = brightness*read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
   
+  // Alpha pre-multiply:
+  color.x = color.x*color.w;
+  color.y = color.y*color.w;
+  color.z = color.z*color.w;
+  
   // write output color:
   d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color); //d_output[x + y*imageW]
 
 }
 
 
+/****************************************************************************************************************/
 __kernel void isosurface_render(
 								__global uint	*d_output, 
 								const	uint  imageW, 
@@ -333,17 +339,18 @@ __kernel void isosurface_render(
   orig += phase*tstep*direc;
   
   // randomize origin point a bit:
-  // const uint entropy = (uint)( 6779514*fast_length(orig) + 6257327*fast_length(direc) );
-  // orig += dithering*tstep*random(entropy+x,entropy+y)*direc;
+  const uint entropy = (uint)( 6779514*fast_length(orig) + 6257327*fast_length(direc) );
+  orig += dithering*tstep*random(entropy+x,entropy+y)*direc;
 	
   // precompute vectors: 
   const float4 vecstep = 0.5f*tstep*direc;
   float4 pos = orig*0.5f+0.5f + tnear*0.5f*direc;
 
   // Loop unrolling setup: 
-  const uint unrolledmaxsteps = (maxsteps/LOOPUNROLL);
-  
-  float isoVal = trangemax;
+  const int unrolledmaxsteps = (maxsteps/LOOPUNROLL);
+
+	// iso value:  
+  float isoVal = mad(1.0f/ta,pow(0.5f,1.0f/gamma),-tb);
 
   // raycasting loop:
   float newVal = read_imagef(volume, volumeSampler, pos).x;
@@ -356,18 +363,24 @@ __kernel void isosurface_render(
   	  for(int j=1; j<LOOPUNROLL; j++)
   		{
   		  newVal = read_imagef(volume, volumeSampler, pos).x;
-  		  if ((newVal>isoVal) != isGreater){
-  			hitIso = true;
-  			break;
-  		  }
-
-		  
+  		  if ((newVal>isoVal) != isGreater)
+  		  {
+  				hitIso = true;
+  				break;
+  			}
+  		  
   		  pos+=vecstep;
   		}
   	  if (hitIso)
   		break;
-	  
   	}
+  	
+  //	
+ 	if (!hitIso) 
+  {
+  	d_output[x+imageW*y] = 0.f;
+  	return;
+  }
 
 
   // find the real intersection point
@@ -380,56 +393,65 @@ __kernel void isosurface_render(
   
   float4 light = (float4)(2,-1,-2,0);
 
-  float c_ambient = .3;
-  float c_diffuse = .4;
-  float c_specular = .3;
+  float c_diffuse = 0.2;
+  float c_specular = 0.4;
 
   light = mult(invM,light);
   light = normalize(light);
   
+  // compute lateral step for normal calculation:
+	const float latx = 1.0f/(get_image_width(volume));
+	const float laty = 1.0f/(get_image_height(volume));
+	const float latz = 1.0f/(get_image_depth(volume));
   
+  
+  // robust 2nd order normal estimation:
   float4 normal;
-  float4 reflect;
-  float h = 10.*trangemin;
-  
+  normal.x = 2.f*read_imagef(volume,volumeSampler,pos+(float4)(latx,0,0,0)).x-
+  	2.f*read_imagef(volume,volumeSampler,pos+(float4)(-latx,0,0,0)).x+
+  	read_imagef(volume,volumeSampler,pos+(float4)(2.f*latx,0,0,0)).x-
+  	read_imagef(volume,volumeSampler,pos+(float4)(-2.f*latx,0,0,0)).x;
 
-  // robust 2nd order
-  normal.x = 2.f*read_imagef(volume,volumeSampler,pos+(float4)(h,0,0,0)).x-
-  	2.f*read_imagef(volume,volumeSampler,pos+(float4)(-h,0,0,0)).x+
-  	read_imagef(volume,volumeSampler,pos+(float4)(2.f*h,0,0,0)).x-
-  	read_imagef(volume,volumeSampler,pos+(float4)(-2.f*h,0,0,0)).x;
+  normal.y = 2.f*read_imagef(volume,volumeSampler,pos+(float4)(0,laty,0,0)).x-
+  	2.f*read_imagef(volume,volumeSampler,pos+(float4)(0,-laty,0,0)).x+
+  	read_imagef(volume,volumeSampler,pos+(float4)(0,2.f*laty,0,0)).x-
+  	read_imagef(volume,volumeSampler,pos+(float4)(0,-2.f*laty,0,0)).x;
 
-  normal.y = 2.f*read_imagef(volume,volumeSampler,pos+(float4)(0,h,0,0)).x-
-  	2.f*read_imagef(volume,volumeSampler,pos+(float4)(0,-h,0,0)).x+
-  	read_imagef(volume,volumeSampler,pos+(float4)(0,2.f*h,0,0)).x-
-  	read_imagef(volume,volumeSampler,pos+(float4)(0,-2.f*h,0,0)).x;
-
-  normal.z = 2.f*read_imagef(volume,volumeSampler,pos+(float4)(0,0,h,0)).x-
-  	2.f*read_imagef(volume,volumeSampler,pos+(float4)(0,0,-h,0)).x+
-  	read_imagef(volume,volumeSampler,pos+(float4)(0,0,2.f*h,0)).x-
-  	read_imagef(volume,volumeSampler,pos+(float4)(0,0,-2.f*h,0)).x;
+  normal.z = 2.f*read_imagef(volume,volumeSampler,pos+(float4)(0,0,latz,0)).x-
+  	2.f*read_imagef(volume,volumeSampler,pos+(float4)(0,0,-latz,0)).x+
+  	read_imagef(volume,volumeSampler,pos+(float4)(0,0,2.f*latz,0)).x-
+  	read_imagef(volume,volumeSampler,pos+(float4)(0,0,-2.f*latz,0)).x;
 
   normal.w = 0;
 
-  //flip normal if we are comming from values greater than isoVal... 
+  // flip normal if we are comming from values greater than isoVal... 
   normal = (1.f-2*isGreater)*normalize(normal);
 
-  reflect = 2*dot(light,normal)*normal-light;
-
+	// Blinn-Phong specular reflection:
+  //float diffuse = fmax(0.f,dot(light,normal));
+  //float specular = pow(fmax(0.f,dot(normalize(light+normalize(direc)),normalize(normal))),45);
+  
+  // Phong specular reflection:
   float diffuse = fmax(0.f,dot(light,normal));
+  float4 reflect = 2*dot(light,normal)*normal-light;
   float specular = pow(fmax(0.f,dot(normalize(reflect),normalize(direc))),10);
 
-  float mappedVal = 0.f;
-  // phong shading
-  if (hitIso){
-  	mappedVal = c_ambient
-  	  + c_diffuse*diffuse
-  	  + (diffuse>0)*c_specular*specular;
+  // Mapping to transfert function range and gamma correction: 
+  const float mappedVal = gamma;
+
+	// lookup in transfer function texture:
+  float4 color = read_imagef(transferColor4, transferSampler, (float2)(mappedVal,0.0f));
+
+  const float lighting  =  (		c_diffuse*diffuse
+										  	  							+ (diffuse>0)*c_specular*specular);
 	
-  }
+	// Apply lighting:
+	const float3 lightcolor = (float3)(1.0f,1.0f,1.0f);
+  color.x = mad(lightcolor.x,lighting,color.x);
+  color.y = mad(lightcolor.y,lighting,color.y);
+  color.z = mad(lightcolor.z,lighting,color.z);
   
-  // lookup in transfer function texture:
-  const float4 color = brightness*read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
+  color = brightness*color;
   
   d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
 

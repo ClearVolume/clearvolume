@@ -9,7 +9,7 @@ public class ClearVolumeIcon
 	static public void setIcon()
 	{
 		// attempt at solving Jug's Dreadlock bug:
-		final GLProfile lProfile = GLProfile.get(GLProfile.GL4);
+		final GLProfile lProfile = GLProfile.getMaxProgrammable(true);
 		// System.out.println( lProfile );
 
 		// load icons:

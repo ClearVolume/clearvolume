@@ -90,7 +90,7 @@ public class ClearVolumeStressTestDemos
 																																																											: 512,
 																																																						NativeTypeEnum.UnsignedByte,
 																																																						false);
-			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 			lClearVolumeRenderer.setVisible(true);
 
 			final int lResolutionX = 512;
@@ -180,7 +180,7 @@ public class ClearVolumeStressTestDemos
 				}
 			});
 
-			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
+			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 			lClearVolumeRenderer.setVisible(true);
 
 			final int lResolutionX = 512;

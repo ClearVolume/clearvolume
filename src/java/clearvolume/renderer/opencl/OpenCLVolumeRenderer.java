@@ -33,9 +33,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 	private CLBuffer<Float> mCLInvModelViewBuffer,
 			mCLInvProjectionBuffer;
 
-	private CLKernel mMaxProjectionRenderKernel;
-	private CLKernel mIsoSurfaceRenderKernel;
-	private CLKernel mClearKernel;
+	private CLKernel mCurrentRenderKernel, mMaxProjectionRenderKernel,
+			mIsoSurfaceRenderKernel, mClearKernel;
 
 	public OpenCLVolumeRenderer(final String pWindowName,
 															final int pWindowWidth,
@@ -106,7 +105,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		mCLDevice.initCL();
 		mCLDevice.printInfo();
 		mMaxProjectionRenderKernel = mCLDevice.compileKernel(	OpenCLVolumeRenderer.class.getResource("kernels/VolumeRender.cl"),
-																									"volumerender");
+																													"maxproj_render");
 		mClearKernel = mCLDevice.compileKernel(	OpenCLVolumeRenderer.class.getResource("kernels/VolumeRender.cl"),
 																						"clearbuffer");
 
@@ -374,78 +373,56 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		{
 			prepareTransferFunctionArray(pRenderLayerIndex);
 
-			/*
-			 * final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
-			 * getAdaptiveLODController
-			 * ().notifyMaxNumberOfSteps(lMaxNumberSteps); final int lMaxSteps =
-			 * lMaxNumberSteps / getAdaptiveLODController().getNumberOfPasses();
-			 * final float lPhase = getAdaptiveLODController().getPhase(); final
-			 * int lClear = getAdaptiveLODController().isBufferClearingNeeded()
-			 * ? 0 : 1;/*
-			 */
 
 			final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
 			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
 			final int lNumberOfPasses = getAdaptiveLODController().getNumberOfPasses();
-			final int lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
-			final float lPhase = getAdaptiveLODController().getPhase();
 			final int lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
 																																						: 1;
 			final int lPassIndex = getAdaptiveLODController().getPassIndex();
 			final boolean lActive = getAdaptiveLODController().isActive();
 
-			final float lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+			int lMaxSteps = lMaxNumberSteps;
+			float lDithering = 0;
+			float lPhase = 0;
 
-			switch (getRenderAlgorithm())
+			switch (getRenderAlgorithm(pRenderLayerIndex))
 			{
 			case MaxProjection:
-				mCLDevice.setArgs(mMaxProjectionRenderKernel,
-													mCLRenderBuffers[pRenderLayerIndex],
-													getTextureWidth(),
-													getTextureHeight(),
-													(float) getBrightness(pRenderLayerIndex),
-													(float) getTransferRangeMin(pRenderLayerIndex),
-													(float) getTransferRangeMax(pRenderLayerIndex),
-													(float) getGamma(pRenderLayerIndex),
-													lMaxSteps,
-													lDithering,
-													lPhase,
-													lClear,
-													mCLTransferFunctionImages[pRenderLayerIndex],
-													mCLInvProjectionBuffer,
-													mCLInvModelViewBuffer,
-													mCLVolumeImages[pRenderLayerIndex]);
-
-				mCLDevice.run(mMaxProjectionRenderKernel,
-											getTextureWidth(),
-											getTextureHeight());
+				mCurrentRenderKernel = mMaxProjectionRenderKernel;
+				lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
+				lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+				lPhase = getAdaptiveLODController().getPhase();
 				break;
-
 			case IsoSurface:
-				mCLDevice.setArgs(mIsoSurfaceRenderKernel,
-													mCLRenderBuffers[pRenderLayerIndex],
-													getTextureWidth(),
-													getTextureHeight(),
-													(float) getBrightness(pRenderLayerIndex),
-													(float) getTransferRangeMin(pRenderLayerIndex),
-													(float) getTransferRangeMax(pRenderLayerIndex),
-													(float) getGamma(pRenderLayerIndex),
-													200,
-													lDithering,
-													lPhase,
-													lClear,
-													mCLTransferFunctionImages[pRenderLayerIndex],
-													mCLInvProjectionBuffer,
-													mCLInvModelViewBuffer,
-													mCLVolumeImages[pRenderLayerIndex]);
-
-				mCLDevice.run(mIsoSurfaceRenderKernel,
-											getTextureWidth(),
-											getTextureHeight());
-
+				mCurrentRenderKernel = mIsoSurfaceRenderKernel;
+				lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex))
+										/ lNumberOfPasses;
+				lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+				lPhase = 0;
 				break;
-
 			}
+
+			mCLDevice.setArgs(mCurrentRenderKernel,
+												mCLRenderBuffers[pRenderLayerIndex],
+												getTextureWidth(),
+												getTextureHeight(),
+												(float) getBrightness(pRenderLayerIndex),
+												(float) getTransferRangeMin(pRenderLayerIndex),
+												(float) getTransferRangeMax(pRenderLayerIndex),
+												(float) getGamma(pRenderLayerIndex),
+												lMaxSteps,
+												lDithering,
+												lPhase,
+												lClear,
+												mCLTransferFunctionImages[pRenderLayerIndex],
+												mCLInvProjectionBuffer,
+												mCLInvModelViewBuffer,
+												mCLVolumeImages[pRenderLayerIndex]);
+
+			mCLDevice.run(mCurrentRenderKernel,
+										getTextureWidth(),
+										getTextureHeight());
 
 		}
 		else
