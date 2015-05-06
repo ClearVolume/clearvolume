@@ -401,9 +401,16 @@ public interface ClearVolumeRendererInterface	extends
 	public RenderAlgorithm getRenderAlgorithm(final int pRenderLayerIndex);
 
 	/**
-	 * Cycles through rendering algorithms
+	 * Cycles through rendering algorithms for all render layers
 	 */
 	public void cycleRenderAlgorithm();
+
+	/**
+	 * Cycles through rendering algorithms for current layer index
+	 * 
+	 * @param pRenderLayerIndex
+	 */
+	public void cycleRenderAlgorithm(int pRenderLayerIndex);
 
 	/**
 	 * Sets the current render layer.
