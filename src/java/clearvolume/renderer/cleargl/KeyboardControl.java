@@ -223,7 +223,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			break;
 
 		case KeyEvent.VK_I:
-			mClearVolumeRenderer.cycleRenderAlgorithm();
+			mClearVolumeRenderer.cycleRenderAlgorithm(mClearVolumeRenderer.getCurrentRenderLayerIndex());
 			break;
 
 		}

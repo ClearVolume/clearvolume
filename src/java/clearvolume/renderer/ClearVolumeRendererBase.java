@@ -1065,7 +1065,7 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Cycles through rendering algorithms
+	 * Cycles through rendering algorithms for all layers
 	 */
 	@Override
 	public void cycleRenderAlgorithm()
@@ -1073,6 +1073,16 @@ public abstract class ClearVolumeRendererBase	implements
 		int i = 0;
 		for (final RenderAlgorithm lRenderAlgorithm : mRenderAlgorithm)
 			mRenderAlgorithm[i++] = lRenderAlgorithm.next();
+		notifyChangeOfVolumeRenderingParameters();
+	}
+
+	/**
+	 * Cycles through rendering algorithms for all layers
+	 */
+	@Override
+	public void cycleRenderAlgorithm(int pRenderLayerIndex)
+	{
+		mRenderAlgorithm[pRenderLayerIndex] = mRenderAlgorithm[pRenderLayerIndex].next();
 		notifyChangeOfVolumeRenderingParameters();
 	}
 
