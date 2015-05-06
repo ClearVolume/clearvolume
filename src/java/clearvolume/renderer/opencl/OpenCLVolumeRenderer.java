@@ -200,20 +200,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 																																										CLImageFormat.ChannelDataType.Float);
 		}
 
-		/*
-		 * final float[] color4 = new float[] {
-		 * lTransferFunctionArray[lTransferFunctionArrayLength - 4],
-		 * lTransferFunctionArray[lTransferFunctionArrayLength - 3],
-		 * lTransferFunctionArray[lTransferFunctionArrayLength - 2],
-		 * lTransferFunctionArray[lTransferFunctionArrayLength - 1] };
-		 * 
-		 * // System.out.println("prepare+ " + pRenderLayerIndex // +
-		 * Arrays.toString(color4));
-		 * 
-		 * mCLDevice.writeFloatBuffer(
-		 * mCLTransferColorBuffers[pRenderLayerIndex],
-		 * FloatBuffer.wrap(color4));/*
-		 */
 
 		mCLDevice.writeImage(	mCLTransferFunctionImages[pRenderLayerIndex],
 													FloatBuffer.wrap(lTransferFunctionArray));
@@ -399,10 +385,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 				mCurrentRenderKernel = mIsoSurfaceRenderKernel;
 				lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses);
 				lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
-				lClear = (lPassIndex == (lNumberOfPasses - 1) || lPassIndex == 0)	? 0
-																																					: 1;
-				lPhase = lClear == 0 ? 0
-														: getAdaptiveLODController().getPhase();
+				lClear = 0;
+				lPhase = 0;
 
 				break;
 			}

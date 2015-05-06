@@ -478,8 +478,8 @@ __kernel void isosurface_render(
   
   color = brightness*color;
   
-  //d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
-  d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color);
+  d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
+  //d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color);
 
 }
 
