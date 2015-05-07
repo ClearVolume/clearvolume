@@ -1046,7 +1046,7 @@ public abstract class ClearGLVolumeRenderer	extends
 			mTextureWidth = lCandidateTextureWidth;
 			mTextureHeight = lCandidateTextureHeight;
 			mUpdateTextureWidthHeight = true;
-			System.out.format("resizing texture: (%d,%d) \n",
+			/*System.out.format("resizing texture: (%d,%d) \n",
 												mTextureWidth,
 												mTextureHeight);/**/
 		}
