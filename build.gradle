@@ -522,6 +522,12 @@ task packagezip(type:Exec,dependsOn:collectdistribution) {
 }
 
 
+task copyRuntimeLibs(type: Copy) {
+	into "./build/lib/dep"
+	from configurations.runtime
+}
+
+
 //***********************************************************************************
 // PUBLISHING
 
