@@ -13,11 +13,11 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer> {
 	private CLKernel mKernelHist;
 	private CLKernel mKernelClearCounts;
 
-	private final int N_BINS = 128;
+	static public final int N_BINS = 128;
 
 	private CLBuffer<Integer> mBufCounts;
 
-	float mMin, mMax;
+	float mMin = 0.f, mMax = 1.f;
 
 	@Override
 	public String getName() {
@@ -43,8 +43,6 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer> {
 
 		}
 
-		setRange(0.f, 1.f);
-		// setRange(0.f, .1f);
 	}
 
 	public void initBuffers() {
@@ -75,6 +73,7 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer> {
 
 		// compute the histogram
 
+		System.out.println(mMax);
 		mKernelHist.setArgs(getVolumeBuffers()[0], mBufCounts, mMin, mMax,
 				N_BINS);
 

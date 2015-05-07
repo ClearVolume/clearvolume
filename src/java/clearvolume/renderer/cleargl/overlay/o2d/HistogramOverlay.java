@@ -9,7 +9,6 @@ import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 import cleargl.ClearGeometryObject;
 import cleargl.GLError;
@@ -35,6 +34,7 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 
 	private GLProgram mGLProgram;
 	private ClearGeometryObject mClearGeometryObject;
+	private ClearGeometryObject mClearGeometryObjectBars;
 
 	private GLProgram mGLProgramLines;
 	private ClearGeometryObject mClearGeometryObjectLines;
@@ -68,7 +68,7 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 
 		setNumberOfBins(pNumberOfBins);
 
-		setMinMax(0.f, 1.f);
+		setMinMax(0.f, 1.3f);
 		final Runnable lRunnable = new Runnable() {
 
 			@Override
@@ -95,7 +95,7 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 
 	}
 
-	private void setMinMax(float pMin, float pMax) {
+	public void setMinMax(float pMin, float pMax) {
 		mMin = pMin;
 		mMax = pMax;
 
@@ -147,8 +147,21 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 
 		mReentrantLock.lock();
 		try {
+
+			float maxVal = 0.f;
 			for (int i = 0; i < mData.capacity(); i++) {
-				mData.put(i, pCounts.get(i));
+
+				float newVal = pCounts.get(i);
+				mData.put(i, newVal);
+				maxVal = Math.max(maxVal, newVal);
+			}
+
+			// setMinMax(0.f, 1.2f * maxVal);
+
+			for (int i = 0; i < mData.capacity(); i++) {
+
+				mData.put(i, mData.get(i) / maxVal);
+
 			}
 
 			mHasChanged = true;
@@ -185,7 +198,11 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 					GL.GL_TRIANGLE_STRIP);
 			mClearGeometryObject.setDynamic(true);
 
-			final int lNumberOfPointsToDraw = 2 * getNumberOfBins();
+			mClearGeometryObjectBars = new ClearGeometryObject(mGLProgram, 3,
+					GL.GL_TRIANGLES);
+			mClearGeometryObjectBars.setDynamic(true);
+
+			final int lNumberOfPointsToDraw = 6 * getNumberOfBins();
 
 			mVerticesFloatArray = new GLFloatArray(lNumberOfPointsToDraw, 3);
 			mNormalArray = new GLFloatArray(lNumberOfPointsToDraw, 3);
@@ -205,6 +222,17 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 					.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray
 							.getFloatBuffer());
 			mClearGeometryObject.setIndicesAndCreateBuffer(mIndexIntArray
+					.getIntBuffer());
+
+			mClearGeometryObjectBars
+					.setVerticesAndCreateBuffer(mVerticesFloatArray
+							.getFloatBuffer());
+			mClearGeometryObjectBars.setNormalsAndCreateBuffer(mNormalArray
+					.getFloatBuffer());
+			mClearGeometryObjectBars
+					.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray
+							.getFloatBuffer());
+			mClearGeometryObjectBars.setIndicesAndCreateBuffer(mIndexIntArray
 					.getIntBuffer());
 
 			GLError.printGLErrors(pGL, "AFTER GRAPH OVERLAY INIT");
@@ -246,124 +274,6 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 		return mOffsetY + mScaleY * pY;
 	}
 
-	// @Override
-	// public void render2D(GL pGL, int pWidth, int pHeight,
-	// GLMatrix pProjectionMatrix) {
-	// if (isDisplayed()) {
-	// try {
-	// mReentrantLock.lock();
-	// {
-	//
-	// // the graph
-	//
-	// mGLProgram.use(pGL);
-	// mIndexIntArray.clear();
-	// mVerticesFloatArray.clear();
-	// mTexCoordFloatArray.clear();
-	//
-	// final float lStepX = 1f / mDataY.size();
-	// int i = 0;
-	// for (i = 0; i < mDataY.size(); i++) {
-	// final float lNormalizedValue = normalizeAndClamp(mDataY
-	// .get(i));
-	//
-	// final float x = transformX(i * lStepX);
-	// final float y = transformY(lNormalizedValue);
-	//
-	// mVerticesFloatArray.add(x, transformY(0), -10);
-	// mTexCoordFloatArray.add(x, 0);
-	// mIndexIntArray.add(2 * i);
-	// mVerticesFloatArray.add(x, y, -10);
-	// mTexCoordFloatArray.add(x, lNormalizedValue);
-	//
-	// // System.out.println("normed" + lNormalizedValue);
-	// mIndexIntArray.add(2 * i + 1);
-	// }
-	//
-	// mVerticesFloatArray.padZeros();
-	// mTexCoordFloatArray.padZeros();
-	// mIndexIntArray.padZeros();
-	//
-	// mClearGeometryObject.updateVertices(mVerticesFloatArray
-	// .getFloatBuffer());
-	// GLError.printGLErrors(pGL,
-	// "AFTER mClearGeometryObject.updateVertices");
-	// mClearGeometryObject
-	// .updateTextureCoords(mTexCoordFloatArray
-	// .getFloatBuffer());
-	// GLError.printGLErrors(pGL,
-	// "AFTER mClearGeometryObject.updateTextureCoords");
-	// mClearGeometryObject.updateIndices(mIndexIntArray
-	// .getIntBuffer());
-	// GLError.printGLErrors(pGL,
-	// "AFTER mClearGeometryObject.updateIndices");
-	//
-	// mClearGeometryObject.setProjection(pProjectionMatrix);
-	//
-	// pGL.glDisable(GL.GL_DEPTH_TEST);
-	// pGL.glEnable(GL.GL_BLEND);
-	// pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-	// pGL.glBlendEquation(GL.GL_FUNC_ADD);/**/
-	//
-	// mClearGeometryObject.draw(0, mDataY.size() * 2);
-	//
-	// // the lines
-	// mGLProgramLines.use(pGL);
-	// mIndexIntArray.clear();
-	// mVerticesFloatArray.clear();
-	// mTexCoordFloatArray.clear();
-	//
-	// for (i = 0; i < mDataY.size(); i++) {
-	// final float lNormalizedValue = normalizeAndClamp(mDataY
-	// .get(i));
-	//
-	// final float x = transformX(i * lStepX);
-	// final float y = transformY(lNormalizedValue);
-	//
-	// mVerticesFloatArray.add(x, y, -10);
-	// mTexCoordFloatArray.add(x, 0);
-	// mIndexIntArray.add(i);
-	//
-	// }
-	//
-	// mVerticesFloatArray.padZeros();
-	// mTexCoordFloatArray.padZeros();
-	// mIndexIntArray.padZeros();
-	//
-	// mClearGeometryObjectLines
-	// .updateVertices(mVerticesFloatArray
-	// .getFloatBuffer());
-	// // GLError.printGLErrors(pGL,
-	// // "AFTER mClearGeometryObject.updateVertices");
-	// mClearGeometryObjectLines
-	// .updateTextureCoords(mTexCoordFloatArray
-	// .getFloatBuffer());
-	// GLError.printGLErrors(pGL,
-	// "AFTER mClearGeometryObject.updateTextureCoords");
-	// mClearGeometryObjectLines.updateIndices(mIndexIntArray
-	// .getIntBuffer());
-	// GLError.printGLErrors(pGL,
-	// "AFTER mClearGeometryObject.updateIndices");
-	//
-	// mClearGeometryObjectLines.setProjection(pProjectionMatrix);
-	//
-	// pGL.glDisable(GL.GL_DEPTH_TEST);
-	// pGL.glEnable(GL.GL_BLEND);
-	// pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-	// pGL.glBlendEquation(GL2.GL_MAX);/**/
-	// //
-	// mClearGeometryObjectLines.draw(0, mDataY.size());
-	//
-	// mHasChanged = false;
-	// }
-	//
-	// } finally {
-	// if (mReentrantLock.isHeldByCurrentThread())
-	// mReentrantLock.unlock();
-	// }
-	// }
-	// }
-
 	@Override
 	public void render2D(GL pGL, int pWidth, int pHeight,
 			GLMatrix pProjectionMatrix) {
@@ -375,11 +285,14 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 					// the graph
 
 					mGLProgram.use(pGL);
+
 					mIndexIntArray.clear();
 					mVerticesFloatArray.clear();
 					mTexCoordFloatArray.clear();
 
-					final float lStepX = 1f / mData.capacity();
+					final float lStepX = 1.f / mData.capacity();
+					final float relBarWidth = .4f;
+
 					int i = 0;
 					for (i = 0; i < mData.capacity(); i++) {
 						final float lNormalizedValue = normalizeAndClamp(mData
@@ -388,89 +301,111 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 						final float x = transformX(i * lStepX);
 						final float y = transformY(lNormalizedValue);
 
-						mVerticesFloatArray.add(x, transformY(0), -10);
-						mTexCoordFloatArray.add(x, 0);
-						mIndexIntArray.add(2 * i);
-						mVerticesFloatArray.add(x, y, -10);
-						mTexCoordFloatArray.add(x, lNormalizedValue);
+						mVerticesFloatArray.add(x - relBarWidth * lStepX,
+								transformY(0), -10);
+						mTexCoordFloatArray.add(x, 1.f);
+						mIndexIntArray.add(6 * i);
 
-						// System.out.println("normed" + lNormalizedValue);
-						mIndexIntArray.add(2 * i + 1);
+						mVerticesFloatArray.add(x - relBarWidth * lStepX, y,
+								-10);
+						mTexCoordFloatArray.add(x, 1.f);
+						mIndexIntArray.add(6 * i + 1);
+
+						mVerticesFloatArray.add(x + relBarWidth * lStepX,
+								transformY(0), -10);
+						mTexCoordFloatArray.add(x, 1.f);
+						mIndexIntArray.add(6 * i + 2);
+
+						mVerticesFloatArray.add(x + relBarWidth * lStepX,
+								transformY(0), -10);
+						mTexCoordFloatArray.add(x, 1.f);
+						mIndexIntArray.add(6 * i + 3);
+
+						mVerticesFloatArray.add(x - relBarWidth * lStepX, y,
+								-10);
+						mTexCoordFloatArray.add(x, 1.f);
+						mIndexIntArray.add(6 * i + 4);
+
+						mVerticesFloatArray.add(x + relBarWidth * lStepX, y,
+								-10);
+						mTexCoordFloatArray.add(x, 1.f);
+						mIndexIntArray.add(6 * i + 5);
 					}
 
 					mVerticesFloatArray.padZeros();
 					mTexCoordFloatArray.padZeros();
 					mIndexIntArray.padZeros();
 
-					mClearGeometryObject.updateVertices(mVerticesFloatArray
+					mClearGeometryObjectBars.updateVertices(mVerticesFloatArray
 							.getFloatBuffer());
 					GLError.printGLErrors(pGL,
 							"AFTER mClearGeometryObject.updateVertices");
-					mClearGeometryObject
+					mClearGeometryObjectBars
 							.updateTextureCoords(mTexCoordFloatArray
 									.getFloatBuffer());
 					GLError.printGLErrors(pGL,
 							"AFTER mClearGeometryObject.updateTextureCoords");
-					mClearGeometryObject.updateIndices(mIndexIntArray
+					mClearGeometryObjectBars.updateIndices(mIndexIntArray
 							.getIntBuffer());
 					GLError.printGLErrors(pGL,
 							"AFTER mClearGeometryObject.updateIndices");
 
-					mClearGeometryObject.setProjection(pProjectionMatrix);
+					mClearGeometryObjectBars.setProjection(pProjectionMatrix);
 
 					pGL.glDisable(GL.GL_DEPTH_TEST);
 					pGL.glEnable(GL.GL_BLEND);
 					pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 					pGL.glBlendEquation(GL.GL_FUNC_ADD);/**/
 
-					mClearGeometryObject.draw(0, mDataY.size() * 2);
+					mClearGeometryObjectBars.draw(0, mData.capacity() * 6);
 
-					// the lines
-					mGLProgramLines.use(pGL);
-					mIndexIntArray.clear();
-					mVerticesFloatArray.clear();
-					mTexCoordFloatArray.clear();
-
-					for (i = 0; i < mData.capacity(); i++) {
-						final float lNormalizedValue = normalizeAndClamp(mData
-								.get(i));
-
-						final float x = transformX(i * lStepX);
-						final float y = transformY(lNormalizedValue);
-
-						mVerticesFloatArray.add(x, y, -10);
-						mTexCoordFloatArray.add(x, 0);
-						mIndexIntArray.add(i);
-
-					}
-
-					mVerticesFloatArray.padZeros();
-					mTexCoordFloatArray.padZeros();
-					mIndexIntArray.padZeros();
-
-					mClearGeometryObjectLines
-							.updateVertices(mVerticesFloatArray
-									.getFloatBuffer());
-					// GLError.printGLErrors(pGL,
-					// "AFTER mClearGeometryObject.updateVertices");
-					mClearGeometryObjectLines
-							.updateTextureCoords(mTexCoordFloatArray
-									.getFloatBuffer());
-					GLError.printGLErrors(pGL,
-							"AFTER mClearGeometryObject.updateTextureCoords");
-					mClearGeometryObjectLines.updateIndices(mIndexIntArray
-							.getIntBuffer());
-					GLError.printGLErrors(pGL,
-							"AFTER mClearGeometryObject.updateIndices");
-
-					mClearGeometryObjectLines.setProjection(pProjectionMatrix);
-
-					pGL.glDisable(GL.GL_DEPTH_TEST);
-					pGL.glEnable(GL.GL_BLEND);
-					pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-					pGL.glBlendEquation(GL2.GL_MAX);/**/
+					// // the lines
+					// mGLProgramLines.use(pGL);
+					// mIndexIntArray.clear();
+					// mVerticesFloatArray.clear();
+					// mTexCoordFloatArray.clear();
 					//
-					mClearGeometryObjectLines.draw(0, mData.capacity());
+					// for (i = 0; i < mData.capacity(); i++) {
+					// final float lNormalizedValue = normalizeAndClamp(mData
+					// .get(i));
+					//
+					// final float x = transformX(i * lStepX);
+					// final float y = transformY(lNormalizedValue);
+					//
+					// mVerticesFloatArray.add(x, y, -10);
+					// mTexCoordFloatArray.add(x, 0);
+					// mIndexIntArray.add(i);
+					//
+					// }
+					//
+					// mVerticesFloatArray.padZeros();
+					// mTexCoordFloatArray.padZeros();
+					// mIndexIntArray.padZeros();
+					//
+					// mClearGeometryObjectLines
+					// .updateVertices(mVerticesFloatArray
+					// .getFloatBuffer());
+					// // GLError.printGLErrors(pGL,
+					// // "AFTER mClearGeometryObject.updateVertices");
+					// mClearGeometryObjectLines
+					// .updateTextureCoords(mTexCoordFloatArray
+					// .getFloatBuffer());
+					// GLError.printGLErrors(pGL,
+					// "AFTER mClearGeometryObject.updateTextureCoords");
+					// mClearGeometryObjectLines.updateIndices(mIndexIntArray
+					// .getIntBuffer());
+					// GLError.printGLErrors(pGL,
+					// "AFTER mClearGeometryObject.updateIndices");
+					//
+					// mClearGeometryObjectLines.setProjection(pProjectionMatrix);
+					//
+					// pGL.glDisable(GL.GL_DEPTH_TEST);
+					// pGL.glEnable(GL.GL_BLEND);
+					// pGL.glBlendFunc(GL.GL_SRC_ALPHA,
+					// GL.GL_ONE_MINUS_SRC_ALPHA);
+					// pGL.glBlendEquation(GL2.GL_MAX);/**/
+					// //
+					// mClearGeometryObjectLines.draw(0, mData.capacity());
 
 					mHasChanged = false;
 				}
