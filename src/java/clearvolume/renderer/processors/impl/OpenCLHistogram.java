@@ -8,98 +8,106 @@ import clearvolume.renderer.processors.OpenCLProcessor;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 
-public class OpenCLHistogram extends OpenCLProcessor<IntBuffer>
-{
+public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer> {
 
 	private CLKernel mKernelHist;
+	private CLKernel mKernelClearCounts;
 
-	private CLBuffer<Float> mBufBins;
+	static public final int N_BINS = 128;
+
 	private CLBuffer<Integer> mBufCounts;
-	private float[] mBins;
+
+	float mMin = 0.f, mMax = 1.f;
 
 	@Override
-	public String getName()
-	{
+	public String getName() {
 		return "opencl_histogram";
 	}
 
-	public void setBins(final float[] pBins)
-	{
-		mBins = pBins;
+	public void setRange(final float pMin, final float pMax) {
+
+		mMax = pMax;
+		mMin = pMin;
 
 	}
 
-	public void ensureOpenCLInitialized()
-	{
-		if (mKernelHist == null)
-		{
-			mKernelHist = getDevice().compileKernel(OpenCLHistogram.class.getResource("kernels/histogram.cl"),
-																							"histogram");
-		}
+	public void ensureOpenCLInitialized() {
+		if (mKernelHist == null) {
+			mKernelHist = getDevice().compileKernel(
+					OpenCLHistogram.class.getResource("kernels/histogram.cl"),
+					"histogram_naive");
 
-		final float[] bins = new float[10];
-		for (int i = 0; i < bins.length; i++)
-		{
-			bins[i] = 1.f * i / bins.length;
+			mKernelClearCounts = getDevice().compileKernel(
+					OpenCLHistogram.class.getResource("kernels/histogram.cl"),
+					"clear_counts");
+
 		}
-		setBins(bins);
 
 	}
 
-	public void initBuffers()
-	{
-
-		final int lBinSize = mBins.length;
+	public void initBuffers() {
 
 		// the buffer containing the counts
-		mBufCounts = getDevice().createOutputIntBuffer(lBinSize);
-
-		// the buffer containing the bins values
-		mBufBins = getDevice().createInputFloatBuffer(lBinSize);
+		mBufCounts = getDevice().createOutputIntBuffer(N_BINS);
 
 	}
 
 	@Override
-	public void process(int pRenderLayerIndex,
-											long pWidthInVoxels,
-											long pHeightInVoxels,
-											long pDepthInVoxels)
-	{
+	public void process(int pRenderLayerIndex, long pWidthInVoxels,
+			long pHeightInVoxels, long pDepthInVoxels) {
 		if (!isActive())
 			return;
 
+		long start = System.nanoTime();
+
 		ensureOpenCLInitialized();
 
-		if (mBufBins == null)
-		{
+		if (mBufCounts == null) {
 			System.out.println("setting up buffers");
 			initBuffers();
 		}
 
-		// fill the bins
-		getDevice().writeFloatBuffer(mBufBins, FloatBuffer.wrap(mBins));
+		// clear the count array
+		mKernelClearCounts.setArgs(mBufCounts);
+		getDevice().run(mKernelClearCounts, (int) N_BINS);
 
-		final FloatBuffer bins = FloatBuffer.wrap(mBins);
+		// compute the histogram
 
-		mKernelHist.setArgs(getVolumeBuffers()[0],
-												mBufBins,
-												mBufCounts,
-												mBins.length);
+		System.out.println(mMax);
+		mKernelHist.setArgs(getVolumeBuffers()[0], mBufCounts, mMin, mMax,
+				N_BINS);
 
-		getDevice().run(mKernelHist,
-										(int) pWidthInVoxels,
-										(int) pHeightInVoxels,
-										(int) pDepthInVoxels);
+		getDevice().run(mKernelHist, (int) pWidthInVoxels,
+				(int) pHeightInVoxels, (int) pDepthInVoxels);
 
+		// fetch it from the gpu
 		final IntBuffer out = getDevice().readIntBufferAsByte(mBufCounts)
-																.asIntBuffer();
+				.asIntBuffer();
 
-		for (int i = 0; i < out.capacity(); i++)
-		{
-			System.out.println(out.get(i));
+		long stop = System.nanoTime();
+
+		if (false) {
+			System.out.println(out.get(0));
+
+			for (int i = 0; i < N_BINS; i++) {
+				System.out.print(out.get(i) + " ");
+			}
+
+			System.out.printf("\n \n histogram: %.4f ms \n",
+					(stop - start) / 1.e6f);
+
 		}
 
-		notifyListenersOfResult(out);
+		// FIXME
+		final FloatBuffer out2 = FloatBuffer.allocate(N_BINS);
+		final long lNumberOfPixels = pWidthInVoxels * pHeightInVoxels
+				* pDepthInVoxels;
+
+		for (int i = 0; i < N_BINS; i++) {
+			out2.put(i, 1.f * out.get(i) / lNumberOfPixels);
+		}
+
+		notifyListenersOfResult(out2);
 
 	}
 }
