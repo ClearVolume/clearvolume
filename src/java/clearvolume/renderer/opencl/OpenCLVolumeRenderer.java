@@ -123,7 +123,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
 		mCLInvProjectionBuffer = mCLDevice.createInputFloatBuffer(16);
 
-
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			prepareVolumeDataArray(i, null);
 
@@ -204,7 +203,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 																																										CLImageFormat.ChannelOrder.RGBA,
 																																										CLImageFormat.ChannelDataType.Float);
 		}
-
 
 		mCLDevice.writeImage(	mCLTransferFunctionImages[pRenderLayerIndex],
 													FloatBuffer.wrap(lTransferFunctionArray));
@@ -395,6 +393,12 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 				break;
 			}
 
+			System.out.format("steps=%d, dith=%g, phase=%g, clear=%d \n",
+												lMaxSteps,
+												lDithering,
+												lPhase,
+												lClear);
+
 			mCLDevice.setArgs(mCurrentRenderKernel,
 												mCLRenderBuffers[pRenderLayerIndex],
 												getTextureWidth(),
@@ -481,6 +485,5 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		}
 
 	}
-
 
 }

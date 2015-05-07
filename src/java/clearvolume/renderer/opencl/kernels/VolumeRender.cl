@@ -214,7 +214,7 @@ maxproj_render(								__global uint	*d_output,
   
   // raycasting loop:
   float maxp = 0.0f;
-	for(int i=0; i<unrolledmaxsteps; i++) 
+	for(int i=0; i<unrolledmaxsteps+LOOPUNROLL; i++) 
 	{
 		for(int j=1; j<LOOPUNROLL; j++)
 		{
@@ -361,7 +361,7 @@ __kernel void isosurface_render(
   bool hitIso = false;
 
   // first pass:
-  for(int i=0; i<unrolledmaxsteps; i++) 
+  for(int i=0; i<unrolledmaxsteps+LOOPUNROLL; i++) 
   	{
   	  for(int j=1; j<LOOPUNROLL; j++)
   		{
