@@ -830,14 +830,19 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 					break;
 				case IsoSurface:
 					lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses);
-					lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+					lDithering = 0; // getDithering(pRenderLayerIndex) * (1.0f *
+													// (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
 					lClear = 0;
 					lPhase = 0;
 
 					break;
 				}
 
-
+				/*System.out.format("### steps=%d, dith=%g, phase=%g, clear=%d \n",
+													lMaxSteps,
+													lDithering,
+													lPhase,
+													lClear);/**/
 
 				mCurrentRenderKernel.launch(lCudaDevicePointer,
 																				getTextureWidth(),

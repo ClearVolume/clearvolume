@@ -8,7 +8,7 @@ public class AdaptiveLODController
 {
 
 	private static final long cMarginTime = 1000 * 1000 * 100; // 10 ms
-	private static final int cMaxNumberOfPasses = 17;
+	private static final int cMaxNumberOfPasses = 9;
 
 	private volatile boolean mActive = true;
 	private volatile boolean mMultiPassRenderingInProgress;
@@ -18,7 +18,6 @@ public class AdaptiveLODController
 	private volatile int mCurrentNumberOfPasses;
 	private volatile int mCurrentGenerator;
 	private volatile int mPassIndex;
-
 
 	private volatile long mLastUserInputTime = Long.MIN_VALUE;
 	private volatile long mFirstPassTimingStartTime = Long.MIN_VALUE,
@@ -61,22 +60,21 @@ public class AdaptiveLODController
 	public void setNumberOfPasses(final int pNumberOfPasses)
 	{
 		mNewNumberOfPasses = min(	cMaxNumberOfPasses,
-																max(1, pNumberOfPasses));
+															max(1, pNumberOfPasses));
 		mNewGenerator = ModularSequence.findKWithBestGapScoreCached(pNumberOfPasses);
 	}
 
 	public void incrementNumberOfPasses()
 	{
-		System.out.println("incrementNumberOfPasses");
+		println("incrementNumberOfPasses");
 		setNumberOfPasses(getNumberOfPasses() + 1);
 	}
 
 	public void decrementNumberOfPasses()
 	{
-		System.out.println("decrementNumberOfPasses");
+		println("decrementNumberOfPasses");
 		setNumberOfPasses(getNumberOfPasses() - 1);
 	}
-
 
 	public boolean isKernelRunNeeded()
 	{
@@ -104,8 +102,6 @@ public class AdaptiveLODController
 			return 0;
 		return mPassIndex;
 	}
-
-
 
 	public boolean isBufferClearingNeeded()
 	{
@@ -139,14 +135,12 @@ public class AdaptiveLODController
 		mPassIndex = 0;
 	}
 
-
-
 	public boolean beforeRendering()
 	{
 		if (!mActive)
 			return true;
 
-		println(this.getClass().getSimpleName() + ".beforeRendering");
+		// println(this.getClass().getSimpleName() + ".beforeRendering");
 		if (mMultiPassRenderingInProgress)
 		{
 			println(this.getClass().getSimpleName() + ".beforeRendering -> multi-pass is active");
@@ -159,8 +153,8 @@ public class AdaptiveLODController
 				mCurrentNumberOfPasses = mNewNumberOfPasses;
 				mCurrentGenerator = mNewGenerator;
 
-				System.out.println("mCurrentNumberOfPasses=" + mCurrentNumberOfPasses);
-				System.out.println("mCurrentGenerator=" + mCurrentGenerator);
+				println("mCurrentNumberOfPasses=" + mCurrentNumberOfPasses);
+				println("mCurrentGenerator=" + mCurrentGenerator);
 
 				mFirstPassTimingStartTime = System.nanoTime();
 				return true;
@@ -172,7 +166,8 @@ public class AdaptiveLODController
 		}
 		else
 		{
-			println(this.getClass().getSimpleName() + ".beforeRendering -> multi-pass not active");
+			// println(this.getClass().getSimpleName() +
+			// ".beforeRendering -> multi-pass not active");
 			return false;
 		}
 
@@ -186,13 +181,13 @@ public class AdaptiveLODController
 
 			final double lElapsedTimeInMs = ((mFirstPassTimingStopTime - mFirstPassTimingStartTime) * 1e-6);
 
-			mFilteredElapsedTimeInMs = 0.95 * mFilteredElapsedTimeInMs
-																	+ 0.05
+			mFilteredElapsedTimeInMs = 0.90 * mFilteredElapsedTimeInMs
+																	+ 0.1
 																	* lElapsedTimeInMs;
 
-			System.out.format("elapsed= %.3f, filtered=%f \n",
-												lElapsedTimeInMs,
-												mFilteredElapsedTimeInMs);
+			format(	"elapsed= %.3f, filtered=%f \n",
+							lElapsedTimeInMs,
+							mFilteredElapsedTimeInMs);
 
 			if (mFilteredElapsedTimeInMs < mTargetTimeForFirstPassInMilliseconds - mTargetTimeHysteresis)
 			{
@@ -268,6 +263,11 @@ public class AdaptiveLODController
 	private void println(String pString)
 	{
 		// System.out.println(pString);
+	}
+
+	private void format(String format, Object... args)
+	{
+		// System.out.format(format, args);
 	}
 
 }
