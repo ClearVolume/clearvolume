@@ -1,6 +1,7 @@
 package clearvolume.renderer.cleargl;
 
 import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,6 +65,7 @@ public abstract class ClearGLVolumeRenderer	extends
 																																		ClearGLEventListener
 {
 
+	private static final double cTextureDimensionChangeRatioThreshold = 1.2;
 	private static final long cMaxWaitingTimeForAcquiringDisplayLockInMs = 200;
 
 	private static final GLMatrix cOverlay2dProjectionMatrix = GLMatrix.getOrthoProjectionMatrix(	-1,
@@ -87,7 +89,6 @@ public abstract class ClearGLVolumeRenderer	extends
 	private volatile int mLastWindowWidth, mLastWindowHeight;
 	private volatile int mViewportX, mViewportY, mViewportWidth,
 			mViewportHeight;
-
 
 	// pixelbuffer objects.
 	protected GLPixelBufferObject[] mPixelBufferObjects;
@@ -119,8 +120,10 @@ public abstract class ClearGLVolumeRenderer	extends
 	private final GLMatrix mVolumeViewMatrix = new GLMatrix();
 	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
 
-
-	private final int mTextureWidth, mTextureHeight;
+	// textures width and height:
+	private volatile int mMaxTextureWidth, mMaxTextureHeight,
+			mTextureWidth, mTextureHeight;
+	private volatile boolean mUpdateTextureWidthHeight = true;
 
 	private volatile boolean mRequestDisplay = true;
 
@@ -289,8 +292,11 @@ public abstract class ClearGLVolumeRenderer	extends
 		mViewportWidth = pWindowWidth;
 		mViewportHeight = pWindowHeight;
 
-		mTextureWidth = Math.min(pMaxTextureWidth, pWindowWidth);
-		mTextureHeight = Math.min(pMaxTextureHeight, pWindowHeight);
+		mMaxTextureWidth = pMaxTextureWidth;
+		mMaxTextureHeight = pMaxTextureHeight;
+
+		mTextureWidth = min(pMaxTextureWidth, pWindowWidth);
+		mTextureHeight = min(pMaxTextureHeight, pWindowHeight);
 
 		mWindowName = pWindowName;
 		mLastWindowWidth = pWindowWidth;
@@ -565,19 +571,6 @@ public abstract class ClearGLVolumeRenderer	extends
 				mQuadVertexArray.addVertexAttributeArray(	mTexCoordAttributeArray,
 																									lTexCoordFloatArray.getFloatBuffer());
 
-				for (int i = 0; i < getNumberOfRenderLayers(); i++)
-				{
-					mLayerTextures[i] = new GLTexture(mGLProgram,
-																						NativeTypeEnum.UnsignedByte,
-																						4,
-																						mTextureWidth,
-																						mTextureHeight,
-																						1,
-																						true,
-																						3);
-
-				}
-
 			}
 			catch (final IOException e)
 			{
@@ -611,6 +604,34 @@ public abstract class ClearGLVolumeRenderer	extends
 		}
 
 	}
+
+	private void ensureTextureAllocated()
+	{
+		if (mUpdateTextureWidthHeight)
+		{
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				if (mLayerTextures[i] != null)
+					mLayerTextures[i].close();
+
+				mLayerTextures[i] = new GLTexture(mGLProgram,
+																					NativeTypeEnum.UnsignedByte,
+																					4,
+																					mTextureWidth,
+																					mTextureHeight,
+																					1,
+																					true,
+																					3);
+
+			}
+
+			notifyChangeOfTextureDimensions();
+			notifyChangeOfVolumeRenderingParameters();
+			mUpdateTextureWidthHeight = false;
+		}
+	}
+
+	abstract protected void notifyChangeOfTextureDimensions();
 
 	/**
 	 * @return true if the implemented renderer initialized successfully.
@@ -652,6 +673,8 @@ public abstract class ClearGLVolumeRenderer	extends
 		if (lTryLock)
 			try
 			{
+				ensureTextureAllocated();
+
 				final boolean lOverlay2DChanged = isOverlay2DChanged();
 				final boolean lOverlay3DChanged = isOverlay3DChanged();
 
@@ -997,6 +1020,37 @@ public abstract class ClearGLVolumeRenderer	extends
 																											0,
 																											1000);/**/
 
+		final int lCandidateTextureWidth = min(mMaxTextureWidth, (mViewportWidth / 64) * 64);
+		final int lCandidateTextureHeight = min(mMaxTextureHeight, (mViewportHeight / 64) * 64);
+
+		if (lCandidateTextureWidth != 0 && lCandidateTextureHeight == 0)
+			return;
+
+		float lRatioWidth = ((float) mTextureWidth) / lCandidateTextureWidth;
+		float lRatioHeight = ((float) mTextureHeight) / lCandidateTextureHeight;
+
+		if (lRatioWidth == 0)
+			lRatioWidth = 1 / lRatioWidth;
+		if (lRatioWidth < 1)
+			lRatioWidth = 1 / lRatioWidth;
+
+		if (lRatioHeight == 0)
+			lRatioHeight = 1 / lRatioHeight;
+		if (lRatioHeight < 1)
+			lRatioHeight = 1 / lRatioHeight;
+
+		//System.out.format("ratios: (%g,%g) \n", lRatioWidth, lRatioHeight);
+
+		if (lRatioWidth > cTextureDimensionChangeRatioThreshold || lRatioHeight > cTextureDimensionChangeRatioThreshold)
+		{
+			mTextureWidth = lCandidateTextureWidth;
+			mTextureHeight = lCandidateTextureHeight;
+			mUpdateTextureWidthHeight = true;
+			System.out.format("resizing texture: (%d,%d) \n",
+												mTextureWidth,
+												mTextureHeight);/**/
+		}
+
 		displayInternal(pDrawable, true);
 
 	}
@@ -1083,8 +1137,6 @@ public abstract class ClearGLVolumeRenderer	extends
 		// getAdaptiveLODController().requestDisplay();
 		// notifyChangeOfVolumeRenderingParameters();
 	}
-
-
 
 	@Override
 	public void addOverlay(Overlay pOverlay)
@@ -1190,5 +1242,6 @@ public abstract class ClearGLVolumeRenderer	extends
 	{
 		mViewportWidth = pViewportWidth;
 	}
+
 
 }
