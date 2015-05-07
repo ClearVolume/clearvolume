@@ -293,14 +293,15 @@ public class ClearVolumeBasicDemos
 		// NativeTypeEnum.UnsignedShort, false);
 		//
 
-		final int lRenderResolution = 1024;
+		final int lMaxTextureRes = 2048;
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
-																																																					lRenderResolution,
-																																																					lRenderResolution,
+		/*final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",/**/
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",/**/
+																																																					768,
+																																																					768,
 																																																					NativeTypeEnum.UnsignedShort,
-																																																					lRenderResolution,
-																																																					lRenderResolution,
+																																																					lMaxTextureRes,
+																																																					lMaxTextureRes,
 																																																					1,
 																																																					false);
 

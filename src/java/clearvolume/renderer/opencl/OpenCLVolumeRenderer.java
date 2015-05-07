@@ -123,14 +123,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
 		mCLInvProjectionBuffer = mCLDevice.createInputFloatBuffer(16);
 
-		final int lRenderBufferSize = getTextureHeight() * getTextureWidth();
-
-		// setting up the OpenCL Renderbuffer we will write the render result
-		// into
-		for (int i = 0; i < getNumberOfRenderLayers(); i++)
-		{
-			mCLRenderBuffers[i] = mCLDevice.createInputOutputIntBuffer(lRenderBufferSize);
-		}
 
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			prepareVolumeDataArray(i, null);
@@ -139,6 +131,19 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 			prepareTransferFunctionArray(i);
 
 		return true;
+	}
+
+	@Override
+	protected void notifyChangeOfTextureDimensions()
+	{
+		final int lRenderBufferSize = getTextureHeight() * getTextureWidth();
+
+		for (int i = 0; i < getNumberOfRenderLayers(); i++)
+		{
+			if (mCLRenderBuffers[i] != null)
+				mCLRenderBuffers[i].release();
+			mCLRenderBuffers[i] = mCLDevice.createInputOutputIntBuffer(lRenderBufferSize);
+		}
 	}
 
 	private void prepareVolumeDataArray(final int pRenderLayerIndex,

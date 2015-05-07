@@ -259,13 +259,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 			prepareTransferFunctionTexture();
 
 			mCudaBufferDevicePointer = new CudaDevicePointer[getNumberOfRenderLayers()];
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
-			{
-				final long lBufferSize = 4 * getTextureWidth()
-																	* getTextureHeight();
-				assert (mCudaBufferDevicePointer[i] == null);
-				mCudaBufferDevicePointer[i] = CudaDevicePointer.malloc(lBufferSize);
-			}
+
 
 			for (final Processor<?> lProcessor : mProcessorsMap.values())
 				if (lProcessor.isCompatibleProcessor(getClass()))
@@ -282,6 +276,22 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 		{
 			e.printStackTrace();
 			return false;
+		}
+	}
+
+	@Override
+	protected void notifyChangeOfTextureDimensions()
+	{
+		for (int i = 0; i < getNumberOfRenderLayers(); i++)
+		{
+			final long lBufferSize = 4 * getTextureWidth()
+																* getTextureHeight();
+			assert (mCudaBufferDevicePointer[i] == null);
+
+			if (mCudaBufferDevicePointer[i] != null)
+				mCudaBufferDevicePointer[i].close();
+
+			mCudaBufferDevicePointer[i] = CudaDevicePointer.malloc(lBufferSize);
 		}
 	}
 
