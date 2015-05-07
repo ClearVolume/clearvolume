@@ -115,8 +115,8 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile long mVolumeSizeX;
 	private volatile long mVolumeSizeY;
 	private volatile long mVolumeSizeZ;
-	private volatile double mVoxelSizeX;
 
+	private volatile double mVoxelSizeX;
 	private volatile double mVoxelSizeY;
 	private volatile double mVoxelSizeZ;
 
@@ -1224,9 +1224,9 @@ public abstract class ClearVolumeRendererBase	implements
 																pSizeX,
 																pSizeY,
 																pSizeZ,
-																1,
-																1,
-																1);
+																pVoxelSizeX,
+																pVoxelSizeY,
+																pVoxelSizeZ);
 	}
 
 	@Override
