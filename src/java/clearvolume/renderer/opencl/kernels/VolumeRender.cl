@@ -353,7 +353,7 @@ __kernel void isosurface_render(
   float isoVal = mad(1.0f/ta,pow(0.5f,1.0f/gamma),-tb);
 
   // starting value:
-  float newVal = read_imagef(volume, volumeSampler, pos).x;
+  float newVal = 0;
 
 	// is iso surface value greater or lower:
   bool isGreater = newVal>isoVal;
