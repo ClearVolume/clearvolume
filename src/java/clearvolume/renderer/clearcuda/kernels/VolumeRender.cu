@@ -332,7 +332,6 @@ isosurface_render(
   const float4 front = make_float4(u,v,-1.f,1.f);
   const float4 back  = make_float4(u,v,1.f,1.f);
   
-  
   // calculate eye ray in world space
   float4 orig0, orig;
   float4 direc0, direc;
@@ -367,8 +366,7 @@ isosurface_render(
 
   // clamp to near plane:
 	if (tnear < 0.0f) tnear = 0.0f;
-   
-
+  
   // compute step size:
   const float tstep = fabs(tnear-tfar)/((maxsteps/LOOPUNROLL)*LOOPUNROLL);
   
@@ -390,7 +388,7 @@ isosurface_render(
   float isoVal = pow(0.5f,1.0f/gamma)/ta-tb;
 
   // starting value:
-  float newVal = tex3D(tex, pos.x, pos.y, pos.z);
+  float newVal = 0;
 
 	// is iso surface value greater or lower:
   bool isGreater = newVal>isoVal;
