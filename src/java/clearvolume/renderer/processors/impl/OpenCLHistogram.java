@@ -74,8 +74,8 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer> {
 		// compute the histogram
 
 		System.out.println(mMax);
-		mKernelHist.setArgs(getVolumeBuffers()[0], mBufCounts, mMin, mMax,
-				N_BINS);
+		mKernelHist.setArgs(getVolumeBuffers()[pRenderLayerIndex], mBufCounts,
+				mMin, mMax, N_BINS);
 
 		getDevice().run(mKernelHist, (int) pWidthInVoxels,
 				(int) pHeightInVoxels, (int) pDepthInVoxels);
