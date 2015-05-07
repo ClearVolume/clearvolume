@@ -123,7 +123,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
 		mCLInvProjectionBuffer = mCLDevice.createInputFloatBuffer(16);
 
-
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			prepareVolumeDataArray(i, null);
 
@@ -204,7 +203,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 																																										CLImageFormat.ChannelOrder.RGBA,
 																																										CLImageFormat.ChannelDataType.Float);
 		}
-
 
 		mCLDevice.writeImage(	mCLTransferFunctionImages[pRenderLayerIndex],
 													FloatBuffer.wrap(lTransferFunctionArray));
@@ -365,7 +363,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 			prepareTransferFunctionArray(pRenderLayerIndex);
 
 			final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
-			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
 			final int lNumberOfPasses = getAdaptiveLODController().getNumberOfPasses();
 
 			final int lPassIndex = getAdaptiveLODController().getPassIndex();
@@ -389,12 +386,19 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 			case IsoSurface:
 				mCurrentRenderKernel = mIsoSurfaceRenderKernel;
 				lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses);
-				lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+				lDithering = 0;// getDithering(pRenderLayerIndex) * (1.0f *
+												// (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
 				lClear = 0;
 				lPhase = 0;
 
 				break;
 			}
+
+			/*System.out.format("steps=%d, dith=%g, phase=%g, clear=%d \n",
+												lMaxSteps,
+												lDithering,
+												lPhase,
+												lClear);/**/
 
 			mCLDevice.setArgs(mCurrentRenderKernel,
 												mCLRenderBuffers[pRenderLayerIndex],
@@ -482,6 +486,5 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		}
 
 	}
-
 
 }
