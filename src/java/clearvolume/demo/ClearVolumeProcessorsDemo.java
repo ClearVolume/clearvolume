@@ -376,6 +376,11 @@ public class ClearVolumeProcessorsDemo {
 							final FloatBuffer pResult) {
 						// System.out.println("histogram: "
 						// + Arrays.toString(pResult.array()));
+						System.out.println(lClearVolumeRenderer
+								.getTransferRangeMax());
+						lHistoProcessor.setRange(0.f,
+								(float) lClearVolumeRenderer
+										.getTransferRangeMax());
 					}
 				});
 
