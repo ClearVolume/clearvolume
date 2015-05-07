@@ -613,13 +613,16 @@ public class ClearVolumeProcessorsDemo {
 				lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
+		float s = 1.f;
 		while (lClearVolumeRenderer.isShowing()) {
-			Thread.sleep(200);
+			Thread.sleep(1000);
 			lClearVolumeRenderer.setVolumeDataBuffer(0,
 					ByteBuffer.wrap(lVolumeDataArray), lResolutionX,
 					lResolutionY, lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
 
+			lDeconvProcessor.setSigmas(s, s, s);
+			s += 1.f;
 			for (int z = 0; z < lResolutionZ; z++)
 				for (int y = 0; y < lResolutionY; y++)
 					for (int x = 0; x < lResolutionX; x++) {
@@ -628,8 +631,14 @@ public class ClearVolumeProcessorsDemo {
 
 						int dstep = 2;
 
-						lVolumeDataArray[lIndex] = (byte) ((lVolumeDataArray[lIndex]
-								- dstep + rand.nextInt(2 * dstep + 1)) % 256);
+						lVolumeDataArray[lIndex] = (byte) (25 * Math
+								.exp(-.01
+										* ((x - x0) * (x - x0) + (y - y0)
+												* (y - y0) + (z - z0)
+												* (z - z0))));
+						// lVolumeDataArray[lIndex] = (byte)
+						// ((lVolumeDataArray[lIndex]
+						// - dstep + rand.nextInt(2 * dstep + 1)) % 256);
 
 					}
 
