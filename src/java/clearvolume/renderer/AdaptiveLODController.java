@@ -1,28 +1,38 @@
 package clearvolume.renderer;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import clearvolume.utils.math.lowdiscrepancy.ModularSequence;
+
 public class AdaptiveLODController
 {
 
 	private static final long cMarginTime = 1000 * 1000 * 100; // 10 ms
-	private static final int cMaxRenderStepsPerPass = 128;
-
-	private final int[] cFibonacci = new int[]
-	{ 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144 };
+	private static final int cMaxNumberOfPasses = 17;
 
 	private volatile boolean mActive = true;
 	private volatile boolean mMultiPassRenderingInProgress;
-	private volatile boolean mRenderingParametersOrVolumeDataChanged = true;
 
-	private volatile int mFibonacciPassNumber;
-	private volatile int mGenerator;
+	private volatile int mNewNumberOfPasses;
+	private volatile int mNewGenerator;
+	private volatile int mCurrentNumberOfPasses;
+	private volatile int mCurrentGenerator;
 	private volatile int mPassIndex;
-	private volatile int mCurrentMaxNumberOfSteps;
+
 
 	private volatile long mLastUserInputTime = Long.MIN_VALUE;
+	private volatile long mFirstPassTimingStartTime = Long.MIN_VALUE,
+			mFirstPassTimingStopTime;
+	private volatile long mTargetTimeForFirstPassInMilliseconds = 33;
+	private volatile long mTargetTimeHysteresis = 5;
+	private volatile double mFilteredElapsedTimeInMs = mTargetTimeForFirstPassInMilliseconds;
 
 	public AdaptiveLODController()
 	{
-		setFibonacciPassNumber(5);
+		mCurrentNumberOfPasses = 3;
+		mCurrentGenerator = 2;
+		mNewNumberOfPasses = mCurrentNumberOfPasses;
+		mNewGenerator = mCurrentGenerator;
 		resetMultiPassRendering();
 	}
 
@@ -41,33 +51,38 @@ public class AdaptiveLODController
 		mActive = !mActive;
 	}
 
-	private void setFibonacciPassNumber(final int pFibonacciPassNumber)
+	public int getNumberOfPasses()
 	{
-		mFibonacciPassNumber = pFibonacciPassNumber;
-		mGenerator = cFibonacci[mFibonacciPassNumber - 1];
+		if (!mActive)
+			return 1;
+		return mCurrentNumberOfPasses;
 	}
 
-	private void setFibonacciPassNumberFromCurrentMaxNumberOfSteps()
+	public void setNumberOfPasses(final int pNumberOfPasses)
 	{
-
-		final int lIdeaNumberOfPasses = Math.round(((float) mCurrentMaxNumberOfSteps) / cMaxRenderStepsPerPass);
-
-		for (int i = 1; i < cFibonacci.length; i++)
-		{
-			if (cFibonacci[i] > lIdeaNumberOfPasses)
-			{
-				setFibonacciPassNumber(i);
-				break;
-			}
-		}
-
+		mNewNumberOfPasses = min(	cMaxNumberOfPasses,
+																max(1, pNumberOfPasses));
+		mNewGenerator = ModularSequence.findKWithBestGapScoreCached(pNumberOfPasses);
 	}
+
+	public void incrementNumberOfPasses()
+	{
+		System.out.println("incrementNumberOfPasses");
+		setNumberOfPasses(getNumberOfPasses() + 1);
+	}
+
+	public void decrementNumberOfPasses()
+	{
+		System.out.println("decrementNumberOfPasses");
+		setNumberOfPasses(getNumberOfPasses() - 1);
+	}
+
 
 	public boolean isKernelRunNeeded()
 	{
 		if (!mActive)
 			return false;
-		
+
 		return mMultiPassRenderingInProgress;
 	}
 
@@ -77,7 +92,7 @@ public class AdaptiveLODController
 			return 0;
 
 		final float lPhase = computePhase(getNumberOfPasses(),
-																			mGenerator,
+																			mCurrentGenerator,
 																			mPassIndex);
 		println("lPhase=" + lPhase);
 		return lPhase;
@@ -90,12 +105,7 @@ public class AdaptiveLODController
 		return mPassIndex;
 	}
 
-	public int getNumberOfPasses()
-	{
-		if (!mActive)
-			return 1;
-		return cFibonacci[mFibonacciPassNumber];
-	}
+
 
 	public boolean isBufferClearingNeeded()
 	{
@@ -129,10 +139,7 @@ public class AdaptiveLODController
 		mPassIndex = 0;
 	}
 
-	public void notifyMaxNumberOfSteps(int pMaxNumberSteps)
-	{
-		mCurrentMaxNumberOfSteps = pMaxNumberSteps;
-	}
+
 
 	public boolean beforeRendering()
 	{
@@ -148,6 +155,14 @@ public class AdaptiveLODController
 				// multipass rendering needs to restart from scratch:
 				println(this.getClass().getSimpleName() + ".beforeRendering -> multi-pass needs to be restarted");
 				resetMultiPassRendering();
+
+				mCurrentNumberOfPasses = mNewNumberOfPasses;
+				mCurrentGenerator = mNewGenerator;
+
+				System.out.println("mCurrentNumberOfPasses=" + mCurrentNumberOfPasses);
+				System.out.println("mCurrentGenerator=" + mCurrentGenerator);
+
+				mFirstPassTimingStartTime = System.nanoTime();
 				return true;
 			}
 			else
@@ -160,10 +175,38 @@ public class AdaptiveLODController
 			println(this.getClass().getSimpleName() + ".beforeRendering -> multi-pass not active");
 			return false;
 		}
+
 	}
 
 	public void afterRendering()
 	{
+		if (mPassIndex == 0 && mFirstPassTimingStartTime != Long.MIN_VALUE)
+		{
+			mFirstPassTimingStopTime = System.nanoTime();
+
+			final double lElapsedTimeInMs = ((mFirstPassTimingStopTime - mFirstPassTimingStartTime) * 1e-6);
+
+			mFilteredElapsedTimeInMs = 0.95 * mFilteredElapsedTimeInMs
+																	+ 0.05
+																	* lElapsedTimeInMs;
+
+			System.out.format("elapsed= %.3f, filtered=%f \n",
+												lElapsedTimeInMs,
+												mFilteredElapsedTimeInMs);
+
+			if (mFilteredElapsedTimeInMs < mTargetTimeForFirstPassInMilliseconds - mTargetTimeHysteresis)
+			{
+				// too fast
+				decrementNumberOfPasses();
+			}
+			else if (mFilteredElapsedTimeInMs > mTargetTimeForFirstPassInMilliseconds + mTargetTimeHysteresis)
+			{
+				// too slow
+				incrementNumberOfPasses();
+			}
+
+			mFirstPassTimingStartTime = Long.MIN_VALUE;
+		}
 
 	}
 
@@ -186,7 +229,7 @@ public class AdaptiveLODController
 			// we are done:
 			println(this.getClass().getSimpleName() + ".proceedWithMultiPass -> all passes done! finished!");
 			mMultiPassRenderingInProgress = false;
-			setFibonacciPassNumberFromCurrentMaxNumberOfSteps();
+
 			resetMultiPassRendering();
 			return true;
 		}
@@ -196,7 +239,7 @@ public class AdaptiveLODController
 																		int pGenerator,
 																		int pPassIndex)
 	{
-		final float lPhase = (((float) (pPassIndex * pGenerator) % pNumberOfPasses)) / pNumberOfPasses;
+		final float lPhase = (((float) ((pPassIndex * pGenerator) % pNumberOfPasses))) / pNumberOfPasses;
 		return lPhase;
 	}
 
@@ -226,7 +269,5 @@ public class AdaptiveLODController
 	{
 		// System.out.println(pString);
 	}
-
-
 
 }

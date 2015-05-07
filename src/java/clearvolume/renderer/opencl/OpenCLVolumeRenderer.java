@@ -365,7 +365,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 			prepareTransferFunctionArray(pRenderLayerIndex);
 
 			final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
-			getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
 			final int lNumberOfPasses = getAdaptiveLODController().getNumberOfPasses();
 
 			final int lPassIndex = getAdaptiveLODController().getPassIndex();

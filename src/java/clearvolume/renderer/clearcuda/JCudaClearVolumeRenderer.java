@@ -809,7 +809,6 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 
 				final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
-				getAdaptiveLODController().notifyMaxNumberOfSteps(lMaxNumberSteps);
 				final int lNumberOfPasses = getAdaptiveLODController().getNumberOfPasses();
 
 				final int lPassIndex = getAdaptiveLODController().getPassIndex();
