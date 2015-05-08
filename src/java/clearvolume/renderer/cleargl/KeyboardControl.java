@@ -302,7 +302,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			}
 
 		if (lHasAnyOverlayBeenToggled)
-			mClearVolumeRenderer.requestDisplay();
+			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 	}
 
 }

@@ -200,9 +200,14 @@ public class ClearVolumeBasicDemos
 		while (lClearVolumeRenderer.isShowing())
 		{
 			{
-				final int lResolutionX = (int) (128 + Math.random() * 320);
-				final int lResolutionY = (int) (128 + Math.random() * 320);
-				final int lResolutionZ = (int) (128 + Math.random() * 320);/**/
+				final int lSize = 128;
+
+				final int lResolutionX = (int) (lSize + Math.random() * lSize
+																								/ 2);
+				final int lResolutionY = (int) (lSize + Math.random() * lSize
+																								/ 2);
+				final int lResolutionZ = (int) (lSize + Math.random() * lSize
+																								/ 2);/**/
 
 				/*
 				 * final int lResolutionX = 2 * 256; final int lResolutionY =
@@ -231,7 +236,7 @@ public class ClearVolumeBasicDemos
 			}
 			System.gc();
 
-			Thread.sleep((long) (1000 * Math.random()));
+			Thread.sleep(3000);
 		}
 
 		lClearVolumeRenderer.close();
@@ -334,6 +339,8 @@ public class ClearVolumeBasicDemos
 		lClearVolumeRenderer.close();
 
 	}
+
+
 
 	@Test
 	public void demoWith16BitIsoSurface()	throws InterruptedException,

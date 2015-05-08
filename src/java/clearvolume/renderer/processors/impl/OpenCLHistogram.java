@@ -55,8 +55,8 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>
 
 	public void initBuffers()
 	{
-		// the buffer containing the counts
-		mBufCounts = getDevice().createOutputIntBuffer(mNumberOfBins);
+		if (mBufCounts == null || mBufCounts.getElementCount() != mNumberOfBins)
+			mBufCounts = getDevice().createOutputIntBuffer(mNumberOfBins);
 	}
 
 	@Override

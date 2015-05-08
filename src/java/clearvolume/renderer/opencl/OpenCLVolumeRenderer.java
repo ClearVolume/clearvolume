@@ -238,7 +238,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		// System.out.println("render");
 		try
 		{
-
 			mCLDevice.writeFloatBuffer(	mCLInvModelViewBuffer,
 																	FloatBuffer.wrap(pInvModelViewMatrix));
 
