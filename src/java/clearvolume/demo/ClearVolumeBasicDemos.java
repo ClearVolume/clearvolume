@@ -287,23 +287,23 @@ public class ClearVolumeBasicDemos
 																				IOException
 	{
 
-		// final ClearVolumeRendererInterface lClearVolumeRenderer =
-		// ClearVolumeRendererFactory
-		// .newBestRenderer("ClearVolumeTest", 512, 512,
-		// NativeTypeEnum.UnsignedShort, false);
-		//
-
 		final int lMaxTextureRes = 2048;
 
-		/*final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",/**/
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",/**/
-																																																					768,
-																																																					768,
-																																																					NativeTypeEnum.UnsignedShort,
-																																																					lMaxTextureRes,
-																																																					lMaxTextureRes,
-																																																					1,
-																																																					false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+																																																					// final
+																																																					// ClearVolumeRendererInterface
+																																																					// lClearVolumeRenderer
+																																																					// =
+																																																					// ClearVolumeRendererFactory.newOpenCLRenderer(
+																																																					// "ClearVolumeTest",
+																																																						512,
+																																																						512,
+																																																						NativeTypeEnum.UnsignedShort,
+																																																						lMaxTextureRes,
+																																																						lMaxTextureRes,
+																																																						1,
+																																																						false);
+
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
@@ -339,9 +339,10 @@ public class ClearVolumeBasicDemos
 					// .exp(-0.001f * dist) + 1. * Math.exp(-0.001f
 					// * dist2)));
 
-					// final short lValue = (short) (32000 * (1. / (1 + 0.001 * dist) + 1.
-					// / (1 + 0.001 * dist2)) + Math.rint(0 * 3000));
-					final short lValue = (short) (((short) x ^ (short) y ^ (short) z));
+					// final short lValue = (short) (32000 * (1. / (1 + 0.001 *
+					// dist) + 1. / (1 + 0.001 * dist2)));
+					final short lValue = (short) (65000 * (1. / (1 + 0.001 * dist)));
+					// final short lValue = (short) (((short) x ^ (short) y ^ (short) z));
 
 					lVolumeDataArray[lIndex] = (byte) (lValue & 0xFF);
 					lVolumeDataArray[lIndex + 1] = (byte) ((lValue >> 8) & 0xFF);

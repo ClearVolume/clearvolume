@@ -302,6 +302,9 @@ isosurface_render(
 									const float trangemin, 
 									const float trangemax, 
 									const float gamma, 
+									const float lightX, 
+									const float lightY, 
+									const float lightZ, 
 									const int   maxsteps,
 									const float dithering,
 									const float phase,
@@ -451,7 +454,7 @@ isosurface_render(
   
   // getting the normals and do some nice phong shading
   
-  float4 light = make_float4(2,-1,-2,0);
+  float4 light = make_float4(-lightX,-lightY,-lightZ,0.0f);
 
   float c_diffuse = 0.2;
   float c_specular = 0.4;

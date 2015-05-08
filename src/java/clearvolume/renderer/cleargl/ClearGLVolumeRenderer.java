@@ -60,9 +60,9 @@ import coremem.types.NativeTypeEnum;
  * @author Loic Royer 2014
  *
  */
-public abstract class ClearGLVolumeRenderer	extends
-																						ClearVolumeRendererBase	implements
-																																		ClearGLEventListener
+public abstract class ClearGLVolumeRenderer extends
+
+ClearVolumeRendererBase implements ClearGLEventListener
 {
 
 	private static final double cTextureDimensionChangeRatioThreshold = 1.2;
@@ -130,6 +130,9 @@ public abstract class ClearGLVolumeRenderer	extends
 	// Recorder:
 	private final GLVideoRecorder mGLVideoRecorder = new GLVideoRecorder(new File(SystemUtils.USER_HOME,
 																																								"Videos/ClearVolume"));
+
+	private final float mLightVector[] = new float[]
+	{ -1.f, 1.f, 1.f };
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
@@ -334,7 +337,8 @@ public abstract class ClearGLVolumeRenderer	extends
 		mClearGLWindow.addMouseListener(lMouseControl);
 
 		// Initialize the keyboard controls
-		final KeyboardControl lKeyboardControl = new KeyboardControl(this);
+		final KeyboardControl lKeyboardControl = new KeyboardControl(	this,
+																																	lMouseControl);
 		mClearGLWindow.addKeyListener(lKeyboardControl);
 
 		mClearGLWindow.addWindowListener(new WindowAdapter()
@@ -590,16 +594,12 @@ public abstract class ClearGLVolumeRenderer	extends
 			}
 
 			/*
-			Runnable lDisplayRequestRunnable = new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					requestDisplay();
-				}
-			};
-			mGLVideoRecorder.startDisplayRequestDeamonThread(lDisplayRequestRunnable);
-			/**/
+			 * Runnable lDisplayRequestRunnable = new Runnable() {
+			 * 
+			 * @Override public void run() { requestDisplay(); } };
+			 * mGLVideoRecorder
+			 * .startDisplayRequestDeamonThread(lDisplayRequestRunnable); /*
+			 */
 
 		}
 
@@ -667,8 +667,11 @@ public abstract class ClearGLVolumeRenderer	extends
 
 		pDrawable.getGL();
 
-		mDisplayReentrantLock.lock(); /*tryLock(	cMaxWaitingTimeForAcquiringDisplayLockInMs,
-																							TimeUnit.MILLISECONDS);/**/
+		mDisplayReentrantLock.lock(); /*
+																	* tryLock(
+																	* cMaxWaitingTimeForAcquiringDisplayLockInMs
+																	* , TimeUnit.MILLISECONDS);/*
+																	*/
 
 		if (lTryLock)
 			try
@@ -678,22 +681,25 @@ public abstract class ClearGLVolumeRenderer	extends
 				final boolean lOverlay2DChanged = isOverlay2DChanged();
 				final boolean lOverlay3DChanged = isOverlay3DChanged();
 
-				/*if (!isNewVolumeDataAvailable() && !lOverlay2DChanged
-						&& !lOverlay3DChanged
-						&& !haveVolumeRenderingParametersChanged()
-						&& !getAdaptiveLODController().isRedrawNeeded()
-						&& !pForceRedraw)
-				{
-					return;
-				}/**/
+				/*
+				 * if (!isNewVolumeDataAvailable() && !lOverlay2DChanged &&
+				 * !lOverlay3DChanged && !haveVolumeRenderingParametersChanged()
+				 * && !getAdaptiveLODController().isRedrawNeeded() &&
+				 * !pForceRedraw) { return; }/*
+				 */
 
 				/*
-				System.out.println("isNewVolumeDataAvailable()=" + isNewVolumeDataAvailable());
-				System.out.println("lOverlay2DChanged=" + lOverlay2DChanged);
-				System.out.println("lOverlay3DChanged=" + lOverlay3DChanged);
-				System.out.println("haveVolumeRenderingParametersChanged()=" + haveVolumeRenderingParametersChanged());
-				System.out.println("getAdaptiveLODController().isRedrawNeeded()=" + getAdaptiveLODController().isRedrawNeeded());
-				System.out.println("pForceRedraw=" + pForceRedraw);/**/
+				 * System.out.println("isNewVolumeDataAvailable()=" +
+				 * isNewVolumeDataAvailable());
+				 * System.out.println("lOverlay2DChanged=" + lOverlay2DChanged);
+				 * System.out.println("lOverlay3DChanged=" + lOverlay3DChanged);
+				 * System.out.println("haveVolumeRenderingParametersChanged()="
+				 * + haveVolumeRenderingParametersChanged());
+				 * System.out.println(
+				 * "getAdaptiveLODController().isRedrawNeeded()=" +
+				 * getAdaptiveLODController().isRedrawNeeded());
+				 * System.out.println("pForceRedraw=" + pForceRedraw);/*
+				 */
 
 				final GL lGL = pDrawable.getGL();
 				lGL.glClearColor(0, 0, 0, 1);
@@ -793,6 +799,19 @@ public abstract class ClearGLVolumeRenderer	extends
 		return lProjectionMatrix;
 	}
 
+	public float[] getLightVector()
+	{
+		return mLightVector;
+	}
+
+	public void setLightVector(final float[] pLight)
+	{
+		mLightVector[0] = pLight[0];
+		mLightVector[1] = pLight[1];
+		mLightVector[2] = pLight[2];
+		notifyChangeOfVolumeRenderingParameters();
+	}
+
 	private GLMatrix getModelViewMatrix()
 	{
 		// scaling...
@@ -807,9 +826,10 @@ public abstract class ClearGLVolumeRenderer	extends
 
 		// final GLMatrix lEulerMatrix = new GLMatrix();
 
-		/*lEulerMatrix.euler(	getRotationX() * 0.01,
-												getRotationY() * 0.01,
-												0.0f);/**/
+		/*
+		 * lEulerMatrix.euler( getRotationX() * 0.01, getRotationY() * 0.01,
+		 * 0.0f);/*
+		 */
 		if (getRotationControllers().size() > 0)
 		{
 			for (final RotationControllerInterface lRotationController : getRotationControllers())
@@ -1020,8 +1040,10 @@ public abstract class ClearGLVolumeRenderer	extends
 																											0,
 																											1000);/**/
 
-		final int lCandidateTextureWidth = min(mMaxTextureWidth, (mViewportWidth / 64) * 64);
-		final int lCandidateTextureHeight = min(mMaxTextureHeight, (mViewportHeight / 64) * 64);
+		final int lCandidateTextureWidth = min(	mMaxTextureWidth,
+																						(mViewportWidth / 64) * 64);
+		final int lCandidateTextureHeight = min(mMaxTextureHeight,
+																						(mViewportHeight / 64) * 64);
 
 		if (lCandidateTextureWidth != 0 && lCandidateTextureHeight == 0)
 			return;
@@ -1039,16 +1061,17 @@ public abstract class ClearGLVolumeRenderer	extends
 		if (lRatioHeight < 1)
 			lRatioHeight = 1 / lRatioHeight;
 
-		//System.out.format("ratios: (%g,%g) \n", lRatioWidth, lRatioHeight);
+		// System.out.format("ratios: (%g,%g) \n", lRatioWidth, lRatioHeight);
 
 		if (lRatioWidth > cTextureDimensionChangeRatioThreshold || lRatioHeight > cTextureDimensionChangeRatioThreshold)
 		{
 			mTextureWidth = lCandidateTextureWidth;
 			mTextureHeight = lCandidateTextureHeight;
 			mUpdateTextureWidthHeight = true;
-			/*System.out.format("resizing texture: (%d,%d) \n",
-												mTextureWidth,
-												mTextureHeight);/**/
+			/*
+			 * System.out.format("resizing texture: (%d,%d) \n", mTextureWidth,
+			 * mTextureHeight);/*
+			 */
 		}
 
 		displayInternal(pDrawable, true);
@@ -1242,6 +1265,5 @@ public abstract class ClearGLVolumeRenderer	extends
 	{
 		mViewportWidth = pViewportWidth;
 	}
-
 
 }

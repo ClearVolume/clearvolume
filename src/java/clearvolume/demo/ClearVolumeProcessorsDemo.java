@@ -581,7 +581,7 @@ public class ClearVolumeProcessorsDemo {
 				.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 128;
+		final int lResolutionX = 64;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
