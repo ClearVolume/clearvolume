@@ -14,6 +14,7 @@ import clearvolume.renderer.cleargl.overlay.o2d.BarGraphOverlay;
 import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
 import clearvolume.renderer.processors.OpenCLProcessor;
 import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.impl.OpenCLDenoise;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
 
 import com.nativelibs4java.opencl.CLBuffer;
@@ -108,6 +109,9 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		addOverlay(lBarGraphOverlay);
 
 		lBarGraphOverlay.setDisplayed(false);
+
+		final OpenCLDenoise lOpenCLDenoise = new OpenCLDenoise();
+		addProcessor(lOpenCLDenoise);
 
 	}
 

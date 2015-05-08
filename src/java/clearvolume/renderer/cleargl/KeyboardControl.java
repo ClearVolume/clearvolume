@@ -7,8 +7,9 @@ import java.util.Collection;
 import clearvolume.controller.AutoRotationController;
 import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.ClearVolumeRendererInterface;
+import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay;
-import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
+import clearvolume.renderer.processors.Processor;
 
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
@@ -260,17 +261,31 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			}
 		}
 
-		processOverlayRelatedEvents(pE);
+		handleOverlayRelatedEvents(pE);
+		handleProcessorsRelatedEvents(pE);
 
 	}
 
-	private void processOverlayRelatedEvents(KeyEvent pE)
+	private void handleOverlayRelatedEvents(KeyEvent pE)
 	{
 		final Collection<Overlay> lOverlays = mClearVolumeRenderer.getOverlays();
 
+		processSingleKeyToggableEvents(pE, lOverlays);
+	}
+
+	private void handleProcessorsRelatedEvents(KeyEvent pE)
+	{
+		final Collection<Processor<?>> lProcessors = mClearVolumeRenderer.getProcessors();
+
+		processSingleKeyToggableEvents(pE, lProcessors);
+	}
+
+	private void processSingleKeyToggableEvents(KeyEvent pE,
+																							final Collection<?> lOverlays)
+	{
 		boolean lHasAnyOverlayBeenToggled = false;
 
-		for (final Overlay lOverlay : lOverlays)
+		for (final Object lOverlay : lOverlays)
 			if (lOverlay instanceof SingleKeyToggable)
 			{
 				final SingleKeyToggable lSingleKeyToggable = (SingleKeyToggable) lOverlay;
@@ -280,7 +295,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 				if (lRightKey && lRightModifiers)
 				{
-					lOverlay.toggleDisplayed();
+					lSingleKeyToggable.toggle();
 
 					lHasAnyOverlayBeenToggled = true;
 				}
@@ -289,4 +304,5 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 		if (lHasAnyOverlayBeenToggled)
 			mClearVolumeRenderer.requestDisplay();
 	}
+
 }

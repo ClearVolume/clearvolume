@@ -19,9 +19,9 @@ import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import clearvolume.audio.audioplot.AudioPlot;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
-import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 
@@ -108,9 +108,9 @@ public class GraphOverlay extends OverlayBase	implements
 	}
 
 	@Override
-	public boolean toggleDisplayed()
+	public boolean toggle()
 	{
-		final boolean lNewState = super.toggleDisplayed();
+		final boolean lNewState = super.toggle();
 		if (lNewState)
 			mAudioPlot.start();
 		else

@@ -9,8 +9,8 @@ import javax.media.opengl.GL;
 import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.OverlayForProcessors;
-import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
@@ -56,9 +56,9 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 	}
 
 	@Override
-	public boolean toggleDisplayed()
+	public boolean toggle()
 	{
-		final boolean lToggleDisplay = super.toggleDisplayed();
+		final boolean lToggleDisplay = super.toggle();
 
 		if (lToggleDisplay)
 			getGraphOverlay().clear();

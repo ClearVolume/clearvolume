@@ -44,7 +44,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 	/**
 	 * True if moving the mouse moves the light
 	 */
-	private volatile boolean mMoveLightMode = true;
+	private volatile boolean mMoveLightMode = false;
 
 	/**
 	 * @param pJoglVolumeRenderer

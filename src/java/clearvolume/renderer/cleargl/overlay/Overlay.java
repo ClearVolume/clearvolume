@@ -25,7 +25,7 @@ public interface Overlay
 	 * 
 	 * @return state after toggle.
 	 */
-	public boolean toggleDisplayed();
+	public boolean toggle();
 
 	/**
 	 * Sets display flag.

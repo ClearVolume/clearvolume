@@ -24,7 +24,7 @@ public class HistogramOverlay extends BarGraphOverlay
 	}
 
 	@Override
-	public boolean toggleDisplayed()
+	public boolean toggle()
 	{
 		setDisplayed(!isDisplayed());
 		return isDisplayed();

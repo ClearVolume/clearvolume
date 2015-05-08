@@ -1135,7 +1135,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	@Override
 	public void toggleBoxDisplay()
 	{
-		mOverlayMap.get("box").toggleDisplayed();
+		mOverlayMap.get("box").toggle();
 	}
 
 	/**
@@ -1172,6 +1172,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	{
 		return mOverlayMap.values();
 	}
+
 
 	/**
 	 * Notifies eye ray listeners.

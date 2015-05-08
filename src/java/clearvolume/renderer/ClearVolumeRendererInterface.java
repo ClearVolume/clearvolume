@@ -918,6 +918,13 @@ public interface ClearVolumeRendererInterface	extends
 	public Collection<Overlay> getOverlays();
 
 	/**
+	 * Returns the list of processors in this renderer.
+	 *
+	 * @return
+	 */
+	public Collection<Processor<?>> getProcessors();
+
+	/**
 	 * Returns a Canvas that can be used to embed this renderer.
 	 *
 	 * @return A NewtCanvasAWT object or null if the renderer cannot be embedded.
@@ -981,6 +988,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
+
 
 
 }

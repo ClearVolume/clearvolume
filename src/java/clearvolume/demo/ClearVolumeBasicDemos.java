@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
+import clearvolume.renderer.RenderAlgorithm;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
 import coremem.ContiguousMemoryInterface;
@@ -350,7 +351,7 @@ public class ClearVolumeBasicDemos
 																																																						lMaxTextureRes,
 																																																						1,
 																																																						false);
-
+		lClearVolumeRenderer.setRenderAlgorithm(RenderAlgorithm.IsoSurface);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 

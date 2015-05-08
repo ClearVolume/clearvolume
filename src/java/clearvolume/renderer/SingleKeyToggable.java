@@ -1,4 +1,4 @@
-package clearvolume.renderer.cleargl.overlay;
+package clearvolume.renderer;
 
 
 /**
@@ -12,7 +12,7 @@ public interface SingleKeyToggable
 {
 
 
-		/**
+	/**
 	 * Returns key code of toggle key combination.
 	 * 
 	 * @return toggle key as short code.
@@ -25,6 +25,11 @@ public interface SingleKeyToggable
 	 * @return toggle key as short code.
 	 */
 	public int toggleKeyModifierMask();
+
+	/**
+	 * Toggle on/off
+	 */
+	public boolean toggle();
 
 
 

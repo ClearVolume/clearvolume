@@ -11,9 +11,9 @@ import cleargl.GLIntArray;
 import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
-import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
 
 import com.jogamp.newt.event.KeyEvent;
 
@@ -50,10 +50,10 @@ public class BoxOverlay extends OverlayBase	implements
 	}
 
 	@Override
-	public boolean toggleDisplayed()
+	public boolean toggle()
 	{
 		mHasChanged = true;
-		return super.toggleDisplayed();
+		return super.toggle();
 	}
 
 	/* (non-Javadoc)

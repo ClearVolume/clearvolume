@@ -1,5 +1,7 @@
 package clearvolume.demo;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -10,6 +12,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
+import clearvolume.renderer.RenderAlgorithm;
 import clearvolume.renderer.cleargl.overlay.o2d.GraphOverlay;
 import clearvolume.renderer.cleargl.overlay.o2d.ImageQualityOverlay;
 import clearvolume.renderer.cleargl.overlay.o3d.DriftOverlay;
@@ -743,22 +746,31 @@ public class ClearVolumeProcessorsDemo
 																																																						1,
 																																																						false);
 
-		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
+		lClearVolumeRenderer.setRenderAlgorithm(RenderAlgorithm.IsoSurface);
 
-		final OpenCLDenoise lDenoiseProcessor = new OpenCLDenoise();
+		OpenCLDenoise lDenoiseProcessor = null;
 
-		lDenoiseProcessor.addResultListener(new ProcessorResultListener<Void>()
+		for (final Processor<?> lProcessor : lClearVolumeRenderer.getProcessors())
 		{
-
-			@Override
-			public void notifyResult(	final Processor<Void> pSource,
-																final Void pResult)
+			if (lProcessor instanceof OpenCLDenoise)
 			{
-				System.out.println("denoise! ");
-			}
-		});
 
-		lClearVolumeRenderer.addProcessor(lDenoiseProcessor);
+				lDenoiseProcessor = (OpenCLDenoise) lProcessor;
+				lDenoiseProcessor.setActive(true);
+				lDenoiseProcessor.addResultListener(new ProcessorResultListener<Boolean>()
+				{
+					@Override
+					public void notifyResult(	final Processor<Boolean> pSource,
+																		final Boolean pResult)
+					{
+						if (pResult)
+							System.out.println("denoise! ");
+					}
+				});
+			}
+		}
+
+		assertNotNull(lDenoiseProcessor);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
@@ -804,7 +816,7 @@ public class ClearVolumeProcessorsDemo
 		final int noiseLevel = 30;
 		while (lClearVolumeRenderer.isShowing())
 		{
-			Thread.sleep(2000);
+			// Thread.sleep(2000);
 			lClearVolumeRenderer.setVolumeDataBuffer(	0,
 																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,

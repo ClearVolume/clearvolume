@@ -1628,6 +1628,12 @@ public abstract class ClearVolumeRendererBase	implements
 			addProcessor(lProcessor);
 	}
 
+	@Override
+	public Collection<Processor<?>> getProcessors()
+	{
+		return mProcessorsMap.values();
+	}
+
 	/**
 	 * Toggles the display of the Control Frame;
 	 */
