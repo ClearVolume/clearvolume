@@ -295,8 +295,8 @@ public class ClearVolumeBasicDemos
 
 		final int lMaxTextureRes = 2048;
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",/**/
-		/*final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",/**/
+		/*final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",/**/
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",/**/
 																																																					768,
 																																																					768,
 																																																					NativeTypeEnum.UnsignedShort,
