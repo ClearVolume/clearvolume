@@ -1112,7 +1112,7 @@ public abstract class ClearGLVolumeRenderer	extends
 	@Override
 	public void toggleBoxDisplay()
 	{
-		mOverlayMap.get("box").toggleDisplay();
+		mOverlayMap.get("box").toggleDisplayed();
 	}
 
 	/**

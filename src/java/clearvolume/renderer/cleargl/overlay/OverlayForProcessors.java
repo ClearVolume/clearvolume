@@ -43,9 +43,9 @@ public class OverlayForProcessors extends OverlayBase	implements
 	}
 
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggleDisplayed()
 	{
-		final boolean lNewState = getDelegatedOverlay().toggleDisplay();
+		final boolean lNewState = getDelegatedOverlay().toggleDisplayed();
 		for (final Processor<?> lProcessor : mProcessors)
 		{
 			lProcessor.toggleActive();

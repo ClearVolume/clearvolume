@@ -25,7 +25,15 @@ public interface Overlay
 	 * 
 	 * @return state after toggle.
 	 */
-	public boolean toggleDisplay();
+	public boolean toggleDisplayed();
+
+	/**
+	 * Sets display flag.
+	 * 
+	 * @param pDisplay
+	 *          true if displayed, false if not
+	 */
+	public void setDisplayed(boolean pDisplay);
 
 	/**
 	 * Returns true if the overlay is displayed.

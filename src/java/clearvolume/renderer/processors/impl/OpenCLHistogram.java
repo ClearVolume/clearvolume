@@ -24,7 +24,7 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>
 	public OpenCLHistogram()
 	{
 		super();
-		// TODO Auto-generated constructor stub
+
 	}
 
 	@Override
@@ -136,4 +136,5 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>
 
 		}
 	}
+
 }

@@ -21,4 +21,6 @@ public interface Processor<R>
 
 	public boolean isActive();
 
+	public void setActive(boolean pActive);
+
 }

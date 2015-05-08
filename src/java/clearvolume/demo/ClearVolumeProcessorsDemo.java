@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.cleargl.overlay.o2d.GraphOverlay;
-import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
 import clearvolume.renderer.cleargl.overlay.o2d.ImageQualityOverlay;
 import clearvolume.renderer.cleargl.overlay.o3d.DriftOverlay;
 import clearvolume.renderer.cleargl.overlay.o3d.PathOverlay;
@@ -20,7 +19,6 @@ import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.CUDAProcessorTest;
 import clearvolume.renderer.processors.impl.OpenCLCenterMass;
-import clearvolume.renderer.processors.impl.OpenCLHistogram;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 import clearvolume.renderer.processors.impl.OpenCLTest;
 import clearvolume.transferf.TransferFunctions;
@@ -435,14 +433,6 @@ public class ClearVolumeProcessorsDemo
 																																																						1,
 																																																						false);
 
-		final HistogramOverlay lHistogramOverlay = new HistogramOverlay();
-		lClearVolumeRenderer.addOverlay(lHistogramOverlay);
-
-		final OpenCLHistogram lHistoProcessor = new OpenCLHistogram();
-		lClearVolumeRenderer.addProcessor(lHistoProcessor);
-		lHistoProcessor.addResultListener(lHistogramOverlay);
-
-		lHistoProcessor.setRange(0.f, 1.f);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);

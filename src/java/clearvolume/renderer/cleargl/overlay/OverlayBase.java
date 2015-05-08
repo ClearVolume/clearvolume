@@ -16,12 +16,21 @@ public abstract class OverlayBase implements Overlay
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay#toggleDisplay()
 	 */
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggleDisplayed()
 	{
 		mDisplay = !mDisplay;
 		return mDisplay;
 	}
 	
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.cleargl.overlay.Overlay#setDisplay(boolean)
+	 */
+	@Override
+	public void setDisplayed(boolean pDisplay)
+	{
+		mDisplay = pDisplay;
+	}
+
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay#isDisplayed()
 	 */

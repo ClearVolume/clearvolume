@@ -82,10 +82,10 @@ public class CursorOverlay extends OverlayBase implements
 	}
 
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggleDisplayed()
 	{
 		mHasChanged = true;
-		return super.toggleDisplay();
+		return super.toggleDisplayed();
 	}
 
 	/* (non-Javadoc)

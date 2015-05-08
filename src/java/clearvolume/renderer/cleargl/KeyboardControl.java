@@ -267,7 +267,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 				if (lRightKey && lRightModifiers)
 				{
-					lOverlay.toggleDisplay();
+					lOverlay.toggleDisplayed();
 					lHasAnyOverlayBeenToggled = true;
 				}
 			}

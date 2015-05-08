@@ -8,8 +8,11 @@ import javax.media.opengl.GLEventListener;
 
 import jcuda.CudaException;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
+import clearvolume.renderer.cleargl.overlay.o2d.BarGraphOverlay;
+import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
 import clearvolume.renderer.processors.OpenCLProcessor;
 import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.impl.OpenCLHistogram;
 
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage2D;
@@ -95,6 +98,15 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		mCLRenderBuffers = new CLBuffer[pNumberOfRenderLayers];
 		mCLVolumeImages = new CLImage3D[pNumberOfRenderLayers];
 		mCLTransferFunctionImages = new CLImage2D[pNumberOfRenderLayers];
+
+		final OpenCLHistogram lHistoProcessor = new OpenCLHistogram();
+		addProcessor(lHistoProcessor);
+
+		final BarGraphOverlay lBarGraphOverlay = new HistogramOverlay(lHistoProcessor);
+		addOverlay(lBarGraphOverlay);
+
+		lBarGraphOverlay.setDisplayed(false);
+
 	}
 
 	@Override
