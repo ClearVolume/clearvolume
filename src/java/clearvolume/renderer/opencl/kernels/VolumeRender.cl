@@ -253,7 +253,9 @@ __kernel void isosurface_render(
 								const	float dithering,
 								const	float phase,
 								const	int   clear,
-								const float lightX, const float lightY,const float lightZ,
+								const float lightX, 
+								const float lightY,
+								const float lightZ,
 								__read_only image2d_t 	transferColor4,
 								__constant float* 		invP,
 								__constant float* 		invM,
@@ -417,7 +419,7 @@ __kernel void isosurface_render(
   
   // getting the normals and do some nice phong shading
   
-  //float4 light = (float4)(2,-1,-2,0);
+  // build light vector:
   float4 light = (float4)(-lightX,-lightY,-lightZ,0);
   
   float c_diffuse = 0.2;

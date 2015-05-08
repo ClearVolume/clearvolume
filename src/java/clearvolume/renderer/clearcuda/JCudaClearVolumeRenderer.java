@@ -7,6 +7,8 @@ package clearvolume.renderer.clearcuda;
  * Copyright 2009-2011 Marco Hutter - http://www.jcuda.org
  */
 
+import static java.lang.Math.pow;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,8 +79,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	/**
 	 * Volume rendering CUDA function
 	 */
-	private CudaFunction mCurrentRenderKernel, mMaxProjectionRenderKernel,
-			mIsoSurfaceRenderKernel;
+	private CudaFunction mCurrentRenderKernel,
+			mMaxProjectionRenderKernel, mIsoSurfaceRenderKernel;
 
 	/**
 	 * We use these buffers when rendering to standard CUDA buffers.
@@ -259,7 +261,6 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 			prepareTransferFunctionTexture();
 
 			mCudaBufferDevicePointer = new CudaDevicePointer[getNumberOfRenderLayers()];
-
 
 			for (final Processor<?> lProcessor : mProcessorsMap.values())
 				if (lProcessor.isCompatibleProcessor(getClass()))
@@ -798,15 +799,12 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 				pointTextureToArray(pRenderLayerIndex);
 
 				mCurrentRenderKernel.setGridDim(iDivUp(	getTextureWidth(),
-																										cBlockSize),
-																						iDivUp(	getTextureHeight(),
-																										cBlockSize),
-																						1);
+																								cBlockSize),
+																				iDivUp(	getTextureHeight(),
+																								cBlockSize),
+																				1);
 
-				mCurrentRenderKernel.setBlockDim(	cBlockSize,
-																							cBlockSize,
-																							1);
-
+				mCurrentRenderKernel.setBlockDim(cBlockSize, cBlockSize, 1);
 
 				final int lMaxNumberSteps = getMaxSteps(pRenderLayerIndex);
 				final int lNumberOfPasses = getAdaptiveLODController().getNumberOfPasses();
@@ -827,13 +825,43 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 					lPhase = getAdaptiveLODController().getPhase();
 					lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
 																																			: 1;
+
+					mCurrentRenderKernel.launch(lCudaDevicePointer,
+																			getTextureWidth(),
+																			getTextureHeight(),
+																			(float) getBrightness(pRenderLayerIndex),
+																			(float) getTransferRangeMin(pRenderLayerIndex),
+																			(float) getTransferRangeMax(pRenderLayerIndex),
+																			(float) getGamma(pRenderLayerIndex),
+																			lMaxSteps,
+																			lDithering,
+																			lPhase,
+																			lClear);
+
 					break;
 				case IsoSurface:
 					lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses);
-					lDithering = 0; // getDithering(pRenderLayerIndex) * (1.0f *
-													// (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
+					lDithering = (float) pow(	getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses),
+														2);
 					lClear = 0;
 					lPhase = 0;
+
+					final float[] lLightVector = getLightVector();
+
+					mCurrentRenderKernel.launch(lCudaDevicePointer,
+																			getTextureWidth(),
+																			getTextureHeight(),
+																			(float) getBrightness(pRenderLayerIndex),
+																			(float) getTransferRangeMin(pRenderLayerIndex),
+																			(float) getTransferRangeMax(pRenderLayerIndex),
+																			(float) getGamma(pRenderLayerIndex),
+																			lLightVector[0],
+																			lLightVector[1],
+																			lLightVector[2],
+																			lMaxSteps,
+																			lDithering,
+																			lPhase,
+																			lClear);
 
 					break;
 				}
@@ -844,17 +872,6 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 													lPhase,
 													lClear);/**/
 
-				mCurrentRenderKernel.launch(lCudaDevicePointer,
-																				getTextureWidth(),
-																				getTextureHeight(),
-																				(float) getBrightness(pRenderLayerIndex),
-																				(float) getTransferRangeMin(pRenderLayerIndex),
-																				(float) getTransferRangeMax(pRenderLayerIndex),
-																				(float) getGamma(pRenderLayerIndex),
-																				lMaxSteps,
-																				lDithering,
-																				lPhase,
-																				lClear);
 			}
 		}
 		else

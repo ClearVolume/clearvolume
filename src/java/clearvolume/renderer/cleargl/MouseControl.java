@@ -3,8 +3,6 @@ package clearvolume.renderer.cleargl;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-import java.util.Arrays;
-
 import org.apache.commons.lang.SystemUtils;
 
 import cleargl.util.arcball.ArcBall;
@@ -22,9 +20,11 @@ import com.jogamp.newt.event.MouseListener;
  * @author Loic Royer 2014
  *
  */
-class MouseControl extends MouseAdapter implements MouseListener {
+class MouseControl extends MouseAdapter implements MouseListener
+{
 
-	private final double mMouseWheelFactor = SystemUtils.IS_OS_WINDOWS ? 10 : 1;
+	private final double mMouseWheelFactor = SystemUtils.IS_OS_WINDOWS ? 10
+																																		: 1;
 
 	/**
 	 * Reference of the renderer
@@ -42,16 +42,28 @@ class MouseControl extends MouseAdapter implements MouseListener {
 	private final ArcBall mArcBall;
 
 	/**
+	 * True if moving the mouse moves the light
+	 */
+	private volatile boolean mMoveLightMode = true;
+
+	/**
 	 * @param pJoglVolumeRenderer
 	 */
-	MouseControl(final ClearGLVolumeRenderer pClearVolumeRenderer) {
+	MouseControl(final ClearGLVolumeRenderer pClearVolumeRenderer)
+	{
 		mRenderer = pClearVolumeRenderer;
 		mArcBall = new ArcBall();
-		mArcBall.setBounds(mRenderer.getViewportWidth(),
-				mRenderer.getViewportHeight());
+		mArcBall.setBounds(	mRenderer.getViewportWidth(),
+												mRenderer.getViewportHeight());
 	}
 
-	private void setSavedMousePosition(final MouseEvent pMouseEvent) {
+	public void toggleMoveLightMode()
+	{
+		mMoveLightMode = !mMoveLightMode;
+	}
+
+	private void setSavedMousePosition(final MouseEvent pMouseEvent)
+	{
 		mSavedMouseX = pMouseEvent.getX();
 		mSavedMouseY = pMouseEvent.getY();
 	}
@@ -62,14 +74,18 @@ class MouseControl extends MouseAdapter implements MouseListener {
 	 * @see com.jogamp.newt.event.MouseAdapter#mouseClicked(com.jogamp.newt.event.MouseEvent)
 	 */
 	@Override
-	public void mouseClicked(final MouseEvent pMouseEvent) {
+	public void mouseClicked(final MouseEvent pMouseEvent)
+	{
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
 
-		if (pMouseEvent.getClickCount() == 1) {
+		if (pMouseEvent.getClickCount() == 1)
+		{
 			handleGammaMinMax(pMouseEvent);
 
-		} else if (pMouseEvent.getClickCount() == 2) {
+		}
+		else if (pMouseEvent.getClickCount() == 2)
+		{
 			mRenderer.toggleFullScreen();
 			mRenderer.notifyChangeOfVolumeRenderingParameters();
 		}
@@ -82,31 +98,31 @@ class MouseControl extends MouseAdapter implements MouseListener {
 	 * @see com.jogamp.newt.event.MouseAdapter#mouseDragged(com.jogamp.newt.event.MouseEvent)
 	 */
 	@Override
-	public void mouseDragged(final MouseEvent pMouseEvent) {
+	public void mouseDragged(final MouseEvent pMouseEvent)
+	{
+		moveLight(pMouseEvent);
+
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
 
 		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
-				&& !pMouseEvent.isAltDown() && !pMouseEvent.isControlDown()
-				&& pMouseEvent.isButtonDown(1)) {
+				&& !pMouseEvent.isAltDown()
+				&& !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
 			final float lMouseX = pMouseEvent.getX();
 			final float lMouseY = pMouseEvent.getY();
-			mArcBall.setBounds(mRenderer.getViewportWidth(),
-					mRenderer.getViewportHeight());
+			mArcBall.setBounds(	mRenderer.getViewportWidth(),
+													mRenderer.getViewportHeight());
 			mArcBall.drag(lMouseX, lMouseY, mRenderer.getQuaternion());
 
 		}
 
 		if (pMouseEvent.isAltDown() && !pMouseEvent.isMetaDown()
-				&& !pMouseEvent.isShiftDown() && !pMouseEvent.isControlDown()
-				&& pMouseEvent.isButtonDown(1)) {
-			final float lMouseX = pMouseEvent.getX();
-			final float lMouseY = pMouseEvent.getY();
-			float light[] = new float[3];
-			mArcBall.mapToSphere(lMouseX, lMouseY, light);
-
-			mRenderer.setLightVector(light);
-			System.out.println(Arrays.toString(light));
+				&& !pMouseEvent.isShiftDown()
+				&& !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
 
 		}
 
@@ -122,9 +138,12 @@ class MouseControl extends MouseAdapter implements MouseListener {
 	 * @see com.jogamp.newt.event.MouseAdapter#mouseMoved(com.jogamp.newt.event.MouseEvent)
 	 */
 	@Override
-	public void mouseMoved(final MouseEvent pMouseEvent) {
+	public void mouseMoved(final MouseEvent pMouseEvent)
+	{
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
+
+		moveLight(pMouseEvent);
 
 		setSavedMousePosition(pMouseEvent);
 	}
@@ -135,7 +154,8 @@ class MouseControl extends MouseAdapter implements MouseListener {
 	 * @see com.jogamp.newt.event.MouseAdapter#mouseWheelMoved(com.jogamp.newt.event.MouseEvent)
 	 */
 	@Override
-	public void mouseWheelMoved(final MouseEvent pMouseEvent) {
+	public void mouseWheelMoved(final MouseEvent pMouseEvent)
+	{
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
 
@@ -143,9 +163,12 @@ class MouseControl extends MouseAdapter implements MouseListener {
 
 		double lZoomWheelFactor = 0.0125f * mMouseWheelFactor;
 
-		if (pMouseEvent.isMetaDown()) {
+		if (pMouseEvent.isMetaDown())
+		{
 			mRenderer.addFOV(lWheelRotation[1] * lZoomWheelFactor);
-		} else {
+		}
+		else
+		{
 			lZoomWheelFactor /= mRenderer.getFOV();
 			mRenderer.addTranslationZ(lWheelRotation[1] * lZoomWheelFactor);
 		}
@@ -157,26 +180,31 @@ class MouseControl extends MouseAdapter implements MouseListener {
 	}
 
 	@Override
-	public void mousePressed(MouseEvent pMouseEvent) {
+	public void mousePressed(MouseEvent pMouseEvent)
+	{
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
 
 		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
-				&& !pMouseEvent.isControlDown() && pMouseEvent.isButtonDown(1)) {
+				&& !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
 			final float lMouseX = pMouseEvent.getX();
 			final float lMouseY = pMouseEvent.getY();
-			mArcBall.setBounds(mRenderer.getViewportWidth(),
-					mRenderer.getViewportHeight());
+			mArcBall.setBounds(	mRenderer.getViewportWidth(),
+													mRenderer.getViewportHeight());
 			mArcBall.setCurrent(mRenderer.getQuaternion());
 			mArcBall.click(lMouseX, lMouseY);
 		}
 
-		mRenderer.getAdaptiveLODController().notifyUserInteractionInProgress();
+		mRenderer.getAdaptiveLODController()
+							.notifyUserInteractionInProgress();
 
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent pMouseEvent) {
+	public void mouseReleased(MouseEvent pMouseEvent)
+	{
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
 
@@ -185,13 +213,27 @@ class MouseControl extends MouseAdapter implements MouseListener {
 
 	}
 
-	private void handleTranslation(final MouseEvent pMouseEvent) {
+	private void moveLight(final MouseEvent pMouseEvent)
+	{
+		if (!mMoveLightMode || mRenderer.getAdaptiveLODController()
+																		.getNumberOfPasses() > 1)
+			return;
+		final float lMouseX = pMouseEvent.getX();
+		final float lMouseY = pMouseEvent.getY();
+		final float light[] = new float[3];
+		mArcBall.mapToSphere(lMouseX, lMouseY, light);
+		mRenderer.setLightVector(light);
+	}
+
+	private void handleTranslation(final MouseEvent pMouseEvent)
+	{
 		final int dx = pMouseEvent.getX() - mSavedMouseX;
 		final int dy = pMouseEvent.getY() - mSavedMouseY;
 
 		// If the right button is held down, translate the object
 		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isControlDown()
-				&& (pMouseEvent.isButtonDown(3))) {
+				&& (pMouseEvent.isButtonDown(3)))
+		{
 
 			mRenderer.addTranslationX(dx / 100.0f);
 			mRenderer.addTranslationY(-dy / 100.0f);
@@ -204,9 +246,12 @@ class MouseControl extends MouseAdapter implements MouseListener {
 	 * 
 	 * @param pMouseEvent
 	 */
-	public void handleGammaMinMax(final MouseEvent pMouseEvent) {
+	public void handleGammaMinMax(final MouseEvent pMouseEvent)
+	{
 		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
-				&& pMouseEvent.isControlDown() && pMouseEvent.isButtonDown(1)) {
+				&& pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
 
 			final double lWidth = mRenderer.getViewportWidth();
 			final double lHeight = mRenderer.getViewportHeight();
@@ -214,13 +259,15 @@ class MouseControl extends MouseAdapter implements MouseListener {
 			final double nx = (pMouseEvent.getX()) / lWidth;
 			final double ny = (lHeight - pMouseEvent.getY()) / lHeight;
 
-			mRenderer.setTransferFunctionRange(Math.abs(Math.pow(nx, 3)),
-					Math.abs(Math.pow(ny, 3)));
+			mRenderer.setTransferFunctionRange(	Math.abs(Math.pow(nx, 3)),
+																					Math.abs(Math.pow(ny, 3)));
 
 		}
 
 		if (!pMouseEvent.isMetaDown() && pMouseEvent.isShiftDown()
-				&& !pMouseEvent.isControlDown() && pMouseEvent.isButtonDown(1)) {
+				&& !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
 			final double lWidth = mRenderer.getViewportWidth();
 			final double nx = (pMouseEvent.getX()) / lWidth;
 
@@ -229,7 +276,9 @@ class MouseControl extends MouseAdapter implements MouseListener {
 		}
 
 		if (!pMouseEvent.isMetaDown() && pMouseEvent.isShiftDown()
-				&& pMouseEvent.isControlDown() && pMouseEvent.isButtonDown(1)) {
+				&& pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1))
+		{
 			final double lWidth = mRenderer.getViewportWidth();
 			final double nx = (pMouseEvent.getX()) / lWidth;
 
@@ -237,7 +286,8 @@ class MouseControl extends MouseAdapter implements MouseListener {
 
 		}
 
-		if (pMouseEvent.isMetaDown() && pMouseEvent.isButtonDown(1)) {
+		if (pMouseEvent.isMetaDown() && pMouseEvent.isButtonDown(1))
+		{
 			final double lWidth = mRenderer.getViewportWidth();
 			double nx = (pMouseEvent.getX()) / lWidth;
 

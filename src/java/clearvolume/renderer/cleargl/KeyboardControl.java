@@ -33,13 +33,23 @@ class KeyboardControl extends KeyAdapter implements KeyListener {
 	private final ClearVolumeRendererInterface mClearVolumeRenderer;
 
 	/**
+	 * Mouse control
+	 */
+	private final MouseControl mMouseControl;
+
+	/**
 	 * Constructs a Keyboard control listener given a renderer.
 	 * 
+	 * @param pMouseControl
+	 * 
 	 * @param pJoglVolumeRenderer
-	 *            renderer
+	 *          renderer
 	 */
-	KeyboardControl(final ClearVolumeRendererInterface pClearVolumeRenderer) {
+	KeyboardControl(final ClearVolumeRendererInterface pClearVolumeRenderer,
+									MouseControl pMouseControl)
+	{
 		mClearVolumeRenderer = pClearVolumeRenderer;
+		mMouseControl = pMouseControl;
 	}
 
 	/**
@@ -206,6 +216,11 @@ class KeyboardControl extends KeyAdapter implements KeyListener {
 			mClearVolumeRenderer.cycleRenderAlgorithm(mClearVolumeRenderer
 					.getCurrentRenderLayerIndex());
 			break;
+
+		case KeyEvent.VK_L:
+			mMouseControl.toggleMoveLightMode();
+			break;
+
 
 		}
 
