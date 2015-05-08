@@ -418,10 +418,10 @@ __kernel void isosurface_render(
   // getting the normals and do some nice phong shading
   
   //float4 light = (float4)(2,-1,-2,0);
-  float4 light = (float4)(lightX,-lightY,-lightZ,0);
+  float4 light = (float4)(-lightX,-lightY,-lightZ,0);
   
   float c_diffuse = 0.2;
-  float c_specular = 0.4;
+  float c_specular = 0.6;
 
   light = mult(invM,light);
   light = normalize(light);

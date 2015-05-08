@@ -125,6 +125,8 @@ ClearVolumeRendererBase implements ClearGLEventListener {
 	private final GLVideoRecorder mGLVideoRecorder = new GLVideoRecorder(
 			new File(SystemUtils.USER_HOME, "Videos/ClearVolume"));
 
+	private float mLight[] = new float[] { -1.f, 1.f, 1.f };
+
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
 	 * name and its dimensions.
@@ -687,27 +689,20 @@ ClearVolumeRendererBase implements ClearGLEventListener {
 		return lProjectionMatrix;
 	}
 
-	protected void getLightVector(float[] light) {
+	public void getLightVector(float[] light) {
 
-		// light[0] = -1.f;
-		// light[1] = 0.f;
-		// light[2] = 1.f;
+		light[0] = mLight[0];
+		light[1] = mLight[1];
+		light[2] = mLight[2];
 
-		// if (getRotationControllers().size() > 0) {
-		// for (final RotationControllerInterface lRotationController :
-		// getRotationControllers())
-		// if (lRotationController.isActive()) {
-		// if (lRotationController instanceof
-		// RotationControllerWithRenderNotification) {
-		// final RotationControllerWithRenderNotification lRenderNotification =
-		// (RotationControllerWithRenderNotification) lRotationController;
-		// lRenderNotification.notifyRender(this);
-		// }
-		// lRotationController.getLight(light);
-		//
-		// notifyChangeOfVolumeRenderingParameters();
-		// }
-		// }
+	}
+
+	public void setLightVector(final float[] light) {
+
+		mLight[0] = light[0];
+		mLight[1] = light[1];
+		mLight[2] = light[2];
+
 	}
 
 	private GLMatrix getModelViewMatrix() {

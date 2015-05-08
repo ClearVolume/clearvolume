@@ -3,6 +3,8 @@ package clearvolume.renderer.cleargl;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import java.util.Arrays;
+
 import org.apache.commons.lang.SystemUtils;
 
 import cleargl.util.arcball.ArcBall;
@@ -85,12 +87,26 @@ class MouseControl extends MouseAdapter implements MouseListener {
 			return;
 
 		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
-				&& !pMouseEvent.isControlDown() && pMouseEvent.isButtonDown(1)) {
+				&& !pMouseEvent.isAltDown() && !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1)) {
 			final float lMouseX = pMouseEvent.getX();
 			final float lMouseY = pMouseEvent.getY();
 			mArcBall.setBounds(mRenderer.getViewportWidth(),
 					mRenderer.getViewportHeight());
 			mArcBall.drag(lMouseX, lMouseY, mRenderer.getQuaternion());
+
+		}
+
+		if (pMouseEvent.isAltDown() && !pMouseEvent.isMetaDown()
+				&& !pMouseEvent.isShiftDown() && !pMouseEvent.isControlDown()
+				&& pMouseEvent.isButtonDown(1)) {
+			final float lMouseX = pMouseEvent.getX();
+			final float lMouseY = pMouseEvent.getY();
+			float light[] = new float[3];
+			mArcBall.mapToSphere(lMouseX, lMouseY, light);
+
+			mRenderer.setLightVector(light);
+			System.out.println(Arrays.toString(light));
 
 		}
 
