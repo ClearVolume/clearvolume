@@ -736,6 +736,7 @@ public class ClearVolumeProcessorsDemo
 	public void demoOpenCLDenoise()	throws InterruptedException,
 																	IOException
 	{
+		final int noiseLevel = 30;
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
 																																																						512,
@@ -764,7 +765,7 @@ public class ClearVolumeProcessorsDemo
 																		final Boolean pResult)
 					{
 						if (pResult)
-							System.out.println("denoise! ");
+							System.out.println("denoise!");
 					}
 				});
 			}
@@ -772,10 +773,15 @@ public class ClearVolumeProcessorsDemo
 
 		assertNotNull(lDenoiseProcessor);
 
+
+		lDenoiseProcessor.setBlockSize(2);
+		lDenoiseProcessor.setSigmaValue(1f * noiseLevel / 256f);
+		lDenoiseProcessor.setSigmaSpace(1.5f);
+
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 64;
+		final int lResolutionX = 128;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
@@ -812,8 +818,7 @@ public class ClearVolumeProcessorsDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-		float s = 1.f;
-		final int noiseLevel = 30;
+
 		while (lClearVolumeRenderer.isShowing())
 		{
 			// Thread.sleep(2000);
@@ -834,17 +839,17 @@ public class ClearVolumeProcessorsDemo
 																* lResolutionY
 																* z;
 
-						lVolumeDataArray[lIndex] = (byte) (200 * (Math.exp(-.01 * ((x - x0) * (x - x0)
-																																				+ (y - y0)
-																																				* (y - y0) + (z - z0) * (z - z0))) + Math.exp(-.01 * ((x - x1) * (x - x1)
-																																																															+ (y - y1)
-																																																															* (y - y1) + (z - z1) * (z - z1)))) + rand.nextInt(noiseLevel + 1));
+						lVolumeDataArray[lIndex] = (byte) (((x > lResolutionX / 2) ? 100
+																																			: 0) + 100
+																								* (Math.exp(-.01 * ((x - x0) * (x - x0)
+																																		+ (y - y0)
+																																		* (y - y0) + (z - z0) * (z - z0))) + Math.exp(-.01 * ((x - x1) * (x - x1)
+																																																													+ (y - y1)
+																																																													* (y - y1) + (z - z1) * (z - z1)))) + rand.nextInt(noiseLevel + 1));
 
 					}
 
-			lDenoiseProcessor.setParams(3, s, s);
-			s += 1.f;
-			// noiseLevel += 1;
+
 
 		}
 

@@ -13,14 +13,15 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 	private CLKernel mKernelBilateral;
 	private CLKernel mKernelCopyBufToImg;
 
-	private float sigSpace, sigValue;
-	private int blockSize;
+	private float mSigmaSpace, mSigmaValue;
+	private int mBlockSize;
 
 	private CLBuffer<Float> mBufScratch;
 
 	public OpenCLDenoise()
 	{
 		super();
+
 		setActive(false);
 	}
 
@@ -36,14 +37,22 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 		return KeyEvent.VK_D;
 	}
 
-	public void setParams(final int pBlockSize,
-												final float pSigmaSpace,
-												final float pSigmaValue)
+	public void setBlockSize(final int pBlockSize)
 	{
-		sigSpace = pSigmaSpace;
-		sigValue = pSigmaValue;
-		blockSize = pBlockSize;
+		mBlockSize = pBlockSize;
 	}
+	
+	public void setSigmaSpace(final float pSigmaSpace)
+	{
+		mSigmaSpace = pSigmaSpace;
+	}
+	
+	public void setSigmaValue(final float pSigmaValue)
+	{
+		mSigmaValue = pSigmaValue;
+	}
+	
+
 
 	public void ensureOpenCLInitialized()
 	{
@@ -55,7 +64,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 			mKernelCopyBufToImg = getDevice().compileKernel(OpenCLDeconv.class.getResource("kernels/deconv.cl"),
 																											"copyBufToImg");
 
-			setParams(2, 1.f, 1.f);
+
 		}
 
 	}
@@ -90,9 +99,9 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 		// bilateral filtering
 		mKernelBilateral.setArgs(	getVolumeBuffers()[pRenderLayerIndex],
 															mBufScratch,
-															blockSize,
-															sigSpace,
-															sigValue);
+															mBlockSize,
+															mSigmaSpace,
+															mSigmaValue);
 		getDevice().run(mKernelBilateral,
 										(int) pWidthInVoxels,
 										(int) pHeightInVoxels,
@@ -106,10 +115,10 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 										(int) pHeightInVoxels,
 										(int) pDepthInVoxels);
 
-		/*System.out.printf("denoising with blockSize, sigSpace, sigValue = %d,%.3f,%.3f\n",
-											blockSize,
+		/*System.out.printf("denoising with mBlockSize, sigSpace, mSigmaValue = %d,%.3f,%.3f\n",
+											mBlockSize,
 											sigSpace,
-											sigValue);/**/
+											mSigmaValue);/**/
 		
 		notifyListenersOfResult(new Boolean(true));
 
