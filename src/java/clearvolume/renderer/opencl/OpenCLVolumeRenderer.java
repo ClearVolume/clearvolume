@@ -3,6 +3,7 @@ package clearvolume.renderer.opencl;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 
 import javax.media.opengl.GLEventListener;
 
@@ -324,6 +325,17 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer implements
 				lPhase = getAdaptiveLODController().getPhase();
 				lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
 						: 1;
+				mCLDevice.setArgs(mCurrentRenderKernel,
+						mCLRenderBuffers[pRenderLayerIndex], getTextureWidth(),
+						getTextureHeight(),
+						(float) getBrightness(pRenderLayerIndex),
+						(float) getTransferRangeMin(pRenderLayerIndex),
+						(float) getTransferRangeMax(pRenderLayerIndex),
+						(float) getGamma(pRenderLayerIndex), lMaxSteps,
+						lDithering, lPhase, lClear,
+						mCLTransferFunctionImages[pRenderLayerIndex],
+						mCLInvProjectionBuffer, mCLInvModelViewBuffer,
+						mCLVolumeImages[pRenderLayerIndex]);
 				break;
 			case IsoSurface:
 				mCurrentRenderKernel = mIsoSurfaceRenderKernel;
@@ -335,6 +347,21 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer implements
 				lClear = 0;
 				lPhase = 0;
 
+				float[] light = new float[3];
+				getLightVector(light);
+
+				System.out.println(Arrays.toString(light));
+				mCLDevice.setArgs(mCurrentRenderKernel,
+						mCLRenderBuffers[pRenderLayerIndex], getTextureWidth(),
+						getTextureHeight(),
+						(float) getBrightness(pRenderLayerIndex),
+						(float) getTransferRangeMin(pRenderLayerIndex),
+						(float) getTransferRangeMax(pRenderLayerIndex),
+						(float) getGamma(pRenderLayerIndex), lMaxSteps,
+						lDithering, lPhase, lClear, light[0], light[1],
+						light[2], mCLTransferFunctionImages[pRenderLayerIndex],
+						mCLInvProjectionBuffer, mCLInvModelViewBuffer,
+						mCLVolumeImages[pRenderLayerIndex]);
 				break;
 			}
 
@@ -342,18 +369,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer implements
 			 * System.out.format("steps=%d, dith=%g, phase=%g, clear=%d \n",
 			 * lMaxSteps, lDithering, lPhase, lClear);/*
 			 */
-
-			mCLDevice.setArgs(mCurrentRenderKernel,
-					mCLRenderBuffers[pRenderLayerIndex], getTextureWidth(),
-					getTextureHeight(),
-					(float) getBrightness(pRenderLayerIndex),
-					(float) getTransferRangeMin(pRenderLayerIndex),
-					(float) getTransferRangeMax(pRenderLayerIndex),
-					(float) getGamma(pRenderLayerIndex), lMaxSteps, lDithering,
-					lPhase, lClear,
-					mCLTransferFunctionImages[pRenderLayerIndex],
-					mCLInvProjectionBuffer, mCLInvModelViewBuffer,
-					mCLVolumeImages[pRenderLayerIndex]);
 
 			mCLDevice.run(mCurrentRenderKernel, getTextureWidth(),
 					getTextureHeight());
