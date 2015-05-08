@@ -22,6 +22,7 @@ import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.CUDAProcessorTest;
 import clearvolume.renderer.processors.impl.OpenCLCenterMass;
 import clearvolume.renderer.processors.impl.OpenCLDeconv;
+import clearvolume.renderer.processors.impl.OpenCLDenoise;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 import clearvolume.renderer.processors.impl.OpenCLTest;
@@ -625,6 +626,104 @@ public class ClearVolumeProcessorsDemo {
 
 			lDeconvProcessor.setSigmas(s, s, s);
 			s += 1.f;
+
+		}
+
+		lClearVolumeRenderer.close();
+	}
+
+	@Test
+	public void demoOpenCLDenoise() throws InterruptedException, IOException {
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory
+				.newOpenCLRenderer("ClearVolumeTest", 512, 512,
+						NativeTypeEnum.UnsignedByte, 512, 512, 1, false);
+
+		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
+
+		final OpenCLDenoise lDenoiseProcessor = new OpenCLDenoise();
+
+		lDenoiseProcessor
+				.addResultListener(new ProcessorResultListener<Void>() {
+
+					@Override
+					public void notifyResult(final Processor<Void> pSource,
+							final Void pResult) {
+						System.out.println("denoise! ");
+					}
+				});
+
+		lClearVolumeRenderer.addProcessor(lDenoiseProcessor);
+
+		lClearVolumeRenderer
+				.setTransferFunction(TransferFunctions.getDefault());
+		lClearVolumeRenderer.setVisible(true);
+
+		final int lResolutionX = 64;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+				* lResolutionZ];
+
+		Random rand = new Random();
+
+		int x0 = lResolutionX / 2 - 10, y0 = lResolutionY / 2, z0 = lResolutionZ / 2;
+		int x1 = lResolutionX / 2 + 10, y1 = lResolutionY / 2, z1 = lResolutionZ / 2;
+
+		for (int z = 0; z < lResolutionZ; z++)
+			for (int y = 0; y < lResolutionY; y++)
+				for (int x = 0; x < lResolutionX; x++) {
+					final int lIndex = x + lResolutionX * y + lResolutionX
+							* lResolutionY * z;
+
+					lVolumeDataArray[lIndex] = (byte) (55 * (Math
+							.exp(-.01
+									* ((x - x0) * (x - x0) + (y - y0)
+											* (y - y0) + (z - z0) * (z - z0))) + Math
+							.exp(-.01
+									* ((x - x1) * (x - x1) + (y - y1)
+											* (y - y1) + (z - z1) * (z - z1)))) + rand
+							.nextInt(5));
+
+				}
+
+		lClearVolumeRenderer.setVolumeDataBuffer(0,
+				ByteBuffer.wrap(lVolumeDataArray), lResolutionX, lResolutionY,
+				lResolutionZ);
+		lClearVolumeRenderer.requestDisplay();
+
+		float s = 1.f;
+		int noiseLevel = 30;
+		while (lClearVolumeRenderer.isShowing()) {
+			Thread.sleep(2000);
+			lClearVolumeRenderer.setVolumeDataBuffer(0,
+					ByteBuffer.wrap(lVolumeDataArray), lResolutionX,
+					lResolutionY, lResolutionZ);
+			lClearVolumeRenderer.requestDisplay();
+
+			for (int z = 0; z < lResolutionZ; z++)
+				for (int y = 0; y < lResolutionY; y++)
+					for (int x = 0; x < lResolutionX; x++) {
+						final int lIndex = x + lResolutionX * y + lResolutionX
+								* lResolutionY * z;
+
+						lVolumeDataArray[lIndex] = (byte) (200 * (Math
+								.exp(-.01
+										* ((x - x0) * (x - x0) + (y - y0)
+												* (y - y0) + (z - z0)
+												* (z - z0))) + Math
+								.exp(-.01
+										* ((x - x1) * (x - x1) + (y - y1)
+												* (y - y1) + (z - z1)
+												* (z - z1)))) + rand
+								.nextInt(noiseLevel + 1));
+
+					}
+
+			lDenoiseProcessor.setParams(3, s, s);
+			s += 1.f;
+			// noiseLevel += 1;
 
 		}
 
