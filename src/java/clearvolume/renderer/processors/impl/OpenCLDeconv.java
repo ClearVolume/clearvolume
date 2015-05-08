@@ -128,7 +128,8 @@ public class OpenCLDeconv extends OpenCLProcessor<Void> {
 		copyBufToImg(mOut, pRenderLayerIndex, pWidthInVoxels, pHeightInVoxels,
 				pDepthInVoxels);
 
-		System.out.println("deconv");
+		System.out.printf("deconv with sigX, sigY, sigZ = %.3f,%.3f,%.3f\n",
+				sigX, sigY, sigZ);
 		// notifyListenersOfResult(new Void);
 
 	}
@@ -152,7 +153,8 @@ public class OpenCLDeconv extends OpenCLProcessor<Void> {
 	private void copyImgToBuf(int pRenderLayerIndex, CLBuffer<Float> bufIn,
 			final long Nx, final long Ny, final long Nz) {
 
-		mKernelCopyImgToBuf.setArgs(getVolumeBuffers()[0], bufIn);
+		mKernelCopyImgToBuf.setArgs(getVolumeBuffers()[pRenderLayerIndex],
+				bufIn);
 		getDevice().run(mKernelCopyImgToBuf, (int) Nx, (int) Ny, (int) Nz);
 
 	}
@@ -160,7 +162,8 @@ public class OpenCLDeconv extends OpenCLProcessor<Void> {
 	private void copyBufToImg(CLBuffer<Float> bufIn, int pRenderLayerIndex,
 			final long Nx, final long Ny, final long Nz) {
 
-		mKernelCopyBufToImg.setArgs(bufIn, getVolumeBuffers()[0]);
+		mKernelCopyBufToImg.setArgs(bufIn,
+				getVolumeBuffers()[pRenderLayerIndex]);
 		getDevice().run(mKernelCopyBufToImg, (int) Nx, (int) Ny, (int) Nz);
 
 	}

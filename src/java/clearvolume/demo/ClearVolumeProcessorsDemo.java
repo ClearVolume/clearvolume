@@ -590,7 +590,8 @@ public class ClearVolumeProcessorsDemo {
 
 		Random rand = new Random();
 
-		int x0 = lResolutionX / 2, y0 = lResolutionY / 2, z0 = lResolutionZ / 2;
+		int x0 = lResolutionX / 2 - 10, y0 = lResolutionY / 2, z0 = lResolutionZ / 2;
+		int x1 = lResolutionX / 2 + 10, y1 = lResolutionY / 2, z1 = lResolutionZ / 2;
 
 		for (int z = 0; z < lResolutionZ; z++)
 			for (int y = 0; y < lResolutionY; y++)
@@ -598,13 +599,14 @@ public class ClearVolumeProcessorsDemo {
 					final int lIndex = x + lResolutionX * y + lResolutionX
 							* lResolutionY * z;
 
-					lVolumeDataArray[lIndex] = (byte) (255 * Math
-							.exp(-.0001
+					lVolumeDataArray[lIndex] = (byte) (55 * (Math
+							.exp(-.01
 									* ((x - x0) * (x - x0) + (y - y0)
-											* (y - y0) + (z - z0) * (z - z0))));
-
-					// lVolumeDataArray[lIndex] = (byte) (118 +
-					// rand.nextInt(20));
+											* (y - y0) + (z - z0) * (z - z0))) + Math
+							.exp(-.01
+									* ((x - x1) * (x - x1) + (y - y1)
+											* (y - y1) + (z - z1) * (z - z1)))) + rand
+							.nextInt(5));
 
 				}
 
@@ -615,7 +617,7 @@ public class ClearVolumeProcessorsDemo {
 
 		float s = 1.f;
 		while (lClearVolumeRenderer.isShowing()) {
-			Thread.sleep(1000);
+			Thread.sleep(2000);
 			lClearVolumeRenderer.setVolumeDataBuffer(0,
 					ByteBuffer.wrap(lVolumeDataArray), lResolutionX,
 					lResolutionY, lResolutionZ);
@@ -623,28 +625,9 @@ public class ClearVolumeProcessorsDemo {
 
 			lDeconvProcessor.setSigmas(s, s, s);
 			s += 1.f;
-			for (int z = 0; z < lResolutionZ; z++)
-				for (int y = 0; y < lResolutionY; y++)
-					for (int x = 0; x < lResolutionX; x++) {
-						final int lIndex = x + lResolutionX * y + lResolutionX
-								* lResolutionY * z;
-
-						int dstep = 2;
-
-						lVolumeDataArray[lIndex] = (byte) (25 * Math
-								.exp(-.01
-										* ((x - x0) * (x - x0) + (y - y0)
-												* (y - y0) + (z - z0)
-												* (z - z0))));
-						// lVolumeDataArray[lIndex] = (byte)
-						// ((lVolumeDataArray[lIndex]
-						// - dstep + rand.nextInt(2 * dstep + 1)) % 256);
-
-					}
 
 		}
 
 		lClearVolumeRenderer.close();
 	}
-
 }
