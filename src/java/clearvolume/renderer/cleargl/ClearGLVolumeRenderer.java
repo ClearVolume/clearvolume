@@ -538,7 +538,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 				for (int i = 0; i < getNumberOfRenderLayers(); i++)
 				{
 					mTexUnits[i] = mGLProgram.getUniform("texUnit" + i);
-					mTexUnits[i].set(i);
+					mTexUnits[i].setInt(i);
 				}
 
 				mQuadVertexArray = new GLVertexArray(mGLProgram);

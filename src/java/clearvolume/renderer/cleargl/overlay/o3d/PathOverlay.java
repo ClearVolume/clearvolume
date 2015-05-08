@@ -125,7 +125,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 
 			mPath.getProgram()
 						.getUniform("vertexCount")
-						.set((mPathPoints.getFloatBuffer().capacity() / 3));
+						.setInt((mPathPoints.getFloatBuffer().capacity() / 3));
 			mPath.getProgram()
 						.getUniform("startColor")
 						.setFloatVector4(mStartColor);

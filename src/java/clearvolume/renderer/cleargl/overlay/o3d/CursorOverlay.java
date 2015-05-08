@@ -258,14 +258,15 @@ public class CursorOverlay extends OverlayBase implements
 			mPlaneY.updateVertices(mVerticesFloatArrayPlaneY.getFloatBuffer());
 			mPlaneZ.updateVertices(mVerticesFloatArrayPlaneZ.getFloatBuffer());
 
-			mBoxGLProgram.getUniform("alpha").set(getAlpha());
+			mBoxGLProgram.getUniform("alpha").setFloat(getAlpha());
 			mBoxGLProgram.getUniform("linethick")
-										.set(1.f / getLineThickness());
+										.setFloat(1.f / getLineThickness());
 			mBoxGLProgram.getUniform("linelength")
-										.set(1.f / getLineLength());
-			mBoxGLProgram.getUniform("lineperiod").set(getLinePeriod());
+										.setFloat(1.f / getLineLength());
+			mBoxGLProgram.getUniform("lineperiod")
+										.setFloat(getLinePeriod());
 			mBoxGLProgram.getUniform("boxlinesalpha")
-										.set(getBoxLinesAlpha());
+										.setFloat(getBoxLinesAlpha());
 			mBoxGLProgram.getUniform("color").setFloatVector4(mColor);
 
 			mBoxGLProgram.getUniform("linepos").setFloatVector2(y, z);
