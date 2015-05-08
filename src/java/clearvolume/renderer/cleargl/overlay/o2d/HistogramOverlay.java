@@ -2,7 +2,6 @@ package clearvolume.renderer.cleargl.overlay.o2d;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import gnu.trove.list.linked.TFloatLinkedList;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -25,31 +24,28 @@ import clearvolume.renderer.processors.ProcessorResultListener;
 
 import com.jogamp.newt.event.KeyEvent;
 
-public class HistogramOverlay extends OverlayBase implements Overlay2D,
-		SingleKeyToggable, ProcessorResultListener<FloatBuffer>, AutoCloseable {
+public class HistogramOverlay extends OverlayBase	implements
+																									Overlay2D,
+																									SingleKeyToggable,
+																									ProcessorResultListener<FloatBuffer>,
+																									AutoCloseable
+{
 
 	private static final int cMaximalWaitTimeForLockInMilliseconds = 10;
 
 	// seems to be supported
 
 	private GLProgram mGLProgram;
-	private ClearGeometryObject mClearGeometryObject;
-	private ClearGeometryObject mClearGeometryObjectBars;
 
-	private GLProgram mGLProgramLines;
-	private ClearGeometryObject mClearGeometryObjectLines;
+	private ClearGeometryObject mClearGeometryObjectBars;
 
 	private GLFloatArray mVerticesFloatArray;
 	private GLIntArray mIndexIntArray;
 	private GLFloatArray mNormalArray;
 	private GLFloatArray mTexCoordFloatArray;
 
-	private final TFloatLinkedList mDataY = new TFloatLinkedList();
-
 	private FloatBuffer mData;
 	private final ReentrantLock mReentrantLock = new ReentrantLock();
-
-	private int mNumberOfBins;
 
 	private DisplayRequestInterface mDisplayRequestInterface;
 	private volatile boolean mHasChanged = false;
@@ -62,23 +58,27 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 
 	protected volatile boolean mStopSignal = false;
 
-	public HistogramOverlay(int pNumberOfBins) {
+	public HistogramOverlay()
+	{
 		super();
-		mData = FloatBuffer.allocate(pNumberOfBins);
-
-		setNumberOfBins(pNumberOfBins);
 
 		setMinMax(0.f, 1.3f);
-		final Runnable lRunnable = new Runnable() {
+		final Runnable lRunnable = new Runnable()
+		{
 
 			@Override
-			public void run() {
-				while (!mStopSignal) {
+			public void run()
+			{
+				while (!mStopSignal)
+				{
 					if (mDisplayRequestInterface != null)
 						mDisplayRequestInterface.requestDisplay();
-					try {
+					try
+					{
 						Thread.sleep(50);
-					} catch (final InterruptedException e) {
+					}
+					catch (final InterruptedException e)
+					{
 					}
 
 				}
@@ -86,97 +86,110 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 			}
 		};
 
-		final Thread lMinMaxCalculationThread = new Thread(lRunnable,
-				HistogramOverlay.class.getSimpleName()
-						+ ".MinMaxCalculationThread");
+		final Thread lMinMaxCalculationThread = new Thread(	lRunnable,
+																												HistogramOverlay.class.getSimpleName() + ".MinMaxCalculationThread");
 		lMinMaxCalculationThread.setDaemon(true);
 		lMinMaxCalculationThread.setPriority(Thread.MIN_PRIORITY);
 		lMinMaxCalculationThread.start();
 
 	}
 
-	public void setMinMax(float pMin, float pMax) {
+	public void setMinMax(float pMin, float pMax)
+	{
 		mMin = pMin;
 		mMax = pMax;
-
 	}
 
 	@Override
-	public boolean toggleDisplay() {
+	public boolean toggleDisplay()
+	{
 		final boolean lNewState = super.toggleDisplay();
 		return lNewState;
 	}
 
 	@Override
-	public String getName() {
+	public String getName()
+	{
 		return "graph";
 	}
 
 	@Override
-	public short toggleKeyCode() {
-		return KeyEvent.VK_G;
+	public short toggleKeyCode()
+	{
+		return KeyEvent.VK_H;
 	}
 
 	@Override
-	public int toggleKeyModifierMask() {
+	public int toggleKeyModifierMask()
+	{
 		return 0;
 	}
 
 	@Override
-	public boolean hasChanged2D() {
+	public boolean hasChanged2D()
+	{
 		return mHasChanged;
 	}
 
-	public int getNumberOfBins() {
-		return mNumberOfBins;
-	}
-
-	public void setNumberOfBins(int pNumberOfBins) {
-		mNumberOfBins = pNumberOfBins;
-		mData = FloatBuffer.allocate(mNumberOfBins);
-
+	public int getNumberOfBins()
+	{
+		return mData == null ? 0 : mData.capacity();
 	}
 
 	@Override
-	public void notifyResult(Processor<FloatBuffer> pSource, FloatBuffer pResult) {
-
+	public void notifyResult(	Processor<FloatBuffer> pSource,
+														FloatBuffer pResult)
+	{
 		setCounts(pResult);
 	}
 
-	public void setCounts(FloatBuffer pCounts) {
+	public void setCounts(FloatBuffer pCounts)
+	{
 
 		mReentrantLock.lock();
-		try {
+		try
+		{
+
+			if (mData == null || mData.capacity() != pCounts.limit())
+			{
+				mData = FloatBuffer.allocate(pCounts.limit());
+			}
 
 			float maxVal = 0.f;
-			for (int i = 0; i < mData.capacity(); i++) {
+			for (int i = 0; i < mData.capacity(); i++)
+			{
 
-				float newVal = pCounts.get(i);
+				final float newVal = pCounts.get(i);
 				mData.put(i, newVal);
 				maxVal = Math.max(maxVal, newVal);
 			}
 
 			// setMinMax(0.f, 1.2f * maxVal);
 
-			for (int i = 0; i < mData.capacity(); i++) {
-
+			for (int i = 0; i < mData.capacity(); i++)
+			{
 				mData.put(i, mData.get(i) / maxVal);
-
 			}
 
 			mHasChanged = true;
-		} finally {
+		}
+		finally
+		{
 			if (mReentrantLock.isHeldByCurrentThread())
 				mReentrantLock.unlock();
 		}
 
 	}
 
-	public void clear() {
+	public void clear()
+	{
 		mReentrantLock.lock();
-		try {
+		try
+		{
 			mHasChanged = true;
-		} finally {
+		}
+		finally
+		{
 			if (mReentrantLock.isHeldByCurrentThread())
 				mReentrantLock.unlock();
 		}
@@ -184,105 +197,95 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 	}
 
 	@Override
-	public void init(GL pGL, DisplayRequestInterface pDisplayRequestInterface) {
+	public void init(	GL pGL,
+										DisplayRequestInterface pDisplayRequestInterface)
+	{
 
 		mDisplayRequestInterface = pDisplayRequestInterface;
-		// box display: construct the program and related objects
+
 		mReentrantLock.lock();
-		try {
-			mGLProgram = GLProgram.buildProgram(pGL, HistogramOverlay.class,
-					"shaders/fancygraph_vert.glsl",
-					"shaders/fancygraph_frag.glsl");
-
-			mClearGeometryObject = new ClearGeometryObject(mGLProgram, 3,
-					GL.GL_TRIANGLE_STRIP);
-			mClearGeometryObject.setDynamic(true);
-
-			mClearGeometryObjectBars = new ClearGeometryObject(mGLProgram, 3,
-					GL.GL_TRIANGLES);
-			mClearGeometryObjectBars.setDynamic(true);
-
-			final int lNumberOfPointsToDraw = 6 * getNumberOfBins();
-
-			mVerticesFloatArray = new GLFloatArray(lNumberOfPointsToDraw, 3);
-			mNormalArray = new GLFloatArray(lNumberOfPointsToDraw, 3);
-			mIndexIntArray = new GLIntArray(lNumberOfPointsToDraw, 1);
-			mTexCoordFloatArray = new GLFloatArray(lNumberOfPointsToDraw, 2);
-
-			mVerticesFloatArray.fillZeros();
-			mNormalArray.fillZeros();
-			mIndexIntArray.fillZeros();
-			mTexCoordFloatArray.fillZeros();
-
-			mClearGeometryObject.setVerticesAndCreateBuffer(mVerticesFloatArray
-					.getFloatBuffer());
-			mClearGeometryObject.setNormalsAndCreateBuffer(mNormalArray
-					.getFloatBuffer());
-			mClearGeometryObject
-					.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray
-							.getFloatBuffer());
-			mClearGeometryObject.setIndicesAndCreateBuffer(mIndexIntArray
-					.getIntBuffer());
-
-			mClearGeometryObjectBars
-					.setVerticesAndCreateBuffer(mVerticesFloatArray
-							.getFloatBuffer());
-			mClearGeometryObjectBars.setNormalsAndCreateBuffer(mNormalArray
-					.getFloatBuffer());
-			mClearGeometryObjectBars
-					.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray
-							.getFloatBuffer());
-			mClearGeometryObjectBars.setIndicesAndCreateBuffer(mIndexIntArray
-					.getIntBuffer());
+		try
+		{
+			mGLProgram = GLProgram.buildProgram(pGL,
+																					HistogramOverlay.class,
+																					"shaders/fancygraph_vert.glsl",
+																					"shaders/fancygraph_frag.glsl");
 
 			GLError.printGLErrors(pGL, "AFTER GRAPH OVERLAY INIT");
 
-			mGLProgramLines = GLProgram.buildProgram(pGL,
-					HistogramOverlay.class, new String[] {
-							"shaders/fancylines_vert.glsl",
-							"shaders/fancylines_geom.glsl",
-							"shaders/fancylines_frag.glsl" });
-
-			mClearGeometryObjectLines = new ClearGeometryObject(
-					mGLProgramLines, 3, GL.GL_LINE_STRIP);
-			mClearGeometryObjectLines.setDynamic(true);
-
-			mClearGeometryObjectLines
-					.setVerticesAndCreateBuffer(mVerticesFloatArray
-							.getFloatBuffer());
-			mClearGeometryObjectLines.setNormalsAndCreateBuffer(mNormalArray
-					.getFloatBuffer());
-			mClearGeometryObjectLines
-					.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray
-							.getFloatBuffer());
-			mClearGeometryObjectLines.setIndicesAndCreateBuffer(mIndexIntArray
-					.getIntBuffer());
-
-		} catch (final IOException e) {
+		}
+		catch (final IOException e)
+		{
 			e.printStackTrace();
-		} finally {
+		}
+		finally
+		{
 			if (mReentrantLock.isHeldByCurrentThread())
 				mReentrantLock.unlock();
 		}
 	}
 
-	private final float transformX(float pX) {
+	private void ensureGeometryCreated()
+	{
+		final int lNumberOfPointsToDraw = 6 * getNumberOfBins();
+
+		final boolean lUpdateNeeded = mVerticesFloatArray == null || mVerticesFloatArray.getNumberOfElements() != lNumberOfPointsToDraw;
+
+		if (!lUpdateNeeded)
+			return;
+
+		if (mClearGeometryObjectBars != null)
+			mClearGeometryObjectBars.close();
+
+		mClearGeometryObjectBars = new ClearGeometryObject(	mGLProgram,
+																												3,
+																												GL.GL_TRIANGLES);
+		mClearGeometryObjectBars.setDynamic(true);
+
+		mVerticesFloatArray = new GLFloatArray(lNumberOfPointsToDraw, 3);
+		mNormalArray = new GLFloatArray(lNumberOfPointsToDraw, 3);
+		mIndexIntArray = new GLIntArray(lNumberOfPointsToDraw, 1);
+		mTexCoordFloatArray = new GLFloatArray(lNumberOfPointsToDraw, 2);
+
+		mVerticesFloatArray.fillZeros();
+		mNormalArray.fillZeros();
+		mIndexIntArray.fillZeros();
+		mTexCoordFloatArray.fillZeros();
+
+		mClearGeometryObjectBars.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
+		mClearGeometryObjectBars.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
+		mClearGeometryObjectBars.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
+		mClearGeometryObjectBars.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
+
+	}
+
+	private final float transformX(float pX)
+	{
 		return mOffsetX + mScaleX * pX;
 	}
 
-	private final float transformY(float pY) {
+	private final float transformY(float pY)
+	{
 		return mOffsetY + mScaleY * pY;
 	}
 
 	@Override
-	public void render2D(GL pGL, int pWidth, int pHeight,
-			GLMatrix pProjectionMatrix) {
-		if (isDisplayed()) {
-			try {
+	public void render2D(	GL pGL,
+												int pWidth,
+												int pHeight,
+												GLMatrix pProjectionMatrix)
+	{
+		if (isDisplayed())
+		{
+			try
+			{
+
 				mReentrantLock.lock();
 				{
+					if (mData == null)
+						return;
 
-					// the graph
+					ensureGeometryCreated();
 
 					mGLProgram.use(pGL);
 
@@ -294,40 +297,40 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 					final float relBarWidth = .4f;
 
 					int i = 0;
-					for (i = 0; i < mData.capacity(); i++) {
-						final float lNormalizedValue = normalizeAndClamp(mData
-								.get(i));
+					for (i = 0; i < mData.capacity(); i++)
+					{
+						final float lNormalizedValue = normalizeAndClamp(mData.get(i));
 
 						final float x = transformX(i * lStepX);
 						final float y = transformY(lNormalizedValue);
 
 						mVerticesFloatArray.add(x - relBarWidth * lStepX,
-								transformY(0), -10);
+																		transformY(0),
+																		-10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i);
 
-						mVerticesFloatArray.add(x - relBarWidth * lStepX, y,
-								-10);
+						mVerticesFloatArray.add(x - relBarWidth * lStepX, y, -10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i + 1);
 
 						mVerticesFloatArray.add(x + relBarWidth * lStepX,
-								transformY(0), -10);
+																		transformY(0),
+																		-10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i + 2);
 
 						mVerticesFloatArray.add(x + relBarWidth * lStepX,
-								transformY(0), -10);
+																		transformY(0),
+																		-10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i + 3);
 
-						mVerticesFloatArray.add(x - relBarWidth * lStepX, y,
-								-10);
+						mVerticesFloatArray.add(x - relBarWidth * lStepX, y, -10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i + 4);
 
-						mVerticesFloatArray.add(x + relBarWidth * lStepX, y,
-								-10);
+						mVerticesFloatArray.add(x + relBarWidth * lStepX, y, -10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i + 5);
 					}
@@ -336,19 +339,15 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 					mTexCoordFloatArray.padZeros();
 					mIndexIntArray.padZeros();
 
-					mClearGeometryObjectBars.updateVertices(mVerticesFloatArray
-							.getFloatBuffer());
+					mClearGeometryObjectBars.updateVertices(mVerticesFloatArray.getFloatBuffer());
 					GLError.printGLErrors(pGL,
-							"AFTER mClearGeometryObject.updateVertices");
-					mClearGeometryObjectBars
-							.updateTextureCoords(mTexCoordFloatArray
-									.getFloatBuffer());
+																"AFTER mClearGeometryObject.updateVertices");
+					mClearGeometryObjectBars.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
 					GLError.printGLErrors(pGL,
-							"AFTER mClearGeometryObject.updateTextureCoords");
-					mClearGeometryObjectBars.updateIndices(mIndexIntArray
-							.getIntBuffer());
+																"AFTER mClearGeometryObject.updateTextureCoords");
+					mClearGeometryObjectBars.updateIndices(mIndexIntArray.getIntBuffer());
 					GLError.printGLErrors(pGL,
-							"AFTER mClearGeometryObject.updateIndices");
+																"AFTER mClearGeometryObject.updateIndices");
 
 					mClearGeometryObjectBars.setProjection(pProjectionMatrix);
 
@@ -410,14 +409,17 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 					mHasChanged = false;
 				}
 
-			} finally {
+			}
+			finally
+			{
 				if (mReentrantLock.isHeldByCurrentThread())
 					mReentrantLock.unlock();
 			}
 		}
 	}
 
-	private float normalizeAndClamp(float pValue) {
+	private float normalizeAndClamp(float pValue)
+	{
 		if (mMax == mMin)
 			return 0;
 		float lValue = (pValue - mMin) / (mMax - mMin);
@@ -426,7 +428,8 @@ public class HistogramOverlay extends OverlayBase implements Overlay2D,
 	}
 
 	@Override
-	public void close() {
+	public void close()
+	{
 
 		mStopSignal = true;
 	}
