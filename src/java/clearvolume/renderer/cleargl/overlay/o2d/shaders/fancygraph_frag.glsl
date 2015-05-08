@@ -6,7 +6,7 @@ in VertexData {
     vec2 TexCoord;
 } VertexIn;
 
-uniform vec4 color = vec4(1.0, 0.0, 0.0, 1.0);
+uniform vec4 color = vec4(.2, 0.6, 1., 1.0);
 out vec4 outColor;
 
  
@@ -14,9 +14,11 @@ void main()
 {
 
 	float intensity = exp(-1.5f*(1.f-VertexIn.TexCoord.y));
-
-    outColor = vec4(intensity*0.2,intensity*0.6,intensity, 0.75);
     
+    
+    
+    outColor = intensity*color;
+    outColor.w = .75f;
 }
 
 

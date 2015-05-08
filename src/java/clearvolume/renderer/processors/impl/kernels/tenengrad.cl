@@ -1,5 +1,7 @@
 /* opencl implementation of the tenengrad filter for image focus estimation
 
+	Author: Martin Weigert (mweigert@mpi-cbg.de)
+
 */  
 
 
