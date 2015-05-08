@@ -283,27 +283,73 @@ public class ClearVolumeBasicDemos
 	}
 
 	@Test
+	public void demoWith16BitGeneratedDatasetStreaming() throws InterruptedException,
+																											IOException
+	{
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+																																																						512,
+																																																						512,
+																																																						NativeTypeEnum.UnsignedShort,
+																																																						512,
+																																																						512,
+																																																						1,
+																																																						false);
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
+		lClearVolumeRenderer.setVisible(true);
+
+		final int lResolutionX = 512;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																							* lResolutionZ
+																							* 2];
+
+		int i = 0;
+		while (lClearVolumeRenderer.isShowing())
+		{
+
+			for (int z = 0; z < lResolutionZ; z++)
+				for (int y = 0; y < lResolutionY; y++)
+					for (int x = 0; x < lResolutionX; x++)
+					{
+						final int lIndex = 2 * (x + lResolutionX * y + lResolutionX * lResolutionY
+																														* z);
+						lVolumeDataArray[lIndex + 1] += (byte) (((byte) x ^ (byte) y
+																											^ (byte) z ^ (byte) i));
+					}
+
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
+																								lResolutionX,
+																								lResolutionY,
+																								lResolutionZ);
+			lClearVolumeRenderer.requestDisplay();
+
+			// Thread.sleep(100);
+			i++;
+		}
+
+		lClearVolumeRenderer.close();
+
+	}
+
+	@Test
 	public void demoWith16BitIsoSurface()	throws InterruptedException,
 																				IOException
 	{
 
 		final int lMaxTextureRes = 2048;
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
-																																																					// final
-																																																					// ClearVolumeRendererInterface
-																																																					// lClearVolumeRenderer
-																																																					// =
-																																																					// ClearVolumeRendererFactory.newOpenCLRenderer(
-																																																					// "ClearVolumeTest",
-																																																						512,
-																																																						512,
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",/**/
+																																																						768,
+																																																						768,
+
 																																																						NativeTypeEnum.UnsignedShort,
 																																																						lMaxTextureRes,
 																																																						lMaxTextureRes,
 																																																						1,
 																																																						false);
-
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);

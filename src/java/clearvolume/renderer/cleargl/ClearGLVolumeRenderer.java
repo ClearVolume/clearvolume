@@ -1135,7 +1135,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	@Override
 	public void toggleBoxDisplay()
 	{
-		mOverlayMap.get("box").toggleDisplay();
+		mOverlayMap.get("box").toggleDisplayed();
 	}
 
 	/**

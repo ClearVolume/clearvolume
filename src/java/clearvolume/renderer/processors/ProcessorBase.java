@@ -9,12 +9,21 @@ public abstract class ProcessorBase<R> implements Processor<R>
 	private volatile boolean mActive = true;
 
 	/* (non-Javadoc)
+	 * @see clearvolume.renderer.processors.Processor#setActive(boolean)
+	 */
+	@Override
+	public void setActive(boolean pIsActive)
+	{
+		mActive = pIsActive;
+	}
+
+	/* (non-Javadoc)
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay#toggleDisplay()
 	 */
 	@Override
 	public boolean toggleActive()
 	{
-		mActive = !mActive;
+		setActive(!isActive());
 		return mActive;
 	}
 

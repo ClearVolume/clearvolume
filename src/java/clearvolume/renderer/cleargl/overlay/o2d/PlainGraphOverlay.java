@@ -104,9 +104,9 @@ public class PlainGraphOverlay extends OverlayBase implements
 	}
 
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggleDisplayed()
 	{
-		final boolean lNewState = super.toggleDisplay();
+		final boolean lNewState = super.toggleDisplayed();
 		if (lNewState)
 			mAudioPlot.start();
 		else

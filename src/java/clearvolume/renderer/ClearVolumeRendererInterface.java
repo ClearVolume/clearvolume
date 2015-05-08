@@ -11,6 +11,7 @@ import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.listeners.EyeRayListener;
+import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
@@ -835,6 +836,20 @@ public interface ClearVolumeRendererInterface	extends
 	public void notifyChangeOfVolumeRenderingParameters();
 
 	/**
+	 * Adds a parameter change listener
+	 * 
+	 * @param pParameterChangeListener
+	 */
+	void addParameterChangeListener(ParameterChangeListener pParameterChangeListener);
+
+	/**
+	 * Removes a parameter change listener
+	 * 
+	 * @param pParameterChangeListener
+	 */
+	void removeParameterChangeListener(ParameterChangeListener pParameterChangeListener);
+
+	/**
 	 * Toggles the display of the Control Frame;
 	 */
 	public void toggleControlPanelDisplay();
@@ -966,5 +981,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
+
 
 }

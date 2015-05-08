@@ -21,6 +21,7 @@ import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.renderer.listeners.EyeRayListener;
+import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
@@ -143,8 +144,12 @@ public abstract class ClearVolumeRendererBase	implements
 	// Eye ray listeners:
 	protected CopyOnWriteArrayList<EyeRayListener> mEyeRayListenerList = new CopyOnWriteArrayList<EyeRayListener>();
 
+	// Eye ray listeners:
+	protected CopyOnWriteArrayList<ParameterChangeListener> mParameterChangeListenerList = new CopyOnWriteArrayList<ParameterChangeListener>();
+
 	// Display lock:
 	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
+
 
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
@@ -243,8 +248,25 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void notifyChangeOfVolumeRenderingParameters()
 	{
+		for (final ParameterChangeListener lParameterChangeListener : mParameterChangeListenerList)
+		{
+			lParameterChangeListener.notifyParameterChange(this);
+		}
+		
 		mVolumeRenderingParametersChanged = true;
 		getAdaptiveLODController().notifyUserInteractionInProgress();
+	}
+
+	@Override
+	public void addParameterChangeListener(ParameterChangeListener pParameterChangeListener)
+	{
+		mParameterChangeListenerList.add(pParameterChangeListener);
+	}
+
+	@Override
+	public void removeParameterChangeListener(ParameterChangeListener pParameterChangeListener)
+	{
+		mParameterChangeListenerList.remove(pParameterChangeListener);
 	}
 
 	/**

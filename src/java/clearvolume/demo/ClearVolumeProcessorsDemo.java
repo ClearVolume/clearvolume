@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -12,7 +11,6 @@ import org.junit.Test;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.cleargl.overlay.o2d.GraphOverlay;
-import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
 import clearvolume.renderer.cleargl.overlay.o2d.ImageQualityOverlay;
 import clearvolume.renderer.cleargl.overlay.o3d.DriftOverlay;
 import clearvolume.renderer.cleargl.overlay.o3d.PathOverlay;
@@ -23,7 +21,6 @@ import clearvolume.renderer.processors.impl.CUDAProcessorTest;
 import clearvolume.renderer.processors.impl.OpenCLCenterMass;
 import clearvolume.renderer.processors.impl.OpenCLDeconv;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
-import clearvolume.renderer.processors.impl.OpenCLHistogram;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 import clearvolume.renderer.processors.impl.OpenCLTest;
 import clearvolume.transferf.TransferFunctions;
@@ -437,34 +434,6 @@ public class ClearVolumeProcessorsDemo
 																																																						512,
 																																																						1,
 																																																						false);
-
-		final HistogramOverlay lHistogramOverlay = new HistogramOverlay(OpenCLHistogram.N_BINS);
-
-		lClearVolumeRenderer.addOverlay(lHistogramOverlay);
-
-		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
-
-		final OpenCLHistogram lHistoProcessor = new OpenCLHistogram();
-
-		lHistoProcessor.addResultListener(new ProcessorResultListener<FloatBuffer>()
-		{
-
-			@Override
-			public void notifyResult(	final Processor<FloatBuffer> pSource,
-																final FloatBuffer pResult)
-			{
-				// System.out.println("histogram: "
-				// + Arrays.toString(pResult.array()));
-				System.out.println(lClearVolumeRenderer.getTransferRangeMax());
-				lHistoProcessor.setRange(	0.f,
-																	(float) lClearVolumeRenderer.getTransferRangeMax());
-			}
-		});
-
-		lClearVolumeRenderer.addProcessor(lHistoProcessor);
-		lHistoProcessor.addResultListener(lHistogramOverlay);
-
-		lHistoProcessor.setRange(0.f, 1.f);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);

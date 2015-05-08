@@ -56,9 +56,9 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 	}
 
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggleDisplayed()
 	{
-		final boolean lToggleDisplay = super.toggleDisplay();
+		final boolean lToggleDisplay = super.toggleDisplayed();
 
 		if (lToggleDisplay)
 			getGraphOverlay().clear();
