@@ -88,10 +88,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedX(-lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.getQuaternion()
-															.invert()
-															.rotateByAngleX(-lRotationSpeed)
-															.invert();
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
+																																	.invert()
+																																	.rotateByAngleX(-lRotationSpeed)
+																																	.invert());
 
 			}
 
@@ -106,10 +106,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedX(+lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.getQuaternion()
-															.invert()
-															.rotateByAngleX(+lRotationSpeed)
-															.invert();
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
+																																	.invert()
+																																	.rotateByAngleX(+lRotationSpeed)
+																																	.invert());
 
 			}
 			else
@@ -123,10 +123,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedY(-lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.getQuaternion()
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
 															.invert()
 															.rotateByAngleY(+lRotationSpeed)
-															.invert();
+																																	.invert());
 
 			}
 			else
@@ -140,10 +140,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedY(+lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.getQuaternion()
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
 															.invert()
 															.rotateByAngleY(-lRotationSpeed)
-															.invert();
+																																	.invert());
 
 			}
 			else
@@ -158,10 +158,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedZ(-lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.getQuaternion()
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
 															.invert()
 															.rotateByAngleZ(+lRotationSpeed)
-															.invert();
+																																	.invert());
 
 			}
 			else
@@ -176,10 +176,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedZ(+lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.getQuaternion()
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
 															.invert()
 															.rotateByAngleZ(-lRotationSpeed)
-															.invert();
+																																	.invert());
 
 			}
 			else

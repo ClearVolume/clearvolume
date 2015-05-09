@@ -150,7 +150,6 @@ public abstract class ClearVolumeRendererBase	implements
 	// Display lock:
 	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
 
-
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
 		super();
@@ -252,7 +251,7 @@ public abstract class ClearVolumeRendererBase	implements
 		{
 			lParameterChangeListener.notifyParameterChange(this);
 		}
-		
+
 		mVolumeRenderingParametersChanged = true;
 		getAdaptiveLODController().notifyUserInteractionInProgress();
 	}
@@ -384,8 +383,17 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setLayerVisible(final int pRenderLayerIndex,
 															final boolean pVisble)
 	{
-		mLayerVisiblityFlagArray[pRenderLayerIndex] = pVisble;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mLayerVisiblityFlagArray[pRenderLayerIndex] = pVisble;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -396,14 +404,24 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void resetBrightnessAndGammaAndTransferFunctionRanges()
 	{
-		for (int i = 0; i < getNumberOfRenderLayers(); i++)
+		getDisplayLock().lock();
+		try
 		{
-			mBrightness[i] = 1.0f;
-			mGamma[i] = 1.0f;
-			mTransferFunctionRangeMin[i] = 0.0f;
-			mTransferFunctionRangeMax[i] = 1.0f;
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				mBrightness[i] = 1.0f;
+				mGamma[i] = 1.0f;
+				mTransferFunctionRangeMin[i] = 0.0f;
+				mTransferFunctionRangeMax[i] = 1.0f;
+			}
+			notifyChangeOfVolumeRenderingParameters();
 		}
-		notifyChangeOfVolumeRenderingParameters();
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	/**
@@ -415,7 +433,6 @@ public abstract class ClearVolumeRendererBase	implements
 	public void addBrightness(final double pBrightnessDelta)
 	{
 		addBrightness(getCurrentRenderLayerIndex(), pBrightnessDelta);
-
 	}
 
 	/**
@@ -479,12 +496,22 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setBrightness(final int pRenderLayerIndex,
 														final double pBrightness)
 	{
-		mBrightness[pRenderLayerIndex] = (float) clamp(	pBrightness,
-																										0,
-																										getNativeType() == NativeTypeEnum.UnsignedByte ? 16
-																																																	: 256);
+		getDisplayLock().lock();
+		try
+		{
+			mBrightness[pRenderLayerIndex] = (float) clamp(	pBrightness,
+																											0,
+																											getNativeType() == NativeTypeEnum.UnsignedByte ? 16
+																																																		: 256);
 
-		notifyChangeOfVolumeRenderingParameters();
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	/**
@@ -532,8 +559,17 @@ public abstract class ClearVolumeRendererBase	implements
 												final double pGamma)
 
 	{
-		mGamma[pRenderLayerIndex] = (float) pGamma;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mGamma[pRenderLayerIndex] = (float) pGamma;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -544,12 +580,22 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setDithering(int pRenderLayerIndex, double pDithering)
 	{
-		mDithering[pRenderLayerIndex] = (float) pDithering;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mDithering[pRenderLayerIndex] = (float) pDithering;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	};
 
 	/**
-	 * Returns samount of dithering [0,1] for a given render layer.
+	 * Returns the amount of dithering [0,1] for a given render layer.
 	 * 
 	 * @param pRenderLayerIndex
 	 * @return dithering
@@ -572,9 +618,18 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setQuality(int pRenderLayerIndex, double pQuality)
 	{
-		pQuality = max(min(pQuality, 1), 0);
-		mQuality[pRenderLayerIndex] = (float) pQuality;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			pQuality = max(min(pQuality, 1), 0);
+			mQuality[pRenderLayerIndex] = (float) pQuality;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	};
 
 	/**
@@ -685,13 +740,22 @@ public abstract class ClearVolumeRendererBase	implements
 																				final double pTransferRangeMin,
 																				final double pTransferRangeMax)
 	{
-		mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
-																																	0,
-																																	1);
-		mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
-																																	0,
-																																	1);
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
+																																		0,
+																																		1);
+			mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
+																																		0,
+																																		1);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -717,11 +781,21 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setTransferFunctionRangeMin(final int pRenderLayerIndex,
 																					final double pTransferRangeMin)
 	{
-		mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
-																																	0,
-																																	1);
+		getDisplayLock().lock();
+		try
+		{
+			mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
+																																		0,
+																																		1);
 
-		notifyChangeOfVolumeRenderingParameters();
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	/**
@@ -747,88 +821,19 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setTransferFunctionRangeMax(final int pRenderLayerIndex,
 																					final double pTransferRangeMax)
 	{
-		mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
-																																	0,
-																																	1);
-		notifyChangeOfVolumeRenderingParameters();
-	}
-
-	/**
-	 * Translates the minimum of the transfer function range.
-	 *
-	 * @param pDelta
-	 *          translation amount
-	 */
-	@Override
-	public void addTransferFunctionRangeMin(final double pDelta)
-	{
-		setTransferFunctionRangeMin(getCurrentRenderLayerIndex(), pDelta);
-	}
-
-	/**
-	 * Translates the minimum of the transfer function range.
-	 *
-	 * @param pRenderLayerIndex
-	 * @param pDelta
-	 */
-	@Override
-	public void addTransferFunctionRangeMin(final int pRenderLayerIndex,
-																					final double pDelta)
-	{
-		setTransferFunctionRangeMin(getTransferRangeMin(pRenderLayerIndex) + pDelta);
-	}
-
-	/**
-	 * Translates the maximum of the transfer function range.
-	 *
-	 * @param pDelta
-	 *          translation amount
-	 */
-	@Override
-	public void addTransferFunctionRangeMax(final double pDelta)
-	{
-		addTransferFunctionRangeMax(getCurrentRenderLayerIndex(), pDelta);
-	}
-
-	/**
-	 * Translates the maximum of the transfer function range.
-	 *
-	 * @param pRenderLayerIndex
-	 * @param pDelta
-	 */
-	@Override
-	public void addTransferFunctionRangeMax(final int pRenderLayerIndex,
-																					final double pDelta)
-	{
-		setTransferFunctionRangeMax(pRenderLayerIndex,
-																getTransferRangeMax(pRenderLayerIndex) + pDelta);
-	}
-
-	/**
-	 * Translates the transfer function range by a given amount.
-	 *
-	 * @param pTransferRangePositionDelta
-	 *          amount of translation added
-	 */
-	@Override
-	public void addTransferFunctionRangePosition(final double pTransferRangePositionDelta)
-	{
-		addTransferFunctionRangeMin(pTransferRangePositionDelta);
-		addTransferFunctionRangeMax(pTransferRangePositionDelta);
-	}
-
-	/**
-	 * Adds a certain amount (possibly negative) to the width of the transfer
-	 * function range.
-	 *
-	 * @param pTransferRangeWidthDelta
-	 *          size added to the width
-	 */
-	@Override
-	public void addTransferFunctionRangeWidth(final double pTransferRangeWidthDelta)
-	{
-		addTransferFunctionRangeMin(-pTransferRangeWidthDelta);
-		addTransferFunctionRangeMax(pTransferRangeWidthDelta);
+		getDisplayLock().lock();
+		try
+		{
+			mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
+																																		0,
+																																		1);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -839,8 +844,17 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void addTranslationX(final double pDX)
 	{
-		mTranslationX += pDX;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			setTranslationX(getTranslationX() + pDX);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -851,8 +865,18 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void addTranslationY(final double pDY)
 	{
-		mTranslationY += pDY;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			setTranslationY(getTranslationY() + pDY);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	/**
@@ -863,20 +887,40 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void addTranslationZ(final double pDZ)
 	{
-		mTranslationZ += pDZ;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			setTranslationZ(getTranslationZ() + pDZ);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	@Override
 	public Quaternion getQuaternion()
 	{
-		return mRotationQuaternion;
+		return new Quaternion(mRotationQuaternion);
 	}
 
 	@Override
 	public void setQuaternion(Quaternion pQuaternion)
 	{
-		mRotationQuaternion.set(pQuaternion);
+		getDisplayLock().lock();
+		try
+		{
+			mRotationQuaternion.set(pQuaternion);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -887,7 +931,18 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setTranslationX(double pTranslationX)
 	{
-		mTranslationX = (float) pTranslationX;
+		getDisplayLock().lock();
+		try
+		{
+			mTranslationX = (float) pTranslationX;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	/**
@@ -898,7 +953,17 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setTranslationY(double pTranslationY)
 	{
-		mTranslationY = (float) pTranslationY;
+		getDisplayLock().lock();
+		try
+		{
+			mTranslationY = (float) pTranslationY;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -909,7 +974,17 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setTranslationZ(double pTranslationZ)
 	{
-		mTranslationZ = (float) pTranslationZ;
+		getDisplayLock().lock();
+		try
+		{
+			mTranslationZ = (float) pTranslationZ;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -920,7 +995,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setDefaultTranslationZ()
 	{
-		mTranslationZ = -4 / getFOV();
+		setTranslationZ(-4 / getFOV());
 	}
 
 	/**
@@ -977,10 +1052,6 @@ public abstract class ClearVolumeRendererBase	implements
 			setTranslationZ(lFactor * getTranslationZ());
 			notifyChangeOfVolumeRenderingParameters();
 		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-		}
 		finally
 		{
 			if (getDisplayLock().isHeldByCurrentThread())
@@ -1032,7 +1103,17 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setTransferFunction(final int pRenderLayerIndex,
 																	final TransferFunction pTransfertFunction)
 	{
-		mTransferFunctions[pRenderLayerIndex] = pTransfertFunction;
+		getDisplayLock().lock();
+		try
+		{
+			mTransferFunctions[pRenderLayerIndex] = pTransfertFunction;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -1077,8 +1158,17 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setRenderAlgorithm(	final int pRenderLayerIndex,
 																	final RenderAlgorithm pRenderAlgorithm)
 	{
-		mRenderAlgorithm[pRenderLayerIndex] = pRenderAlgorithm;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mRenderAlgorithm[pRenderLayerIndex] = pRenderAlgorithm;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -1087,9 +1177,18 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setRenderAlgorithm(final RenderAlgorithm pRenderAlgorithm)
 	{
-		for (int i = 0; i < mRenderAlgorithm.length; i++)
-			mRenderAlgorithm[i] = pRenderAlgorithm;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			for (int i = 0; i < mRenderAlgorithm.length; i++)
+				mRenderAlgorithm[i] = pRenderAlgorithm;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -1098,10 +1197,19 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void cycleRenderAlgorithm()
 	{
-		int i = 0;
-		for (final RenderAlgorithm lRenderAlgorithm : mRenderAlgorithm)
-			mRenderAlgorithm[i++] = lRenderAlgorithm.next();
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			int i = 0;
+			for (final RenderAlgorithm lRenderAlgorithm : mRenderAlgorithm)
+				mRenderAlgorithm[i++] = lRenderAlgorithm.next();
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -1110,8 +1218,17 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void cycleRenderAlgorithm(int pRenderLayerIndex)
 	{
-		mRenderAlgorithm[pRenderLayerIndex] = mRenderAlgorithm[pRenderLayerIndex].next();
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mRenderAlgorithm[pRenderLayerIndex] = mRenderAlgorithm[pRenderLayerIndex].next();
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -1166,10 +1283,19 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void resetRotationTranslation()
 	{
-		mRotationQuaternion.setIdentity();
-		mTranslationX = 0;
-		mTranslationY = 0;
-		setDefaultTranslationZ();
+		getDisplayLock().lock();
+		try
+		{
+			mRotationQuaternion.setIdentity();
+			setTranslationX(0);
+			setTranslationY(0);
+			setDefaultTranslationZ();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	@Override
@@ -1207,9 +1333,19 @@ public abstract class ClearVolumeRendererBase	implements
 														final double pVoxelSizeY,
 														final double pVoxelSizeZ)
 	{
-		mVoxelSizeX = pVoxelSizeX;
-		mVoxelSizeY = pVoxelSizeY;
-		mVoxelSizeZ = pVoxelSizeZ;
+		getDisplayLock().lock();
+		try
+		{
+			mVoxelSizeX = pVoxelSizeX;
+			mVoxelSizeY = pVoxelSizeY;
+			mVoxelSizeZ = pVoxelSizeZ;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**

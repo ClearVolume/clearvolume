@@ -113,7 +113,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 			final float lMouseY = pMouseEvent.getY();
 			mArcBall.setBounds(	mRenderer.getViewportWidth(),
 													mRenderer.getViewportHeight());
-			mArcBall.drag(lMouseX, lMouseY, mRenderer.getQuaternion());
+			mRenderer.setQuaternion(mArcBall.drag(lMouseX, lMouseY));
 
 		}
 

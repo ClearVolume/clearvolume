@@ -213,40 +213,6 @@ public interface ClearVolumeRendererInterface	extends
 																					double pTransferRangeMax);
 
 	/**
-	 * @param pDelta
-	 */
-	public void addTransferFunctionRangeMin(double pDelta);
-
-	/**
-	 * @param pRenderLayerIndex
-	 * @param pDelta
-	 */
-	public void addTransferFunctionRangeMin(int pRenderLayerIndex,
-																					double pDelta);
-
-	/**
-	 * @param pDelta
-	 */
-	public void addTransferFunctionRangeMax(double pDelta);
-
-	/**
-	 * @param pRenderLayerIndex
-	 * @param pDelta
-	 */
-	public void addTransferFunctionRangeMax(int pRenderLayerIndex,
-																					double pDelta);
-
-	/**
-	 * @param pTransferRangePositionDelta
-	 */
-	public void addTransferFunctionRangePosition(double pTransferRangePositionDelta);
-
-	/**
-	 * @param pTransferRangeWidthDelta
-	 */
-	public void addTransferFunctionRangeWidth(double pTransferRangeWidthDelta);
-
-	/**
 	 * Sets the transfer function used for rendering.
 	 *
 	 * @param pTransfertFunction

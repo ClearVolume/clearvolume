@@ -1221,14 +1221,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		return lPreventOtherDisplayChanges;
 	}
 
-	public void rotate(int pDx, int pDy)
-	{
-		// getQuaternion().invert();
-		getQuaternion().rotateByAngleX((float) (-pDy * 0.01));
-		getQuaternion().rotateByAngleY((float) (-pDx * 0.01));
-		// getQuaternion().invert();
-	}
-
 	@Override
 	public void disableClose()
 	{
