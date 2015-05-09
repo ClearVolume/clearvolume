@@ -793,11 +793,19 @@ public interface ClearVolumeRendererInterface	extends
 	void addFOV(double pDelta);
 
 	/**
+	 * Copies the given Quaternion to the current Quaternion values.
+	 * 
+	 * @param pQuaternion
+	 */
+	void setQuaternion(Quaternion pQuaternion);
+
+	/**
 	 * Returns the Quaternion.
 	 *
 	 * @return Quaternion
 	 */
 	public Quaternion getQuaternion();
+
 
 	/**
 	 * Adds a rotation controller.
@@ -988,6 +996,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
+
 
 
 

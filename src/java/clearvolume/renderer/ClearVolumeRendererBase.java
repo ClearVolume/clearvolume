@@ -873,6 +873,12 @@ public abstract class ClearVolumeRendererBase	implements
 		return mRotationQuaternion;
 	}
 
+	@Override
+	public void setQuaternion(Quaternion pQuaternion)
+	{
+		mRotationQuaternion.set(pQuaternion);
+	}
+
 	/**
 	 * Interface method implementation
 	 *

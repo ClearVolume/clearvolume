@@ -48,6 +48,7 @@ import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
+import com.jogamp.opengl.math.Quaternion;
 
 import coremem.types.NativeTypeEnum;
 
@@ -824,27 +825,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 		// building up the inverse Modelview matrix
 
-		// final GLMatrix lEulerMatrix = new GLMatrix();
+		applyControllersTransform();
 
-		/*
-		 * lEulerMatrix.euler( getRotationX() * 0.01, getRotationY() * 0.01,
-		 * 0.0f);/*
-		 */
-		if (getRotationControllers().size() > 0)
-		{
-			for (final RotationControllerInterface lRotationController : getRotationControllers())
-				if (lRotationController.isActive())
-				{
-					if (lRotationController instanceof RotationControllerWithRenderNotification)
-					{
-						final RotationControllerWithRenderNotification lRenderNotification = (RotationControllerWithRenderNotification) lRotationController;
-						lRenderNotification.notifyRender(this);
-					}
-					getQuaternion().mult(lRotationController.getQuaternion());
-
-					notifyChangeOfVolumeRenderingParameters();
-				}
-		}
 
 		final GLMatrix lModelViewMatrix = new GLMatrix();
 		lModelViewMatrix.setIdentity();
@@ -855,6 +837,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 		lModelViewMatrix.mult(getQuaternion());
 
+
+
 		lModelViewMatrix.scale(	(float) (lScaleX / lMaxScale),
 														(float) (lScaleY / lMaxScale),
 														(float) (lScaleZ / lMaxScale));/**/
@@ -864,6 +848,30 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		// lInvVolumeMatrix.transpose();
 
 		return lModelViewMatrix;
+	}
+
+	private void applyControllersTransform()
+	{
+		if (getRotationControllers().size() > 0)
+		{
+			final Quaternion lQuaternion = new Quaternion();
+
+			for (final RotationControllerInterface lRotationController : getRotationControllers())
+				if (lRotationController.isActive())
+				{
+					if (lRotationController instanceof RotationControllerWithRenderNotification)
+					{
+						final RotationControllerWithRenderNotification lRenderNotification = (RotationControllerWithRenderNotification) lRotationController;
+						lRenderNotification.notifyRender(this);
+					}
+					lQuaternion.mult(lRotationController.getQuaternion());
+
+					notifyChangeOfVolumeRenderingParameters();
+				}
+
+			lQuaternion.mult(getQuaternion());
+			setQuaternion(lQuaternion);
+		}
 	}
 
 	private boolean isOverlay2DChanged()
