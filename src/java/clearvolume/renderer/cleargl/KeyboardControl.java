@@ -80,6 +80,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 		case KeyEvent.VK_SPACE:
 			mToggleRotationTranslation = !mToggleRotationTranslation;
 			break;
+
 		case KeyEvent.VK_DOWN:
 			if (mToggleRotationTranslation)
 			{
@@ -98,6 +99,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				mClearVolumeRenderer.addTranslationY(-lTranslationSpeed);
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 			break;
+
 		case KeyEvent.VK_UP:
 			if (mToggleRotationTranslation)
 			{
@@ -112,9 +114,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			}
 			else
 				mClearVolumeRenderer.addTranslationY(+lTranslationSpeed);
-
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
-
 			break;
 
 		case KeyEvent.VK_LEFT:
@@ -132,8 +132,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			else
 				mClearVolumeRenderer.addTranslationX(-lTranslationSpeed);
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
-
 			break;
+
 		case KeyEvent.VK_RIGHT:
 			if (mToggleRotationTranslation)
 			{
@@ -150,7 +150,6 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				mClearVolumeRenderer.addTranslationX(+lTranslationSpeed);
 
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
-
 			break;
 
 		case KeyEvent.VK_PAGE_DOWN:
@@ -169,8 +168,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				mClearVolumeRenderer.addTranslationZ(-lTranslationSpeed / mClearVolumeRenderer.getFOV());
 
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
-
 			break;
+
 		case KeyEvent.VK_PAGE_UP:
 			if (mToggleRotationTranslation)
 			{
@@ -187,8 +186,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				mClearVolumeRenderer.addTranslationZ(+lTranslationSpeed / mClearVolumeRenderer.getFOV());
 
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
-
 			break;
+
 		case KeyEvent.VK_ESCAPE:
 			if (mClearVolumeRenderer.isFullScreen())
 				mClearVolumeRenderer.toggleFullScreen();
@@ -196,6 +195,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 		case KeyEvent.VK_S:
 			mClearVolumeRenderer.toggleRecording();
+			break;
 
 		case KeyEvent.VK_R:
 			if (lAutoRotateController.isActive() && !lAutoRotateController.isRotating())

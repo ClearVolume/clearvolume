@@ -178,8 +178,8 @@ public abstract class ClearVolumeRendererBase	implements
 			mBrightness[i] = 1;
 			mTransferFunctionRangeMin[i] = 0f;
 			mTransferFunctionRangeMax[i] = 1f;
-			mGamma[i] = 1.0f;
-			mQuality[i] = 0.75f;
+			mGamma[i] = 1f;
+			mQuality[i] = 1f;
 			mDithering[i] = 1f;
 		}
 
@@ -590,7 +590,7 @@ public abstract class ClearVolumeRendererBase	implements
 	};
 
 	/**
-	 * Returns the maximal number of steps during ray casting forna given layer.
+	 * Returns the maximal number of steps during ray casting for a given layer.
 	 * This size depends on the volume dimension and quality.
 	 * 
 	 * @param pRenderLayerIndex

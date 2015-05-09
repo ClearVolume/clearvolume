@@ -100,10 +100,9 @@ class MouseControl extends MouseAdapter implements MouseListener
 	@Override
 	public void mouseDragged(final MouseEvent pMouseEvent)
 	{
-		moveLight(pMouseEvent);
-
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
+
 
 		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
 				&& !pMouseEvent.isAltDown()
@@ -118,12 +117,13 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		}
 
-		if (pMouseEvent.isAltDown() && !pMouseEvent.isMetaDown()
+		if (!mMoveLightMode && pMouseEvent.isAltDown()
+				&& !pMouseEvent.isMetaDown()
 				&& !pMouseEvent.isShiftDown()
 				&& !pMouseEvent.isControlDown()
 				&& pMouseEvent.isButtonDown(1))
 		{
-
+			moveLight(pMouseEvent);
 		}
 
 		handleTranslation(pMouseEvent);
@@ -143,7 +143,10 @@ class MouseControl extends MouseAdapter implements MouseListener
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
 
-		moveLight(pMouseEvent);
+		if (mMoveLightMode) // &&
+												// mRenderer.getAdaptiveLODController().getNumberOfPasses()
+												// == 1
+			moveLight(pMouseEvent);
 
 		setSavedMousePosition(pMouseEvent);
 	}
@@ -215,9 +218,6 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 	private void moveLight(final MouseEvent pMouseEvent)
 	{
-		if (!mMoveLightMode || mRenderer.getAdaptiveLODController()
-																		.getNumberOfPasses() > 1)
-			return;
 		final float lMouseX = pMouseEvent.getX();
 		final float lMouseY = pMouseEvent.getY();
 		final float light[] = new float[3];

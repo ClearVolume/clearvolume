@@ -374,7 +374,7 @@ isosurface_render(
   const float tstep = fabs(tnear-tfar)/((maxsteps/LOOPUNROLL)*LOOPUNROLL);
   
   // apply phase:
-  orig += phase*tstep*direc;
+	orig += phase*tstep*direc;
   
 	// randomize origin point a bit:
 	const uint entropy = (uint)( 6779514*length(orig) + 6257327*length(direc) );
@@ -400,21 +400,19 @@ isosurface_render(
 
   // first pass:
   for(int i=0; i<unrolledmaxsteps; i++) 
-  	{
-  	  for(int j=1; j<LOOPUNROLL; j++)
-  		{
-  		  newVal = tex3D(tex, pos.x, pos.y, pos.z);
-  		  if ((newVal>isoVal) != isGreater)
-  		  {
-  				hitIso = true;
-  				break;
-  			}
-  		  
-  		  pos+=vecstep;
-  		}
-  	  if (hitIso)
-  			break;
-  	}
+  {
+	  for(int j=1; j<LOOPUNROLL; j++)
+		{
+		  newVal = tex3D(tex, pos.x, pos.y, pos.z);
+		  if ((newVal>isoVal) != isGreater)
+		  {
+				hitIso = true;
+				break; 
+			}
+		  pos+=vecstep;
+		}
+		if(hitIso) break;
+  }
  
   
   //early termination if iso surface not hit:
@@ -436,12 +434,11 @@ isosurface_render(
   		  if ((newVal>isoVal) != isGreater)
   		  {
   				hitIso = true;
-  				break;
+					break;
   			}
   		  pos+=finevecstep;
   		}
-  	  if (hitIso)
-  		break;
+  		if(hitIso) break;
   	}
   /**/
   	
@@ -517,8 +514,8 @@ isosurface_render(
   
   color = brightness*color;
   
-  d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
-  //d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color);
+  //d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
+  d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color);
 
 }
 

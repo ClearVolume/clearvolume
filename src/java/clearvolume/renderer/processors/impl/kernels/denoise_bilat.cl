@@ -35,7 +35,7 @@ __kernel void bilat(__read_only image3d_t input,
 	  	{
 				const float pix1 = read_imagef(input,sampler,(int4)(i+i2,j+j2,k+k2,0)).x;
 				const float diff = 1.f*pix0-pix1; 
-				float weight = exp(iss2*(i22+j22+k2*k2))* exp(isv2*diff*diff);
+				float weight = native_exp(iss2*(i22+j22+k2*k2))* native_exp(isv2*diff*diff);
 		
 				res += pix1*weight;
 				sum += weight;

@@ -594,13 +594,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 				}
 			}
 
-			/*
-			 * Runnable lDisplayRequestRunnable = new Runnable() {
-			 * 
-			 * @Override public void run() { requestDisplay(); } };
-			 * mGLVideoRecorder
-			 * .startDisplayRequestDeamonThread(lDisplayRequestRunnable); /*
-			 */
+			ensureTextureAllocated();
 
 		}
 
@@ -623,6 +617,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																					1,
 																					true,
 																					3);
+				mLayerTextures[i].clear();
 
 			}
 
@@ -758,7 +753,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 				updateFrameRateDisplay();
 
 				if (lLastRenderPass)
-					mGLVideoRecorder.screenshot(pDrawable);
+					mGLVideoRecorder.screenshot(pDrawable,
+																			!getAutoRotateController().isRotating());
 
 			}
 			finally
@@ -827,7 +823,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 		applyControllersTransform();
 
-
 		final GLMatrix lModelViewMatrix = new GLMatrix();
 		lModelViewMatrix.setIdentity();
 
@@ -836,8 +831,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																getTranslationZ());/**/
 
 		lModelViewMatrix.mult(getQuaternion());
-
-
 
 		lModelViewMatrix.scale(	(float) (lScaleX / lMaxScale),
 														(float) (lScaleY / lMaxScale),
@@ -1180,7 +1173,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	{
 		return mOverlayMap.values();
 	}
-
 
 	/**
 	 * Notifies eye ray listeners.

@@ -781,9 +781,9 @@ public class ClearVolumeProcessorsDemo
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 128;
+		final int lResolutionX = 320;
 		final int lResolutionY = lResolutionX;
-		final int lResolutionZ = lResolutionX;
+		final int lResolutionZ = 50;
 
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ];

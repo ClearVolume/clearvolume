@@ -349,7 +349,7 @@ public class ClearVolumeBasicDemos
 
 		final int lMaxTextureRes = 2048;
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",/**/
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newCudaRenderer(	"ClearVolumeTest",/**/
 																																																						768,
 																																																						768,
 
@@ -395,8 +395,8 @@ public class ClearVolumeBasicDemos
 
 					// final short lValue = (short) (32000 * (1. / (1 + 0.001 *
 					// dist) + 1. / (1 + 0.001 * dist2)));
-					final short lValue = (short) (65000 * (1. / (1 + 0.001 * dist)));
-					// final short lValue = (short) (((short) x ^ (short) y ^ (short) z));
+					// final short lValue = (short) (65000 * (1. / (1 + 0.001 * dist)));
+					final short lValue = (short) (((short) x ^ (short) y ^ (short) z));
 
 					lVolumeDataArray[lIndex] = (byte) (lValue & 0xFF);
 					lVolumeDataArray[lIndex + 1] = (byte) ((lValue >> 8) & 0xFF);

@@ -7,6 +7,7 @@ package clearvolume.renderer.clearcuda;
  * Copyright 2009-2011 Marco Hutter - http://www.jcuda.org
  */
 
+import static java.lang.Math.max;
 import static java.lang.Math.pow;
 
 import java.io.File;
@@ -820,11 +821,10 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 				switch (getRenderAlgorithm(pRenderLayerIndex))
 				{
 				case MaxProjection:
-					lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
+					lMaxSteps = max(16, lMaxNumberSteps / lNumberOfPasses);
 					lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
 					lPhase = getAdaptiveLODController().getPhase();
-					lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
-																																			: 1;
+					lClear = (lPassIndex == 0) ? 0 : 1;
 
 					mCurrentRenderKernel.launch(lCudaDevicePointer,
 																			getTextureWidth(),
@@ -840,11 +840,13 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 					break;
 				case IsoSurface:
-					lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses);
+					lMaxSteps = max(16,
+													(lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses));
 					lDithering = (float) pow(	getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses),
-														2);
-					lClear = 0;
-					lPhase = 0;
+																		2);
+					lPhase = getAdaptiveLODController().getPhase();
+					lClear = (lPassIndex == lNumberOfPasses - 1) || (lPassIndex == 0)	? 0
+																																						: 1;
 
 					final float[] lLightVector = getLightVector();
 

@@ -1,5 +1,6 @@
 package clearvolume.renderer.opencl;
 
+import static java.lang.Math.max;
 import static java.lang.Math.pow;
 
 import java.nio.ByteBuffer;
@@ -9,6 +10,9 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.GLEventListener;
 
 import jcuda.CudaException;
+
+import org.bridj.Pointer;
+
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.o2d.BarGraphOverlay;
 import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
@@ -41,6 +45,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 	private CLKernel mCurrentRenderKernel, mMaxProjectionRenderKernel,
 			mIsoSurfaceRenderKernel, mClearKernel;
+
+	private Pointer<Integer> mTransferBuffer;
 
 	public OpenCLVolumeRenderer(final String pWindowName,
 															final int pWindowWidth,
@@ -396,11 +402,11 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 			{
 			case MaxProjection:
 				mCurrentRenderKernel = mMaxProjectionRenderKernel;
-				lMaxSteps = lMaxNumberSteps / lNumberOfPasses;
+				lMaxSteps = max(16, lMaxNumberSteps / lNumberOfPasses);
 				lDithering = getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
 				lPhase = getAdaptiveLODController().getPhase();
-				lClear = getAdaptiveLODController().isBufferClearingNeeded() ? 0
-																																		: 1;
+				lClear = (lPassIndex == 0) ? 0 : 1;
+
 				mCLDevice.setArgs(mCurrentRenderKernel,
 													mCLRenderBuffers[pRenderLayerIndex],
 													getTextureWidth(),
@@ -421,11 +427,13 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 			case IsoSurface:
 				mCurrentRenderKernel = mIsoSurfaceRenderKernel;
 
-				lMaxSteps = (lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses);
+				lMaxSteps = max(16,
+												(lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses));
 				lDithering = (float) pow(	getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses),
 																	2);
-				lClear = 0;
-				lPhase = 0;
+				lPhase = getAdaptiveLODController().getPhase();
+				lClear = (lPassIndex == lNumberOfPasses - 1) || (lPassIndex == 0)	? 0
+																																					: 1;
 
 				final float[] lLightVector = getLightVector();
 
@@ -451,11 +459,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 				break;
 			}
 
-			/*
-			 * System.out.format("steps=%d, dith=%g, phase=%g, clear=%d \n",
-			 * lMaxSteps, lDithering, lPhase, lClear);/*
-			 */
-
 			mCLDevice.run(mCurrentRenderKernel,
 										getTextureWidth(),
 										getTextureHeight());
@@ -474,8 +477,18 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 		}
 
-		final ByteBuffer lRenderedImageBuffer = mCLDevice.readIntBufferAsByte(mCLRenderBuffers[pRenderLayerIndex]);
-		copyBufferToTexture(pRenderLayerIndex, lRenderedImageBuffer);
+		if (mTransferBuffer == null || mTransferBuffer.getValidBytes() != mCLRenderBuffers[pRenderLayerIndex].getByteCount())
+		{
+			if (mTransferBuffer != null)
+				mTransferBuffer.release();
+			mTransferBuffer = mCLRenderBuffers[pRenderLayerIndex].allocateCompatibleMemory(mCLDevice.mCLDevice);
+			// System.out.println("####### allocating");
+		}
+
+		mCLDevice.copyCLBufferToPointer(mCLRenderBuffers[pRenderLayerIndex],
+																		mTransferBuffer);
+		copyBufferToTexture(pRenderLayerIndex,
+												mTransferBuffer.getByteBuffer());
 
 	}
 
