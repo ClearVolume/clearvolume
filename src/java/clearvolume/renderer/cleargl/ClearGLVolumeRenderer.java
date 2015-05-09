@@ -66,7 +66,8 @@ public abstract class ClearGLVolumeRenderer extends
 ClearVolumeRendererBase implements ClearGLEventListener
 {
 
-	private static final double cTextureDimensionChangeRatioThreshold = 1.2;
+	private static final double cTextureDimensionChangeRatioThreshold = 1.05;
+	private static final double cTextureAspectChangeRatioThreshold = 1.05;
 	private static final long cMaxWaitingTimeForAcquiringDisplayLockInMs = 200;
 
 	private static final GLMatrix cOverlay2dProjectionMatrix = GLMatrix.getOrthoProjectionMatrix(	-1,
@@ -604,26 +605,36 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	{
 		if (mUpdateTextureWidthHeight)
 		{
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			getDisplayLock().lock();
+			try
 			{
-				if (mLayerTextures[i] != null)
-					mLayerTextures[i].close();
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					if (mLayerTextures[i] != null)
+						mLayerTextures[i].close();
 
-				mLayerTextures[i] = new GLTexture(mGLProgram,
-																					NativeTypeEnum.UnsignedByte,
-																					4,
-																					mTextureWidth,
-																					mTextureHeight,
-																					1,
-																					true,
-																					3);
-				mLayerTextures[i].clear();
+					mLayerTextures[i] = new GLTexture(mGLProgram,
+																						NativeTypeEnum.UnsignedByte,
+																						4,
+																						mTextureWidth,
+																						mTextureHeight,
+																						1,
+																						true,
+																						2);
+					mLayerTextures[i].clear();
+
+				}
+
+				notifyChangeOfTextureDimensions();
+				notifyChangeOfVolumeRenderingParameters();
 
 			}
-
-			notifyChangeOfTextureDimensions();
-			notifyChangeOfVolumeRenderingParameters();
-			mUpdateTextureWidthHeight = false;
+			finally
+			{
+				mUpdateTextureWidthHeight = false;
+				if (getDisplayLock().isHeldByCurrentThread())
+					getDisplayLock().unlock();
+			}
 		}
 	}
 
@@ -639,6 +650,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	{
 		pByteBuffer.rewind();
 		mLayerTextures[pRenderLayerIndex].copyFrom(pByteBuffer);
+		mLayerTextures[pRenderLayerIndex].updateMipMaps();
 	}
 
 	public void clearTexture(final int pRenderLayerIndex)
@@ -1007,75 +1019,92 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	public void reshape(final GLAutoDrawable pDrawable,
 											final int x,
 											final int y,
-											final int pWidth,
+											int pWidth,
 											int pHeight)
 	{
-		getAdaptiveLODController().notifyUserInteractionInProgress();
-
-		mViewportX = x;
-		mViewportY = y;
-		mViewportWidth = pWidth;
-		mViewportHeight = pHeight;
-
-		if (pHeight < 8)
-			pHeight = 8;
-
-		final GL lGL = pDrawable.getGL().getGL();
-
-		lGL.glViewport(0, 0, pWidth, pHeight);/**/
-
-		final float lAspectRatio = (1.0f * pWidth) / pHeight;
-
-		if (lAspectRatio >= 1)
-			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
-																											1,
-																											-1	/ lAspectRatio,
-																											1 / lAspectRatio,
-																											0,
-																											1000);
-		else
-			mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
-																											lAspectRatio,
-																											-1,
-																											1,
-																											0,
-																											1000);/**/
-
-		final int lCandidateTextureWidth = min(	mMaxTextureWidth,
-																						(mViewportWidth / 64) * 64);
-		final int lCandidateTextureHeight = min(mMaxTextureHeight,
-																						(mViewportHeight / 64) * 64);
-
-		if (lCandidateTextureWidth != 0 && lCandidateTextureHeight == 0)
-			return;
-
-		float lRatioWidth = ((float) mTextureWidth) / lCandidateTextureWidth;
-		float lRatioHeight = ((float) mTextureHeight) / lCandidateTextureHeight;
-
-		if (lRatioWidth == 0)
-			lRatioWidth = 1 / lRatioWidth;
-		if (lRatioWidth < 1)
-			lRatioWidth = 1 / lRatioWidth;
-
-		if (lRatioHeight == 0)
-			lRatioHeight = 1 / lRatioHeight;
-		if (lRatioHeight < 1)
-			lRatioHeight = 1 / lRatioHeight;
-
-		// System.out.format("ratios: (%g,%g) \n", lRatioWidth, lRatioHeight);
-
-		if (lRatioWidth > cTextureDimensionChangeRatioThreshold || lRatioHeight > cTextureDimensionChangeRatioThreshold)
+		try
 		{
-			mTextureWidth = lCandidateTextureWidth;
-			mTextureHeight = lCandidateTextureHeight;
-			mUpdateTextureWidthHeight = true;
-			/*
-			 * System.out.format("resizing texture: (%d,%d) \n", mTextureWidth,
-			 * mTextureHeight);/*
-			 */
-		}
+			getAdaptiveLODController().notifyUserInteractionInProgress();
 
-		displayInternal(pDrawable, true);
+			// final GL lGl = pDrawable.getGL();
+			// lGl.glClearColor(0, 0, 0, 1);
+			// lGl.glClear(GL.GL_COLOR_BUFFER_BIT);
+
+			mViewportX = x;
+			mViewportY = y;
+			mViewportWidth = pWidth;
+			mViewportHeight = pHeight;
+
+			if (pHeight < 16)
+				pHeight = 16;
+
+			if (pWidth < 16)
+				pWidth = 16;
+
+			final float lAspectRatio = (1.0f * pWidth) / pHeight;
+
+			if (lAspectRatio >= 1)
+				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
+																												1,
+																												-1	/ lAspectRatio,
+																												1 / lAspectRatio,
+																												0,
+																												1000);
+			else
+				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
+																												lAspectRatio,
+																												-1,
+																												1,
+																												0,
+																												1000);/**/
+
+			final int lCandidateTextureWidth = min(	mMaxTextureWidth,
+																							(mViewportWidth / 64) * 64);
+			final int lCandidateTextureHeight = min(mMaxTextureHeight,
+																							(mViewportHeight / 64) * 64);
+
+			if (lCandidateTextureWidth != 0 && lCandidateTextureHeight == 0)
+				return;
+
+			float lRatioWidth = ((float) mTextureWidth) / lCandidateTextureWidth;
+			float lRatioHeight = ((float) mTextureHeight) / lCandidateTextureHeight;
+			float lRatioAspect = (((float) mTextureWidth) / mTextureHeight) / ((float) lCandidateTextureWidth / lCandidateTextureHeight);
+
+			if (lRatioWidth == 0)
+				lRatioWidth = 1 / lRatioWidth;
+			if (lRatioWidth < 1)
+				lRatioWidth = 1 / lRatioWidth;
+
+			if (lRatioHeight == 0)
+				lRatioHeight = 1 / lRatioHeight;
+			if (lRatioHeight < 1)
+				lRatioHeight = 1 / lRatioHeight;
+
+			if (lRatioAspect == 0)
+				lRatioAspect = 1 / lRatioAspect;
+			if (lRatioAspect < 1)
+				lRatioAspect = 1 / lRatioAspect;
+
+			// System.out.format("ratios: (%g,%g) \n", lRatioWidth, lRatioHeight);
+
+			if (lRatioWidth > cTextureDimensionChangeRatioThreshold || lRatioHeight > cTextureDimensionChangeRatioThreshold
+					|| lRatioAspect > cTextureAspectChangeRatioThreshold)
+			{
+				mTextureWidth = lCandidateTextureWidth;
+				mTextureHeight = lCandidateTextureHeight;
+				mUpdateTextureWidthHeight = true;
+
+				/*System.out.format("resizing texture: (%d,%d) \n",
+													mTextureWidth,
+													mTextureHeight);/**/
+			}
+
+			// displayInternal(pDrawable, true);
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+		}
 
 	}
 
