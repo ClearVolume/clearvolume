@@ -124,8 +124,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 					lAutoRotateController.addRotationSpeedY(-lAutoRotationSpeed);
 				else
 					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-															.invert()
-															.rotateByAngleY(+lRotationSpeed)
+																																	.invert()
+																																	.rotateByAngleY(+lRotationSpeed)
 																																	.invert());
 
 			}
@@ -141,8 +141,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 					lAutoRotateController.addRotationSpeedY(+lAutoRotationSpeed);
 				else
 					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-															.invert()
-															.rotateByAngleY(-lRotationSpeed)
+																																	.invert()
+																																	.rotateByAngleY(-lRotationSpeed)
 																																	.invert());
 
 			}
@@ -159,8 +159,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 					lAutoRotateController.addRotationSpeedZ(-lAutoRotationSpeed);
 				else
 					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-															.invert()
-															.rotateByAngleZ(+lRotationSpeed)
+																																	.invert()
+																																	.rotateByAngleZ(+lRotationSpeed)
 																																	.invert());
 
 			}
@@ -177,8 +177,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 					lAutoRotateController.addRotationSpeedZ(+lAutoRotationSpeed);
 				else
 					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-															.invert()
-															.rotateByAngleZ(-lRotationSpeed)
+																																	.invert()
+																																	.rotateByAngleZ(-lRotationSpeed)
 																																	.invert());
 
 			}
@@ -291,7 +291,9 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				final SingleKeyToggable lSingleKeyToggable = (SingleKeyToggable) lOverlay;
 
 				final boolean lRightKey = pE.getKeyCode() == lSingleKeyToggable.toggleKeyCode();
-				final boolean lRightModifiers = (pE.getModifiers() & lSingleKeyToggable.toggleKeyModifierMask()) == lSingleKeyToggable.toggleKeyModifierMask();
+				final boolean lRightModifiers = pE.getModifiers() == lSingleKeyToggable.toggleKeyModifierMask();
+				// (pE.getModifiers() & lSingleKeyToggable.toggleKeyModifierMask()) ==
+				// lSingleKeyToggable.toggleKeyModifierMask();
 
 				if (lRightKey && lRightModifiers)
 				{

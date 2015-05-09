@@ -21,7 +21,6 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 	public OpenCLDenoise()
 	{
 		super();
-
 		setActive(false);
 	}
 
@@ -61,7 +60,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 			mKernelBilateral = getDevice().compileKernel(	OpenCLDenoise.class.getResource("kernels/denoise_bilat.cl"),
 																										"bilat");
 
-			mKernelCopyBufToImg = getDevice().compileKernel(OpenCLDeconv.class.getResource("kernels/deconv.cl"),
+			mKernelCopyBufToImg = getDevice().compileKernel(OpenCLDeconvolutionLR.class.getResource("kernels/deconv.cl"),
 																											"copyBufToImg");
 
 
@@ -89,36 +88,44 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 		if (!isActive())
 			return;
 
-		// final long start = System.nanoTime();
+		try
+		{
+			// final long start = System.nanoTime();
 
-		ensureOpenCLInitialized();
+			ensureOpenCLInitialized();
 
-		// System.out.println("setting up buffers");
-		initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
+			// System.out.println("setting up buffers");
+			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 
-		// bilateral filtering
-		mKernelBilateral.setArgs(	getVolumeBuffers()[pRenderLayerIndex],
-															mBufScratch,
-															mBlockSize,
-															mSigmaSpace,
-															mSigmaValue);
-		getDevice().run(mKernelBilateral,
-										(int) pWidthInVoxels,
-										(int) pHeightInVoxels,
-										(int) pDepthInVoxels);
+			// bilateral filtering
+			mKernelBilateral.setArgs(	getVolumeBuffers()[pRenderLayerIndex],
+																mBufScratch,
+																mBlockSize,
+																mSigmaSpace,
+																mSigmaValue);
+			getDevice().run(mKernelBilateral,
+											(int) pWidthInVoxels,
+											(int) pHeightInVoxels,
+											(int) pDepthInVoxels);
 
-		// copy back
-		mKernelCopyBufToImg.setArgs(mBufScratch,
-																getVolumeBuffers()[pRenderLayerIndex]);
-		getDevice().run(mKernelCopyBufToImg,
-										(int) pWidthInVoxels,
-										(int) pHeightInVoxels,
-										(int) pDepthInVoxels);
+			// copy back
+			mKernelCopyBufToImg.setArgs(mBufScratch,
+																	getVolumeBuffers()[pRenderLayerIndex]);
+			getDevice().run(mKernelCopyBufToImg,
+											(int) pWidthInVoxels,
+											(int) pHeightInVoxels,
+											(int) pDepthInVoxels);
 
-		/*System.out.printf("denoising with mBlockSize, sigSpace, mSigmaValue = %d,%.3f,%.3f\n",
-											mBlockSize,
-											sigSpace,
-											mSigmaValue);/**/
+			/*System.out.printf("denoising with mBlockSize, sigSpace, mSigmaValue = %d,%.3f,%.3f\n",
+												mBlockSize,
+												sigSpace,
+												mSigmaValue);/**/
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+			notifyListenersOfResult(new Boolean(false));
+		}
 		
 		notifyListenersOfResult(new Boolean(true));
 

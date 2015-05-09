@@ -22,7 +22,7 @@ import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.CUDAProcessorTest;
 import clearvolume.renderer.processors.impl.OpenCLCenterMass;
-import clearvolume.renderer.processors.impl.OpenCLDeconv;
+import clearvolume.renderer.processors.impl.OpenCLDeconvolutionLR;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 import clearvolume.renderer.processors.impl.OpenCLTest;
@@ -656,27 +656,35 @@ public class ClearVolumeProcessorsDemo
 																																																						1,
 																																																						false);
 
-		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
+		OpenCLDeconvolutionLR lOpenCLDeconvolutionLR = null;
 
-		final OpenCLDeconv lDeconvProcessor = new OpenCLDeconv();
-
-		lDeconvProcessor.addResultListener(new ProcessorResultListener<Void>()
+		for (final Processor<?> lProcessor : lClearVolumeRenderer.getProcessors())
 		{
-
-			@Override
-			public void notifyResult(	final Processor<Void> pSource,
-																final Void pResult)
+			if (lProcessor instanceof OpenCLDeconvolutionLR)
 			{
-				System.out.println("deconv!: ");
-			}
-		});
 
-		lClearVolumeRenderer.addProcessor(lDeconvProcessor);
+				lOpenCLDeconvolutionLR = (OpenCLDeconvolutionLR) lProcessor;
+				lOpenCLDeconvolutionLR.setActive(true);
+				lOpenCLDeconvolutionLR.addResultListener(new ProcessorResultListener<Boolean>()
+				{
+					@Override
+					public void notifyResult(	final Processor<Boolean> pSource,
+																		final Boolean pResult)
+					{
+						if (pResult)
+							System.out.println("deconvolved!");
+					}
+				});
+			}
+		}
+
+		lOpenCLDeconvolutionLR.setActive(true);
+
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 64;
+		final int lResolutionX = 128;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
@@ -685,47 +693,40 @@ public class ClearVolumeProcessorsDemo
 
 		final Random rand = new Random();
 
-		final int x0 = lResolutionX / 2 - 10, y0 = lResolutionY / 2, z0 = lResolutionZ / 2;
-		final int x1 = lResolutionX / 2 + 10, y1 = lResolutionY / 2, z1 = lResolutionZ / 2;
 
-		for (int z = 0; z < lResolutionZ; z++)
-			for (int y = 0; y < lResolutionY; y++)
-				for (int x = 0; x < lResolutionX; x++)
-				{
-					final int lIndex = x + lResolutionX
-															* y
-															+ lResolutionX
-															* lResolutionY
-															* z;
 
-					lVolumeDataArray[lIndex] = (byte) (55 * (Math.exp(-.01 * ((x - x0) * (x - x0)
-																																		+ (y - y0)
-																																		* (y - y0) + (z - z0) * (z - z0))) + Math.exp(-.01 * ((x - x1) * (x - x1)
-																																																													+ (y - y1)
-																																																													* (y - y1) + (z - z1) * (z - z1)))) + rand.nextInt(5));
+		final float s = 5.f;
+		lOpenCLDeconvolutionLR.setSigmas(s, s, s);
 
-				}
-
-		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																							ByteBuffer.wrap(lVolumeDataArray),
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
-		lClearVolumeRenderer.requestDisplay();
-
-		float s = 1.f;
 		while (lClearVolumeRenderer.isShowing())
 		{
-			Thread.sleep(2000);
+			final int x0 = lResolutionX / 2 - 10, y0 = lResolutionY / 2, z0 = lResolutionZ / 2;
+			final int x1 = lResolutionX / 2 + 10, y1 = lResolutionY / 2, z1 = lResolutionZ / 2;
+
+			for (int z = 0; z < lResolutionZ; z++)
+				for (int y = 0; y < lResolutionY; y++)
+					for (int x = 0; x < lResolutionX; x++)
+					{
+						final int lIndex = x + lResolutionX
+																* y
+																+ lResolutionX
+																* lResolutionY
+																* z;
+
+						lVolumeDataArray[lIndex] = (byte) (55 * (Math.exp(-.01 * ((x - x0) * (x - x0)
+																																			+ (y - y0)
+																																			* (y - y0) + (z - z0) * (z - z0))) + Math.exp(-.01 * ((x - x1) * (x - x1)
+																																																														+ (y - y1)
+																																																														* (y - y1) + (z - z1) * (z - z1)))) + rand.nextInt(5));
+
+					}
+
 			lClearVolumeRenderer.setVolumeDataBuffer(	0,
 																								ByteBuffer.wrap(lVolumeDataArray),
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
-			lClearVolumeRenderer.requestDisplay();
 
-			lDeconvProcessor.setSigmas(s, s, s);
-			s += 1.f;
 
 		}
 

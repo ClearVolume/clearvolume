@@ -18,6 +18,7 @@ import clearvolume.renderer.cleargl.overlay.o2d.BarGraphOverlay;
 import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
 import clearvolume.renderer.processors.OpenCLProcessor;
 import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.impl.OpenCLDeconvolutionLR;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
 
@@ -119,6 +120,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		final OpenCLDenoise lOpenCLDenoise = new OpenCLDenoise();
 		addProcessor(lOpenCLDenoise);
 
+		final OpenCLDeconvolutionLR lOpenCLDeconvolutionLR = new OpenCLDeconvolutionLR();
+		addProcessor(lOpenCLDeconvolutionLR);
 	}
 
 	@Override
