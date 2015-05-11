@@ -522,8 +522,8 @@ task packagezip(type:Exec,dependsOn:collectdistribution) {
 }
 
 
-task copyRuntimeLibs(type: Copy) {
-	into "./build/lib/dep"
+task collectDependencies(type: Copy) {
+	into "./build/libs/dependencies"
 	from configurations.runtime
 }
 
