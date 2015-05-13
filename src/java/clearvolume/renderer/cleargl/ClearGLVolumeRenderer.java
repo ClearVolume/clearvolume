@@ -428,7 +428,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	{
 		if (mNewtCanvasAWT == null)
 			mClearGLWindow.setVisible(pIsVisible);
-
 	}
 
 	/**
@@ -983,6 +982,9 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 */
 	private void updateFrameRateDisplay()
 	{
+		if(mNewtCanvasAWT!=null)
+			return;
+
 		step++;
 		final long currentTime = System.nanoTime();
 		if (prevTimeNS == -1)
