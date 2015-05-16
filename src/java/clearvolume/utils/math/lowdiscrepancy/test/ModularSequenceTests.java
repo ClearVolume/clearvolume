@@ -11,7 +11,6 @@ public class ModularSequenceTests
 	public void test()
 	{
 
-
 		System.out.println(ModularSequence.computeGapList(13, 8, 12));
 		System.out.println(ModularSequence.computeGapScore(13, 8, 12));
 		System.out.println(ModularSequence.computeGapScore(13, 8));

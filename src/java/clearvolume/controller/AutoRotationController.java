@@ -33,7 +33,6 @@ public class AutoRotationController	extends
 		// in case we need to be notified at render time...
 	}
 
-
 	public void addRotationSpeedX(float pDelta)
 	{
 		getQuaternion().rotateByAngleX(pDelta);

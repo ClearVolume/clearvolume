@@ -26,6 +26,7 @@ public class Sinusoid extends ToneBase implements Source
 	 * Constructs a sinusoid source with given frequency.
 	 * 
 	 * @param pFrequency
+	 *          frequency
 	 */
 	public Sinusoid(float pFrequency)
 	{
@@ -38,9 +39,9 @@ public class Sinusoid extends ToneBase implements Source
 	@Override
 	public float next()
 	{
-		float lSample = (float) (getAmplitude() * sin(mTime));
+		final float lSample = (float) (getAmplitude() * sin(mTime));
 
-		float lPeriodInSamples = getSamplingFrequency() / getFrequencyInHertz();
+		final float lPeriodInSamples = getSamplingFrequency() / getFrequencyInHertz();
 		mTime += (2 * PI) / lPeriodInSamples;
 		if (mTime > 2 * PI)
 			mTime -= 2 * PI;

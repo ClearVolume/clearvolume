@@ -8,7 +8,6 @@ import clearvolume.network.client.main.ClearVolumeClientMain;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
 import coremem.types.NativeTypeEnum;
 
-
 public class ClearVolumeClientMainDemo
 {
 

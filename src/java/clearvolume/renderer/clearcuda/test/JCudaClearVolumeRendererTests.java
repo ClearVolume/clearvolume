@@ -107,8 +107,7 @@ public class JCudaClearVolumeRendererTests
 
 			final int lLength = lResolutionX * lResolutionY * lResolutionZ;
 
-			final byte[] lVolumeDataArray = new byte[lLength
-																								* 2];
+			final byte[] lVolumeDataArray = new byte[lLength * 2];
 
 			for (int z = 0; z < lResolutionZ; z++)
 				for (int y = 0; y < lResolutionY; y++)

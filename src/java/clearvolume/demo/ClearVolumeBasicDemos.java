@@ -340,8 +340,6 @@ public class ClearVolumeBasicDemos
 
 	}
 
-
-
 	@Test
 	public void demoWith16BitIsoSurface()	throws InterruptedException,
 																				IOException
@@ -350,13 +348,13 @@ public class ClearVolumeBasicDemos
 		final int lMaxTextureRes = 2048;
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",/**/
-																																																						768,
-																																																						768,
-																																																						NativeTypeEnum.UnsignedShort,
-																																																						lMaxTextureRes,
-																																																						lMaxTextureRes,
-																																																						1,
-																																																						false);
+																																																					768,
+																																																					768,
+																																																					NativeTypeEnum.UnsignedShort,
+																																																					lMaxTextureRes,
+																																																					lMaxTextureRes,
+																																																					1,
+																																																					false);
 		lClearVolumeRenderer.setRenderAlgorithm(RenderAlgorithm.IsoSurface);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);

@@ -5,8 +5,8 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 
 import clearvolume.utils.ClearVolumeJFrame;
 import clearvolume.volume.sink.filter.ChannelFilterSink;
@@ -19,10 +19,13 @@ public class ChannelFilterSinkJFrame extends ClearVolumeJFrame
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private JPanel mContentPane;
+	private final JPanel mContentPane;
 
 	/**
 	 * Launch the application.
+	 * 
+	 * @param pChannelFilterSink
+	 *          channel filter sink
 	 */
 	public static void launch(final ChannelFilterSink pChannelFilterSink)
 	{
@@ -33,10 +36,10 @@ public class ChannelFilterSinkJFrame extends ClearVolumeJFrame
 			{
 				try
 				{
-					ChannelFilterSinkJFrame frame = new ChannelFilterSinkJFrame(pChannelFilterSink);
+					final ChannelFilterSinkJFrame frame = new ChannelFilterSinkJFrame(pChannelFilterSink);
 					frame.setVisible(true);
 				}
-				catch (Exception e)
+				catch (final Exception e)
 				{
 					e.printStackTrace();
 				}
@@ -48,6 +51,7 @@ public class ChannelFilterSinkJFrame extends ClearVolumeJFrame
 	 * Create the frame.
 	 * 
 	 * @param pChannelFilterSink
+	 *          channel filter sink
 	 */
 	public ChannelFilterSinkJFrame(ChannelFilterSink pChannelFilterSink)
 	{
@@ -55,7 +59,7 @@ public class ChannelFilterSinkJFrame extends ClearVolumeJFrame
 		setTitle("Channel Filter Selection");
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		setBackground(Color.WHITE);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 275, 327);
 		mContentPane = new JPanel();
 		mContentPane.setBackground(Color.WHITE);
@@ -65,7 +69,7 @@ public class ChannelFilterSinkJFrame extends ClearVolumeJFrame
 
 		if (pChannelFilterSink != null)
 		{
-			ChannelFilterSinkJPanel lChannelFilterSinkJPanel = new ChannelFilterSinkJPanel(pChannelFilterSink);
+			final ChannelFilterSinkJPanel lChannelFilterSinkJPanel = new ChannelFilterSinkJPanel(pChannelFilterSink);
 			mContentPane.add(lChannelFilterSinkJPanel);
 		}
 	}

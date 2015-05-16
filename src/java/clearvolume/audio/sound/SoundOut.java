@@ -18,11 +18,11 @@ import javax.sound.sampled.SourceDataLine;
 public class SoundOut implements AutoCloseable
 {
 
-	private AudioFormat mAudioFormat;
+	private final AudioFormat mAudioFormat;
 
 	private SourceDataLine mSourceDataLine;
 
-	private Object mLock = new Object();
+	private final Object mLock = new Object();
 
 	/**
 	 * Default constructor with 44100f samples per second, 16 bit samples, and 1
@@ -38,8 +38,11 @@ public class SoundOut implements AutoCloseable
 	 * of channels.
 	 * 
 	 * @param pSampleRate
+	 *          sample rate
 	 * @param pSampleSizeInBits
+	 *          sample size in bits
 	 * @param pNumberOfChannels
+	 *          numebr of channels
 	 */
 	public SoundOut(float pSampleRate,
 									int pSampleSizeInBits,
@@ -57,6 +60,7 @@ public class SoundOut implements AutoCloseable
 	 * Starts to process incoming samples.
 	 * 
 	 * @throws LineUnavailableException
+	 *           thrown if line unavailable
 	 */
 	public void start() throws LineUnavailableException
 	{
@@ -116,8 +120,8 @@ public class SoundOut implements AutoCloseable
 		{
 			final double lDoubleValue = pBuffer[i];
 			final int lIntValue = (int) (lDoubleValue * (1 << 15));
-			byte a = (byte) ((lIntValue) & 0xff);
-			byte b = (byte) ((lIntValue >> 8) & 0xff);
+			final byte a = (byte) ((lIntValue) & 0xff);
+			final byte b = (byte) ((lIntValue >> 8) & 0xff);
 
 			mTemporaryBuffer.add(a);
 			mTemporaryBuffer.add(b);
@@ -163,8 +167,8 @@ public class SoundOut implements AutoCloseable
 		{
 			final double lDoubleValue = pBuffer[i];
 			final int lIntValue = (int) (lDoubleValue * (1 << 15));
-			byte a = (byte) ((lIntValue) & 0xff);
-			byte b = (byte) ((lIntValue >> 8) & 0xff);
+			final byte a = (byte) ((lIntValue) & 0xff);
+			final byte b = (byte) ((lIntValue >> 8) & 0xff);
 
 			mTemporaryBuffer.add(a);
 			mTemporaryBuffer.add(b);

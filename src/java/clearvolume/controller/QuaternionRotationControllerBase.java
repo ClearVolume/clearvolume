@@ -11,7 +11,7 @@ import com.jogamp.opengl.math.Quaternion;
  *
  */
 public class QuaternionRotationControllerBase	implements
-																					RotationControllerInterface
+																							RotationControllerInterface
 {
 
 	private volatile boolean mActive = true;
@@ -43,6 +43,7 @@ public class QuaternionRotationControllerBase	implements
 	 * Sets the quaternion.
 	 * 
 	 * @param pQuaternion
+	 *          quaternion
 	 */
 	@Override
 	public void setQuaternion(final Quaternion pQuaternion)
@@ -66,9 +67,5 @@ public class QuaternionRotationControllerBase	implements
 	{
 		return mQuaternion;
 	}
-
-
-
-
 
 }

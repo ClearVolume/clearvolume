@@ -22,13 +22,17 @@ import clearvolume.utils.ClearVolumeJFrame;
 
 public class ClearVolumeClientMain
 {
+	private static Image sAppIcon; // if set, this icon will be used to resteal
+																	// the application icon after JOGL stole it!
 
 	private JFrame mApplicationJFrame;
 	private VolumeCaptureListener mVolumeCaptureListener;
-	private static Image appicon; // if set, this icon will be used to resteal the application icon after JOGL stole it!
 
 	/**
 	 * Launch the application.
+	 *
+	 * @param args
+	 *          command line arguments
 	 */
 	public static void main(final String[] args)
 	{
@@ -36,8 +40,8 @@ public class ClearVolumeClientMain
 	}
 
 	public static void launchClientGUI(	final VolumeCaptureListener pVolumeCaptureListener,
-			final Image appicon,
-			final boolean pExitOnClose )
+																			final Image appicon,
+																			final boolean pExitOnClose)
 	{
 		try
 		{
@@ -49,10 +53,9 @@ public class ClearVolumeClientMain
 					try
 					{
 						CheckRequirements.check();
-						final ClearVolumeClientMain lClearVolumeMain = new ClearVolumeClientMain(
-								pVolumeCaptureListener,
-								appicon,
-								pExitOnClose );
+						final ClearVolumeClientMain lClearVolumeMain = new ClearVolumeClientMain(	pVolumeCaptureListener,
+																																											appicon,
+																																											pExitOnClose);
 						lClearVolumeMain.mApplicationJFrame.setVisible(true);
 					}
 					catch (final Exception e)
@@ -68,10 +71,10 @@ public class ClearVolumeClientMain
 		}
 	}
 
-	public static void launchClientGUI( final VolumeCaptureListener pVolumeCaptureListener,
-			final boolean pExitOnClose )
+	public static void launchClientGUI(	final VolumeCaptureListener pVolumeCaptureListener,
+																			final boolean pExitOnClose)
 	{
-		launchClientGUI( pVolumeCaptureListener, null, pExitOnClose );
+		launchClientGUI(pVolumeCaptureListener, null, pExitOnClose);
 	}
 
 	protected void setVolumeCaptureListener(final VolumeCaptureListener pVolumeCaptureListener)
@@ -91,7 +94,8 @@ public class ClearVolumeClientMain
 		final ClearVolumeTCPClientHelper lClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper()
 		{
 			@Override
-			public void reportError(final Throwable pE, final String pErrorMessage)
+			public void reportError(final Throwable pE,
+															final String pErrorMessage)
 			{
 				System.err.println("Cannot connect to host: '" + pHostName
 														+ ":"
@@ -109,8 +113,8 @@ public class ClearVolumeClientMain
 																						pBytesPerVoxel,
 																						pNumberOfLayers,
 																						pTimeShiftMultiChannel,
-				pMultiColor,
-				appicon );
+																						pMultiColor,
+																						sAppIcon);
 
 	}
 
@@ -118,10 +122,12 @@ public class ClearVolumeClientMain
 	 * Create the application.
 	 *
 	 * @param pVolumeCaptureListener
+	 *          volume capture listener
 	 * @param pExitOnClose
+	 *          true if exit on close
 	 */
 	public ClearVolumeClientMain(	final VolumeCaptureListener pVolumeCaptureListener,
-			final boolean pExitOnClose )
+																final boolean pExitOnClose)
 	{
 		super();
 		initialize(pVolumeCaptureListener, pExitOnClose);
@@ -131,16 +137,19 @@ public class ClearVolumeClientMain
 	 * Create the application.
 	 *
 	 * @param pVolumeCaptureListener
-	 * @param appicon
+	 *          volume capture listener
+	 * @param pAppIcon
+	 *          app icon
 	 * @param pExitOnClose
+	 *          true if exit on close
 	 */
-	public ClearVolumeClientMain( final VolumeCaptureListener pVolumeCaptureListener,
-			final Image appicon,
-			final boolean pExitOnClose )
+	public ClearVolumeClientMain(	final VolumeCaptureListener pVolumeCaptureListener,
+																final Image pAppIcon,
+																final boolean pExitOnClose)
 	{
 		super();
-		this.appicon = appicon;
-		initialize( pVolumeCaptureListener, appicon, pExitOnClose );
+		ClearVolumeClientMain.sAppIcon = sAppIcon;
+		initialize(pVolumeCaptureListener, sAppIcon, pExitOnClose);
 	}
 
 	/**
@@ -152,21 +161,21 @@ public class ClearVolumeClientMain
 	private void initialize(final VolumeCaptureListener pVolumeCaptureListener,
 													final boolean pExitOnClose)
 	{
-		initialize( pVolumeCaptureListener, null, pExitOnClose );
+		initialize(pVolumeCaptureListener, null, pExitOnClose);
 	}
 
 	/**
 	 * Initialize the contents of the frame.
 	 *
 	 * @param pVolumeCaptureListener
-	 * @param appicon
+	 * @param sAppIcon
 	 * @param pExitOnClose
 	 */
-	private void initialize( final VolumeCaptureListener pVolumeCaptureListener,
-			final Image appicon,
-			final boolean pExitOnClose )
+	private void initialize(final VolumeCaptureListener pVolumeCaptureListener,
+													final Image appicon,
+													final boolean pExitOnClose)
 	{
-		mApplicationJFrame = new ClearVolumeJFrame( appicon == null );
+		mApplicationJFrame = new ClearVolumeJFrame(appicon == null);
 		mApplicationJFrame.setResizable(false);
 		mApplicationJFrame.getContentPane().setBackground(Color.WHITE);
 		mApplicationJFrame.setBounds(100, 100, 529, 529);
@@ -198,8 +207,8 @@ public class ClearVolumeClientMain
 		label.setIcon(new ImageIcon(ClearVolumeClientMain.class.getResource("images/ClearVolumeLogo_cropped.png")));
 		mApplicationJFrame.getContentPane().add(label);
 
-		final ConnectionPanel lConnectionPanel =
-				new ConnectionPanel( pVolumeCaptureListener, appicon );
+		final ConnectionPanel lConnectionPanel = new ConnectionPanel(	pVolumeCaptureListener,
+																																	appicon);
 		lConnectionPanel.setBackground(Color.WHITE);
 		lConnectionPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		lConnectionPanel.setBounds(8, 174, 512, 305);

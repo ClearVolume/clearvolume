@@ -23,10 +23,10 @@ import clearvolume.renderer.processors.ProcessorResultListener;
 import com.jogamp.opengl.GL;
 
 public abstract class BarGraphOverlay extends OverlayBase	implements
-																								Overlay2D,
-																								SingleKeyToggable,
-																								ProcessorResultListener<FloatBuffer>,
-																								AutoCloseable
+																													Overlay2D,
+																													SingleKeyToggable,
+																													ProcessorResultListener<FloatBuffer>,
+																													AutoCloseable
 {
 
 	private GLProgram mGLProgram;
@@ -41,14 +41,12 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 	private FloatBuffer mBarHeightData;
 	private final ReentrantLock mReentrantLock = new ReentrantLock();
 
-
 	private volatile boolean mHasChanged = false;
 
 	private volatile float mOffsetX = -1, mOffsetY = 2f / 3;
 	private volatile float mScaleX = 1, mScaleY = 1f / 3;
 	private volatile float mMin;
 	private volatile float mMax;
-
 
 	public BarGraphOverlay()
 	{
@@ -302,7 +300,8 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 					pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 					pGL.glBlendEquation(GL.GL_FUNC_ADD);/**/
 
-					mClearGeometryObjectBars.draw(0, mBarHeightData.capacity() * 6);
+					mClearGeometryObjectBars.draw(0,
+																				mBarHeightData.capacity() * 6);
 
 					mHasChanged = false;
 				}
@@ -335,6 +334,5 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 			mClearGeometryObjectBars.close();
 
 	}
-
 
 }

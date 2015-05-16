@@ -1,6 +1,5 @@
 package clearvolume.renderer;
 
-
 /**
  * Overlays that implement this interface can declare a key binding that will be
  * used to toggle it's display on/off
@@ -10,7 +9,6 @@ package clearvolume.renderer;
  */
 public interface SingleKeyToggable
 {
-
 
 	/**
 	 * Returns key code of toggle key combination.
@@ -28,9 +26,9 @@ public interface SingleKeyToggable
 
 	/**
 	 * Toggle on/off
+	 * 
+	 * @return new state
 	 */
 	public boolean toggle();
-
-
 
 }

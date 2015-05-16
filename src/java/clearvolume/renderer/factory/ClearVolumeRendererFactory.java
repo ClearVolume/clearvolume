@@ -15,11 +15,15 @@ public class ClearVolumeRendererFactory
 	 * height.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
+	 *          window height
 	 * @param useInCanvas
 	 *          must be set true if you will use ClearVolume embedded in an AWT or
 	 *          Swing container.
+	 * @return best 8 bit renderer
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer8Bit(	final String pWindowName,
 																																				final int pWindowWidth,
@@ -39,12 +43,18 @@ public class ClearVolumeRendererFactory
 	 * a default of 768x768.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
 	 * @param useInCanvas
 	 *          must be set true if you will use ClearVolume embedded in an AWT or
 	 *          Swing container.
+	 * 
+	 * @return best ClearVolume renderer
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
 																																		final int pWindowWidth,
@@ -65,12 +75,20 @@ public class ClearVolumeRendererFactory
 	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
 	 * name, width, height, bytes=per-voxel, max window width and height.
 	 *
+	 * 
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          nativ etype
 	 * @param pMaxTextureWidth
+	 *          max render width
 	 * @param pMaxTextureHeight
+	 *          max render height
+	 * @return best ClearVolume renderer
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
 																																		final int pWindowWidth,
@@ -94,14 +112,21 @@ public class ClearVolumeRendererFactory
 	 * name, width, height, bytes=per-voxel, max window width and height.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native typ
 	 * @param pMaxTextureWidth
+	 *          max render width
 	 * @param pMaxTextureHeight
+	 *          max render height
 	 * @param useInCanvas
 	 *          must be set true if you will use ClearVolume embedded in an AWT or
 	 *          Swing container.
+	 * @return best ClearVolume renderer
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
 																																		final int pWindowWidth,
@@ -126,15 +151,23 @@ public class ClearVolumeRendererFactory
 	 * name, width, height, and bytes=per-voxel, max window width and height, and
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
 	 * @param pMaxTextureWidth
+	 *          max render width
 	 * @param pMaxTextureHeight
+	 *          max render height
 	 * @param pNumberOfRenderLayers
+	 *          number of render layers
 	 * @param pUseInCanvas
 	 *          must be set true if you will use ClearVolume embedded in an AWT or
 	 *          Swing container.
+	 * @return best ClearVolume renderer
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
 																																		final int pWindowWidth,
@@ -184,8 +217,6 @@ public class ClearVolumeRendererFactory
 			{
 				System.err.println("Caution: Use of CUDA has been explicitly disabled!");
 			}
-
-
 
 			System.err.println("Your system cannot run ClearVolume because it does not support CUDA or OpenCL.");
 			return null;

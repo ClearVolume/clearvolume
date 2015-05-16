@@ -44,7 +44,7 @@ import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.Quaternion;
@@ -122,8 +122,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	private final GLMatrix mQuadProjectionMatrix = new GLMatrix();
 
 	// textures width and height:
-	private volatile int mMaxTextureWidth, mMaxTextureHeight,
-			mTextureWidth, mTextureHeight;
+	private volatile int mMaxRenderWidth, mMaxRenderHeight,
+			mRenderWidth, mRenderHeight;
 	private volatile boolean mUpdateTextureWidthHeight = true;
 
 	private volatile boolean mRequestDisplay = true;
@@ -140,8 +140,11 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 * name and its dimensions.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
+	 *          window height
 	 */
 	public ClearGLVolumeRenderer(	final String pWindowName,
 																final int pWindowWidth,
@@ -158,9 +161,13 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 * name, its dimensions, and bytes-per-voxel.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
 	 */
 	public ClearGLVolumeRenderer(	final String pWindowName,
 																final int pWindowWidth,
@@ -180,25 +187,31 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 * name, its dimensions, and bytes-per-voxel.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
-	 * @param pMaxTextureWidth
-	 * @param pMaxTextureHeight
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
+	 * @param pMaxRenderWidth
+	 *          max render width
+	 * @param pMaxRenderHeight
+	 *          max render height
 	 */
 	public ClearGLVolumeRenderer(	final String pWindowName,
 																final int pWindowWidth,
 																final int pWindowHeight,
 																final NativeTypeEnum pNativeTypeEnum,
-																final int pMaxTextureWidth,
-																final int pMaxTextureHeight)
+																final int pMaxRenderWidth,
+																final int pMaxRenderHeight)
 	{
 		this(	pWindowName,
 					pWindowWidth,
 					pWindowHeight,
 					pNativeTypeEnum,
-					pMaxTextureWidth,
-					pMaxTextureHeight,
+					pMaxRenderWidth,
+					pMaxRenderHeight,
 					1);
 	}
 
@@ -207,12 +220,18 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 * name, its dimensions, and bytes-per-voxel.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
-	 * @param pMaxTextureWidth
-	 * @param pMaxTextureHeight
-	 * @param useInCanvas
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
+	 * @param pMaxRenderWidth
+	 *          max render width
+	 * @param pMaxRenderHeight
+	 *          max render height
+	 * @param pUseInCanvas
 	 *          if true, this Renderer will not be displayed in a window of it's
 	 *          own, but must be embedded in a GUI as Canvas.
 	 */
@@ -220,18 +239,18 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																final int pWindowWidth,
 																final int pWindowHeight,
 																final NativeTypeEnum pNativeTypeEnum,
-																final int pMaxTextureWidth,
-																final int pMaxTextureHeight,
-																final boolean useInCanvas)
+																final int pMaxRenderWidth,
+																final int pMaxRenderHeight,
+																final boolean pUseInCanvas)
 	{
 		this(	pWindowName,
 					pWindowWidth,
 					pWindowHeight,
 					pNativeTypeEnum,
-					pMaxTextureWidth,
-					pMaxTextureHeight,
+					pMaxRenderWidth,
+					pMaxRenderHeight,
 					1,
-					useInCanvas);
+					pUseInCanvas);
 	}
 
 	/**
@@ -240,12 +259,19 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 * and number of render layers.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
 	 * @param pMaxTextureWidth
+	 *          max render width
 	 * @param pMaxTextureHeight
+	 *          max render height
 	 * @param pNumberOfRenderLayers
+	 *          number of render layers
 	 */
 	public ClearGLVolumeRenderer(	final String pWindowName,
 																final int pWindowWidth,
@@ -271,12 +297,19 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 * and number of render layers.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
-	 * @param pMaxTextureWidth
-	 * @param pMaxTextureHeight
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
+	 * @param pMaxRenderWidth
+	 *          max render width
+	 * @param pMaxRenderHeight
+	 *          max render height
 	 * @param pNumberOfRenderLayers
+	 *          number of render layers
 	 * @param pUseInCanvas
 	 *          if true, this Renderer will not be displayed in a window of it's
 	 *          own, but must be embedded in a GUI as Canvas.
@@ -286,8 +319,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																final int pWindowWidth,
 																final int pWindowHeight,
 																final NativeTypeEnum pNativeTypeEnum,
-																final int pMaxTextureWidth,
-																final int pMaxTextureHeight,
+																final int pMaxRenderWidth,
+																final int pMaxRenderHeight,
 																final int pNumberOfRenderLayers,
 																final boolean pUseInCanvas)
 	{
@@ -296,11 +329,11 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		mViewportWidth = pWindowWidth;
 		mViewportHeight = pWindowHeight;
 
-		mMaxTextureWidth = pMaxTextureWidth;
-		mMaxTextureHeight = pMaxTextureHeight;
+		mMaxRenderWidth = pMaxRenderWidth;
+		mMaxRenderHeight = pMaxRenderHeight;
 
-		mTextureWidth = min(pMaxTextureWidth, pWindowWidth);
-		mTextureHeight = min(pMaxTextureHeight, pWindowHeight);
+		mRenderWidth = min(pMaxRenderWidth, pWindowWidth);
+		mRenderHeight = min(pMaxRenderHeight, pWindowHeight);
 
 		mWindowName = pWindowName;
 		mLastWindowWidth = pWindowWidth;
@@ -467,9 +500,9 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 *
 	 * @return texture width
 	 */
-	public int getTextureWidth()
+	public int getRenderWidth()
 	{
-		return mTextureWidth;
+		return mRenderWidth;
 	}
 
 	/**
@@ -477,9 +510,9 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 *
 	 * @return texture height
 	 */
-	public int getTextureHeight()
+	public int getRenderHeight()
 	{
-		return mTextureHeight;
+		return mRenderHeight;
 	}
 
 	/**
@@ -614,8 +647,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					mLayerTextures[i] = new GLTexture(mGLProgram,
 																						NativeTypeEnum.UnsignedByte,
 																						4,
-																						mTextureWidth,
-																						mTextureHeight,
+																						mRenderWidth,
+																						mRenderHeight,
 																						1,
 																						true,
 																						2);
@@ -712,7 +745,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 				lGL.glDisable(GL.GL_CULL_FACE);
 				lGL.glEnable(GL.GL_BLEND);
 				lGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
-				lGL.glBlendEquation(GL2.GL_MAX);
+				lGL.glBlendEquation(GL2ES3.GL_MAX);
 
 				setDefaultProjectionMatrix();
 
@@ -1009,11 +1042,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		mClearGLWindow.setWindowTitle(pTitleString);
 	}
 
-	/**
-	 * Interface method implementation
-	 *
-	 * @see javax.media.opengl.GLEventListener#reshape(javax.media.opengl.GLAutoDrawable,
-	 *      int, int, int, int)
+	/* (non-Javadoc)
+	 * @see com.jogamp.opengl.GLEventListener#reshape(com.jogamp.opengl.GLAutoDrawable, int, int, int, int)
 	 */
 	@Override
 	public void reshape(final GLAutoDrawable pDrawable,
@@ -1062,9 +1092,9 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																								max(getVolumeSizeY(),
 																										getVolumeSizeZ()));
 
-			final int lMaxTextureWidth = min(	mMaxTextureWidth,
+			final int lMaxTextureWidth = min(	mMaxRenderWidth,
 																				2 * lMaxVolumeDimension);
-			final int lMaxTextureHeight = min(mMaxTextureHeight,
+			final int lMaxTextureHeight = min(mMaxRenderHeight,
 																				2 * lMaxVolumeDimension);
 
 			final int lCandidateTextureWidth = ((min(	lMaxTextureWidth,
@@ -1075,11 +1105,9 @@ ClearVolumeRendererBase implements ClearGLEventListener
 			if (lCandidateTextureWidth == 0 || lCandidateTextureHeight == 0)
 				return;
 
-			float lRatioWidth = ((float) mTextureWidth) / lCandidateTextureWidth;
-			float lRatioHeight = ((float) mTextureHeight) / lCandidateTextureHeight;
-			float lRatioAspect = (((float) mTextureWidth) / mTextureHeight) / ((float) lCandidateTextureWidth / lCandidateTextureHeight);
-
-
+			float lRatioWidth = ((float) mRenderWidth) / lCandidateTextureWidth;
+			float lRatioHeight = ((float) mRenderHeight) / lCandidateTextureHeight;
+			float lRatioAspect = (((float) mRenderWidth) / mRenderHeight) / ((float) lCandidateTextureWidth / lCandidateTextureHeight);
 
 			if (lRatioWidth > 0 && lRatioWidth < 1)
 				lRatioWidth = 1f / lRatioWidth;
@@ -1097,13 +1125,13 @@ ClearVolumeRendererBase implements ClearGLEventListener
 			if (lRatioWidth > cTextureDimensionChangeRatioThreshold || lRatioHeight > cTextureDimensionChangeRatioThreshold
 					|| lRatioAspect > cTextureAspectChangeRatioThreshold)
 			{
-				mTextureWidth = lCandidateTextureWidth;
-				mTextureHeight = lCandidateTextureHeight;
+				mRenderWidth = lCandidateTextureWidth;
+				mRenderHeight = lCandidateTextureHeight;
 				mUpdateTextureWidthHeight = true;
 
 				/*System.out.format("resizing texture: (%d,%d) \n",
-													mTextureWidth,
-													mTextureHeight);/**/
+													mRenderWidth,
+													mRenderHeight);/**/
 			}
 
 		}
@@ -1212,8 +1240,11 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	/**
 	 * Notifies eye ray listeners.
 	 * 
-	 * @param pMouseEvent
 	 * @param pRenderer
+	 *          renderer that calls listeners
+	 * @param pMouseEvent
+	 *          associated mouse event.
+	 * @return true if event captured
 	 */
 	public boolean notifyEyeRayListeners(	ClearGLVolumeRenderer pRenderer,
 																				MouseEvent pMouseEvent)

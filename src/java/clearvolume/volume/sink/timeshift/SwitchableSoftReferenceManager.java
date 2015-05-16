@@ -16,10 +16,12 @@ public class SwitchableSoftReferenceManager<T>
 	public SwitchableSoftReferenceManager()
 	{
 		super();
-		Runnable lRunnable = new Runnable() {
-			
+		Runnable lRunnable = new Runnable()
+		{
+
 			@Override
-			public void run() {
+			public void run()
+			{
 				while (true)
 				{
 					try
@@ -49,7 +51,7 @@ public class SwitchableSoftReferenceManager<T>
 				}
 			}
 		};
-				
+
 		Thread lCleanUpThread = new Thread(	lRunnable,
 																				"SwitchableSoftReferenceCleanUpThread");
 		lCleanUpThread.setDaemon(true);

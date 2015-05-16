@@ -64,7 +64,6 @@ public class ClearVolumeMultiChannelDemos
 
 	}
 
-
 	@Test
 	public void demoWith8BitGeneratedDataset2LayersJCuda() throws InterruptedException,
 																												IOException
@@ -289,7 +288,6 @@ public class ClearVolumeMultiChannelDemos
 																							lResolutionY,
 																							lResolutionZ);
 
-
 		final byte[] lVolumeDataArray1 = new byte[lResolutionX * lResolutionY
 																							* lResolutionZ];
 
@@ -340,7 +338,6 @@ public class ClearVolumeMultiChannelDemos
 																							lResolutionY,
 																							lResolutionZ);/**/
 
-
 		int i = 0;
 		while (lClearVolumeRenderer.isShowing())
 		{
@@ -357,7 +354,7 @@ public class ClearVolumeMultiChannelDemos
 
 	@Test
 	public void demoWith8BitGeneratedDataset3LayersCuda()	throws InterruptedException,
-																													IOException
+																												IOException
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",

@@ -12,6 +12,9 @@ public class ClearVolumeMain
 
 	/**
 	 * Launch the application.
+	 * 
+	 * @param args
+	 *          command line arguments
 	 */
 	public static void main(String[] args)
 	{
@@ -19,8 +22,8 @@ public class ClearVolumeMain
 		{
 			CheckRequirements.check();
 
-			CommandLine lCommandLineValues = new CommandLine();
-			CmdLineParser lCmdLineParser = new CmdLineParser(lCommandLineValues);
+			final CommandLine lCommandLineValues = new CommandLine();
+			final CmdLineParser lCmdLineParser = new CmdLineParser(lCommandLineValues);
 			lCmdLineParser.getProperties().withUsageWidth(80);
 
 			System.err.println("[ClearVolume command line utility]");
@@ -28,7 +31,7 @@ public class ClearVolumeMain
 			{
 				lCmdLineParser.parseArgument(args);
 			}
-			catch (CmdLineException e)
+			catch (final CmdLineException e)
 			{
 				System.err.println(e.getMessage());
 				lCmdLineParser.printUsage(System.err);
@@ -47,12 +50,11 @@ public class ClearVolumeMain
 																			lCommandLineValues.mBytesPerVoxel,
 																			lCommandLineValues.mNumberOfLayers,
 																			lCommandLineValues.mTimeShiftAndMultiChannel,
-																			lCommandLineValues.mMultiColor
-																			);
+																			lCommandLineValues.mMultiColor);
 			else
 				ClearVolumeClientMain.main(args);
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 		}

@@ -28,7 +28,6 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 	private final VolumeManager mManager = new VolumeManager(2);
 	private volatile Volume mLastVolumeSeen;
 
-
 	public ClearVolumeTCPServerSink(int pBufferMaxCapacity)
 	{
 		super();
@@ -52,12 +51,17 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 	@Override
 	public void close() throws IOException
 	{
-		if (mServerSocketChannel == null || !mServerSocketChannel.isOpen())
+		try
 		{
-			mServerSocketChannel = null;
+			if (mServerSocketChannel != null && mServerSocketChannel.isOpen())
+				mServerSocketChannel.close();
+
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
 		}
 
-		mServerSocketChannel.close();
 		mServerSocketChannel = null;
 	}
 
@@ -88,8 +92,8 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 			if (mLastVolumeSeen == null)
 			{
 				lNewLastSeenVolume = mManager.requestAndWaitForVolumeLike(1,
-																																			TimeUnit.MILLISECONDS,
-																																			pVolume);
+																																	TimeUnit.MILLISECONDS,
+																																	pVolume);
 			}
 			else
 				lNewLastSeenVolume = mLastVolumeSeen;
@@ -99,15 +103,14 @@ public class ClearVolumeTCPServerSink extends RelaySinkAdapter implements
 
 			mLastVolumeSeen = lNewLastSeenVolume;
 			// System.out.println(mLastVolumeSeen);
+
+			final boolean lSucceededInSending = mSourceToSinkBufferedAdapter.sendVolumeWithFeedback(pVolume);
+			if (!lSucceededInSending)
+				if (getRelaySink() != null)
+					getRelaySink().sendVolume(pVolume);
+				else
+					pVolume.makeAvailableToManager();
 		}
-
-		final boolean lSucceededInSending = mSourceToSinkBufferedAdapter.sendVolumeWithFeedback(pVolume);
-		if (!lSucceededInSending)
-			if (getRelaySink() != null)
-				getRelaySink().sendVolume(pVolume);
-			else
-				pVolume.makeAvailableToManager();
-
 	}
 
 	@Override

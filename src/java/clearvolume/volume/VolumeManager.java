@@ -76,7 +76,7 @@ public class VolumeManager implements ClearVolumeCloseable
 	}
 
 	public Volume requestAndWaitForNextAvailableVolume(	long pTimeOut,
-																														TimeUnit pTimeUnit)
+																											TimeUnit pTimeUnit)
 	{
 		do
 		{
@@ -110,7 +110,7 @@ public class VolumeManager implements ClearVolumeCloseable
 	}
 
 	private Volume allocateAndUseNewVolume(	NativeTypeEnum pType,
-																								long[] pDimensions)
+																					long[] pDimensions)
 	{
 		final Volume lVolume = new Volume(pType, pDimensions);
 		lVolume.setManager(this);
@@ -123,7 +123,8 @@ public class VolumeManager implements ClearVolumeCloseable
 		for (final SoftReference<Volume> lVolumeSoftReference : mAvailableVolumesQueue)
 		{
 			final Volume lVolume = lVolumeSoftReference.get();
-			lVolume.close();
+			if (lVolume != null)
+				lVolume.close();
 		}
 		mAvailableVolumesQueue.clear();
 	}

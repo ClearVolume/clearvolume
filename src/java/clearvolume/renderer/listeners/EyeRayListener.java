@@ -16,7 +16,7 @@ public interface EyeRayListener
 	 *         change (rotation, translation, ...)
 	 */
 	boolean notifyEyeRay(	ClearGLVolumeRenderer pRenderer,
-										MouseEvent pMouseEvent,
-										EyeRay pEyeRay);
+												MouseEvent pMouseEvent,
+												EyeRay pEyeRay);
 
 }

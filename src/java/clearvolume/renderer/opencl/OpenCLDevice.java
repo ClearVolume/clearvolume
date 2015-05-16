@@ -92,7 +92,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
 		mCLContextByteOrder = mCLContext.getByteOrder();
 
-		return (mCLContext != null && mCLContext != null && mCLQueue != null);
+		return (mCLDevice != null && mCLContext != null && mCLQueue != null);
 
 	}
 
@@ -253,8 +253,9 @@ public class OpenCLDevice implements ClearVolumeCloseable
 			e.printStackTrace();
 		}
 
-		System.out.println(lBestDevice.getName() + " is best in platform "
-												+ lBestDevice.getPlatform().getName());
+		if (lBestDevice != null)
+			System.out.println(lBestDevice.getName() + " is best in platform "
+													+ lBestDevice.getPlatform().getName());
 		return lBestDevice;
 	}
 

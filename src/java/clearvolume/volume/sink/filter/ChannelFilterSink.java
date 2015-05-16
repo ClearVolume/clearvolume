@@ -22,10 +22,11 @@ import clearvolume.volume.sink.VolumeSinkInterface;
 import clearvolume.volume.sink.relay.RelaySinkAdapter;
 import clearvolume.volume.sink.relay.RelaySinkInterface;
 
-public class ChannelFilterSink extends RelaySinkAdapter implements
-		RelaySinkInterface, ClearVolumeCloseable {
-	private static final ExecutorService mSeekingExecutor = Executors
-			.newSingleThreadExecutor();
+public class ChannelFilterSink extends RelaySinkAdapter	implements
+																												RelaySinkInterface,
+																												ClearVolumeCloseable
+{
+	private static final ExecutorService mSeekingExecutor = Executors.newSingleThreadExecutor();
 
 	private final Object mLock = new Object();
 	private final ConcurrentHashMap<Integer, String> mSeenChannelIdToNameMap = new ConcurrentHashMap<Integer, String>();
@@ -36,22 +37,28 @@ public class ChannelFilterSink extends RelaySinkAdapter implements
 	private final VolumeManager mEmptyVolumeManager = new VolumeManager(2);
 	private final VolumeSinkInterface mVolumeSinkForFilteredVolumes = new NullVolumeSink();;
 
-	AbstractListModel<String> mChannelListModel = new AbstractListModel<String>() {
+	AbstractListModel<String> mChannelListModel = new AbstractListModel<String>()
+	{
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public int getSize() {
+		public int getSize()
+		{
 			return mSeenChannelList.size();
 		}
 
 		@Override
-		public String getElementAt(int pIndex) {
+		public String getElementAt(int pIndex)
+		{
 
-			try {
+			try
+			{
 				final Integer lChannelId = mSeenChannelList.get(pIndex);
 				return lChannelId + " | "
-						+ mSeenChannelIdToNameMap.get(lChannelId);
-			} catch (final Exception e) {
+								+ mSeenChannelIdToNameMap.get(lChannelId);
+			}
+			catch (final Exception e)
+			{
 				final int lSize = mSeenChannelIdToNameMap.size();
 				if (pIndex >= lSize)
 					pIndex = lSize;
@@ -62,25 +69,32 @@ public class ChannelFilterSink extends RelaySinkAdapter implements
 
 	};
 
-	public ChannelFilterSink() {
+	public ChannelFilterSink()
+	{
 
 	}
 
-	public ChannelFilterSink(VolumeSinkInterface pRelaySink) {
+	public ChannelFilterSink(VolumeSinkInterface pRelaySink)
+	{
 		super(pRelaySink);
 
 	}
 
-	public void setActiveChannels(final int[] pActiveChannels) {
-		mSeekingExecutor.execute(new Runnable() {
+	public void setActiveChannels(final int[] pActiveChannels)
+	{
+		mSeekingExecutor.execute(new Runnable()
+		{
 
 			@Override
-			public void run() {
-				synchronized (mLock) {
+			public void run()
+			{
+				synchronized (mLock)
+				{
 					final Set<Integer> lOldActiveChannelsKeySet = mActiveChannelMap.keySet();
 					final ArrayList<Integer> lOldActiveChannels = new ArrayList<Integer>(lOldActiveChannelsKeySet);
 					mActiveChannelMap.clear();
-					for (final int lActiveChannel : pActiveChannels) {
+					for (final int lActiveChannel : pActiveChannels)
+					{
 						mActiveChannelMap.put(lActiveChannel, true);
 					}
 					for (int i = 0; i < pActiveChannels.length; i++)
@@ -96,7 +110,8 @@ public class ChannelFilterSink extends RelaySinkAdapter implements
 		});
 	}
 
-	private static boolean contains(final int[] array, final int v) {
+	private static boolean contains(final int[] array, final int v)
+	{
 		for (final int e : array)
 			if (e == v)
 				return true;
@@ -106,29 +121,33 @@ public class ChannelFilterSink extends RelaySinkAdapter implements
 	@Override
 	public void sendVolume(Volume pVolume)
 	{
-		synchronized (mLock) {
+		synchronized (mLock)
+		{
 			final int lChannelID = pVolume.getChannelID();
 			final String lChannelName = pVolume.getChannelName();
 
 			if (mChanneltoVolumeMap.get(lChannelID) != null)
 				if (mVolumeSinkForFilteredVolumes != null)
-					mVolumeSinkForFilteredVolumes
-							.sendVolume(mChanneltoVolumeMap.get(lChannelID));
+					mVolumeSinkForFilteredVolumes.sendVolume(mChanneltoVolumeMap.get(lChannelID));
 			mChanneltoVolumeMap.put(lChannelID, pVolume);
 
-			if (!mSeenChannelList.contains(lChannelID)) {
+			if (!mSeenChannelList.contains(lChannelID))
+			{
 				mSeenChannelList.add(lChannelID);
 				mActiveChannelMap.put(lChannelID, true);
-				final ListDataListener[] lListeners = mChannelListModel
-						.getListeners(ListDataListener.class);
-				for (final ListDataListener lListDataListener : lListeners) {
-					final ListDataEvent lListDataEvent = new ListDataEvent(
-							lListDataListener, ListDataEvent.CONTENTS_CHANGED,
-							0, mSeenChannelList.size());
-					SwingUtilities.invokeLater(new Runnable() {
+				final ListDataListener[] lListeners = mChannelListModel.getListeners(ListDataListener.class);
+				for (final ListDataListener lListDataListener : lListeners)
+				{
+					final ListDataEvent lListDataEvent = new ListDataEvent(	lListDataListener,
+																																	ListDataEvent.CONTENTS_CHANGED,
+																																	0,
+																																	mSeenChannelList.size());
+					SwingUtilities.invokeLater(new Runnable()
+					{
 
 						@Override
-						public void run() {
+						public void run()
+						{
 							lListDataListener.contentsChanged(lListDataEvent);
 						};
 					});
@@ -141,16 +160,21 @@ public class ChannelFilterSink extends RelaySinkAdapter implements
 		}
 	}
 
-	private void sendVolumeInternal(final int lChannelID) {
-		synchronized (mLock) {
+	private void sendVolumeInternal(final int lChannelID)
+	{
+		synchronized (mLock)
+		{
 			final Volume lVolume = mChanneltoVolumeMap.get(lChannelID);
 			final Boolean lBoolean = mActiveChannelMap.get(lChannelID);
-			if (lBoolean != null && lBoolean) {
+			if (lBoolean != null && lBoolean)
+			{
 				forward(lVolume);
-			} else {
-				final Volume lEmptyVolume = mEmptyVolumeManager
-						.requestAndWaitForVolumeLike(1, TimeUnit.MILLISECONDS,
-								lVolume);
+			}
+			else
+			{
+				final Volume lEmptyVolume = mEmptyVolumeManager.requestAndWaitForVolumeLike(1,
+																																										TimeUnit.MILLISECONDS,
+																																										lVolume);
 				lEmptyVolume.copyMetaDataFrom(lVolume);
 				forward(lEmptyVolume);
 			}
@@ -158,7 +182,8 @@ public class ChannelFilterSink extends RelaySinkAdapter implements
 	}
 
 	@Override
-	public VolumeManager getManager() {
+	public VolumeManager getManager()
+	{
 		if (!(getRelaySink() instanceof NullVolumeSink))
 			if (getRelaySink() != null)
 				return getRelaySink().getManager();
@@ -171,13 +196,16 @@ public class ChannelFilterSink extends RelaySinkAdapter implements
 			getRelaySink().sendVolume(pVolume);
 	}
 
-	public ListModel<String> getChannelListModel() {
+	public ListModel<String> getChannelListModel()
+	{
 		return mChannelListModel;
 	}
 
 	@Override
-	public void close() {
-		synchronized (mLock) {
+	public void close()
+	{
+		synchronized (mLock)
+		{
 			mSeenChannelIdToNameMap.clear();
 			mSeenChannelList.clear();
 			mActiveChannelMap.clear();

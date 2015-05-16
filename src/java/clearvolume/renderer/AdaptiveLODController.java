@@ -190,10 +190,7 @@ public class AdaptiveLODController
 
 			final double lDifference = lQuality - lSpeed;
 
-			format("q=%g, s=%g, diff=%g \n",
-												lQuality,
-												lSpeed,
-												lDifference);
+			format("q=%g, s=%g, diff=%g \n", lQuality, lSpeed, lDifference);
 
 			if (lDifference > cHysteresis)
 			{

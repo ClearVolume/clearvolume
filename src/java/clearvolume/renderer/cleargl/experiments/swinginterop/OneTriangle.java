@@ -1,7 +1,7 @@
 package clearvolume.renderer.cleargl.experiments.swinginterop;
 
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
 
 public class OneTriangle
@@ -10,7 +10,7 @@ public class OneTriangle
 
 	protected static void setup(GL pGL, int width, int height)
 	{
-		pGL.getGL2().glMatrixMode(GL2.GL_PROJECTION);
+		pGL.getGL2().glMatrixMode(GLMatrixFunc.GL_PROJECTION);
 		pGL.getGL2().glLoadIdentity();
 
 		// coordinate system origin at lower left with width and height same as the
@@ -18,7 +18,7 @@ public class OneTriangle
 		final GLU glu = new GLU();
 		glu.gluOrtho2D(0.0f, width, 0.0f, height);
 
-		pGL.getGL2().glMatrixMode(GL2.GL_MODELVIEW);
+		pGL.getGL2().glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
 		pGL.getGL2().glLoadIdentity();
 
 		pGL.glViewport(0, 0, width, height);

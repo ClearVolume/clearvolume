@@ -125,8 +125,11 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	 * name, width and height.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
+	 *          window height
 	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
 																	final int pWindowWidth,
@@ -140,9 +143,13 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	 * name, width, height, and bytes=per-voxel.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
 	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
 																	final int pWindowWidth,
@@ -160,25 +167,31 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	 * name, width, height, and bytes=per-voxel.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
-	 * @param pMaxTextureWidth
-	 * @param pMaxTextureHeight
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
+	 * @param pMaxRenderWidth
+	 *          max render width
+	 * @param pMaxRenderHeight
+	 *          max render height
 	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
 																	final int pWindowWidth,
 																	final int pWindowHeight,
 																	final NativeTypeEnum pNativeTypeEnum,
-																	final int pMaxTextureWidth,
-																	final int pMaxTextureHeight)
+																	final int pMaxRenderWidth,
+																	final int pMaxRenderHeight)
 	{
 		super("[CUDA] " + pWindowName,
 					pWindowWidth,
 					pWindowHeight,
 					pNativeTypeEnum,
-					pMaxTextureWidth,
-					pMaxTextureHeight);
+					pMaxRenderWidth,
+					pMaxRenderHeight);
 	}
 
 	/**
@@ -186,19 +199,29 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	 * name, width, height, and bytes=per-voxel.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
-	 * @param pMaxTextureWidth
-	 * @param pMaxTextureHeight
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
+	 * @param pMaxRenderWidth
+	 *          max render width
+	 * @param pMaxRenderHeight
+	 *          max render height
 	 * @param pNumberOfRenderLayers
+	 *          number of render layers
+	 * @param pUseInCanvas
+	 *          true if the renderer is to be used as part of a AWT/Swing/SWT
+	 *          component.
 	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
 																	final int pWindowWidth,
 																	final int pWindowHeight,
 																	final NativeTypeEnum pNativeTypeEnum,
-																	final int pMaxTextureWidth,
-																	final int pMaxTextureHeight,
+																	final int pMaxRenderWidth,
+																	final int pMaxRenderHeight,
 																	final int pNumberOfRenderLayers,
 																	final boolean pUseInCanvas)
 	{
@@ -206,8 +229,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 					pWindowWidth,
 					pWindowHeight,
 					pNativeTypeEnum,
-					pMaxTextureWidth,
-					pMaxTextureHeight,
+					pMaxRenderWidth,
+					pMaxRenderHeight,
 					pNumberOfRenderLayers,
 					pUseInCanvas);
 
@@ -287,9 +310,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	{
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
-			final long lBufferSize = 4 * getTextureWidth()
-																* getTextureHeight();
-			assert (mCudaBufferDevicePointer[i] == null);
+			final long lBufferSize = 4 * getRenderWidth()
+																* getRenderHeight();
 
 			if (mCudaBufferDevicePointer[i] != null)
 				mCudaBufferDevicePointer[i].close();
@@ -800,9 +822,9 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 				pointTransferFunctionTextureToArray(pRenderLayerIndex);
 				pointTextureToArray(pRenderLayerIndex);
 
-				mCurrentRenderKernel.setGridDim(iDivUp(	getTextureWidth(),
+				mCurrentRenderKernel.setGridDim(iDivUp(	getRenderWidth(),
 																								cBlockSize),
-																				iDivUp(	getTextureHeight(),
+																				iDivUp(	getRenderHeight(),
 																								cBlockSize),
 																				1);
 
@@ -828,8 +850,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 					lClear = (lPassIndex == 0) ? 0 : 1;
 
 					mCurrentRenderKernel.launch(lCudaDevicePointer,
-																			getTextureWidth(),
-																			getTextureHeight(),
+																			getRenderWidth(),
+																			getRenderHeight(),
 																			(float) getBrightness(pRenderLayerIndex),
 																			(float) getTransferRangeMin(pRenderLayerIndex),
 																			(float) getTransferRangeMax(pRenderLayerIndex),
@@ -852,8 +874,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 					final float[] lLightVector = getLightVector();
 
 					mCurrentRenderKernel.launch(lCudaDevicePointer,
-																			getTextureWidth(),
-																			getTextureHeight(),
+																			getRenderWidth(),
+																			getRenderHeight(),
 																			(float) getBrightness(pRenderLayerIndex),
 																			(float) getTransferRangeMin(pRenderLayerIndex),
 																			(float) getTransferRangeMax(pRenderLayerIndex),
@@ -915,10 +937,8 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 			}
 	}
 
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.cleargl.JOGLClearVolumeFrameRenderer#close()
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.cleargl.ClearGLVolumeRenderer#close()
 	 */
 	@Override
 	public void close()

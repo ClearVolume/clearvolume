@@ -23,7 +23,13 @@ public interface Overlay2D
 	 * OpenGl code to render the 2D overlay.
 	 * 
 	 * @param pGL
+	 *          GL object
+	 * @param pWidth
+	 *          viewport width
+	 * @param pHeight
+	 *          viewport height
 	 * @param pProjectionMatrix
+	 *          projection matrix
 	 */
 	public void render2D(	GL pGL,
 												int pWidth,

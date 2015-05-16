@@ -162,7 +162,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 	@Override
 	protected void notifyChangeOfTextureDimensions()
 	{
-		final int lRenderBufferSize = getTextureHeight() * getTextureWidth();
+		final int lRenderBufferSize = getRenderHeight() * getRenderWidth();
 
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 		{
@@ -426,8 +426,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 				mCLDevice.setArgs(mCurrentRenderKernel,
 													mCLRenderBuffers[pRenderLayerIndex],
-													getTextureWidth(),
-													getTextureHeight(),
+													getRenderWidth(),
+													getRenderHeight(),
 													(float) getBrightness(pRenderLayerIndex),
 													(float) getTransferRangeMin(pRenderLayerIndex),
 													(float) getTransferRangeMax(pRenderLayerIndex),
@@ -456,8 +456,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 				mCLDevice.setArgs(mCurrentRenderKernel,
 													mCLRenderBuffers[pRenderLayerIndex],
-													getTextureWidth(),
-													getTextureHeight(),
+													getRenderWidth(),
+													getRenderHeight(),
 													(float) getBrightness(pRenderLayerIndex),
 													(float) getTransferRangeMin(pRenderLayerIndex),
 													(float) getTransferRangeMax(pRenderLayerIndex),
@@ -477,20 +477,18 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 			}
 
 			mCLDevice.run(mCurrentRenderKernel,
-										getTextureWidth(),
-										getTextureHeight());
+										getRenderWidth(),
+										getRenderHeight());
 
 		}
 		else
 		{
 			mCLDevice.setArgs(mClearKernel,
 												mCLRenderBuffers[pRenderLayerIndex],
-												getTextureWidth(),
-												getTextureHeight());
+												getRenderWidth(),
+												getRenderHeight());
 
-			mCLDevice.run(mClearKernel,
-										getTextureWidth(),
-										getTextureHeight());
+			mCLDevice.run(mClearKernel, getRenderWidth(), getRenderHeight());
 
 		}
 

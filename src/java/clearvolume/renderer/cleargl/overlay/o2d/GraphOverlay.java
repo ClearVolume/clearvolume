@@ -24,7 +24,7 @@ import clearvolume.renderer.processors.ProcessorResultListener;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES3;
 
 public class GraphOverlay extends OverlayBase	implements
 																							Overlay2D,
@@ -432,7 +432,7 @@ public class GraphOverlay extends OverlayBase	implements
 					pGL.glDisable(GL.GL_DEPTH_TEST);
 					pGL.glEnable(GL.GL_BLEND);
 					pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-					pGL.glBlendEquation(GL2.GL_MAX);/**/
+					pGL.glBlendEquation(GL2ES3.GL_MAX);/**/
 					//
 					mClearGeometryObjectLines.draw(0, mDataY.size());
 

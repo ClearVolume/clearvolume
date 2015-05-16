@@ -40,18 +40,16 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 	{
 		mBlockSize = pBlockSize;
 	}
-	
+
 	public void setSigmaSpace(final float pSigmaSpace)
 	{
 		mSigmaSpace = pSigmaSpace;
 	}
-	
+
 	public void setSigmaValue(final float pSigmaValue)
 	{
 		mSigmaValue = pSigmaValue;
 	}
-	
-
 
 	public void ensureOpenCLInitialized()
 	{
@@ -62,7 +60,6 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 
 			mKernelCopyBufToImg = getDevice().compileKernel(OpenCLDeconvolutionLR.class.getResource("kernels/deconv.cl"),
 																											"copyBufToImg");
-
 
 		}
 
@@ -126,7 +123,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 			e.printStackTrace();
 			notifyListenersOfResult(new Boolean(false));
 		}
-		
+
 		notifyListenersOfResult(new Boolean(true));
 
 	}

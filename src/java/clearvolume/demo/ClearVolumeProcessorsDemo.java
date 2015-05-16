@@ -680,7 +680,6 @@ public class ClearVolumeProcessorsDemo
 
 		lOpenCLDeconvolutionLR.setActive(true);
 
-
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -692,8 +691,6 @@ public class ClearVolumeProcessorsDemo
 																							* lResolutionZ];
 
 		final Random rand = new Random();
-
-
 
 		final float s = 5.f;
 		lOpenCLDeconvolutionLR.setSigmas(s, s, s);
@@ -726,7 +723,6 @@ public class ClearVolumeProcessorsDemo
 																								lResolutionX,
 																								lResolutionY,
 																								lResolutionZ);
-
 
 		}
 
@@ -774,7 +770,6 @@ public class ClearVolumeProcessorsDemo
 
 		assertNotNull(lDenoiseProcessor);
 
-
 		lDenoiseProcessor.setBlockSize(2);
 		lDenoiseProcessor.setSigmaValue(1f * noiseLevel / 256f);
 		lDenoiseProcessor.setSigmaSpace(1.5f);
@@ -819,7 +814,6 @@ public class ClearVolumeProcessorsDemo
 																							lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
-
 		while (lClearVolumeRenderer.isShowing())
 		{
 			// Thread.sleep(2000);
@@ -849,8 +843,6 @@ public class ClearVolumeProcessorsDemo
 																																																													* (y - y1) + (z - z1) * (z - z1)))) + rand.nextInt(noiseLevel + 1));
 
 					}
-
-
 
 		}
 

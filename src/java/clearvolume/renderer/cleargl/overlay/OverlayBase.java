@@ -1,6 +1,5 @@
 package clearvolume.renderer.cleargl.overlay;
 
-
 /**
  * OverlayBase - Class implementing basic functionality of classes implementing
  * the Overlay interface.
@@ -21,7 +20,7 @@ public abstract class OverlayBase implements Overlay
 		setDisplayed(!isDisplayed());
 		return isDisplayed();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay#setDisplay(boolean)
 	 */

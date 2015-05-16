@@ -22,7 +22,7 @@ import clearvolume.renderer.listeners.EyeRayListener;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2ES3;
 
 /**
  * CursorOverlay - Displays a movable 3D cursor
@@ -248,7 +248,7 @@ public class CursorOverlay extends OverlayBase implements
 			pGL.glDisable(GL.GL_CULL_FACE);
 			pGL.glEnable(GL.GL_BLEND);
 			pGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
-			pGL.glBlendEquation(GL2.GL_MAX);
+			pGL.glBlendEquation(GL2ES3.GL_MAX);
 
 			mBoxGLProgram.use(pGL);
 

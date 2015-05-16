@@ -18,7 +18,7 @@ public interface TransferFunction
 	 * @return dimension
 	 */
 	int getDimension();
-	
+
 	/**
 	 * Returns the data of the transfer function in the form of a float array in
 	 * row major order.

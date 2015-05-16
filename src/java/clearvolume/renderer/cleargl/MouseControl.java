@@ -103,7 +103,6 @@ class MouseControl extends MouseAdapter implements MouseListener
 		if (mRenderer.notifyEyeRayListeners(mRenderer, pMouseEvent))
 			return;
 
-
 		if (!pMouseEvent.isMetaDown() && !pMouseEvent.isShiftDown()
 				&& !pMouseEvent.isAltDown()
 				&& !pMouseEvent.isControlDown()
@@ -245,6 +244,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 	 * Sets the transfer function range.
 	 * 
 	 * @param pMouseEvent
+	 *          mouse event
 	 */
 	public void handleGammaMinMax(final MouseEvent pMouseEvent)
 	{

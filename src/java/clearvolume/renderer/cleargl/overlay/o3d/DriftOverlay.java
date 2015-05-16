@@ -28,10 +28,6 @@ public class DriftOverlay extends PathOverlay	implements
 																							Overlay2D
 {
 
-	protected FloatBuffer mStartColor = FloatBuffer.wrap(new float[]
-	{ 0.0f, 1.0f, 0.0f, 1.0f });
-	protected FloatBuffer mEndColor = FloatBuffer.wrap(new float[]
-	{ 1.0f, 0.0f, 0.0f, 1.0f });
 	protected SynchronizedDescriptiveStatistics stats;
 
 	protected ClearTextRenderer textRenderer;
@@ -45,8 +41,10 @@ public class DriftOverlay extends PathOverlay	implements
 	{
 		super.init(pGL, pDisplayRequestInterface);
 
-		super.mStartColor = mStartColor;
-		super.mEndColor = mEndColor;
+		super.mStartColor = FloatBuffer.wrap(new float[]
+		{ 0.0f, 1.0f, 0.0f, 1.0f });
+		super.mEndColor = FloatBuffer.wrap(new float[]
+		{ 1.0f, 0.0f, 0.0f, 1.0f });
 		textRenderer = new ClearTextRenderer(pGL, false);
 	}
 

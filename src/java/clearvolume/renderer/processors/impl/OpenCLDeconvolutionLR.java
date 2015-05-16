@@ -3,6 +3,7 @@ package clearvolume.renderer.processors.impl;
 import clearvolume.renderer.opencl.OpenCLDevice;
 import clearvolume.renderer.processors.OpenCLProcessor;
 
+import com.jogamp.newt.event.InputEvent;
 import com.jogamp.newt.event.KeyEvent;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
@@ -15,7 +16,6 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>
 	private CLKernel mKernelCopyImgToBuf;
 	private CLKernel mKernelCopyBufToImg;
 	private CLKernel mKernelDiv;
-
 
 	CLBuffer<Float> mInput;
 	CLBuffer<Float> mTmp;
@@ -50,7 +50,7 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>
 	@Override
 	public int toggleKeyModifierMask()
 	{
-		return KeyEvent.SHIFT_MASK;
+		return InputEvent.SHIFT_MASK;
 	};
 
 	public void setSigmas(final float pSigmaX,
@@ -198,7 +198,7 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>
 			e.printStackTrace();
 			notifyListenersOfResult(new Boolean(false));
 		}
-		
+
 		notifyListenersOfResult(new Boolean(true));
 	}
 

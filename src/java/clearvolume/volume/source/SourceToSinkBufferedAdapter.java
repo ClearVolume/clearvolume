@@ -49,8 +49,7 @@ public class SourceToSinkBufferedAdapter implements
 		}
 	}
 
-	public Volume requestVolumeAndWait(int pTimeOut,
-																				TimeUnit pTimeUnit)
+	public Volume requestVolumeAndWait(int pTimeOut, TimeUnit pTimeUnit)
 	{
 		try
 		{

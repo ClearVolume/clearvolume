@@ -2,7 +2,6 @@ package clearvolume.renderer.listeners;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
 
-
 /**
  * ParameterChangeListener Interface
  *

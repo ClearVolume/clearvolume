@@ -16,7 +16,7 @@ public interface Overlay
 	/**
 	 * Name of overlay.
 	 * 
-	 * @return
+	 * @return Name.
 	 */
 	public String getName();
 

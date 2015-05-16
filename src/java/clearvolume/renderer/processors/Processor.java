@@ -2,7 +2,6 @@ package clearvolume.renderer.processors;
 
 import clearvolume.renderer.SingleKeyToggable;
 
-
 public interface Processor<R> extends SingleKeyToggable
 {
 
