@@ -2,11 +2,11 @@ package clearvolume.renderer.cleargl.overlay;
 
 import java.util.ArrayList;
 
-import javax.media.opengl.GL;
-
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.processors.Processor;
+
+import com.jogamp.opengl.GL;
 
 public class OverlayForProcessors extends OverlayBase	implements
 																											Overlay2D,

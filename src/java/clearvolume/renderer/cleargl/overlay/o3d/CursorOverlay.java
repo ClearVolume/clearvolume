@@ -6,9 +6,6 @@ import static java.lang.Math.sqrt;
 
 import java.io.IOException;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
 import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
@@ -24,6 +21,8 @@ import clearvolume.renderer.listeners.EyeRayListener;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 /**
  * CursorOverlay - Displays a movable 3D cursor

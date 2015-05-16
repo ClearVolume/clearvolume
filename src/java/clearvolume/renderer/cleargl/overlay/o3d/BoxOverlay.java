@@ -2,9 +2,6 @@ package clearvolume.renderer.cleargl.overlay.o3d;
 
 import java.io.IOException;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
 import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
@@ -16,6 +13,8 @@ import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
 
 import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 
 /**
  * BoxOverlay - Nice shader based box and grid 3D overlay.

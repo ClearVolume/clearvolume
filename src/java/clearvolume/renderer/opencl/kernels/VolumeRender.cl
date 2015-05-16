@@ -265,7 +265,7 @@ __kernel void isosurface_render(
 
   
 	// samplers:
-  const sampler_t volumeSampler   =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP | CLK_FILTER_LINEAR ;
+  const sampler_t volumeSampler   =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR ;
   const sampler_t transferSampler =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR ;
 
 	// convert range bounds to linear map:
@@ -353,7 +353,7 @@ __kernel void isosurface_render(
   float isoVal = mad(1.0f/ta,pow(0.5f,1.0f/gamma),-tb);
 
   // starting value:
-  float newVal = 0;
+  float newVal = 0; //read_imagef(volume, volumeSampler, pos).x;
 
 	// is iso surface value greater or lower:
   bool isGreater = newVal>isoVal;

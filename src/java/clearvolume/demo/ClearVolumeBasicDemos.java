@@ -349,10 +349,9 @@ public class ClearVolumeBasicDemos
 
 		final int lMaxTextureRes = 2048;
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newCudaRenderer(	"ClearVolumeTest",/**/
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",/**/
 																																																						768,
 																																																						768,
-
 																																																						NativeTypeEnum.UnsignedShort,
 																																																						lMaxTextureRes,
 																																																						lMaxTextureRes,
@@ -362,7 +361,7 @@ public class ClearVolumeBasicDemos
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
-		final int lResolutionX = 256;
+		final int lResolutionX = 512;
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 

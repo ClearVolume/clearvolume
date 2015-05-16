@@ -5,8 +5,6 @@ import java.awt.FontFormatException;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
 import cleargl.ClearTextRenderer;
@@ -15,6 +13,8 @@ import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
+
+import com.jogamp.opengl.GL;
 
 /**
  * Drift Path Overlay.

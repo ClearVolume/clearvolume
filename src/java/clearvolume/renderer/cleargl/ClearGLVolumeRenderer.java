@@ -11,12 +11,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.media.nativewindow.WindowClosingProtocol.WindowClosingMode;
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLProfile;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 
@@ -44,10 +38,15 @@ import clearvolume.renderer.cleargl.utils.ScreenToEyeRay;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
 import clearvolume.renderer.listeners.EyeRayListener;
 
+import com.jogamp.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.Quaternion;
 
 import coremem.types.NativeTypeEnum;
@@ -664,11 +663,10 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	@Override
 	public void display(final GLAutoDrawable pDrawable)
 	{
-		displayInternal(pDrawable, false);
+		displayInternal(pDrawable);
 	}
 
-	private void displayInternal(	final GLAutoDrawable pDrawable,
-																boolean pForceRedraw)
+	private void displayInternal(final GLAutoDrawable pDrawable)
 	{
 		final boolean lTryLock = true;
 
@@ -982,7 +980,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 */
 	private void updateFrameRateDisplay()
 	{
-		if(mNewtCanvasAWT!=null)
+		if (mNewtCanvasAWT != null)
 			return;
 
 		step++;
@@ -1034,8 +1032,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 			mViewportX = x;
 			mViewportY = y;
-			mViewportWidth = pWidth;
-			mViewportHeight = pHeight;
+			setViewportWidth(pWidth);
+			setViewportHeight(pHeight);
 
 			if (pHeight < 16)
 				pHeight = 16;
@@ -1060,34 +1058,41 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																												0,
 																												1000);/**/
 
-			final int lCandidateTextureWidth = min(	mMaxTextureWidth,
-																							(mViewportWidth / 64) * 64);
-			final int lCandidateTextureHeight = min(mMaxTextureHeight,
-																							(mViewportHeight / 64) * 64);
+			final int lMaxVolumeDimension = (int) max(getVolumeSizeX(),
+																								max(getVolumeSizeY(),
+																										getVolumeSizeZ()));
 
-			if (lCandidateTextureWidth != 0 && lCandidateTextureHeight == 0)
+			final int lMaxTextureWidth = min(	mMaxTextureWidth,
+																				2 * lMaxVolumeDimension);
+			final int lMaxTextureHeight = min(mMaxTextureHeight,
+																				2 * lMaxVolumeDimension);
+
+			final int lCandidateTextureWidth = ((min(	lMaxTextureWidth,
+																								getViewportWidth()) / 128) * 128);
+			final int lCandidateTextureHeight = ((min(lMaxTextureHeight,
+																								getViewportHeight()) / 128) * 128);
+
+			if (lCandidateTextureWidth == 0 || lCandidateTextureHeight == 0)
 				return;
 
 			float lRatioWidth = ((float) mTextureWidth) / lCandidateTextureWidth;
 			float lRatioHeight = ((float) mTextureHeight) / lCandidateTextureHeight;
 			float lRatioAspect = (((float) mTextureWidth) / mTextureHeight) / ((float) lCandidateTextureWidth / lCandidateTextureHeight);
 
-			if (lRatioWidth == 0)
-				lRatioWidth = 1 / lRatioWidth;
-			if (lRatioWidth < 1)
-				lRatioWidth = 1 / lRatioWidth;
 
-			if (lRatioHeight == 0)
-				lRatioHeight = 1 / lRatioHeight;
-			if (lRatioHeight < 1)
-				lRatioHeight = 1 / lRatioHeight;
 
-			if (lRatioAspect == 0)
-				lRatioAspect = 1 / lRatioAspect;
-			if (lRatioAspect < 1)
-				lRatioAspect = 1 / lRatioAspect;
+			if (lRatioWidth > 0 && lRatioWidth < 1)
+				lRatioWidth = 1f / lRatioWidth;
 
-			// System.out.format("ratios: (%g,%g) \n", lRatioWidth, lRatioHeight);
+			if (lRatioHeight > 0 && lRatioHeight < 1)
+				lRatioHeight = 1f / lRatioHeight;
+
+			if (lRatioAspect > 0 && lRatioAspect < 1)
+				lRatioAspect = 1f / lRatioAspect;
+
+			/*System.out.format("modified ratios: (%g,%g) \n",
+												lRatioWidth,
+												lRatioHeight);/**/
 
 			if (lRatioWidth > cTextureDimensionChangeRatioThreshold || lRatioHeight > cTextureDimensionChangeRatioThreshold
 					|| lRatioAspect > cTextureAspectChangeRatioThreshold)
@@ -1101,7 +1106,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 													mTextureHeight);/**/
 			}
 
-			// displayInternal(pDrawable, true);
 		}
 		catch (final Throwable e)
 		{
@@ -1278,6 +1282,11 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	public int getViewportHeight()
 	{
 		return mViewportHeight;
+	}
+
+	public void setViewportHeight(int pViewportHeight)
+	{
+		mViewportHeight = pViewportHeight;
 	}
 
 	public int getViewportWidth()

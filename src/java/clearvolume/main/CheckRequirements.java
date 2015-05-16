@@ -2,13 +2,14 @@ package clearvolume.main;
 
 import java.awt.HeadlessException;
 
-import javax.media.opengl.GLException;
-import javax.media.opengl.GLProfile;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.lang.SystemUtils;
 
 import clearvolume.exceptions.UnsupportedArchitectureException;
+
+import com.jogamp.opengl.GLException;
+import com.jogamp.opengl.GLProfile;
 
 public class CheckRequirements
 {

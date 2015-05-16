@@ -20,9 +20,6 @@ import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-
 import jcuda.CudaException;
 import jcuda.Pointer;
 import jcuda.driver.CUaddress_mode;
@@ -42,6 +39,10 @@ import clearcuda.CudaTextureReference;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.processors.CUDAProcessor;
 import clearvolume.renderer.processors.Processor;
+
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
+
 import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;

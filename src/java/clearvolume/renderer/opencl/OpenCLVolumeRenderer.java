@@ -7,12 +7,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GLEventListener;
-
 import jcuda.CudaException;
 
 import org.bridj.Pointer;
 
+import clearvolume.exceptions.ClearVolumeUnsupportdDataTypeException;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.o2d.BarGraphOverlay;
 import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
@@ -22,6 +21,7 @@ import clearvolume.renderer.processors.impl.OpenCLDeconvolutionLR;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
 
+import com.jogamp.opengl.GLEventListener;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLImage3D;
@@ -201,6 +201,20 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 																																						lDepth,
 																																						CLImageFormat.ChannelOrder.R,
 																																						CLImageFormat.ChannelDataType.UNormInt16);
+			else if (getNativeType() == NativeTypeEnum.Byte)
+				mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
+																																						lHeight,
+																																						lDepth,
+																																						CLImageFormat.ChannelOrder.R,
+																																						CLImageFormat.ChannelDataType.UNormInt8);
+			else if (getNativeType() == NativeTypeEnum.Short)
+				mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
+																																						lHeight,
+																																						lDepth,
+																																						CLImageFormat.ChannelOrder.R,
+																																						CLImageFormat.ChannelDataType.UNormInt16);
+			else
+				throw new ClearVolumeUnsupportdDataTypeException("Received an unsupported data type: " + getNativeType());
 
 			fillWithByteBuffer(	mCLVolumeImages[pRenderLayerIndex],
 													lVolumeDataBuffer);

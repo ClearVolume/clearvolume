@@ -1,8 +1,8 @@
 package clearvolume.renderer.cleargl.overlay;
 
-import javax.media.opengl.GL;
-
 import cleargl.GLMatrix;
+
+import com.jogamp.opengl.GL;
 
 /**
  * Overlay2D interface - methods specific for 2D overlays.

@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
-
 import cleargl.ClearGeometryObject;
 import cleargl.GLError;
 import cleargl.GLFloatArray;
@@ -21,6 +19,8 @@ import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
+
+import com.jogamp.opengl.GL;
 
 public abstract class BarGraphOverlay extends OverlayBase	implements
 																								Overlay2D,

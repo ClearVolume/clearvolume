@@ -1,8 +1,8 @@
 package clearvolume.renderer.cleargl.overlay;
 
-import javax.media.opengl.GL;
-
 import clearvolume.renderer.DisplayRequestInterface;
+
+import com.jogamp.opengl.GL;
 
 /**
  * Overlays enable rendering OpenGl primitives within the 3D volume (3D overlay)

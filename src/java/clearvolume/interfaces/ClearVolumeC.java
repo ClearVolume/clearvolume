@@ -1,5 +1,19 @@
 package clearvolume.interfaces;
 
+import java.awt.EventQueue;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
+import org.bridj.Pointer;
+import org.bridj.Pointer.Releaser;
+import org.bridj.PointerIO;
+
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.network.server.ClearVolumeTCPServerSink;
 import clearvolume.renderer.ClearVolumeRendererInterface;
@@ -15,19 +29,6 @@ import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 import coremem.types.NativeTypeEnum;
-import org.bridj.Pointer;
-import org.bridj.Pointer.Releaser;
-import org.bridj.PointerIO;
-
-import java.awt.*;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 public class ClearVolumeC
 {

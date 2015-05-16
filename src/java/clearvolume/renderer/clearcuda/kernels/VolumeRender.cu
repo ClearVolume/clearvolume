@@ -391,7 +391,7 @@ isosurface_render(
   float isoVal = pow(0.5f,1.0f/gamma)/ta-tb;
 
   // starting value:
-  float newVal = 0;
+  float newVal = 0; //tex3D(tex, pos.x, pos.y, pos.z);
 
 	// is iso surface value greater or lower:
   bool isGreater = newVal>isoVal;

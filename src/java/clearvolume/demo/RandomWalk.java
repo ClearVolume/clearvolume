@@ -1,8 +1,7 @@
 package clearvolume.demo;
 
-import clearvolume.renderer.processors.ProcessorBase;
-
 import static java.lang.Math.random;
+import clearvolume.renderer.processors.ProcessorBase;
 
 public class RandomWalk extends ProcessorBase<float[]>
 {

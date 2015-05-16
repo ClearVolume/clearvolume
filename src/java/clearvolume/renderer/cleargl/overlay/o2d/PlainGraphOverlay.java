@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
-
 import cleargl.ClearGeometryObject;
 import cleargl.GLError;
 import cleargl.GLFloatArray;
@@ -25,6 +23,7 @@ import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 
 import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
 
 public class PlainGraphOverlay extends OverlayBase implements
 																									Overlay2D,
