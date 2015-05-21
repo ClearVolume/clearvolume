@@ -10,11 +10,13 @@ import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.renderer.opencl.OpenCLAvailability;
 
+import com.jogamp.opengl.GL;
+
 public class ClearVolumeRendererFactoryTests
 {
 
 	@Test
-	public void test()
+	public void testBestRenderer8Bit()
 	{
 		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
 			return;
@@ -25,6 +27,64 @@ public class ClearVolumeRendererFactoryTests
 																																																						128,
 																																																						128,
 																																																						false);
+			System.out.println(lNewBestRenderer.getClass());
+			assertNotNull(lNewBestRenderer);
+		}
+		catch (final Throwable e)
+		{
+			System.err.println("!!! COULD NOT BUILD ANY RENDERER NEITHER WITH CUDA OR OPENCL !!!");
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testBestRenderer16Bit()
+	{
+		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
+			return;
+
+		try
+		{
+			final ClearVolumeRendererInterface lNewBestRenderer = ClearVolumeRendererFactory.newBestRenderer16Bit("Test",
+																																																						128,
+																																																						128,
+																																																						false);
+			System.out.println(lNewBestRenderer.getClass());
+			assertNotNull(lNewBestRenderer);
+		}
+		catch (final Throwable e)
+		{
+			System.err.println("!!! COULD NOT BUILD ANY RENDERER NEITHER WITH CUDA OR OPENCL !!!");
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testIsolatedRenderer()
+	{
+		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
+			return;
+
+		try
+		{
+			ClearVolumeRendererFactory.setClassLoaderIsolation(true);
+			
+			final String lJoglJar = GL.class.getProtectionDomain()
+																			.getCodeSource()
+																			.getLocation()
+																			.toString();
+			System.out.println(lJoglJar);
+			
+			ClearVolumeRendererFactory.getPrivateJarList().add(lJoglJar);
+
+			final ClearVolumeRendererInterface lNewBestRenderer = ClearVolumeRendererFactory.newBestRenderer16Bit("Test",
+																																																						128,
+																																																						128,
+																																																						false);
+			ClearVolumeRendererFactory.setClassLoaderIsolation(false);
+
 			System.out.println(lNewBestRenderer.getClass());
 			assertNotNull(lNewBestRenderer);
 		}

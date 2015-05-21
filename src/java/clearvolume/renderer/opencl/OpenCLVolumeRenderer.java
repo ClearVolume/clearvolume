@@ -87,13 +87,13 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 	@SuppressWarnings("unchecked")
 	public OpenCLVolumeRenderer(final String pWindowName,
-															final int pWindowWidth,
-															final int pWindowHeight,
+															final Integer pWindowWidth,
+															final Integer pWindowHeight,
 															final NativeTypeEnum pNativeTypeEnum,
-															final int pMaxTextureWidth,
-															final int pMaxTextureHeight,
-															final int pNumberOfRenderLayers,
-															final boolean useInCanvas)
+															final Integer pMaxTextureWidth,
+															final Integer pMaxTextureHeight,
+															final Integer pNumberOfRenderLayers,
+															final Boolean useInCanvas)
 	{
 
 		super("[OpenCL] " + pWindowName,

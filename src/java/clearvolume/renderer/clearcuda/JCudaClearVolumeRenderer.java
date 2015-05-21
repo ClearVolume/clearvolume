@@ -217,12 +217,12 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	 *          component.
 	 */
 	public JCudaClearVolumeRenderer(final String pWindowName,
-																	final int pWindowWidth,
-																	final int pWindowHeight,
+																	final Integer pWindowWidth,
+																	final Integer pWindowHeight,
 																	final NativeTypeEnum pNativeTypeEnum,
-																	final int pMaxRenderWidth,
-																	final int pMaxRenderHeight,
-																	final int pNumberOfRenderLayers,
+																	final Integer pMaxRenderWidth,
+																	final Integer pMaxRenderHeight,
+																	final Integer pNumberOfRenderLayers,
 																	final boolean pUseInCanvas)
 	{
 		super("[CUDA] " + pWindowName,

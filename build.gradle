@@ -190,6 +190,8 @@ dependencies
 	compile group: "net.coremem", name: "CoreMem", version: "(,1.0.0]", changing: true, transitive:true
 	compile 'com.nativelibs4java:javacl:1.0.0-RC4'
 	
+	compile 'org.xeustechnologies:jcl-core:2.6'
+	
 
 	// usage: gradle .... -Plocal=true
 	if (project.hasProperty('local')) {
