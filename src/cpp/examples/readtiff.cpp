@@ -1,11 +1,11 @@
 /**
- * ClearVolume native interface example test
+ * ClearVolume TIFF Reading Example
  * 
  * This is an example of how to instanciate and use a ClearVolume renderer from C/C++.
- * In addition this example also instanciates a ClearVolume server. You can connect
- * to the server using the ClearVolume client: ClearVolume.exe.jar -c localhost
- *
- * @author Loic Royer 2014
+ * This example will load an 8bit TIFF file and send it to ClearVolume for
+ * display.
+ * 
+ * @author Ulrik Günther, Loic Royer 2014
  *
  */
 

@@ -3,7 +3,7 @@
  * 
  * Header file for the cvlib native binding library to ClearVolume.
  *
- * @author Loic Royer 2014
+ * @author Loic Royer, Ulrik Günther 2014-2015
  *
  */
 

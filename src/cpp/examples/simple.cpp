@@ -5,7 +5,7 @@
  * In addition this example also instanciates a ClearVolume server. You can connect
  * to the server using the ClearVolume client: ClearVolume.exe.jar -c localhost
  *
- * @author Loic Royer 2014
+ * @author Loic Royer, Ulrik Günther 2014-2015
  *
  */
 

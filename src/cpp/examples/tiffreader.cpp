@@ -1,3 +1,13 @@
+/**
+ * ClearVolume LibTIFF wrapper 
+ * 
+ * Provides an object-oriented and very, veeeeery slim interface to LibTIFF for
+ * loading data.
+ * 
+ * @author Ulrik Günther 2015
+ *
+ */
+
 #include "tiffreader.h"
 #include <algorithm>
 

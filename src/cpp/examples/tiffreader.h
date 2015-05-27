@@ -1,10 +1,13 @@
 //
-//  SPIMStackReader.h
-//  dive
-//
-//  Created by Ulrik Guenther on 13/05/14.
-//  Copyright (c) 2014 ulrik.is. All rights reserved.
-//
+/**
+ * ClearVolume LibTIFF wrapper 
+ * 
+ * Provides an object-oriented and very, veeeeery slim interface to LibTIFF for
+ * loading data.
+ * 
+ * @author Ulrik Günther 2015
+ *
+ */
 
 #ifndef __tiffreader_h__
 #define __tiffreader_h__
