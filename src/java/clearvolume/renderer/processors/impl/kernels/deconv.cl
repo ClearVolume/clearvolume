@@ -1,5 +1,10 @@
 
-__kernel void blur_sep(__global float * input, __global float * output , const float sigma, const int Nh, const int flag){
+__kernel void blur_sep(	__global float * 	input, 
+												__global float * 	output, 
+													 const float 		sigma, 
+													 const int 			Nh, 
+													 const int 			flag)
+{
 
   // flag = 1 -> in x axis 
   // flag = 2 -> in y axis 
@@ -67,19 +72,17 @@ __kernel void blur_sep(__global float * input, __global float * output , const f
  }
 
 
-__kernel void multiply(__global float * input, __global float * output){
-
-
+__kernel void multiply(	__global float * input, 
+												__global float * output)
+{
 	int i = get_global_id(0);
-
 	output[i] = input[i]*output[i];
-	
+}
 
- }
-
-__kernel void divide (__global float * input, __global float * input2,__global float * output){
-
-
+__kernel void divide (__global float * input, 
+											__global float * input2,
+											__global float * output)
+{
 	int i = get_global_id(0);
 
 	float denom = input2[i];
@@ -90,9 +93,10 @@ __kernel void divide (__global float * input, __global float * input2,__global f
  }
 
 
-__kernel void copyImgToBuf(__read_only image3d_t input, __global float* output){
+__kernel void copyImgToBuf(	__read_only image3d_t input, 
+														__global float* 			output)
+{
 
-  
   const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE |	CLK_ADDRESS_CLAMP_TO_EDGE |	CLK_FILTER_NEAREST ;
 
   int i = get_global_id(0);
@@ -105,36 +109,27 @@ __kernel void copyImgToBuf(__read_only image3d_t input, __global float* output){
   int Nz = get_global_size(2); 
  
 
-  output[i+Nx*j+Nx*Ny*k] = read_imagef(input,sampler,
-					   (float4)(i,j,k,0.f)).x;
- 
+  output[i+Nx*j+Nx*Ny*k] = read_imagef(input,sampler,(float4)(i,j,k,0.f)).x;
  
  }
-__kernel void copyBufToImg(__global float* input,__write_only image3d_t output){
-
-  
-  
-
+ 
+ 
+__kernel void copyBufToImg(	__global float* 				input,
+														__write_only image3d_t 	output)
+{
   int i = get_global_id(0);
   int j = get_global_id(1);
   int k = get_global_id(2);
-
-    
+   
   int Nx = get_global_size(0);
   int Ny = get_global_size(1);
   int Nz = get_global_size(2); 
  
+ 	write_imagef(output, (int4)(i,j,k,0), (float4)(input[i+Nx*j+Nx*Ny*k], 0.f,0.f,0.f));
+}
 
- write_imagef(output,
-					(int4)(i,j,k,0),(float4)(input[i+Nx*j+Nx*Ny*k],0.f,0.f,0.f));
- 
- 
- }
-
-__kernel void test(__global float * input){
-
-
-	int i = get_global_id(0);
-	
+__kernel void test(__global float * input)
+{
+	int i = get_global_id(0);	
 	input[i] = 0.001*i;
- }
+}

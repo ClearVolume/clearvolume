@@ -38,12 +38,16 @@ public class ClearVolumeTCPClient implements AutoCloseable
 	@Override
 	public void close() throws IOException
 	{
-		if (mSocketChannel == null || !mSocketChannel.isConnected())
+		try
 		{
-			mSocketChannel = null;
+			if (mSocketChannel != null && mSocketChannel.isConnected())
+				mSocketChannel.close();
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
 		}
 
-		mSocketChannel.close();
 		mSocketChannel = null;
 	}
 

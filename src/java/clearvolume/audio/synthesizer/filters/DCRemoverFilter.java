@@ -11,7 +11,7 @@ import clearvolume.audio.synthesizer.sources.Source;
 public class DCRemoverFilter extends FilterBase
 {
 
-	private LowPassFilter mLowPassFilter;
+	private final LowPassFilter mLowPassFilter;
 
 	/**
 	 * Default constructor with alpha = 0.1.
@@ -48,7 +48,6 @@ public class DCRemoverFilter extends FilterBase
 		mLowPassFilter = new LowPassFilter(pAlpha);
 	}
 
-
 	/* (non-Javadoc)
 	 * @see clearvolume.audio.synthesizer.sources.Source#next()
 	 */
@@ -65,11 +64,11 @@ public class DCRemoverFilter extends FilterBase
 	@Override
 	public float next()
 	{
-		Source lSource = getSource();
-		float lInSample = lSource.next();
+		final Source lSource = getSource();
+		final float lInSample = lSource.next();
 
-		float lOutSample = lInSample - getAmplitude()
-												* mLowPassFilter.next();
+		final float lOutSample = lInSample - getAmplitude()
+															* mLowPassFilter.next();
 
 		return lOutSample;
 	}
@@ -78,9 +77,6 @@ public class DCRemoverFilter extends FilterBase
 	 * Returns alpha.
 	 * 
 	 * @return alpha
-	 */
-	/**
-	 * @return
 	 */
 	public double getAlpha()
 	{

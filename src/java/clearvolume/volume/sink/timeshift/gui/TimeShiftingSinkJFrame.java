@@ -5,14 +5,13 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 
 import clearvolume.utils.ClearVolumeJFrame;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 
-public class TimeShiftingSinkJFrame	extends
-																								ClearVolumeJFrame
+public class TimeShiftingSinkJFrame extends ClearVolumeJFrame
 {
 
 	/**
@@ -20,10 +19,13 @@ public class TimeShiftingSinkJFrame	extends
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private JPanel mContentPane;
+	private final JPanel mContentPane;
 
 	/**
 	 * Launch the application.
+	 * 
+	 * @param pTimeShiftingSink
+	 *          time shifting sink
 	 */
 	public static void launch(final TimeShiftingSink pTimeShiftingSink)
 	{
@@ -34,10 +36,10 @@ public class TimeShiftingSinkJFrame	extends
 			{
 				try
 				{
-					TimeShiftingSinkJFrame frame = new TimeShiftingSinkJFrame(pTimeShiftingSink);
+					final TimeShiftingSinkJFrame frame = new TimeShiftingSinkJFrame(pTimeShiftingSink);
 					frame.setVisible(true);
 				}
-				catch (Exception e)
+				catch (final Exception e)
 				{
 					e.printStackTrace();
 				}
@@ -49,6 +51,7 @@ public class TimeShiftingSinkJFrame	extends
 	 * Create the frame.
 	 * 
 	 * @param pTimeShiftingSink
+	 *          time shifting sink
 	 */
 	public TimeShiftingSinkJFrame(TimeShiftingSink pTimeShiftingSink)
 	{
@@ -56,7 +59,7 @@ public class TimeShiftingSinkJFrame	extends
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		setResizable(false);
 		setBackground(Color.WHITE);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 651, 159);
 		mContentPane = new JPanel();
 		mContentPane.setBackground(Color.WHITE);
@@ -64,7 +67,7 @@ public class TimeShiftingSinkJFrame	extends
 		mContentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(mContentPane);
 
-		TimeShiftingSinkJPanel lTimeShiftingSinkPanel = new TimeShiftingSinkJPanel(pTimeShiftingSink);
+		final TimeShiftingSinkJPanel lTimeShiftingSinkPanel = new TimeShiftingSinkJPanel(pTimeShiftingSink);
 		mContentPane.add(lTimeShiftingSinkPanel);
 	}
 

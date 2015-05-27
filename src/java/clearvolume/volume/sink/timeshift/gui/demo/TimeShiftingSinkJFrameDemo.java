@@ -36,7 +36,7 @@ public class TimeShiftingSinkJFrameDemo
 		};
 
 		final TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
-																																																	100);
+																																		100);
 		TimeShiftingSinkJFrame.launch(lTimeShiftingSink);
 
 		lTimeShiftingSink.setRelaySink(lVolumeSinkInterface);

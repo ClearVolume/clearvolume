@@ -55,12 +55,12 @@ public class ClearVolumeRendererSinkDemo
 			final int lChannel = i % 2;
 
 			final Volume lVolume = lManager.requestAndWaitForVolume(1,
-																																TimeUnit.MILLISECONDS,
-																																NativeTypeEnum.UnsignedShort,
-																																1,
-																																cWidth,
-																																cHeight,
-																																cDepth);
+																															TimeUnit.MILLISECONDS,
+																															NativeTypeEnum.UnsignedShort,
+																															1,
+																															cWidth,
+																															cHeight,
+																															cDepth);
 
 			final ByteBuffer lVolumeData = lVolume.getDataBuffer();
 

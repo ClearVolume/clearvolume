@@ -62,13 +62,13 @@ public class ClearVolumeNetworkTests
 			return;
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-            256,
-            256,
+																																																					256,
+																																																					256,
 																																																					NativeTypeEnum.UnsignedByte,
-            256,
-            256,
-            1,
-            false);
+																																																					256,
+																																																					256,
+																																																					1,
+																																																					false);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
@@ -109,13 +109,13 @@ public class ClearVolumeNetworkTests
 		assertTrue(lClearVolumeTCPClient.start());
 
 		final Volume lVolume = lClearVolumeTCPServerSink.getManager()
-																													.requestAndWaitForVolume(	1,
-																																										TimeUnit.MILLISECONDS,
-																																										NativeTypeEnum.UnsignedByte,
-																																										1,
-																																										cWidth,
-																																										cHeight,
-																																										cDepth);
+																										.requestAndWaitForVolume(	1,
+																																							TimeUnit.MILLISECONDS,
+																																							NativeTypeEnum.UnsignedByte,
+																																							1,
+																																							cWidth,
+																																							cHeight,
+																																							cDepth);
 		for (int i = 0; i < pNumberOfVolumes; i++)
 		{
 			final ByteBuffer lVolumeData = lVolume.getDataBuffer();

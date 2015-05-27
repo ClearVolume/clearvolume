@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
-
 import cleargl.ClearGeometryObject;
 import cleargl.GLError;
 import cleargl.GLFloatArray;
@@ -18,13 +16,14 @@ import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import clearvolume.audio.audioplot.AudioPlot;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
-import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 
 import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
 
 public class PlainGraphOverlay extends OverlayBase implements
 																									Overlay2D,
@@ -104,9 +103,9 @@ public class PlainGraphOverlay extends OverlayBase implements
 	}
 
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggle()
 	{
-		final boolean lNewState = super.toggleDisplay();
+		final boolean lNewState = super.toggle();
 		if (lNewState)
 			mAudioPlot.start();
 		else

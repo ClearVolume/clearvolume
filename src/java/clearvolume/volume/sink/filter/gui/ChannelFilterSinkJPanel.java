@@ -36,13 +36,13 @@ public class ChannelFilterSinkJPanel extends JPanel	implements
 			{
 				try
 				{
-					JFrame lJFrame = new JFrame();
+					final JFrame lJFrame = new JFrame();
 
-					ChannelFilterSinkJPanel lChannelFilterSinkJPanel = new ChannelFilterSinkJPanel(pChannelFilterSink);
+					final ChannelFilterSinkJPanel lChannelFilterSinkJPanel = new ChannelFilterSinkJPanel(pChannelFilterSink);
 					lJFrame.getContentPane().add(lChannelFilterSinkJPanel);
 					lJFrame.setVisible(true);
 				}
-				catch (Exception e)
+				catch (final Exception e)
 				{
 					e.printStackTrace();
 				}
@@ -52,6 +52,9 @@ public class ChannelFilterSinkJPanel extends JPanel	implements
 
 	/**
 	 * Create the panel.
+	 * 
+	 * @param pChannelFilterSink
+	 *          channel filter sink
 	 */
 	public ChannelFilterSinkJPanel(final ChannelFilterSink pChannelFilterSink)
 	{
@@ -104,9 +107,8 @@ public class ChannelFilterSinkJPanel extends JPanel	implements
 
 		if (pChannelFilterSink != null)
 		{
-			ListModel<String> lChannelListModel = pChannelFilterSink.getChannelListModel();
+			final ListModel<String> lChannelListModel = pChannelFilterSink.getChannelListModel();
 			mActiveChannelJList.setModel(lChannelListModel);
-
 
 			lChannelListModel.addListDataListener(this);
 		}
@@ -114,13 +116,11 @@ public class ChannelFilterSinkJPanel extends JPanel	implements
 		{
 		}
 
-
-
 	}
 
 	private void update()
 	{
-		int[] lActiveChannels = mActiveChannelJList.getSelectedIndices();
+		final int[] lActiveChannels = mActiveChannelJList.getSelectedIndices();
 		mChannelFilterSink.setActiveChannels(lActiveChannels);
 	}
 
@@ -133,15 +133,17 @@ public class ChannelFilterSinkJPanel extends JPanel	implements
 	@Override
 	public void intervalAdded(final ListDataEvent pE)
 	{
-		SwingUtilities.invokeLater(new Runnable() {
-			
+		SwingUtilities.invokeLater(new Runnable()
+		{
+
 			@Override
-			public void run() {
-				TIntArrayList lSelectedIndices = new TIntArrayList(mActiveChannelJList.getSelectedIndices());
+			public void run()
+			{
+				final TIntArrayList lSelectedIndices = new TIntArrayList(mActiveChannelJList.getSelectedIndices());
 				for (int i = pE.getIndex0(); i < pE.getIndex1(); i++)
 					lSelectedIndices.add(i);
 				mActiveChannelJList.setSelectedIndices(lSelectedIndices.toArray());
-				
+
 			}
 		});
 	}

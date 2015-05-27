@@ -1,8 +1,8 @@
 package clearvolume.renderer.cleargl;
 
-import javax.media.opengl.GLProfile;
-
 import cleargl.ClearGLWindow;
+
+import com.jogamp.opengl.GLProfile;
 
 public class ClearVolumeIcon
 {

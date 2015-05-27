@@ -17,10 +17,10 @@ public class ClearVolumeSerializationTests
 	public void test()
 	{
 		final Volume lVolume = new Volume(NativeTypeEnum.UnsignedByte,
-																						1,
-																						128,
-																						128,
-																						128);
+																			1,
+																			128,
+																			128,
+																			128);
 		lVolume.setTimeIndex(2);
 		lVolume.setTimeInSeconds(3.3);
 		lVolume.setChannelID(4);
@@ -36,7 +36,7 @@ public class ClearVolumeSerializationTests
 		lSerializedVolumeData.put((byte) 123);
 
 		final ByteBuffer lBuffer = ClearVolumeSerialization.serialize(lVolume,
-																														null);
+																																	null);
 
 		final Volume lDeserializedVolume = new Volume();
 		ClearVolumeSerialization.deserialize(lBuffer, lDeserializedVolume);

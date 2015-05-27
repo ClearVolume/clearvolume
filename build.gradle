@@ -2,7 +2,7 @@
 
 plugins {
 	id "us.kirchmeier.capsule" version "0.9.0" //  VERSION 0.10.0 of Capsule has a bug!! staying with 0.9.0
-	id "com.jfrog.bintray" version "1.0"
+	id "com.jfrog.bintray" version "1.2"
 }
 
 
@@ -522,8 +522,8 @@ task packagezip(type:Exec,dependsOn:collectdistribution) {
 }
 
 
-task copyRuntimeLibs(type: Copy) {
-	into "./build/lib/dep"
+task collectDependencies(type: Copy) {
+	into "./build/libs/dependencies"
 	from configurations.runtime
 }
 
@@ -531,9 +531,20 @@ task copyRuntimeLibs(type: Copy) {
 //***********************************************************************************
 // PUBLISHING
 
+/*
+ * Gets the version name from the latest Git tag
+ */
+def getVersionName = { ->
+		def stdout = new ByteArrayOutputStream()
+		exec {
+				commandLine 'git', 'describe', '--tags'
+				standardOutput = stdout
+		}
+		return stdout.toString().trim()
+}
 
 group = 'net.clearvolume'
-version = '0.9.3'
+version = getVersionName()
 
 artifacts
 {
@@ -602,6 +613,8 @@ if(hasProperty('bintray_user') && hasProperty('bintray_key') )
 	}
 	/**/
 }
+
+
 
 
 

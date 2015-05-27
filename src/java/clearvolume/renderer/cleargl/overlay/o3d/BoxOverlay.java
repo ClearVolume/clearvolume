@@ -2,20 +2,19 @@ package clearvolume.renderer.cleargl.overlay.o3d;
 
 import java.io.IOException;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
 import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
 import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
-import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
 
 import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES3;
 
 /**
  * BoxOverlay - Nice shader based box and grid 3D overlay.
@@ -50,10 +49,10 @@ public class BoxOverlay extends OverlayBase	implements
 	}
 
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggle()
 	{
 		mHasChanged = true;
-		return super.toggleDisplay();
+		return super.toggle();
 	}
 
 	/* (non-Javadoc)
@@ -258,7 +257,7 @@ public class BoxOverlay extends OverlayBase	implements
 			pGL.glEnable(GL.GL_CULL_FACE);
 			pGL.glEnable(GL.GL_BLEND);
 			pGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
-			pGL.glBlendEquation(GL2.GL_MAX);
+			pGL.glBlendEquation(GL2ES3.GL_MAX);
 			pGL.glFrontFace(GL.GL_CW);
 			mBoxGLProgram.use(pGL);
 			mClearGeometryObject.draw();

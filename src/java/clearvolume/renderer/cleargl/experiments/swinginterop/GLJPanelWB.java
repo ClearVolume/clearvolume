@@ -2,8 +2,8 @@ package clearvolume.renderer.cleargl.experiments.swinginterop;
 
 import java.awt.Graphics;
 
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.awt.GLJPanel;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.awt.GLJPanel;
 
 public class GLJPanelWB extends GLJPanel
 {

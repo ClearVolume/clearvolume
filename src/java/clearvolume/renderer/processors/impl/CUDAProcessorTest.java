@@ -40,8 +40,6 @@ public class CUDAProcessorTest extends CUDAProcessor<Double>
 
 	}
 
-
-
 	private void ensureCudaInitialized()
 	{
 		if (mSumFunction == null)

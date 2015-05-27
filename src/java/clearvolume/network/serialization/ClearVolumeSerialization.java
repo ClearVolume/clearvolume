@@ -27,8 +27,8 @@ public class ClearVolumeSerialization
 
 		final long lDataLength = pVolume.getDataSizeInBytes();
 		final int lNeededBufferLength = ToIntExact.toIntExact(3 * cLongSizeInBytes
-																					+ lHeaderLength
-																					+ lDataLength);
+																													+ lHeaderLength
+																													+ lDataLength);
 		if (pByteBuffer == null || pByteBuffer.capacity() != lNeededBufferLength)
 		{
 			pByteBuffer = ByteBuffer.allocateDirect(lNeededBufferLength);
@@ -81,8 +81,8 @@ public class ClearVolumeSerialization
 	{
 
 		final Map<String, String> lHeaderMap = KeyValueMaps.readMapFromBuffer(pByteBuffer,
-																																		pHeaderLength,
-																																		null);
+																																					pHeaderLength,
+																																					null);
 		final long lIndex = parseLong(lHeaderMap.get("index"), 0);
 		final double lTime = parseDouble(lHeaderMap.get("time"), 0);
 		final int lVolumeChannelID = parseInt(lHeaderMap.get("channel"),
@@ -336,8 +336,6 @@ public class ClearVolumeSerialization
 		return lHeaderLength;
 	};
 
-
-
 	public static final Volume deserialize(	ByteBuffer pByteBuffer,
 																					Volume pVolume)
 	{
@@ -367,8 +365,6 @@ public class ClearVolumeSerialization
 		pVolume.readFromByteBuffer(pByteBuffer);
 	}
 
-	
-	
 	private static void sleep()
 	{
 		try

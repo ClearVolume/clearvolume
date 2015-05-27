@@ -1,8 +1,8 @@
 package clearvolume.renderer.cleargl.overlay;
 
-import javax.media.opengl.GL;
-
 import clearvolume.renderer.DisplayRequestInterface;
+
+import com.jogamp.opengl.GL;
 
 /**
  * Overlays enable rendering OpenGl primitives within the 3D volume (3D overlay)
@@ -16,7 +16,7 @@ public interface Overlay
 	/**
 	 * Name of overlay.
 	 * 
-	 * @return
+	 * @return Name.
 	 */
 	public String getName();
 
@@ -25,7 +25,15 @@ public interface Overlay
 	 * 
 	 * @return state after toggle.
 	 */
-	public boolean toggleDisplay();
+	public boolean toggle();
+
+	/**
+	 * Sets display flag.
+	 * 
+	 * @param pDisplay
+	 *          true if displayed, false if not
+	 */
+	public void setDisplayed(boolean pDisplay);
 
 	/**
 	 * Returns true if the overlay is displayed.

@@ -27,6 +27,7 @@ public abstract class FilterBase extends SourceBase implements Filter
 	 * unchanged going through the filter.
 	 * 
 	 * @param pAmplitude
+	 *          amplitude
 	 */
 	public FilterBase(float pAmplitude)
 	{

@@ -8,11 +8,11 @@ public class SwingUtilities
 {
 	public static final ImageIcon loadIcon(	Class pRootClass,
 																					String strPath)
-  {
-      URL imgURL = pRootClass.getResource(strPath);
+	{
+		URL imgURL = pRootClass.getResource(strPath);
 		if (imgURL != null)
-          return new ImageIcon(imgURL);
-      else
-          return null;
-  }
+			return new ImageIcon(imgURL);
+		else
+			return null;
+	}
 }

@@ -1,5 +1,4 @@
-package clearvolume.renderer.cleargl.overlay;
-
+package clearvolume.renderer;
 
 /**
  * Overlays that implement this interface can declare a key binding that will be
@@ -11,8 +10,7 @@ package clearvolume.renderer.cleargl.overlay;
 public interface SingleKeyToggable
 {
 
-
-		/**
+	/**
 	 * Returns key code of toggle key combination.
 	 * 
 	 * @return toggle key as short code.
@@ -26,6 +24,11 @@ public interface SingleKeyToggable
 	 */
 	public int toggleKeyModifierMask();
 
-
+	/**
+	 * Toggle on/off
+	 * 
+	 * @return new state
+	 */
+	public boolean toggle();
 
 }

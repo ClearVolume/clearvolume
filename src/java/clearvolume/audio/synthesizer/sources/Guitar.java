@@ -30,7 +30,7 @@ public class Guitar extends ToneBase implements Source
 	@Override
 	public float next()
 	{
-		int lPeriodInSamples = getPeriodInSamples();
+		final int lPeriodInSamples = getPeriodInSamples();
 
 		ensureCorrectBuffersAllocated(lPeriodInSamples);
 
@@ -42,7 +42,7 @@ public class Guitar extends ToneBase implements Source
 
 		mWorkBuffer[mTime] *= getAttenuation();
 
-		float lSample = getAmplitude() * mWorkBuffer[mTime];
+		final float lSample = getAmplitude() * mWorkBuffer[mTime];
 
 		mTime++;
 
@@ -53,10 +53,11 @@ public class Guitar extends ToneBase implements Source
 	 * Strike the string of the Guitar with a given intensity.
 	 * 
 	 * @param pIntensity
+	 *          intensity
 	 */
 	public void strike(float pIntensity)
 	{
-		int lPeriodInSamples = getPeriodInSamples();
+		final int lPeriodInSamples = getPeriodInSamples();
 		ensureCorrectBuffersAllocated(lPeriodInSamples);
 		regenerateNoise(lPeriodInSamples, 1f);
 		for (int j = 0; j < lPeriodInSamples; j++)
@@ -94,7 +95,7 @@ public class Guitar extends ToneBase implements Source
 			final int lOldLength = mWorkBuffer.length;
 			final int lNewLength = pPeriodInSamples;
 
-			float[] lNewNoiseBuffer = new float[pPeriodInSamples];
+			final float[] lNewNoiseBuffer = new float[pPeriodInSamples];
 
 			for (int i = 0; i < lNewLength - 1; i++)
 				lNewNoiseBuffer[i] = mNoiseBuffer[(i * lOldLength) / lNewLength];
@@ -132,7 +133,7 @@ public class Guitar extends ToneBase implements Source
 	 */
 	private void regenerateNoise(int pPeriodInSamples, float pAlpha)
 	{
-		ThreadLocalRandom lThreadLocalRandom = ThreadLocalRandom.current();
+		final ThreadLocalRandom lThreadLocalRandom = ThreadLocalRandom.current();
 
 		for (int i = 1; i < pPeriodInSamples - 1; i++)
 			mNoiseBuffer[i] = (1 - pAlpha) * mNoiseBuffer[i]
@@ -144,7 +145,7 @@ public class Guitar extends ToneBase implements Source
 	}
 
 	/**
-	 * @return
+	 * @return attenuation
 	 */
 	public float getAttenuation()
 	{
@@ -153,6 +154,7 @@ public class Guitar extends ToneBase implements Source
 
 	/**
 	 * @param pAttenuation
+	 *          attenuation
 	 */
 	public void setAttenuation(float pAttenuation)
 	{

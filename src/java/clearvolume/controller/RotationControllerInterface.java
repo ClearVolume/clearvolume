@@ -20,7 +20,7 @@ public interface RotationControllerInterface
 	/**
 	 * Returns the current Quaternion
 	 * 
-	 * @param pVolumeViewMatrix
+	 * @return current quaternion
 	 */
 	Quaternion getQuaternion();
 

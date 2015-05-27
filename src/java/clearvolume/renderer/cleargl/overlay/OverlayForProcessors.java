@@ -2,11 +2,11 @@ package clearvolume.renderer.cleargl.overlay;
 
 import java.util.ArrayList;
 
-import javax.media.opengl.GL;
-
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.processors.Processor;
+
+import com.jogamp.opengl.GL;
 
 public class OverlayForProcessors extends OverlayBase	implements
 																											Overlay2D,
@@ -43,12 +43,12 @@ public class OverlayForProcessors extends OverlayBase	implements
 	}
 
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggle()
 	{
-		final boolean lNewState = getDelegatedOverlay().toggleDisplay();
+		final boolean lNewState = getDelegatedOverlay().toggle();
 		for (final Processor<?> lProcessor : mProcessors)
 		{
-			lProcessor.toggleActive();
+			lProcessor.toggle();
 		}
 		return lNewState;
 	}

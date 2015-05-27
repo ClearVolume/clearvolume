@@ -4,7 +4,6 @@ import java.awt.Image;
 import java.awt.Window;
 import java.lang.reflect.Method;
 
-
 public class AppleMac
 {
 
@@ -26,7 +25,6 @@ public class AppleMac
 			System.err.println(e.getLocalizedMessage());
 		}
 	}
-
 
 	private static String OS = System.getProperty("os.name")
 																		.toLowerCase();
@@ -53,7 +51,7 @@ public class AppleMac
 						Method lMethod = cClass.getDeclaredMethod("setDockIconImage",
 																											Image.class);
 						lMethod.invoke(cApplication, pImage);
-						//cApplication.setDockIconImage(pImage);
+						// cApplication.setDockIconImage(pImage);
 					}
 					catch (final Throwable e)
 					{

@@ -81,9 +81,13 @@ public class ExternalRotationController	extends
 	 * Constructs an instance of the ExternalRotationController class
 	 * 
 	 * @param pPortNumber
+	 *          port number
 	 * @param pDisplayRequest
+	 *          display request
 	 * @throws UnknownHostException
+	 *           thrown when host unknown
 	 * @throws IOException
+	 *           thrown when IO error
 	 */
 	public ExternalRotationController(final int pPortNumber,
 																		DisplayRequestInterface pDisplayRequest) throws UnknownHostException,

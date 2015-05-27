@@ -3,8 +3,6 @@ package clearvolume.renderer.cleargl.overlay.o3d;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-
 import cleargl.GLAttribute;
 import cleargl.GLFloatArray;
 import cleargl.GLMatrix;
@@ -15,6 +13,8 @@ import cleargl.GLVertexAttributeArray;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
+
+import com.jogamp.opengl.GL;
 
 /**
  * OldBoxOverlay - old style 3D box overlay.

@@ -13,7 +13,7 @@ public class ReverbFilter extends FilterBase
 {
 
 	private float[] mReverbBuffer;
-	private float[] mWorkBuffer;
+	private final float[] mWorkBuffer;
 
 	/**
 	 * Default constructor.
@@ -25,6 +25,9 @@ public class ReverbFilter extends FilterBase
 
 	/**
 	 * Constructor that takes the amplitude of the reverb contribution.
+	 * 
+	 * @param pAmplitude
+	 *          amplitude
 	 */
 	public ReverbFilter(float pAmplitude)
 	{
@@ -44,7 +47,7 @@ public class ReverbFilter extends FilterBase
 	{
 		super(pAmplitude);
 
-		int lReverbPeriodInSamples = Math.round(getSamplingFrequency() * pReverbPeriodInSeconds);
+		final int lReverbPeriodInSamples = Math.round(getSamplingFrequency() * pReverbPeriodInSeconds);
 		mReverbBuffer = new float[lReverbPeriodInSamples];
 		mWorkBuffer = new float[lReverbPeriodInSamples];
 		setDefaulKernel();
@@ -85,6 +88,7 @@ public class ReverbFilter extends FilterBase
 	 * Sets the reverb kernel in the form of a float array.
 	 * 
 	 * @param pReverbKernel
+	 *          reverb kernel
 	 */
 	public void setReverbKernel(float[] pReverbKernel)
 	{
@@ -97,15 +101,15 @@ public class ReverbFilter extends FilterBase
 	@Override
 	public float next()
 	{
-		Source lSource = getSource();
-		float lInSample = lSource.next();
+		final Source lSource = getSource();
+		final float lInSample = lSource.next();
 
 		// System.out.println(lInSample);
 
 		for (int i = 0; i < mWorkBuffer.length; i++)
 			mWorkBuffer[i] += lInSample * mReverbBuffer[i];
 
-		float lOutSample = mWorkBuffer[0];
+		final float lOutSample = mWorkBuffer[0];
 
 		for (int i = 0; i < mWorkBuffer.length - 1; i++)
 			mWorkBuffer[i] = mWorkBuffer[i + 1];

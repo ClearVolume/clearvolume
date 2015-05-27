@@ -64,7 +64,7 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 									&& !mStopSignal)
 					{
 						final Volume lVolumeToSend = mVolumeSource.requestVolumeAndWait(10,
-																																					TimeUnit.MILLISECONDS);
+																																						TimeUnit.MILLISECONDS);
 						if (lVolumeToSend != null)
 							sendVolumeToClient(lSocketChannel, lVolumeToSend, true);
 
@@ -81,6 +81,9 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 
 			}
 
+		}
+		catch (final java.nio.channels.AsynchronousCloseException e)
+		{
 		}
 		catch (final Throwable e)
 		{

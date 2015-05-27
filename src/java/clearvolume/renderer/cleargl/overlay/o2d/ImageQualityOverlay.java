@@ -4,18 +4,17 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.IOException;
 
-import javax.media.opengl.GL;
-
 import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.OverlayForProcessors;
-import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 
 import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
 
 public class ImageQualityOverlay extends OverlayForProcessors	implements
 																															SingleKeyToggable
@@ -56,9 +55,9 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 	}
 
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggle()
 	{
-		final boolean lToggleDisplay = super.toggleDisplay();
+		final boolean lToggleDisplay = super.toggle();
 
 		if (lToggleDisplay)
 			getGraphOverlay().clear();

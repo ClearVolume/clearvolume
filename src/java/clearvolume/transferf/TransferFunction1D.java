@@ -37,6 +37,7 @@ public class TransferFunction1D implements TransferFunction
 	 * Adds a point in this 1D transfer function. e.g: addPoint(1.0,0.5,0.3,1)
 	 * 
 	 * @param pRGBA
+	 *          single RGBA 4-tuple of double values
 	 */
 	public void addPoint(final double... pRGBA)
 	{
@@ -51,6 +52,7 @@ public class TransferFunction1D implements TransferFunction
 	 * Adds a point in this 1D transfer function. e.g: addPoint(1.0f,0.5f,0.3f,1f)
 	 * 
 	 * @param pRGBA
+	 *          single RGBA 4-tuple of float values
 	 */
 	public void addPoint(final float... pRGBA)
 	{

@@ -34,7 +34,8 @@ public class TimeShiftingSinkTests
 			}
 		};
 
-		final TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50, 100);
+		final TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
+																																		100);
 
 		lTimeShiftingSink.setRelaySink(lVolumeSinkInterface);
 

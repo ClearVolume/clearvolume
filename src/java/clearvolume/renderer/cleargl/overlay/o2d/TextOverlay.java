@@ -1,11 +1,11 @@
 package clearvolume.renderer.cleargl.overlay.o2d;
 
-import javax.media.opengl.GL;
-
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
+
+import com.jogamp.opengl.GL;
 
 public class TextOverlay extends OverlayBase implements Overlay2D
 {

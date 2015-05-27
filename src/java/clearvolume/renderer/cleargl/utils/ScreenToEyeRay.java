@@ -22,8 +22,6 @@ public class ScreenToEyeRay
 
 	}
 
-
-
 	public static final EyeRay convert(	int width,
 																			int height,
 																			int mouseX,
@@ -39,12 +37,10 @@ public class ScreenToEyeRay
 		final float[] back = new float[]
 		{ u, v, 1.f, 1.f };
 
-
 		final float[] orig0 = pInverseProjectionMatrix.mult(front);
 		GLMatrix.mult(orig0, 1.0f / orig0[3]);
 		final float[] orig = pInverseModelViewMatrix.mult(orig0);
 		GLMatrix.mult(orig, 1.0f / orig[3]);
-
 
 		final float[] direc0 = pInverseProjectionMatrix.mult(back);
 		GLMatrix.mult(direc0, 1.0f / direc0[3]);
@@ -55,7 +51,6 @@ public class ScreenToEyeRay
 
 		GLMatrix.mult(orig, 0.5f);
 		GLMatrix.add(orig, 0.5f);
-
 
 		final EyeRay lEyeRay = new EyeRay();
 		lEyeRay.org = orig;
@@ -98,6 +93,5 @@ public class ScreenToEyeRay
 	}
 
 	/**/
-
 
 }

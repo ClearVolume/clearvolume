@@ -18,13 +18,16 @@ public class SoundIn
 	TargetDataLine targetDataLine;
 
 	/**
-	 * @throws java.awt.HeadlessException
+	 * Constructor
 	 */
 	public SoundIn()
 	{
 		super();
 	}
 
+	/**
+	 * Starts sound input
+	 */
 	public void start()
 	{
 		try
@@ -48,6 +51,9 @@ public class SoundIn
 		}
 	}
 
+	/**
+	 * Stops sound input
+	 */
 	public void stop()
 	{
 		try

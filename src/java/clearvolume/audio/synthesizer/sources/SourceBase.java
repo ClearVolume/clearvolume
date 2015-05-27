@@ -29,13 +29,15 @@ public abstract class SourceBase
 
 	/**
 	 * Default constructor with a given amplitude.
+	 * 
+	 * @param pAmplitude
+	 *          amplitude
 	 */
 	public SourceBase(float pAmplitude)
 	{
 		super();
 		mAmplitude = pAmplitude;
 	}
-
 
 	/**
 	 * Returns the sampling frequency.

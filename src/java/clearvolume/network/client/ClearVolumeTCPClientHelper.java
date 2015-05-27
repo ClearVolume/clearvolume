@@ -45,17 +45,17 @@ public abstract class ClearVolumeTCPClientHelper
 													final int pBytesPerVoxel,
 													final int pNumberOfLayers,
 													final boolean pTimeShift,
-			final boolean pChannelFilter,
-			final Image appicon )
+													final boolean pChannelFilter,
+													final Image appicon)
 	{
 		final String lWindowTitle = "ClearVolume[" + pServerAddress
-													+ ":"
-													+ pPortNumber
-													+ "]";
+																+ ":"
+																+ pPortNumber
+																+ "]";
 
 		try
 		{
-			
+
 			final NativeTypeEnum lNativeType = pBytesPerVoxel == 1 ? NativeTypeEnum.UnsignedByte
 																														: NativeTypeEnum.UnsignedShort;
 
@@ -108,14 +108,14 @@ public abstract class ClearVolumeTCPClientHelper
 				}
 
 				final AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
-																																																					cMaxQueueLength,
-																																																					cMaxMillisecondsToWait,
-																																																					TimeUnit.MILLISECONDS);
+																																																								cMaxQueueLength,
+																																																								cMaxMillisecondsToWait,
+																																																								TimeUnit.MILLISECONDS);
 
 				final ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
 
 				final SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
-																																		pPortNumber);
+																																					pPortNumber);
 				assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
 
 				assertTrue(lClearVolumeTCPClient.start());
@@ -125,7 +125,7 @@ public abstract class ClearVolumeTCPClientHelper
 				lClearVolumeRendererSink.setVisible(true);
 
 				// Resteal app icon after JOGL stole it!
-				setCurrentAppIcon( appicon );
+				setCurrentAppIcon(appicon);
 
 				while (lClearVolumeRendererSink.isShowing())
 				{
@@ -260,11 +260,12 @@ public abstract class ClearVolumeTCPClientHelper
 	 * Use this method to set the icon for this app. Best used after JOGL stole
 	 * the application icon. Bad JOGL!
 	 * 
-	 * @param finalicon
+	 * @param pFinalIcon
+	 *          final icon
 	 */
-	public static void setCurrentAppIcon(final Image finalicon)
+	public static void setCurrentAppIcon(final Image pFinalIcon)
 	{
-		if (finalicon == null)
+		if (pFinalIcon == null)
 			return;
 
 		final String os = System.getProperty("os.name").toLowerCase();
@@ -277,16 +278,16 @@ public abstract class ClearVolumeTCPClientHelper
 			{
 				if (os.indexOf("mac") >= 0)
 				{
-					Application.getApplication().setDockIconImage(finalicon);
+					Application.getApplication().setDockIconImage(pFinalIcon);
 				}
-				else if (os.indexOf("win") >= 0)
+				/*else if (os.indexOf("win") >= 0)
 				{
 					// not yet clear
 				}
 				else
 				{
 					// not yet clear
-				}
+				}/**/
 			}
 		});
 	}

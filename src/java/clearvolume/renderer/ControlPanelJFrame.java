@@ -1,6 +1,7 @@
 package clearvolume.renderer;
 
 import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 
 public class ControlPanelJFrame extends JFrame
 {
@@ -10,17 +11,22 @@ public class ControlPanelJFrame extends JFrame
 	private final ControlJPanel mControlJPanel;
 
 	/**
-	 * Create the frame.
+	 * Constructs a ControlPanel
+	 * 
+	 * @param pRenderLayerToBeControlled
+	 *          render layer to be controlled
+	 * @param pClearVolumeRendererInterface
+	 *          render interface
 	 */
-	public ControlPanelJFrame(
-			final int layerToBeControlled,
-			final ClearVolumeRendererInterface pClearVolumeRendererInterface )
+	public ControlPanelJFrame(final int pRenderLayerToBeControlled,
+														final ClearVolumeRendererInterface pClearVolumeRendererInterface)
 	{
 		super();
 		setSize(448, 149);
 		setResizable(false);
-		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		mControlJPanel = new ControlJPanel( layerToBeControlled, pClearVolumeRendererInterface );
+		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		mControlJPanel = new ControlJPanel(	pRenderLayerToBeControlled,
+																				pClearVolumeRendererInterface);
 		setContentPane(mControlJPanel);
 
 	}

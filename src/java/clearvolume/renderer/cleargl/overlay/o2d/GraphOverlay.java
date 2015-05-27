@@ -8,9 +8,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
 import cleargl.ClearGeometryObject;
 import cleargl.GLError;
 import cleargl.GLFloatArray;
@@ -19,13 +16,15 @@ import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import clearvolume.audio.audioplot.AudioPlot;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
-import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.renderer.processors.ProcessorResultListener;
 
 import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES3;
 
 public class GraphOverlay extends OverlayBase	implements
 																							Overlay2D,
@@ -74,6 +73,7 @@ public class GraphOverlay extends OverlayBase	implements
 		setMaxNumberOfDataPoints(pMaxNumberOfDataPoints);
 
 		clearMinMax();
+
 		final Runnable lRunnable = new Runnable()
 		{
 
@@ -84,8 +84,6 @@ public class GraphOverlay extends OverlayBase	implements
 				{
 					if (isDisplayed())
 						computeMinMax(mAlpha);
-					if (mDisplayRequestInterface != null)
-						mDisplayRequestInterface.requestDisplay();
 					try
 					{
 						Thread.sleep(50);
@@ -109,9 +107,9 @@ public class GraphOverlay extends OverlayBase	implements
 	}
 
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggle()
 	{
-		final boolean lNewState = super.toggleDisplay();
+		final boolean lNewState = super.toggle();
 		if (lNewState)
 			mAudioPlot.start();
 		else
@@ -434,7 +432,7 @@ public class GraphOverlay extends OverlayBase	implements
 					pGL.glDisable(GL.GL_DEPTH_TEST);
 					pGL.glEnable(GL.GL_BLEND);
 					pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-					pGL.glBlendEquation(GL2.GL_MAX);/**/
+					pGL.glBlendEquation(GL2ES3.GL_MAX);/**/
 					//
 					mClearGeometryObjectLines.draw(0, mDataY.size());
 

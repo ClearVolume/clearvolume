@@ -48,10 +48,11 @@ public class AsynchronousVolumeSinkAdapter implements
 
 	public boolean start()
 	{
-		final Runnable lRunnable = new Runnable() {
-			
+		final Runnable lRunnable = new Runnable()
+		{
+
 			@Override
-			public void run() 
+			public void run()
 			{
 				while (!mStopSignal)
 				{
@@ -70,8 +71,8 @@ public class AsynchronousVolumeSinkAdapter implements
 			}
 		};
 
-		final Thread lThread = new Thread(lRunnable, this.getClass()
-																								.getSimpleName());
+		final Thread lThread = new Thread(lRunnable,
+																			this.getClass().getSimpleName());
 		lThread.setDaemon(true);
 		lThread.start();
 		return true;

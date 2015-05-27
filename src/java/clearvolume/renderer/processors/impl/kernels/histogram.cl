@@ -5,22 +5,23 @@
 
 */
   
-  
-  
 
 // clear buffers
-__kernel void clear_counts(__global uint *count){
-
+__kernel void clear_counts(__global uint *count)
+{
    int i = get_global_id(0);
-  
    count[i] = 0;
- 
 }
 
 
 
 // histogram of floats
-__kernel void histogram_naive(__read_only image3d_t input,volatile __global int *count, const float pMin,const float pMax, const int N_BINS){
+__kernel void histogram_naive(__read_only image3d_t input,
+															volatile __global int *count, 
+															const float pMin,
+															const float pMax, 
+															const int N_BINS)
+{
 
   const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE |	CLK_ADDRESS_CLAMP |	CLK_FILTER_NEAREST ;
  
@@ -34,10 +35,8 @@ __kernel void histogram_naive(__read_only image3d_t input,volatile __global int 
  
   uint pos = (uint) ((val-pMin)/(pMax-pMin)*(N_BINS-1));
   
-  
   if ((pos>=0) &&(pos<N_BINS))
   	atomic_add(&count[pos],1);
-  
    
 }
 

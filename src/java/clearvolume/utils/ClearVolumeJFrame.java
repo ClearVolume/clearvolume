@@ -18,13 +18,14 @@ public class ClearVolumeJFrame extends JFrame
 
 	public ClearVolumeJFrame()
 	{
-		this( true );
+		this(true);
 	}
 
-	public ClearVolumeJFrame( final boolean pSetClearVolumeIcon )
+	public ClearVolumeJFrame(final boolean pSetClearVolumeIcon)
 	{
 		super();
-		if ( pSetClearVolumeIcon ) {
+		if (pSetClearVolumeIcon)
+		{
 			setClearVolumeIcon();
 		}
 	}
@@ -35,7 +36,8 @@ public class ClearVolumeJFrame extends JFrame
 		setClearVolumeIcon();
 	}
 
-	public ClearVolumeJFrame(final String pTitle, final GraphicsConfiguration pGc)
+	public ClearVolumeJFrame(	final String pTitle,
+														final GraphicsConfiguration pGc)
 	{
 		super(pTitle, pGc);
 		setClearVolumeIcon();
@@ -54,7 +56,7 @@ public class ClearVolumeJFrame extends JFrame
 			final URL lImageURL = getClass().getResource(cClearVolumeWindowIconRessourcePath);
 			final ImageIcon lImageIcon = new ImageIcon(lImageURL);
 
-			if(AppleMac.isMac())
+			if (AppleMac.isMac())
 			{
 				AppleMac.setApplicationIcon(lImageIcon.getImage());
 				AppleMac.setApplicationName("ClearVolume");

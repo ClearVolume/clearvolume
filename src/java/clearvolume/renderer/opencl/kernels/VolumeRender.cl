@@ -250,7 +250,7 @@ __kernel void isosurface_render(
 								const	float trangemax, 
 								const	float gamma,
 								const	int   maxsteps,
-								const	float dithering,
+								const	float dithering,	
 								const	float phase,
 								const	int   clear,
 								const float lightX, 
@@ -338,9 +338,6 @@ __kernel void isosurface_render(
   // compute step size:
   const float tstep = fabs(tnear-tfar)/((maxsteps/LOOPUNROLL)*LOOPUNROLL);
   
-  // apply phase:
-  orig += phase*tstep*direc;
-  
   // randomize origin point a bit:
   const uint entropy = (uint)( 6779514*fast_length(orig) + 6257327*fast_length(direc) );
   orig += dithering*tstep*random(entropy+x,entropy+y)*direc;
@@ -356,7 +353,7 @@ __kernel void isosurface_render(
   float isoVal = mad(1.0f/ta,pow(0.5f,1.0f/gamma),-tb);
 
   // starting value:
-  float newVal = 0;
+  float newVal = 0; //read_imagef(volume, volumeSampler, pos).x;
 
 	// is iso surface value greater or lower:
   bool isGreater = newVal>isoVal;
@@ -377,8 +374,7 @@ __kernel void isosurface_render(
   		  
   		  pos+=vecstep;
   		}
-  	  if (hitIso)
-  			break;
+  	  if (hitIso) break;
   	}
  
   
@@ -405,8 +401,7 @@ __kernel void isosurface_render(
   			}
   		  pos+=finevecstep;
   		}
-  	  if (hitIso)
-  		break;
+  	  if (hitIso) break;
   	}
   /**/
   	
@@ -426,7 +421,7 @@ __kernel void isosurface_render(
   float c_specular = 0.6;
 
   light = mult(invM,light);
-  light = normalize(light);
+  light = fast_normalize(light);
   
   // compute lateral step for normal calculation:
 	const float latx = 1.0f/(get_image_width(volume));
@@ -454,16 +449,16 @@ __kernel void isosurface_render(
   normal.w = 0;
 
   // flip normal if we are comming from values greater than isoVal... 
-  normal = (1.f-2*isGreater)*normalize(normal);
+  normal = (1.f-2*isGreater)*fast_normalize(normal);
 
 	// Blinn-Phong specular reflection:
   //float diffuse = fmax(0.f,dot(light,normal));
-  //float specular = pow(fmax(0.f,dot(normalize(light+normalize(direc)),normalize(normal))),45);
+  //float specular = native_powr(fmax(0.f,dot(fast_normalize(light+fast_normalize(direc)),fast_normalize(normal))),45);
   
   // Phong specular reflection:
   float diffuse = fmax(0.f,dot(light,normal));
   float4 reflect = 2*dot(light,normal)*normal-light;
-  float specular = pow(fmax(0.f,dot(normalize(reflect),normalize(direc))),10);
+  float specular = native_powr(fmax(0.f,dot(fast_normalize(reflect),fast_normalize(direc))),10);
 
   // Mapping to transfert function range and gamma correction: 
   const float mappedVal = gamma;
@@ -471,8 +466,7 @@ __kernel void isosurface_render(
 	// lookup in transfer function texture:
   float4 color = read_imagef(transferColor4, transferSampler, (float2)(mappedVal,0.0f));
 
-  const float lighting  =  (		c_diffuse*diffuse
-										  	  							+ (diffuse>0)*c_specular*specular);
+  const float lighting  =  (c_diffuse*diffuse + (diffuse>0)*c_specular*specular);
 	
 	// Apply lighting:
 	const float3 lightcolor = (float3)(1.0f,1.0f,1.0f);
@@ -482,8 +476,8 @@ __kernel void isosurface_render(
   
   color = brightness*color;
   
-  d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
-  //d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color);
+  //d_output[x + y*imageW] = rgbaFloatToIntAndMax(0,color);
+  d_output[x + y*imageW] = rgbaFloatToIntAndMax(clear*d_output[x + y*imageW],color);
 
 }
 

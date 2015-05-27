@@ -70,7 +70,6 @@ public class ClearVolumeOverlayDemos
 
 	}
 
-
 	@Test
 	public void demoDriftOverlay() throws InterruptedException,
 																IOException
@@ -143,7 +142,6 @@ public class ClearVolumeOverlayDemos
 
 		lClearVolumeRenderer.close();
 	}
-
 
 	@Test
 	public void demoGraphOverlay() throws InterruptedException,
@@ -335,6 +333,5 @@ public class ClearVolumeOverlayDemos
 
 		lClearVolumeRenderer.close();
 	}
-
 
 }

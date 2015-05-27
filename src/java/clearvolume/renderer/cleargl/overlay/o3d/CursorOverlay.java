@@ -6,24 +6,23 @@ import static java.lang.Math.sqrt;
 
 import java.io.IOException;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
 import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
 import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
-import clearvolume.renderer.cleargl.overlay.SingleKeyToggable;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
 import clearvolume.renderer.listeners.EyeRayListener;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES3;
 
 /**
  * CursorOverlay - Displays a movable 3D cursor
@@ -82,10 +81,10 @@ public class CursorOverlay extends OverlayBase implements
 	}
 
 	@Override
-	public boolean toggleDisplay()
+	public boolean toggle()
 	{
 		mHasChanged = true;
-		return super.toggleDisplay();
+		return super.toggle();
 	}
 
 	/* (non-Javadoc)
@@ -249,7 +248,7 @@ public class CursorOverlay extends OverlayBase implements
 			pGL.glDisable(GL.GL_CULL_FACE);
 			pGL.glEnable(GL.GL_BLEND);
 			pGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
-			pGL.glBlendEquation(GL2.GL_MAX);
+			pGL.glBlendEquation(GL2ES3.GL_MAX);
 
 			mBoxGLProgram.use(pGL);
 
@@ -258,14 +257,15 @@ public class CursorOverlay extends OverlayBase implements
 			mPlaneY.updateVertices(mVerticesFloatArrayPlaneY.getFloatBuffer());
 			mPlaneZ.updateVertices(mVerticesFloatArrayPlaneZ.getFloatBuffer());
 
-			mBoxGLProgram.getUniform("alpha").set(getAlpha());
+			mBoxGLProgram.getUniform("alpha").setFloat(getAlpha());
 			mBoxGLProgram.getUniform("linethick")
-										.set(1.f / getLineThickness());
+										.setFloat(1.f / getLineThickness());
 			mBoxGLProgram.getUniform("linelength")
-										.set(1.f / getLineLength());
-			mBoxGLProgram.getUniform("lineperiod").set(getLinePeriod());
+										.setFloat(1.f / getLineLength());
+			mBoxGLProgram.getUniform("lineperiod")
+										.setFloat(getLinePeriod());
 			mBoxGLProgram.getUniform("boxlinesalpha")
-										.set(getBoxLinesAlpha());
+										.setFloat(getBoxLinesAlpha());
 			mBoxGLProgram.getUniform("color").setFloatVector4(mColor);
 
 			mBoxGLProgram.getUniform("linepos").setFloatVector2(y, z);

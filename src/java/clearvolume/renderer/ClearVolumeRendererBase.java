@@ -21,6 +21,7 @@ import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.renderer.listeners.EyeRayListener;
+import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
@@ -88,7 +89,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	private final TransferFunction[] mTransferFunctions;
 
-	private volatile boolean[] mLayerVisiblityFlagArray;
+	private final boolean[] mLayerVisiblityFlagArray;
 
 	// geometric, brigthness an contrast settings.
 	private final Quaternion mRotationQuaternion = new Quaternion();
@@ -124,7 +125,7 @@ public abstract class ClearVolumeRendererBase	implements
 
 	// data copy locking and waiting
 	private final Object[] mSetVolumeDataBufferLocks;
-	private volatile FragmentedMemoryInterface[] mVolumeDataByteBuffers;
+	private final FragmentedMemoryInterface[] mVolumeDataByteBuffers;
 	private final CountDownLatch[] mDataBufferCopyIsFinishedArray;
 
 	// Control frame:
@@ -142,6 +143,9 @@ public abstract class ClearVolumeRendererBase	implements
 
 	// Eye ray listeners:
 	protected CopyOnWriteArrayList<EyeRayListener> mEyeRayListenerList = new CopyOnWriteArrayList<EyeRayListener>();
+
+	// Eye ray listeners:
+	protected CopyOnWriteArrayList<ParameterChangeListener> mParameterChangeListenerList = new CopyOnWriteArrayList<ParameterChangeListener>();
 
 	// Display lock:
 	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
@@ -173,8 +177,8 @@ public abstract class ClearVolumeRendererBase	implements
 			mBrightness[i] = 1;
 			mTransferFunctionRangeMin[i] = 0f;
 			mTransferFunctionRangeMax[i] = 1f;
-			mGamma[i] = 1.0f;
-			mQuality[i] = 0.75f;
+			mGamma[i] = 1f;
+			mQuality[i] = 1f;
 			mDithering[i] = 1f;
 		}
 
@@ -216,7 +220,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Returns the number of bytes per voxel for this renderer.
 	 * 
-	 * @return
+	 * @return bytes per voxel
 	 */
 	@Override
 	public long getBytesPerVoxel()
@@ -243,8 +247,25 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void notifyChangeOfVolumeRenderingParameters()
 	{
+		for (final ParameterChangeListener lParameterChangeListener : mParameterChangeListenerList)
+		{
+			lParameterChangeListener.notifyParameterChange(this);
+		}
+
 		mVolumeRenderingParametersChanged = true;
 		getAdaptiveLODController().notifyUserInteractionInProgress();
+	}
+
+	@Override
+	public void addParameterChangeListener(ParameterChangeListener pParameterChangeListener)
+	{
+		mParameterChangeListenerList.add(pParameterChangeListener);
+	}
+
+	@Override
+	public void removeParameterChangeListener(ParameterChangeListener pParameterChangeListener)
+	{
+		mParameterChangeListenerList.remove(pParameterChangeListener);
 	}
 
 	/**
@@ -322,7 +343,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Gets active flag for the current render layer.
 	 *
-	 * @return
+	 * @return true if layer visible
 	 */
 	@Override
 	public boolean isLayerVisible()
@@ -333,7 +354,7 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Gets active flag for the given render layer.
 	 *
-	 * @return
+	 * @return true if layer visible
 	 */
 	@Override
 	public boolean isLayerVisible(final int pRenderLayerIndex)
@@ -344,26 +365,38 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Sets active flag for the current render layer.
 	 *
-	 * @param pVisble
+	 * @param pVisible
+	 *          true to set layer visible, false to set it invisible
 	 */
 	@Override
-	public void setLayerVisible(boolean pVisble)
+	public void setLayerVisible(boolean pVisible)
 	{
-		setLayerVisible(getCurrentRenderLayerIndex(), pVisble);
+		setLayerVisible(getCurrentRenderLayerIndex(), pVisible);
 	}
 
 	/**
 	 * Sets active flag for the given render layer.
 	 *
 	 * @param pRenderLayerIndex
-	 * @param pVisble
+	 *          render layer index
+	 * @param pVisible
+	 *          true to set layer visible, false to set it invisible
 	 */
 	@Override
 	public void setLayerVisible(final int pRenderLayerIndex,
-															final boolean pVisble)
+															final boolean pVisible)
 	{
-		mLayerVisiblityFlagArray[pRenderLayerIndex] = pVisble;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mLayerVisiblityFlagArray[pRenderLayerIndex] = pVisible;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -374,40 +407,24 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void resetBrightnessAndGammaAndTransferFunctionRanges()
 	{
-		for (int i = 0; i < getNumberOfRenderLayers(); i++)
+		getDisplayLock().lock();
+		try
 		{
-			mBrightness[i] = 1.0f;
-			mGamma[i] = 1.0f;
-			mTransferFunctionRangeMin[i] = 0.0f;
-			mTransferFunctionRangeMax[i] = 1.0f;
+			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			{
+				mBrightness[i] = 1.0f;
+				mGamma[i] = 1.0f;
+				mTransferFunctionRangeMin[i] = 0.0f;
+				mTransferFunctionRangeMax[i] = 1.0f;
+			}
+			notifyChangeOfVolumeRenderingParameters();
 		}
-		notifyChangeOfVolumeRenderingParameters();
-	}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 
-	/**
-	 * Adds to the brightness of the image
-	 *
-	 * @param pBrightnessDelta
-	 */
-	@Override
-	public void addBrightness(final double pBrightnessDelta)
-	{
-		addBrightness(getCurrentRenderLayerIndex(), pBrightnessDelta);
-
-	}
-
-	/**
-	 * Adds to the brightness of the image for a given render layer index
-	 *
-	 * @param pRenderLayer
-	 * @param pBrightnessDelta
-	 */
-	@Override
-	public void addBrightness(final int pRenderLayerIndex,
-														final double pBrightnessDelta)
-	{
-		setBrightness(pRenderLayerIndex,
-									getBrightness() + pBrightnessDelta);
 	}
 
 	/**
@@ -426,6 +443,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Returns the brightness level of a given render layer index.
 	 *
 	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @return brightness level.
 	 */
 	@Override
@@ -450,6 +468,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets brightness for a given render layer index.
 	 *
 	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @param pBrightness
 	 *          brightness level
 	 */
@@ -457,12 +476,22 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setBrightness(final int pRenderLayerIndex,
 														final double pBrightness)
 	{
-		mBrightness[pRenderLayerIndex] = (float) clamp(	pBrightness,
-																										0,
-																										getNativeType() == NativeTypeEnum.UnsignedByte ? 16
-																																																	: 256);
+		getDisplayLock().lock();
+		try
+		{
+			mBrightness[pRenderLayerIndex] = (float) clamp(	pBrightness,
+																											0,
+																											getNativeType() == NativeTypeEnum.UnsignedByte ? 16
+																																																		: 256);
 
-		notifyChangeOfVolumeRenderingParameters();
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	/**
@@ -477,10 +506,11 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Returns the Gamma size.
+	 * Returns the Gamma value.
 	 *
 	 * @param pRenderLayerIndex
-	 * @return
+	 *          render layer index
+	 * @return gamma value for layer
 	 */
 	@Override
 	public double getGamma(final int pRenderLayerIndex)
@@ -489,9 +519,10 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Interface method implementation
+	 * Sets the gamma for the current render layer index.
 	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setGamma(double)
+	 * @param pGamma
+	 *          gamma value
 	 */
 	@Override
 	public void setGamma(final double pGamma)
@@ -503,33 +534,58 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets the gamma for a given render layer index.
 	 *
 	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @param pGamma
+	 *          gamma value
 	 */
 	@Override
 	public void setGamma(	final int pRenderLayerIndex,
 												final double pGamma)
 
 	{
-		mGamma[pRenderLayerIndex] = (float) pGamma;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mGamma[pRenderLayerIndex] = (float) pGamma;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
+	 * Sets dithering value [0,1].
+	 * 
 	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @param pDithering
 	 *          new dithering level for render layer
 	 */
 	@Override
 	public void setDithering(int pRenderLayerIndex, double pDithering)
 	{
-		mDithering[pRenderLayerIndex] = (float) pDithering;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mDithering[pRenderLayerIndex] = (float) pDithering;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	};
 
 	/**
-	 * Returns samount of dithering [0,1] for a given render layer.
+	 * Returns the amount of dithering [0,1] for a given render layer.
 	 * 
 	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @return dithering
 	 */
 	@Override
@@ -539,26 +595,36 @@ public abstract class ClearVolumeRendererBase	implements
 	};
 
 	/**
-	 * Sets the amount of dithering [0,1] for a given render layer.
+	 * Sets the render quality [0,1] for a given render layer.
+	 * 
 	 * 
 	 * @param pRenderLayerIndex
-	 * 
-	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @param pQuality
 	 *          new quality level for render layer
 	 */
 	@Override
 	public void setQuality(int pRenderLayerIndex, double pQuality)
 	{
-		pQuality = max(min(pQuality, 1), 0);
-		mQuality[pRenderLayerIndex] = (float) pQuality;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			pQuality = max(min(pQuality, 1), 0);
+			mQuality[pRenderLayerIndex] = (float) pQuality;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	};
 
 	/**
 	 * Returns the quality level [0,1] for a given render layer.
 	 * 
 	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @return quality level
 	 */
 	@Override
@@ -568,10 +634,11 @@ public abstract class ClearVolumeRendererBase	implements
 	};
 
 	/**
-	 * Returns the maximal number of steps during ray casting forna given layer.
+	 * Returns the maximal number of steps during ray casting for a given layer.
 	 * This size depends on the volume dimension and quality.
 	 * 
 	 * @param pRenderLayerIndex
+	 *          renderlayer index
 	 * @return maximal number of steps
 	 */
 	public int getMaxSteps(final int pRenderLayerIndex)
@@ -600,7 +667,8 @@ public abstract class ClearVolumeRendererBase	implements
 	 * layer.
 	 *
 	 * @param pRenderLayerIndex
-	 * @return
+	 *          render layer index
+	 * @return minimum of transfer function range
 	 */
 	@Override
 	public double getTransferRangeMin(final int pRenderLayerIndex)
@@ -626,7 +694,8 @@ public abstract class ClearVolumeRendererBase	implements
 	 * index.
 	 *
 	 * @param pRenderLayerIndex
-	 * @return
+	 *          render layer index
+	 * @return maximum of transfer function range
 	 */
 	@Override
 	public double getTransferRangeMax(final int pRenderLayerIndex)
@@ -639,7 +708,9 @@ public abstract class ClearVolumeRendererBase	implements
 	 * index.
 	 *
 	 * @param pTransferRangeMin
+	 *          transfer range min
 	 * @param pTransferRangeMax
+	 *          transfer range max
 	 */
 	@Override
 	public void setTransferFunctionRange(	final double pTransferRangeMin,
@@ -655,21 +726,33 @@ public abstract class ClearVolumeRendererBase	implements
 	 * index.
 	 *
 	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @param pTransferRangeMin
+	 *          transfer range min
 	 * @param pTransferRangeMax
+	 *          transfer range max
 	 */
 	@Override
 	public void setTransferFunctionRange(	final int pRenderLayerIndex,
 																				final double pTransferRangeMin,
 																				final double pTransferRangeMax)
 	{
-		mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
-																																	0,
-																																	1);
-		mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
-																																	0,
-																																	1);
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
+																																		0,
+																																		1);
+			mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
+																																		0,
+																																		1);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -689,17 +772,29 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets transfer range minimum, must be within [0,1].
 	 *
 	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @param pTransferRangeMin
+	 *          transfer range min
 	 */
 	@Override
 	public void setTransferFunctionRangeMin(final int pRenderLayerIndex,
 																					final double pTransferRangeMin)
 	{
-		mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
-																																	0,
-																																	1);
+		getDisplayLock().lock();
+		try
+		{
+			mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
+																																		0,
+																																		1);
 
-		notifyChangeOfVolumeRenderingParameters();
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	/**
@@ -719,94 +814,27 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets transfer function range maximum, must be within [0,1].
 	 *
 	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @param pTransferRangeMax
+	 *          transfer range max
 	 */
 	@Override
 	public void setTransferFunctionRangeMax(final int pRenderLayerIndex,
 																					final double pTransferRangeMax)
 	{
-		mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
-																																	0,
-																																	1);
-		notifyChangeOfVolumeRenderingParameters();
-	}
-
-	/**
-	 * Translates the minimum of the transfer function range.
-	 *
-	 * @param pDelta
-	 *          translation amount
-	 */
-	@Override
-	public void addTransferFunctionRangeMin(final double pDelta)
-	{
-		setTransferFunctionRangeMin(getCurrentRenderLayerIndex(), pDelta);
-	}
-
-	/**
-	 * Translates the minimum of the transfer function range.
-	 *
-	 * @param pRenderLayerIndex
-	 * @param pDelta
-	 */
-	@Override
-	public void addTransferFunctionRangeMin(final int pRenderLayerIndex,
-																					final double pDelta)
-	{
-		setTransferFunctionRangeMin(getTransferRangeMin(pRenderLayerIndex) + pDelta);
-	}
-
-	/**
-	 * Translates the maximum of the transfer function range.
-	 *
-	 * @param pDelta
-	 *          translation amount
-	 */
-	@Override
-	public void addTransferFunctionRangeMax(final double pDelta)
-	{
-		addTransferFunctionRangeMax(getCurrentRenderLayerIndex(), pDelta);
-	}
-
-	/**
-	 * Translates the maximum of the transfer function range.
-	 *
-	 * @param pRenderLayerIndex
-	 * @param pDelta
-	 */
-	@Override
-	public void addTransferFunctionRangeMax(final int pRenderLayerIndex,
-																					final double pDelta)
-	{
-		setTransferFunctionRangeMax(pRenderLayerIndex,
-																getTransferRangeMax(pRenderLayerIndex) + pDelta);
-	}
-
-	/**
-	 * Translates the transfer function range by a given amount.
-	 *
-	 * @param pTransferRangePositionDelta
-	 *          amount of translation added
-	 */
-	@Override
-	public void addTransferFunctionRangePosition(final double pTransferRangePositionDelta)
-	{
-		addTransferFunctionRangeMin(pTransferRangePositionDelta);
-		addTransferFunctionRangeMax(pTransferRangePositionDelta);
-	}
-
-	/**
-	 * Adds a certain amount (possibly negative) to the width of the transfer
-	 * function range.
-	 *
-	 * @param pTransferRangeWidthDelta
-	 *          size added to the width
-	 */
-	@Override
-	public void addTransferFunctionRangeWidth(final double pTransferRangeWidthDelta)
-	{
-		addTransferFunctionRangeMin(-pTransferRangeWidthDelta);
-		addTransferFunctionRangeMax(pTransferRangeWidthDelta);
+		getDisplayLock().lock();
+		try
+		{
+			mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
+																																		0,
+																																		1);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -817,8 +845,17 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void addTranslationX(final double pDX)
 	{
-		mTranslationX += pDX;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			setTranslationX(getTranslationX() + pDX);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -829,8 +866,18 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void addTranslationY(final double pDY)
 	{
-		mTranslationY += pDY;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			setTranslationY(getTranslationY() + pDY);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	/**
@@ -841,14 +888,40 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void addTranslationZ(final double pDZ)
 	{
-		mTranslationZ += pDZ;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			setTranslationZ(getTranslationZ() + pDZ);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	@Override
 	public Quaternion getQuaternion()
 	{
-		return mRotationQuaternion;
+		return new Quaternion(mRotationQuaternion);
+	}
+
+	@Override
+	public void setQuaternion(Quaternion pQuaternion)
+	{
+		getDisplayLock().lock();
+		try
+		{
+			mRotationQuaternion.set(pQuaternion);
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -859,7 +932,18 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setTranslationX(double pTranslationX)
 	{
-		mTranslationX = (float) pTranslationX;
+		getDisplayLock().lock();
+		try
+		{
+			mTranslationX = (float) pTranslationX;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
 	}
 
 	/**
@@ -870,7 +954,17 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setTranslationY(double pTranslationY)
 	{
-		mTranslationY = (float) pTranslationY;
+		getDisplayLock().lock();
+		try
+		{
+			mTranslationY = (float) pTranslationY;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -881,7 +975,17 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setTranslationZ(double pTranslationZ)
 	{
-		mTranslationZ = (float) pTranslationZ;
+		getDisplayLock().lock();
+		try
+		{
+			mTranslationZ = (float) pTranslationZ;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -892,7 +996,7 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setDefaultTranslationZ()
 	{
-		mTranslationZ = -4 / getFOV();
+		setTranslationZ(-4 / getFOV());
 	}
 
 	/**
@@ -949,10 +1053,6 @@ public abstract class ClearVolumeRendererBase	implements
 			setTranslationZ(lFactor * getTranslationZ());
 			notifyChangeOfVolumeRenderingParameters();
 		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-		}
 		finally
 		{
 			if (getDisplayLock().isHeldByCurrentThread())
@@ -1004,14 +1104,20 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setTransferFunction(final int pRenderLayerIndex,
 																	final TransferFunction pTransfertFunction)
 	{
-		mTransferFunctions[pRenderLayerIndex] = pTransfertFunction;
+		getDisplayLock().lock();
+		try
+		{
+			mTransferFunctions[pRenderLayerIndex] = pTransfertFunction;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
-	/**
-	 * Interface method implementation
-	 *
-	 * @return
-	 *
+	/* (non-Javadoc)
 	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getTransferFunction(int)
 	 */
 	@Override
@@ -1049,8 +1155,17 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setRenderAlgorithm(	final int pRenderLayerIndex,
 																	final RenderAlgorithm pRenderAlgorithm)
 	{
-		mRenderAlgorithm[pRenderLayerIndex] = pRenderAlgorithm;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mRenderAlgorithm[pRenderLayerIndex] = pRenderAlgorithm;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -1059,9 +1174,18 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void setRenderAlgorithm(final RenderAlgorithm pRenderAlgorithm)
 	{
-		for (int i = 0; i < mRenderAlgorithm.length; i++)
-			mRenderAlgorithm[i] = pRenderAlgorithm;
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			for (int i = 0; i < mRenderAlgorithm.length; i++)
+				mRenderAlgorithm[i] = pRenderAlgorithm;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -1070,10 +1194,19 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void cycleRenderAlgorithm()
 	{
-		int i = 0;
-		for (final RenderAlgorithm lRenderAlgorithm : mRenderAlgorithm)
-			mRenderAlgorithm[i++] = lRenderAlgorithm.next();
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			int i = 0;
+			for (final RenderAlgorithm lRenderAlgorithm : mRenderAlgorithm)
+				mRenderAlgorithm[i++] = lRenderAlgorithm.next();
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -1082,8 +1215,17 @@ public abstract class ClearVolumeRendererBase	implements
 	@Override
 	public void cycleRenderAlgorithm(int pRenderLayerIndex)
 	{
-		mRenderAlgorithm[pRenderLayerIndex] = mRenderAlgorithm[pRenderLayerIndex].next();
-		notifyChangeOfVolumeRenderingParameters();
+		getDisplayLock().lock();
+		try
+		{
+			mRenderAlgorithm[pRenderLayerIndex] = mRenderAlgorithm[pRenderLayerIndex].next();
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
@@ -1102,26 +1244,31 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Returns for a given index the corresponding volume data buffer.
 	 *
+	 * @param pRenderLayerIndex
+	 *          render layer index
 	 * @return data buffer for a given render layer.
 	 */
-	public FragmentedMemoryInterface getVolumeDataBuffer(final int pVolumeDataBufferIndex)
+	public FragmentedMemoryInterface getVolumeDataBuffer(final int pRenderLayerIndex)
 	{
-		return mVolumeDataByteBuffers[pVolumeDataBufferIndex];
+		return mVolumeDataByteBuffers[pRenderLayerIndex];
 	}
 
 	/**
 	 * Clears volume data buffer.
 	 *
+	 * @param pRenderLayerIndex
+	 *          render layer index
 	 */
-	public void clearVolumeDataBufferReference(final int pVolumeDataBufferIndex)
+	public void clearVolumeDataBufferReference(final int pRenderLayerIndex)
 	{
-		mVolumeDataByteBuffers[pVolumeDataBufferIndex] = null;
+		mVolumeDataByteBuffers[pRenderLayerIndex] = null;
 	}
 
 	/**
 	 * Returns object used for locking volume data copy for a given layer.
 	 *
 	 * @param pRenderLayerIndex
+	 *          render layer index
 	 *
 	 * @return locking object
 	 */
@@ -1131,37 +1278,66 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#resetRotationTranslation()
+	 * Reset rotation and translation.
 	 */
 	@Override
 	public void resetRotationTranslation()
 	{
-		mRotationQuaternion.setIdentity();
-		mTranslationX = 0;
-		mTranslationY = 0;
-		setDefaultTranslationZ();
+		getDisplayLock().lock();
+		try
+		{
+			mRotationQuaternion.setIdentity();
+			setTranslationX(0);
+			setTranslationY(0);
+			setDefaultTranslationZ();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
+	/**
+	 * Sets current render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          current render layer index
+	 */
 	@Override
-	public void setCurrentRenderLayer(final int pLayerIndex)
+	public void setCurrentRenderLayer(final int pRenderLayerIndex)
 	{
-		mCurrentRenderLayerIndex = pLayerIndex;
+		mCurrentRenderLayerIndex = pRenderLayerIndex;
 	}
 
+	/**
+	 * Returns current render layer.
+	 * 
+	 * @return current render layer index
+	 */
 	@Override
 	public int getCurrentRenderLayerIndex()
 	{
 		return mCurrentRenderLayerIndex;
 	}
 
+	/**
+	 * Returns current render layer.
+	 * 
+	 * @param pNumberOfRenderLayers
+	 *          number of render layers
+	 */
 	@Override
 	public void setNumberOfRenderLayers(final int pNumberOfRenderLayers)
 	{
 		mNumberOfRenderLayers = pNumberOfRenderLayers;
 	}
 
+	/**
+	 * Returns number of render layers.
+	 * 
+	 * @return current render layer index
+	 */
 	@Override
 	public int getNumberOfRenderLayers()
 	{
@@ -1169,50 +1345,97 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVoxelSize(double,
-	 *      double, double)
+	 * Sets the voxel size.
+	 * 
+	 * @param pVoxelSizeX
+	 *          voxel size along X
+	 * @param pVoxelSizeY
+	 *          voxel size along Y
+	 * @param pVoxelSizeZ
+	 *          voxel size along Z
+	 * 
 	 */
 	@Override
 	public void setVoxelSize(	final double pVoxelSizeX,
 														final double pVoxelSizeY,
 														final double pVoxelSizeZ)
 	{
-		mVoxelSizeX = pVoxelSizeX;
-		mVoxelSizeY = pVoxelSizeY;
-		mVoxelSizeZ = pVoxelSizeZ;
+		getDisplayLock().lock();
+		try
+		{
+			mVoxelSizeX = pVoxelSizeX;
+			mVoxelSizeY = pVoxelSizeY;
+			mVoxelSizeZ = pVoxelSizeZ;
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
 	}
 
 	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long)
+	 * Sets volume data buffer. Voxels are assumed to be isotropic.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          render layer index
+	 * @param pByteBuffer
+	 *          byte buffer
+	 * @param pVolumeSizeX
+	 *          size in voxels along X
+	 * @param pVolumeSizeY
+	 *          size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          size in voxels along Z
+	 * 
+	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
 																			final ByteBuffer pByteBuffer,
-																			final long pSizeX,
-																			final long pSizeY,
-																			final long pSizeZ)
+																			final long pVolumeSizeX,
+																			final long pVolumeSizeY,
+																			final long pVolumeSizeZ)
 	{
 		return setVolumeDataBuffer(	pRenderLayerIndex,
 																pByteBuffer,
-																pSizeX,
-																pSizeY,
-																pSizeZ,
+																pVolumeSizeX,
+																pVolumeSizeY,
+																pVolumeSizeZ,
 																1,
 																1,
 																1);
 	}
 
+	/**
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          render layer index
+	 * @param pByteBuffer
+	 *          byte buffer
+	 * @param pVolumeSizeX
+	 *          volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *          volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          volume size in voxels along Z
+	 * @param pVoxelSizeX
+	 *          voxel dimension along X
+	 * @param pVoxelSizeY
+	 *          voxel dimension along Y
+	 * @param pVoxelSizeZ
+	 *          voxel dimension along Z
+	 * 
+	 * @return true if transfer was completed (no time out)
+	 */
 	@Override
 	public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
 																			ByteBuffer pByteBuffer,
-																			long pSizeX,
-																			long pSizeY,
-																			long pSizeZ,
+																			long pVolumeSizeX,
+																			long pVolumeSizeY,
+																			long pVolumeSizeZ,
 																			double pVoxelSizeX,
 																			double pVoxelSizeY,
 																			double pVoxelSizeZ)
@@ -1221,121 +1444,198 @@ public abstract class ClearVolumeRendererBase	implements
 																TimeUnit.SECONDS,
 																pRenderLayerIndex,
 																pByteBuffer,
-																pSizeX,
-																pSizeY,
-																pSizeZ,
+																pVolumeSizeX,
+																pVolumeSizeY,
+																pVolumeSizeZ,
 																pVoxelSizeX,
 																pVoxelSizeY,
 																pVoxelSizeZ);
 	}
 
+	/**
+	 * Sets volume data buffer.
+	 * 
+	 * @param pTimeOut
+	 *          time out duration
+	 * @param pTimeUnit
+	 *          time unit for time out duration
+	 * @param pRenderLayerIndex
+	 *          render layer index
+	 * @param pByteBuffer
+	 *          byte buffer
+	 * @param pVolumeSizeX
+	 *          volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *          volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          volume size in voxels along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
+	 */
 	@Override
 	public boolean setVolumeDataBuffer(	long pTimeOut,
 																			TimeUnit pTimeUnit,
 																			final int pRenderLayerIndex,
 																			final ByteBuffer pByteBuffer,
-																			final long pSizeX,
-																			final long pSizeY,
-																			final long pSizeZ)
+																			final long pVolumeSizeX,
+																			final long pVolumeSizeY,
+																			final long pVolumeSizeZ)
 	{
 		return setVolumeDataBuffer(	pTimeOut,
 																pTimeUnit,
 																pRenderLayerIndex,
 																pByteBuffer,
-																pSizeX,
-																pSizeY,
-																pSizeZ,
+																pVolumeSizeX,
+																pVolumeSizeY,
+																pVolumeSizeZ,
 																1,
 																1,
 																1);
 	}
 
 	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long)
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          render layer index
+	 * @param pFragmentedMemoryInterface
+	 *          fragmented buffer
+	 * @param pVolumeSizeX
+	 *          volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *          volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          volume size in voxels along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
 																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			final long pSizeX,
-																			final long pSizeY,
-																			final long pSizeZ)
+																			final long pVolumeSizeX,
+																			final long pVolumeSizeY,
+																			final long pVolumeSizeZ)
 	{
 		return setVolumeDataBuffer(	pRenderLayerIndex,
 																pFragmentedMemoryInterface,
-																pSizeX,
-																pSizeY,
-																pSizeZ,
+																pVolumeSizeX,
+																pVolumeSizeY,
+																pVolumeSizeZ,
 																1,
 																1,
 																1);
 	}
 
 	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long)
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          render layer index
+	 * @param pContiguousMemoryInterface
+	 *          contguous buffer
+	 * @param pVolumeSizeX
+	 *          volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *          volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          volume size in voxels along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
 																			final ContiguousMemoryInterface pContiguousMemoryInterface,
-																			final long pSizeX,
-																			final long pSizeY,
-																			final long pSizeZ)
+																			final long pVolumeSizeX,
+																			final long pVolumeSizeY,
+																			final long pVolumeSizeZ)
 	{
 		return setVolumeDataBuffer(	pRenderLayerIndex,
 																FragmentedMemory.wrap(pContiguousMemoryInterface),
-																pSizeX,
-																pSizeY,
-																pSizeZ,
+																pVolumeSizeX,
+																pVolumeSizeY,
+																pVolumeSizeZ,
 																1,
 																1,
 																1);
 	}
 
 	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long, double, double, double)
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          render layer index
+	 * @param pContiguousMemoryInterface
+	 *          contiguous buffer
+	 * @param pVolumeSizeX
+	 *          volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *          volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          volume size in voxels along Z
+	 * @param pVoxelSizeX
+	 *          voxel dimension along X
+	 * @param pVoxelSizeY
+	 *          voxel dimension along Y
+	 * @param pVoxelSizeZ
+	 *          voxel dimension along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
 																			final ContiguousMemoryInterface pContiguousMemoryInterface,
-																			final long pSizeX,
-																			final long pSizeY,
-																			final long pSizeZ,
+																			final long pVolumeSizeX,
+																			final long pVolumeSizeY,
+																			final long pVolumeSizeZ,
 																			final double pVoxelSizeX,
 																			final double pVoxelSizeY,
 																			final double pVoxelSizeZ)
 	{
 		return setVolumeDataBuffer(	pRenderLayerIndex,
 																FragmentedMemory.wrap(pContiguousMemoryInterface),
-																pSizeX,
-																pSizeY,
-																pSizeZ,
+																pVolumeSizeX,
+																pVolumeSizeY,
+																pVolumeSizeZ,
 																pVoxelSizeX,
 																pVoxelSizeY,
 																pVoxelSizeZ);
 	}
 
 	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long, double, double, double)
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          render pByteBuffer index
+	 * @param pByteBuffer
+	 *          NIO byte buffer
+	 * @param pVolumeSizeX
+	 *          volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *          volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          volume size in voxels along Z
+	 * @param pVoxelSizeX
+	 *          voxel dimension along X
+	 * @param pVoxelSizeY
+	 *          voxel dimension along Y
+	 * @param pVoxelSizeZ
+	 *          voxel dimension along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	long pTimeOut,
 																			TimeUnit pTimeUnit,
 																			final int pRenderLayerIndex,
 																			final ByteBuffer pByteBuffer,
-																			final long pSizeX,
-																			final long pSizeY,
-																			final long pSizeZ,
+																			final long pVolumeSizeX,
+																			final long pVolumeSizeY,
+																			final long pVolumeSizeZ,
 																			final double pVoxelSizeX,
 																			final double pVoxelSizeY,
 																			final double pVoxelSizeZ)
@@ -1358,15 +1658,25 @@ public abstract class ClearVolumeRendererBase	implements
 																pTimeUnit,
 																pRenderLayerIndex,
 																lFragmentedMemoryInterface,
-																pSizeX,
-																pSizeY,
-																pSizeZ,
+																pVolumeSizeX,
+																pVolumeSizeY,
+																pVolumeSizeZ,
 																pVoxelSizeX,
 																pVoxelSizeY,
 																pVoxelSizeZ);
 
 	}
 
+	/**
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          render pByteBuffer index
+	 * @param pVolume
+	 *          volume
+	 * 
+	 * @return true if transfer was completed (no time out)
+	 */
 	@Override
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
 																			final Volume pVolume)
@@ -1382,17 +1692,34 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long, double, double, double)
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          render pByteBuffer index
+	 * @param pFragmentedMemoryInterface
+	 *          fragmented buffer
+	 * @param pVolumeSizeX
+	 *          volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *          volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          volume size in voxels along Z
+	 * @param pVoxelSizeX
+	 *          voxel dimension along X
+	 * @param pVoxelSizeY
+	 *          voxel dimension along Y
+	 * @param pVoxelSizeZ
+	 *          voxel dimension along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
 																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			final long pSizeX,
-																			final long pSizeY,
-																			final long pSizeZ,
+																			final long pVolumeSizeX,
+																			final long pVolumeSizeY,
+																			final long pVolumeSizeZ,
 																			final double pVoxelSizeX,
 																			final double pVoxelSizeY,
 																			final double pVoxelSizeZ)
@@ -1401,28 +1728,45 @@ public abstract class ClearVolumeRendererBase	implements
 																TimeUnit.SECONDS,
 																pRenderLayerIndex,
 																pFragmentedMemoryInterface,
-																pSizeX,
-																pSizeY,
-																pSizeZ,
+																pVolumeSizeX,
+																pVolumeSizeY,
+																pVolumeSizeZ,
 																pVoxelSizeX,
 																pVoxelSizeY,
 																pVoxelSizeZ);
 	}
 
 	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVolumeDataBuffer(java.nio.ByteBuffer,
-	 *      long, long, long, double, double, double)
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          render pByteBuffer index
+	 * @param pFragmentedMemoryInterface
+	 *          fragmented buffer
+	 * @param pVolumeSizeX
+	 *          volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *          volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          volume size in voxels along Z
+	 * @param pVoxelSizeX
+	 *          voxel dimension along X
+	 * @param pVoxelSizeY
+	 *          voxel dimension along Y
+	 * @param pVoxelSizeZ
+	 *          voxel dimension along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	long pTimeOut,
 																			TimeUnit pTimeUnit,
 																			final int pRenderLayerIndex,
 																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			final long pSizeX,
-																			final long pSizeY,
-																			final long pSizeZ,
+																			final long pVolumeSizeX,
+																			final long pVolumeSizeY,
+																			final long pVolumeSizeZ,
 																			final double pVoxelSizeX,
 																			final double pVoxelSizeY,
 																			final double pVoxelSizeZ)
@@ -1430,15 +1774,15 @@ public abstract class ClearVolumeRendererBase	implements
 		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
 
-			if (mVolumeSizeX != pSizeX || mVolumeSizeY != pSizeY
-					|| mVolumeSizeZ != pSizeZ)
+			if (mVolumeSizeX != pVolumeSizeX || mVolumeSizeY != pVolumeSizeY
+					|| mVolumeSizeZ != pVolumeSizeZ)
 			{
 				mVolumeDimensionsChanged = true;
 			}
 
-			mVolumeSizeX = pSizeX;
-			mVolumeSizeY = pSizeY;
-			mVolumeSizeZ = pSizeZ;
+			mVolumeSizeX = pVolumeSizeX;
+			mVolumeSizeY = pVolumeSizeY;
+			mVolumeSizeZ = pVolumeSizeZ;
 
 			mVoxelSizeX = pVoxelSizeX;
 			mVoxelSizeY = pVoxelSizeY;
@@ -1604,6 +1948,12 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		for (final Processor<?> lProcessor : pProcessors)
 			addProcessor(lProcessor);
+	}
+
+	@Override
+	public Collection<Processor<?>> getProcessors()
+	{
+		return mProcessorsMap.values();
 	}
 
 	/**
