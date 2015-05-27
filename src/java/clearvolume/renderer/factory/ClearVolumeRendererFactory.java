@@ -10,6 +10,7 @@ import org.xeustechnologies.jcl.JclUtils;
 import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.opencl.OpenCLAvailability;
+import clearvolume.transferf.TransferFunction;
 import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeRendererFactory
@@ -281,7 +282,7 @@ public class ClearVolumeRendererFactory
 
 			if (lProperties.getProperty("ClearVolume.disableOpenCL") == null)
 			{
-				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreatOpenCLRenderer(pWindowName,
+				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreateOpenCLRenderer(pWindowName,
 																																														pWindowWidth,
 																																														pWindowHeight,
 																																														pNativeTypeEnum,
@@ -390,7 +391,7 @@ public class ClearVolumeRendererFactory
 			if (!lOpenCLOperational)
 				return null;
 
-			return internalCreatOpenCLRenderer(	pWindowName,
+			return internalCreateOpenCLRenderer(	pWindowName,
 																					pWindowWidth,
 																					pWindowHeight,
 																					pNativeTypeEnum,
@@ -423,7 +424,7 @@ public class ClearVolumeRendererFactory
 			{ pWindowName,
 				pWindowWidth,
 				pWindowHeight,
-				pNativeTypeEnum,
+				pNativeTypeEnum.toString(),
 				pMaxTextureWidth,
 				pMaxTextureHeight,
 				pNumberOfRenderLayers,
@@ -451,7 +452,7 @@ public class ClearVolumeRendererFactory
 		}
 	}
 
-	private static ClearVolumeRendererInterface internalCreatOpenCLRenderer(final String pWindowName,
+	private static ClearVolumeRendererInterface internalCreateOpenCLRenderer(final String pWindowName,
 																																					final int pWindowWidth,
 																																					final int pWindowHeight,
 																																					final NativeTypeEnum pNativeTypeEnum,
@@ -468,7 +469,7 @@ public class ClearVolumeRendererFactory
 			{ pWindowName,
 				pWindowWidth,
 				pWindowHeight,
-				pNativeTypeEnum,
+				pNativeTypeEnum.toString(),
 				pMaxTextureWidth,
 				pMaxTextureHeight,
 				pNumberOfRenderLayers,
@@ -488,12 +489,26 @@ public class ClearVolumeRendererFactory
 			return new clearvolume.renderer.opencl.OpenCLVolumeRenderer(pWindowName,
 																																	pWindowWidth,
 																																	pWindowHeight,
-																																	pNativeTypeEnum,
+																																	pNativeTypeEnum.toString(),
 																																	pMaxTextureWidth,
 																																	pMaxTextureHeight,
 																																	pNumberOfRenderLayers,
 																																	pUseInCanvas);
 		}
+	}
+
+	public static TransferFunction castTransfertFunction(TransferFunction pTransferFunction)
+	{
+		final JclObjectFactory lJclObjectFactory = JclObjectFactory.getInstance();
+		
+		final Object lIsolatedClearVolumeRenderer = lJclObjectFactory.create(	getJarClassLoader(),
+																																					"clearvolume.transferf.TransferFunction1D",
+																																					lConstructorArguments);
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = JclUtils.cast(lIsolatedClearVolumeRenderer,
+																																						ClearVolumeRendererInterface.class);
+		
+		final retur
 	}
 
 }

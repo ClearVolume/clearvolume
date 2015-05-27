@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 project (ClearVolumeC)
 set(CMAKE_BUILD_TYPE Release)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "build/output")
+
 find_package(JNI)
 
 if (JNI_FOUND)
