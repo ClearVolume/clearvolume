@@ -1153,6 +1153,17 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
+	 * Returns currently used transfer function.
+	 *
+	 * @return currently used transfer function
+	 */
+	@Override
+	public float[] getTransferFunctionArray()
+	{
+		return mTransferFunctions[getCurrentRenderLayerIndex()].getArray();
+	}
+
+	/**
 	 * Returns currently used mProjectionMatrix algorithm.
 	 *
 	 * @return currently used mProjectionMatrix algorithm
