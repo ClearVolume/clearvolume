@@ -10,7 +10,6 @@ import org.xeustechnologies.jcl.JclUtils;
 import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.opencl.OpenCLAvailability;
-import clearvolume.transferf.TransferFunction;
 import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeRendererFactory
@@ -282,14 +281,14 @@ public class ClearVolumeRendererFactory
 
 			if (lProperties.getProperty("ClearVolume.disableOpenCL") == null)
 			{
-				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreateOpenCLRenderer(pWindowName,
-																																														pWindowWidth,
-																																														pWindowHeight,
-																																														pNativeTypeEnum,
-																																														pMaxTextureWidth,
-																																														pMaxTextureHeight,
-																																														pNumberOfRenderLayers,
-																																														pUseInCanvas);
+				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreateOpenCLRenderer(	pWindowName,
+																																															pWindowWidth,
+																																															pWindowHeight,
+																																															pNativeTypeEnum,
+																																															pMaxTextureWidth,
+																																															pMaxTextureHeight,
+																																															pNumberOfRenderLayers,
+																																															pUseInCanvas);
 				return lNewOpenCLRenderer;
 			}
 			else
@@ -391,7 +390,7 @@ public class ClearVolumeRendererFactory
 			if (!lOpenCLOperational)
 				return null;
 
-			return internalCreateOpenCLRenderer(	pWindowName,
+			return internalCreateOpenCLRenderer(pWindowName,
 																					pWindowWidth,
 																					pWindowHeight,
 																					pNativeTypeEnum,
@@ -452,14 +451,14 @@ public class ClearVolumeRendererFactory
 		}
 	}
 
-	private static ClearVolumeRendererInterface internalCreateOpenCLRenderer(final String pWindowName,
-																																					final int pWindowWidth,
-																																					final int pWindowHeight,
-																																					final NativeTypeEnum pNativeTypeEnum,
-																																					final int pMaxTextureWidth,
-																																					final int pMaxTextureHeight,
-																																					final int pNumberOfRenderLayers,
-																																					final boolean pUseInCanvas)
+	private static ClearVolumeRendererInterface internalCreateOpenCLRenderer(	final String pWindowName,
+																																						final int pWindowWidth,
+																																						final int pWindowHeight,
+																																						final NativeTypeEnum pNativeTypeEnum,
+																																						final int pMaxTextureWidth,
+																																						final int pMaxTextureHeight,
+																																						final int pNumberOfRenderLayers,
+																																						final boolean pUseInCanvas)
 	{
 		if (sClassLoaderIsolationActive && getJarClassLoader() != null)
 		{
@@ -497,11 +496,11 @@ public class ClearVolumeRendererFactory
 		}
 	}
 
-	public static TransferFunction castIsolatedTransfertFunction(Object pTransferFunction)
+	public static <T> T castFromIsolated(	Object pTransferFunction,
+																				Class<T> pClass)
 	{
-		final TransferFunction lTransferFunction = JclUtils.cast(	pTransferFunction,
-																															TransferFunction.class);
-		return lTransferFunction;
+		final T lObject = JclUtils.cast(pTransferFunction, pClass);
+		return lObject;
 	}
 
 }
