@@ -89,6 +89,26 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 	public OpenCLVolumeRenderer(final String pWindowName,
 															final Integer pWindowWidth,
 															final Integer pWindowHeight,
+															final String pNativeTypeEnum,
+															final Integer pMaxTextureWidth,
+															final Integer pMaxTextureHeight,
+															final Integer pNumberOfRenderLayers,
+															final Boolean pUseInCanvas)
+	{
+		this(	pWindowName,
+					pWindowWidth,
+					pWindowHeight,
+					NativeTypeEnum.valueOf(pNativeTypeEnum),
+					pMaxTextureWidth,
+					pMaxTextureHeight,
+					pNumberOfRenderLayers,
+					pUseInCanvas);
+	}
+
+	@SuppressWarnings("unchecked")
+	public OpenCLVolumeRenderer(final String pWindowName,
+															final Integer pWindowWidth,
+															final Integer pWindowHeight,
 															final NativeTypeEnum pNativeTypeEnum,
 															final Integer pMaxTextureWidth,
 															final Integer pMaxTextureHeight,
