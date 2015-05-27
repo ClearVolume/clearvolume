@@ -1158,9 +1158,9 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @return currently used transfer function
 	 */
 	@Override
-	public float[] getTransferFunctionArray()
+	public float[] getTransferFunctionArray(final int pRenderLayerIndex)
 	{
-		return mTransferFunctions[getCurrentRenderLayerIndex()].getArray();
+		return mTransferFunctions[pRenderLayerIndex].getArray();
 	}
 
 	/**
