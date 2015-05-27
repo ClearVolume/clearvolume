@@ -90,6 +90,7 @@ void run_clearvolume()
     }
 
     buffer = (char*)tr->getBuffer();
+    cerr << "Buffer size is " << tr->getBufferSize() << endl;
 
     cout << "Starting sending volumes ... " << endl;
 
@@ -104,14 +105,14 @@ void run_clearvolume()
 
     //We send the data to both the in-process renderer and server.
     if(send8bitUINTVolumeDataToSink(lRendererID, channel, buffer,
-                tr->getBufferSize()*2,
+                tr->getBufferSize()/4,
                 (*(tr->getDimensions()))[0],
                 (*(tr->getDimensions()))[1],
                 (*(tr->getDimensions()))[2]) != 0) {
         cout << "ERROR while sending volume! (renderer)\n";
     }
     if(send8bitUINTVolumeDataToSink(lServerID, channel, buffer,
-                tr->getBufferSize()*2,
+                tr->getBufferSize()/4,
                 (*(tr->getDimensions()))[0],
                 (*(tr->getDimensions()))[1],
                 (*(tr->getDimensions()))[2]) != 0) {
