@@ -28,8 +28,6 @@ static string classpath;
 
 void run_clearvolume()
 {
-	cout << "TEST BEGIN\n";
-
 	// First we initialize the library and provide the location of the ClearVolume jar file.
 	// the JVM location is determined automatically using the JAVA_HOME env var.
 	int lReturnCode = begincvlib(const_cast<char*>(classpath.c_str()), OPENCL);
@@ -116,7 +114,6 @@ void run_clearvolume()
 
 	// closes the library
 	endcvlib();
-	cout << "TEST END\n";
 }
 
 static void dummyCallback(void * info) {}
@@ -130,7 +127,7 @@ int main(int argc, char** argv)
 	if (argc >= 2) {
 		classpath = argv[1];
 	} else {
-		classpath = "jars/AppleJavaExtensions-1.4.jar;jars/ClearVolume-0.9.0.jar;jars/CoreMem-0.1.0.jar;jars/args4j-2.0.29.jar;jars/bridj-0.7.0.jar;jars/clearcuda-0.9.0.jar;jars/cleargl-0.9.1.jar;jars/commons-collections-3.2.1.jar;jars/commons-io-2.4.jar;jars/commons-lang-2.6.jar;jars/commons-math3-3.4.1.jar;jars/dx-1.7.jar;jars/gluegen-rt-2.2.4-natives-linux-amd64.jar;jars/gluegen-rt-2.2.4-natives-macosx-universal.jar;jars/gluegen-rt-2.2.4-natives-windows-amd64.jar;jars/gluegen-rt-2.2.4.jar;jars/hamcrest-core-1.3.jar;jars/javacl-1.0.0-RC4.jar;jars/javacl-core-1.0.0-RC4.jar;jars/jcuda-maven-6.5.jar;jars/jogl-all-2.2.4-natives-linux-amd64.jar;jars/jogl-all-2.2.4-natives-macosx-universal.jar;jars/jogl-all-2.2.4-natives-windows-amd64.jar;jars/jogl-all-2.2.4.jar;jars/junit-4.12.jar;jars/log4j-api-2.1.jar;jars/log4j-core-2.1.jar;jars/miglayout-3.7.4.jar;jars/nativelibs4java-utils-1.6.jar;jars/opencl4java-1.0.0-RC4.jar;jars/trove4j-3.0.3.jar";
+		classpath = "";
 	}
 
     thread cv_thread(run_clearvolume);

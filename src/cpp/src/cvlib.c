@@ -12,7 +12,9 @@
 
 //#include "jvmlib/jni.h"       /* where everything is defined */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define cErrorNone "No Error"
 
@@ -69,10 +71,59 @@ void cv_sigaction(int signal, siginfo_t *info, void *reserved)
 
         }
 
-//	(*env)->CallVoidMethod(env, obj, nativeCrashed);
 	old_sa[signal].sa_handler(signal);
 }
 #endif
+
+char* get_cv_jars(const char* path, char* buffer) {
+    DIR* jar_dir;
+    struct dirent* entry;
+    int error;
+
+    char* tmp = "\0";
+
+    if ((jar_dir = opendir(path)) != NULL) {
+        while ((entry = readdir(jar_dir)) != NULL) {
+            if(strncmp(".jar", entry->d_name+(strlen(entry->d_name))-4, 4) == 0) {
+                char* new;
+                unsigned long new_size = strlen(tmp) + strlen(path) + strlen(entry->d_name) + 32;
+                if((new = malloc(new_size)) != NULL) {
+                    new[0] = '\0';
+
+                    strncat(new, tmp, new_size);
+
+                    strncat(new, path, new_size);
+                    strncat(new, "/", new_size);
+                    strncat(new, entry->d_name, new_size);
+                    strncat(new, JAR_SEPARATOR, new_size);
+
+                    if(strlen(tmp) > 0) {
+                        free(tmp);
+                    }
+                    tmp = malloc(strlen(new)+1);
+                    strncpy(tmp, new, strlen(new));
+                } else {
+                    fprintf(stderr, "malloc failed, out of memory?\n");
+                    return NULL;
+                }
+            }
+        }
+        
+        closedir (jar_dir);
+
+        buffer = malloc(strlen(tmp));
+        strncpy(buffer, tmp, strlen(tmp));
+
+        printf("Using class path: %s\n", buffer);
+
+        return buffer;
+
+    } else {
+        /* could not open directory */
+        perror ("");
+        return NULL;
+    }
+}
 
 __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath, backend_t backend)
 {
@@ -113,13 +164,29 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
     size_t lJREFolderPathLength= strlen(JREFolderPath);
 
 #endif
-    char lClassPathPrefix[] = "-Djava.class.path=";
-    size_t lClassPathPrefixLength= strlen(lClassPathPrefix);
+    char* lClassPathPrefix = "-Djava.class.path=";
 
-    char lClassPathString[1024];
+    char* lClassPathString;
+    char path[1024];
+    char* jars;
 
-    strcpy(lClassPathString,lClassPathPrefix);
-    strcat(lClassPathString,pClearVolumeJarPath);
+    if(strlen(pClearVolumeJarPath) > 0) {
+        strcpy(path, pClearVolumeJarPath);
+    } else {
+        strcpy(path, "./jars");
+    }
+
+    if((jars = get_cv_jars(path, jars)) > 0) {
+        printf("Getting CV jars ...");
+        printf("%s\n", jars);
+    } else {
+        jars = (char*)malloc(1);
+        jars[0] = '\0';
+    }
+
+    lClassPathString = malloc(strlen(lClassPathPrefix) + strlen(jars) + 1);
+    strcpy(lClassPathString, lClassPathPrefix);
+    strcat(lClassPathString, jars);
 
     memset(&sJVMArgs, 0, sizeof(sJVMArgs));
 
