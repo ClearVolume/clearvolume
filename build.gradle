@@ -33,33 +33,31 @@ task cmake(type:Exec) {
 
 	File lFile = new File(cmakefolder)
 	lFile.mkdir()
-	
+
 	inputs.dir lFile.absolutePath
-		
+
 	workingDir cmakefolder
-	
+
 	def cmake_args = [] as List
 	cmake_args.add('../../src/cpp')
-	
+
 	if (Os.isFamily(Os.FAMILY_WINDOWS))
 	{
-		//outputs.file './build/cpp/src/libsqeazy.dll'
+		cmake_args.add("-G\"Visual Studio ${project.vsversion} x64\"")
 		executable 'cmake'
 		args cmake_args
 	}
 	else if (Os.isFamily(Os.FAMILY_MAC))
 	{
-		//outputs.file './build/cpp/src/libsqeazy.dylib'
 		executable 'cmake'
 		args cmake_args
 	}
 	else if (Os.isFamily(Os.FAMILY_UNIX))
 	{
-		//outputs.file './build/cpp/src/libsqeazy.so'
 		executable 'cmake'
 		args cmake_args
 	}
-	
+
 	println commandLine
 }
 
@@ -67,35 +65,32 @@ task cmake(type:Exec) {
 
 // make task:
 task make(type:Exec) {
-	
+
 	File lFile = new File(cmakefolder)
 	lFile.mkdir()
-	
+
 	inputs.dir lFile.absolutePath
-		
+
 	workingDir cmakefolder
-	
+
 	def make_args = [] as List
-	
+
 	if (Os.isFamily(Os.FAMILY_WINDOWS))
 	{
-		//outputs.file './build/cpp/src/libsqeazy.dll'
 		executable 'make'
 		args make_args
 	}
 	else if (Os.isFamily(Os.FAMILY_MAC))
 	{
-		//outputs.file './build/cpp/src/libsqeazy.dylib'
 		executable 'make'
 		args make_args
 	}
 	else if (Os.isFamily(Os.FAMILY_UNIX))
 	{
-		//outputs.file './build/cpp/src/libsqeazy.so'
 		executable 'make'
 		args make_args
 	}
-	
+
 	println commandLine
 }
 
@@ -171,9 +166,9 @@ dependencies
 
 	compile group: "net.coremem", name: "CoreMem", version: "(,1.0.0]", changing: true, transitive:true
 	compile 'com.nativelibs4java:javacl:1.0.0-RC4'
-	
+
 	compile 'org.xeustechnologies:jcl-core:2.6'
-	
+
 
 	// usage: gradle .... -Plocal=true
 	if (project.hasProperty('local')) {
@@ -218,7 +213,7 @@ repositories
 task cvFatJar(type:Jar) {
 	archiveName = "ClearVolume.fat.jar"
 	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+	with jar
 
 	manifest {
 		attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')
@@ -257,17 +252,15 @@ task fatCapsule(type: FatCapsule) {
 
 
 task copyCapsule{
-	doLast {
-		copy{
-			from('./build/libs/')
-			into('./build/executable')
-			include('*-capsule.jar')
-			rename('.+-capsule.jar','ClearVolume.exe.jar')
-		}
+	copy{
+		from('./build/libs/')
+		into('./build/executable')
+		include('*-capsule.jar')
+		rename('.+-capsule.jar','ClearVolume.exe.jar')
 	}
 }
 
-copyCapsule.dependsOn build
+copyCapsule.dependsOn fatCapsule
 
 
 //***********************************************************************************
@@ -354,120 +347,35 @@ task packagelvcvlib {
 	}
 }
 
-//***********************************************************************************
-// OSX APP PACKAGING TASKS
-
-task packageosxapp {
-
-	def os = System.getProperty("os.name").toLowerCase()
-	if (os.contains("mac"))
-	{
-		copy
-		{
-			from('./deploy/osx/ClearVolume.app/')
-			into('./build/executable/ClearVolume.app/')
-			include "*.*"
-			include '**/**'
-			include '**/**/**'
-			include '**/**/**/**/'
-			include '**/**/**/**/**/'
-			include '**/**/**/**/**/**/'
-			include '**/**/**/**/**/**/**/'
-			include '**/**/**/**/**/**/**/**/'
-		}
-
-		def javahome = System.getenv('JAVA_HOME')
-
-		copy
-		{
-			from(javahome+'/jre/')
-			into('./build/executable/ClearVolume.app/Contents/Resources/jre')
-			include "*.*"
-			include '**/**'
-			include '**/**/**'
-			include '**/**/**/**/'
-			include '**/**/**/**/**/'
-			include '**/**/**/**/**/**/'
-			include '**/**/**/**/**/**/**/'
-			include '**/**/**/**/**/**/**/**/'
-			exclude 'libjfxwebkit.dylib'
-			exclude 'jfxrt.jar'
-		}
-
-		copy
-		{
-			from('./build/executable/')
-			into('./build/executable/ClearVolume.app/Contents/Resources')
-			include('ClearVolume.exe.jar')
-		}
-	}
-}
-
-packageosxapp.dependsOn copyCapsule
 
 
-//***********************************************************************************
-// WIN EXE  TASKS
 
-task packagewinapp(type:Exec) {
 
-	def os = System.getProperty("os.name").toLowerCase()
-	if (os.contains("win"))
-	{
-
-		def userhome = System.getenv('HOME')
-
-		copy
-		{
-			from(userhome+'/.winjre/')
-			into('./build/executable/ClearVolumeWin/jre')
-			include "*.*"
-			include '**/**'
-			include '**/**/**'
-			include '**/**/**/**/'
-			include '**/**/**/**/**/'
-			include '**/**/**/**/**/**/'
-			include '**/**/**/**/**/**/**/'
-			include '**/**/**/**/**/**/**/**/'
-			exclude 'libjfxwebkit.dll'
-			exclude 'jfxrt.jar'
-		}
-
-		copy
-		{
-			from('./deploy/win/libs/')
-			into('./build/executable/ClearVolumeWin/dlls/')
-			include "*.dll"
-		}
-
-		workingDir '.'
-		commandLine './packagewinapp.sh'
-
-		standardOutput = new ByteArrayOutputStream()
-
-		ext.output = {return standardOutput.toString()}
-	}
-}
-
-packagewinapp.dependsOn copyCapsule
 
 //***********************************************************************************
 // DISTRIBUTION PACKAGING TASKS
 
-task collectdistribution(dependsOn:[packageosxapp, packagewinapp]) {
+task collectdistribution {
 
 	copy
 	{
 		from('./build/executable/')
 		into('./build/distribution/')
-		include "*.*"
-		include '**/**'
-		include '**/**/**'
-		include '**/**/**/**/'
-		include '**/**/**/**/**/'
-		include '**/**/**/**/**/**/'
-		include '**/**/**/**/**/**/**/'
-		include '**/**/**/**/**/**/**/**/'
+		include "*.jar"
+	}
+	
+	copy
+	{
+		from('./build/labview/')
+		into('./build/distribution/labview')
+		include "*.jar"
+	}
+	
+	copy
+	{
+		from('./build/cvlib/')
+		into('./build/distribution/cvlib')
+		include "*.jar"
 	}
 
 	copy
@@ -476,33 +384,25 @@ task collectdistribution(dependsOn:[packageosxapp, packagewinapp]) {
 		into('./build/distribution/javalibs')
 		include "*.*"
 		include '**/**'
+		exclude '**/*capsule.jar'
 	}
+
 }
 
-
-task packagedmg(type:Exec,dependsOn:collectdistribution ) {
-
-	def os = System.getProperty("os.name").toLowerCase()
-	if (os.contains("nix") || os.contains("mac"))
-	{
-		workingDir '.'
-		commandLine './packagedmg.sh'
-		standardOutput = new ByteArrayOutputStream()
-		ext.output = {return standardOutput.toString()}
-	}
-}
+collectdistribution.dependsOn copyCapsule
 
 
 task packagezip(type:Exec,dependsOn:collectdistribution) {
 
 	def os = System.getProperty("os.name").toLowerCase()
-	if (os.contains("nix") || os.contains("mac"))
-	{
-		workingDir '.'
-		commandLine './packagezip.sh'
-		standardOutput = new ByteArrayOutputStream()
-		ext.output = {return standardOutput.toString()}
-	}
+	//println "OS:"+os
+	//if (os.contains("nix") || os.contains("mac"))
+	//	{
+	workingDir '.'
+	commandLine './packagezip.sh'
+	standardOutput = new ByteArrayOutputStream()
+	ext.output = {return standardOutput.toString()}
+	//}
 }
 
 
@@ -518,13 +418,14 @@ task collectDependencies(type: Copy) {
 /*
  * Gets the version name from the latest Git tag
  */
-def getVersionName = { ->
-		def stdout = new ByteArrayOutputStream()
-		exec {
-				commandLine 'git', 'describe', '--tags'
-				standardOutput = stdout
-		}
-		return stdout.toString().trim()
+def getVersionName = {
+	->
+	def stdout = new ByteArrayOutputStream()
+	exec {
+		commandLine 'git', 'describe', '--tags'
+		standardOutput = stdout
+	}
+	return stdout.toString().trim()
 }
 
 group = 'net.clearvolume'

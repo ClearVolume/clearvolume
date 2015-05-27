@@ -6,6 +6,8 @@ import java.util.Properties;
 import org.xeustechnologies.jcl.JarClassLoader;
 import org.xeustechnologies.jcl.JclObjectFactory;
 import org.xeustechnologies.jcl.JclUtils;
+import org.xeustechnologies.jcl.proxy.CglibProxyProvider;
+import org.xeustechnologies.jcl.proxy.ProxyProviderFactory;
 
 import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
@@ -74,6 +76,8 @@ public class ClearVolumeRendererFactory
 			return sJarClassLoader;
 
 		sJarClassLoader = new JarClassLoader();
+
+		ProxyProviderFactory.setDefaultProxyProvider(new CglibProxyProvider());
 
 		for (final Object lJARSource : sPrivateJarList)
 			sJarClassLoader.add(lJARSource);
@@ -418,7 +422,7 @@ public class ClearVolumeRendererFactory
 	{
 		if (sClassLoaderIsolationActive && getJarClassLoader() != null)
 		{
-			final JclObjectFactory lJclObjectFactory = JclObjectFactory.getInstance();
+			final JclObjectFactory lJclObjectFactory = JclObjectFactory.getInstance(true);
 
 			final Object[] lConstructorArguments = new Object[]
 			{ pWindowName,
