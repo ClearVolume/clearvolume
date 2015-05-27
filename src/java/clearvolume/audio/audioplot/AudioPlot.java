@@ -15,7 +15,7 @@ import clearvolume.audio.synthesizer.filters.WarmifyFilter;
 import clearvolume.audio.synthesizer.sources.Guitar;
 
 /**
- * AudioPlot - this class implements the mapping of a value in the range [0,1]
+ * AudioPlot - this class implements the mapping of a size in the range [0,1]
  * into an audio range represented by varying beats per second and tone
  * frequency.
  *
@@ -28,24 +28,24 @@ import clearvolume.audio.synthesizer.sources.Guitar;
 public class AudioPlot implements AutoCloseable
 {
 
-	private double mSlowPeriod;
-	private double mFastPeriod;
-	private double mLowFreq;
-	private double mHighFreq;
+	private final double mSlowPeriod;
+	private final double mFastPeriod;
+	private final double mLowFreq;
+	private final double mHighFreq;
 	private boolean mInvertRange;
 
 	private volatile SoundOut mSoundOut;
 
-	private Runnable mDeamonThreadRunnable;
+	private final Runnable mDeamonThreadRunnable;
 	private volatile boolean mStopSignal = false;
 	private volatile boolean mThreadStoppedSignal = true;
-	private ReentrantLock mReentrantLock = new ReentrantLock();
+	private final ReentrantLock mReentrantLock = new ReentrantLock();
 
-	private Guitar mGuitar;
+	private final Guitar mGuitar;
 
 	private volatile double mPeriodInSeconds = 1;
 	private volatile Thread mThread;
-	private Object mStartStopLock = new Object();
+	private final Object mStartStopLock = new Object();
 
 	/**
 	 * Default constructor.
@@ -107,16 +107,16 @@ public class AudioPlot implements AutoCloseable
 
 		mGuitar = new Guitar();
 
-		NoiseFilter lNoiseFilter = new NoiseFilter(0.01f);
+		final NoiseFilter lNoiseFilter = new NoiseFilter(0.01f);
 		lNoiseFilter.setSource(mGuitar);
 
-		WarmifyFilter lWarmifyFilter = new WarmifyFilter(1f);
+		final WarmifyFilter lWarmifyFilter = new WarmifyFilter(1f);
 		lWarmifyFilter.setSource(lNoiseFilter);
 
-		ReverbFilter lReverbFilter = new ReverbFilter(1, 0.001f);
+		final ReverbFilter lReverbFilter = new ReverbFilter(1, 0.001f);
 		lReverbFilter.setSource(lWarmifyFilter);/**/
 
-		LowPassFilter lLowPassFilter = new LowPassFilter();
+		final LowPassFilter lLowPassFilter = new LowPassFilter();
 		lLowPassFilter.setSource(lReverbFilter);
 
 		mGuitar.setAmplitude(0.5f);
@@ -161,7 +161,7 @@ public class AudioPlot implements AutoCloseable
 						try
 						{
 							mGuitar.strike(0.5f);
-							long lPeriodInNanoseconds = (long) ((1000L * 1000L * 1000L) * mPeriodInSeconds);
+							final long lPeriodInNanoseconds = (long) ((1000L * 1000L * 1000L) * mPeriodInSeconds);
 							// System.out.println("mPeriodInSeconds=" + mPeriodInSeconds);
 							// System.out.println("lPeriodInNanoseconds=" +
 							// lPeriodInNanoseconds);
@@ -181,7 +181,7 @@ public class AudioPlot implements AutoCloseable
 					mThreadStoppedSignal = true;
 
 				}
-				catch (Throwable e)
+				catch (final Throwable e)
 				{
 					e.printStackTrace();
 				}
@@ -215,7 +215,7 @@ public class AudioPlot implements AutoCloseable
 			{
 				Thread.sleep(10);
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 			}
 	};
@@ -233,11 +233,11 @@ public class AudioPlot implements AutoCloseable
 	}
 
 	/**
-	 * Sets the new current value. The value must be normalized within the range
+	 * Sets the new current size. The size must be normalized within the range
 	 * [0,1].
 	 * 
 	 * @param pValue
-	 *          value within range [0,1]
+	 *          size within range [0,1]
 	 */
 	public void setValue(double pValue)
 	{
@@ -248,11 +248,11 @@ public class AudioPlot implements AutoCloseable
 		if (isInvertRange())
 			pValue = 1 - pValue;
 
-		double lValueQuadratic = pow(pValue, 2);
-		double lValueCubic = pow(pValue, 3);
+		final double lValueQuadratic = pow(pValue, 2);
+		final double lValueCubic = pow(pValue, 3);
 
-		float lFrequency = (float) (mLowFreq + lValueCubic * (mHighFreq - mLowFreq));
-		double lBeatPeriodInSeconds = (float) (mSlowPeriod + lValueQuadratic * (mFastPeriod - mSlowPeriod));
+		final float lFrequency = (float) (mLowFreq + lValueCubic * (mHighFreq - mLowFreq));
+		final double lBeatPeriodInSeconds = (float) (mSlowPeriod + lValueQuadratic * (mFastPeriod - mSlowPeriod));
 
 		try
 		{
@@ -292,6 +292,7 @@ public class AudioPlot implements AutoCloseable
 		mInvertRange = pInvertRange;
 	}
 
+	@Override
 	public void close()
 	{
 		stop();

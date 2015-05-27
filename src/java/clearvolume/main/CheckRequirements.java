@@ -2,13 +2,14 @@ package clearvolume.main;
 
 import java.awt.HeadlessException;
 
-import javax.media.opengl.GLException;
-import javax.media.opengl.GLProfile;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.lang.SystemUtils;
 
-import clearvolume.utils.UnsupportedArchitectureException;
+import clearvolume.exceptions.UnsupportedArchitectureException;
+
+import com.jogamp.opengl.GLException;
+import com.jogamp.opengl.GLProfile;
 
 public class CheckRequirements
 {
@@ -44,15 +45,15 @@ public class CheckRequirements
 
 			try
 			{
-				GLProfile.get(GLProfile.GL4);
+				GLProfile.get(GLProfile.GL3);
 			}
 			catch (final GLException e)
 			{
-				System.err.println("Sorry, but for graphics rendering, ClearVolume requires your graphics device to support OpenGL 4.0 or higher.");
+				System.err.println("Sorry, but for graphics rendering, ClearVolume requires your graphics device to support OpenGL 3.0 or higher.");
 				System.err.println("On your device, only the following OpenGL versions are available:\n" + GLProfile.glAvailabilityToString());
 				JOptionPane.showMessageDialog(null,
-																			"Sorry, but for graphics rendering, ClearVolume requires your graphics device to support OpenGL 4.0 or higher.\n\nOn your device, only the following OpenGL versions are available:\n" + GLProfile.glAvailabilityToString(),
-																			"OpenGL 4.0+ not supported",
+																			"Sorry, but for graphics rendering, ClearVolume requires your graphics device to support OpenGL 3.0 or higher.\n\nOn your device, only the following OpenGL versions are available:\n" + GLProfile.glAvailabilityToString(),
+																			"OpenGL 3.0+ not supported",
 																			JOptionPane.ERROR_MESSAGE);
 			}
 		}

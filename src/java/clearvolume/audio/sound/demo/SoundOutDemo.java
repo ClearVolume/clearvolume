@@ -34,7 +34,6 @@ public class SoundOutDemo
 
 		SoundOut lSoundOut = new SoundOut();
 
-
 		for (int i = 0; i < 10; i++)
 		{
 			System.out.println("i=" + i);
@@ -46,7 +45,6 @@ public class SoundOutDemo
 
 			Thread.sleep(100);
 		}
-
 
 		lSoundOut.close();
 	}

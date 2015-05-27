@@ -5,52 +5,52 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import clearvolume.ClearVolumeCloseable;
+import coremem.types.NativeTypeEnum;
 
 public class VolumeManager implements ClearVolumeCloseable
 {
 
-	private final ArrayBlockingQueue<SoftReference<Volume<?>>> mAvailableVolumesQueue;
+	private final ArrayBlockingQueue<SoftReference<Volume>> mAvailableVolumesQueue;
 
-	private int mMaxAvailableVolumes;
+	private final int mMaxAvailableVolumes;
 
 	public VolumeManager(int pMaxAvailableVolumes)
 	{
 		super();
 		mMaxAvailableVolumes = pMaxAvailableVolumes;
-		mAvailableVolumesQueue = new ArrayBlockingQueue<SoftReference<Volume<?>>>(mMaxAvailableVolumes);
+		mAvailableVolumesQueue = new ArrayBlockingQueue<SoftReference<Volume>>(mMaxAvailableVolumes);
 	}
 
-	public <T> Volume<?> requestAndWaitForVolumeLike(	int pTimeOut,
-																										TimeUnit pTimeUnit,
-																										Volume<T> pVolume)
+	public Volume requestAndWaitForVolumeLike(int pTimeOut,
+																						TimeUnit pTimeUnit,
+																						Volume pVolume)
 	{
 		if (pVolume.getDataBuffer().remaining() == 2 * pVolume.getBytesPerVoxel()
-																				* pVolume.getNumberOfVoxels() && pVolume.getType()
-																																								.equals(Byte.class))
+																								* pVolume.getNumberOfVoxels() && pVolume.getNativeType() == NativeTypeEnum.UnsignedByte)
 		{
 			return requestAndWaitForVolume(	pTimeOut,
 																			pTimeUnit,
-																			Character.class,
+																			NativeTypeEnum.UnsignedShort,
 																			pVolume.getDimensionsInVoxels());
 		}
 
 		return requestAndWaitForVolume(	pTimeOut,
 																		pTimeUnit,
-																		pVolume.getType(),
+																		pVolume.getNativeType(),
 																		pVolume.getDimensionsInVoxels());
 
 	}
 
-	public <T> Volume<T> requestAndWaitForVolume(	long pTimeOut,
-																								TimeUnit pTimeUnit,
-																								Class<T> pType,
-																								long... pDimensions)
+	public Volume requestAndWaitForVolume(long pTimeOut,
+																				TimeUnit pTimeUnit,
+																				NativeTypeEnum pType,
+																				long... pDimensions)
 	{
 		do
 		{
 			try
 			{
-				SoftReference<Volume<?>> lPolledVolumeReference;
+				SoftReference<Volume> lPolledVolumeReference;
 				// System.out.println("mAvailableVolumesQueue.size()=" +
 				// mAvailableVolumesQueue.size());
 				lPolledVolumeReference = mAvailableVolumesQueue.poll(	pTimeOut,
@@ -58,7 +58,7 @@ public class VolumeManager implements ClearVolumeCloseable
 
 				if (lPolledVolumeReference == null)
 					return allocateAndUseNewVolume(pType, pDimensions);
-				Volume<?> lVolume = lPolledVolumeReference.get();
+				final Volume lVolume = lPolledVolumeReference.get();
 
 				if (lVolume == null)
 					return allocateAndUseNewVolume(pType, pDimensions);
@@ -66,23 +66,23 @@ public class VolumeManager implements ClearVolumeCloseable
 				if (!lVolume.isCompatibleWith(pType, pDimensions))
 					return allocateAndUseNewVolume(pType, pDimensions);
 
-				return (Volume<T>) lVolume;
+				return lVolume;
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 			}
 		}
 		while (true);
 	}
 
-	public <T> Volume<?> requestAndWaitForNextAvailableVolume(long pTimeOut,
-																														TimeUnit pTimeUnit)
+	public Volume requestAndWaitForNextAvailableVolume(	long pTimeOut,
+																											TimeUnit pTimeUnit)
 	{
 		do
 		{
 			try
 			{
-				SoftReference<Volume<?>> lPolledVolumeReference;
+				SoftReference<Volume> lPolledVolumeReference;
 				// System.out.println("mAvailableVolumesQueue.size()=" +
 				// mAvailableVolumesQueue.size());
 				lPolledVolumeReference = mAvailableVolumesQueue.poll(	pTimeOut,
@@ -90,29 +90,29 @@ public class VolumeManager implements ClearVolumeCloseable
 
 				if (lPolledVolumeReference == null)
 					return null;
-				Volume<?> lVolume = lPolledVolumeReference.get();
+				final Volume lVolume = lPolledVolumeReference.get();
 
 				if (lVolume == null)
 					return null;
 
 				return lVolume;
 			}
-			catch (InterruptedException e)
+			catch (final InterruptedException e)
 			{
 			}
 		}
 		while (true);
 	}
 
-	public <T> void makeAvailable(Volume<T> pVolume)
+	public <T> void makeAvailable(Volume pVolume)
 	{
-		mAvailableVolumesQueue.offer(new SoftReference<Volume<?>>(pVolume));
+		mAvailableVolumesQueue.offer(new SoftReference<Volume>(pVolume));
 	}
 
-	private <T> Volume<T> allocateAndUseNewVolume(Class<T> pType,
-																								long[] pDimensions)
+	private Volume allocateAndUseNewVolume(	NativeTypeEnum pType,
+																					long[] pDimensions)
 	{
-		Volume<T> lVolume = new Volume<T>(pType, pDimensions);
+		final Volume lVolume = new Volume(pType, pDimensions);
 		lVolume.setManager(this);
 		return lVolume;
 	}
@@ -120,10 +120,11 @@ public class VolumeManager implements ClearVolumeCloseable
 	@Override
 	public void close()
 	{
-		for (SoftReference<Volume<?>> lVolumeSoftReference : mAvailableVolumesQueue)
+		for (final SoftReference<Volume> lVolumeSoftReference : mAvailableVolumesQueue)
 		{
-			Volume<?> lVolume = lVolumeSoftReference.get();
-			lVolume.close();
+			final Volume lVolume = lVolumeSoftReference.get();
+			if (lVolume != null)
+				lVolume.close();
 		}
 		mAvailableVolumesQueue.clear();
 	}

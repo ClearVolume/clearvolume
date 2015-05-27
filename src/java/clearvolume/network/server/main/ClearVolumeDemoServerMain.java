@@ -7,10 +7,13 @@ public class ClearVolumeDemoServerMain
 
 	/**
 	 * Launch the application.
+	 *
+	 * @param args
+	 *          command line parameters
 	 */
 	public static void main(String[] args)
 	{
-		ClearVolumeNetworkDemo lClearVolumeNetworkDemo = new ClearVolumeNetworkDemo();
+		final ClearVolumeNetworkDemo lClearVolumeNetworkDemo = new ClearVolumeNetworkDemo();
 		lClearVolumeNetworkDemo.startServerOneChannel();
 	}
 

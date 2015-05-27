@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 
 import com.jogamp.opengl.math.Quaternion;
@@ -22,7 +21,7 @@ import com.jogamp.opengl.math.Quaternion;
  * 
  * where (qw,qx,qy,qz) is a quaternion with qw,qx,qy,qz are floats. and
  * (ax,ay,az) is an acceleration vector (if available), and b1,b2, b3 are
- * variable value buttons.
+ * variable size buttons.
  * 
  * typically, the data arrives from a Egg3D controller or similarly compatible
  * rotation controller. the default TCP port is 4444.
@@ -46,10 +45,11 @@ import com.jogamp.opengl.math.Quaternion;
  * @author Loic Royer 2014
  *
  */
-public class ExternalRotationController	implements
-																				RotationControllerInterface,
-																				Closeable,
-																				Runnable
+public class ExternalRotationController	extends
+																				QuaternionRotationControllerBase implements
+																																				RotationControllerInterface,
+																																				Closeable,
+																																				Runnable
 {
 
 	/**
@@ -59,7 +59,7 @@ public class ExternalRotationController	implements
 
 	// network related fields.
 	private Socket mClientSocket;
-	private int mPortNumber;
+	private final int mPortNumber;
 	private volatile BufferedReader mBufferedInputStreamFromServer;
 
 	// Quaternion and locking object.
@@ -75,19 +75,23 @@ public class ExternalRotationController	implements
 	 * DisplayRequest object that has to be called when requesting a display
 	 * update.
 	 */
-	private DisplayRequestInterface mDisplayRequest;
+	private final DisplayRequestInterface mDisplayRequest;
 
 	/**
 	 * Constructs an instance of the ExternalRotationController class
 	 * 
 	 * @param pPortNumber
+	 *          port number
 	 * @param pDisplayRequest
+	 *          display request
 	 * @throws UnknownHostException
+	 *           thrown when host unknown
 	 * @throws IOException
+	 *           thrown when IO error
 	 */
 	public ExternalRotationController(final int pPortNumber,
-																		DisplayRequestInterface pDisplayRequest)	throws UnknownHostException,
-																																		IOException
+																		DisplayRequestInterface pDisplayRequest) throws UnknownHostException,
+																																						IOException
 	{
 		super();
 		mPortNumber = pPortNumber;
@@ -104,7 +108,7 @@ public class ExternalRotationController	implements
 	 */
 	public void connectAsynchronouslyOrWait()
 	{
-		Runnable lConnectionRunnable = new Runnable()
+		final Runnable lConnectionRunnable = new Runnable()
 		{
 			@Override
 			public void run()
@@ -114,13 +118,13 @@ public class ExternalRotationController	implements
 					{
 						Thread.sleep(500);
 					}
-					catch (InterruptedException e)
+					catch (final InterruptedException e)
 					{
 					}
 			}
 		};
-		Thread lConnectionThread = new Thread(lConnectionRunnable,
-																					"ClearVolume-ExternalControllerConnectionThread");
+		final Thread lConnectionThread = new Thread(lConnectionRunnable,
+																								"ClearVolume-ExternalControllerConnectionThread");
 		lConnectionThread.setDaemon(true);
 		lConnectionThread.start();
 	}
@@ -151,22 +155,6 @@ public class ExternalRotationController	implements
 		}
 	}
 
-
-
-		/**
-	 * Interface method implementation
-	 * 
-	 * @see clearvolume.controller.RotationControllerInterface#rotate(cleargl.GLMatrix)
-	 */
-	@Override
-	public void rotate(final GLMatrix pGLMatrix)
-	{
-		synchronized (mQuaternionUpdateLock)
-		{
-			pGLMatrix.mult(mQuaternion);
-		}
-	}
-
 	/**
 	 * Interface method implementation
 	 * 
@@ -188,7 +176,7 @@ public class ExternalRotationController	implements
 	@Override
 	public void run()
 	{
-		BufferedReader lBufferedInputStreamFromServer = mBufferedInputStreamFromServer;
+		final BufferedReader lBufferedInputStreamFromServer = mBufferedInputStreamFromServer;
 		while (mBufferedInputStreamFromServer != null && mBufferedInputStreamFromServer == lBufferedInputStreamFromServer)
 		{
 			String lReadLine;
@@ -198,7 +186,7 @@ public class ExternalRotationController	implements
 				parseMessage(lReadLine);
 				mDisplayRequest.requestDisplay();
 			}
-			catch (Throwable e)
+			catch (final Throwable e)
 			{
 				System.out.println("Connection to external controller lost");
 				System.err.println(e.getLocalizedMessage());
@@ -218,9 +206,10 @@ public class ExternalRotationController	implements
 	private void parseMessage(String pReadLine)
 	{
 		// System.out.println(pReadLine);
-		String lSubString = pReadLine.substring(1, pReadLine.length() - 2);
+		final String lSubString = pReadLine.substring(1,
+																									pReadLine.length() - 2);
 
-		String[] lSplittedSubString = lSubString.split(",");
+		final String[] lSplittedSubString = lSubString.split(",");
 
 		final float lQuaternionW = Float.parseFloat(lSplittedSubString[0]);
 		final float lQuaternionX = Float.parseFloat(lSplittedSubString[1]);
@@ -256,7 +245,8 @@ public class ExternalRotationController	implements
 	public boolean isActive()
 	{
 		return mClientSocket != null && mClientSocket.isConnected()
-						&& !mClientSocket.isClosed();
+						&& !mClientSocket.isClosed()
+						&& super.isActive();
 	}
 
 }

@@ -1,7 +1,8 @@
 package clearvolume.renderer.processors;
 
+import clearvolume.renderer.SingleKeyToggable;
 
-public interface Processor<R>
+public interface Processor<R> extends SingleKeyToggable
 {
 
 	public void addResultListener(ProcessorResultListener<R> pProcessorResultListener);
@@ -17,8 +18,11 @@ public interface Processor<R>
 
 	public String getName();
 
-	public boolean toggleActive();
+	@Override
+	public boolean toggle();
 
 	public boolean isActive();
+
+	public void setActive(boolean pActive);
 
 }

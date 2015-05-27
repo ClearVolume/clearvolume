@@ -97,7 +97,7 @@ public class ShepardRissetGlissando extends SourceBase implements
 	}
 
 	/**
-	 * Computes the value of the amplitude envelop for a given frequency.
+	 * Computes the size of the amplitude envelop for a given frequency.
 	 * 
 	 * @param pFrequency
 	 *          frequency
@@ -109,7 +109,7 @@ public class ShepardRissetGlissando extends SourceBase implements
 			return 0;
 		float lNormalizedFrequency = (pFrequency - mBottomFrequency) / (mTopFrequency - mBottomFrequency);
 		float lAmplitude = (float) (getAmplitude() * pow(	sin(PI * lNormalizedFrequency),
-																									2));
+																											2));
 		return lAmplitude;
 	}
 
@@ -127,7 +127,6 @@ public class ShepardRissetGlissando extends SourceBase implements
 		}
 		return lSample;
 	}
-
 
 	/* (non-Javadoc)
 	 * @see clearvolume.audio.synthesizer.sources.Source#getPeriodInSamples()

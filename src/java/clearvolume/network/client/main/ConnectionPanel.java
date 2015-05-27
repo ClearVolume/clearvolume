@@ -21,7 +21,7 @@ import javax.swing.border.EmptyBorder;
 import net.miginfocom.swing.MigLayout;
 import clearvolume.network.client.ClearVolumeTCPClientHelper;
 import clearvolume.network.serialization.ClearVolumeSerialization;
-import clearvolume.renderer.VolumeCaptureListener;
+import clearvolume.renderer.listeners.VolumeCaptureListener;
 
 public class ConnectionPanel extends JPanel
 {
@@ -43,9 +43,11 @@ public class ConnectionPanel extends JPanel
 
 	private final VolumeCaptureListener mVolumeCaptureListener;
 
-	private final Image appicon; // if set, this icon will set as application icon (to prevent jogl icon steal!)
+	private final Image appicon; // if set, this icon will set as application icon
+																// (to prevent jogl icon steal!)
 
-	public ConnectionPanel( final VolumeCaptureListener pVolumeCaptureListener, final Image appicon )
+	public ConnectionPanel(	final VolumeCaptureListener pVolumeCaptureListener,
+													final Image appicon)
 	{
 		this.appicon = appicon;
 
@@ -245,8 +247,8 @@ public class ConnectionPanel extends JPanel
 																									lBytesPerVoxel,
 																									lNumberOfLayers,
 																									lTimeShiftMultiChannel,
-							lChannelFilter,
-							appicon );
+																									lChannelFilter,
+																									appicon);
 				}
 			};
 

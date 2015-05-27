@@ -8,7 +8,7 @@ public class CommandLine
 {
 
 	/*
-	// Max value for the random seed (minimum is 0). 
+	// Max size for the random seed (minimum is 0). 
 	public static final int MAX_RANDOM_SEED = 1000;
 
 	// Valid options for the experiment type 

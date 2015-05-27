@@ -1,5 +1,7 @@
 package clearvolume.interfaces;
 
+import java.awt.EventQueue;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -27,6 +29,7 @@ import clearvolume.volume.sink.filter.gui.ChannelFilterSinkJFrame;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
+import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeC
 {
@@ -55,8 +58,8 @@ public class ClearVolumeC
 	private static volatile long sTimeShiftHardHoryzon = 20;
 	private static volatile int sMaxAvailableVolumes = 10;
 	private static volatile int sMaxQueueLength = 10;
-	private static volatile long sMaxMillisecondsToWaitForCopy = 10;
-	private static volatile long sMaxMillisecondsToWait = 10;
+	private static volatile long sMaxMillisecondsToWaitForCopy = 100;
+	private static volatile long sMaxMillisecondsToWait = 100;
 
 	public static final String getLastExceptionMessage()
 	{
@@ -73,128 +76,158 @@ public class ClearVolumeC
 
 	public static int[] getRendererList()
 	{
-		List<Integer> lRendererList = Collections.list(sIDToRendererMap.keys());
-		int[] lRendererArray = new int[lRendererList.size()];
+		final List<Integer> lRendererList = Collections.list(sIDToRendererMap.keys());
+		final int[] lRendererArray = new int[lRendererList.size()];
 		int i = 0;
-		for (Integer lId : lRendererList)
+		for (final Integer lId : lRendererList)
 			lRendererArray[i++] = lId;
 
 		return lRendererArray;
 	}
 
 	public static int createRenderer(	final int pRendererId,
-			final int pWindowWidth,
-			final int pWindowHeight,
-			final int pBytesPerVoxel,
-			final int pMaxTextureWidth,
-			final int pMaxTextureHeight)
+																		final int pWindowWidth,
+																		final int pWindowHeight,
+																		final int pBytePerVoxel,
+																		final int pMaxTextureWidth,
+																		final int pMaxTextureHeight)
 	{
 		return createRenderer(pRendererId,
-				pWindowWidth,
-				pWindowHeight,
-				pBytesPerVoxel,
-				pMaxTextureWidth,
-				pMaxTextureHeight,
-				true,
-				true);
+													pWindowWidth,
+													pWindowHeight,
+													pBytePerVoxel,
+													pMaxTextureWidth,
+													pMaxTextureHeight,
+													true,
+													true);
 	}
 
 	public static int createRenderer(	final int pRendererId,
-			final int pWindowWidth,
-			final int pWindowHeight,
-			final int pBytesPerVoxel,
-			final int pMaxTextureWidth,
-			final int pMaxTextureHeight,
-			final boolean pTimeShift,
-			final boolean pChannelSelector)
+																		final int pWindowWidth,
+																		final int pWindowHeight,
+																		final int pBytePerVoxel,
+																		final int pMaxTextureWidth,
+																		final int pMaxTextureHeight,
+																		final boolean pTimeShift,
+																		final boolean pChannelSelector)
 	{
 		try
 		{
-			ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolume[ID=" + pRendererId
-					+ "]",
-					pWindowWidth,
-					pWindowHeight,
-					pBytesPerVoxel,
-					pMaxTextureWidth,
-					pMaxTextureHeight,
-					false);
-
-			VolumeManager lVolumeManager = lClearVolumeRenderer.createCompatibleVolumeManager(sMaxAvailableVolumes);
-			sIDToVolumeManager.put(pRendererId, lVolumeManager);
-
-			lClearVolumeRenderer.setVisible(true);
-			sIDToRendererMap.put(pRendererId, lClearVolumeRenderer);
-
-			ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-					lVolumeManager,
-					sMaxMillisecondsToWaitForCopy,
-					TimeUnit.MILLISECONDS);
-			VolumeSinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
-
-			TimeShiftingSink lTimeShiftingSink = null;
-			TimeShiftingSinkJFrame lTimeShiftingSinkJFrame = null;
-			if (pTimeShift)
+			EventQueue.invokeAndWait(new Runnable()
 			{
-				lTimeShiftingSink = new TimeShiftingSink(	sTimeShiftSoftHoryzon,
-						sTimeShiftHardHoryzon);
-				sIDToTimeShiftingSink.put(pRendererId, lTimeShiftingSink);
+				@Override
+				public void run()
+				{
+					try
+					{
+						NativeTypeEnum lNativeTypeEnum = NativeTypeEnum.UnsignedShort;
+						switch (pBytePerVoxel)
+						{
+						case 1:
+							lNativeTypeEnum = NativeTypeEnum.UnsignedByte;
+							break;
+						case 2:
+							lNativeTypeEnum = NativeTypeEnum.UnsignedShort;
+							break;
+						}
+						final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolume[ID=" + pRendererId
+																																																											+ "]",
+																																																									pWindowWidth,
+																																																									pWindowHeight,
+																																																									lNativeTypeEnum,
+																																																									pMaxTextureWidth,
+																																																									pMaxTextureHeight,
+																																																									false);
 
-				lTimeShiftingSinkJFrame = new TimeShiftingSinkJFrame(lTimeShiftingSink);
-				lTimeShiftingSinkJFrame.setVisible(true);
-				sIDToTimeShiftingSinkJFrame.put(pRendererId,
-						lTimeShiftingSinkJFrame);
+						final VolumeManager lVolumeManager = lClearVolumeRenderer.createCompatibleVolumeManager(sMaxAvailableVolumes);
+						sIDToVolumeManager.put(pRendererId, lVolumeManager);
 
-				lTimeShiftingSink.setRelaySink(lSinkAfterAsynchronousVolumeSinkAdapter);
+						lClearVolumeRenderer.setVisible(true);
+						sIDToRendererMap.put(pRendererId, lClearVolumeRenderer);
 
-				lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
+						final ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
+																																																	lVolumeManager,
+																																																	sMaxMillisecondsToWaitForCopy,
+																																																	TimeUnit.MILLISECONDS);
+						VolumeSinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
 
-				lSinkAfterAsynchronousVolumeSinkAdapter = lTimeShiftingSink;
-			}
+						TimeShiftingSink lTimeShiftingSink = null;
+						TimeShiftingSinkJFrame lTimeShiftingSinkJFrame = null;
+						if (pTimeShift)
+						{
+							lTimeShiftingSink = new TimeShiftingSink(	sTimeShiftSoftHoryzon,
+																												sTimeShiftHardHoryzon);
+							sIDToTimeShiftingSink.put(pRendererId,
+																				lTimeShiftingSink);
 
-			ChannelFilterSink lChannelFilterSink = null;
-			ChannelFilterSinkJFrame lChannelFilterSinkJFrame = null;
-			if (pChannelSelector)
-			{
-				lChannelFilterSink = new ChannelFilterSink();
-				sIDToChannelFilterSink.put(pRendererId, lChannelFilterSink);
+							lTimeShiftingSinkJFrame = new TimeShiftingSinkJFrame(lTimeShiftingSink);
+							lTimeShiftingSinkJFrame.setVisible(true);
+							sIDToTimeShiftingSinkJFrame.put(pRendererId,
+																							lTimeShiftingSinkJFrame);
 
-				lChannelFilterSinkJFrame = new ChannelFilterSinkJFrame(lChannelFilterSink);
-				lChannelFilterSinkJFrame.setVisible(true);
-				sIDToChannelFilterSinkJFrame.put(	pRendererId,
-						lChannelFilterSinkJFrame);
+							lTimeShiftingSink.setRelaySink(lSinkAfterAsynchronousVolumeSinkAdapter);
 
-				lChannelFilterSink.setRelaySink(lSinkAfterAsynchronousVolumeSinkAdapter);
+							lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
-				lSinkAfterAsynchronousVolumeSinkAdapter = lChannelFilterSink;
-			}
+							lSinkAfterAsynchronousVolumeSinkAdapter = lTimeShiftingSink;
+						}
 
-			AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
-					sMaxQueueLength,
-					sMaxMillisecondsToWait,
-					TimeUnit.MILLISECONDS);
-			lAsynchronousVolumeSinkAdapter.start();
+						ChannelFilterSink lChannelFilterSink = null;
+						ChannelFilterSinkJFrame lChannelFilterSinkJFrame = null;
+						if (pChannelSelector)
+						{
+							lChannelFilterSink = new ChannelFilterSink();
+							sIDToChannelFilterSink.put(	pRendererId,
+																					lChannelFilterSink);
 
-			sIDToVolumeAsyncSink.put(	pRendererId,
-					lAsynchronousVolumeSinkAdapter);
+							lChannelFilterSinkJFrame = new ChannelFilterSinkJFrame(lChannelFilterSink);
+							lChannelFilterSinkJFrame.setVisible(true);
+							sIDToChannelFilterSinkJFrame.put(	pRendererId,
+																								lChannelFilterSinkJFrame);
 
-			sIDToVolumeSink.put(pRendererId, lAsynchronousVolumeSinkAdapter);
+							lChannelFilterSink.setRelaySink(lSinkAfterAsynchronousVolumeSinkAdapter);
 
-			return 0;
+							lSinkAfterAsynchronousVolumeSinkAdapter = lChannelFilterSink;
+						}
+
+						final AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
+																																																										sMaxQueueLength,
+																																																										sMaxMillisecondsToWait,
+																																																										TimeUnit.MILLISECONDS);
+						lAsynchronousVolumeSinkAdapter.start();
+
+						sIDToVolumeAsyncSink.put(	pRendererId,
+																			lAsynchronousVolumeSinkAdapter);
+
+						sIDToVolumeSink.put(pRendererId,
+																lAsynchronousVolumeSinkAdapter);
+
+						return;
+					}
+					catch (final Throwable e)
+					{
+						e.printStackTrace();
+						sLastThrowableException = e;
+						return;
+					}
+
+				}
+			});
 		}
-		catch (Throwable e)
+		catch (InvocationTargetException | InterruptedException e)
 		{
 			e.printStackTrace();
 			sLastThrowableException = e;
-			return 1;
 		}
 
+		return 0;
 	}
 
 	public static int destroyRenderer(final int pRendererId)
 	{
 		try
 		{
-			AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = sIDToVolumeAsyncSink.get(pRendererId);
+			final AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = sIDToVolumeAsyncSink.get(pRendererId);
 			if (lAsynchronousVolumeSinkAdapter != null)
 			{
 				lAsynchronousVolumeSinkAdapter.stop();
@@ -202,7 +235,7 @@ public class ClearVolumeC
 				sIDToVolumeAsyncSink.remove(pRendererId);
 			}
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return 1;
@@ -210,10 +243,10 @@ public class ClearVolumeC
 
 		try
 		{
-			TimeShiftingSink lTimeShiftingSink = sIDToTimeShiftingSink.get(pRendererId);
+			final TimeShiftingSink lTimeShiftingSink = sIDToTimeShiftingSink.get(pRendererId);
 			if (lTimeShiftingSink != null)
 			{
-				TimeShiftingSinkJFrame lTimeShiftingSinkJFrame = sIDToTimeShiftingSinkJFrame.get(pRendererId);
+				final TimeShiftingSinkJFrame lTimeShiftingSinkJFrame = sIDToTimeShiftingSinkJFrame.get(pRendererId);
 				lTimeShiftingSinkJFrame.setVisible(false);
 				lTimeShiftingSinkJFrame.dispose();
 				lTimeShiftingSink.close();
@@ -221,7 +254,7 @@ public class ClearVolumeC
 				sIDToTimeShiftingSink.remove(pRendererId);
 			}
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return 2;
@@ -229,10 +262,10 @@ public class ClearVolumeC
 
 		try
 		{
-			ChannelFilterSink lChannelFilterSink = sIDToChannelFilterSink.get(pRendererId);
+			final ChannelFilterSink lChannelFilterSink = sIDToChannelFilterSink.get(pRendererId);
 			if (lChannelFilterSink != null)
 			{
-				ChannelFilterSinkJFrame lChannelFilterSinkJFrame = sIDToChannelFilterSinkJFrame.get(pRendererId);
+				final ChannelFilterSinkJFrame lChannelFilterSinkJFrame = sIDToChannelFilterSinkJFrame.get(pRendererId);
 				lChannelFilterSinkJFrame.setVisible(false);
 				lChannelFilterSinkJFrame.dispose();
 				lChannelFilterSink.close();
@@ -240,7 +273,7 @@ public class ClearVolumeC
 				sIDToChannelFilterSink.remove(pRendererId);
 			}
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return 3;
@@ -248,13 +281,13 @@ public class ClearVolumeC
 
 		try
 		{
-			VolumeManager lVolumeManager = sIDToVolumeManager.get(pRendererId);
+			final VolumeManager lVolumeManager = sIDToVolumeManager.get(pRendererId);
 			if (lVolumeManager != null)
 			{
 				sIDToVolumeManager.remove(pRendererId);
 			}
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return 4;
@@ -262,17 +295,17 @@ public class ClearVolumeC
 
 		try
 		{
-			ClearVolumeRendererInterface lClearVolumeRenderer = sIDToRendererMap.get(pRendererId);
+			final ClearVolumeRendererInterface lClearVolumeRenderer = sIDToRendererMap.get(pRendererId);
 			if (lClearVolumeRenderer != null)
 			{
 				sIDToRendererMap.remove(pRendererId);
-				lClearVolumeRenderer.waitToFinishDataBufferCopy(1,
-						TimeUnit.SECONDS);
+				lClearVolumeRenderer.waitToFinishAllDataBufferCopy(	1,
+																														TimeUnit.SECONDS);
 
 				lClearVolumeRenderer.close();
 			}
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return 5;
@@ -285,13 +318,13 @@ public class ClearVolumeC
 	{
 		try
 		{
-			VolumeManager lVolumeManager = new VolumeManager(sMaxAvailableVolumes);
+			final VolumeManager lVolumeManager = new VolumeManager(sMaxAvailableVolumes);
 			sIDToVolumeManager.put(pServerId, lVolumeManager);
 
-			ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(sMaxAvailableVolumes);
+			final ClearVolumeTCPServerSink lClearVolumeTCPServerSink = new ClearVolumeTCPServerSink(sMaxAvailableVolumes);
 			lClearVolumeTCPServerSink.setRelaySink(new NullVolumeSink());
 
-			SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
+			final SocketAddress lServerSocketAddress = new InetSocketAddress(ClearVolumeSerialization.cStandardTCPPort);
 			if (!lClearVolumeTCPServerSink.open(lServerSocketAddress))
 			{
 				return 3;
@@ -307,7 +340,7 @@ public class ClearVolumeC
 			return 0;
 
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			sLastThrowableException = e;
@@ -320,7 +353,7 @@ public class ClearVolumeC
 	{
 		try
 		{
-			ClearVolumeTCPServerSink lClearVolumeTCPServerSink = sIDToServerMap.get(pServerId);
+			final ClearVolumeTCPServerSink lClearVolumeTCPServerSink = sIDToServerMap.get(pServerId);
 			if (lClearVolumeTCPServerSink != null)
 			{
 				sIDToServerMap.remove(pServerId);
@@ -328,7 +361,7 @@ public class ClearVolumeC
 				lClearVolumeTCPServerSink.close();
 			}
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return 1;
@@ -336,13 +369,13 @@ public class ClearVolumeC
 
 		try
 		{
-			VolumeSinkInterface lVolumeSink = sIDToVolumeSink.get(pServerId);
+			final VolumeSinkInterface lVolumeSink = sIDToVolumeSink.get(pServerId);
 			if (lVolumeSink != null)
 			{
 				sIDToVolumeSink.remove(pServerId);
 			}
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return 2;
@@ -350,14 +383,14 @@ public class ClearVolumeC
 
 		try
 		{
-			VolumeManager lVolumeManager = sIDToVolumeManager.get(pServerId);
+			final VolumeManager lVolumeManager = sIDToVolumeManager.get(pServerId);
 			if (lVolumeManager != null)
 			{
 				sIDToVolumeManager.remove(pServerId);
 			}
 			return 0;
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return 3;
@@ -366,17 +399,17 @@ public class ClearVolumeC
 	}
 
 	public static int setVoxelDimensionsInRealUnits(final int pSinkId,
-			final double pWidthInRealUnits,
-			final double pHeightInRealUnits,
-			final double pDepthInRealUnits)
+																									final double pWidthInRealUnits,
+																									final double pHeightInRealUnits,
+																									final double pDepthInRealUnits)
 	{
 		try
 		{
 			sIDToVolumeDimensionsInRealUnit.put(pSinkId, new double[]
-					{ pWidthInRealUnits, pHeightInRealUnits, pDepthInRealUnits });
+			{ pWidthInRealUnits, pHeightInRealUnits, pDepthInRealUnits });
 			return 0;
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			sLastThrowableException = e;
@@ -385,8 +418,8 @@ public class ClearVolumeC
 	}
 
 	public static int setVolumeIndexAndTime(final int pSinkId,
-			final int pVolumeIndex,
-			final double pVolumeTimeInSeconds)
+																					final int pVolumeIndex,
+																					final double pVolumeTimeInSeconds)
 	{
 		try
 		{
@@ -394,7 +427,7 @@ public class ClearVolumeC
 			sIDToVolumeTimeInSeconds.put(pSinkId, pVolumeTimeInSeconds);
 			return 0;
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			sLastThrowableException = e;
@@ -403,15 +436,15 @@ public class ClearVolumeC
 	}
 
 	public static int setChannelName(	final int pChannelID,
-			final String pChanelName)
+																		final String pChanelName)
 	{
 		try
 		{
 			sChannelIDToChannelName.put(pChannelID,
-					new String(pChanelName).intern());
+																	new String(pChanelName).intern());
 			return 0;
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			sLastThrowableException = e;
@@ -420,16 +453,16 @@ public class ClearVolumeC
 	}
 
 	public static int setChannelColor(final int pChannelID,
-			final float[] pChanelColor)
+																		final float[] pChanelColor)
 	{
 		try
 		{
 			sChannelIDToChannelColor.put(	pChannelID,
-					Arrays.copyOf(pChanelColor,
-							pChanelColor.length));
+																		Arrays.copyOf(pChanelColor,
+																									pChanelColor.length));
 			return 0;
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			sLastThrowableException = e;
@@ -438,16 +471,16 @@ public class ClearVolumeC
 	}
 
 	public static int setChannelViewMatrix(	final int pChannelID,
-			final float[] pViewMatrix)
+																					final float[] pViewMatrix)
 	{
 		try
 		{
 			sChannelIDToChannelViewMatrix.put(pChannelID,
-					Arrays.copyOf(pViewMatrix,
-							pViewMatrix.length));
+																				Arrays.copyOf(pViewMatrix,
+																											pViewMatrix.length));
 			return 0;
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			sLastThrowableException = e;
@@ -456,82 +489,82 @@ public class ClearVolumeC
 	}
 
 	public static int send8bitUINTVolumeDataToSink(	final int pSinkId,
-			final int pChannelId,
-			final long pBufferAddress,
-			final long pBufferLength,
-			final int pWidthInVoxels,
-			final int pHeightInVoxels,
-			final int pDepthInVoxels)
+																									final int pChannelId,
+																									final long pBufferAddress,
+																									final long pBufferLength,
+																									final int pWidthInVoxels,
+																									final int pHeightInVoxels,
+																									final int pDepthInVoxels)
 	{
-		Pointer<Byte> lBridJPointer = getBridJPointer(pBufferAddress,
-				pBufferLength,
-				Byte.class);
+		final Pointer<Byte> lBridJPointer = getBridJPointer(pBufferAddress,
+																												pBufferLength,
+																												Byte.class);
 
-		ByteBuffer lByteBuffer = lBridJPointer.getByteBuffer();
+		final ByteBuffer lByteBuffer = lBridJPointer.getByteBuffer();
 
 		return send8bitUINTVolumeDataToSink(pSinkId,
-				pChannelId,
-				lByteBuffer,
-				pWidthInVoxels,
-				pHeightInVoxels,
-				pDepthInVoxels);
+																				pChannelId,
+																				lByteBuffer,
+																				pWidthInVoxels,
+																				pHeightInVoxels,
+																				pDepthInVoxels);
 	}
 
 	public static int send8bitUINTVolumeDataToSink(	final int pSinkId,
-			final int pChannelId,
-			ByteBuffer pByteBuffer,
-			final int pWidthInVoxels,
-			final int pHeightInVoxels,
-			final int pDepthInVoxels)
+																									final int pChannelId,
+																									ByteBuffer pByteBuffer,
+																									final int pWidthInVoxels,
+																									final int pHeightInVoxels,
+																									final int pDepthInVoxels)
 	{
 		try
 		{
-			VolumeManager lVolumeManager = sIDToVolumeManager.get(pSinkId);
+			final VolumeManager lVolumeManager = sIDToVolumeManager.get(pSinkId);
 
-			Volume<Byte> lRequestedVolume = lVolumeManager.requestAndWaitForVolume(	sMaxMillisecondsToWait,
-					TimeUnit.MILLISECONDS,
-					Byte.class,
-					1,
-					pWidthInVoxels,
-					pHeightInVoxels,
-					pDepthInVoxels);
+			final Volume lRequestedVolume = lVolumeManager.requestAndWaitForVolume(	sMaxMillisecondsToWait,
+																																							TimeUnit.MILLISECONDS,
+																																							NativeTypeEnum.UnsignedByte,
+																																							1,
+																																							pWidthInVoxels,
+																																							pHeightInVoxels,
+																																							pDepthInVoxels);
 
-			String lChannelName = sChannelIDToChannelName.get(pChannelId);
+			final String lChannelName = sChannelIDToChannelName.get(pChannelId);
 			if (lChannelName != null)
 				lRequestedVolume.setChannelName(lChannelName);
 
-			float[] lChannelColor = sChannelIDToChannelColor.get(pChannelId);
+			final float[] lChannelColor = sChannelIDToChannelColor.get(pChannelId);
 			if (lChannelColor != null)
 				lRequestedVolume.setColor(lChannelColor);
 
-			float[] lViewMatrix = sChannelIDToChannelViewMatrix.get(pChannelId);
+			final float[] lViewMatrix = sChannelIDToChannelViewMatrix.get(pChannelId);
 			if (lViewMatrix != null)
 				lRequestedVolume.setViewMatrix(lViewMatrix);
 
-			Integer lTimeIndex = sIDToVolumeTimeIndex.get(pSinkId);
+			final Integer lTimeIndex = sIDToVolumeTimeIndex.get(pSinkId);
 			if (lTimeIndex != null)
 				lRequestedVolume.setTimeIndex(lTimeIndex);
 
-			Double lTimeInSeconds = sIDToVolumeTimeInSeconds.get(pSinkId);
+			final Double lTimeInSeconds = sIDToVolumeTimeInSeconds.get(pSinkId);
 			if (lTimeInSeconds != null)
 				lRequestedVolume.setTimeInSeconds(lTimeInSeconds);
 
-			double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
+			final double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 			if (lDimensionsInRealUnits != null)
 				lRequestedVolume.setVoxelSizeInRealUnits(	"um",
-						lDimensionsInRealUnits);
+																									lDimensionsInRealUnits);
 
-			ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
+			final ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
 			lVolumeData.clear();
 			pByteBuffer.rewind();
 			lVolumeData.put(pByteBuffer);
 
-			VolumeSinkInterface lVolumeSinkInterface = sIDToVolumeSink.get(pSinkId);
+			final VolumeSinkInterface lVolumeSinkInterface = sIDToVolumeSink.get(pSinkId);
 			lVolumeSinkInterface.sendVolume(lRequestedVolume);
 
 			return 0;
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			sLastThrowableException = e;
@@ -540,59 +573,59 @@ public class ClearVolumeC
 	}
 
 	public static int send16bitUINTVolumeDataToSink(final int pSinkId,
-			final int pChannelId,
-			final long pBufferAddress,
-			final long pBufferLength,
-			final int pWidthInVoxels,
-			final int pHeightInVoxels,
-			final int pDepthInVoxels)
+																									final int pChannelId,
+																									final long pBufferAddress,
+																									final long pBufferLength,
+																									final int pWidthInVoxels,
+																									final int pHeightInVoxels,
+																									final int pDepthInVoxels)
 	{
-		Pointer<Byte> lBridJPointer = getBridJPointer(pBufferAddress,
-				pBufferLength,
-				Byte.class);
+		final Pointer<Byte> lBridJPointer = getBridJPointer(pBufferAddress,
+																												pBufferLength,
+																												Byte.class);
 
-		ByteBuffer lByteBuffer = lBridJPointer.getByteBuffer();
+		final ByteBuffer lByteBuffer = lBridJPointer.getByteBuffer();
 
 		return send16bitUINTVolumeDataToSink(	pSinkId,
-				pChannelId,
-				lByteBuffer,
-				pWidthInVoxels,
-				pHeightInVoxels,
-				pDepthInVoxels);
+																					pChannelId,
+																					lByteBuffer,
+																					pWidthInVoxels,
+																					pHeightInVoxels,
+																					pDepthInVoxels);
 	}
 
 	public static int send16bitUINTVolumeDataToSink(final int pSinkId,
-			final int pChannelId,
-			final ByteBuffer pByteBuffer,
-			final int pWidthInVoxels,
-			final int pHeightInVoxels,
-			final int pDepthInVoxels)
+																									final int pChannelId,
+																									final ByteBuffer pByteBuffer,
+																									final int pWidthInVoxels,
+																									final int pHeightInVoxels,
+																									final int pDepthInVoxels)
 	{
 		try
 		{
-			VolumeManager lVolumeManager = sIDToVolumeManager.get(pSinkId);
+			final VolumeManager lVolumeManager = sIDToVolumeManager.get(pSinkId);
 
-			Volume<Character> lRequestedVolume = lVolumeManager.requestAndWaitForVolume(sMaxMillisecondsToWait,
-					TimeUnit.MILLISECONDS,
-					Character.class,
-					1,
-					pWidthInVoxels,
-					pHeightInVoxels,
-					pDepthInVoxels);
+			final Volume lRequestedVolume = lVolumeManager.requestAndWaitForVolume(	sMaxMillisecondsToWait,
+																																							TimeUnit.MILLISECONDS,
+																																							NativeTypeEnum.UnsignedShort,
+																																							1,
+																																							pWidthInVoxels,
+																																							pHeightInVoxels,
+																																							pDepthInVoxels);
 
 			setCurrentVolumeMetadata(pSinkId, pChannelId, lRequestedVolume);
 
-			ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
+			final ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
 			lVolumeData.clear();
 			pByteBuffer.rewind();
 			lVolumeData.put(pByteBuffer);
 
-			VolumeSinkInterface lVolumeSinkInterface = sIDToVolumeSink.get(pSinkId);
+			final VolumeSinkInterface lVolumeSinkInterface = sIDToVolumeSink.get(pSinkId);
 			lVolumeSinkInterface.sendVolume(lRequestedVolume);
 
 			return 0;
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			sLastThrowableException = e;
@@ -601,49 +634,49 @@ public class ClearVolumeC
 	}
 
 	private static void setCurrentVolumeMetadata(	final int pSinkId,
-			final int pChannelId,
-			Volume<Character> lRequestedVolume)
+																								final int pChannelId,
+																								Volume lRequestedVolume)
 	{
-		String lChannelName = sChannelIDToChannelName.get(pChannelId);
+		final String lChannelName = sChannelIDToChannelName.get(pChannelId);
 		if (lChannelName != null)
 			lRequestedVolume.setChannelName(lChannelName);
 
-		float[] lChannelColor = sChannelIDToChannelColor.get(pChannelId);
+		final float[] lChannelColor = sChannelIDToChannelColor.get(pChannelId);
 		if (lChannelColor != null)
 			lRequestedVolume.setColor(lChannelColor);
 
-		float[] lViewMatrix = sChannelIDToChannelViewMatrix.get(pChannelId);
+		final float[] lViewMatrix = sChannelIDToChannelViewMatrix.get(pChannelId);
 		if (lViewMatrix != null)
 			lRequestedVolume.setViewMatrix(lViewMatrix);
 
-		Integer lTimeIndex = sIDToVolumeTimeIndex.get(pSinkId);
+		final Integer lTimeIndex = sIDToVolumeTimeIndex.get(pSinkId);
 		if (lTimeIndex != null)
 			lRequestedVolume.setTimeIndex(lTimeIndex);
 
-		Double lTimeInSeconds = sIDToVolumeTimeInSeconds.get(pSinkId);
+		final Double lTimeInSeconds = sIDToVolumeTimeInSeconds.get(pSinkId);
 		if (lTimeInSeconds != null)
 			lRequestedVolume.setTimeInSeconds(lTimeInSeconds);
 
-		double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
+		final double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 		if (lDimensionsInRealUnits != null)
 			lRequestedVolume.setVoxelSizeInRealUnits(	"um",
-					lDimensionsInRealUnits);
+																								lDimensionsInRealUnits);
 	}
 
 	// jbyte* bbuf_in; jbyte* bbuf_out;
 	// bbuf_in = (*env)->GetDirectBufferAddress(env, buf1);
 	// bbuf_out= (*env)->GetDirectBufferAddress(env, buf2);
 	// The return type of GetDirectBufferAddress is void*, you need to cast it to
-			// a jbyte*: bbuf_in = (jbyte*)(env*)->GetDirectBufferAddress(env, buf1); //C
-			// bbuf_in = (jbyte*)env->GetDirectBufferAddress(buf1); //c++
+	// a jbyte*: bbuf_in = (jbyte*)(env*)->GetDirectBufferAddress(env, buf1); //C
+	// bbuf_in = (jbyte*)env->GetDirectBufferAddress(buf1); //c++
 
 	private static final <T> Pointer<T> getBridJPointer(final long pBufferAddress,
-			final long pBufferLength,
-			final Class<T> pTargetClass)
-			{
+																											final long pBufferLength,
+																											final Class<T> pTargetClass)
+	{
 
-		PointerIO<?> lPointerIO = PointerIO.getInstance(pTargetClass);
-		Releaser lReleaser = new Releaser()
+		final PointerIO<?> lPointerIO = PointerIO.getInstance(pTargetClass);
+		final Releaser lReleaser = new Releaser()
 		{
 
 			@Override
@@ -654,74 +687,89 @@ public class ClearVolumeC
 		};
 
 		@SuppressWarnings("unchecked")
-		Pointer<T> lPointerToAddress = (Pointer<T>) Pointer.pointerToAddress(	pBufferAddress,
-				pBufferLength,
-				lPointerIO,
-				lReleaser);
+		final Pointer<T> lPointerToAddress = (Pointer<T>) Pointer.pointerToAddress(	pBufferAddress,
+																																								pBufferLength,
+																																								lPointerIO,
+																																								lReleaser);
 
 		return lPointerToAddress;
 
-			}
+	}
 
-	/**********************************/
-
+	/**
+	 * Requests a Volume
+	 * 
+	 * @param pSinkId
+	 *          sink ID
+	 * @param pChannelId
+	 *          channel ID
+	 * @param pByteBuffer
+	 *          buffer
+	 * @param pWidthInVoxels
+	 *          width in voxels
+	 * @param pHeightInVoxels
+	 *          height in voxels
+	 * @param pDepthInVoxels
+	 *          depth in voxels
+	 * @return 0 if no error occurred !=0 if error occurred
+	 */
 	public static int requestVolumeBuffer(final int pSinkId,
-			final int pChannelId,
-			ByteBuffer pByteBuffer,
-			final int pWidthInVoxels,
-			final int pHeightInVoxels,
-			final int pDepthInVoxels)
+																				final int pChannelId,
+																				ByteBuffer pByteBuffer,
+																				final int pWidthInVoxels,
+																				final int pHeightInVoxels,
+																				final int pDepthInVoxels)
 	{
 		try
 		{
-			VolumeManager lVolumeManager = sIDToVolumeManager.get(pSinkId);
+			final VolumeManager lVolumeManager = sIDToVolumeManager.get(pSinkId);
 
-			Volume<Byte> lRequestedVolume = lVolumeManager.requestAndWaitForVolume(	sMaxMillisecondsToWait,
-					TimeUnit.MILLISECONDS,
-					Byte.class,
-					1,
-					pWidthInVoxels,
-					pHeightInVoxels,
-					pDepthInVoxels);
+			final Volume lRequestedVolume = lVolumeManager.requestAndWaitForVolume(	sMaxMillisecondsToWait,
+																																							TimeUnit.MILLISECONDS,
+																																							NativeTypeEnum.UnsignedByte,
+																																							1,
+																																							pWidthInVoxels,
+																																							pHeightInVoxels,
+																																							pDepthInVoxels);
 
 			lRequestedVolume.setChannelID(pChannelId);
 
-			String lChannelName = sChannelIDToChannelName.get(pChannelId);
+			final String lChannelName = sChannelIDToChannelName.get(pChannelId);
 			if (lChannelName != null)
 				lRequestedVolume.setChannelName(lChannelName);
 
-			float[] lChannelColor = sChannelIDToChannelColor.get(pChannelId);
+			final float[] lChannelColor = sChannelIDToChannelColor.get(pChannelId);
 			if (lChannelColor != null)
 				lRequestedVolume.setColor(lChannelColor);
 
-			float[] lViewMatrix = sChannelIDToChannelViewMatrix.get(pChannelId);
+			final float[] lViewMatrix = sChannelIDToChannelViewMatrix.get(pChannelId);
 			if (lViewMatrix != null)
 				lRequestedVolume.setViewMatrix(lViewMatrix);
 
-			Integer lTimeIndex = sIDToVolumeTimeIndex.get(pSinkId);
+			final Integer lTimeIndex = sIDToVolumeTimeIndex.get(pSinkId);
 			if (lTimeIndex != null)
 				lRequestedVolume.setTimeIndex(lTimeIndex);
 
-			Double lTimeInSeconds = sIDToVolumeTimeInSeconds.get(pSinkId);
+			final Double lTimeInSeconds = sIDToVolumeTimeInSeconds.get(pSinkId);
 			if (lTimeInSeconds != null)
 				lRequestedVolume.setTimeInSeconds(lTimeInSeconds);
 
-			double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
+			final double[] lDimensionsInRealUnits = sIDToVolumeDimensionsInRealUnit.get(pSinkId);
 			if (lDimensionsInRealUnits != null)
 				lRequestedVolume.setVoxelSizeInRealUnits(	"um",
-						lDimensionsInRealUnits);
+																									lDimensionsInRealUnits);
 
-			ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
+			final ByteBuffer lVolumeData = lRequestedVolume.getDataBuffer();
 			lVolumeData.clear();
 			pByteBuffer.rewind();
 			lVolumeData.put(pByteBuffer);
 
-			VolumeSinkInterface lVolumeSinkInterface = sIDToVolumeSink.get(pSinkId);
+			final VolumeSinkInterface lVolumeSinkInterface = sIDToVolumeSink.get(pSinkId);
 			lVolumeSinkInterface.sendVolume(lRequestedVolume);
 
 			return 0;
 		}
-		catch (Throwable e)
+		catch (final Throwable e)
 		{
 			e.printStackTrace();
 			sLastThrowableException = e;

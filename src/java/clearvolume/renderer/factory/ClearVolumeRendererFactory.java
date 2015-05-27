@@ -5,6 +5,7 @@ import java.util.Properties;
 import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.opencl.OpenCLAvailability;
+import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeRendererFactory
 {
@@ -14,11 +15,15 @@ public class ClearVolumeRendererFactory
 	 * height.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
+	 *          window height
 	 * @param useInCanvas
 	 *          must be set true if you will use ClearVolume embedded in an AWT or
 	 *          Swing container.
+	 * @return best 8 bit renderer
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer8Bit(	final String pWindowName,
 																																				final int pWindowWidth,
@@ -28,7 +33,7 @@ public class ClearVolumeRendererFactory
 		return newBestRenderer(	pWindowName,
 														pWindowWidth,
 														pWindowHeight,
-														1,
+														NativeTypeEnum.UnsignedByte,
 														useInCanvas);
 	}
 
@@ -38,23 +43,29 @@ public class ClearVolumeRendererFactory
 	 * a default of 768x768.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
 	 * @param useInCanvas
 	 *          must be set true if you will use ClearVolume embedded in an AWT or
 	 *          Swing container.
+	 * 
+	 * @return best ClearVolume renderer
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
 																																		final int pWindowWidth,
 																																		final int pWindowHeight,
-																																		final int pBytesPerVoxel,
+																																		final NativeTypeEnum pNativeTypeEnum,
 																																		final boolean useInCanvas)
 	{
 		return newBestRenderer(	pWindowName,
 														pWindowWidth,
 														pWindowHeight,
-														pBytesPerVoxel,
+														pNativeTypeEnum,
 														768,
 														768,
 														useInCanvas);
@@ -64,24 +75,32 @@ public class ClearVolumeRendererFactory
 	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
 	 * name, width, height, bytes=per-voxel, max window width and height.
 	 *
+	 * 
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          nativ etype
 	 * @param pMaxTextureWidth
+	 *          max render width
 	 * @param pMaxTextureHeight
+	 *          max render height
+	 * @return best ClearVolume renderer
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
 																																		final int pWindowWidth,
 																																		final int pWindowHeight,
-																																		final int pBytesPerVoxel,
+																																		final NativeTypeEnum pNativeTypeEnum,
 																																		final int pMaxTextureWidth,
 																																		final int pMaxTextureHeight)
 	{
 		return newBestRenderer(	pWindowName,
 														pWindowWidth,
 														pWindowHeight,
-														pBytesPerVoxel,
+														pNativeTypeEnum,
 														pMaxTextureWidth,
 														pMaxTextureHeight,
 														1,
@@ -93,19 +112,26 @@ public class ClearVolumeRendererFactory
 	 * name, width, height, bytes=per-voxel, max window width and height.
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native typ
 	 * @param pMaxTextureWidth
+	 *          max render width
 	 * @param pMaxTextureHeight
+	 *          max render height
 	 * @param useInCanvas
 	 *          must be set true if you will use ClearVolume embedded in an AWT or
 	 *          Swing container.
+	 * @return best ClearVolume renderer
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
 																																		final int pWindowWidth,
 																																		final int pWindowHeight,
-																																		final int pBytesPerVoxel,
+																																		final NativeTypeEnum pNativeTypeEnum,
 																																		final int pMaxTextureWidth,
 																																		final int pMaxTextureHeight,
 																																		final boolean useInCanvas)
@@ -113,7 +139,7 @@ public class ClearVolumeRendererFactory
 		return newBestRenderer(	pWindowName,
 														pWindowWidth,
 														pWindowHeight,
-														pBytesPerVoxel,
+														pNativeTypeEnum,
 														pMaxTextureWidth,
 														pMaxTextureHeight,
 														1,
@@ -125,20 +151,28 @@ public class ClearVolumeRendererFactory
 	 * name, width, height, and bytes=per-voxel, max window width and height, and
 	 *
 	 * @param pWindowName
+	 *          window name
 	 * @param pWindowWidth
+	 *          window width
 	 * @param pWindowHeight
-	 * @param pBytesPerVoxel
+	 *          window height
+	 * @param pNativeTypeEnum
+	 *          native type
 	 * @param pMaxTextureWidth
+	 *          max render width
 	 * @param pMaxTextureHeight
+	 *          max render height
 	 * @param pNumberOfRenderLayers
+	 *          number of render layers
 	 * @param pUseInCanvas
 	 *          must be set true if you will use ClearVolume embedded in an AWT or
 	 *          Swing container.
+	 * @return best ClearVolume renderer
 	 */
 	public static final ClearVolumeRendererInterface newBestRenderer(	final String pWindowName,
 																																		final int pWindowWidth,
 																																		final int pWindowHeight,
-																																		final int pBytesPerVoxel,
+																																		final NativeTypeEnum pNativeTypeEnum,
 																																		final int pMaxTextureWidth,
 																																		final int pMaxTextureHeight,
 																																		final int pNumberOfRenderLayers,
@@ -148,12 +182,29 @@ public class ClearVolumeRendererFactory
 		{
 			final Properties lProperties = new Properties(System.getProperties());
 
+			if (lProperties.getProperty("ClearVolume.disableOpenCL") == null)
+			{
+				final ClearVolumeRendererInterface lNewOpenCLRenderer = newOpenCLRenderer(pWindowName,
+																																									pWindowWidth,
+																																									pWindowHeight,
+																																									pNativeTypeEnum,
+																																									pMaxTextureWidth,
+																																									pMaxTextureHeight,
+																																									pNumberOfRenderLayers,
+																																									pUseInCanvas);
+				return lNewOpenCLRenderer;
+			}
+			else
+			{
+				System.err.println("Caution: Use of OpenCL has been explicitly disabled!");
+			}
+
 			if (lProperties.getProperty("ClearVolume.disableCUDA") == null)
 			{
 				final ClearVolumeRendererInterface lNewCudaRenderer = newCudaRenderer(pWindowName,
 																																							pWindowWidth,
 																																							pWindowHeight,
-																																							pBytesPerVoxel,
+																																							pNativeTypeEnum,
 																																							pMaxTextureWidth,
 																																							pMaxTextureHeight,
 																																							pNumberOfRenderLayers,
@@ -165,23 +216,6 @@ public class ClearVolumeRendererFactory
 			else
 			{
 				System.err.println("Caution: Use of CUDA has been explicitly disabled!");
-			}
-
-			if (lProperties.getProperty("ClearVolume.disableOpenCL") == null)
-			{
-				final ClearVolumeRendererInterface lNewOpenCLRenderer = newOpenCLRenderer(pWindowName,
-																																									pWindowWidth,
-																																									pWindowHeight,
-																																									pBytesPerVoxel,
-																																									pMaxTextureWidth,
-																																									pMaxTextureHeight,
-																																									pNumberOfRenderLayers,
-																																									pUseInCanvas);
-				return lNewOpenCLRenderer;
-			}
-			else
-			{
-				System.err.println("Caution: Use of OpenCL has been explicitly disabled!");
 			}
 
 			System.err.println("Your system cannot run ClearVolume because it does not support CUDA or OpenCL.");
@@ -197,7 +231,7 @@ public class ClearVolumeRendererFactory
 	public static final ClearVolumeRendererInterface newCudaRenderer(	final String pWindowName,
 																																		final int pWindowWidth,
 																																		final int pWindowHeight,
-																																		final int pBytesPerVoxel,
+																																		final NativeTypeEnum pNativeTypeEnum,
 																																		final int pMaxTextureWidth,
 																																		final int pMaxTextureHeight,
 																																		final int pNumberOfRenderLayers,
@@ -221,7 +255,7 @@ public class ClearVolumeRendererFactory
 			return new clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer(	pWindowName,
 																																					pWindowWidth,
 																																					pWindowHeight,
-																																					pBytesPerVoxel,
+																																					pNativeTypeEnum,
 																																					pMaxTextureWidth,
 																																					pMaxTextureHeight,
 																																					pNumberOfRenderLayers,
@@ -237,7 +271,7 @@ public class ClearVolumeRendererFactory
 	public static final ClearVolumeRendererInterface newOpenCLRenderer(	final String pWindowName,
 																																			final int pWindowWidth,
 																																			final int pWindowHeight,
-																																			final int pBytesPerVoxel,
+																																			final NativeTypeEnum pNativeTypeEnum,
 																																			final int pMaxTextureWidth,
 																																			final int pMaxTextureHeight,
 																																			final int pNumberOfRenderLayers,
@@ -261,7 +295,7 @@ public class ClearVolumeRendererFactory
 			return new clearvolume.renderer.opencl.OpenCLVolumeRenderer(pWindowName,
 																																	pWindowWidth,
 																																	pWindowHeight,
-																																	pBytesPerVoxel,
+																																	pNativeTypeEnum,
 																																	pMaxTextureWidth,
 																																	pMaxTextureHeight,
 																																	pNumberOfRenderLayers,

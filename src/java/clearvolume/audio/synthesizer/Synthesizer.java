@@ -19,16 +19,18 @@ import clearvolume.audio.synthesizer.sources.Source;
 public class Synthesizer
 {
 
-	private Source mSource;
+	private final Source mSource;
 
 	private float[] mBuffer;
-	private SoundOut mSoundOut;
+	private final SoundOut mSoundOut;
 
 	/**
 	 * Constructs a synthesizer from a source/filter and a SoundOut object.
 	 * 
 	 * @param pSource
+	 *          source
 	 * @param pSoundOut
+	 *          sound out
 	 */
 	public Synthesizer(Source pSource, SoundOut pSoundOut)
 	{
@@ -42,7 +44,7 @@ public class Synthesizer
 	 * 
 	 * @return estimated time in seconds spent in the call.
 	 */
-	public long playSamples()
+	public double playSamples()
 	{
 		return playSamples(null);
 	}
@@ -56,9 +58,8 @@ public class Synthesizer
 	 *          reentrant lock to unlock.
 	 * @return estimated time in seconds spent in the call.
 	 */
-	public long playSamples(ReentrantLock pReentrantLock)
+	public double playSamples(ReentrantLock pReentrantLock)
 	{
-		// int lPreferredNumberOfSamples = mSource.getPeriodInSamples();
 		return playSamples(512, pReentrantLock);
 	}
 
@@ -69,7 +70,7 @@ public class Synthesizer
 	 *          number of samples to play.
 	 * @return estimated time in seconds spent in the call.
 	 */
-	public long playSamples(int pNumberOfSamples)
+	public double playSamples(int pNumberOfSamples)
 	{
 		return playSamples(pNumberOfSamples, null);
 	}
@@ -83,23 +84,23 @@ public class Synthesizer
 	 *          number of samples to play.
 	 * @param pReentrantLock
 	 *          reentrant lock to unlock.
-	 * @return
+	 * @return duration in seconds
 	 */
-	public long playSamples(int pNumberOfSamples,
-													ReentrantLock pReentrantLock)
+	public double playSamples(int pNumberOfSamples,
+														ReentrantLock pReentrantLock)
 	{
 		if (mBuffer == null || mBuffer.length < pNumberOfSamples)
 			mBuffer = new float[pNumberOfSamples];
 
 		for (int i = 0; i < pNumberOfSamples; i++)
 		{
-			float lValue = mSource.next();
+			final float lValue = mSource.next();
 			mBuffer[i] = lValue;
 		}
 
 		mSoundOut.play(mBuffer, pNumberOfSamples, pReentrantLock);
 
-		return (long) (pNumberOfSamples / mSoundOut.getSampleRate());
+		return (((double) pNumberOfSamples) / mSoundOut.getSampleRate());
 
 	}
 

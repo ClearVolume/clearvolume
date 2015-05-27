@@ -16,15 +16,15 @@ public class ClearVolumeRendererFactoryTests
 	@Test
 	public void test()
 	{
-		if (!CudaAvailability.isClearCudaOperational() || !OpenCLAvailability.isOpenCLAvailable())
+		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
 			return;
 
 		try
 		{
 			final ClearVolumeRendererInterface lNewBestRenderer = ClearVolumeRendererFactory.newBestRenderer8Bit(	"Test",
-			                                                                                                     	128,
-			                                                                                                     	128,
-			                                                                                                     	false);
+																																																						128,
+																																																						128,
+																																																						false);
 			System.out.println(lNewBestRenderer.getClass());
 			assertNotNull(lNewBestRenderer);
 		}

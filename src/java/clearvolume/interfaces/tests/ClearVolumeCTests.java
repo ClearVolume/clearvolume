@@ -137,8 +137,9 @@ public class ClearVolumeCTests
 																							* lResolutionZ
 																							* 2];
 
-		for (int i = 0; i < 512; i++)
+		for (int i = 0; i < 32; i++)
 		{
+			System.out.println("i=" + i);
 			for (int z = 0; z < lResolutionZ; z++)
 				for (int y = 0; y < lResolutionY; y++)
 					for (int x = 0; x < lResolutionX; x++)

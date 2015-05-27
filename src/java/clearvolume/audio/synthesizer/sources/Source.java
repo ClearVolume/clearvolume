@@ -12,7 +12,7 @@ public interface Source
 	/**
 	 * Returns the fundamental period of the signal.
 	 * 
-	 * @return
+	 * @return period in samples
 	 */
 	public int getPeriodInSamples();
 

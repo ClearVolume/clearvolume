@@ -15,7 +15,7 @@ import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
-import clearvolume.renderer.VolumeCaptureListener;
+import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.filter.ChannelFilterSink;
@@ -26,6 +26,8 @@ import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
 
 import com.apple.eawt.Application;
+
+import coremem.types.NativeTypeEnum;
 
 public abstract class ClearVolumeTCPClientHelper
 {
@@ -43,21 +45,24 @@ public abstract class ClearVolumeTCPClientHelper
 													final int pBytesPerVoxel,
 													final int pNumberOfLayers,
 													final boolean pTimeShift,
-			final boolean pChannelFilter,
-			final Image appicon )
+													final boolean pChannelFilter,
+													final Image appicon)
 	{
 		final String lWindowTitle = "ClearVolume[" + pServerAddress
-													+ ":"
-													+ pPortNumber
-													+ "]";
+																+ ":"
+																+ pPortNumber
+																+ "]";
 
 		try
 		{
 
+			final NativeTypeEnum lNativeType = pBytesPerVoxel == 1 ? NativeTypeEnum.UnsignedByte
+																														: NativeTypeEnum.UnsignedShort;
+
 			try (ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(lWindowTitle,
 																																													pWindowSize,
 																																													pWindowSize,
-																																													pBytesPerVoxel,
+																																													lNativeType,
 																																													pNumberOfLayers,
 																																													cMaxMillisecondsToWaitForCopy,
 																																													TimeUnit.MILLISECONDS,
@@ -103,14 +108,14 @@ public abstract class ClearVolumeTCPClientHelper
 				}
 
 				final AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
-																																																					cMaxQueueLength,
-																																																					cMaxMillisecondsToWait,
-																																																					TimeUnit.MILLISECONDS);
+																																																								cMaxQueueLength,
+																																																								cMaxMillisecondsToWait,
+																																																								TimeUnit.MILLISECONDS);
 
 				final ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
 
 				final SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
-																																		pPortNumber);
+																																					pPortNumber);
 				assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
 
 				assertTrue(lClearVolumeTCPClient.start());
@@ -120,7 +125,7 @@ public abstract class ClearVolumeTCPClientHelper
 				lClearVolumeRendererSink.setVisible(true);
 
 				// Resteal app icon after JOGL stole it!
-				setCurrentAppIcon( appicon );
+				setCurrentAppIcon(appicon);
 
 				while (lClearVolumeRendererSink.isShowing())
 				{
@@ -252,28 +257,38 @@ public abstract class ClearVolumeTCPClientHelper
 	public abstract void reportError(Throwable e, String pErrorMessage);
 
 	/**
-	 * Use this method to set the icon for this app.
-	 * Best used after JOGL stole the application icon. Bad JOGL!
+	 * Use this method to set the icon for this app. Best used after JOGL stole
+	 * the application icon. Bad JOGL!
 	 * 
-	 * @param finalicon
+	 * @param pFinalIcon
+	 *          final icon
 	 */
-	public static void setCurrentAppIcon( final Image finalicon ) {
-		if ( finalicon == null ) return;
+	public static void setCurrentAppIcon(final Image pFinalIcon)
+	{
+		if (pFinalIcon == null)
+			return;
 
-		final String os = System.getProperty( "os.name" ).toLowerCase();
+		final String os = System.getProperty("os.name").toLowerCase();
 
-		SwingUtilities.invokeLater( new Runnable() {
+		SwingUtilities.invokeLater(new Runnable()
+		{
 
 			@Override
-			public void run() {
-				if ( os.indexOf( "mac" ) >= 0 ) {
-					Application.getApplication().setDockIconImage( finalicon );
-				} else if ( os.indexOf( "win" ) >= 0 ) {
-//					not yet clear
-				} else {
-//					not yet clear
+			public void run()
+			{
+				if (os.indexOf("mac") >= 0)
+				{
+					Application.getApplication().setDockIconImage(pFinalIcon);
 				}
+				/*else if (os.indexOf("win") >= 0)
+				{
+					// not yet clear
+				}
+				else
+				{
+					// not yet clear
+				}/**/
 			}
-		} );
+		});
 	}
 }

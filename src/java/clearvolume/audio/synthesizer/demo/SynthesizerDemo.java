@@ -52,8 +52,6 @@ public class SynthesizerDemo
 		LowPassFilter lLowPassFilter = new LowPassFilter();
 		lLowPassFilter.setSource(lReverbFilter);/**/
 
-
-
 		lGuitar.setAmplitude(0.5f);
 
 		SoundOut lSoundOut = new SoundOut();
@@ -67,8 +65,8 @@ public class SynthesizerDemo
 			lSynthesizer.playSamples();
 
 			lGuitar.setFrequencyInHertz((float) (220 + 440 + 440 * sin(2 * PI
-																														* i
-																														/ 1000)));
+																																	* i
+																																	/ 1000)));
 			if (i % 10 == 0)
 				lGuitar.strike(0.5f);
 

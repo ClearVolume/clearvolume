@@ -2,20 +2,35 @@ package clearvolume.renderer.processors;
 
 import java.util.ArrayList;
 
-public abstract class ProcessorBase<R> implements Processor<R>
+import clearvolume.renderer.SingleKeyToggable;
+
+import com.jogamp.newt.event.KeyEvent;
+
+public abstract class ProcessorBase<R>	implements
+																				Processor<R>,
+																				SingleKeyToggable
 {
 	private final ArrayList<ProcessorResultListener<R>> mListenerList = new ArrayList<>();
 
 	private volatile boolean mActive = true;
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.jogl.overlay.Overlay#toggleDisplay()
+	 * @see clearvolume.renderer.processors.Processor#setActive(boolean)
 	 */
 	@Override
-	public boolean toggleActive()
+	public void setActive(boolean pIsActive)
 	{
-		mActive = !mActive;
-		return mActive;
+		mActive = pIsActive;
+	}
+
+	/* (non-Javadoc)
+	 * @see clearvolume.renderer.cleargl.overlay.Overlay#toggleDisplay()
+	 */
+	@Override
+	public boolean toggle()
+	{
+		setActive(!isActive());
+		return isActive();
 	}
 
 	/* (non-Javadoc)
@@ -26,6 +41,18 @@ public abstract class ProcessorBase<R> implements Processor<R>
 	{
 		return mActive;
 	}
+
+	@Override
+	public short toggleKeyCode()
+	{
+		return KeyEvent.VK_UNDEFINED;
+	};
+
+	@Override
+	public int toggleKeyModifierMask()
+	{
+		return 0;
+	};
 
 	@Override
 	public void addResultListener(ProcessorResultListener<R> pProcessorResultListener)

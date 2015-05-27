@@ -14,12 +14,13 @@ import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.network.server.ClearVolumeTCPServerSink;
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
+import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
+import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeNetworkDemo
 {
@@ -64,13 +65,13 @@ public class ClearVolumeNetworkDemo
 				{
 					if (i % 1000 == 0)
 						System.out.println("sending volume with index=" + i);
-					final Volume<Character> lVolume = lVolumeManager.requestAndWaitForVolume(	1,
-																																										TimeUnit.MILLISECONDS,
-																																										Character.class,
-																																										1,
-																																										cWidth,
-																																										cHeight,
-																																										cDepth);
+					final Volume lVolume = lVolumeManager.requestAndWaitForVolume(1,
+																																				TimeUnit.MILLISECONDS,
+																																				NativeTypeEnum.UnsignedShort,
+																																				1,
+																																				cWidth,
+																																				cHeight,
+																																				cDepth);
 
 					final long lTimePoint = i / pNumberOfChannels;
 					final int lChannleID = (int) (i % pNumberOfChannels);
@@ -119,14 +120,11 @@ public class ClearVolumeNetworkDemo
 	@Test
 	public void startClient() throws IOException, InterruptedException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
-																																														256,
-																																														256,
-																																														2,
-																																														256,
-																																														256,
-																																														2,
-																																														false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
+																																																					256,
+																																																					256,
+																																																					NativeTypeEnum.UnsignedShort,
+																																																					false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -153,6 +151,5 @@ public class ClearVolumeNetworkDemo
 		lClearVolumeRenderer.close();
 
 	}
-
 
 }

@@ -11,6 +11,13 @@ package clearvolume.transferf;
 public class TransferFunctions
 {
 
+	public static TransferFunction getDefault()
+	{
+		return CoolWarmTransferFunction.get();
+		// return MatlabStyleTransferFunction.get();
+		// return HotTransferFunction.get();
+	}
+
 	public static TransferFunction getGradientForColor(int pColorIndex)
 	{
 		final TransferFunction1D lTransfertFunction = new TransferFunction1D();

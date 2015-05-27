@@ -8,14 +8,24 @@ import clearvolume.renderer.processors.OpenCLProcessor;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 
-public class OpenCLHistogram extends OpenCLProcessor<IntBuffer>
+public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>
 {
 
 	private CLKernel mKernelHist;
+	private CLKernel mKernelClearCounts;
 
-	private CLBuffer<Float> mBufBins;
 	private CLBuffer<Integer> mBufCounts;
-	private float[] mBins;
+
+	private volatile float mMin = 0.f, mMax = 1.f;
+
+	private volatile int mNumberOfBins = 128;
+	private FloatBuffer mOutputBuffer;
+
+	public OpenCLHistogram()
+	{
+		super();
+
+	}
 
 	@Override
 	public String getName()
@@ -23,10 +33,10 @@ public class OpenCLHistogram extends OpenCLProcessor<IntBuffer>
 		return "opencl_histogram";
 	}
 
-	public void setBins(final float[] pBins)
+	public void setRange(final float pMin, final float pMax)
 	{
-		mBins = pBins;
-
+		mMax = pMax;
+		mMin = pMin;
 	}
 
 	public void ensureOpenCLInitialized()
@@ -34,29 +44,19 @@ public class OpenCLHistogram extends OpenCLProcessor<IntBuffer>
 		if (mKernelHist == null)
 		{
 			mKernelHist = getDevice().compileKernel(OpenCLHistogram.class.getResource("kernels/histogram.cl"),
-																							"histogram");
-		}
+																							"histogram_naive");
 
-		final float[] bins = new float[10];
-		for (int i = 0; i < bins.length; i++)
-		{
-			bins[i] = 1.f * i / bins.length;
+			mKernelClearCounts = getDevice().compileKernel(	OpenCLHistogram.class.getResource("kernels/histogram.cl"),
+																											"clear_counts");
+
 		}
-		setBins(bins);
 
 	}
 
 	public void initBuffers()
 	{
-
-		final int lBinSize = mBins.length;
-
-		// the buffer containing the counts
-		mBufCounts = getDevice().createOutputIntBuffer(lBinSize);
-
-		// the buffer containing the bins values
-		mBufBins = getDevice().createInputFloatBuffer(lBinSize);
-
+		if (mBufCounts == null || mBufCounts.getElementCount() != mNumberOfBins)
+			mBufCounts = getDevice().createOutputIntBuffer(mNumberOfBins);
 	}
 
 	@Override
@@ -68,38 +68,74 @@ public class OpenCLHistogram extends OpenCLProcessor<IntBuffer>
 		if (!isActive())
 			return;
 
+		final long start = System.nanoTime();
+
 		ensureOpenCLInitialized();
 
-		if (mBufBins == null)
+		if (mBufCounts == null)
 		{
-			System.out.println("setting up buffers");
+			// System.out.println("setting up buffers");
 			initBuffers();
 		}
 
-		// fill the bins
-		getDevice().writeFloatBuffer(mBufBins, FloatBuffer.wrap(mBins));
+		// clear the count array:
+		mKernelClearCounts.setArgs(mBufCounts);
+		getDevice().run(mKernelClearCounts, mNumberOfBins);
 
-		final FloatBuffer bins = FloatBuffer.wrap(mBins);
+		// compute the histogram
 
+		// System.out.println(mMax);
 		mKernelHist.setArgs(getVolumeBuffers()[0],
-												mBufBins,
 												mBufCounts,
-												mBins.length);
+												mMin,
+												mMax,
+												mNumberOfBins);
 
 		getDevice().run(mKernelHist,
 										(int) pWidthInVoxels,
 										(int) pHeightInVoxels,
 										(int) pDepthInVoxels);
 
+		// fetch it from the gpu
 		final IntBuffer out = getDevice().readIntBufferAsByte(mBufCounts)
-																.asIntBuffer();
+																			.asIntBuffer();
 
-		for (int i = 0; i < out.capacity(); i++)
+		final long stop = System.nanoTime();
+
+		if (false)
+			debugOutput(start, out, stop);
+
+		if (mOutputBuffer == null || mOutputBuffer.capacity() != mNumberOfBins)
+			mOutputBuffer = FloatBuffer.allocate(mNumberOfBins);
+
+		final long lNumberOfPixels = pWidthInVoxels * pHeightInVoxels
+																	* pDepthInVoxels;
+
+		for (int i = 0; i < mNumberOfBins; i++)
 		{
-			System.out.println(out.get(i));
+			mOutputBuffer.put(i, 1.f * out.get(i) / lNumberOfPixels);
 		}
 
-		notifyListenersOfResult(out);
+		notifyListenersOfResult(mOutputBuffer);
 
 	}
+
+	private void debugOutput(	final long start,
+														final IntBuffer out,
+														final long stop)
+	{
+		{
+			System.out.println(out.get(0));
+
+			for (int i = 0; i < mNumberOfBins; i++)
+			{
+				System.out.print(out.get(i) + " ");
+			}
+
+			System.out.printf("\n \n histogram: %.4f ms \n",
+												(stop - start) / 1.e6f);
+
+		}
+	}
+
 }

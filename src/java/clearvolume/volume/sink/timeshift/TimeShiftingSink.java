@@ -21,11 +21,11 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	private static final float cCleanUpRatio = 0.25f;
 
 	private static final ExecutorService mSeekingExecutor = Executors.newSingleThreadExecutor();
-	private SwitchableSoftReferenceManager<Volume<?>> mSwitchableSoftReferenceManager;
+	private final SwitchableSoftReferenceManager<Volume> mSwitchableSoftReferenceManager;
 
-	private Object mLock = new Object();
-	private HashMap<Integer, TreeMap<Long, SwitchableSoftReference<Volume<?>>>> mChannelToVolumeListsMap = new HashMap<>();
-	private TreeSet<Integer> mAvailableChannels = new TreeSet<>();
+	private final Object mLock = new Object();
+	private HashMap<Integer, TreeMap<Long, SwitchableSoftReference<Volume>>> mChannelToVolumeListsMap = new HashMap<>();
+	private final TreeSet<Integer> mAvailableChannels = new TreeSet<>();
 
 	private volatile long mSoftMemoryHorizonInTimePointIndices;
 	private volatile long mHardMemoryHorizonInTimePointIndices;
@@ -48,28 +48,30 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 
 	public void setTimeShiftNormalized(final double pTimeShiftNormalized)
 	{
-		Runnable lRunnable = new Runnable() {
-			
+		final Runnable lRunnable = new Runnable()
+		{
+
 			@Override
-			public void run() 
+			public void run()
 			{
 				synchronized (mLock)
 				{
-				final long lPreviousTimeShift = mTimeShift;
-				
-				// find the available data interval to evade invalid indices
-				final long startPos = Math.max(0, mHighestTimePointIndexSeen - mHardMemoryHorizonInTimePointIndices);
-				final long interval = mHighestTimePointIndexSeen - startPos;
-				
+					final long lPreviousTimeShift = mTimeShift;
+
+					// find the available data interval to evade invalid indices
+					final long startPos = Math.max(	0,
+																					mHighestTimePointIndexSeen - mHardMemoryHorizonInTimePointIndices);
+					final long interval = mHighestTimePointIndexSeen - startPos;
+
 					// System.err.println("interval=[" + startPos +"," +interval+"]");
-				mTimeShift = -Math.round(interval * pTimeShiftNormalized);
+					mTimeShift = -Math.round(interval * pTimeShiftNormalized);
 					if (lPreviousTimeShift != mTimeShift)
-					for (int lChannel : mAvailableChannels)
-						sendVolumeInternal(lChannel);
+						for (final int lChannel : mAvailableChannels)
+							sendVolumeInternal(lChannel);
 				}
 			}
 		};
-		
+
 		mSeekingExecutor.execute(lRunnable);
 	}
 
@@ -82,16 +84,19 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	{
 		return mTimeShift;
 	}
-	
-	public long getHardMemoryHorizon() {
+
+	public long getHardMemoryHorizon()
+	{
 		return mHardMemoryHorizonInTimePointIndices;
 	}
-	
-	public long getSoftMemoryHorizon() {
+
+	public long getSoftMemoryHorizon()
+	{
 		return mSoftMemoryHorizonInTimePointIndices;
 	}
-	
-	public long getNumberOfTimepoints() {
+
+	public long getNumberOfTimepoints()
+	{
 		return mHighestTimePointIndexSeen;
 	}
 
@@ -106,13 +111,13 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	}
 
 	@Override
-	public void sendVolume(Volume<?> pVolume)
+	public void sendVolume(Volume pVolume)
 	{
 		synchronized (mLock)
 		{
-			int lVolumeChannelID = pVolume.getChannelID();
+			final int lVolumeChannelID = pVolume.getChannelID();
 			mAvailableChannels.add(lVolumeChannelID);
-			TreeMap<Long, SwitchableSoftReference<Volume<?>>> lTimePointIndexToVolumeMapReference = mChannelToVolumeListsMap.get(lVolumeChannelID);
+			TreeMap<Long, SwitchableSoftReference<Volume>> lTimePointIndexToVolumeMapReference = mChannelToVolumeListsMap.get(lVolumeChannelID);
 
 			if (lTimePointIndexToVolumeMapReference == null)
 			{
@@ -120,7 +125,6 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 				mChannelToVolumeListsMap.put(	lVolumeChannelID,
 																			lTimePointIndexToVolumeMapReference);
 			}
-
 
 			lTimePointIndexToVolumeMapReference.put(pVolume.getTimeIndex(),
 																							wrapWithReference(pVolume));
@@ -139,11 +143,14 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	{
 		synchronized (mLock)
 		{
-			Volume<?> lVolumeToSend = getVolumeToSend(lVolumeChannelID);		
+			final Volume lVolumeToSend = getVolumeToSend(lVolumeChannelID);
 
-			if (lVolumeToSend != null) {
+			if (lVolumeToSend != null)
+			{
 				getRelaySink().sendVolume(lVolumeToSend);
-			} else {
+			}
+			else
+			{
 				System.err.println("Did not have any volume to send :(");
 			}
 
@@ -151,38 +158,38 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 		}
 	}
 
-	private SwitchableSoftReference<Volume<?>> wrapWithReference(final Volume<?> pVolume)
+	private SwitchableSoftReference<Volume> wrapWithReference(final Volume pVolume)
 	{
-		Runnable lCleaningRunnable = new Runnable() 
+		final Runnable lCleaningRunnable = new Runnable()
 		{
 			@Override
-			public void run() 
+			public void run()
 			{
 				System.out.println("CLEANING!");
 				pVolume.makeAvailableToManager();
 			}
 		};
-		return mSwitchableSoftReferenceManager.wrapReference(	pVolume, lCleaningRunnable);
+		return mSwitchableSoftReferenceManager.wrapReference(	pVolume,
+																													lCleaningRunnable);
 	}
 
-	private Volume<?> getVolumeToSend(int pVolumeChannelID)
+	private Volume getVolumeToSend(int pVolumeChannelID)
 	{
 		synchronized (mLock)
 		{
-			TreeMap<Long, SwitchableSoftReference<Volume<?>>> lTimePointIndexToVolumeMap = mChannelToVolumeListsMap.get(pVolumeChannelID);
+			final TreeMap<Long, SwitchableSoftReference<Volume>> lTimePointIndexToVolumeMap = mChannelToVolumeListsMap.get(pVolumeChannelID);
 
 			if (lTimePointIndexToVolumeMap.isEmpty())
 				return null;
 
-			Entry<Long, SwitchableSoftReference<Volume<?>>> lIndexVolumeEntry = lTimePointIndexToVolumeMap.floorEntry(mHighestTimePointIndexSeen + mTimeShift);
+			Entry<Long, SwitchableSoftReference<Volume>> lIndexVolumeEntry = lTimePointIndexToVolumeMap.floorEntry(mHighestTimePointIndexSeen + mTimeShift);
 			if (lIndexVolumeEntry == null)
 				lIndexVolumeEntry = lTimePointIndexToVolumeMap.ceilingEntry(mHighestTimePointIndexSeen + mTimeShift);
-
 
 			if (lIndexVolumeEntry == null)
 				return null;
 
-			Volume<?> lVolume = lIndexVolumeEntry.getValue().get();
+			final Volume lVolume = lIndexVolumeEntry.getValue().get();
 			if (lVolume == null)
 			{
 				lTimePointIndexToVolumeMap.remove(lIndexVolumeEntry.getKey());
@@ -199,13 +206,13 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			if (pTimePointIndex % mCleanUpPeriodInTimePoints != 0)
 				return;
 
-			TreeMap<Long, SwitchableSoftReference<Volume<?>>> lTimePointIndexToVolumeMap = mChannelToVolumeListsMap.get(pChannelID);
+			final TreeMap<Long, SwitchableSoftReference<Volume>> lTimePointIndexToVolumeMap = mChannelToVolumeListsMap.get(pChannelID);
 			if (lTimePointIndexToVolumeMap.isEmpty())
 			{
 				mChannelToVolumeListsMap.remove(pChannelID);
 				return;
 			}
-			Long lLastTimePoint = lTimePointIndexToVolumeMap.lastKey();
+			final Long lLastTimePoint = lTimePointIndexToVolumeMap.lastKey();
 
 			Long lTimePoint = lLastTimePoint;
 			while (lTimePoint != null && lTimePoint > lLastTimePoint - mSoftMemoryHorizonInTimePointIndices)
@@ -214,7 +221,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			}
 			while (lTimePoint != null && lTimePoint > lLastTimePoint - mHardMemoryHorizonInTimePointIndices)
 			{
-				SwitchableSoftReference<Volume<?>> lSwitchableSoftReference = lTimePointIndexToVolumeMap.get(lTimePoint);
+				final SwitchableSoftReference<Volume> lSwitchableSoftReference = lTimePointIndexToVolumeMap.get(lTimePoint);
 				if (lSwitchableSoftReference.isGone())
 				{
 					lTimePointIndexToVolumeMap.remove(lTimePoint);
@@ -225,8 +232,8 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			}
 			while (lTimePoint != null)
 			{
-				SwitchableSoftReference<Volume<?>> lSwitchableSoftReference = lTimePointIndexToVolumeMap.get(lTimePoint);
-				Volume<?> lVolume = lSwitchableSoftReference.get();
+				final SwitchableSoftReference<Volume> lSwitchableSoftReference = lTimePointIndexToVolumeMap.get(lTimePoint);
+				final Volume lVolume = lSwitchableSoftReference.get();
 				if (lVolume != null)
 					lVolume.makeAvailableToManager();
 				lTimePointIndexToVolumeMap.remove(lTimePoint);
@@ -246,14 +253,14 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	{
 		synchronized (mLock)
 		{
-			for (Map.Entry<Integer, TreeMap<Long, SwitchableSoftReference<Volume<?>>>> lTimeLineForChannelEntry : mChannelToVolumeListsMap.entrySet())
+			for (final Map.Entry<Integer, TreeMap<Long, SwitchableSoftReference<Volume>>> lTimeLineForChannelEntry : mChannelToVolumeListsMap.entrySet())
 			{
-				TreeMap<Long, SwitchableSoftReference<Volume<?>>> lTimeLineTreeMap = lTimeLineForChannelEntry.getValue();
+				final TreeMap<Long, SwitchableSoftReference<Volume>> lTimeLineTreeMap = lTimeLineForChannelEntry.getValue();
 
-				for (Map.Entry<Long, SwitchableSoftReference<Volume<?>>> lTimePointEntry : lTimeLineTreeMap.entrySet())
+				for (final Map.Entry<Long, SwitchableSoftReference<Volume>> lTimePointEntry : lTimeLineTreeMap.entrySet())
 				{
-					SwitchableSoftReference<Volume<?>> lVolumeSoftReference = lTimePointEntry.getValue();
-					Volume<?> lVolume = lVolumeSoftReference.get();
+					final SwitchableSoftReference<Volume> lVolumeSoftReference = lTimePointEntry.getValue();
+					final Volume lVolume = lVolumeSoftReference.get();
 					if (lVolume != null)
 						lVolume.close();
 					lVolumeSoftReference.soften();

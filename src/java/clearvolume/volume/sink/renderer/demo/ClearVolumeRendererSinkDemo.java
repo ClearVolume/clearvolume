@@ -12,6 +12,7 @@ import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.filter.ChannelFilterSink;
 import clearvolume.volume.sink.filter.gui.ChannelFilterSinkJFrame;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
+import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeRendererSinkDemo
 {
@@ -24,26 +25,28 @@ public class ClearVolumeRendererSinkDemo
 	@Test
 	public void demo() throws InterruptedException
 	{
-		ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeRendererSink Demo",
-				512,
-				512,
-				2,
-				512,
-				512,
-				2,
-				false);
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeRendererSink Demo",
+																																																					512,
+																																																					512,
+																																																					NativeTypeEnum.UnsignedShort,
+																																																					512,
+																																																					512,
+																																																					2,
+																																																					false);
 		lClearVolumeRenderer.setVisible(true);
 
-		ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-				lClearVolumeRenderer.createCompatibleVolumeManager(200),
-				100,
-				TimeUnit.MILLISECONDS);
+		final ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
+																																													lClearVolumeRenderer.createCompatibleVolumeManager(200),
+																																													100,
+																																													TimeUnit.MILLISECONDS);
 
-		ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
+		final ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
+
+		lChannelFilterSink.setRelaySink(lClearVolumeRendererSink);
 
 		ChannelFilterSinkJFrame.launch(lChannelFilterSink);
 
-		VolumeManager lManager = lChannelFilterSink.getManager();
+		final VolumeManager lManager = lChannelFilterSink.getManager();
 
 		final int lMaxVolumesSent = 1000;
 		for (int i = 0; i < lMaxVolumesSent; i++)
@@ -51,15 +54,15 @@ public class ClearVolumeRendererSinkDemo
 			final int lTimePoint = i / 2;
 			final int lChannel = i % 2;
 
-			Volume<Short> lVolume = lManager.requestAndWaitForVolume(	1,
-					TimeUnit.MILLISECONDS,
-					Short.class,
-					1,
-					cWidth,
-					cHeight,
-					cDepth);
+			final Volume lVolume = lManager.requestAndWaitForVolume(1,
+																															TimeUnit.MILLISECONDS,
+																															NativeTypeEnum.UnsignedShort,
+																															1,
+																															cWidth,
+																															cHeight,
+																															cDepth);
 
-			ByteBuffer lVolumeData = lVolume.getDataBuffer();
+			final ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
 			lVolumeData.rewind();
 			for (int j = 0; j < lVolumeData.limit(); j++)
@@ -86,13 +89,13 @@ public class ClearVolumeRendererSinkDemo
 						lVolumeData.put(lByteValue);
 					}/**/
 
-					lVolume.setTimeIndex(lTimePoint);
-					lVolume.setTimeInSeconds(0.1 * lTimePoint);
-					lVolume.setChannelID(lChannel);
+			lVolume.setTimeIndex(lTimePoint);
+			lVolume.setTimeInSeconds(0.1 * lTimePoint);
+			lVolume.setChannelID(lChannel);
 
-					lChannelFilterSink.sendVolume(lVolume);
+			lChannelFilterSink.sendVolume(lVolume);
 
-					Thread.sleep(50);
+			Thread.sleep(50);
 		}
 	}
 
