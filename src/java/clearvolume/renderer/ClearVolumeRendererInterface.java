@@ -263,6 +263,20 @@ public interface ClearVolumeRendererInterface	extends
 																	TransferFunction pTransfertFunction);
 
 	/**
+	 * Sets the transfer function used for rendering.
+	 * 
+	 * @param pRenderLayerIndex
+	 *          render layer index
+	 * @param pDimension
+	 *          transfer function dimension
+	 * @param pTransfertFunction
+	 *          transfer function
+	 */
+	public void setTransferFunction(int pRenderLayerIndex,
+																	int pDimension,
+																	float[] pTransfertFunction);
+
+	/**
 	 * Returns the transfer function set for the current layer.
 	 * 
 	 * @return transfer function

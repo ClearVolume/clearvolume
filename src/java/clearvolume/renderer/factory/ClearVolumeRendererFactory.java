@@ -497,18 +497,11 @@ public class ClearVolumeRendererFactory
 		}
 	}
 
-	public static TransferFunction castTransfertFunction(TransferFunction pTransferFunction)
+	public static TransferFunction castIsolatedTransfertFunction(Object pTransferFunction)
 	{
-		final JclObjectFactory lJclObjectFactory = JclObjectFactory.getInstance();
-		
-		final Object lIsolatedClearVolumeRenderer = lJclObjectFactory.create(	getJarClassLoader(),
-																																					"clearvolume.transferf.TransferFunction1D",
-																																					lConstructorArguments);
-
-		final ClearVolumeRendererInterface lClearVolumeRenderer = JclUtils.cast(lIsolatedClearVolumeRenderer,
-																																						ClearVolumeRendererInterface.class);
-		
-		final retur
+		final TransferFunction lTransferFunction = JclUtils.cast(	pTransferFunction,
+																															TransferFunction.class);
+		return lTransferFunction;
 	}
 
 }

@@ -25,6 +25,7 @@ import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.processors.Processor;
 import clearvolume.transferf.TransferFunction;
+import clearvolume.transferf.TransferFunction1D;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
@@ -1115,6 +1116,20 @@ public abstract class ClearVolumeRendererBase	implements
 			if (getDisplayLock().isHeldByCurrentThread())
 				getDisplayLock().unlock();
 		}
+	}
+
+	@Override
+	public void setTransferFunction(final int pRenderLayerIndex,
+																	final int pDimension,
+																	float[] pTransferFunctionData)
+	{
+		if (pDimension == 1)
+		{
+			final TransferFunction1D lTransferFunction1D = new TransferFunction1D();
+			lTransferFunction1D.set(pTransferFunctionData);
+			setTransferFunction(pRenderLayerIndex, lTransferFunction1D);
+		}
+
 	}
 
 	/* (non-Javadoc)
