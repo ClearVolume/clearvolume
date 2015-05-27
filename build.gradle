@@ -24,100 +24,82 @@ apply plugin: 'idea'
 //***********************************************************************************
 // NATIVE CODE BUILDING
 
-String lOsString = System.properties['os.name'].toLowerCase()
-println "OS string: ${lOsString}"
+import org.apache.tools.ant.taskdefs.condition.Os
 
-// fix below using:
-// http://gradle.org/docs/current/release-notes#major-changes-to-incubating-'native-component'-and-'jvm-component'-plugins
-//if (lOsString.contains('wine'))
-//{
-//
-//	ext {
-//		javaHome = System.getenv('JAVA_HOME')
-//		javaHomeInclude = javaHome + '/include'
-//		if (System.properties['os.name'].toLowerCase().contains('linux'))
-//		{
-//			javaHomeIncludeOs = javaHomeInclude + '/linux'
-//		}
-//		else
-//		{
-//			javaHomeIncludeOs = javaHomeInclude + '/win32'
-//		}
-//	}
-//
-//	dependencies {
-//		if (! javaHome) {
-//			logger.error('JAVA_HOME is not set.')
-//		}
-//		println 'JAVA_HOME: ' + javaHome
-//	}
-//
-//	model {
-//		platforms { x64 { architecture "x86_64" } }
-//
-//		repositories {
-//			libs(PrebuiltLibraries) {
-//				jvm {
-//					binaries.withType(SharedLibraryBinary) {
-//						sharedLibraryFile = file(javaHome + "/lib/jvm.lib")
-//					}
-//				}
-//			}
-//		}
-//	
-//		toolChains {
-//			visualCpp(VisualCpp) {
-//				// Specify the installDir if Visual Studio cannot be located
-//				// installDir "C:/Apps/Microsoft Visual Studio 10.0"
-//			}
-//		}
-//	}
-//
-//	binaries.all {
-//		if (toolChain in VisualCpp) {
-//			cppCompiler.args "/EHsc"
-//		}
-//	}
-//
-//	libraries { 
-//		cvlib { targetPlatforms "x64" } 
-//	}
-//
-//	sources {
-//		cvlib {
-//			cpp {
-//				source {
-//					srcDirs "src/cpp"
-//					include "**/*.cpp"
-//				}
-//				exportedHeaders {
-//					srcDirs "src/cpp","src/cpp/lib"
-//					include "**/*.h"
-//				}
-//			}
-//		}
-//	}
-//
-//	executables {
-//		cvlib_test {
-//			targetPlatforms "x64"
-//			binaries.all { lib libraries.cvlib.shared  }
-//		}
-//	}
-//
-//	sources {
-//		cvlib_test {
-//			cpp {
-//				source {
-//					srcDir "src/cpp"
-//					include "cvlib_test.cpp"
-//				}
-//				lib library: 'jvm'
-//			}
-//		}
-//	
-//	}
-//}
+String cmakefolder = "./build/cmake"
+
+// cmake task:
+task cmake(type:Exec) {
+
+	File lFile = new File(cmakefolder)
+	lFile.mkdir()
+	
+	inputs.dir lFile.absolutePath
+		
+	workingDir cmakefolder
+	
+	def cmake_args = [] as List
+	cmake_args.add('../../src/cpp')
+	
+	if (Os.isFamily(Os.FAMILY_WINDOWS))
+	{
+		//outputs.file './build/cpp/src/libsqeazy.dll'
+		executable 'cmake'
+		args cmake_args
+	}
+	else if (Os.isFamily(Os.FAMILY_MAC))
+	{
+		//outputs.file './build/cpp/src/libsqeazy.dylib'
+		executable 'cmake'
+		args cmake_args
+	}
+	else if (Os.isFamily(Os.FAMILY_UNIX))
+	{
+		//outputs.file './build/cpp/src/libsqeazy.so'
+		executable 'cmake'
+		args cmake_args
+	}
+	
+	println commandLine
+}
+
+
+
+// make task:
+task make(type:Exec) {
+	
+	File lFile = new File(cmakefolder)
+	lFile.mkdir()
+	
+	inputs.dir lFile.absolutePath
+		
+	workingDir cmakefolder
+	
+	def make_args = [] as List
+	
+	if (Os.isFamily(Os.FAMILY_WINDOWS))
+	{
+		//outputs.file './build/cpp/src/libsqeazy.dll'
+		executable 'make'
+		args make_args
+	}
+	else if (Os.isFamily(Os.FAMILY_MAC))
+	{
+		//outputs.file './build/cpp/src/libsqeazy.dylib'
+		executable 'make'
+		args make_args
+	}
+	else if (Os.isFamily(Os.FAMILY_UNIX))
+	{
+		//outputs.file './build/cpp/src/libsqeazy.so'
+		executable 'make'
+		args make_args
+	}
+	
+	println commandLine
+}
+
+make.dependsOn cmake
 
 
 
