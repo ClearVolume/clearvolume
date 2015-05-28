@@ -21,80 +21,7 @@ apply plugin: 'idea'
 ]*.options*.encoding = 'UTF-8'
 
 
-//***********************************************************************************
-// NATIVE CODE BUILDING
 
-import org.apache.tools.ant.taskdefs.condition.Os
-
-String cmakefolder = "./build/cmake"
-
-// cmake task:
-task cmake(type:Exec) {
-
-	File lFile = new File(cmakefolder)
-	lFile.mkdir()
-
-	inputs.dir lFile.absolutePath
-
-	workingDir cmakefolder
-
-	def cmake_args = [] as List
-	cmake_args.add('../../src/cpp')
-
-	if (Os.isFamily(Os.FAMILY_WINDOWS))
-	{
-		cmake_args.add("-G\"Visual Studio ${project.vsversion} x64\"")
-		executable 'cmake'
-		args cmake_args
-	}
-	else if (Os.isFamily(Os.FAMILY_MAC))
-	{
-		executable 'cmake'
-		args cmake_args
-	}
-	else if (Os.isFamily(Os.FAMILY_UNIX))
-	{
-		executable 'cmake'
-		args cmake_args
-	}
-
-	println commandLine
-}
-
-
-
-// make task:
-task make(type:Exec) {
-
-	File lFile = new File(cmakefolder)
-	lFile.mkdir()
-
-	inputs.dir lFile.absolutePath
-
-	workingDir cmakefolder
-
-	def make_args = [] as List
-
-	if (Os.isFamily(Os.FAMILY_WINDOWS))
-	{
-		executable 'make'
-		args make_args
-	}
-	else if (Os.isFamily(Os.FAMILY_MAC))
-	{
-		executable 'make'
-		args make_args
-	}
-	else if (Os.isFamily(Os.FAMILY_UNIX))
-	{
-		executable 'make'
-		args make_args
-	}
-
-	println commandLine
-}
-
-make.dependsOn cmake
 
 
 
@@ -201,26 +128,6 @@ repositories
 }
 
 
-
-/*jar {
- def classpath  = configurations.compile.collect { it.directory&&{println it; true} ? it : zipTree(it) } 
- from(classpath)
- manifest {
- attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')
- }
- }/**/
-
-task cvFatJar(type:Jar) {
-	archiveName = "ClearVolume.fat.jar"
-	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-	with jar
-
-	manifest {
-		attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')
-	}
-}
-
-
 task sourcesJar(type: Jar, dependsOn:classes) {
 	classifier = 'sources'
 	from sourceSets.main.allSource
@@ -240,6 +147,96 @@ if (JavaVersion.current().isJava8Compatible()) {
 }
 
 
+//***********************************************************************************
+// NATIVE CODE BUILDING
+ 
+ import org.apache.tools.ant.taskdefs.condition.Os
+ 
+ String cmakefolder = "./build/cmake"
+ File lCMakeFile = file(cmakefolder)
+ lCMakeFile.mkdirs()
+ 
+ // cmake task:
+ task cmake(type:Exec) {
+ 
+	 inputs.dir lCMakeFile.absolutePath
+	 outputs.dir lCMakeFile.absolutePath
+ 
+	 workingDir cmakefolder
+ 
+	 def cmake_args = [] as List
+	 cmake_args.add('../../src/cpp')
+ 
+	 if (Os.isFamily(Os.FAMILY_WINDOWS))
+	 {
+		 cmake_args.add("-G\"Visual Studio ${project.vsversion} x64\"")
+		 executable 'cmake'
+		 args cmake_args
+	 }
+	 else if (Os.isFamily(Os.FAMILY_MAC))
+	 {
+		 executable 'cmake'
+		 args cmake_args
+	 }
+	 else if (Os.isFamily(Os.FAMILY_UNIX))
+	 {
+		 executable 'cmake'
+		 args cmake_args
+	 }
+ 
+	 println commandLine
+ }
+ 
+ 
+ 
+ // make task:
+ task make(type:Exec) {
+ 
+	 inputs.dir lCMakeFile.absolutePath
+	 outputs.dir lCMakeFile.absolutePath
+	 
+	 workingDir cmakefolder
+ 
+	 def make_args = [] as List
+ 
+	 if (Os.isFamily(Os.FAMILY_WINDOWS))
+	 {
+		 executable 'make'
+		 args make_args
+	 }
+	 else if (Os.isFamily(Os.FAMILY_MAC))
+	 {
+		 executable 'make'
+		 args make_args
+	 }
+	 else if (Os.isFamily(Os.FAMILY_UNIX))
+	 {
+		 executable 'make'
+		 args make_args
+	 }
+ 
+	 println commandLine
+ }
+ 
+ make.dependsOn cmake
+
+
+ 
+ 
+//***********************************************************************************
+// FAT JAR TASKS
+ 
+task cvFatJar(type:Jar) {
+	archiveName = "ClearVolume.fat.jar"
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	with jar
+
+	manifest {
+		attributes("Class-Path": ".", 'Main-Class': 'clearvolume.main.ClearVolumeMain')
+	}
+}
+
+
 
 
 //***********************************************************************************
@@ -251,13 +248,11 @@ task fatCapsule(type: FatCapsule) {
 }
 
 
-task copyCapsule{
-	copy{
-		from('./build/libs/')
-		into('./build/executable')
-		include('*-capsule.jar')
-		rename('.+-capsule.jar','ClearVolume.exe.jar')
-	}
+task copyCapsule(type: Copy){
+	from('./build/libs/')
+	into('./build/executable')
+	include('*-capsule.jar')
+	rename('.+-capsule.jar','ClearVolume.exe.jar')
 }
 
 copyCapsule.dependsOn fatCapsule
@@ -268,85 +263,113 @@ copyCapsule.dependsOn fatCapsule
 
 task packagecvlib {
 
+	inputs.dir './build/cmake/'
+	inputs.dir './build/cmake/build/output'
+	inputs.dir './src/cpp/examples'
+	inputs.dir './src/cpp/include'
+	inputs.dir './build/libs/'
+	outputs.dir file('./build/cvlib/')
+	
 	def os = System.getProperty("os.name").toLowerCase()
-	if (os.contains("win"))
+	if (os.contains("win") || os.contains("mac"))
 	{
-		copy
-		{
-			from('./build/binaries/cvlibSharedLibrary/')
-			into('./build/cvlib/')
-			include('cvlib.dll')
-		}
-
-		copy
-		{
-			from('./src/cpp/')
-			into('./build/cvlib/')
-			include('cvlib.h','cvlib_test.cpp')
-		}
-
-		copy
-		{
-			from('./build/binaries/cvlib_testExecutable/')
-			into('./build/cvlib/')
-			include('cvlib_test.exe')
-		}
-
-		copy
-		{
-			from('./build/libs/')
-			into('./build/cvlib/')
-			include('ClearVolume.fat.jar')
-			rename('ClearVolume.fat.jar','ClearVolume.jar')
+		doLast{
+			copy
+			{
+				from('./build/cmake/')
+				into('./build/cvlib/')
+				include('libclearvolume.*','clearvolume.*')
+			}
+	
+			copy
+			{
+				from('./build/cmake/build/output')
+				into('./build/cvlib/')
+				include('*')
+			}
+	
+			copy
+			{
+				from('./src/cpp/examples')
+				into('./build/cvlib/')
+				include('*.cpp')
+			}
+	
+			copy
+			{
+				from('./src/cpp/include')
+				into('./build/cvlib/')
+				include('*.h')
+			}
+	
+			copy
+			{
+				from('./build/libs/')
+				into('./build/cvlib/jars')
+				include('ClearVolume.fat.jar')
+				rename('ClearVolume.fat.jar','ClearVolume.jar')
+			}
 		}
 	}
-
 }
+
+packagecvlib.dependsOn cvFatJar
+packagecvlib.dependsOn make
 
 task packagelvcvlib {
 
+	inputs.dir './src/labview/'
+	inputs.dir './src/labview/lvcvlib'
+	inputs.dir './src/labview/lvcvlib/VIs'
+	inputs.dir './build/cvlib/'
+	inputs.dir './build/libs/'
+	outputs.dir file('./build/labview/')
+	
 	def os = System.getProperty("os.name").toLowerCase()
-	if (os.contains("win"))
+	if (os.contains("win") || os.contains("mac"))
 	{
-		copy
-		{
-			from('./src/labview/')
-			into('./build/labview/')
-			include('*')
+		doLast{
+			copy
+			{
+				from('./src/labview/')
+				into('./build/labview/')
+				include('*')
+			}
+	
+			copy
+			{
+				from('./src/labview/lvcvlib')
+				into('./build/labview/lvcvlib/')
+				include('*')
+			}
+	
+			copy
+			{
+				from('./src/labview/lvcvlib/VIs')
+				into('./build/labview/lvcvlib/VIs')
+				include('*')
+			}
+	
+			copy
+			{
+				from('./build/cvlib/')
+				into('./build/labview/lvcvlib/')
+				include('*.dll')
+				include('*.h')
+			}
+	
+			copy
+			{
+				from('./build/libs/')
+				into('./build/labview/')
+				include('ClearVolume.fat.jar')
+				rename('ClearVolume.fat.jar','ClearVolume.jar')
+			}
 		}
-
-		copy
-		{
-			from('./src/labview/lvcvlib')
-			into('./build/labview/lvcvlib/')
-			include('*')
-		}
-
-		copy
-		{
-			from('./src/labview/lvcvlib/VIs')
-			into('./build/labview/lvcvlib/VIs')
-			include('*')
-		}
-
-		copy
-		{
-			from('./build/binaries/cvlibSharedLibrary/')
-			into('./build/labview/lvcvlib/')
-			include('cvlib.dll')
-		}
-
-		copy
-		{
-			from('./build/libs/')
-			into('./build/labview/')
-			include('ClearVolume.fat.jar')
-			rename('ClearVolume.fat.jar','ClearVolume.jar')
-		}
-
 	}
 }
 
+packagelvcvlib.dependsOn packagecvlib
 
 
 
@@ -357,39 +380,51 @@ task packagelvcvlib {
 
 task collectdistribution {
 
-	copy
-	{
-		from('./build/executable/')
-		into('./build/distribution/')
-		include "*.jar"
-	}
+	//inputs.dir './build/executable/'
+	//inputs.dir './build/labview/'
+	//inputs.dir './build/cvlib/'
+	//inputs.dir './build/libs/'
+	//outputs.dir './build/distribution/'
 	
-	copy
-	{
-		from('./build/labview/')
-		into('./build/distribution/labview')
-		include "*.jar"
-	}
+	doLast{
+		copy
+		{
+			from('./build/executable/')
+			into('./build/distribution/')
+			include "*"
+		}
 	
-	copy
-	{
-		from('./build/cvlib/')
-		into('./build/distribution/cvlib')
-		include "*.jar"
-	}
-
-	copy
-	{
-		from('./build/libs/')
-		into('./build/distribution/javalibs')
-		include "*.*"
-		include '**/**'
-		exclude '**/*capsule.jar'
+		copy
+		{
+			from('./build/labview/')
+			into('./build/distribution/labview')
+			include "*"
+		}
+	
+		copy
+		{
+			from('./build/cvlib/')
+			into('./build/distribution/cvlib')
+			include "*"
+		}
+	
+		copy
+		{
+			from('./build/libs/')
+			into('./build/distribution/javalibs')
+			include "*.*"
+			include '**/**'
+			exclude '**/*capsule.jar'
+		}
 	}
 
 }
 
-collectdistribution.dependsOn copyCapsule
+collectdistribution.dependsOn make
+collectdistribution.dependsOn packagecvlib
+collectdistribution.dependsOn packagelvcvlib
+collectdistribution.dependsOn fatCapsule
+
 
 
 task packagezip(type:Exec,dependsOn:collectdistribution) {
@@ -399,7 +434,7 @@ task packagezip(type:Exec,dependsOn:collectdistribution) {
 	//if (os.contains("nix") || os.contains("mac"))
 	//	{
 	workingDir '.'
-	commandLine './packagezip.sh'
+	commandLine './scripts/packagezip.sh'
 	standardOutput = new ByteArrayOutputStream()
 	ext.output = {return standardOutput.toString()}
 	//}

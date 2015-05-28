@@ -5,7 +5,7 @@
  * In addition this example also instanciates a ClearVolume server. You can connect
  * to the server using the ClearVolume client: ClearVolume.exe.jar -c localhost
  *
- * @author Loic Royer 2014
+ * @author Loic Royer, Ulrik Gunther 2014
  *
  */
 
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 	if (argc >= 2) {
 		classpath = argv[1];
 	} else {
-		classpath = "jars/AppleJavaExtensions-1.4.jar;jars/ClearVolume-0.9.0.jar;jars/CoreMem-0.1.0.jar;jars/args4j-2.0.29.jar;jars/bridj-0.7.0.jar;jars/clearcuda-0.9.0.jar;jars/cleargl-0.9.1.jar;jars/commons-collections-3.2.1.jar;jars/commons-io-2.4.jar;jars/commons-lang-2.6.jar;jars/commons-math3-3.4.1.jar;jars/dx-1.7.jar;jars/gluegen-rt-2.2.4-natives-linux-amd64.jar;jars/gluegen-rt-2.2.4-natives-macosx-universal.jar;jars/gluegen-rt-2.2.4-natives-windows-amd64.jar;jars/gluegen-rt-2.2.4.jar;jars/hamcrest-core-1.3.jar;jars/javacl-1.0.0-RC4.jar;jars/javacl-core-1.0.0-RC4.jar;jars/jcuda-maven-6.5.jar;jars/jogl-all-2.2.4-natives-linux-amd64.jar;jars/jogl-all-2.2.4-natives-macosx-universal.jar;jars/jogl-all-2.2.4-natives-windows-amd64.jar;jars/jogl-all-2.2.4.jar;jars/junit-4.12.jar;jars/log4j-api-2.1.jar;jars/log4j-core-2.1.jar;jars/miglayout-3.7.4.jar;jars/nativelibs4java-utils-1.6.jar;jars/opencl4java-1.0.0-RC4.jar;jars/trove4j-3.0.3.jar";
+		classpath = "jars/ClearVolume.jar";
 	}
 
     thread cv_thread(run_clearvolume);
