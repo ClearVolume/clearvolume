@@ -159,22 +159,24 @@ if (JavaVersion.current().isJava8Compatible()) {
  // cmake task:
  task cmake(type:Exec) {
  
-	 inputs.dir lCMakeFile.absolutePath
+	 inputs.dir file('./src/cpp')
 	 outputs.dir lCMakeFile.absolutePath
  
 	 workingDir cmakefolder
  
 	 def cmake_args = [] as List
-	 cmake_args.add('../../src/cpp')
+	
  
 	 if (Os.isFamily(Os.FAMILY_WINDOWS))
 	 {
-		 cmake_args.add("-G\"Visual Studio ${project.vsversion} x64\"")
+	 	 cmake_args.add('..\\..\\src\\cpp')
+	 	 //cmake_args.add('-G NMake Makefiles')
 		 executable 'cmake'
 		 args cmake_args
 	 }
 	 else if (Os.isFamily(Os.FAMILY_MAC))
 	 {
+	 	 cmake_args.add('../../src/cpp')
 		 executable 'cmake'
 		 args cmake_args
 	 }
@@ -378,7 +380,7 @@ packagelvcvlib.dependsOn packagecvlib
 //***********************************************************************************
 // DISTRIBUTION PACKAGING TASKS
 
-task collectdistribution {
+task distribution {
 
 	//inputs.dir './build/executable/'
 	//inputs.dir './build/labview/'
@@ -420,15 +422,14 @@ task collectdistribution {
 
 }
 
-collectdistribution.dependsOn make
-collectdistribution.dependsOn packagecvlib
-collectdistribution.dependsOn packagelvcvlib
-collectdistribution.dependsOn fatCapsule
-collectdistribution.dependsOn copyCapsule
+distribution.dependsOn make
+distribution.dependsOn packagecvlib
+distribution.dependsOn packagelvcvlib
+distribution.dependsOn fatCapsule
+distribution.dependsOn copyCapsule
 
 
-
-task packagezip(type:Exec,dependsOn:collectdistribution) {
+task packagezip(type:Exec,dependsOn:distribution) {
 
 	def os = System.getProperty("os.name").toLowerCase()
 	//println "OS:"+os
