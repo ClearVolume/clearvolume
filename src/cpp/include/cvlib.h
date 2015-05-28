@@ -3,7 +3,7 @@
  * 
  * Header file for the cvlib native binding library to ClearVolume.
  *
- * @author Loic Royer 2014
+ * @author Loic Royer, Ulrik Günther 2014-2015
  *
  */
 
@@ -12,9 +12,17 @@
     #define __cdecl __attribute__((__cdecl__))
     #define __declspec(dllexport) __attribute__ ((visibility("default")))
     #define __int64 unsigned long long
+    #define JAR_SEPARATOR ":"
+
+    #include <dirent.h>
+#elif __LINUX__
+    #define JAR_SEPARATOR ":"
+    #include <dirent.h>
 #elif _WIN32
     #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+    #define JAR_SEPARATOR ";"
 	#include <Windows.h>
+    #include "dirent_windows.h"
 #endif
 
 #include <jni.h>
