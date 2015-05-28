@@ -5,17 +5,18 @@ project (ClearVolumeC)
 find_package(JNI)
 find_package(TIFF)
 
+set(WITH_LIBTIFF "$ENV{ENABLE_LIBTIFF}")
 if (JNI_FOUND)
     message (STATUS "JNI found, using:")
     message (STATUS "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
     message (STATUS "JNI_LIBRARIES=${JNI_LIBRARIES}")
 endif()
 
-if (TIFF_FOUND)
+if (TIFF_FOUND AND WITH_LIBTIFF)
     message (STATUS "Building with LibTIFF support")
     include_directories(${TIFF_INCLUDE_DIRS})
 else()
-    message (STATUS "LibTIFF not found, building only non-LibTIFF examples.")
+    message (STATUS "LibTIFF not found or disabled, building only non-LibTIFF examples.")
 endif()
 
 include_directories(${JNI_INCLUDE_DIRS})
@@ -35,7 +36,7 @@ ENDIF (APPLE)
 
 # libtiff-dependent examples
 # 2. readtiff
-if (TIFF_FOUND)
+if (TIFF_FOUND AND WITH_LIBTIFF)
     add_executable(Example_ReadTIFF examples/readtiff.cpp examples/tiffreader.cpp)
     target_compile_features(Example_ReadTIFF PRIVATE cxx_enum_forward_declarations)
     target_link_libraries(Example_ReadTIFF clearvolume)
@@ -45,6 +46,3 @@ if (TIFF_FOUND)
         target_link_libraries(Example_ReadTIFF ${COREFOUNDATION_LIBRARY})
     ENDIF (APPLE)
 endif()
-
-
-
