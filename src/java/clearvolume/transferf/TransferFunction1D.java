@@ -22,6 +22,12 @@ public class TransferFunction1D implements TransferFunction
 		super();
 	}
 
+	public void set(float[] pTransferFunctionData)
+	{
+		mTransferFunctionList.clear();
+		mTransferFunctionList.add(pTransferFunctionData);
+	}
+
 	/**
 	 * Adds a point in this 1D transfer function. e.g: addPointComponent(1.0)
 	 * 
@@ -95,5 +101,7 @@ public class TransferFunction1D implements TransferFunction
 		return String.format(	"TransferFunction1D [mTransferFunctionList=%s]",
 													mTransferFunctionList);
 	}
+
+
 
 }
