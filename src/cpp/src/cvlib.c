@@ -71,6 +71,10 @@ void cv_sigaction(int signal, siginfo_t *info, void *reserved)
 
         }
 
+    if(signal == 10 || signal == 11) {
+        endcvlib();
+    }
+
 	old_sa[signal].sa_handler(signal);
 }
 #endif
@@ -302,9 +306,7 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
 #define CATCHSIG(X) sigaction(X, &handler, &old_sa[X])
 	CATCHSIG(SIGILL);
 	CATCHSIG(SIGABRT);
-	CATCHSIG(SIGBUS);
 	CATCHSIG(SIGFPE);
-	CATCHSIG(SIGSEGV);
 	CATCHSIG(SIGPIPE);
 #endif
 
