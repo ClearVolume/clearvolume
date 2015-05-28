@@ -54,23 +54,45 @@ TIFFReader::TIFFReader(string filename) {
     
     cerr << "Image dimensions: " << width << "x" << height << "x" << samples << "Sx" << nbits << "Bx" << dircount << "SL" << endl;
     
-    uint32 imageSize = width*height*sizeof(uint32);
+    uint32 imageSize = width*height;
     dataBuffer.reserve(imageSize*dircount);
     
-    cout << "TIFFReader: Reading " << dircount << " slices";
+    int ScanlineSize=TIFFScanlineSize(tif);
+    int StripSize =  TIFFStripSize(tif);
+    int rowsPerStrip;
+    int nRowsToConvert;
+    
+    tsample_t vSample=1;
+    raster = (uint32*)_TIFFmalloc(StripSize);
+    uint8 *TBuf = (uint8*)raster;
+    
+    TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rowsPerStrip);
+
+    
+    cout << "SPIMStack: Reading " << dircount << " slices";
     for(int i = 0; i < dircount; i++) {
         TIFFSetDirectory(tif, i);
-        raster = new uint32[imageSize];
+        //raster = new uint32 [imageSize];
         
-        TIFFReadRGBAImageOriented(tif, width, height, raster, ORIENTATION_TOPLEFT, 0);
-        std::copy(raster, raster+imageSize, back_inserter(dataBuffer));
+        //TIFFReadRGBAImageOriented(tif, width, height, raster, ORIENTATION_TOPLEFT, 0);
+        
+        for (int topRow = 0; topRow < height; topRow += rowsPerStrip) {
+            nRowsToConvert = (topRow + rowsPerStrip >height?height- topRow : rowsPerStrip);
+            TIFFReadEncodedStrip(tif, TIFFComputeStrip(tif, topRow, 0), TBuf, nRowsToConvert*ScanlineSize);
+            
+            std::copy(TBuf, TBuf+nRowsToConvert*width, back_inserter(dataBuffer));
+            
+        }
+        
+        
+        //dataBuffer.insert(dataBuffer.begin()+i, raster, raster+imageSize);
         
         cout << ".";
-        
-        delete[] raster;
     }
     
-    cerr << "Buffer size: " << dataBuffer.size()/1024.0f/1024.0f << "M" << endl;
+    _TIFFfree(raster);
+    
+    cout << "Buffer size: " << dataBuffer.size()/1024.0f/1024.0f << "M" << endl;
     
     TIFFClose(tif);
 }
