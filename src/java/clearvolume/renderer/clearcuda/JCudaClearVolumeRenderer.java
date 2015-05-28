@@ -219,47 +219,6 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	public JCudaClearVolumeRenderer(final String pWindowName,
 																	final Integer pWindowWidth,
 																	final Integer pWindowHeight,
-																	final String pNativeTypeEnum,
-																	final Integer pMaxRenderWidth,
-																	final Integer pMaxRenderHeight,
-																	final Integer pNumberOfRenderLayers,
-																	final boolean pUseInCanvas)
-	{
-		this(	pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					NativeTypeEnum.valueOf(pNativeTypeEnum),
-					pMaxRenderWidth,
-					pMaxRenderHeight,
-					pNumberOfRenderLayers,
-					pUseInCanvas);
-	}
-
-	/**
-	 * Constructs an instance of the JCudaClearVolumeRenderer class given a window
-	 * name, width, height, and bytes=per-voxel.
-	 *
-	 * @param pWindowName
-	 *          window name
-	 * @param pWindowWidth
-	 *          window width
-	 * @param pWindowHeight
-	 *          window height
-	 * @param pNativeTypeEnum
-	 *          native type
-	 * @param pMaxRenderWidth
-	 *          max render width
-	 * @param pMaxRenderHeight
-	 *          max render height
-	 * @param pNumberOfRenderLayers
-	 *          number of render layers
-	 * @param pUseInCanvas
-	 *          true if the renderer is to be used as part of a AWT/Swing/SWT
-	 *          component.
-	 */
-	public JCudaClearVolumeRenderer(final String pWindowName,
-																	final Integer pWindowWidth,
-																	final Integer pWindowHeight,
 																	final NativeTypeEnum pNativeTypeEnum,
 																	final Integer pMaxRenderWidth,
 																	final Integer pMaxRenderHeight,

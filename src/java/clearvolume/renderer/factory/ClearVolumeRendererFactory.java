@@ -12,7 +12,6 @@ import org.xeustechnologies.jcl.proxy.ProxyProviderFactory;
 import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.opencl.OpenCLAvailability;
-import clearvolume.transferf.TransferFunction;
 import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeRendererFactory
@@ -286,7 +285,7 @@ public class ClearVolumeRendererFactory
 
 			if (lProperties.getProperty("ClearVolume.disableOpenCL") == null)
 			{
-				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreateOpenCLRenderer(pWindowName,
+				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreatOpenCLRenderer(pWindowName,
 																																														pWindowWidth,
 																																														pWindowHeight,
 																																														pNativeTypeEnum,
@@ -428,7 +427,7 @@ public class ClearVolumeRendererFactory
 			{ pWindowName,
 				pWindowWidth,
 				pWindowHeight,
-				pNativeTypeEnum.toString(),
+				pNativeTypeEnum,
 				pMaxTextureWidth,
 				pMaxTextureHeight,
 				pNumberOfRenderLayers,
