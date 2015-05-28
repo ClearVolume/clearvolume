@@ -424,6 +424,7 @@ collectdistribution.dependsOn make
 collectdistribution.dependsOn packagecvlib
 collectdistribution.dependsOn packagelvcvlib
 collectdistribution.dependsOn fatCapsule
+collectdistribution.dependsOn copyCapsule
 
 
 
