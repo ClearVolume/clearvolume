@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.2)
 
 project (ClearVolumeC)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "build/output")
+
 find_package(JNI)
 find_package(TIFF)
 
