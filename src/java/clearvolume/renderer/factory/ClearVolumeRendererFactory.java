@@ -1,13 +1,6 @@
 package clearvolume.renderer.factory;
 
-import java.util.ArrayList;
 import java.util.Properties;
-
-import org.xeustechnologies.jcl.JarClassLoader;
-import org.xeustechnologies.jcl.JclObjectFactory;
-import org.xeustechnologies.jcl.JclUtils;
-import org.xeustechnologies.jcl.proxy.CglibProxyProvider;
-import org.xeustechnologies.jcl.proxy.ProxyProviderFactory;
 
 import clearcuda.CudaAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
@@ -17,72 +10,7 @@ import coremem.types.NativeTypeEnum;
 public class ClearVolumeRendererFactory
 {
 
-	private static boolean sClassLoaderIsolationActive = false;
 
-	private static final ArrayList<Object> sPrivateJarList = new ArrayList<>();
-
-	private static JarClassLoader sJarClassLoader = null;
-
-	/**
-	 * Sets the Class loader isolation flag
-	 * 
-	 * @param pClassLoaderIsolationOn
-	 *          true if classloader isolation is ON
-	 */
-	public static void setClassLoaderIsolation(boolean pClassLoaderIsolationOn)
-	{
-		sClassLoaderIsolationActive = pClassLoaderIsolationOn;
-	}
-
-	/**
-	 * Returns the state of the class loader isolation gflag.
-	 * 
-	 * @return true i class loader isolation is active, false otherwise
-	 */
-	public static boolean isClassLoaderIsolationOn()
-	{
-		return sClassLoaderIsolationActive;
-	}
-
-	/**
-	 * Returns the list of private JAR files for use in the isolated class loader.
-	 * Add entries for JARs that will have priority over default class loader
-	 * jars. THIS MUST BE DONE BEFORE ANY RENDERER IS CREATED AND CANNOT BE
-	 * CHANGED AFTERWARDS.
-	 * 
-	 * Example of objects that are considered JAR file sources:
-	 * 
-	 * "myjar.jar" new URL("http://myserver.com/myjar.jar") new
-	 * FileInputStream("myotherjar.jar") "myclassfolder/" (contains class files)
-	 * "myjarlib/" (contains jar files)
-	 * 
-	 * @return List of JAR files
-	 */
-	public static ArrayList<Object> getPrivateJarList()
-	{
-		return sPrivateJarList;
-	}
-
-	/**
-	 * Returns and if necessary instantiates the JarClassLoader instance that will
-	 * handle class loader isolation. Once it is created it cannot be changed.
-	 * 
-	 * @return
-	 */
-	private static JarClassLoader getJarClassLoader()
-	{
-		if (sJarClassLoader != null)
-			return sJarClassLoader;
-
-		sJarClassLoader = new JarClassLoader();
-
-		ProxyProviderFactory.setDefaultProxyProvider(new CglibProxyProvider());
-
-		for (final Object lJARSource : sPrivateJarList)
-			sJarClassLoader.add(lJARSource);
-
-		return sJarClassLoader;
-	}
 
 	/**
 	 * Constructs an ClearVolumeRenderer class given a window name, width and
@@ -285,7 +213,7 @@ public class ClearVolumeRendererFactory
 
 			if (lProperties.getProperty("ClearVolume.disableOpenCL") == null)
 			{
-				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreatOpenCLRenderer(pWindowName,
+				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreateOpenCLRenderer(	pWindowName,
 																																														pWindowWidth,
 																																														pWindowHeight,
 																																														pNativeTypeEnum,
@@ -419,31 +347,7 @@ public class ClearVolumeRendererFactory
 																																					final int pNumberOfRenderLayers,
 																																					final boolean pUseInCanvas)
 	{
-		if (sClassLoaderIsolationActive && getJarClassLoader() != null)
-		{
-			final JclObjectFactory lJclObjectFactory = JclObjectFactory.getInstance(true);
 
-			final Object[] lConstructorArguments = new Object[]
-			{ pWindowName,
-				pWindowWidth,
-				pWindowHeight,
-				pNativeTypeEnum,
-				pMaxTextureWidth,
-				pMaxTextureHeight,
-				pNumberOfRenderLayers,
-				pUseInCanvas };
-
-			final Object lIsolatedClearVolumeRenderer = lJclObjectFactory.create(	getJarClassLoader(),
-																																						"clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer",
-																																						lConstructorArguments);
-
-			final ClearVolumeRendererInterface lClearVolumeRenderer = JclUtils.cast(lIsolatedClearVolumeRenderer,
-																																							ClearVolumeRendererInterface.class);
-
-			return lClearVolumeRenderer;
-		}
-		else
-		{
 			return new clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer(	pWindowName,
 																																					pWindowWidth,
 																																					pWindowHeight,
@@ -452,7 +356,6 @@ public class ClearVolumeRendererFactory
 																																					pMaxTextureHeight,
 																																					pNumberOfRenderLayers,
 																																					pUseInCanvas);
-		}
 	}
 
 	private static ClearVolumeRendererInterface internalCreateOpenCLRenderer(final String pWindowName,
@@ -464,31 +367,7 @@ public class ClearVolumeRendererFactory
 																																					final int pNumberOfRenderLayers,
 																																					final boolean pUseInCanvas)
 	{
-		if (sClassLoaderIsolationActive && getJarClassLoader() != null)
-		{
-			final JclObjectFactory lJclObjectFactory = JclObjectFactory.getInstance();
 
-			final Object[] lConstructorArguments = new Object[]
-			{ pWindowName,
-				pWindowWidth,
-				pWindowHeight,
-				pNativeTypeEnum.toString(),
-				pMaxTextureWidth,
-				pMaxTextureHeight,
-				pNumberOfRenderLayers,
-				pUseInCanvas };
-
-			final Object lIsolatedClearVolumeRenderer = lJclObjectFactory.create(	getJarClassLoader(),
-																																						"clearvolume.renderer.opencl.OpenCLVolumeRenderer",
-																																						lConstructorArguments);
-
-			final ClearVolumeRendererInterface lClearVolumeRenderer = JclUtils.cast(lIsolatedClearVolumeRenderer,
-																																							ClearVolumeRendererInterface.class);
-
-			return lClearVolumeRenderer;
-		}
-		else
-		{
 			return new clearvolume.renderer.opencl.OpenCLVolumeRenderer(pWindowName,
 																																	pWindowWidth,
 																																	pWindowHeight,
@@ -497,21 +376,8 @@ public class ClearVolumeRendererFactory
 																																	pMaxTextureHeight,
 																																	pNumberOfRenderLayers,
 																																	pUseInCanvas);
-		}
 	}
 
-	public static TransferFunction castTransfertFunction(TransferFunction pTransferFunction)
-	{
-		final JclObjectFactory lJclObjectFactory = JclObjectFactory.getInstance();
-		
-		final Object lIsolatedClearVolumeRenderer = lJclObjectFactory.create(	getJarClassLoader(),
-																																					"clearvolume.transferf.TransferFunction1D",
-																																					lConstructorArguments);
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = JclUtils.cast(lIsolatedClearVolumeRenderer,
-																																						ClearVolumeRendererInterface.class);
-		
-		final retur
-	}
 
 }
