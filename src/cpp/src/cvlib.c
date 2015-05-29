@@ -10,7 +10,6 @@
 #include "cvlib.h"
 #include <stdbool.h>
 
-//#include "jvmlib/jni.h"       /* where everything is defined */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
