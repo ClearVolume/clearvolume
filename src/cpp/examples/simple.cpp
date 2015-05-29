@@ -5,7 +5,7 @@
  * In addition this example also instanciates a ClearVolume server. You can connect
  * to the server using the ClearVolume client: ClearVolume.exe.jar -c localhost
  *
- * @author Loic Royer, Ulrik Günther 2014-2015
+ * @author Loic Royer, Ulrik Gunther 2014
  *
  */
 
@@ -28,6 +28,8 @@ static string classpath;
 
 void run_clearvolume()
 {
+	cout << "TEST BEGIN\n";
+
 	// First we initialize the library and provide the location of the ClearVolume jar file.
 	// the JVM location is determined automatically using the JAVA_HOME env var.
 	int lReturnCode = begincvlib(const_cast<char*>(classpath.c_str()), OPENCL);
@@ -114,6 +116,7 @@ void run_clearvolume()
 
 	// closes the library
 	endcvlib();
+	cout << "TEST END\n";
 }
 
 static void dummyCallback(void * info) {}
@@ -127,7 +130,7 @@ int main(int argc, char** argv)
 	if (argc >= 2) {
 		classpath = argv[1];
 	} else {
-		classpath = "";
+		classpath = "jars/ClearVolume.jar";
 	}
 
     thread cv_thread(run_clearvolume);

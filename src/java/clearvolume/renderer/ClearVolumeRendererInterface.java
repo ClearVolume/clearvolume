@@ -277,6 +277,13 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return transfer function
 	 */
 	public TransferFunction getTransferFunction(int pRenderLayerIndex);
+	
+	/**
+	 * Returns the transfer function array
+	 * 
+	 * @return transfer function array
+	 */
+	public float[] getTransferFunctionArray();
 
 	/**
 	 * Sets the transfer function range. Both min and max values should be within

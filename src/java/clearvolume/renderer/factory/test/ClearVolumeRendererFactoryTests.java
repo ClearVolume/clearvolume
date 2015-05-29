@@ -14,7 +14,7 @@ public class ClearVolumeRendererFactoryTests
 {
 
 	@Test
-	public void test()
+	public void testBestRenderer8Bit()
 	{
 		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
 			return;
@@ -35,5 +35,29 @@ public class ClearVolumeRendererFactoryTests
 			fail();
 		}
 	}
+
+	@Test
+	public void testBestRenderer16Bit()
+	{
+		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
+			return;
+
+		try
+		{
+			final ClearVolumeRendererInterface lNewBestRenderer = ClearVolumeRendererFactory.newBestRenderer16Bit("Test",
+																																																						128,
+																																																						128,
+																																																						false);
+			System.out.println(lNewBestRenderer.getClass());
+			assertNotNull(lNewBestRenderer);
+		}
+		catch (final Throwable e)
+		{
+			System.err.println("!!! COULD NOT BUILD ANY RENDERER NEITHER WITH CUDA OR OPENCL !!!");
+			e.printStackTrace();
+			fail();
+		}
+	}
+
 
 }
