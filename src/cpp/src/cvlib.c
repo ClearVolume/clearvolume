@@ -10,11 +10,9 @@
 #include "cvlib.h"
 #include <stdbool.h>
 
-//#include "jvmlib/jni.h"       /* where everything is defined */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #define cErrorNone "No Error"
 
@@ -306,7 +304,9 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
 #define CATCHSIG(X) sigaction(X, &handler, &old_sa[X])
 	CATCHSIG(SIGILL);
 	CATCHSIG(SIGABRT);
+//	CATCHSIG(SIGBUS);
 	CATCHSIG(SIGFPE);
+//	CATCHSIG(SIGSEGV);
 	CATCHSIG(SIGPIPE);
 #endif
 
