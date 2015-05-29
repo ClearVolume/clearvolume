@@ -13,7 +13,10 @@
 		<Item Name="CurrentVIPath.vi" Type="VI" URL="../CurrentVIPath.vi"/>
 		<Item Name="test.vi" Type="VI" URL="../test.vi"/>
 		<Item Name="Dependencies" Type="Dependencies">
-			<Item Name="cvlib.lvlib" Type="Library" URL="../lvcvlib/cvlib.lvlib"/>
+			<Item Name="vi.lib" Type="Folder">
+				<Item Name="Error Cluster From Error Code.vi" Type="VI" URL="/&lt;vilib&gt;/Utility/error.llb/Error Cluster From Error Code.vi"/>
+			</Item>
+			<Item Name="clearvolume.lvlib" Type="Library" URL="../clearvolume/clearvolume.lvlib"/>
 		</Item>
 		<Item Name="Build Specifications" Type="Build"/>
 	</Item>

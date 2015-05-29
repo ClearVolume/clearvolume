@@ -1016,7 +1016,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		if (mNewtCanvasAWT != null)
 			return;
 
-		step++;
+		/*step++;
 		final long currentTime = System.nanoTime();
 		if (prevTimeNS == -1)
 		{
@@ -1031,7 +1031,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 			setWindowTitle(t);
 			prevTimeNS = currentTime;
 			step = 0;
-		}
+		}/**/
 	}
 
 	/**

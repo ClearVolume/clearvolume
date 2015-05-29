@@ -2,6 +2,16 @@ cmake_minimum_required(VERSION 3.2)
 
 project (ClearVolumeC)
 
+if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+    MESSAGE( "64 bits compiler detected" )
+    SET( EX_PLATFORM 64 )
+    SET( EX_PLATFORM_NAME "x64" )
+else( CMAKE_SIZEOF_VOID_P EQUAL 8 ) 
+    MESSAGE( "32 bits compiler detected" )
+    SET( EX_PLATFORM 32 )
+    SET( EX_PLATFORM_NAME "x86" )
+endif( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "build/output")
 
 find_package(JNI)

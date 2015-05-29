@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 	if (argc >= 2) {
 		classpath = argv[1];
 	} else {
-		classpath = "jars/ClearVolume.jar";
+		classpath = "jars/";
 	}
 
     thread cv_thread(run_clearvolume);

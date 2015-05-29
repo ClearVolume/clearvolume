@@ -159,6 +159,7 @@ if (JavaVersion.current().isJava8Compatible()) {
  // cmake task:
  task cmake(type:Exec) {
  
+ 	 inputs.file './build.gradle'
 	 inputs.dir file('./src/cpp')
 	 outputs.dir lCMakeFile.absolutePath
  
@@ -169,8 +170,10 @@ if (JavaVersion.current().isJava8Compatible()) {
  
 	 if (Os.isFamily(Os.FAMILY_WINDOWS))
 	 {
+	 	 println 'We are on Windows, using 64bit build'
+	 	 cmake_args.add('-G')
+	 	 cmake_args.add('\"Visual Studio 12 2013 Win64\"')
 	 	 cmake_args.add('..\\..\\src\\cpp')
-	 	 //cmake_args.add('-G NMake Makefiles')
 		 executable 'cmake'
 		 args cmake_args
 	 }
@@ -194,6 +197,8 @@ if (JavaVersion.current().isJava8Compatible()) {
  // make task:
  task make(type:Exec) {
  
+
+ 	 inputs.file './build.gradle'
 	 inputs.dir lCMakeFile.absolutePath
 	 outputs.dir lCMakeFile.absolutePath
 	 
@@ -269,15 +274,18 @@ copyCapsule.dependsOn fatCapsule
 
 task packagecvlib {
 
+	/*inputs.file './build.gradle'
 	inputs.dir './build/cmake/'
 	inputs.dir './build/cmake/build/output'
+	inputs.dir './build/cmake/build/output/Release'
 	inputs.dir './src/cpp/examples'
 	inputs.dir './src/cpp/include'
 	inputs.dir './build/libs/'
 	outputs.dir file('./build/cvlib/')
+	outputs.dir file('./build/cvlib/jars')/**/
 	
 	def os = System.getProperty("os.name").toLowerCase()
-	if (os.contains("win") || os.contains("mac"))
+	if (os.contains("mac"))
 	{
 		doLast{
 			copy
@@ -294,27 +302,44 @@ task packagecvlib {
 				include('*')
 			}
 	
+			
+		}
+	}
+	else if (os.contains("win"))
+	{
+		doLast{
 			copy
 			{
-				from('./src/cpp/examples')
+				from('./build/cmake/build/output/Release')
 				into('./build/cvlib/')
-				include('*.cpp')
+				include('*')
 			}
 	
-			copy
-			{
-				from('./src/cpp/include')
-				into('./build/cvlib/')
-				include('*.h')
-			}
-	
-			copy
-			{
-				from('./build/libs/')
-				into('./build/cvlib/jars')
-				include('ClearVolume.fat.jar')
-				rename('ClearVolume.fat.jar','ClearVolume.jar')
-			}
+		}
+	}
+
+	doLast{
+		copy
+		{
+			from('./src/cpp/examples')
+			into('./build/cvlib/')
+			include('*.cpp')
+		}
+
+		copy
+		{
+			from('./src/cpp/include')
+			into('./build/cvlib/')
+			include('*.h')
+		}
+
+		file('./build/cvlib/jars').mkdirs()
+		copy
+		{
+			from('./build/libs/')
+			into('./build/cvlib/jars')
+			include('ClearVolume.fat.jar')
+			rename('ClearVolume.fat.jar','ClearVolume.jar')
 		}
 	}
 }
@@ -324,12 +349,13 @@ packagecvlib.dependsOn make
 
 task packagelvcvlib {
 
+	/*inputs.file './build.gradle'
 	inputs.dir './src/labview/'
 	inputs.dir './src/labview/lvcvlib'
 	inputs.dir './src/labview/lvcvlib/VIs'
 	inputs.dir './build/cvlib/'
 	inputs.dir './build/libs/'
-	outputs.dir file('./build/labview/')
+	outputs.dir file('./build/labview/')/**/
 	
 	def os = System.getProperty("os.name").toLowerCase()
 	if (os.contains("win") || os.contains("mac"))
@@ -344,30 +370,36 @@ task packagelvcvlib {
 	
 			copy
 			{
-				from('./src/labview/lvcvlib')
-				into('./build/labview/lvcvlib/')
+				from('./src/labview/clearvolume')
+				into('./build/labview/clearvolume/')
 				include('*')
 			}
 	
 			copy
 			{
-				from('./src/labview/lvcvlib/VIs')
-				into('./build/labview/lvcvlib/VIs')
+				from('./src/labview/clearvolume/VIs')
+				into('./build/labview/clearvolume/VIs')
+				include('*')
+			}
+
+			copy
+			{
+				from('./src/labview/clearvolume/subvi')
+				into('./build/labview/clearvolume/subvi')
 				include('*')
 			}
 	
 			copy
 			{
 				from('./build/cvlib/')
-				into('./build/labview/lvcvlib/')
+				into('./build/labview/clearvolume/')
 				include('*.dll')
-				include('*.h')
 			}
 	
 			copy
 			{
 				from('./build/libs/')
-				into('./build/labview/')
+				into('./build/labview/clearvolume')
 				include('ClearVolume.fat.jar')
 				rename('ClearVolume.fat.jar','ClearVolume.jar')
 			}
@@ -386,6 +418,7 @@ packagelvcvlib.dependsOn packagecvlib
 
 task distribution {
 
+	inputs.file './build.gradle'
 	//inputs.dir './build/executable/'
 	//inputs.dir './build/labview/'
 	//inputs.dir './build/cvlib/'
