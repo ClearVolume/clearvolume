@@ -203,18 +203,22 @@ if (JavaVersion.current().isJava8Compatible()) {
  
 	 if (Os.isFamily(Os.FAMILY_WINDOWS))
 	 {
-		 executable 'make'
-		 args make_args
+	 	make_args.add('--build')
+	 	make_args.add('.')
+	 	make_args.add('--config')
+	 	make_args.add('Release')
+		executable 'cmake'
+		args make_args
 	 }
 	 else if (Os.isFamily(Os.FAMILY_MAC))
 	 {
-		 executable 'make'
-		 args make_args
+		executable 'make'
+		args make_args
 	 }
 	 else if (Os.isFamily(Os.FAMILY_UNIX))
 	 {
-		 executable 'make'
-		 args make_args
+		executable 'make'
+		args make_args
 	 }
  
 	 println commandLine
