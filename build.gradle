@@ -438,6 +438,9 @@ task distribution {
 			from('./build/labview/')
 			into('./build/distribution/labview')
 			include "*"
+			include '**/**'
+			include '**/**/**'
+			include '**/**/**/**/'
 		}
 	
 		copy
