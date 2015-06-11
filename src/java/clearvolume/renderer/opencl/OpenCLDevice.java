@@ -108,6 +108,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
 			long lMaxMemory = 0;
 
 			CLPlatform lBestPlatform = null;
+
 			for (final CLPlatform lCLPlatform : lCLPlatforms)
 			{
 				final CLDevice lBestCLDeviceForPlateform = getDeviceWithMostMemory(	pGPUOnly,
@@ -127,6 +128,16 @@ public class OpenCLDevice implements ClearVolumeCloseable
 							e.printStackTrace();
 						}
 					}
+			}
+
+			final String lPreferredPlatform = System.getenv("CLEARVOLUME_DEVICE");
+			String[] lPreferred = lPreferredPlatform.split(",");
+
+			if(lPreferred.length == 2 && Integer.parseInt(lPreferred[0]) < lCLPlatforms.length &&
+							Integer.parseInt(lPreferred[1]) < lCLPlatforms[Integer.parseInt(lPreferred[0])].listAllDevices(true).length) {
+				System.out.println("Overriding device selection:");
+				lBestDevice = lCLPlatforms[Integer.parseInt(lPreferred[0])].listAllDevices(true)[Integer.parseInt(lPreferred[1])];
+				lBestPlatform = lCLPlatforms[Integer.parseInt(lPreferred[0])];
 			}
 
 			if (lBestPlatform != null && lBestDevice != null)
