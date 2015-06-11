@@ -1,1 +1,1 @@
-gradle clean build -x test distribution
+gradle build -x test distribution
