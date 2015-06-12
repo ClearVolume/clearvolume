@@ -132,7 +132,12 @@ public class OpenCLDevice implements ClearVolumeCloseable
 			}
 
 			try {
-				final String lPreferredPlatform = System.getenv("CV_OPENCL_DEVICE");
+				String lPreferredPlatform = System.getenv("CV_OPENCL_DEVICE");
+
+				if(lPreferredPlatform == null) {
+					lPreferredPlatform = System.getProperty("ClearVolume.OpenCLDevice");
+				}
+
 				final String[] lPreferred = lPreferredPlatform.split(",");
 
 				final int platformId = Integer.parseInt(lPreferred[0]);
