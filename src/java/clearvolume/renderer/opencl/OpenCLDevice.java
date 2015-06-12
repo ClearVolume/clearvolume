@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import org.bridj.Pointer;
@@ -130,14 +131,21 @@ public class OpenCLDevice implements ClearVolumeCloseable
 					}
 			}
 
-			final String lPreferredPlatform = System.getenv("CLEARVOLUME_DEVICE");
-			String[] lPreferred = lPreferredPlatform.split(",");
+			try {
+				final String lPreferredPlatform = System.getenv("CV_OPENCL_DEVICE");
+				final String[] lPreferred = lPreferredPlatform.split(",");
 
-			if(lPreferred.length == 2 && Integer.parseInt(lPreferred[0]) < lCLPlatforms.length &&
-							Integer.parseInt(lPreferred[1]) < lCLPlatforms[Integer.parseInt(lPreferred[0])].listAllDevices(true).length) {
-				System.out.println("Overriding device selection:");
-				lBestDevice = lCLPlatforms[Integer.parseInt(lPreferred[0])].listAllDevices(true)[Integer.parseInt(lPreferred[1])];
-				lBestPlatform = lCLPlatforms[Integer.parseInt(lPreferred[0])];
+				final int platformId = Integer.parseInt(lPreferred[0]);
+				final int deviceId = Integer.parseInt(lPreferred[1]);
+
+				if(lPreferred.length == 2 && platformId < lCLPlatforms.length &&
+								deviceId < lCLPlatforms[platformId].listAllDevices(true).length) {
+					System.out.println("Overriding device selection:");
+					lBestDevice = lCLPlatforms[platformId].listAllDevices(true)[deviceId];
+					lBestPlatform = lCLPlatforms[platformId];
+				}
+			} catch(final NumberFormatException | ArrayIndexOutOfBoundsException e) {
+				System.err.println("Invalid specification for device and platform IDs. Please set as CV_OPENCL_DEVICE=platformId,deviceId");
 			}
 
 			if (lBestPlatform != null && lBestDevice != null)
