@@ -211,7 +211,7 @@ public class ClearVolumeRendererFactory
 		{
 			final Properties lProperties = new Properties(System.getProperties());
 
-			if (lProperties.getProperty("ClearVolume.disableOpenCL") == null)
+			if (lProperties.getProperty("ClearVolume.disableOpenCL") == null && System.getenv("CV_DISABLE_OPENCL") == null)
 			{
 				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreateOpenCLRenderer(	pWindowName,
 																																														pWindowWidth,
@@ -228,7 +228,7 @@ public class ClearVolumeRendererFactory
 				System.err.println("Caution: Use of OpenCL has been explicitly disabled!");
 			}
 
-			if (lProperties.getProperty("ClearVolume.disableCUDA") == null)
+			if (lProperties.getProperty("ClearVolume.disableCUDA") == null && System.getenv("CV_DISABLE_CUDA") == null)
 			{
 				final ClearVolumeRendererInterface lNewCudaRenderer = internalCreateCudaRenderer(	pWindowName,
 																																													pWindowWidth,
