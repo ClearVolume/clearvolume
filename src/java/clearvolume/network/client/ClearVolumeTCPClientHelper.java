@@ -1,6 +1,5 @@
 package clearvolume.network.client;
 
-import static org.junit.Assert.assertTrue;
 
 import java.awt.Image;
 import java.net.InetSocketAddress;
@@ -116,11 +115,14 @@ public abstract class ClearVolumeTCPClientHelper
 
 				final SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
 																																					pPortNumber);
-				assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
+				if (!lClearVolumeTCPClient.open(lClientSocketAddress))
+				{
+					throw new RuntimeException("Could not open connection to " + pServerAddress);
+				}
 
-				assertTrue(lClearVolumeTCPClient.start());
+				lClearVolumeTCPClient.start();
 
-				assertTrue(lAsynchronousVolumeSinkAdapter.start());
+				lAsynchronousVolumeSinkAdapter.start();
 
 				lClearVolumeRendererSink.setVisible(true);
 
@@ -139,7 +141,7 @@ public abstract class ClearVolumeTCPClientHelper
 					}
 				}
 
-				assertTrue(lAsynchronousVolumeSinkAdapter.stop());
+				lAsynchronousVolumeSinkAdapter.stop();
 				if (lTimeShiftingSink != null)
 				{
 					lTimeShiftingSinkJFrame.setVisible(false);
@@ -153,7 +155,7 @@ public abstract class ClearVolumeTCPClientHelper
 					lChannelFilterSink.close();
 				}
 
-				assertTrue(lClearVolumeTCPClient.stop());
+				lClearVolumeTCPClient.stop();
 				lClearVolumeTCPClient.close();
 			}
 		}
