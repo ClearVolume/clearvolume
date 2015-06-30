@@ -23,7 +23,10 @@ import clearvolume.controller.RotationControllerInterface;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.panels.ControlPanelJFrame;
+import clearvolume.renderer.panels.ParametersListPanelJFrame;
+import clearvolume.renderer.panels.HasGUIPanel;
+import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
@@ -128,11 +131,8 @@ public abstract class ClearVolumeRendererBase	implements
 	private final FragmentedMemoryInterface[] mVolumeDataByteBuffers;
 	private final CountDownLatch[] mDataBufferCopyIsFinishedArray;
 
-	// Control frame:
-	private ControlPanelJFrame mControlFrame;
-
 	// Map of processors:
-	protected Map<String, Processor<?>> mProcessorsMap = new ConcurrentHashMap<>();
+	protected Map<String, ProcessorInterface<?>> mProcessorInterfacesMap = new ConcurrentHashMap<>();
 
 	// List of Capture Listeners
 	protected ArrayList<VolumeCaptureListener> mVolumeCaptureListenerList = new ArrayList<VolumeCaptureListener>();
@@ -149,6 +149,10 @@ public abstract class ClearVolumeRendererBase	implements
 
 	// Display lock:
 	protected final ReentrantLock mDisplayReentrantLock = new ReentrantLock(true);
+
+	// GUI Frames:
+	private ControlPanelJFrame mControlFrame;
+	private final ParametersListPanelJFrame mParametersListFrame;
 
 	public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
 	{
@@ -189,6 +193,16 @@ public abstract class ClearVolumeRendererBase	implements
 
 		mAutoRotationController = new AutoRotationController();
 		mRotationControllerList.add(mAutoRotationController);
+
+		mParametersListFrame = new ParametersListPanelJFrame();
+		SwingUtilities.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				mParametersListFrame.setVisible(true);
+			}
+		});
 
 	}
 
@@ -1932,9 +1946,7 @@ public abstract class ClearVolumeRendererBase	implements
 		return mRotationControllerList;
 	}
 
-	/**
-	 * Toggles the display of the Control Frame;
-	 */
+
 	@Override
 	public void toggleControlPanelDisplay()
 	{
@@ -1942,34 +1954,44 @@ public abstract class ClearVolumeRendererBase	implements
 			mControlFrame.setVisible(!mControlFrame.isVisible());
 	}
 
-	/**
-	 * Toggles the display of the Control Frame;
-	 */
+
 	@Override
-	public void addProcessor(final Processor<?> pProcessor)
+	public void addProcessor(final ProcessorInterface<?> pProcessor)
 	{
-		mProcessorsMap.put(pProcessor.getName(), pProcessor);
+		mProcessorInterfacesMap.put(pProcessor.getName(), pProcessor);
+		if (pProcessor instanceof HasGUIPanel)
+		{
+			final HasGUIPanel lHasGUIPanel = (HasGUIPanel) pProcessor;
+			mParametersListFrame.addPanel(lHasGUIPanel.getPanel());
+		}
 	}
 
-	/**
-	 * Toggles the display of the Control Frame;
-	 */
 	@Override
-	public void addProcessors(final Collection<Processor<?>> pProcessors)
+	public void removeProcessor(final ProcessorInterface<?> pProcessor)
 	{
-		for (final Processor<?> lProcessor : pProcessors)
+		mProcessorInterfacesMap.remove(pProcessor.getName());
+		if (pProcessor instanceof HasGUIPanel)
+		{
+			final HasGUIPanel lHasGUIPanel = (HasGUIPanel) pProcessor;
+			mParametersListFrame.removePanel(lHasGUIPanel.getPanel());
+		}
+	}
+
+
+	@Override
+	public void addProcessors(final Collection<ProcessorInterface<?>> pProcessors)
+	{
+		for (final ProcessorInterface<?> lProcessor : pProcessors)
 			addProcessor(lProcessor);
 	}
 
 	@Override
-	public Collection<Processor<?>> getProcessors()
+	public Collection<ProcessorInterface<?>> getProcessors()
 	{
-		return mProcessorsMap.values();
+		return mProcessorInterfacesMap.values();
 	}
 
-	/**
-	 * Toggles the display of the Control Frame;
-	 */
+
 	@Override
 	public void addVolumeCaptureListener(final VolumeCaptureListener pVolumeCaptureListener)
 	{

@@ -1,14 +1,21 @@
 package clearvolume.renderer.processors.impl;
 
+import static java.lang.Math.log1p;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import javax.swing.JPanel;
+
+import clearvolume.renderer.cleargl.overlay.o2d.panels.HistogramPanel;
+import clearvolume.renderer.panels.HasGUIPanel;
 import clearvolume.renderer.processors.OpenCLProcessor;
 
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 
-public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>
+public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>	implements
+																																	HasGUIPanel
 {
 
 	private CLKernel mKernelHist;
@@ -17,7 +24,7 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>
 	private CLBuffer<Integer> mBufCounts;
 
 	private volatile float mMin = 0.f, mMax = 1.f;
-
+	private volatile boolean mLogarithm = false;
 	private volatile int mNumberOfBins = 128;
 	private FloatBuffer mOutputBuffer;
 
@@ -33,10 +40,25 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>
 		return "opencl_histogram";
 	}
 
+	public void setLogarithm(boolean pLogarithm)
+	{
+		mLogarithm = pLogarithm;
+	}
+
 	public void setRange(final float pMin, final float pMax)
 	{
 		mMax = pMax;
 		mMin = pMin;
+	}
+
+	public float getRangeMin()
+	{
+		return mMin;
+	}
+
+	public float getRangeMax()
+	{
+		return mMax;
 	}
 
 	public void ensureOpenCLInitialized()
@@ -108,12 +130,15 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>
 		if (mOutputBuffer == null || mOutputBuffer.capacity() != mNumberOfBins)
 			mOutputBuffer = FloatBuffer.allocate(mNumberOfBins);
 
-		final long lNumberOfPixels = pWidthInVoxels * pHeightInVoxels
+		final long lNumberOfVoxels = pWidthInVoxels * pHeightInVoxels
 																	* pDepthInVoxels;
 
 		for (int i = 0; i < mNumberOfBins; i++)
 		{
-			mOutputBuffer.put(i, 1.f * out.get(i) / lNumberOfPixels);
+			float lValue = 1.f * out.get(i) / lNumberOfVoxels;
+			if (mLogarithm)
+				lValue = (float) log1p(lValue);
+			mOutputBuffer.put(i, lValue);
 		}
 
 		notifyListenersOfResult(mOutputBuffer);
@@ -136,6 +161,14 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>
 												(stop - start) / 1.e6f);
 
 		}
+	}
+
+	@Override
+	public JPanel getPanel()
+	{
+		final HistogramPanel lJPanel = new HistogramPanel(this);
+
+		return lJPanel;
 	}
 
 }

@@ -1,8 +1,7 @@
 package clearvolume.renderer.cleargl.overlay.o3d;
 
+import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontFormatException;
-import java.io.IOException;
 import java.nio.FloatBuffer;
 
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
@@ -11,8 +10,9 @@ import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
+import clearvolume.utils.ClearVolumeDefaultFont;
 
 import com.jogamp.opengl.GL;
 
@@ -60,7 +60,7 @@ public class DriftOverlay extends PathOverlay	implements
 	}
 
 	@Override
-	public void notifyResult(Processor<float[]> pSource, float[] pResult)
+	public void notifyResult(ProcessorInterface<float[]> pSource, float[] pResult)
 	{
 		addNewCenterOfMass(pResult[0], pResult[1], pResult[2]);
 	}
@@ -80,25 +80,7 @@ public class DriftOverlay extends PathOverlay	implements
 		Font font = null;
 		stats = new SynchronizedDescriptiveStatistics();
 
-		final String fontPath = "/clearvolume/fonts/SourceCodeProLight.ttf";
-
-		try
-		{
-			font = Font.createFont(	Font.TRUETYPE_FONT,
-															getClass().getResourceAsStream(fontPath))
-									.deriveFont(12.0f);
-		}
-		catch (final FontFormatException | IOException e)
-		{
-			// use a fallback font in case the original couldn't be found or there has
-			// been a problem
-			// with the font format
-			System.err.println("Could not use \"" + fontPath
-													+ "\" ("
-													+ e.toString()
-													+ "), falling back to Sans.");
-			font = new Font("Sans", Font.PLAIN, 12);
-		}
+		font = ClearVolumeDefaultFont.getFontPlain(12);
 
 		int i = 0;
 		for (; i < getPathPoints().capacity(); i = i + 3)
@@ -128,8 +110,7 @@ public class DriftOverlay extends PathOverlay	implements
 																		10,
 																		15,
 																		font,
-																		FloatBuffer.wrap(new float[]
-																		{ 1.0f, 1.0f, 1.0f }),
+																		Color.white,
 																		false);
 	}
 

@@ -18,7 +18,7 @@ import clearvolume.renderer.cleargl.overlay.o2d.ImageQualityOverlay;
 import clearvolume.renderer.cleargl.overlay.o3d.DriftOverlay;
 import clearvolume.renderer.cleargl.overlay.o3d.PathOverlay;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.CUDAProcessorTest;
 import clearvolume.renderer.processors.impl.OpenCLCenterMass;
@@ -102,7 +102,7 @@ public class ClearVolumeProcessorsDemo
 		{
 
 			@Override
-			public void notifyResult(	final Processor<Double> pSource,
+			public void notifyResult(	final ProcessorInterface<Double> pSource,
 																final Double pResult)
 			{
 				System.out.println(pResult);
@@ -171,7 +171,7 @@ public class ClearVolumeProcessorsDemo
 		lOpenCLTenengrad.addResultListener(new ProcessorResultListener<Double>()
 		{
 			@Override
-			public void notifyResult(	final Processor<Double> pSource,
+			public void notifyResult(	final ProcessorInterface<Double> pSource,
 																final Double pResult)
 			{
 				System.out.println("tenengrad = " + pResult);
@@ -262,7 +262,7 @@ public class ClearVolumeProcessorsDemo
 																																																						false);
 		final ImageQualityOverlay lImageQualityOverlay = new ImageQualityOverlay();
 		lClearVolumeRenderer.addOverlay(lImageQualityOverlay);
-		lClearVolumeRenderer.addProcessors(lImageQualityOverlay.getProcessors());
+		lClearVolumeRenderer.addProcessors(lImageQualityOverlay.getProcessorInterfaces());
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
@@ -345,7 +345,7 @@ public class ClearVolumeProcessorsDemo
 		lOpenCLCenterMass.addResultListener(new ProcessorResultListener<float[]>()
 		{
 			@Override
-			public void notifyResult(	final Processor<float[]> pSource,
+			public void notifyResult(	final ProcessorInterface<float[]> pSource,
 																final float[] pResult)
 			{
 
@@ -425,8 +425,8 @@ public class ClearVolumeProcessorsDemo
 	}
 
 	@Test
-	public void demoOpenCLHistogram()	throws InterruptedException,
-																		IOException
+	public void demoOpenCLHistogram8Bit()	throws InterruptedException,
+																				IOException
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
@@ -503,7 +503,101 @@ public class ClearVolumeProcessorsDemo
 																* lResolutionY
 																* z;
 
-						lVolumeDataArray[lIndex] = (byte) ((lVolumeDataArray[lIndex] - 5 + rand.nextInt(10)) % 256);
+						if (x % 2 == 0)
+							lVolumeDataArray[lIndex] = (byte) (1 + ((lVolumeDataArray[lIndex] - 5 + rand.nextInt(10)) % 256));
+						else
+							lVolumeDataArray[lIndex] = (byte) 128;
+
+					}
+
+		}
+
+		lClearVolumeRenderer.close();
+	}
+
+	@Test
+	public void demoOpenCLHistogram16Bit() throws InterruptedException,
+																		IOException
+	{
+
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+																																																						512,
+																																																						512,
+																																																						NativeTypeEnum.UnsignedShort,
+																																																						512,
+																																																						512,
+																																																						1,
+																																																						false);
+
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
+		lClearVolumeRenderer.setVisible(true);
+
+		final int lResolutionX = 96;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
+																							* lResolutionZ
+																							* 2];
+
+		final Random rand = new Random();
+
+		for (int z = 0; z < lResolutionZ; z++)
+			for (int y = 0; y < lResolutionY; y++)
+				for (int x = 0; x < lResolutionX; x++)
+				{
+					final int lIndex = x + lResolutionX
+															* y
+															+ lResolutionX
+															* lResolutionY
+															* z;
+					// int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
+					// if (lCharValue < 12)
+					// lCharValue = 0;
+
+					// lVolumeDataArray[lIndex] = (byte) lCharValue;
+
+					// lVolumeDataArray[lIndex] = (byte) 100;
+
+					// nextInt is normally exclusive of the top value,
+					// so add 1 to make it inclusive
+
+					// lVolumeDataArray[lIndex] = (byte) (200 * x * x
+					// / lResolutionX / lResolutionX + rand.nextInt(20));
+					lVolumeDataArray[2 * lIndex + 1] = (byte) (0);
+					lVolumeDataArray[2 * lIndex + 0] = (byte) (rand.nextInt(128));
+
+				}
+
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							ByteBuffer.wrap(lVolumeDataArray),
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
+		lClearVolumeRenderer.requestDisplay();
+
+		while (lClearVolumeRenderer.isShowing())
+		{
+			// Thread.sleep(300);
+			lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																								ByteBuffer.wrap(lVolumeDataArray),
+																								lResolutionX,
+																								lResolutionY,
+																								lResolutionZ);
+			lClearVolumeRenderer.requestDisplay();
+
+			for (int z = 0; z < lResolutionZ; z++)
+				for (int y = 0; y < lResolutionY; y++)
+					for (int x = 0; x < lResolutionX; x++)
+					{
+						final int lIndex = x + lResolutionX
+																* y
+																+ lResolutionX
+																* lResolutionY
+																* z;
+
+						lVolumeDataArray[2 * lIndex + 1] = (byte) (0);
+						lVolumeDataArray[2 * lIndex + 0] = (byte) (rand.nextInt(128));
 
 					}
 
@@ -658,7 +752,7 @@ public class ClearVolumeProcessorsDemo
 
 		OpenCLDeconvolutionLR lOpenCLDeconvolutionLR = null;
 
-		for (final Processor<?> lProcessor : lClearVolumeRenderer.getProcessors())
+		for (final ProcessorInterface<?> lProcessor : lClearVolumeRenderer.getProcessors())
 		{
 			if (lProcessor instanceof OpenCLDeconvolutionLR)
 			{
@@ -668,7 +762,7 @@ public class ClearVolumeProcessorsDemo
 				lOpenCLDeconvolutionLR.addResultListener(new ProcessorResultListener<Boolean>()
 				{
 					@Override
-					public void notifyResult(	final Processor<Boolean> pSource,
+					public void notifyResult(	final ProcessorInterface<Boolean> pSource,
 																		final Boolean pResult)
 					{
 						if (pResult)
@@ -748,7 +842,7 @@ public class ClearVolumeProcessorsDemo
 
 		OpenCLDenoise lDenoiseProcessor = null;
 
-		for (final Processor<?> lProcessor : lClearVolumeRenderer.getProcessors())
+		for (final ProcessorInterface<?> lProcessor : lClearVolumeRenderer.getProcessors())
 		{
 			if (lProcessor instanceof OpenCLDenoise)
 			{
@@ -758,7 +852,7 @@ public class ClearVolumeProcessorsDemo
 				lDenoiseProcessor.addResultListener(new ProcessorResultListener<Boolean>()
 				{
 					@Override
-					public void notifyResult(	final Processor<Boolean> pSource,
+					public void notifyResult(	final ProcessorInterface<Boolean> pSource,
 																		final Boolean pResult)
 					{
 						if (pResult)

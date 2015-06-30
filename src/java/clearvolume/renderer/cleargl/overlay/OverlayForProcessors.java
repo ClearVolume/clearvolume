@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorInterface;
 
 import com.jogamp.opengl.GL;
 
@@ -13,7 +13,7 @@ public class OverlayForProcessors extends OverlayBase	implements
 																											Overlay3D
 {
 
-	private final ArrayList<Processor<?>> mProcessors = new ArrayList<Processor<?>>();
+	private final ArrayList<ProcessorInterface<?>> mProcessorInterfaces = new ArrayList<ProcessorInterface<?>>();
 
 	private final Overlay mOverlay;
 
@@ -27,26 +27,26 @@ public class OverlayForProcessors extends OverlayBase	implements
 		return mOverlay;
 	}
 
-	public void addProcessor(Processor<?> pProcessor)
+	public void addProcessor(ProcessorInterface<?> pProcessor)
 	{
-		mProcessors.add(pProcessor);
+		mProcessorInterfaces.add(pProcessor);
 	}
 
-	public void removeProcessor(Processor<?> pProcessor)
+	public void removeProcessor(ProcessorInterface<?> pProcessor)
 	{
-		mProcessors.remove(pProcessor);
+		mProcessorInterfaces.remove(pProcessor);
 	}
 
-	public ArrayList<Processor<?>> getProcessors()
+	public ArrayList<ProcessorInterface<?>> getProcessorInterfaces()
 	{
-		return mProcessors;
+		return mProcessorInterfaces;
 	}
 
 	@Override
 	public boolean toggle()
 	{
 		final boolean lNewState = getDelegatedOverlay().toggle();
-		for (final Processor<?> lProcessor : mProcessors)
+		for (final ProcessorInterface<?> lProcessor : mProcessorInterfaces)
 		{
 			lProcessor.toggle();
 		}

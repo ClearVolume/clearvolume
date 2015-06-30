@@ -9,7 +9,7 @@ import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorInterface;
 
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
@@ -275,7 +275,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 	private void handleProcessorsRelatedEvents(KeyEvent pE)
 	{
-		final Collection<Processor<?>> lProcessors = mClearVolumeRenderer.getProcessors();
+		final Collection<ProcessorInterface<?>> lProcessors = mClearVolumeRenderer.getProcessors();
 
 		processSingleKeyToggableEvents(pE, lProcessors);
 	}

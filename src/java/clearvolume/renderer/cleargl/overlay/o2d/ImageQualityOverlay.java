@@ -9,7 +9,7 @@ import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.OverlayForProcessors;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 
@@ -44,7 +44,7 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 		{
 
 			@Override
-			public void notifyResult(	Processor<Double> pSource,
+			public void notifyResult(	ProcessorInterface<Double> pSource,
 																Double pResult)
 			{
 				mMeasure = pResult;

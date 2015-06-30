@@ -1,13 +1,17 @@
 package clearvolume.renderer.cleargl.overlay.o2d;
 
+import static java.lang.Math.log1p;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
 import cleargl.ClearGeometryObject;
+import cleargl.ClearTextRenderer;
 import cleargl.GLError;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
@@ -17,8 +21,10 @@ import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.panels.HasGUIPanel;
+import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
+import clearvolume.utils.ClearVolumeDefaultFont;
 
 import com.jogamp.opengl.GL;
 
@@ -26,10 +32,15 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 																													Overlay2D,
 																													SingleKeyToggable,
 																													ProcessorResultListener<FloatBuffer>,
-																													AutoCloseable
+																													AutoCloseable,
+																													HasGUIPanel
 {
 
+	private static final Color cTextColor = new Color(0.2f, 0.6f, 1.0f);
+
 	private GLProgram mGLProgram;
+
+	private ClearTextRenderer mClearTextRenderer;
 
 	private ClearGeometryObject mClearGeometryObjectBars;
 
@@ -45,13 +56,29 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 
 	private volatile float mOffsetX = -1, mOffsetY = 2f / 3;
 	private volatile float mScaleX = 1, mScaleY = 1f / 3;
-	private volatile float mMin;
-	private volatile float mMax;
+	private volatile float mMin, mMax;
+	
+	private volatile float mRangeMin = 0, mRangeMax = 1;
+
+	private volatile boolean mLogarithm = false;
+
+
 
 	public BarGraphOverlay()
 	{
 		super();
 		setMinMax(0.f, 1.3f);
+	}
+
+	public void setLogarithm(boolean pLogarithm)
+	{
+		mLogarithm = pLogarithm;
+	}
+
+	public void setDisplayedRange(float pRangeMin, float pRangeMax)
+	{
+		mRangeMin = pRangeMin;
+		mRangeMax = pRangeMax;
 	}
 
 	public void setMinMax(float pMin, float pMax)
@@ -84,7 +111,7 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 	}
 
 	@Override
-	public void notifyResult(	Processor<FloatBuffer> pSource,
+	public void notifyResult(	ProcessorInterface<FloatBuffer> pSource,
 														FloatBuffer pResult)
 	{
 		setCounts(pResult);
@@ -106,7 +133,8 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 			for (int i = 0; i < mBarHeightData.capacity(); i++)
 			{
 
-				final float newVal = pCounts.get(i);
+				final float newVal = (float) (mLogarithm ? log1p(pCounts.get(i))
+																								: pCounts.get(i));
 				mBarHeightData.put(i, newVal);
 				maxVal = Math.max(maxVal, newVal);
 			}
@@ -156,6 +184,8 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 																					"shaders/bargraph_frag.glsl");
 
 			GLError.printGLErrors(pGL, "AFTER BAR GRAPH OVERLAY INIT");
+
+			mClearTextRenderer = new ClearTextRenderer(pGL, true);
 
 		}
 		catch (final IOException e)
@@ -302,6 +332,24 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 
 					mClearGeometryObjectBars.draw(0,
 																				mBarHeightData.capacity() * 6);
+
+					final Font lFont = ClearVolumeDefaultFont.getFontPlain(12);
+
+					mClearTextRenderer.drawTextAtPosition(String.format("%.4f",
+																															mRangeMin),
+																								10,
+																								(int) ((5.0 / 6) * pHeight) - 12,
+																								lFont,
+																								cTextColor,
+																								false);
+
+					mClearTextRenderer.drawTextAtPosition(String.format("%.4f",
+																															mRangeMax),
+																								(pWidth / 2) - 5 * 12,
+																								(int) ((5.0 / 6) * pHeight) - 12,
+																								lFont,
+																								cTextColor,
+																								false);
 
 					mHasChanged = false;
 				}

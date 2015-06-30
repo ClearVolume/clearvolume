@@ -7,5 +7,5 @@ public interface DriftProcessor	extends
 																ProcessorResultListener<float[]>
 {
 	@Override
-	public void notifyResult(Processor<float[]> pSource, float[] delta);
+	public void notifyResult(ProcessorInterface<float[]> pSource, float[] delta);
 }

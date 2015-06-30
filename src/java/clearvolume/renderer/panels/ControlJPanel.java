@@ -1,4 +1,4 @@
-package clearvolume.renderer;
+package clearvolume.renderer.panels;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -6,6 +6,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import clearvolume.renderer.ClearVolumeRendererInterface;
 import net.miginfocom.swing.MigLayout;
 
 public class ControlJPanel extends JPanel

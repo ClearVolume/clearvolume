@@ -19,7 +19,7 @@ import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
 
 import com.jogamp.newt.event.KeyEvent;
@@ -152,7 +152,7 @@ public class GraphOverlay extends OverlayBase	implements
 	}
 
 	@Override
-	public void notifyResult(Processor<Double> pSource, Double pResult)
+	public void notifyResult(ProcessorInterface<Double> pSource, Double pResult)
 	{
 		addPoint(pResult);
 	}

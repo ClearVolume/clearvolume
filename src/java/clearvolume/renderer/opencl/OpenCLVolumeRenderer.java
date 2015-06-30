@@ -13,10 +13,9 @@ import org.bridj.Pointer;
 
 import clearvolume.exceptions.ClearVolumeUnsupportdDataTypeException;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
-import clearvolume.renderer.cleargl.overlay.o2d.BarGraphOverlay;
 import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
 import clearvolume.renderer.processors.OpenCLProcessor;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.impl.OpenCLDeconvolutionLR;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
@@ -132,10 +131,10 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		final OpenCLHistogram lHistoProcessor = new OpenCLHistogram();
 		addProcessor(lHistoProcessor);
 
-		final BarGraphOverlay lBarGraphOverlay = new HistogramOverlay(lHistoProcessor);
-		addOverlay(lBarGraphOverlay);
+		final HistogramOverlay lHistogramOverlay = new HistogramOverlay(lHistoProcessor);
+		addOverlay(lHistogramOverlay);
 
-		lBarGraphOverlay.setDisplayed(false);
+		lHistogramOverlay.setDisplayed(false);
 
 		final OpenCLDenoise lOpenCLDenoise = new OpenCLDenoise();
 		addProcessor(lOpenCLDenoise);
@@ -159,7 +158,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		mIsoSurfaceRenderKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRender.cl"),
 																											"isosurface_render");
 
-		for (final Processor<?> lProcessor : mProcessorsMap.values())
+		for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
 				if (lProcessor instanceof OpenCLProcessor)
 				{
@@ -530,7 +529,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 	private void runProcessorHook(final int pRenderLayerIndex)
 	{
 
-		for (final Processor<?> lProcessor : mProcessorsMap.values())
+		for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
 			{
 				synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))

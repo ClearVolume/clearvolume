@@ -2,7 +2,7 @@ package clearvolume.renderer.processors;
 
 import clearvolume.renderer.SingleKeyToggable;
 
-public interface Processor<R> extends SingleKeyToggable
+public interface ProcessorInterface<R> extends SingleKeyToggable
 {
 
 	public void addResultListener(ProcessorResultListener<R> pProcessorResultListener);
