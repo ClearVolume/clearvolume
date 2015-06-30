@@ -12,7 +12,6 @@ import java.util.Random;
 import org.junit.Test;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.RenderAlgorithm;
 import clearvolume.renderer.cleargl.overlay.o2d.GraphOverlay;
 import clearvolume.renderer.cleargl.overlay.o2d.ImageQualityOverlay;
 import clearvolume.renderer.cleargl.overlay.o3d.DriftOverlay;
@@ -105,6 +104,7 @@ public class ClearVolumeProcessorsDemo
 			public void notifyResult(	final ProcessorInterface<Double> pSource,
 																final Double pResult)
 			{
+
 				System.out.println(pResult);
 			}
 		});
@@ -168,6 +168,7 @@ public class ClearVolumeProcessorsDemo
 		lClearVolumeRenderer.addOverlay(lGraphOverlay);
 
 		final OpenCLTenengrad lOpenCLTenengrad = new OpenCLTenengrad();
+
 		lOpenCLTenengrad.addResultListener(new ProcessorResultListener<Double>()
 		{
 			@Override
@@ -342,6 +343,7 @@ public class ClearVolumeProcessorsDemo
 		lClearVolumeRenderer.addOverlay(lDriftOverlay);
 
 		final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
+
 		lOpenCLCenterMass.addResultListener(new ProcessorResultListener<float[]>()
 		{
 			@Override
@@ -425,8 +427,8 @@ public class ClearVolumeProcessorsDemo
 	}
 
 	@Test
-	public void demoOpenCLHistogram8Bit()	throws InterruptedException,
-																				IOException
+	public void demoOpenCLHistogram()	throws InterruptedException,
+																		IOException
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
@@ -439,6 +441,7 @@ public class ClearVolumeProcessorsDemo
 																																																						false);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
+
 		lClearVolumeRenderer.setVisible(true);
 
 		final int lResolutionX = 256;
@@ -517,7 +520,7 @@ public class ClearVolumeProcessorsDemo
 
 	@Test
 	public void demoOpenCLHistogram16Bit() throws InterruptedException,
-																		IOException
+																				IOException
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
@@ -769,6 +772,7 @@ public class ClearVolumeProcessorsDemo
 							System.out.println("deconvolved!");
 					}
 				});
+
 			}
 		}
 
@@ -838,7 +842,7 @@ public class ClearVolumeProcessorsDemo
 																																																						1,
 																																																						false);
 
-		lClearVolumeRenderer.setRenderAlgorithm(RenderAlgorithm.IsoSurface);
+		// lClearVolumeRenderer.setRenderAlgorithm(RenderAlgorithm.IsoSurface);
 
 		OpenCLDenoise lDenoiseProcessor = null;
 
@@ -859,6 +863,7 @@ public class ClearVolumeProcessorsDemo
 							System.out.println("denoise!");
 					}
 				});
+
 			}
 		}
 
