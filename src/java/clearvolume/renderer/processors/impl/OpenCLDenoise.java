@@ -7,9 +7,11 @@ import com.jogamp.newt.event.KeyEvent;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 
-public class OpenCLDenoise extends OpenCLProcessor<Boolean> {
+public class OpenCLDenoise extends OpenCLProcessor<Boolean>
+{
 
-	public enum DenoiseAlgorithm {
+	public enum DenoiseAlgorithm
+	{
 		BILATERAL, NLM
 	}
 
@@ -27,7 +29,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean> {
 
 	private final int NLM_BS = 1; // Search size
 	private final int NLM_FS = 1; // Patch size
-	private float NLM_SIGMA = .1f;
+	private final float NLM_SIGMA = .1f;
 	private CLKernel mKernelCopyBufToImg;
 
 	private float mSigmaSpace, mSigmaValue;
@@ -36,95 +38,85 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean> {
 	private CLBuffer<Float> mBufScratch;
 	private CLBuffer<Float> mBufScratch2;
 
-	private CLBuffer<Float> mBuf_NLM_dist, mBuf_NLM_acc, mBuf_NLM_weight;
+	private CLBuffer<Float> mBuf_NLM_dist, mBuf_NLM_acc,
+			mBuf_NLM_weight;
 
-	public OpenCLDenoise() {
+	public OpenCLDenoise()
+	{
 		super();
 		setActive(false);
 	}
 
-	public void setDenoiseAlgorithm(final DenoiseAlgorithm pDenoiseAlgorithm) {
+	public void setDenoiseAlgorithm(final DenoiseAlgorithm pDenoiseAlgorithm)
+	{
 		mDenoiseAlgorithm = pDenoiseAlgorithm;
 	}
 
 	@Override
-	public String getName() {
+	public String getName()
+	{
 		return "opencl_denoise";
 	}
 
 	@Override
-	public short toggleKeyCode() {
+	public short toggleKeyCode()
+	{
 		return KeyEvent.VK_D;
 	}
 
-	public void setBlockSize(final int pBlockSize) {
+	public void setBlockSize(final int pBlockSize)
+	{
 		mBlockSize = pBlockSize;
 	}
 
-	public void setSigmaSpace(final float pSigmaSpace) {
+	public void setSigmaSpace(final float pSigmaSpace)
+	{
 		mSigmaSpace = pSigmaSpace;
 	}
 
-	public void setSigmaValue(final float pSigmaValue) {
+	public void setSigmaValue(final float pSigmaValue)
+	{
 		mSigmaValue = pSigmaValue;
 	}
 
-	public void ensureOpenCLInitialized() {
-		if (mKernelBilateral == null) {
-			mKernelBilateral = getDevice()
-					.compileKernel(
-							OpenCLDenoise.class
-									.getResource("kernels/denoise_bilat.cl"),
-							"bilat");
+	public void ensureOpenCLInitialized()
+	{
+		if (mKernelBilateral == null)
+		{
+			mKernelBilateral = getDevice().compileKernel(	OpenCLDenoise.class.getResource("kernels/denoise_bilat.cl"),
+																										"bilat");
 
-			mKernelCopyBufToImg = getDevice()
-					.compileKernel(
-							OpenCLDeconvolutionLR.class
-									.getResource("kernels/deconv.cl"),
-							"copyBufToImg");
+			mKernelCopyBufToImg = getDevice().compileKernel(OpenCLDeconvolutionLR.class.getResource("kernels/deconv.cl"),
+																											"copyBufToImg");
 
-			mKernelNLM_dist = getDevice()
-					.compileKernel(
-							OpenCLDenoise.class
-									.getResource("kernels/denoise_nlm_fast.cl"),
-							"dist");
+			mKernelNLM_dist = getDevice().compileKernel(OpenCLDenoise.class.getResource("kernels/denoise_nlm_fast.cl"),
+																									"dist");
 
-			mKernelNLM_convolve = getDevice()
-					.compileKernel(
-							OpenCLDenoise.class
-									.getResource("kernels/denoise_nlm_fast.cl"),
-							"convolve");
+			mKernelNLM_convolve = getDevice().compileKernel(OpenCLDenoise.class.getResource("kernels/denoise_nlm_fast.cl"),
+																											"convolve");
 
-			mKernelNLM_comp_plus = getDevice()
-					.compileKernel(
-							OpenCLDenoise.class
-									.getResource("kernels/denoise_nlm_fast.cl"),
-							"computePlus");
+			mKernelNLM_comp_plus = getDevice().compileKernel(	OpenCLDenoise.class.getResource("kernels/denoise_nlm_fast.cl"),
+																												"computePlus");
 
-			mKernelNLM_comp_minus = getDevice()
-					.compileKernel(
-							OpenCLDenoise.class
-									.getResource("kernels/denoise_nlm_fast.cl"),
-							"computeMinus");
+			mKernelNLM_comp_minus = getDevice().compileKernel(OpenCLDenoise.class.getResource("kernels/denoise_nlm_fast.cl"),
+																												"computeMinus");
 
-			mKernelNLM_assemble = getDevice()
-					.compileKernel(
-							OpenCLDenoise.class
-									.getResource("kernels/denoise_nlm_fast.cl"),
-							"assemble");
+			mKernelNLM_assemble = getDevice().compileKernel(OpenCLDenoise.class.getResource("kernels/denoise_nlm_fast.cl"),
+																											"assemble");
 
-			mKernelNLM_Simple = getDevice().compileKernel(
-					OpenCLDenoise.class.getResource("kernels/denoise_nlm.cl"),
-					"nlm");
+			mKernelNLM_Simple = getDevice().compileKernel(OpenCLDenoise.class.getResource("kernels/denoise_nlm.cl"),
+																										"nlm");
 
 		}
 
 	}
 
-	public void initBuffers(final long Nx, final long Ny, final long Nz) {
+	public void initBuffers(final long Nx, final long Ny, final long Nz)
+	{
 		final long lLength = Nx * Ny * Nz;
 
-		if (mBufScratch == null || mBufScratch.getElementCount() != lLength) {
+		if (mBufScratch == null || mBufScratch.getElementCount() != lLength)
+		{
 			final OpenCLDevice mDev = getDevice();
 			mBufScratch = mDev.createOutputFloatBuffer(lLength);
 			mBufScratch2 = mDev.createOutputFloatBuffer(lLength);
@@ -137,19 +129,27 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean> {
 	}
 
 	@Override
-	public void process(int pRenderLayerIndex, long pWidthInVoxels,
-			long pHeightInVoxels, long pDepthInVoxels) {
+	public void process(int pRenderLayerIndex,
+											long pWidthInVoxels,
+											long pHeightInVoxels,
+											long pDepthInVoxels)
+	{
 		if (!isActive())
 			return;
 
-		switch (mDenoiseAlgorithm) {
+		switch (mDenoiseAlgorithm)
+		{
 		case BILATERAL:
-			process_bilateral(pRenderLayerIndex, pWidthInVoxels,
-					pHeightInVoxels, pDepthInVoxels);
+			process_bilateral(pRenderLayerIndex,
+												pWidthInVoxels,
+												pHeightInVoxels,
+												pDepthInVoxels);
 			break;
 		case NLM:
-			process_nlm_fast(pRenderLayerIndex, pWidthInVoxels,
-					pHeightInVoxels, pDepthInVoxels);
+			process_nlm_fast(	pRenderLayerIndex,
+												pWidthInVoxels,
+												pHeightInVoxels,
+												pDepthInVoxels);
 
 			break;
 
@@ -157,10 +157,14 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean> {
 
 	}
 
-	private void process_bilateral(int pRenderLayerIndex, long pWidthInVoxels,
-			long pHeightInVoxels, long pDepthInVoxels) {
+	private void process_bilateral(	int pRenderLayerIndex,
+																	long pWidthInVoxels,
+																	long pHeightInVoxels,
+																	long pDepthInVoxels)
+	{
 
-		try {
+		try
+		{
 			// final long start = System.nanoTime();
 
 			ensureOpenCLInitialized();
@@ -169,23 +173,32 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean> {
 			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 
 			// bilateral filtering
-			mKernelBilateral.setArgs(getVolumeBuffers()[pRenderLayerIndex],
-					mBufScratch, mBlockSize, mSigmaSpace, mSigmaValue);
-			getDevice().run(mKernelBilateral, (int) pWidthInVoxels,
-					(int) pHeightInVoxels, (int) pDepthInVoxels);
+			mKernelBilateral.setArgs(	getVolumeBuffers()[pRenderLayerIndex],
+																mBufScratch,
+																mBlockSize,
+																mSigmaSpace,
+																mSigmaValue);
+			getDevice().run(mKernelBilateral,
+											(int) pWidthInVoxels,
+											(int) pHeightInVoxels,
+											(int) pDepthInVoxels);
 
 			// copy back
 			mKernelCopyBufToImg.setArgs(mBufScratch,
-					getVolumeBuffers()[pRenderLayerIndex]);
-			getDevice().run(mKernelCopyBufToImg, (int) pWidthInVoxels,
-					(int) pHeightInVoxels, (int) pDepthInVoxels);
+																	getVolumeBuffers()[pRenderLayerIndex]);
+			getDevice().run(mKernelCopyBufToImg,
+											(int) pWidthInVoxels,
+											(int) pHeightInVoxels,
+											(int) pDepthInVoxels);
 
 			/*
 			 * System.out.printf(
 			 * "denoising with mBlockSize, sigSpace, mSigmaValue = %d,%.3f,%.3f\n"
 			 * , mBlockSize, sigSpace, mSigmaValue);/*
 			 */
-		} catch (final Throwable e) {
+		}
+		catch (final Throwable e)
+		{
 			e.printStackTrace();
 			notifyListenersOfResult(new Boolean(false));
 		}
@@ -194,86 +207,109 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean> {
 
 	}
 
-	private void process_nlm_fast(int pRenderLayerIndex, long pWidthInVoxels,
-			long pHeightInVoxels, long pDepthInVoxels) {
+	private void process_nlm_fast(int pRenderLayerIndex,
+																long pWidthInVoxels,
+																long pHeightInVoxels,
+																long pDepthInVoxels)
+	{
 
-		try {
+		try
+		{
 			// final long start = System.nanoTime();
 
 			ensureOpenCLInitialized();
 
-			System.out.println("setting up buffers");
+			// System.out.println("setting up buffers");
 			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 
 			for (int dx = 0; dx < NLM_BS + 1; dx++)
 				for (int dy = -NLM_BS; dy < NLM_BS + 1; dy++)
-					for (int dz = -NLM_BS; dz < NLM_BS + 1; dz++) {
+					for (int dz = -NLM_BS; dz < NLM_BS + 1; dz++)
+					{
 
-						mKernelNLM_dist.setArgs(
-								getVolumeBuffers()[pRenderLayerIndex],
-								mBuf_NLM_dist, (int) dx, (int) dy, (int) dz);
-						getDevice().run(mKernelNLM_dist, (int) pWidthInVoxels,
-								(int) pHeightInVoxels, (int) pDepthInVoxels);
+						mKernelNLM_dist.setArgs(getVolumeBuffers()[pRenderLayerIndex],
+																		mBuf_NLM_dist,
+																		dx,
+																		dy,
+																		dz);
+						getDevice().run(mKernelNLM_dist,
+														(int) pWidthInVoxels,
+														(int) pHeightInVoxels,
+														(int) pDepthInVoxels);
 
-						mKernelNLM_convolve.setArgs(mBuf_NLM_dist, mBufScratch,
-								(int) 1);
+						mKernelNLM_convolve.setArgs(mBuf_NLM_dist, mBufScratch, 1);
 						getDevice().run(mKernelNLM_convolve,
-								(int) pWidthInVoxels, (int) pHeightInVoxels,
-								(int) pDepthInVoxels);
+														(int) pWidthInVoxels,
+														(int) pHeightInVoxels,
+														(int) pDepthInVoxels);
 
-						mKernelNLM_convolve.setArgs(mBufScratch, mBufScratch2,
-								(int) 2);
+						mKernelNLM_convolve.setArgs(mBufScratch, mBufScratch2, 2);
 						getDevice().run(mKernelNLM_convolve,
-								(int) pWidthInVoxels, (int) pHeightInVoxels,
-								(int) pDepthInVoxels);
+														(int) pWidthInVoxels,
+														(int) pHeightInVoxels,
+														(int) pDepthInVoxels);
 
-						mKernelNLM_convolve.setArgs(mBufScratch2, mBufScratch,
-								(int) 4);
+						mKernelNLM_convolve.setArgs(mBufScratch2, mBufScratch, 4);
 						getDevice().run(mKernelNLM_convolve,
-								(int) pWidthInVoxels, (int) pHeightInVoxels,
-								(int) pDepthInVoxels);
+														(int) pWidthInVoxels,
+														(int) pHeightInVoxels,
+														(int) pDepthInVoxels);
 
-						mKernelNLM_comp_plus.setArgs(
-								getVolumeBuffers()[pRenderLayerIndex],
-								mBufScratch, mBuf_NLM_acc, mBuf_NLM_weight,
-								(int) dx, (int) dy, (int) dz,
-								(float) (NLM_SIGMA));
+						mKernelNLM_comp_plus.setArgs(	getVolumeBuffers()[pRenderLayerIndex],
+																					mBufScratch,
+																					mBuf_NLM_acc,
+																					mBuf_NLM_weight,
+																					dx,
+																					dy,
+																					dz,
+																					(NLM_SIGMA));
 						getDevice().run(mKernelNLM_comp_plus,
-								(int) pWidthInVoxels, (int) pHeightInVoxels,
-								(int) pDepthInVoxels);
+														(int) pWidthInVoxels,
+														(int) pHeightInVoxels,
+														(int) pDepthInVoxels);
 
-						if (dx != 0 || dy != 0 || dz != 0) {
-							mKernelNLM_comp_minus.setArgs(
-									getVolumeBuffers()[pRenderLayerIndex],
-									mBufScratch, mBuf_NLM_acc, mBuf_NLM_weight,
-									(int) dx, (int) dy, (int) dz,
-									(float) (NLM_SIGMA));
-							getDevice()
-									.run(mKernelNLM_comp_minus,
-											(int) pWidthInVoxels,
-											(int) pHeightInVoxels,
-											(int) pDepthInVoxels);
+						if (dx != 0 || dy != 0 || dz != 0)
+						{
+							mKernelNLM_comp_minus.setArgs(getVolumeBuffers()[pRenderLayerIndex],
+																						mBufScratch,
+																						mBuf_NLM_acc,
+																						mBuf_NLM_weight,
+																						dx,
+																						dy,
+																						dz,
+																						(NLM_SIGMA));
+							getDevice().run(mKernelNLM_comp_minus,
+															(int) pWidthInVoxels,
+															(int) pHeightInVoxels,
+															(int) pDepthInVoxels);
 						}
 
 					}
 			// assemble
-			mKernelNLM_assemble.setArgs(mBuf_NLM_acc, mBuf_NLM_weight,
-					mBufScratch);
-			getDevice().run(mKernelNLM_assemble, (int) pWidthInVoxels,
-					(int) pHeightInVoxels, (int) pDepthInVoxels);
+			mKernelNLM_assemble.setArgs(mBuf_NLM_acc,
+																	mBuf_NLM_weight,
+																	mBufScratch);
+			getDevice().run(mKernelNLM_assemble,
+											(int) pWidthInVoxels,
+											(int) pHeightInVoxels,
+											(int) pDepthInVoxels);
 
 			// copy back
 			mKernelCopyBufToImg.setArgs(mBufScratch,
-					getVolumeBuffers()[pRenderLayerIndex]);
-			getDevice().run(mKernelCopyBufToImg, (int) pWidthInVoxels,
-					(int) pHeightInVoxels, (int) pDepthInVoxels);
+																	getVolumeBuffers()[pRenderLayerIndex]);
+			getDevice().run(mKernelCopyBufToImg,
+											(int) pWidthInVoxels,
+											(int) pHeightInVoxels,
+											(int) pDepthInVoxels);
 
 			/*
 			 * System.out.printf(
 			 * "denoising with mBlockSize, sigSpace, mSigmaValue = %d,%.3f,%.3f\n"
 			 * , mBlockSize, sigSpace, mSigmaValue);/*
 			 */
-		} catch (final Throwable e) {
+		}
+		catch (final Throwable e)
+		{
 			e.printStackTrace();
 			notifyListenersOfResult(new Boolean(false));
 		}
@@ -282,34 +318,47 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean> {
 
 	}
 
-	private void process_nlm(int pRenderLayerIndex, long pWidthInVoxels,
-			long pHeightInVoxels, long pDepthInVoxels) {
+	private void process_nlm(	int pRenderLayerIndex,
+														long pWidthInVoxels,
+														long pHeightInVoxels,
+														long pDepthInVoxels)
+	{
 
-		try {
+		try
+		{
 			// final long start = System.nanoTime();
 
 			ensureOpenCLInitialized();
 
-			System.out.println("setting up buffers");
+			// System.out.println("setting up buffers");
 			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 
 			mKernelNLM_Simple.setArgs(getVolumeBuffers()[pRenderLayerIndex],
-					mBufScratch, (int) NLM_FS, (int) NLM_BS, (float) (.1));
-			getDevice().run(mKernelNLM_Simple, (int) pWidthInVoxels,
-					(int) pHeightInVoxels, (int) pDepthInVoxels);
+																mBufScratch,
+																NLM_FS,
+																NLM_BS,
+																(float) (.1));
+			getDevice().run(mKernelNLM_Simple,
+											(int) pWidthInVoxels,
+											(int) pHeightInVoxels,
+											(int) pDepthInVoxels);
 
 			// copy back
 			mKernelCopyBufToImg.setArgs(mBufScratch,
-					getVolumeBuffers()[pRenderLayerIndex]);
-			getDevice().run(mKernelCopyBufToImg, (int) pWidthInVoxels,
-					(int) pHeightInVoxels, (int) pDepthInVoxels);
+																	getVolumeBuffers()[pRenderLayerIndex]);
+			getDevice().run(mKernelCopyBufToImg,
+											(int) pWidthInVoxels,
+											(int) pHeightInVoxels,
+											(int) pDepthInVoxels);
 
 			/*
 			 * System.out.printf(
 			 * "denoising with mBlockSize, sigSpace, mSigmaValue = %d,%.3f,%.3f\n"
 			 * , mBlockSize, sigSpace, mSigmaValue);/*
 			 */
-		} catch (final Throwable e) {
+		}
+		catch (final Throwable e)
+		{
 			e.printStackTrace();
 			notifyListenersOfResult(new Boolean(false));
 		}
