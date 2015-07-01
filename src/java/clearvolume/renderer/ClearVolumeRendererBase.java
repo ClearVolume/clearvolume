@@ -15,6 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import clearvolume.ClearVolumeCloseable;
@@ -24,8 +25,8 @@ import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.panels.ControlPanelJFrame;
-import clearvolume.renderer.panels.ParametersListPanelJFrame;
 import clearvolume.renderer.panels.HasGUIPanel;
+import clearvolume.renderer.panels.ParametersListPanelJFrame;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.transferf.TransferFunctions;
@@ -195,14 +196,6 @@ public abstract class ClearVolumeRendererBase	implements
 		mRotationControllerList.add(mAutoRotationController);
 
 		mParametersListFrame = new ParametersListPanelJFrame();
-		SwingUtilities.invokeLater(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				mParametersListFrame.setVisible(true);
-			}
-		});
 
 	}
 
@@ -1946,14 +1939,33 @@ public abstract class ClearVolumeRendererBase	implements
 		return mRotationControllerList;
 	}
 
-
 	@Override
 	public void toggleControlPanelDisplay()
 	{
 		if (mControlFrame != null)
-			mControlFrame.setVisible(!mControlFrame.isVisible());
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					mControlFrame.setVisible(!mControlFrame.isVisible());
+				}
+			});
 	}
 
+	@Override
+	public void toggleParametersListFrame()
+	{
+		if (mParametersListFrame != null)
+			SwingUtilities.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					mParametersListFrame.setVisible(!mParametersListFrame.isVisible());
+				}
+			});
+	}
 
 	@Override
 	public void addProcessor(final ProcessorInterface<?> pProcessor)
@@ -1962,7 +1974,9 @@ public abstract class ClearVolumeRendererBase	implements
 		if (pProcessor instanceof HasGUIPanel)
 		{
 			final HasGUIPanel lHasGUIPanel = (HasGUIPanel) pProcessor;
-			mParametersListFrame.addPanel(lHasGUIPanel.getPanel());
+			final JPanel lPanel = lHasGUIPanel.getPanel();
+			if (lPanel != null)
+				mParametersListFrame.addPanel(lPanel);
 		}
 	}
 
@@ -1973,10 +1987,11 @@ public abstract class ClearVolumeRendererBase	implements
 		if (pProcessor instanceof HasGUIPanel)
 		{
 			final HasGUIPanel lHasGUIPanel = (HasGUIPanel) pProcessor;
-			mParametersListFrame.removePanel(lHasGUIPanel.getPanel());
+			final JPanel lPanel = lHasGUIPanel.getPanel();
+			if (lPanel != null)
+				mParametersListFrame.removePanel(lPanel);
 		}
 	}
-
 
 	@Override
 	public void addProcessors(final Collection<ProcessorInterface<?>> pProcessors)
@@ -1990,7 +2005,6 @@ public abstract class ClearVolumeRendererBase	implements
 	{
 		return mProcessorInterfacesMap.values();
 	}
-
 
 	@Override
 	public void addVolumeCaptureListener(final VolumeCaptureListener pVolumeCaptureListener)

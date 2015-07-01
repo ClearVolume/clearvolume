@@ -25,7 +25,7 @@ public class HistogramPanel extends JPanel
 	{
 		setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
-		mLograrithmRadioButton = new JRadioButton("Lograrithm");
+		mLograrithmRadioButton = new JRadioButton("Logarithm");
 		mLograrithmRadioButton.addActionListener(new ActionListener()
 		{
 			@Override

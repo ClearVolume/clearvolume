@@ -1,39 +1,42 @@
 package clearvolume.renderer.processors.impl;
 
+import javax.swing.JPanel;
+
 import clearvolume.renderer.opencl.OpenCLDevice;
+import clearvolume.renderer.panels.HasGUIPanel;
 import clearvolume.renderer.processors.OpenCLProcessor;
+import clearvolume.renderer.processors.impl.panels.DenoisePanel;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 
-public class OpenCLDenoise extends OpenCLProcessor<Boolean>
+public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
+																														HasGUIPanel
 {
 
 	public enum DenoiseAlgorithm
 	{
-		BILATERAL, NLM
+		BilateralFiltering, LocalMeans
 	}
 
-	private DenoiseAlgorithm mDenoiseAlgorithm = DenoiseAlgorithm.NLM;
+	private DenoiseAlgorithm mDenoiseAlgorithm = DenoiseAlgorithm.LocalMeans;
 
 	private CLKernel mKernelBilateral;
-
 	private CLKernel mKernelNLM_dist;
 	private CLKernel mKernelNLM_convolve;
 	private CLKernel mKernelNLM_comp_plus;
 	private CLKernel mKernelNLM_comp_minus;
 	private CLKernel mKernelNLM_assemble;
-
 	private CLKernel mKernelNLM_Simple;
-
-	private final int NLM_BS = 1; // Search size
-	private final int NLM_FS = 1; // Patch size
-	private final float NLM_SIGMA = .1f;
 	private CLKernel mKernelCopyBufToImg;
 
-	private float mSigmaSpace, mSigmaValue;
-	private int mBlockSize;
+	private volatile int mBlockSize = 1;
+	private volatile float mSigma = .1f;
+	private volatile int mNLM_BlockSearchSize = 1; // Search size
+	private volatile float mBF_SigmaSpace = 1.5f;
+
+
 
 	private CLBuffer<Float> mBufScratch;
 	private CLBuffer<Float> mBufScratch2;
@@ -52,6 +55,11 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 		mDenoiseAlgorithm = pDenoiseAlgorithm;
 	}
 
+	public DenoiseAlgorithm getDenoiseAlgorithm()
+	{
+		return mDenoiseAlgorithm;
+	}
+
 	@Override
 	public String getName()
 	{
@@ -64,19 +72,45 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 		return KeyEvent.VK_D;
 	}
 
+
+	public void setSearchSize(final int pSearchSize)
+	{
+		mNLM_BlockSearchSize = pSearchSize;
+	}
+
+	public int getSearchSize()
+	{
+		return mNLM_BlockSearchSize;
+	}
+
 	public void setBlockSize(final int pBlockSize)
 	{
 		mBlockSize = pBlockSize;
 	}
 
-	public void setSigmaSpace(final float pSigmaSpace)
+	public int getBlockSize()
 	{
-		mSigmaSpace = pSigmaSpace;
+		return mBlockSize;
 	}
 
-	public void setSigmaValue(final float pSigmaValue)
+	public void setSigmaSpace(final float pSigmaSpace)
 	{
-		mSigmaValue = pSigmaValue;
+		mBF_SigmaSpace = pSigmaSpace;
+	}
+
+	public float getSigmaSpace()
+	{
+		return mBF_SigmaSpace;
+	}
+
+	public void setSigma(final float pSigma)
+	{
+		mSigma = pSigma;
+	}
+
+	public float getSigma()
+	{
+		return mSigma;
 	}
 
 	public void ensureOpenCLInitialized()
@@ -111,20 +145,35 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 
 	}
 
-	public void initBuffers(final long Nx, final long Ny, final long Nz)
+	public void initBuffersBF(final long Nx,
+														final long Ny,
+														final long Nz)
 	{
 		final long lLength = Nx * Ny * Nz;
+		final OpenCLDevice lDev = getDevice();
 
 		if (mBufScratch == null || mBufScratch.getElementCount() != lLength)
 		{
-			final OpenCLDevice mDev = getDevice();
-			mBufScratch = mDev.createOutputFloatBuffer(lLength);
-			mBufScratch2 = mDev.createOutputFloatBuffer(lLength);
+			mBufScratch = lDev.createOutputFloatBuffer(lLength);
+			mBufScratch2 = lDev.createOutputFloatBuffer(lLength);
+		}
 
-			mBuf_NLM_acc = mDev.createOutputFloatBuffer(lLength);
-			mBuf_NLM_weight = mDev.createOutputFloatBuffer(lLength);
-			mBuf_NLM_dist = mDev.createOutputFloatBuffer(lLength);
+	}
 
+	public void initBuffersNLM(	final long Nx,
+															final long Ny,
+															final long Nz)
+	{
+		final long lLength = Nx * Ny * Nz;
+		final OpenCLDevice lDev = getDevice();
+		
+		initBuffersBF(Nx, Ny, Nz);
+
+		if (mBuf_NLM_acc == null || mBuf_NLM_acc.getElementCount() != lLength)
+		{
+			mBuf_NLM_acc = lDev.createOutputFloatBuffer(lLength);
+			mBuf_NLM_weight = lDev.createOutputFloatBuffer(lLength);
+			mBuf_NLM_dist = lDev.createOutputFloatBuffer(lLength);
 		}
 	}
 
@@ -139,13 +188,13 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 
 		switch (mDenoiseAlgorithm)
 		{
-		case BILATERAL:
+		case BilateralFiltering:
 			process_bilateral(pRenderLayerIndex,
 												pWidthInVoxels,
 												pHeightInVoxels,
 												pDepthInVoxels);
 			break;
-		case NLM:
+		case LocalMeans:
 			process_nlm_fast(	pRenderLayerIndex,
 												pWidthInVoxels,
 												pHeightInVoxels,
@@ -170,14 +219,14 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 			ensureOpenCLInitialized();
 
 			// System.out.println("setting up buffers");
-			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
+			initBuffersBF(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 
 			// bilateral filtering
 			mKernelBilateral.setArgs(	getVolumeBuffers()[pRenderLayerIndex],
 																mBufScratch,
 																mBlockSize,
-																mSigmaSpace,
-																mSigmaValue);
+																mBF_SigmaSpace,
+																mSigma);
 			getDevice().run(mKernelBilateral,
 											(int) pWidthInVoxels,
 											(int) pHeightInVoxels,
@@ -193,8 +242,8 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 
 			/*
 			 * System.out.printf(
-			 * "denoising with mBlockSize, sigSpace, mSigmaValue = %d,%.3f,%.3f\n"
-			 * , mBlockSize, sigSpace, mSigmaValue);/*
+			 * "denoising with mBF_BlockSize, sigSpace, mBF_SigmaValue = %d,%.3f,%.3f\n"
+			 * , mBF_BlockSize, sigSpace, mBF_SigmaValue);/*
 			 */
 		}
 		catch (final Throwable e)
@@ -220,11 +269,12 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 			ensureOpenCLInitialized();
 
 			// System.out.println("setting up buffers");
-			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
+			initBuffersNLM(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 
-			for (int dx = 0; dx < NLM_BS + 1; dx++)
-				for (int dy = -NLM_BS; dy < NLM_BS + 1; dy++)
-					for (int dz = -NLM_BS; dz < NLM_BS + 1; dz++)
+
+			for (int dx = 0; dx < mNLM_BlockSearchSize + 1; dx++)
+				for (int dy = -mNLM_BlockSearchSize; dy < mNLM_BlockSearchSize + 1; dy++)
+					for (int dz = -mNLM_BlockSearchSize; dz < mNLM_BlockSearchSize + 1; dz++)
 					{
 
 						mKernelNLM_dist.setArgs(getVolumeBuffers()[pRenderLayerIndex],
@@ -262,7 +312,8 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 																					dx,
 																					dy,
 																					dz,
-																					(NLM_SIGMA));
+																					mSigma);
+
 						getDevice().run(mKernelNLM_comp_plus,
 														(int) pWidthInVoxels,
 														(int) pHeightInVoxels,
@@ -277,7 +328,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 																						dx,
 																						dy,
 																						dz,
-																						(NLM_SIGMA));
+																						(mSigma));
 							getDevice().run(mKernelNLM_comp_minus,
 															(int) pWidthInVoxels,
 															(int) pHeightInVoxels,
@@ -304,8 +355,8 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 
 			/*
 			 * System.out.printf(
-			 * "denoising with mBlockSize, sigSpace, mSigmaValue = %d,%.3f,%.3f\n"
-			 * , mBlockSize, sigSpace, mSigmaValue);/*
+			 * "denoising with mBF_BlockSize, sigSpace, mBF_SigmaValue = %d,%.3f,%.3f\n"
+			 * , mBF_BlockSize, sigSpace, mBF_SigmaValue);/*
 			 */
 		}
 		catch (final Throwable e)
@@ -331,12 +382,12 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 			ensureOpenCLInitialized();
 
 			// System.out.println("setting up buffers");
-			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
+			initBuffersNLM(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 
 			mKernelNLM_Simple.setArgs(getVolumeBuffers()[pRenderLayerIndex],
 																mBufScratch,
-																NLM_FS,
-																NLM_BS,
+																mBlockSize,
+																mNLM_BlockSearchSize,
 																(float) (.1));
 			getDevice().run(mKernelNLM_Simple,
 											(int) pWidthInVoxels,
@@ -353,8 +404,8 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 
 			/*
 			 * System.out.printf(
-			 * "denoising with mBlockSize, sigSpace, mSigmaValue = %d,%.3f,%.3f\n"
-			 * , mBlockSize, sigSpace, mSigmaValue);/*
+			 * "denoising with mBF_BlockSize, sigSpace, mBF_SigmaValue = %d,%.3f,%.3f\n"
+			 * , mBF_BlockSize, sigSpace, mBF_SigmaValue);/*
 			 */
 		}
 		catch (final Throwable e)
@@ -366,4 +417,13 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>
 		notifyListenersOfResult(new Boolean(true));
 
 	}
+
+	@Override
+	public JPanel getPanel()
+	{
+		final DenoisePanel lDenoisePanel = new DenoisePanel(this);
+
+		return lDenoisePanel;
+	}
+
 }

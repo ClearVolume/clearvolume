@@ -507,7 +507,7 @@ public class ClearVolumeProcessorsDemo
 																* z;
 
 						if (x % 2 == 0)
-							lVolumeDataArray[lIndex] = (byte) (1 + ((lVolumeDataArray[lIndex] - 5 + rand.nextInt(10)) % 256));
+							lVolumeDataArray[lIndex] = (byte) (118 + rand.nextInt(20));
 						else
 							lVolumeDataArray[lIndex] = (byte) 128;
 
@@ -870,7 +870,7 @@ public class ClearVolumeProcessorsDemo
 		assertNotNull(lDenoiseProcessor);
 
 		lDenoiseProcessor.setBlockSize(2);
-		lDenoiseProcessor.setSigmaValue(1f * noiseLevel / 256f);
+		lDenoiseProcessor.setSigma(1f * noiseLevel / 256f);
 		lDenoiseProcessor.setSigmaSpace(1.5f);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());

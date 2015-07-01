@@ -1,5 +1,6 @@
 package clearvolume.renderer.cleargl.overlay.o2d;
 
+import static java.lang.Math.abs;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -7,7 +8,6 @@ import java.nio.FloatBuffer;
 
 import javax.swing.JPanel;
 
-import clearvolume.renderer.cleargl.overlay.o2d.panels.HistogramPanel;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
 
@@ -41,7 +41,6 @@ public class HistogramOverlay extends BarGraphOverlay
 		setDisplayedRange(pMin, pMax);
 	}
 
-
 	@Override
 	public void setDisplayed(boolean pDisplay)
 	{
@@ -71,7 +70,7 @@ public class HistogramOverlay extends BarGraphOverlay
 	@Override
 	public JPanel getPanel()
 	{
-		return new HistogramPanel(this);
+		return null; // new HistogramPanel(this);
 	}
 
 	private void adjustMinMax(FloatBuffer pResult)
@@ -85,7 +84,7 @@ public class HistogramOverlay extends BarGraphOverlay
 			lMax = max(lMax, pResult.get(i));
 		}
 
-		final float lThreshold = 0.05f * lMax;
+		final float lThreshold = 0.01f * lMax;
 
 		final float lRange = mHistoProcessor.getRangeMax() - mHistoProcessor.getRangeMin();
 		final float lStep = lRange / lLength;
@@ -97,12 +96,21 @@ public class HistogramOverlay extends BarGraphOverlay
 		for (int i = lLength - 1; i >= 0 && pResult.get(i) <= lThreshold; i--, lNewMax -= lStep)
 			;
 
-		lNewMin = mHistoProcessor.getRangeMin() + max(0, lNewMin - 5
-																											* lStep)
-							* lRange;
-		lNewMax = mHistoProcessor.getRangeMin() + min(1, lNewMax + 5
-																											* lStep)
-							* lRange;
+		lNewMin = max(0,
+									mHistoProcessor.getRangeMin() + (lNewMin - 5 * lStep)
+											* lRange);
+		lNewMax = min(1,
+									mHistoProcessor.getRangeMin() + (lNewMax + 5 * lStep)
+											* lRange);
+
+		if (abs(lNewMax - lNewMin) < (1.0f / 128))
+		{
+			lNewMin = lNewMin - 0.5f * 128 * abs(lNewMax - lNewMin);
+			lNewMax = lNewMax + 0.5f * 128 * abs(lNewMax - lNewMin);
+		}
+
+		lNewMin = 0.9f * lNewMin + 0.1f * mHistoProcessor.getRangeMin();
+		lNewMax = 0.9f * lNewMax + 0.1f * mHistoProcessor.getRangeMax();
 
 		// for (int i = 0; i < lLength; i++)
 		// System.out.println("->" + pResult.get(i));

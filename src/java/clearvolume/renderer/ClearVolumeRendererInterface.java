@@ -969,6 +969,11 @@ public interface ClearVolumeRendererInterface	extends
 	public void toggleControlPanelDisplay();
 
 	/**
+	 * Toggles parameter list frame;
+	 */
+	public void toggleParametersListFrame();
+
+	/**
 	 * Toggles recording of rendered window frames.
 	 */
 	public void toggleRecording();
@@ -1110,5 +1115,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
+
+
 
 }

@@ -240,6 +240,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			mMouseControl.toggleMoveLightMode();
 			break;
 
+		case KeyEvent.VK_P:
+			mClearVolumeRenderer.toggleParametersListFrame();
+			break;
+
 		}
 
 		if (pE.getKeyCode() >= KeyEvent.VK_0 && pE.getKeyCode() <= KeyEvent.VK_9)

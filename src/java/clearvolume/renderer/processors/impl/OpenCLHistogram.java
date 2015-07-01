@@ -25,7 +25,7 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>	implements
 
 	private volatile float mMin = 0.f, mMax = 1.f;
 	private volatile boolean mLogarithm = false;
-	private volatile int mNumberOfBins = 128;
+	private volatile int mNumberOfBins = 64;
 	private FloatBuffer mOutputBuffer;
 
 	public OpenCLHistogram()
@@ -168,7 +168,7 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>	implements
 	{
 		final HistogramPanel lJPanel = new HistogramPanel(this);
 
-		return lJPanel;
+		return null;
 	}
 
 }
