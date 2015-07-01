@@ -294,25 +294,38 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 																		mBuf_NLM_dist,
 																		dx,
 																		dy,
-																		dz);
+																		dz,
+																		(int) (2 * mBlockSize + 1) * (2 * mBlockSize + 1));
+
 						getDevice().run(mKernelNLM_dist,
 														(int) pWidthInVoxels,
 														(int) pHeightInVoxels,
 														(int) pDepthInVoxels);
 
-						mKernelNLM_convolve.setArgs(mBuf_NLM_dist, mBufScratch, 1);
+						mKernelNLM_convolve.setArgs(mBuf_NLM_dist,
+																				mBufScratch,
+																				(int) mBlockSize,
+																				1);
+						System.out.println(mBlockSize);
+
 						getDevice().run(mKernelNLM_convolve,
 														(int) pWidthInVoxels,
 														(int) pHeightInVoxels,
 														(int) pDepthInVoxels);
 
-						mKernelNLM_convolve.setArgs(mBufScratch, mBufScratch2, 2);
+						mKernelNLM_convolve.setArgs(mBufScratch,
+																				mBufScratch2,
+																				(int) mBlockSize,
+																				2);
 						getDevice().run(mKernelNLM_convolve,
 														(int) pWidthInVoxels,
 														(int) pHeightInVoxels,
 														(int) pDepthInVoxels);
 
-						mKernelNLM_convolve.setArgs(mBufScratch2, mBufScratch, 4);
+						mKernelNLM_convolve.setArgs(mBufScratch2,
+																				mBufScratch,
+																				(int) mBlockSize,
+																				4);
 						getDevice().run(mKernelNLM_convolve,
 														(int) pWidthInVoxels,
 														(int) pHeightInVoxels,
