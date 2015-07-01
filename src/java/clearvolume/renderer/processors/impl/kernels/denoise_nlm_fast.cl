@@ -94,7 +94,7 @@ __kernel void convolve(	__global float * 	input,
   }
 
    output[i+Nx*j+Nx*Ny*k] = res;  
- 
+   
  }
 
 __kernel void computePlus(	__read_only image3d_t input,
@@ -173,6 +173,26 @@ __kernel void assemble(	__global float * accBuf,
   int Ny = get_global_size(1);
   
   outBuf[i0+Nx*j0+Nx*Ny*k0] = accBuf[i0+Nx*j0+Nx*Ny*k0]/weightBuf[i0+Nx*j0+Nx*Ny*k0];
+  
+  
 
+}
+
+
+__kernel void startup(	__global float * accBuf,
+						__global float* weightBuf){
+
+  
+    
+  uint i0 = get_global_id(0);
+  uint j0 = get_global_id(1);
+  uint k0 = get_global_id(2);
+  
+  int Nx = get_global_size(0);
+  int Ny = get_global_size(1);
+  
+  accBuf[i0+Nx*j0+Nx*Ny*k0] = 0.f;
+  weightBuf[i0+Nx*j0+Nx*Ny*k0] = 0.f;
+  
 
 }
