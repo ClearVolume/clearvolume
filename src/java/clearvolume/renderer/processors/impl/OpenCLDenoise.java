@@ -29,6 +29,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 	private CLKernel mKernelNLM_comp_minus;
 	private CLKernel mKernelNLM_assemble;
 	private CLKernel mKernelNLM_Simple;
+	private CLKernel mKernelNLM_startup;
 	private CLKernel mKernelCopyBufToImg;
 
 	private volatile int mBlockSize = 1;
@@ -43,6 +44,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 
 	private CLBuffer<Float> mBuf_NLM_dist, mBuf_NLM_acc,
 			mBuf_NLM_weight;
+
 
 	public OpenCLDenoise()
 	{
@@ -125,6 +127,9 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 
 			mKernelNLM_dist = getDevice().compileKernel(OpenCLDenoise.class.getResource("kernels/denoise_nlm_fast.cl"),
 																									"dist");
+
+			mKernelNLM_startup = getDevice().compileKernel(	OpenCLDenoise.class.getResource("kernels/denoise_nlm_fast.cl"),
+																											"startup");
 
 			mKernelNLM_convolve = getDevice().compileKernel(OpenCLDenoise.class.getResource("kernels/denoise_nlm_fast.cl"),
 																											"convolve");
@@ -271,6 +276,14 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 			// System.out.println("setting up buffers");
 			initBuffersNLM(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 
+			// set all to zero
+			mKernelNLM_startup.setArgs(	mBuf_NLM_acc,
+ mBuf_NLM_weight);
+
+			getDevice().run(mKernelNLM_startup,
+											(int) pWidthInVoxels,
+											(int) pHeightInVoxels,
+											(int) pDepthInVoxels);
 
 			for (int dx = 0; dx < mNLM_BlockSearchSize + 1; dx++)
 				for (int dy = -mNLM_BlockSearchSize; dy < mNLM_BlockSearchSize + 1; dy++)
@@ -336,18 +349,21 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 						}
 
 					}
+
 			// assemble
-			mKernelNLM_assemble.setArgs(mBuf_NLM_acc,
-																	mBuf_NLM_weight,
-																	mBufScratch);
-			getDevice().run(mKernelNLM_assemble,
-											(int) pWidthInVoxels,
-											(int) pHeightInVoxels,
-											(int) pDepthInVoxels);
+			 mKernelNLM_assemble.setArgs(mBuf_NLM_acc,
+			 mBuf_NLM_weight,
+			 mBufScratch);
+			 getDevice().run(mKernelNLM_assemble,
+			 (int) pWidthInVoxels,
+			 (int) pHeightInVoxels,
+			 (int) pDepthInVoxels);
 
 			// copy back
 			mKernelCopyBufToImg.setArgs(mBufScratch,
 																	getVolumeBuffers()[pRenderLayerIndex]);
+
+			
 			getDevice().run(mKernelCopyBufToImg,
 											(int) pWidthInVoxels,
 											(int) pHeightInVoxels,
