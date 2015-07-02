@@ -19,7 +19,7 @@ public class TransferFunctions
 	}
 
 
-	public static TransferFunction getGradientForColor(int pColorIndex)
+	public static TransferFunction1D getGradientForColor(int pColorIndex)
 	{
 		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
 		switch (pColorIndex % 4)
@@ -48,7 +48,7 @@ public class TransferFunctions
 		return lTransfertFunction;
 	}
 
-	public static TransferFunction getGradientForColor(float... pColorRGBA)
+	public static TransferFunction1D getGradientForColor(float... pColorRGBA)
 	{
 		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
 		lTransfertFunction.addPoint(0, 0, 0, 0);

@@ -21,6 +21,7 @@ public class DeconvolvePanel extends JPanel
 	private final JTextField mBlockSizeTextField;
 	private final JTextField mSigmaTextField;
 	private final JTextField mSigmaSpaceTextField;
+	private final JTextField mNumberOfIterationsTextField;
 
 	public DeconvolvePanel()
 	{
@@ -39,6 +40,13 @@ public class DeconvolvePanel extends JPanel
 		final JCheckBox lDeconvolutionOnOffCheckBox = new JCheckBox("Lucy-Richardson deconvolution on/off");
 		add(lDeconvolutionOnOffCheckBox, "cell 0 0 2 1");
 		lDeconvolutionOnOffCheckBox.setSelected(mOpenCLDeconvolution.isActive());
+
+		final JLabel lNumberOfIterationsLabel = new JLabel("Number of iterations");
+		add(lNumberOfIterationsLabel, "cell 0 1,alignx trailing");
+
+		mNumberOfIterationsTextField = new JTextField("" + mOpenCLDeconvolution.getNumberOfIterations());
+		mNumberOfIterationsTextField.setColumns(10);
+		add(mNumberOfIterationsTextField, "cell 1 1,growx");
 
 
 		final JLabel lBlockSizeLabel = new JLabel("Sigma X");
@@ -71,6 +79,14 @@ public class DeconvolvePanel extends JPanel
 			}
 		});
 
+		mNumberOfIterationsTextField.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent pE)
+			{
+				mOpenCLDeconvolution.setNumberOfIterations(Integer.parseInt(mNumberOfIterationsTextField.getText()));
+			}
+		});
 
 		mBlockSizeTextField.addActionListener(new ActionListener()
 		{

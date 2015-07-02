@@ -18,9 +18,10 @@ public class CyclingTransferFunction extends TransferFunction1D	implements
 		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getCoolWarm());
 		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getMatlabStyle());
 		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getHot());
-		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getBlueGradient());
-		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getGreenGradient());
-		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getRedGradient());
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getGradientForColor(0));
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getGradientForColor(1));
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getGradientForColor(2));
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getGradientForColor(3));
 
 		return lCyclingTransferFunction;
 	}

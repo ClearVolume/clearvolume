@@ -11,6 +11,8 @@ import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.transferf.CyclableTransferFunction;
+import clearvolume.transferf.CyclingTransferFunction;
+import clearvolume.transferf.TransferFunction1D;
 
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
@@ -247,9 +249,16 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				final CyclableTransferFunction lCyclableTransferFunction = (CyclableTransferFunction) mClearVolumeRenderer.getTransferFunction();
 				lCyclableTransferFunction.next();
 			}
+			else if (mClearVolumeRenderer.getTransferFunction() instanceof TransferFunction1D)
+			{
+				final CyclingTransferFunction lCyclingTransferFunction = CyclingTransferFunction.getDefault();
+				lCyclingTransferFunction.addTransferFunction((TransferFunction1D) mClearVolumeRenderer.getTransferFunction());
+				mClearVolumeRenderer.setTransferFunction(lCyclingTransferFunction);
+			}
+			break;
+
 		case KeyEvent.VK_P:
 			mClearVolumeRenderer.toggleParametersListFrame();
-
 			break;
 
 		}

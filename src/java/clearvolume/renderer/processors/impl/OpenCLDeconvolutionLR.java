@@ -28,10 +28,9 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
 	CLBuffer<Float> mScratch;
 	CLBuffer<Float> mOut;
 
-	private float sigX, sigY, sigZ;
-	private int NhX, NhY, NhZ;
-
-	private static int Niter = 5;
+	private volatile float sigX, sigY, sigZ;
+	private volatile int NhX, NhY, NhZ;
+	private volatile int mNumberOfIterations = 5;
 
 	public OpenCLDeconvolutionLR()
 	{
@@ -57,6 +56,16 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
 	{
 		return InputEvent.SHIFT_MASK;
 	};
+
+	public void setNumberOfIterations(int pNumberOfIterations)
+	{
+		mNumberOfIterations = pNumberOfIterations;
+	}
+
+	public int getNumberOfIterations()
+	{
+		return mNumberOfIterations;
+	}
 
 	public void setSigmas(final float pSigmaX,
 												final float pSigmaY,
@@ -184,7 +193,7 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
 										pHeightInVoxels,
 										pDepthInVoxels);
 
-			for (int i = 0; i < Niter; i++)
+			for (int i = 0; i < mNumberOfIterations; i++)
 			{
 
 				blur(	mOut,
