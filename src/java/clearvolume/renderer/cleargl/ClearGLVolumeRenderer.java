@@ -946,8 +946,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					try
 					{
 						lOverlay2D.render2D(lGL,
-																getViewportWidth(),
-																getViewportHeight(),
+																getWindowWidth(),
+																getWindowHeight(),
 																pProjectionMatrix);
 					}
 					catch (final Throwable e)
@@ -977,8 +977,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					try
 					{
 						lOverlay3D.render3D(lGL,
-																getViewportWidth(),
-																getViewportHeight(),
+																getWindowWidth(),
+																getWindowHeight(),
 																pProjectionMatrix,
 																pModelViewMatrix);
 					}

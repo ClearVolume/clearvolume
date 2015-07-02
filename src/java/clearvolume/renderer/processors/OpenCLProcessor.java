@@ -4,7 +4,7 @@ import clearvolume.renderer.opencl.OpenCLDevice;
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
 
 public abstract class OpenCLProcessor<R> extends ProcessorBase<R>	implements
-																																	Processor<R>
+																																	ProcessorInterface<R>
 {
 
 	private OpenCLDevice mOpenCLDevice;

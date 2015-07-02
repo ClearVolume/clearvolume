@@ -125,7 +125,9 @@ __kernel void copyBufToImg(	__global float* 				input,
   int Ny = get_global_size(1);
   int Nz = get_global_size(2); 
  
- 	write_imagef(output, (int4)(i,j,k,0), (float4)(input[i+Nx*j+Nx*Ny*k], 0.f,0.f,0.f));
+  write_imagef(output, (int4)(i,j,k,0), (float4)(input[i+Nx*j+Nx*Ny*k], 0.f,0.f,0.f));
+  
+  
 }
 
 __kernel void test(__global float * input)

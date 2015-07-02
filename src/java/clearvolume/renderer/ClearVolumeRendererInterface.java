@@ -13,7 +13,7 @@ import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
@@ -969,6 +969,11 @@ public interface ClearVolumeRendererInterface	extends
 	public void toggleControlPanelDisplay();
 
 	/**
+	 * Toggles parameter list frame;
+	 */
+	public void toggleParametersListFrame();
+
+	/**
 	 * Toggles recording of rendered window frames.
 	 */
 	public void toggleRecording();
@@ -998,17 +1003,25 @@ public interface ClearVolumeRendererInterface	extends
 	 * Adds a processor to this renderer.
 	 *
 	 * @param pProcessor
-	 *          Processor to add.
+	 *          ProcessorInterface to add.
 	 */
-	public void addProcessor(Processor<?> pProcessor);
+	public void addProcessor(ProcessorInterface<?> pProcessor);
 
+	/**
+	 * Removes a processor to this renderer.
+	 *
+	 * @param pProcessor
+	 *          ProcessorInterface to remove.
+	 */
+	public void removeProcessor(final ProcessorInterface<?> pProcessor);
+	
 	/**
 	 * Adds these processors to this renderer.
 	 *
 	 * @param pProcessors
 	 *          Processors to add.
 	 */
-	public void addProcessors(Collection<Processor<?>> pProcessors);
+	public void addProcessors(Collection<ProcessorInterface<?>> pProcessors);
 
 	/**
 	 * Adds a capture listener to this renderer.
@@ -1034,9 +1047,9 @@ public interface ClearVolumeRendererInterface	extends
 	/**
 	 * Returns the list of processors in this renderer.
 	 *
-	 * @return Psrocessors collection
+	 * @return Processors collection
 	 */
-	public Collection<Processor<?>> getProcessors();
+	public Collection<ProcessorInterface<?>> getProcessors();
 
 	/**
 	 * Returns a Canvas that can be used to embed this renderer.
@@ -1102,5 +1115,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
+
+
 
 }

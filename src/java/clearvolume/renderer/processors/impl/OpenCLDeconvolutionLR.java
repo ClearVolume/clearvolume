@@ -1,14 +1,19 @@
 package clearvolume.renderer.processors.impl;
 
+import javax.swing.JPanel;
+
 import clearvolume.renderer.opencl.OpenCLDevice;
+import clearvolume.renderer.panels.HasGUIPanel;
 import clearvolume.renderer.processors.OpenCLProcessor;
+import clearvolume.renderer.processors.impl.panels.DeconvolvePanel;
 
 import com.jogamp.newt.event.InputEvent;
 import com.jogamp.newt.event.KeyEvent;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 
-public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>
+public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
+																																		HasGUIPanel
 {
 
 	private CLKernel mKernelBlur;
@@ -57,15 +62,42 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>
 												final float pSigmaY,
 												final float pSigmaZ)
 	{
+		setSigmaX(pSigmaX);
+		setSigmaY(pSigmaY);
+		setSigmaZ(pSigmaZ);
+	}
 
+	public void setSigmaX(final float pSigmaX)
+	{
 		sigX = pSigmaX;
-		sigY = pSigmaY;
-		sigZ = pSigmaZ;
-
 		NhX = (int) (4 * sigX + 1);
-		NhY = (int) (4 * sigY + 1);
-		NhZ = (int) (4 * sigZ + 1);
+	}
 
+	public float getSigmaX()
+	{
+		return sigX;
+	}
+
+	public void setSigmaY(final float pSigmaY)
+	{
+		sigY = pSigmaY;
+		NhY = (int) (4 * sigY + 1);
+	}
+
+	public float getSigmaY()
+	{
+		return sigY;
+	}
+
+	public void setSigmaZ(final float pSigmaZ)
+	{
+		sigZ = pSigmaZ;
+		NhZ = (int) (4 * sigZ + 1);
+	}
+
+	public float getSigmaZ()
+	{
+		return sigZ;
 	}
 
 	public void ensureOpenCLInitialized()
@@ -260,6 +292,14 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>
 
 		mKernelBlur.setArgs(bufScratch, bufOut, sigZ, (NhZ), 4);
 		getDevice().run(mKernelBlur, (int) Nx, (int) Ny, (int) Nz);
+	}
+
+	@Override
+	public JPanel getPanel()
+	{
+		final DeconvolvePanel lDeconvolvePanel = new DeconvolvePanel(this);
+
+		return lDeconvolvePanel;
 	}
 
 }

@@ -1,7 +1,9 @@
-package clearvolume.renderer;
+package clearvolume.renderer.panels;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
+
+import clearvolume.renderer.ClearVolumeRendererInterface;
 
 public class ControlPanelJFrame extends JFrame
 {

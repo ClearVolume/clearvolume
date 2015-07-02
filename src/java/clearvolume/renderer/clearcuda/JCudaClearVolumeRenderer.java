@@ -38,7 +38,7 @@ import clearcuda.CudaModule;
 import clearcuda.CudaTextureReference;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.processors.CUDAProcessor;
-import clearvolume.renderer.processors.Processor;
+import clearvolume.renderer.processors.ProcessorInterface;
 
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -328,7 +328,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 			mCudaBufferDevicePointer = new CudaDevicePointer[getNumberOfRenderLayers()];
 
-			for (final Processor<?> lProcessor : mProcessorsMap.values())
+			for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
 				if (lProcessor.isCompatibleProcessor(getClass()))
 					if (lProcessor instanceof CUDAProcessor)
 					{
@@ -958,7 +958,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 	private void runProcessorsHook(final int pRenderLayerIndex)
 	{
-		for (final Processor<?> lProcessor : mProcessorsMap.values())
+		for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
 			{
 				synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))

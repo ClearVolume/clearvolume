@@ -6,7 +6,7 @@ import clearcuda.CudaDevice;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 
 public abstract class CUDAProcessor<R> extends ProcessorBase<R>	implements
-																																Processor<R>
+																																ProcessorInterface<R>
 {
 	private CudaDevice mCudaDevice;
 	private CudaContext mCudaContext;

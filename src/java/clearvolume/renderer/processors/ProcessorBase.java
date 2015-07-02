@@ -7,7 +7,7 @@ import clearvolume.renderer.SingleKeyToggable;
 import com.jogamp.newt.event.KeyEvent;
 
 public abstract class ProcessorBase<R>	implements
-																				Processor<R>,
+																				ProcessorInterface<R>,
 																				SingleKeyToggable
 {
 	private final ArrayList<ProcessorResultListener<R>> mListenerList = new ArrayList<>();
@@ -15,7 +15,7 @@ public abstract class ProcessorBase<R>	implements
 	private volatile boolean mActive = true;
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.processors.Processor#setActive(boolean)
+	 * @see clearvolume.renderer.processors.ProcessorInterface#setActive(boolean)
 	 */
 	@Override
 	public void setActive(boolean pIsActive)
@@ -34,7 +34,7 @@ public abstract class ProcessorBase<R>	implements
 	}
 
 	/* (non-Javadoc)
-	 * @see clearvolume.renderer.processors.Processor#isActive()
+	 * @see clearvolume.renderer.processors.ProcessorInterface#isActive()
 	 */
 	@Override
 	public boolean isActive()
