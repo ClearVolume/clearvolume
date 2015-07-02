@@ -1,18 +1,7 @@
 
-#ifndef FS
-#define FS 1
-#endif
-
-#ifndef BS
-#define BS 2
-#endif /* BS */
-
-#define NPATCH ((2.f*FS+1)*(2.f*FS+1)*(2.f*FS+1))
 
 
-
-
-__kernel void dist(__read_only image3d_t input,__global float * output, const int dx,const int dy,const int dz){
+__kernel void dist(__read_only image3d_t input,__global float * output, const int dx,const int dy,const int dz, const int NPATCH){
 
 
 const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE |	CLK_ADDRESS_CLAMP_TO_EDGE |	CLK_FILTER_NEAREST ;
@@ -41,6 +30,7 @@ output[i+Nx*j+Nx*Ny*k] = d;
 
 __kernel void convolve(	__global float * 	input, 
 						__global float * 	output, 
+						const int FS,
 						const int 			flag)
 {
 
