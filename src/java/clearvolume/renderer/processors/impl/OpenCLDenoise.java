@@ -37,14 +37,11 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 	private volatile int mNLM_BlockSearchSize = 1; // Search size
 	private volatile float mBF_SigmaSpace = 1.5f;
 
-
-
 	private CLBuffer<Float> mBufScratch;
 	private CLBuffer<Float> mBufScratch2;
 
 	private CLBuffer<Float> mBuf_NLM_dist, mBuf_NLM_acc,
 			mBuf_NLM_weight;
-
 
 	public OpenCLDenoise()
 	{
@@ -73,7 +70,6 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 	{
 		return KeyEvent.VK_D;
 	}
-
 
 	public void setSearchSize(final int pSearchSize)
 	{
@@ -171,7 +167,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 	{
 		final long lLength = Nx * Ny * Nz;
 		final OpenCLDevice lDev = getDevice();
-		
+
 		initBuffersBF(Nx, Ny, Nz);
 
 		if (mBuf_NLM_acc == null || mBuf_NLM_acc.getElementCount() != lLength)
@@ -277,8 +273,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 			initBuffersNLM(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 
 			// set all to zero
-			mKernelNLM_startup.setArgs(	mBuf_NLM_acc,
- mBuf_NLM_weight);
+			mKernelNLM_startup.setArgs(mBuf_NLM_acc, mBuf_NLM_weight);
 
 			getDevice().run(mKernelNLM_startup,
 											(int) pWidthInVoxels,
@@ -295,7 +290,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 																		dx,
 																		dy,
 																		dz,
-																		(int) (2 * mBlockSize + 1) * (2 * mBlockSize + 1));
+																		(2 * mBlockSize + 1) * (2 * mBlockSize + 1));
 
 						getDevice().run(mKernelNLM_dist,
 														(int) pWidthInVoxels,
@@ -304,9 +299,9 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 
 						mKernelNLM_convolve.setArgs(mBuf_NLM_dist,
 																				mBufScratch,
-																				(int) mBlockSize,
+																				mBlockSize,
 																				1);
-						System.out.println(mBlockSize);
+						// System.out.println(mBlockSize);
 
 						getDevice().run(mKernelNLM_convolve,
 														(int) pWidthInVoxels,
@@ -315,7 +310,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 
 						mKernelNLM_convolve.setArgs(mBufScratch,
 																				mBufScratch2,
-																				(int) mBlockSize,
+																				mBlockSize,
 																				2);
 						getDevice().run(mKernelNLM_convolve,
 														(int) pWidthInVoxels,
@@ -324,7 +319,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 
 						mKernelNLM_convolve.setArgs(mBufScratch2,
 																				mBufScratch,
-																				(int) mBlockSize,
+																				mBlockSize,
 																				4);
 						getDevice().run(mKernelNLM_convolve,
 														(int) pWidthInVoxels,
@@ -361,23 +356,21 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 															(int) pDepthInVoxels);
 						}
 
-
 					}
 
 			// assemble
-			 mKernelNLM_assemble.setArgs(mBuf_NLM_acc,
-			 mBuf_NLM_weight,
-			 mBufScratch);
-			 getDevice().run(mKernelNLM_assemble,
-			 (int) pWidthInVoxels,
-			 (int) pHeightInVoxels,
-			 (int) pDepthInVoxels);
+			mKernelNLM_assemble.setArgs(mBuf_NLM_acc,
+																	mBuf_NLM_weight,
+																	mBufScratch);
+			getDevice().run(mKernelNLM_assemble,
+											(int) pWidthInVoxels,
+											(int) pHeightInVoxels,
+											(int) pDepthInVoxels);
 
 			// copy back
 			mKernelCopyBufToImg.setArgs(mBufScratch,
 																	getVolumeBuffers()[pRenderLayerIndex]);
 
-			
 			getDevice().run(mKernelCopyBufToImg,
 											(int) pWidthInVoxels,
 											(int) pHeightInVoxels,
