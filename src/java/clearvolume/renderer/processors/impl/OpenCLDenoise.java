@@ -361,6 +361,7 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 															(int) pDepthInVoxels);
 						}
 
+
 					}
 
 			// assemble
