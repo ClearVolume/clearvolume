@@ -1,0 +1,57 @@
+package clearvolume.transferf;
+
+import java.util.ArrayList;
+
+public class CyclingTransferFunction extends TransferFunction1D	implements
+																																CyclableTransferFunction
+{
+
+	private final ArrayList<TransferFunction1D> mListOfTransferFunctions = new ArrayList<TransferFunction1D>();
+
+	private int mIndex = 0;
+
+	public static CyclingTransferFunction getDefault()
+	{
+		final CyclingTransferFunction lCyclingTransferFunction = new CyclingTransferFunction();
+
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getGrayLevel());
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getCoolWarm());
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getMatlabStyle());
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getHot());
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getBlueGradient());
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getGreenGradient());
+		lCyclingTransferFunction.addTransferFunction(TransferFunctions.getRedGradient());
+
+		return lCyclingTransferFunction;
+	}
+
+	public void addTransferFunction(TransferFunction1D pTransferFunction)
+	{
+		mListOfTransferFunctions.add(pTransferFunction);
+	}
+
+	@Override
+	public int getCurrent()
+	{
+		return mIndex;
+	}
+
+	@Override
+	public void next()
+	{
+		mIndex = (mIndex + 1) % mListOfTransferFunctions.size();
+	}
+
+	@Override
+	public float[] getArray()
+	{
+		return mListOfTransferFunctions.get(mIndex).getArray();
+	}
+
+	@Override
+	public int getDimension()
+	{
+		return mListOfTransferFunctions.get(mIndex).getDimension();
+	}
+
+}

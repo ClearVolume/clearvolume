@@ -10,6 +10,7 @@ import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.processors.Processor;
+import clearvolume.transferf.CyclableTransferFunction;
 
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
@@ -238,6 +239,14 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 		case KeyEvent.VK_L:
 			mMouseControl.toggleMoveLightMode();
+			break;
+
+		case KeyEvent.VK_T:
+			if (mClearVolumeRenderer.getTransferFunction() instanceof CyclableTransferFunction)
+			{
+				final CyclableTransferFunction lCyclableTransferFunction = (CyclableTransferFunction) mClearVolumeRenderer.getTransferFunction();
+				lCyclableTransferFunction.next();
+			}
 			break;
 
 		}

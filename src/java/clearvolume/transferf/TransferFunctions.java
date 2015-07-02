@@ -13,10 +13,11 @@ public class TransferFunctions
 
 	public static TransferFunction getDefault()
 	{
-		return CoolWarmTransferFunction.get();
+		return CyclingTransferFunction.getDefault();
 		// return MatlabStyleTransferFunction.get();
 		// return HotTransferFunction.get();
 	}
+
 
 	public static TransferFunction getGradientForColor(int pColorIndex)
 	{
@@ -148,9 +149,19 @@ public class TransferFunctions
 		return lTransfertFunction;
 	}
 
-	public static TransferFunction getCoolWarm()
+	public static TransferFunction1D getCoolWarm()
 	{
 		return CoolWarmTransferFunction.get();
+	}
+
+	public static TransferFunction1D getHot()
+	{
+		return HotTransferFunction.get();
+	}
+
+	public static TransferFunction1D getMatlabStyle()
+	{
+		return MatlabStyleTransferFunction.get();
 	}
 
 }
