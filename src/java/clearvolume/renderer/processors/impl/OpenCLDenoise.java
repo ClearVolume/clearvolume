@@ -155,6 +155,11 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 
 		if (mBufScratch == null || mBufScratch.getElementCount() != lLength)
 		{
+			if (mBufScratch != null)
+				mBufScratch.release();
+			if (mBufScratch2 != null)
+				mBufScratch2.release();
+
 			mBufScratch = lDev.createOutputFloatBuffer(lLength);
 			mBufScratch2 = lDev.createOutputFloatBuffer(lLength);
 		}
@@ -172,6 +177,13 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean>	implements
 
 		if (mBuf_NLM_acc == null || mBuf_NLM_acc.getElementCount() != lLength)
 		{
+			if (mBuf_NLM_acc != null)
+				mBuf_NLM_acc.release();
+			if (mBuf_NLM_weight != null)
+				mBuf_NLM_weight.release();
+			if (mBuf_NLM_dist != null)
+				mBuf_NLM_dist.release();
+
 			mBuf_NLM_acc = lDev.createOutputFloatBuffer(lLength);
 			mBuf_NLM_weight = lDev.createOutputFloatBuffer(lLength);
 			mBuf_NLM_dist = lDev.createOutputFloatBuffer(lLength);

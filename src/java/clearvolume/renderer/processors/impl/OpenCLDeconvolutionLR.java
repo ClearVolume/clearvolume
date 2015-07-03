@@ -22,11 +22,11 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
 	private CLKernel mKernelCopyBufToImg;
 	private CLKernel mKernelDiv;
 
-	CLBuffer<Float> mInput;
-	CLBuffer<Float> mTmp;
-	CLBuffer<Float> mTmp2;
-	CLBuffer<Float> mScratch;
-	CLBuffer<Float> mOut;
+	private CLBuffer<Float> mInput;
+	private CLBuffer<Float> mTmp;
+	private CLBuffer<Float> mTmp2;
+	private CLBuffer<Float> mScratch;
+	private CLBuffer<Float> mOut;
 
 	private volatile float sigX, sigY, sigZ;
 	private volatile int NhX, NhY, NhZ;
@@ -175,11 +175,7 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
 
 			ensureOpenCLInitialized();
 
-			if (mInput == null)
-			{
-				System.out.println("setting up buffers");
-				initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
-			}
+			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
 
 			copyImgToBuf(	pRenderLayerIndex,
 										mInput,
