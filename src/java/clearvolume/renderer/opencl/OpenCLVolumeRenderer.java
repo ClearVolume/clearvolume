@@ -14,8 +14,10 @@ import org.bridj.Pointer;
 import clearvolume.exceptions.ClearVolumeUnsupportdDataTypeException;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
+import clearvolume.renderer.cleargl.overlay.o3d.DriftOverlay;
 import clearvolume.renderer.processors.OpenCLProcessor;
 import clearvolume.renderer.processors.ProcessorInterface;
+import clearvolume.renderer.processors.impl.OpenCLCenterMass;
 import clearvolume.renderer.processors.impl.OpenCLDeconvolutionLR;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
@@ -141,6 +143,12 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 		final OpenCLDeconvolutionLR lOpenCLDeconvolutionLR = new OpenCLDeconvolutionLR();
 		addProcessor(lOpenCLDeconvolutionLR);
+
+		final DriftOverlay lDriftOverlay = new DriftOverlay();
+		addOverlay(lDriftOverlay);
+		final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
+		addProcessor(lOpenCLCenterMass);
+		lOpenCLCenterMass.addResultListener(lDriftOverlay);
 	}
 
 	@Override

@@ -297,8 +297,7 @@ public class ClearVolumeProcessorsDemo {
 				});
 
 		lClearVolumeRenderer.addProcessor(lOpenCLCenterMass);
-		// TODO: put that back:
-		// lOpenCLCenterMass.addResultListener(lDriftOverlay);
+		lOpenCLCenterMass.addResultListener(lDriftOverlay);
 
 		lClearVolumeRenderer
 				.setTransferFunction(TransferFunctions.getDefault());

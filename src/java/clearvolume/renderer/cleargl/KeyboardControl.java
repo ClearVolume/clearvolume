@@ -261,6 +261,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			mClearVolumeRenderer.toggleParametersListFrame();
 			break;
 
+
 		}
 
 		if (pE.getKeyCode() >= KeyEvent.VK_0 && pE.getKeyCode() <= KeyEvent.VK_9)

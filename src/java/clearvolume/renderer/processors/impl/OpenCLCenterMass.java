@@ -4,6 +4,7 @@ import java.nio.FloatBuffer;
 
 import clearvolume.renderer.processors.OpenCLProcessor;
 
+import com.jogamp.newt.event.KeyEvent;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 
@@ -151,4 +152,10 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]>
 		return new float[]
 		{ new_x, new_y, new_z };
 	}
+
+	@Override
+	public short toggleKeyCode()
+	{
+		return KeyEvent.VK_G;
+	};
 }

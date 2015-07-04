@@ -9,11 +9,13 @@ import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatisti
 import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.utils.ClearVolumeDefaultFont;
 
+import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 
 /**
@@ -25,7 +27,8 @@ import com.jogamp.opengl.GL;
 
 public class DriftOverlay extends PathOverlay	implements
 																							ProcessorResultListener<float[]>,
-																							Overlay2D
+																							Overlay2D,
+																							SingleKeyToggable
 {
 
 	protected SynchronizedDescriptiveStatistics stats;
@@ -77,6 +80,9 @@ public class DriftOverlay extends PathOverlay	implements
 												int pHeight,
 												GLMatrix pProjectionMatrix)
 	{
+		if (!isDisplayed())
+			return;
+
 		Font font = null;
 		stats = new SynchronizedDescriptiveStatistics();
 
@@ -112,6 +118,18 @@ public class DriftOverlay extends PathOverlay	implements
 																		font,
 																		Color.white,
 																		false);
+	}
+
+	@Override
+	public short toggleKeyCode()
+	{
+		return KeyEvent.VK_G;
+	}
+
+	@Override
+	public int toggleKeyModifierMask()
+	{
+		return 0;
 	}
 
 }
