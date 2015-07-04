@@ -267,7 +267,7 @@ task copyCapsule(type: Copy){
 }
 
 copyCapsule.dependsOn fatCapsule
-
+build.dependsOn copyCapsule
 
 //***********************************************************************************
 // CVLIB PACKAGING TASKS
