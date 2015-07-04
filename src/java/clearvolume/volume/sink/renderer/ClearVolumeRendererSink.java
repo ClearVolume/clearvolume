@@ -106,11 +106,11 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		TransferFunction lTransferFunction;
 		final float[] lColor = pVolume.getColor();
 		if (lColor != null)
+		{
 			lTransferFunction = TransferFunctions.getGradientForColor(lColor);
-		else
-			lTransferFunction = TransferFunctions.getGradientForColor(lRenderLayer);
+			mClearVolumeRendererInterface.setTransferFunction(lTransferFunction);
+		}
 
-		mClearVolumeRendererInterface.setTransferFunction(lTransferFunction);
 		mClearVolumeRendererInterface.setVolumeDataBuffer(lRenderLayer,
 																											pVolume);
 

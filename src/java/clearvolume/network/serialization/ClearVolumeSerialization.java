@@ -90,9 +90,13 @@ public class ClearVolumeSerialization
 		final String lVolumeChannelName = parseString(lHeaderMap.get("channelname"),
 																									"noname");
 
-		final float[] lColor = parseFloatArray(	lHeaderMap.get("color"),
-																						new float[]
-																						{ 1.f, 1.f, 1.f, 1.f });
+		final float[] lColor = lHeaderMap.get("color") == null ? null
+																													: parseFloatArray(lHeaderMap.get("color"),
+																																						new float[]
+																																						{ 1.f,
+																																							1.f,
+																																							1.f,
+																																							1.f });
 
 		final float[] lViewMatrix = parseFloatArray(lHeaderMap.get("viewmatrix"),
 																								new float[]
