@@ -149,6 +149,9 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
 		addProcessor(lOpenCLCenterMass);
 		lOpenCLCenterMass.addResultListener(lDriftOverlay);
+		lDriftOverlay.setDisplayed(false);
+		lOpenCLCenterMass.setActive(false);
+
 	}
 
 	@Override

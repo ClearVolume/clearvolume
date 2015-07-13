@@ -91,7 +91,8 @@ public class OpenCLDenoise extends OpenCLProcessor<Boolean> implements
 		mSigma = pSigma;
 	}
 
-	public float getSigma() {
+	public float getSigma()
+	{
 		return mSigma;
 	}
 
