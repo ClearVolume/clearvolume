@@ -17,6 +17,10 @@
     #include <dirent.h>
 #elif __LINUX__
     #define JAR_SEPARATOR ":"
+    #define __cdecl __attribute__((__cdecl__))
+    #define __declspec(dllexport) __attribute__ ((visibility("default")))
+    #define __int64 unsigned long long
+
     #include <dirent.h>
 #elif _WIN32
     #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
