@@ -15,7 +15,7 @@
     #define JAR_SEPARATOR ":"
 
     #include <dirent.h>
-#elif __LINUX__
+#elif __linux__
     #define JAR_SEPARATOR ":"
     #define __cdecl __attribute__((__cdecl__))
     #define __declspec(dllexport) __attribute__ ((visibility("default")))
