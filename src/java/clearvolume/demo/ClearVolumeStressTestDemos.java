@@ -21,6 +21,7 @@ import clearvolume.transferf.TransferFunctions;
 
 import com.jogamp.newt.awt.NewtCanvasAWT;
 
+import coremem.buffers.ContiguousBuffer;
 import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeStressTestDemos
@@ -235,6 +236,52 @@ public class ClearVolumeStressTestDemos
 
 			lClearVolumeRenderer.close();
 		}
+
+	}
+
+	@Test
+	public void demoWithBigBig16BitGeneratedDataset()	throws InterruptedException,
+																										IOException
+	{
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
+																																																					512,
+																																																					512,
+																																																					NativeTypeEnum.UnsignedShort,
+																																																					false);
+		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
+		lClearVolumeRenderer.setVisible(true);
+
+		final int lResolutionX = 1024;
+		final int lResolutionY = lResolutionX;
+		final int lResolutionZ = lResolutionX;
+
+		ContiguousBuffer lContiguousBuffer = ContiguousBuffer.allocate(lResolutionX * lResolutionY
+																																		* lResolutionZ
+																																		* 2L);
+
+
+
+		for (int z = 0; z < lResolutionZ; z++)
+			for (int y = 0; y < lResolutionY; y++)
+				for (int x = 0; x < lResolutionX; x++)
+				{
+					lContiguousBuffer.writeByte((byte) (((byte) x ^ (byte) y ^ (byte) z)));
+					lContiguousBuffer.writeByte((byte) 0);
+				}
+
+		lClearVolumeRenderer.setVolumeDataBuffer(	0,
+																							lContiguousBuffer.getContiguousMemory(),
+																							lResolutionX,
+																							lResolutionY,
+																							lResolutionZ);
+		lClearVolumeRenderer.requestDisplay();
+
+		while (lClearVolumeRenderer.isShowing())
+		{
+			Thread.sleep(100);
+		}
+
+		lClearVolumeRenderer.close();
 
 	}
 

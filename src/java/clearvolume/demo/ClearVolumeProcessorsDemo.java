@@ -773,20 +773,16 @@ public class ClearVolumeProcessorsDemo {
 						final int lIndex = x + lResolutionX * y + lResolutionX
 								* lResolutionY * z;
 
-						// lVolumeDataArray[lIndex] = (byte) (((x > lResolutionX
-						// / 2) ? 100
-						// : 0)
-						// + 100
-						// * (Math.exp(-.01
-						// * ((x - x0) * (x - x0) + (y - y0)
-						// * (y - y0) + (z - z0)
-						// * (z - z0))) + Math.exp(-.01
-						// * ((x - x1) * (x - x1) + (y - y1)
-						// * (y - y1) + (z - z1)
-						// * (z - z1)))) + rand
-						// .nextInt(noiseLevel + 1));
-						lVolumeDataArray[lIndex] = (byte) (((x % 30 == 0) ? 100
-								: 0) + rand.nextInt(noiseLevel + 1));
+						/*lVolumeDataArray[lIndex] = (byte) (((x > lResolutionX / 2) ? 100
+																																			: 0) + 100
+																								* (Math.exp(-.01 * ((x - x0) * (x - x0)
+																																		+ (y - y0)
+																																		* (y - y0) + (z - z0) * (z - z0))) + Math.exp(-.01 * ((x - x1) * (x - x1)
+																																																													+ (y - y1)
+																																																													* (y - y1) + (z - z1) * (z - z1)))) + rand.nextInt(noiseLevel + 1));
+						*/
+						lVolumeDataArray[lIndex] = (byte) (((x % 30 == 0) && (y % 40 < 5)	? 100
+																															: 0) + rand.nextInt(noiseLevel + 1));
 
 					}
 
