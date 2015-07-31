@@ -357,6 +357,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 		boolean lAnyVolumeDataUpdated = false;
 
+
 		for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++)
 		{
 			synchronized (getSetVolumeDataBufferLock(lLayerIndex))
@@ -377,7 +378,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 						}
 
 						prepareVolumeDataArray(lLayerIndex, lVolumeDataBuffer);
-						clearVolumeDimensionsChanged();
 					}
 					else
 					{
@@ -394,6 +394,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 			}
 		}
+
+		clearVolumeDimensionsChanged();
 
 		if (lAnyVolumeDataUpdated || haveVolumeRenderingParametersChanged()
 				|| getAdaptiveLODController().isKernelRunNeeded())

@@ -236,7 +236,7 @@ public class ClearVolumeBasicDemos
 			}
 			System.gc();
 
-			Thread.sleep(3000);
+			Thread.sleep(1000);
 		}
 
 		lClearVolumeRenderer.close();

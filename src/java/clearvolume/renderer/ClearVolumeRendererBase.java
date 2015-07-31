@@ -1789,6 +1789,57 @@ public abstract class ClearVolumeRendererBase	implements
 																			final double pVoxelSizeY,
 																			final double pVoxelSizeZ)
 	{
+		return setVolumeDataBuffer(	true,
+																pTimeOut,
+																pTimeUnit,
+																pRenderLayerIndex,
+																pFragmentedMemoryInterface,
+																pVolumeSizeX,
+																pVolumeSizeY,
+																pVolumeSizeZ,
+																pVoxelSizeX,
+																pVoxelSizeY,
+																pVoxelSizeZ);
+	}
+
+	/**
+	 * Sets volume data buffer.
+	 * 
+	 * @param pWaitForCopy
+	 *          set to true for waiting for data to be copied.
+	 * @param pRenderLayerIndex
+	 *          render pByteBuffer index
+	 * @param pFragmentedMemoryInterface
+	 *          fragmented buffer
+	 * @param pVolumeSizeX
+	 *          volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *          volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          volume size in voxels along Z
+	 * @param pVoxelSizeX
+	 *          voxel dimension along X
+	 * @param pVoxelSizeY
+	 *          voxel dimension along Y
+	 * @param pVoxelSizeZ
+	 *          voxel dimension along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
+	 */
+	@Override
+	public boolean setVolumeDataBuffer(	boolean pWaitForCopy,
+																			long pTimeOut,
+																			TimeUnit pTimeUnit,
+																			final int pRenderLayerIndex,
+																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
+																			final long pVolumeSizeX,
+																			final long pVolumeSizeY,
+																			final long pVolumeSizeZ,
+																			final double pVoxelSizeX,
+																			final double pVoxelSizeY,
+																			final double pVoxelSizeZ)
+	{
 		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
 
@@ -1812,15 +1863,21 @@ public abstract class ClearVolumeRendererBase	implements
 			notifyChangeOfVolumeRenderingParameters();
 		}
 
-		// System.out.print("Waiting...");
-		final boolean lWaitResult = waitToFinishDataBufferCopy(	pRenderLayerIndex,
-																														pTimeOut,
-																														pTimeUnit);
+		if (pWaitForCopy)
+		{
+			// System.out.print("Waiting...");
+			final boolean lWaitResult = waitToFinishDataBufferCopy(	pRenderLayerIndex,
+																															pTimeOut,
+																															pTimeUnit);
+			return lWaitResult;
+		}
+		else
+			return false;
+
 		// if (!lWaitResult)
 		// System.err.println("TIMEOUT!");
 		// System.out.println(" finished!");
 
-		return lWaitResult;
 	}
 
 	@Override

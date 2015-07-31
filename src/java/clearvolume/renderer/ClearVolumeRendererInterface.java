@@ -277,7 +277,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return transfer function
 	 */
 	public TransferFunction getTransferFunction(int pRenderLayerIndex);
-	
+
 	/**
 	 * Returns the transfer function array
 	 * 
@@ -743,6 +743,43 @@ public interface ClearVolumeRendererInterface	extends
 																			double pVoxelSizeZ);
 
 	/**
+	 * Sets volume data buffer.
+	 * 
+	 * @param pWaitForCopy
+	 *          set to true for waiting for data to be copied.
+	 * @param pRenderLayerIndex
+	 *          render pByteBuffer index
+	 * @param pFragmentedMemoryInterface
+	 *          fragmented buffer
+	 * @param pVolumeSizeX
+	 *          volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *          volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *          volume size in voxels along Z
+	 * @param pVoxelSizeX
+	 *          voxel dimension along X
+	 * @param pVoxelSizeY
+	 *          voxel dimension along Y
+	 * @param pVoxelSizeZ
+	 *          voxel dimension along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
+	 */
+	public boolean setVolumeDataBuffer(	boolean pWaitForCopy,
+																			long pTimeOut,
+																			TimeUnit pTimeUnit,
+																			int pRenderLayerIndex,
+																			FragmentedMemoryInterface pFragmentedMemoryInterface,
+																			long pVolumeSizeX,
+																			long pVolumeSizeY,
+																			long pVolumeSizeZ,
+																			double pVoxelSizeX,
+																			double pVoxelSizeY,
+																			double pVoxelSizeZ);
+
+	/**
 	 * Updates the given render layer with a volume.
 	 *
 	 * @param pRenderLayerIndex
@@ -1014,7 +1051,7 @@ public interface ClearVolumeRendererInterface	extends
 	 *          ProcessorInterface to remove.
 	 */
 	public void removeProcessor(final ProcessorInterface<?> pProcessor);
-	
+
 	/**
 	 * Adds these processors to this renderer.
 	 *
@@ -1115,7 +1152,5 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
-
-
 
 }
