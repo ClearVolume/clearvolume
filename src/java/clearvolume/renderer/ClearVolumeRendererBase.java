@@ -128,7 +128,7 @@ public abstract class ClearVolumeRendererBase	implements
 	private volatile boolean mVolumeDimensionsChanged;
 
 	// data copy locking and waiting
-	private final Object[] mSetVolumeDataBufferLocks;
+	private final Object mSetVolumeDataBufferLock;
 	private final FragmentedMemoryInterface[] mVolumeDataByteBuffers;
 	private final CountDownLatch[] mDataBufferCopyIsFinishedArray;
 
@@ -160,7 +160,7 @@ public abstract class ClearVolumeRendererBase	implements
 		super();
 
 		mNumberOfRenderLayers = pNumberOfRenderLayers;
-		mSetVolumeDataBufferLocks = new Object[pNumberOfRenderLayers];
+		mSetVolumeDataBufferLock = new Object();
 		mVolumeDataByteBuffers = new FragmentedMemoryInterface[pNumberOfRenderLayers];
 		mDataBufferCopyIsFinishedArray = new CountDownLatch[pNumberOfRenderLayers];
 		mTransferFunctions = new TransferFunction[pNumberOfRenderLayers];
@@ -175,7 +175,7 @@ public abstract class ClearVolumeRendererBase	implements
 
 		for (int i = 0; i < pNumberOfRenderLayers; i++)
 		{
-			mSetVolumeDataBufferLocks[i] = new Object();
+
 			mTransferFunctions[i] = TransferFunctions.getGradientForColor(i);
 			mLayerVisiblityFlagArray[i] = true;
 			mRenderAlgorithm[i] = RenderAlgorithm.MaxProjection;
@@ -1290,9 +1290,9 @@ public abstract class ClearVolumeRendererBase	implements
 	 *
 	 * @return locking object
 	 */
-	public Object getSetVolumeDataBufferLock(final int pRenderLayerIndex)
+	public Object getSetVolumeDataBufferLock()
 	{
-		return mSetVolumeDataBufferLocks[pRenderLayerIndex];
+		return mSetVolumeDataBufferLock;
 	}
 
 	/**
@@ -1840,7 +1840,7 @@ public abstract class ClearVolumeRendererBase	implements
 																			final double pVoxelSizeY,
 																			final double pVoxelSizeZ)
 	{
-		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
+		synchronized (getSetVolumeDataBufferLock())
 		{
 
 			if (mVolumeSizeX != pVolumeSizeX || mVolumeSizeY != pVolumeSizeY

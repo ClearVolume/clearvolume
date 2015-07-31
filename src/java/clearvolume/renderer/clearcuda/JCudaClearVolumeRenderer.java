@@ -419,7 +419,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	private void prepareVolumeDataArray(final int pRenderLayerIndex,
 																			final FragmentedMemoryInterface pVolumeDataBuffer)
 	{
-		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
+		synchronized (getSetVolumeDataBufferLock())
 		{
 
 			FragmentedMemoryInterface lVolumeDataBuffer = pVolumeDataBuffer;
@@ -465,7 +465,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	private void copyVolumeData(final int pRenderLayerIndex,
 															FragmentedMemoryInterface lVolumeDataBuffer)
 	{
-		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
+		synchronized (getSetVolumeDataBufferLock())
 		{
 			if (lVolumeDataBuffer.getNumberOfFragments() == 1)
 			{
@@ -587,9 +587,9 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 			try
 			{
-				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				synchronized (getSetVolumeDataBufferLock())
 				{
-					synchronized (getSetVolumeDataBufferLock(i))
+					for (int i = 0; i < getNumberOfRenderLayers(); i++)
 					{
 						if (mVolumeDataCudaArrays[i] != null)
 						{
@@ -738,10 +738,11 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 		{
 			final ByteBuffer[] lCaptureBuffers = new ByteBuffer[getNumberOfRenderLayers()];
 
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			synchronized (getSetVolumeDataBufferLock())
 			{
-				synchronized (getSetVolumeDataBufferLock(i))
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
 				{
+
 					lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (Size.of(getNativeType()) * getVolumeSizeX()
 																																* getVolumeSizeY() * getVolumeSizeZ()))
 																					.order(ByteOrder.nativeOrder());
@@ -775,10 +776,11 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 		boolean lAnyVolumeDataUpdated = false;
 
-		for (int lRenderLayerIndex = 0; lRenderLayerIndex < getNumberOfRenderLayers(); lRenderLayerIndex++)
+		synchronized (getSetVolumeDataBufferLock())
 		{
-			synchronized (getSetVolumeDataBufferLock(lRenderLayerIndex))
+			for (int lRenderLayerIndex = 0; lRenderLayerIndex < getNumberOfRenderLayers(); lRenderLayerIndex++)
 			{
+
 				final FragmentedMemoryInterface lVolumeDataBuffer = getVolumeDataBuffer(lRenderLayerIndex);
 
 				if (lVolumeDataBuffer != null)
@@ -961,7 +963,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 		for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
 			if (lProcessor.isCompatibleProcessor(getClass()))
 			{
-				synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
+				synchronized (getSetVolumeDataBufferLock())
 				{
 					if (lProcessor instanceof CUDAProcessor)
 					{

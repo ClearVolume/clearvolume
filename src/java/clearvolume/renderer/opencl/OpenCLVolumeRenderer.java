@@ -11,6 +11,7 @@ import jcuda.CudaException;
 
 import org.bridj.Pointer;
 
+import clearvolume.exceptions.ClearVolumeMemoryException;
 import clearvolume.exceptions.ClearVolumeUnsupportdDataTypeException;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
@@ -205,7 +206,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 	private void prepareVolumeDataArray(final int pRenderLayerIndex,
 																			final FragmentedMemoryInterface pVolumeDataBuffer)
 	{
-		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
+		synchronized (getSetVolumeDataBufferLock())
 		{
 
 			FragmentedMemoryInterface lVolumeDataBuffer = pVolumeDataBuffer;
@@ -217,6 +218,13 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 			final long lWidth = getVolumeSizeX();
 			final long lHeight = getVolumeSizeY();
 			final long lDepth = getVolumeSizeZ();
+			final long lBytePerVoxel = getBytesPerVoxel();
+
+			if (lVolumeDataBuffer.getSizeInBytes() != (lWidth * lHeight
+																									* lDepth * lBytePerVoxel))
+			{
+				throw new ClearVolumeMemoryException("Volume buffer has wrong size!");
+			}
 
 			if (getNativeType() == NativeTypeEnum.UnsignedByte)
 
@@ -314,10 +322,11 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 			final ByteBuffer[] lCaptureBuffers = new ByteBuffer[getNumberOfRenderLayers()];
 
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
+			synchronized (getSetVolumeDataBufferLock())
 			{
-				synchronized (getSetVolumeDataBufferLock(i))
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
 				{
+
 					lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (getBytesPerVoxel() * getVolumeSizeX()
 																																* getVolumeSizeY() * getVolumeSizeZ()))
 																					.order(ByteOrder.nativeOrder());
@@ -351,17 +360,16 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 	private boolean[] updateBufferAndRunKernel()
 	{
+		boolean lAnyVolumeDataUpdated = false;
 		final boolean[] lUpdated = new boolean[getNumberOfRenderLayers()];
-
 		lUpdated[0] = true;
 
-		boolean lAnyVolumeDataUpdated = false;
-
-
-		for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++)
+		synchronized (getSetVolumeDataBufferLock())
 		{
-			synchronized (getSetVolumeDataBufferLock(lLayerIndex))
+
+			for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++)
 			{
+
 				final FragmentedMemoryInterface lVolumeDataBuffer = getVolumeDataBuffer(lLayerIndex);
 
 				if (lVolumeDataBuffer != null)
@@ -373,7 +381,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 					{
 						if (mCLVolumeImages[lLayerIndex] != null)
 						{
-
 							mCLVolumeImages[lLayerIndex].release();
 						}
 
@@ -393,9 +400,10 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 				}
 
 			}
-		}
 
-		clearVolumeDimensionsChanged();
+			clearVolumeDimensionsChanged();
+
+		}
 
 		if (lAnyVolumeDataUpdated || haveVolumeRenderingParametersChanged()
 				|| getAdaptiveLODController().isKernelRunNeeded())
@@ -541,12 +549,12 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 	private void runProcessorHook(final int pRenderLayerIndex)
 	{
-
-		for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
-			if (lProcessor.isCompatibleProcessor(getClass()))
-			{
-				synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
+		synchronized (getSetVolumeDataBufferLock())
+		{
+			for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
+				if (lProcessor.isCompatibleProcessor(getClass()))
 				{
+
 					if (lProcessor instanceof OpenCLProcessor)
 					{
 						final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
@@ -566,7 +574,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 					 * lElapsedTimeInMilliseconds);/*
 					 */
 				}
-			}
+		}
 	}
 
 	@Override
