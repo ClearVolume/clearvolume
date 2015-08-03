@@ -23,7 +23,7 @@ public class CheckRequirements
 			{
 				System.err.println("Sorry, but due to the large data handled, ClearVolume only supports 64bit architectures.");
 				JOptionPane.showMessageDialog(null,
-																			"Sorry, but due to the large data handled, ClearVolume only supports 64bit architectures. Fix: upgrade Java version >= 8.",
+																			"Sorry, but due to the large data handled, ClearVolume only supports 64bit architectures.\n\nIf you are sure you are running a 64bit operating system on a 64bit computer, be sure that you have also installed a 64bit version of Java.",
 																			"Unsupported architecture",
 																			JOptionPane.ERROR_MESSAGE);
 				throw new UnsupportedArchitectureException("ClearVolume only supports 64bit architectures.");
