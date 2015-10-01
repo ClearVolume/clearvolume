@@ -740,63 +740,76 @@ ClearVolumeRendererBase implements ClearGLEventListener
 				 */
 
 				final GL lGL = pDrawable.getGL();
-				lGL.glClearColor(0, 0, 0, 1);
-				lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-				lGL.glDisable(GL.GL_CULL_FACE);
-				lGL.glEnable(GL.GL_BLEND);
-				lGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
-				lGL.glBlendEquation(GL2ES3.GL_MAX);
 
-				setDefaultProjectionMatrix();
+				lGL.glEnable(GL.GL_SCISSOR_TEST);
 
-				final GLMatrix lModelViewMatrix = getModelViewMatrix();
-				final GLMatrix lProjectionMatrix = getDefaultProjectionMatrix();
+				int w = getWindowWidth();
+				int h = getWindowHeight();
 
-				GLError.printGLErrors(lGL, "BEFORE RENDER VOLUME");
+				boolean lLastRenderPass = getAdaptiveLODController().beforeRendering();
+				final float[] eyeShift = new float[]{-0.1f, 0.1f};
 
-				if (haveVolumeRenderingParametersChanged() || isNewVolumeDataAvailable())
-					getAdaptiveLODController().renderingParametersOrVolumeDataChanged();
+				for(int eye = 0; eye <= 1; eye++) {
+					lGL.glViewport(w/2 * eye, 0, w/2, h);
+					lGL.glScissor(w/2 * eye, 0, w/2, h);
 
-				final boolean lLastRenderPass = getAdaptiveLODController().beforeRendering();
+					lGL.glClearColor(0, 0, 0, 1);
+					lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+					lGL.glDisable(GL.GL_CULL_FACE);
+					lGL.glEnable(GL.GL_BLEND);
+					lGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
+					lGL.glBlendEquation(GL2ES3.GL_MAX);
 
-				renderVolume(	lModelViewMatrix.clone()
-																			.invert()
-																			.transpose()
-																			.getFloatArray(),
-											lProjectionMatrix.clone()
-																				.invert()
-																				.transpose()
-																				.getFloatArray());
+					setDefaultProjectionMatrix();
 
-				getAdaptiveLODController().afterRendering();
+				  GLMatrix lModelViewMatrix = getModelViewMatrix(new float[]{eyeShift[eye], 0.0f, 0.0f});
+					GLMatrix lProjectionMatrix = getDefaultProjectionMatrix();
 
-				clearChangeOfVolumeParametersFlag();
+					GLError.printGLErrors(lGL, "BEFORE RENDER VOLUME");
 
-				GLError.printGLErrors(lGL, "AFTER RENDER VOLUME");
+					if (haveVolumeRenderingParametersChanged() || isNewVolumeDataAvailable())
+						getAdaptiveLODController().renderingParametersOrVolumeDataChanged();
 
-				mGLProgram.use(lGL);
+					renderVolume(lModelViewMatrix.clone()
+													.invert()
+													.transpose()
+													.getFloatArray(),
+									lProjectionMatrix.clone()
+													.invert()
+													.transpose()
+													.getFloatArray());
 
-				for (int i = 0; i < getNumberOfRenderLayers(); i++)
-					mLayerTextures[i].bind(i);
 
-				mQuadProjectionMatrixUniform.setFloatMatrix(mQuadProjectionMatrix.getFloatArray(),
-																										false);
+					getAdaptiveLODController().afterRendering();
 
-				mQuadVertexArray.draw(GL.GL_TRIANGLES);
+					clearChangeOfVolumeParametersFlag();
 
-				final GLMatrix lAspectRatioCorrectedProjectionMatrix = getAspectRatioCorrectedProjectionMatrix();
+					GLError.printGLErrors(lGL, "AFTER RENDER VOLUME");
 
-				renderOverlays3D(	lGL,
-													lAspectRatioCorrectedProjectionMatrix,
-													lModelViewMatrix);
+					mGLProgram.use(lGL);
 
-				renderOverlays2D(lGL, cOverlay2dProjectionMatrix);
+					for (int i = 0; i < getNumberOfRenderLayers(); i++)
+						mLayerTextures[i].bind(i);
+
+					mQuadProjectionMatrixUniform.setFloatMatrix(mQuadProjectionMatrix.getFloatArray(),
+									false);
+
+					mQuadVertexArray.draw(GL.GL_TRIANGLES);
+
+					final GLMatrix lAspectRatioCorrectedProjectionMatrix = getAspectRatioCorrectedProjectionMatrix();
+
+					renderOverlays3D(lGL,
+									lAspectRatioCorrectedProjectionMatrix,
+									lModelViewMatrix);
+
+					renderOverlays2D(lGL, cOverlay2dProjectionMatrix);
+				}
 
 				updateFrameRateDisplay();
 
-				if (lLastRenderPass)
-					mGLVideoRecorder.screenshot(pDrawable,
-																			!getAutoRotateController().isRotating());
+				if (lLastRenderPass) {
+					mGLVideoRecorder.screenshot(pDrawable, false);
+				}
 
 			}
 			finally
@@ -851,7 +864,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		notifyChangeOfVolumeRenderingParameters();
 	}
 
-	private GLMatrix getModelViewMatrix()
+	private GLMatrix getModelViewMatrix(final float eyeShift[])
 	{
 		// scaling...
 
@@ -872,6 +885,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																getTranslationY(),
 																getTranslationZ());/**/
 
+		lModelViewMatrix.translate(eyeShift[0], eyeShift[1], eyeShift[2]);
+
 		lModelViewMatrix.mult(getQuaternion());
 
 		lModelViewMatrix.scale(	(float) (lScaleX / lMaxScale),
@@ -883,6 +898,64 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		// lInvVolumeMatrix.transpose();
 
 		return lModelViewMatrix;
+	}
+
+	private GLMatrix getModelViewMatrix()
+	{
+		// scaling...
+
+		final double lScaleX = getVolumeSizeX() * getVoxelSizeX();
+		final double lScaleY = getVolumeSizeY() * getVoxelSizeY();
+		final double lScaleZ = getVolumeSizeZ() * getVoxelSizeZ();
+
+		final double lMaxScale = max(max(lScaleX, lScaleY), lScaleZ);
+
+		// building up the inverse Modelview matrix
+
+		applyControllersTransform();
+
+		final GLMatrix lModelViewMatrix = new GLMatrix();
+		lModelViewMatrix.setIdentity();
+
+		lModelViewMatrix.translate(	getTranslationX(),
+						getTranslationY(),
+						getTranslationZ());/**/
+
+		lModelViewMatrix.mult(getQuaternion());
+
+		lModelViewMatrix.scale(	(float) (lScaleX / lMaxScale),
+						(float) (lScaleY / lMaxScale),
+						(float) (lScaleZ / lMaxScale));/**/
+
+		// lInvVolumeMatrix.mult(lEulerMatrix);
+
+		// lInvVolumeMatrix.transpose();
+
+		return lModelViewMatrix;
+	}
+
+	private void applyControllersTransform(float eyeShift[])
+	{
+		if (getRotationControllers().size() > 0)
+		{
+			final Quaternion lQuaternion = new Quaternion();
+
+			for (final RotationControllerInterface lRotationController : getRotationControllers())
+				if (lRotationController.isActive())
+				{
+					if (lRotationController instanceof RotationControllerWithRenderNotification)
+					{
+						final RotationControllerWithRenderNotification lRenderNotification = (RotationControllerWithRenderNotification) lRotationController;
+						lRenderNotification.notifyRender(this);
+					}
+					lQuaternion.mult(lRotationController.getQuaternion());
+
+					notifyChangeOfVolumeRenderingParameters();
+				}
+
+			lQuaternion.mult(getQuaternion());
+			setQuaternion(lQuaternion);
+		}
 	}
 
 	private void applyControllersTransform()
