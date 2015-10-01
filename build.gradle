@@ -96,6 +96,10 @@ dependencies
 
 	compile 'org.xeustechnologies:jcl-core:2.6'
 
+    // Rift Support
+    compile 'org.saintandreas:jovr:0.4.4.0'
+    compile 'org.saintandreas:math:[1.0.4,2)'
+
 
 	// usage: gradle .... -Plocal=true
 	if (project.hasProperty('local')) {
