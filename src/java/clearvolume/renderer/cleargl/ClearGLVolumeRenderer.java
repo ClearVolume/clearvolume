@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import clearvolume.controller.TranslationRotationControllerInterface;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 
@@ -934,7 +935,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		return lModelViewMatrix;
 	}
 
-	private void applyControllersTransform(float eyeShift[])
+	private void applyControllersTransform()
 	{
 		if (getRotationControllers().size() > 0)
 		{
@@ -956,28 +957,17 @@ ClearVolumeRendererBase implements ClearGLEventListener
 			lQuaternion.mult(getQuaternion());
 			setQuaternion(lQuaternion);
 		}
-	}
 
-	private void applyControllersTransform()
-	{
-		if (getRotationControllers().size() > 0)
-		{
+		if(getTranslationRotationControllers().size() > 0) {
 			final Quaternion lQuaternion = new Quaternion();
 
-			for (final RotationControllerInterface lRotationController : getRotationControllers())
-				if (lRotationController.isActive())
-				{
-					if (lRotationController instanceof RotationControllerWithRenderNotification)
-					{
-						final RotationControllerWithRenderNotification lRenderNotification = (RotationControllerWithRenderNotification) lRotationController;
-						lRenderNotification.notifyRender(this);
-					}
-					lQuaternion.mult(lRotationController.getQuaternion());
+			for(final TranslationRotationControllerInterface lTRController : getTranslationRotationControllers())
+				if(lTRController.isActive()) {
+					lQuaternion.set(lTRController.getQuaternion());
 
 					notifyChangeOfVolumeRenderingParameters();
 				}
 
-			lQuaternion.mult(getQuaternion());
 			setQuaternion(lQuaternion);
 		}
 	}

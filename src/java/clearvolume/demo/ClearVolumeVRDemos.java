@@ -6,6 +6,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
+import clearvolume.controller.OculusRiftController;
 import org.junit.Test;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
@@ -89,14 +90,6 @@ public class ClearVolumeVRDemos
 
   }
 
-  public static Hmd openFirstHmd() {
-    Hmd hmd = Hmd.create(0);
-    if(null == hmd) {
-      return null;//hmd = Hmd.createDebug(OvrLibrary.ovrHmdType.ovrHmd_DK2);
-    }
-    return hmd;
-  }
-
   @Test
   public void demoVRWith8BitGeneratedDataset() throws InterruptedException,
           IOException
@@ -110,21 +103,15 @@ public class ClearVolumeVRDemos
             1024,
             1,
             false);
+
+
+    OculusRiftController ovr = new OculusRiftController(0, lClearVolumeRenderer);
+
     lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
     lClearVolumeRenderer.setVisible(true);
 
-    final Hmd hmd;
-    Hmd.initialize();
-
-    hmd = openFirstHmd();
-    if (0 == hmd.configureTracking(
-            ovrTrackingCap_Orientation |
-                    ovrTrackingCap_Position, 0)) {
-      throw new IllegalStateException(
-              "Unable to start the sensor");
-    }
-
-    System.err.println("Using Rift HMD: " + hmd.Type + ", sn=" + hmd.SerialNumber.toString() + ", res " + hmd.Resolution.w + "x" + hmd.Resolution.h);
+    lClearVolumeRenderer.addTranslationRotationController(ovr);
+    ovr.connectAsynchronouslyOrWait();
 
     final int lResolutionX = 512;
     final int lResolutionY = lResolutionX;
@@ -161,8 +148,10 @@ public class ClearVolumeVRDemos
     }
 
     lClearVolumeRenderer.close();
-    hmd.destroy();
-    hmd.shutdown();
+    
+    if(ovr != null) {
+      ovr.close();
+    }
   }
 
   @Test

@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
+import clearvolume.controller.TranslationRotationControllerInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.ParameterChangeListener;
@@ -972,6 +973,21 @@ public interface ClearVolumeRendererInterface	extends
 	 * @return currently used rotation controller.
 	 */
 	public ArrayList<RotationControllerInterface> getRotationControllers();
+
+	/**
+	 * Adds a translation/rotation controller.
+	 *
+	 * @param pRotationControllerInterface
+	 *          rotation controller
+	 */
+	public void addTranslationRotationController(TranslationRotationControllerInterface pTranslationRotationControllerInterface);
+
+	/**
+	 * Returns the current list of rotation controllers.
+	 *
+	 * @return currently used rotation controller.
+	 */
+	public ArrayList<TranslationRotationControllerInterface> getTranslationRotationControllers();
 
 	/**
 	 * Returns the auto rotation controller.

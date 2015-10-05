@@ -21,6 +21,8 @@ import javax.swing.SwingUtilities;
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
+import clearvolume.controller.TranslationControllerInterface;
+import clearvolume.controller.TranslationRotationControllerInterface;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
@@ -82,6 +84,11 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Rotation controller in addition to the mouse
 	 */
 	private final ArrayList<RotationControllerInterface> mRotationControllerList = new ArrayList<RotationControllerInterface>();
+
+	/**
+	 * Translation/rotation controllers, e.g. VR glasses
+	 */
+	private final ArrayList<TranslationRotationControllerInterface> mTransRotControllerList = new ArrayList<TranslationRotationControllerInterface>();
 
 	/**
 	 * Auto rotation controller
@@ -1963,6 +1970,18 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
+	 * Adds a translation/rotation controller.
+	 *
+	 * @param pTranslationRotationControllerInterface
+	 *          translation/rotation controller
+	 */
+	@Override
+	public void addTranslationRotationController(TranslationRotationControllerInterface pTranslationRotationControllerInterface)
+	{
+		mTransRotControllerList.add(pTranslationRotationControllerInterface);
+	}
+
+	/**
 	 * Removes a rotation controller.
 	 *
 	 * @param pRotationControllerInterface
@@ -1994,6 +2013,17 @@ public abstract class ClearVolumeRendererBase	implements
 	public ArrayList<RotationControllerInterface> getRotationControllers()
 	{
 		return mRotationControllerList;
+	}
+
+	/**
+	 * Returns the current list of rotation controllers.
+	 *
+	 * @return currently used rotation controller.
+	 */
+	@Override
+	public ArrayList<TranslationRotationControllerInterface> getTranslationRotationControllers()
+	{
+		return mTransRotControllerList;
 	}
 
 	@Override
