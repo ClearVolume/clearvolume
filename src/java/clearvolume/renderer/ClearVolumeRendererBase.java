@@ -52,8 +52,8 @@ import coremem.util.Size;
  */
 
 public abstract class ClearVolumeRendererBase	implements
-																							ClearVolumeRendererInterface,
-																							ClearVolumeCloseable
+												ClearVolumeRendererInterface,
+												ClearVolumeCloseable
 {
 
 	/**
@@ -116,16 +116,18 @@ public abstract class ClearVolumeRendererBase	implements
 
 	private volatile boolean mVolumeRenderingParametersChanged = true;
 
+	private volatile boolean mVolumeDataUpdateAllowed = true;
+
 	// volume dimensions settings
-	private volatile long mVolumeSizeX;
-	private volatile long mVolumeSizeY;
-	private volatile long mVolumeSizeZ;
+	private volatile long[] mVolumeSizeX;
+	private volatile long[] mVolumeSizeY;
+	private volatile long[] mVolumeSizeZ;
 
-	private volatile double mVoxelSizeX;
-	private volatile double mVoxelSizeY;
-	private volatile double mVoxelSizeZ;
+	private volatile double[] mVoxelSizeX;
+	private volatile double[] mVoxelSizeY;
+	private volatile double[] mVoxelSizeZ;
 
-	private volatile boolean mVolumeDimensionsChanged;
+	private volatile boolean[] mVolumeDimensionsChanged;
 
 	// data copy locking and waiting
 	private final Object[] mSetVolumeDataBufferLocks;
@@ -163,6 +165,7 @@ public abstract class ClearVolumeRendererBase	implements
 		mSetVolumeDataBufferLocks = new Object[pNumberOfRenderLayers];
 		mVolumeDataByteBuffers = new FragmentedMemoryInterface[pNumberOfRenderLayers];
 		mDataBufferCopyIsFinishedArray = new CountDownLatch[pNumberOfRenderLayers];
+		mVolumeDimensionsChanged = new boolean[pNumberOfRenderLayers];
 		mTransferFunctions = new TransferFunction[pNumberOfRenderLayers];
 		mLayerVisiblityFlagArray = new boolean[pNumberOfRenderLayers];
 		mRenderAlgorithm = new RenderAlgorithm[pNumberOfRenderLayers];
@@ -172,6 +175,14 @@ public abstract class ClearVolumeRendererBase	implements
 		mGamma = new float[pNumberOfRenderLayers];
 		mQuality = new float[pNumberOfRenderLayers];
 		mDithering = new float[pNumberOfRenderLayers];
+
+		mVolumeSizeX = new long[pNumberOfRenderLayers];
+		mVolumeSizeY = new long[pNumberOfRenderLayers];
+		mVolumeSizeZ = new long[pNumberOfRenderLayers];
+
+		mVoxelSizeX = new double[pNumberOfRenderLayers];
+		mVoxelSizeY = new double[pNumberOfRenderLayers];
+		mVoxelSizeZ = new double[pNumberOfRenderLayers];
 
 		for (int i = 0; i < pNumberOfRenderLayers; i++)
 		{
@@ -185,6 +196,10 @@ public abstract class ClearVolumeRendererBase	implements
 			mGamma[i] = 1f;
 			mQuality[i] = 1f;
 			mDithering[i] = 1f;
+
+			mVoxelSizeX[i] = 1;
+			mVoxelSizeY[i] = 1;
+			mVoxelSizeZ[i] = 1;
 		}
 
 		if (pNumberOfRenderLayers == 1)
@@ -204,7 +219,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * construction time and should not be modified later
 	 *
 	 * @param pNativeTypeEnum
-	 *          native type
+	 *            native type
 	 */
 	@Override
 	public void setNativeType(final NativeTypeEnum pNativeTypeEnum)
@@ -276,6 +291,28 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
+	 * Returns the state of the flag that allows/disallows the update of volume
+	 * data.
+	 * 
+	 * @return flag state,
+	 */
+	@Override
+	public boolean isVolumeDataUpdateAllowed()
+	{
+		return mVolumeDataUpdateAllowed;
+	}
+
+	/**
+	 * Sets the flag that allows/disallows the update of volume data. This is
+	 * usefull when rendering multi-channel data.
+	 */
+	@Override
+	public void setVolumeDataUpdateAllowed(boolean pVolumeDataUpdateAllowed)
+	{
+		mVolumeDataUpdateAllowed = pVolumeDataUpdateAllowed;
+	}
+
+	/**
 	 * Clears the state of the update-volume-parameters flag
 	 */
 	public void clearChangeOfVolumeParametersFlag()
@@ -284,67 +321,99 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Returns the volume size along x axis.
+	 * Returns the volume size along x axis for a given render layer.
 	 *
 	 * @return volume size along x
 	 */
-	public long getVolumeSizeX()
+	public long getVolumeSizeX(final int pRenderLayerIndex)
 	{
-		return mVolumeSizeX;
+		return mVolumeSizeX[pRenderLayerIndex];
 	}
 
 	/**
-	 * Returns the volume size along y axis.
+	 * Returns the volume size along y axis for a given render layer.
 	 *
 	 * @return volume size along y
 	 */
-	public long getVolumeSizeY()
+	public long getVolumeSizeY(final int pRenderLayerIndex)
 	{
-		return mVolumeSizeY;
+		return mVolumeSizeY[pRenderLayerIndex];
 	}
 
 	/**
-	 * Returns the volume size along z axis.
+	 * Returns the volume size along z axis for a given render layer.
 	 *
 	 * @return volume size along z
 	 */
-	public long getVolumeSizeZ()
+	public long getVolumeSizeZ(final int pRenderLayerIndex)
 	{
-		return mVolumeSizeZ;
+		return mVolumeSizeZ[pRenderLayerIndex];
 	}
 
-	public double getVoxelSizeX()
+	/**
+	 * Returns the voxel size along X in A.U. for a given render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *            render layer index.
+	 * @return voxel size in A.U.
+	 */
+	public double getVoxelSizeX(final int pRenderLayerIndex)
 	{
-		return mVoxelSizeX;
+		return mVoxelSizeX[pRenderLayerIndex];
 	}
 
-	public double getVoxelSizeY()
+	/**
+	 * Returns the voxel size along Y in A.U. for a given render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *            render layer index.
+	 * @return voxel size in A.U.
+	 */
+	public double getVoxelSizeY(final int pRenderLayerIndex)
 	{
-		return mVoxelSizeY;
+		return mVoxelSizeY[pRenderLayerIndex];
 	}
 
-	public double getVoxelSizeZ()
+	/**
+	 * Returns the voxel size along Z in A.U. for a given render layer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *            render layer index.
+	 * @return voxel size in A.U.
+	 */
+	public double getVoxelSizeZ(final int pRenderLayerIndex)
 	{
-		return mVoxelSizeZ;
+		return mVoxelSizeZ[pRenderLayerIndex];
 	}
 
 	/**
 	 * Returns whether the volume dimensions have been changed since last data
-	 * upload.
+	 * upload of a given render layer.
 	 *
 	 * @return true if volume dimensions changed.
 	 */
-	public boolean haveVolumeDimensionsChanged()
+	public boolean haveVolumeDimensionsChanged(final int pRenderLayerIndex)
 	{
-		return mVolumeDimensionsChanged;
+		return mVolumeDimensionsChanged[pRenderLayerIndex];
 	}
 
 	/**
-	 *
+	 * Clears the flag that indicates that volume dimensions have changed for a
+	 * specific layer index.
+	 */
+	public void clearVolumeDimensionsChanged(final int pRenderLayerIndex)
+	{
+		mVolumeDimensionsChanged[pRenderLayerIndex] = false;
+	}
+
+	/**
+	 * Clears the flag that indicates that volume dimensions have changed for
+	 * all layers.
 	 */
 	public void clearVolumeDimensionsChanged()
 	{
-		mVolumeDimensionsChanged = false;
+		for (int l = 0; l < getNumberOfRenderLayers(); l++)
+			clearVolumeDimensionsChanged(l);
 	}
 
 	/**
@@ -373,7 +442,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets active flag for the current render layer.
 	 *
 	 * @param pVisible
-	 *          true to set layer visible, false to set it invisible
+	 *            true to set layer visible, false to set it invisible
 	 */
 	@Override
 	public void setLayerVisible(boolean pVisible)
@@ -385,13 +454,13 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets active flag for the given render layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pVisible
-	 *          true to set layer visible, false to set it invisible
+	 *            true to set layer visible, false to set it invisible
 	 */
 	@Override
 	public void setLayerVisible(final int pRenderLayerIndex,
-															final boolean pVisible)
+								final boolean pVisible)
 	{
 		getDisplayLock().lock();
 		try
@@ -450,7 +519,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Returns the brightness level of a given render layer index.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return brightness level.
 	 */
 	@Override
@@ -463,7 +532,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets brightness.
 	 *
 	 * @param pBrightness
-	 *          brightness level
+	 *            brightness level
 	 */
 	@Override
 	public void setBrightness(final double pBrightness)
@@ -475,21 +544,21 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets brightness for a given render layer index.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pBrightness
-	 *          brightness level
+	 *            brightness level
 	 */
 	@Override
-	public void setBrightness(final int pRenderLayerIndex,
-														final double pBrightness)
+	public void setBrightness(	final int pRenderLayerIndex,
+								final double pBrightness)
 	{
 		getDisplayLock().lock();
 		try
 		{
 			mBrightness[pRenderLayerIndex] = (float) clamp(	pBrightness,
-																											0,
-																											getNativeType() == NativeTypeEnum.UnsignedByte ? 16
-																																																		: 256);
+															0,
+															getNativeType() == NativeTypeEnum.UnsignedByte	? 16
+																											: 256);
 
 			notifyChangeOfVolumeRenderingParameters();
 		}
@@ -516,7 +585,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Returns the Gamma value.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return gamma value for layer
 	 */
 	@Override
@@ -529,7 +598,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets the gamma for the current render layer index.
 	 *
 	 * @param pGamma
-	 *          gamma value
+	 *            gamma value
 	 */
 	@Override
 	public void setGamma(final double pGamma)
@@ -541,13 +610,13 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets the gamma for a given render layer index.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pGamma
-	 *          gamma value
+	 *            gamma value
 	 */
 	@Override
 	public void setGamma(	final int pRenderLayerIndex,
-												final double pGamma)
+							final double pGamma)
 
 	{
 		getDisplayLock().lock();
@@ -567,9 +636,9 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets dithering value [0,1].
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pDithering
-	 *          new dithering level for render layer
+	 *            new dithering level for render layer
 	 */
 	@Override
 	public void setDithering(int pRenderLayerIndex, double pDithering)
@@ -592,7 +661,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Returns the amount of dithering [0,1] for a given render layer.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return dithering
 	 */
 	@Override
@@ -606,9 +675,9 @@ public abstract class ClearVolumeRendererBase	implements
 	 * 
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pQuality
-	 *          new quality level for render layer
+	 *            new quality level for render layer
 	 */
 	@Override
 	public void setQuality(int pRenderLayerIndex, double pQuality)
@@ -631,7 +700,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Returns the quality level [0,1] for a given render layer.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return quality level
 	 */
 	@Override
@@ -645,16 +714,16 @@ public abstract class ClearVolumeRendererBase	implements
 	 * This size depends on the volume dimension and quality.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          renderlayer index
+	 *            renderlayer index
 	 * @return maximal number of steps
 	 */
 	public int getMaxSteps(final int pRenderLayerIndex)
 	{
-		return (int) (sqrt(getVolumeSizeX() * getVolumeSizeX()
-												+ getVolumeSizeY()
-												* getVolumeSizeY()
-												+ getVolumeSizeZ()
-												* getVolumeSizeZ()) * getQuality(pRenderLayerIndex));
+		return (int) (sqrt(getVolumeSizeX(pRenderLayerIndex) * getVolumeSizeX(pRenderLayerIndex)
+							+ getVolumeSizeY(pRenderLayerIndex)
+							* getVolumeSizeY(pRenderLayerIndex)
+							+ getVolumeSizeZ(pRenderLayerIndex)
+							* getVolumeSizeZ(pRenderLayerIndex)) * getQuality(pRenderLayerIndex));
 	}
 
 	/**
@@ -674,7 +743,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return minimum of transfer function range
 	 */
 	@Override
@@ -697,11 +766,11 @@ public abstract class ClearVolumeRendererBase	implements
 	}
 
 	/**
-	 * Returns the maximum of the transfer function range for a given render layer
-	 * index.
+	 * Returns the maximum of the transfer function range for a given render
+	 * layer index.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return maximum of transfer function range
 	 */
 	@Override
@@ -715,17 +784,17 @@ public abstract class ClearVolumeRendererBase	implements
 	 * index.
 	 *
 	 * @param pTransferRangeMin
-	 *          transfer range min
+	 *            transfer range min
 	 * @param pTransferRangeMax
-	 *          transfer range max
+	 *            transfer range max
 	 */
 	@Override
 	public void setTransferFunctionRange(	final double pTransferRangeMin,
-																				final double pTransferRangeMax)
+											final double pTransferRangeMax)
 	{
 		setTransferFunctionRange(	getCurrentRenderLayerIndex(),
-															pTransferRangeMin,
-															pTransferRangeMax);
+									pTransferRangeMin,
+									pTransferRangeMax);
 	}
 
 	/**
@@ -733,26 +802,26 @@ public abstract class ClearVolumeRendererBase	implements
 	 * index.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pTransferRangeMin
-	 *          transfer range min
+	 *            transfer range min
 	 * @param pTransferRangeMax
-	 *          transfer range max
+	 *            transfer range max
 	 */
 	@Override
 	public void setTransferFunctionRange(	final int pRenderLayerIndex,
-																				final double pTransferRangeMin,
-																				final double pTransferRangeMax)
+											final double pTransferRangeMin,
+											final double pTransferRangeMax)
 	{
 		getDisplayLock().lock();
 		try
 		{
 			mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
-																																		0,
-																																		1);
+																			0,
+																			1);
 			mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
-																																		0,
-																																		1);
+																			0,
+																			1);
 			notifyChangeOfVolumeRenderingParameters();
 		}
 		finally
@@ -766,33 +835,33 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets transfer range minimum, must be within [0,1].
 	 *
 	 * @param pTransferRangeMin
-	 *          minimum
+	 *            minimum
 	 */
 	@Override
 	public void setTransferFunctionRangeMin(final double pTransferRangeMin)
 	{
 		setTransferFunctionRangeMin(getCurrentRenderLayerIndex(),
-																pTransferRangeMin);
+									pTransferRangeMin);
 	}
 
 	/**
 	 * Sets transfer range minimum, must be within [0,1].
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pTransferRangeMin
-	 *          transfer range min
+	 *            transfer range min
 	 */
 	@Override
 	public void setTransferFunctionRangeMin(final int pRenderLayerIndex,
-																					final double pTransferRangeMin)
+											final double pTransferRangeMin)
 	{
 		getDisplayLock().lock();
 		try
 		{
 			mTransferFunctionRangeMin[pRenderLayerIndex] = (float) clamp(	pTransferRangeMin,
-																																		0,
-																																		1);
+																			0,
+																			1);
 
 			notifyChangeOfVolumeRenderingParameters();
 		}
@@ -808,33 +877,33 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets transfer function range maximum, must be within [0,1].
 	 *
 	 * @param pTransferRangeMax
-	 *          maximum
+	 *            maximum
 	 */
 	@Override
 	public void setTransferFunctionRangeMax(final double pTransferRangeMax)
 	{
 		setTransferFunctionRangeMax(getCurrentRenderLayerIndex(),
-																pTransferRangeMax);
+									pTransferRangeMax);
 	}
 
 	/**
 	 * Sets transfer function range maximum, must be within [0,1].
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pTransferRangeMax
-	 *          transfer range max
+	 *            transfer range max
 	 */
 	@Override
 	public void setTransferFunctionRangeMax(final int pRenderLayerIndex,
-																					final double pTransferRangeMax)
+											final double pTransferRangeMax)
 	{
 		getDisplayLock().lock();
 		try
 		{
 			mTransferFunctionRangeMax[pRenderLayerIndex] = (float) clamp(	pTransferRangeMax,
-																																		0,
-																																		1);
+																			0,
+																			1);
 			notifyChangeOfVolumeRenderingParameters();
 		}
 		finally
@@ -1050,7 +1119,8 @@ public abstract class ClearVolumeRendererBase	implements
 		getDisplayLock().lock();
 		try
 		{
-			final double lNewFOV = min(cMaximalFOV, max(cMinimalFOV, pFOV));
+			final double lNewFOV = min(	cMaximalFOV,
+										max(cMinimalFOV, pFOV));
 			final double lFactor = mFOV / lNewFOV;
 			/*System.out.format("old:%f new%f factor=%f \n",
 												mFOV,
@@ -1098,7 +1168,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public void setTransferFunction(final TransferFunction pTransfertFunction)
 	{
 		setTransferFunction(getCurrentRenderLayerIndex(),
-												pTransfertFunction);
+							pTransfertFunction);
 	}
 
 	/**
@@ -1109,7 +1179,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	@Override
 	public void setTransferFunction(final int pRenderLayerIndex,
-																	final TransferFunction pTransfertFunction)
+									final TransferFunction pTransfertFunction)
 	{
 		getDisplayLock().lock();
 		try
@@ -1171,7 +1241,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	@Override
 	public void setRenderAlgorithm(	final int pRenderLayerIndex,
-																	final RenderAlgorithm pRenderAlgorithm)
+									final RenderAlgorithm pRenderAlgorithm)
 	{
 		getDisplayLock().lock();
 		try
@@ -1263,7 +1333,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Returns for a given index the corresponding volume data buffer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return data buffer for a given render layer.
 	 */
 	public FragmentedMemoryInterface getVolumeDataBuffer(final int pRenderLayerIndex)
@@ -1275,7 +1345,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Clears volume data buffer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 */
 	public void clearVolumeDataBufferReference(final int pRenderLayerIndex)
 	{
@@ -1286,7 +1356,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Returns object used for locking volume data copy for a given layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 *
 	 * @return locking object
 	 */
@@ -1320,7 +1390,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets current render layer.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          current render layer index
+	 *            current render layer index
 	 */
 	@Override
 	public void setCurrentRenderLayer(final int pRenderLayerIndex)
@@ -1343,7 +1413,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Returns current render layer.
 	 * 
 	 * @param pNumberOfRenderLayers
-	 *          number of render layers
+	 *            number of render layers
 	 */
 	@Override
 	public void setNumberOfRenderLayers(final int pNumberOfRenderLayers)
@@ -1365,25 +1435,28 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Sets the voxel size.
 	 * 
+	 * @param pRenderLayerIndex
+	 *            render layer index
 	 * @param pVoxelSizeX
-	 *          voxel size along X
+	 *            voxel size along X
 	 * @param pVoxelSizeY
-	 *          voxel size along Y
+	 *            voxel size along Y
 	 * @param pVoxelSizeZ
-	 *          voxel size along Z
+	 *            voxel size along Z
 	 * 
 	 */
 	@Override
-	public void setVoxelSize(	final double pVoxelSizeX,
-														final double pVoxelSizeY,
-														final double pVoxelSizeZ)
+	public void setVoxelSize(	final int pRenderLayerIndex,
+								final double pVoxelSizeX,
+								final double pVoxelSizeY,
+								final double pVoxelSizeZ)
 	{
 		getDisplayLock().lock();
 		try
 		{
-			mVoxelSizeX = pVoxelSizeX;
-			mVoxelSizeY = pVoxelSizeY;
-			mVoxelSizeZ = pVoxelSizeZ;
+			mVoxelSizeX[pRenderLayerIndex] = pVoxelSizeX;
+			mVoxelSizeY[pRenderLayerIndex] = pVoxelSizeY;
+			mVoxelSizeZ[pRenderLayerIndex] = pVoxelSizeZ;
 			notifyChangeOfVolumeRenderingParameters();
 		}
 		finally
@@ -1397,266 +1470,351 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets volume data buffer. Voxels are assumed to be isotropic.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pByteBuffer
-	 *          byte buffer
+	 *            byte buffer
 	 * @param pVolumeSizeX
-	 *          size in voxels along X
+	 *            size in voxels along X
 	 * @param pVolumeSizeY
-	 *          size in voxels along Y
+	 *            size in voxels along Y
 	 * @param pVolumeSizeZ
-	 *          size in voxels along Z
+	 *            size in voxels along Z
 	 * 
 	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
-																			final ByteBuffer pByteBuffer,
-																			final long pVolumeSizeX,
-																			final long pVolumeSizeY,
-																			final long pVolumeSizeZ)
+										final ByteBuffer pByteBuffer,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ)
 	{
 		return setVolumeDataBuffer(	pRenderLayerIndex,
-																pByteBuffer,
-																pVolumeSizeX,
-																pVolumeSizeY,
-																pVolumeSizeZ,
-																1,
-																1,
-																1);
+									pByteBuffer,
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									1,
+									1,
+									1);
 	}
 
 	/**
 	 * Sets volume data buffer.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pByteBuffer
-	 *          byte buffer
+	 *            byte buffer
 	 * @param pVolumeSizeX
-	 *          volume size in voxels along X
+	 *            volume size in voxels along X
 	 * @param pVolumeSizeY
-	 *          volume size in voxels along Y
+	 *            volume size in voxels along Y
 	 * @param pVolumeSizeZ
-	 *          volume size in voxels along Z
+	 *            volume size in voxels along Z
 	 * @param pVoxelSizeX
-	 *          voxel dimension along X
+	 *            voxel dimension along X
 	 * @param pVoxelSizeY
-	 *          voxel dimension along Y
+	 *            voxel dimension along Y
 	 * @param pVoxelSizeZ
-	 *          voxel dimension along Z
+	 *            voxel dimension along Z
 	 * 
 	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
-																			ByteBuffer pByteBuffer,
-																			long pVolumeSizeX,
-																			long pVolumeSizeY,
-																			long pVolumeSizeZ,
-																			double pVoxelSizeX,
-																			double pVoxelSizeY,
-																			double pVoxelSizeZ)
+										ByteBuffer pByteBuffer,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ,
+										double pVoxelSizeX,
+										double pVoxelSizeY,
+										double pVoxelSizeZ)
 	{
 		return setVolumeDataBuffer(	cDefaultSetVolumeDataBufferTimeout,
-																TimeUnit.SECONDS,
-																pRenderLayerIndex,
-																pByteBuffer,
-																pVolumeSizeX,
-																pVolumeSizeY,
-																pVolumeSizeZ,
-																pVoxelSizeX,
-																pVoxelSizeY,
-																pVoxelSizeZ);
+									TimeUnit.SECONDS,
+									pRenderLayerIndex,
+									pByteBuffer,
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									pVoxelSizeX,
+									pVoxelSizeY,
+									pVoxelSizeZ);
 	}
 
 	/**
 	 * Sets volume data buffer.
 	 * 
 	 * @param pTimeOut
-	 *          time out duration
+	 *            time out duration
 	 * @param pTimeUnit
-	 *          time unit for time out duration
+	 *            time unit for time out duration
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pByteBuffer
-	 *          byte buffer
+	 *            byte buffer
 	 * @param pVolumeSizeX
-	 *          volume size in voxels along X
+	 *            volume size in voxels along X
 	 * @param pVolumeSizeY
-	 *          volume size in voxels along Y
+	 *            volume size in voxels along Y
 	 * @param pVolumeSizeZ
-	 *          volume size in voxels along Z
+	 *            volume size in voxels along Z
 	 * 
 	 * 
 	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	long pTimeOut,
-																			TimeUnit pTimeUnit,
-																			final int pRenderLayerIndex,
-																			final ByteBuffer pByteBuffer,
-																			final long pVolumeSizeX,
-																			final long pVolumeSizeY,
-																			final long pVolumeSizeZ)
+										TimeUnit pTimeUnit,
+										final int pRenderLayerIndex,
+										final ByteBuffer pByteBuffer,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ)
 	{
 		return setVolumeDataBuffer(	pTimeOut,
-																pTimeUnit,
-																pRenderLayerIndex,
-																pByteBuffer,
-																pVolumeSizeX,
-																pVolumeSizeY,
-																pVolumeSizeZ,
-																1,
-																1,
-																1);
+									pTimeUnit,
+									pRenderLayerIndex,
+									pByteBuffer,
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									1,
+									1,
+									1);
 	}
 
 	/**
 	 * Sets volume data buffer.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pFragmentedMemoryInterface
-	 *          fragmented buffer
+	 *            fragmented buffer
 	 * @param pVolumeSizeX
-	 *          volume size in voxels along X
+	 *            volume size in voxels along X
 	 * @param pVolumeSizeY
-	 *          volume size in voxels along Y
+	 *            volume size in voxels along Y
 	 * @param pVolumeSizeZ
-	 *          volume size in voxels along Z
+	 *            volume size in voxels along Z
 	 * 
 	 * 
 	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
-																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			final long pVolumeSizeX,
-																			final long pVolumeSizeY,
-																			final long pVolumeSizeZ)
+										final FragmentedMemoryInterface pFragmentedMemoryInterface,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ)
 	{
 		return setVolumeDataBuffer(	pRenderLayerIndex,
-																pFragmentedMemoryInterface,
-																pVolumeSizeX,
-																pVolumeSizeY,
-																pVolumeSizeZ,
-																1,
-																1,
-																1);
+									pFragmentedMemoryInterface,
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									1,
+									1,
+									1);
 	}
 
 	/**
 	 * Sets volume data buffer.
 	 * 
+	 * @param pTimeOut
+	 *            time out duration
+	 * @param pTimeUnit
+	 *            time unit for time out duration
 	 * @param pRenderLayerIndex
-	 *          render layer index
-	 * @param pContiguousMemoryInterface
-	 *          contguous buffer
-	 * @param pVolumeSizeX
-	 *          volume size in voxels along X
-	 * @param pVolumeSizeY
-	 *          volume size in voxels along Y
-	 * @param pVolumeSizeZ
-	 *          volume size in voxels along Z
-	 * 
-	 * 
-	 * @return true if transfer was completed (no time out)
-	 */
-	@Override
-	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
-																			final ContiguousMemoryInterface pContiguousMemoryInterface,
-																			final long pVolumeSizeX,
-																			final long pVolumeSizeY,
-																			final long pVolumeSizeZ)
-	{
-		return setVolumeDataBuffer(	pRenderLayerIndex,
-																FragmentedMemory.wrap(pContiguousMemoryInterface),
-																pVolumeSizeX,
-																pVolumeSizeY,
-																pVolumeSizeZ,
-																1,
-																1,
-																1);
-	}
-
-	/**
-	 * Sets volume data buffer.
-	 * 
-	 * @param pRenderLayerIndex
-	 *          render layer index
-	 * @param pContiguousMemoryInterface
-	 *          contiguous buffer
-	 * @param pVolumeSizeX
-	 *          volume size in voxels along X
-	 * @param pVolumeSizeY
-	 *          volume size in voxels along Y
-	 * @param pVolumeSizeZ
-	 *          volume size in voxels along Z
-	 * @param pVoxelSizeX
-	 *          voxel dimension along X
-	 * @param pVoxelSizeY
-	 *          voxel dimension along Y
-	 * @param pVoxelSizeZ
-	 *          voxel dimension along Z
-	 * 
-	 * 
-	 * @return true if transfer was completed (no time out)
-	 */
-	@Override
-	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
-																			final ContiguousMemoryInterface pContiguousMemoryInterface,
-																			final long pVolumeSizeX,
-																			final long pVolumeSizeY,
-																			final long pVolumeSizeZ,
-																			final double pVoxelSizeX,
-																			final double pVoxelSizeY,
-																			final double pVoxelSizeZ)
-	{
-		return setVolumeDataBuffer(	pRenderLayerIndex,
-																FragmentedMemory.wrap(pContiguousMemoryInterface),
-																pVolumeSizeX,
-																pVolumeSizeY,
-																pVolumeSizeZ,
-																pVoxelSizeX,
-																pVoxelSizeY,
-																pVoxelSizeZ);
-	}
-
-	/**
-	 * Sets volume data buffer.
-	 * 
-	 * @param pRenderLayerIndex
-	 *          render pByteBuffer index
+	 *            render layer index
 	 * @param pByteBuffer
-	 *          NIO byte buffer
+	 *            byte buffer
 	 * @param pVolumeSizeX
-	 *          volume size in voxels along X
+	 *            volume size in voxels along X
 	 * @param pVolumeSizeY
-	 *          volume size in voxels along Y
+	 *            volume size in voxels along Y
 	 * @param pVolumeSizeZ
-	 *          volume size in voxels along Z
-	 * @param pVoxelSizeX
-	 *          voxel dimension along X
-	 * @param pVoxelSizeY
-	 *          voxel dimension along Y
-	 * @param pVoxelSizeZ
-	 *          voxel dimension along Z
+	 *            volume size in voxels along Z
 	 * 
 	 * 
 	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	long pTimeOut,
-																			TimeUnit pTimeUnit,
-																			final int pRenderLayerIndex,
-																			final ByteBuffer pByteBuffer,
-																			final long pVolumeSizeX,
-																			final long pVolumeSizeY,
-																			final long pVolumeSizeZ,
-																			final double pVoxelSizeX,
-																			final double pVoxelSizeY,
-																			final double pVoxelSizeZ)
+										TimeUnit pTimeUnit,
+										final int pRenderLayerIndex,
+										final FragmentedMemoryInterface pFragmentedMemoryInterface,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ)
+	{
+		return setVolumeDataBuffer(	pTimeOut,
+									pTimeUnit,
+									pRenderLayerIndex,
+									pFragmentedMemoryInterface,
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									1,
+									1,
+									1);
+	}
+
+	/**
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *            render layer index
+	 * @param pContiguousMemoryInterface
+	 *            contguous buffer
+	 * @param pVolumeSizeX
+	 *            volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *            volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *            volume size in voxels along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
+	 */
+	@Override
+	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
+										final ContiguousMemoryInterface pContiguousMemoryInterface,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ)
+	{
+		return setVolumeDataBuffer(	pRenderLayerIndex,
+									FragmentedMemory.wrap(pContiguousMemoryInterface),
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									1,
+									1,
+									1);
+	}
+	
+	/**
+	 * Sets volume data buffer.
+	 * 
+	 * @param pTimeOut
+	 *            time out duration
+	 * @param pTimeUnit
+	 *            time unit for time out duration
+	 * @param pRenderLayerIndex
+	 *            render layer index
+	 * @param pContiguousMemoryInterface
+	 *            contiguous memory
+	 * @param pVolumeSizeX
+	 *            volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *            volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *            volume size in voxels along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
+	 */
+	@Override
+	public boolean setVolumeDataBuffer(	long pTimeOut,
+										TimeUnit pTimeUnit,
+										final int pRenderLayerIndex,
+										final ContiguousMemoryInterface pContiguousMemoryInterface,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ)
+	{
+		return setVolumeDataBuffer(	pTimeOut,
+									pTimeUnit,
+									pRenderLayerIndex,
+									FragmentedMemory.wrap(pContiguousMemoryInterface),
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									1,
+									1,
+									1);
+	}
+
+
+	/**
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *            render layer index
+	 * @param pContiguousMemoryInterface
+	 *            contiguous buffer
+	 * @param pVolumeSizeX
+	 *            volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *            volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *            volume size in voxels along Z
+	 * @param pVoxelSizeX
+	 *            voxel dimension along X
+	 * @param pVoxelSizeY
+	 *            voxel dimension along Y
+	 * @param pVoxelSizeZ
+	 *            voxel dimension along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
+	 */
+	@Override
+	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
+										final ContiguousMemoryInterface pContiguousMemoryInterface,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ,
+										final double pVoxelSizeX,
+										final double pVoxelSizeY,
+										final double pVoxelSizeZ)
+	{
+		return setVolumeDataBuffer(	pRenderLayerIndex,
+									FragmentedMemory.wrap(pContiguousMemoryInterface),
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									pVoxelSizeX,
+									pVoxelSizeY,
+									pVoxelSizeZ);
+	}
+
+	/**
+	 * Sets volume data buffer.
+	 * 
+	 * @param pRenderLayerIndex
+	 *            render pByteBuffer index
+	 * @param pByteBuffer
+	 *            NIO byte buffer
+	 * @param pVolumeSizeX
+	 *            volume size in voxels along X
+	 * @param pVolumeSizeY
+	 *            volume size in voxels along Y
+	 * @param pVolumeSizeZ
+	 *            volume size in voxels along Z
+	 * @param pVoxelSizeX
+	 *            voxel dimension along X
+	 * @param pVoxelSizeY
+	 *            voxel dimension along Y
+	 * @param pVoxelSizeZ
+	 *            voxel dimension along Z
+	 * 
+	 * 
+	 * @return true if transfer was completed (no time out)
+	 */
+	@Override
+	public boolean setVolumeDataBuffer(	long pTimeOut,
+										TimeUnit pTimeUnit,
+										final int pRenderLayerIndex,
+										final ByteBuffer pByteBuffer,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ,
+										final double pVoxelSizeX,
+										final double pVoxelSizeY,
+										final double pVoxelSizeZ)
 	{
 
 		FragmentedMemoryInterface lFragmentedMemoryInterface;
@@ -1673,15 +1831,15 @@ public abstract class ClearVolumeRendererBase	implements
 		}
 
 		return setVolumeDataBuffer(	pTimeOut,
-																pTimeUnit,
-																pRenderLayerIndex,
-																lFragmentedMemoryInterface,
-																pVolumeSizeX,
-																pVolumeSizeY,
-																pVolumeSizeZ,
-																pVoxelSizeX,
-																pVoxelSizeY,
-																pVoxelSizeZ);
+									pTimeUnit,
+									pRenderLayerIndex,
+									lFragmentedMemoryInterface,
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									pVoxelSizeX,
+									pVoxelSizeY,
+									pVoxelSizeZ);
 
 	}
 
@@ -1689,173 +1847,173 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Sets volume data buffer.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render pByteBuffer index
+	 *            render pByteBuffer index
 	 * @param pVolume
-	 *          volume
+	 *            volume
 	 * 
 	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
-																			final Volume pVolume)
+										final Volume pVolume)
 	{
 		return setVolumeDataBuffer(	pRenderLayerIndex,
-																pVolume.getDataBuffer(),
-																pVolume.getWidthInVoxels(),
-																pVolume.getHeightInVoxels(),
-																pVolume.getDepthInVoxels(),
-																pVolume.getVoxelWidthInRealUnits(),
-																pVolume.getVoxelHeightInRealUnits(),
-																pVolume.getVoxelDepthInRealUnits());
+									pVolume.getDataBuffer(),
+									pVolume.getWidthInVoxels(),
+									pVolume.getHeightInVoxels(),
+									pVolume.getDepthInVoxels(),
+									pVolume.getVoxelWidthInRealUnits(),
+									pVolume.getVoxelHeightInRealUnits(),
+									pVolume.getVoxelDepthInRealUnits());
 	}
 
 	/**
 	 * Sets volume data buffer.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render pByteBuffer index
+	 *            render pByteBuffer index
 	 * @param pFragmentedMemoryInterface
-	 *          fragmented buffer
+	 *            fragmented buffer
 	 * @param pVolumeSizeX
-	 *          volume size in voxels along X
+	 *            volume size in voxels along X
 	 * @param pVolumeSizeY
-	 *          volume size in voxels along Y
+	 *            volume size in voxels along Y
 	 * @param pVolumeSizeZ
-	 *          volume size in voxels along Z
+	 *            volume size in voxels along Z
 	 * @param pVoxelSizeX
-	 *          voxel dimension along X
+	 *            voxel dimension along X
 	 * @param pVoxelSizeY
-	 *          voxel dimension along Y
+	 *            voxel dimension along Y
 	 * @param pVoxelSizeZ
-	 *          voxel dimension along Z
+	 *            voxel dimension along Z
 	 * 
 	 * 
 	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
-																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			final long pVolumeSizeX,
-																			final long pVolumeSizeY,
-																			final long pVolumeSizeZ,
-																			final double pVoxelSizeX,
-																			final double pVoxelSizeY,
-																			final double pVoxelSizeZ)
+										final FragmentedMemoryInterface pFragmentedMemoryInterface,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ,
+										final double pVoxelSizeX,
+										final double pVoxelSizeY,
+										final double pVoxelSizeZ)
 	{
 		return setVolumeDataBuffer(	cDefaultSetVolumeDataBufferTimeout,
-																TimeUnit.SECONDS,
-																pRenderLayerIndex,
-																pFragmentedMemoryInterface,
-																pVolumeSizeX,
-																pVolumeSizeY,
-																pVolumeSizeZ,
-																pVoxelSizeX,
-																pVoxelSizeY,
-																pVoxelSizeZ);
+									TimeUnit.SECONDS,
+									pRenderLayerIndex,
+									pFragmentedMemoryInterface,
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									pVoxelSizeX,
+									pVoxelSizeY,
+									pVoxelSizeZ);
 	}
 
 	/**
 	 * Sets volume data buffer.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render pByteBuffer index
+	 *            render pByteBuffer index
 	 * @param pFragmentedMemoryInterface
-	 *          fragmented buffer
+	 *            fragmented buffer
 	 * @param pVolumeSizeX
-	 *          volume size in voxels along X
+	 *            volume size in voxels along X
 	 * @param pVolumeSizeY
-	 *          volume size in voxels along Y
+	 *            volume size in voxels along Y
 	 * @param pVolumeSizeZ
-	 *          volume size in voxels along Z
+	 *            volume size in voxels along Z
 	 * @param pVoxelSizeX
-	 *          voxel dimension along X
+	 *            voxel dimension along X
 	 * @param pVoxelSizeY
-	 *          voxel dimension along Y
+	 *            voxel dimension along Y
 	 * @param pVoxelSizeZ
-	 *          voxel dimension along Z
+	 *            voxel dimension along Z
 	 * 
 	 * 
 	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	long pTimeOut,
-																			TimeUnit pTimeUnit,
-																			final int pRenderLayerIndex,
-																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			final long pVolumeSizeX,
-																			final long pVolumeSizeY,
-																			final long pVolumeSizeZ,
-																			final double pVoxelSizeX,
-																			final double pVoxelSizeY,
-																			final double pVoxelSizeZ)
+										TimeUnit pTimeUnit,
+										final int pRenderLayerIndex,
+										final FragmentedMemoryInterface pFragmentedMemoryInterface,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ,
+										final double pVoxelSizeX,
+										final double pVoxelSizeY,
+										final double pVoxelSizeZ)
 	{
 		return setVolumeDataBuffer(	true,
-																pTimeOut,
-																pTimeUnit,
-																pRenderLayerIndex,
-																pFragmentedMemoryInterface,
-																pVolumeSizeX,
-																pVolumeSizeY,
-																pVolumeSizeZ,
-																pVoxelSizeX,
-																pVoxelSizeY,
-																pVoxelSizeZ);
+									pTimeOut,
+									pTimeUnit,
+									pRenderLayerIndex,
+									pFragmentedMemoryInterface,
+									pVolumeSizeX,
+									pVolumeSizeY,
+									pVolumeSizeZ,
+									pVoxelSizeX,
+									pVoxelSizeY,
+									pVoxelSizeZ);
 	}
 
 	/**
 	 * Sets volume data buffer.
 	 * 
 	 * @param pWaitForCopy
-	 *          set to true for waiting for data to be copied.
+	 *            set to true for waiting for data to be copied.
 	 * @param pRenderLayerIndex
-	 *          render pByteBuffer index
+	 *            render pByteBuffer index
 	 * @param pFragmentedMemoryInterface
-	 *          fragmented buffer
+	 *            fragmented buffer
 	 * @param pVolumeSizeX
-	 *          volume size in voxels along X
+	 *            volume size in voxels along X
 	 * @param pVolumeSizeY
-	 *          volume size in voxels along Y
+	 *            volume size in voxels along Y
 	 * @param pVolumeSizeZ
-	 *          volume size in voxels along Z
+	 *            volume size in voxels along Z
 	 * @param pVoxelSizeX
-	 *          voxel dimension along X
+	 *            voxel dimension along X
 	 * @param pVoxelSizeY
-	 *          voxel dimension along Y
+	 *            voxel dimension along Y
 	 * @param pVoxelSizeZ
-	 *          voxel dimension along Z
+	 *            voxel dimension along Z
 	 * 
 	 * 
 	 * @return true if transfer was completed (no time out)
 	 */
 	@Override
 	public boolean setVolumeDataBuffer(	boolean pWaitForCopy,
-																			long pTimeOut,
-																			TimeUnit pTimeUnit,
-																			final int pRenderLayerIndex,
-																			final FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			final long pVolumeSizeX,
-																			final long pVolumeSizeY,
-																			final long pVolumeSizeZ,
-																			final double pVoxelSizeX,
-																			final double pVoxelSizeY,
-																			final double pVoxelSizeZ)
+										long pTimeOut,
+										TimeUnit pTimeUnit,
+										final int pRenderLayerIndex,
+										final FragmentedMemoryInterface pFragmentedMemoryInterface,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ,
+										final double pVoxelSizeX,
+										final double pVoxelSizeY,
+										final double pVoxelSizeZ)
 	{
 		synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
 		{
 
-			if (mVolumeSizeX != pVolumeSizeX || mVolumeSizeY != pVolumeSizeY
-					|| mVolumeSizeZ != pVolumeSizeZ)
+			if (mVolumeSizeX[pRenderLayerIndex] != pVolumeSizeX || mVolumeSizeY[pRenderLayerIndex] != pVolumeSizeY
+				|| mVolumeSizeZ[pRenderLayerIndex] != pVolumeSizeZ)
 			{
-				mVolumeDimensionsChanged = true;
+				mVolumeDimensionsChanged[pRenderLayerIndex] = true;
 			}
 
-			mVolumeSizeX = pVolumeSizeX;
-			mVolumeSizeY = pVolumeSizeY;
-			mVolumeSizeZ = pVolumeSizeZ;
+			mVolumeSizeX[pRenderLayerIndex] = pVolumeSizeX;
+			mVolumeSizeY[pRenderLayerIndex] = pVolumeSizeY;
+			mVolumeSizeZ[pRenderLayerIndex] = pVolumeSizeZ;
 
-			mVoxelSizeX = pVoxelSizeX;
-			mVoxelSizeY = pVoxelSizeY;
-			mVoxelSizeZ = pVoxelSizeZ;
+			mVoxelSizeX[pRenderLayerIndex] = pVoxelSizeX;
+			mVoxelSizeY[pRenderLayerIndex] = pVoxelSizeY;
+			mVoxelSizeZ[pRenderLayerIndex] = pVoxelSizeZ;
 
 			clearCompletionOfDataBufferCopy(pRenderLayerIndex);
 			mVolumeDataByteBuffers[pRenderLayerIndex] = pFragmentedMemoryInterface;
@@ -1867,8 +2025,8 @@ public abstract class ClearVolumeRendererBase	implements
 		{
 			// System.out.print("Waiting...");
 			final boolean lWaitResult = waitToFinishDataBufferCopy(	pRenderLayerIndex,
-																															pTimeOut,
-																															pTimeUnit);
+																	pTimeOut,
+																	pTimeUnit);
 			return lWaitResult;
 		}
 		else
@@ -1909,13 +2067,13 @@ public abstract class ClearVolumeRendererBase	implements
 	 */
 	@Override
 	public boolean waitToFinishAllDataBufferCopy(	final long pTimeOut,
-																								final TimeUnit pTimeUnit)
+													final TimeUnit pTimeUnit)
 	{
 		boolean lNoTimeOut = true;
 		for (int i = 0; i < getNumberOfRenderLayers(); i++)
 			lNoTimeOut &= waitToFinishDataBufferCopy(	getCurrentRenderLayerIndex(),
-																								pTimeOut,
-																								pTimeUnit);
+														pTimeOut,
+														pTimeUnit);
 
 		return lNoTimeOut;
 	}
@@ -1926,9 +2084,9 @@ public abstract class ClearVolumeRendererBase	implements
 	 * @return true is completed, false if it timed-out.
 	 */
 	@Override
-	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
-																						final long pTimeOut,
-																						final TimeUnit pTimeUnit)
+	public boolean waitToFinishDataBufferCopy(	final int pRenderLayerIndex,
+												final long pTimeOut,
+												final TimeUnit pTimeUnit)
 
 	{
 		try
@@ -1937,16 +2095,16 @@ public abstract class ClearVolumeRendererBase	implements
 			if (mDataBufferCopyIsFinishedArray[pRenderLayerIndex] == null)
 				return true;
 			final boolean lAwaitResult = mDataBufferCopyIsFinishedArray[pRenderLayerIndex].await(	pTimeOut,
-																																														pTimeUnit);
+																									pTimeUnit);
 			// final long lStopNs = System.nanoTime();
 			// System.out.println("ELPASED:" + (lStopNs - lStartNs) / 1.0e6);
 			return lAwaitResult;
 		}
 		catch (final InterruptedException e)
 		{
-			return waitToFinishDataBufferCopy(pRenderLayerIndex,
-																				pTimeOut,
-																				pTimeUnit);
+			return waitToFinishDataBufferCopy(	pRenderLayerIndex,
+												pTimeOut,
+												pTimeUnit);
 		}
 	}
 
@@ -1954,7 +2112,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Adds a rotation controller.
 	 *
 	 * @param pRotationControllerInterface
-	 *          rotation controller
+	 *            rotation controller
 	 */
 	@Override
 	public void addRotationController(RotationControllerInterface pRotationControllerInterface)
@@ -1966,7 +2124,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Removes a rotation controller.
 	 *
 	 * @param pRotationControllerInterface
-	 *          rotation controller
+	 *            rotation controller
 	 */
 	@Override
 	public void removeRotationController(RotationControllerInterface pRotationControllerInterface)
@@ -2070,31 +2228,31 @@ public abstract class ClearVolumeRendererBase	implements
 			mVolumeCaptureListenerList.add(pVolumeCaptureListener);
 	}
 
-	public void notifyVolumeCaptureListeners(	ByteBuffer[] pCaptureBuffer,
-																						NativeTypeEnum pNativeType,
-																						long pVolumeWidth,
-																						long pVolumeHeight,
-																						long pVolumeDepth,
-																						double pVoxelWidth,
-																						double pVoxelHeight,
-																						double pVoxelDepth)
+	public void notifyVolumeCaptureListeners(	ByteBuffer pCaptureBuffer,
+												NativeTypeEnum pNativeType,
+												long pVolumeWidth,
+												long pVolumeHeight,
+												long pVolumeDepth,
+												double pVoxelWidth,
+												double pVoxelHeight,
+												double pVoxelDepth)
 	{
 		for (final VolumeCaptureListener lVolumeCaptureListener : mVolumeCaptureListenerList)
 		{
-			lVolumeCaptureListener.capturedVolume(pCaptureBuffer,
-																						pNativeType,
-																						pVolumeWidth,
-																						pVolumeHeight,
-																						pVolumeDepth,
-																						pVoxelWidth,
-																						pVoxelHeight,
-																						pVoxelDepth);
+			lVolumeCaptureListener.capturedVolume(	pCaptureBuffer,
+													pNativeType,
+													pVolumeWidth,
+													pVolumeHeight,
+													pVolumeDepth,
+													pVoxelWidth,
+													pVoxelHeight,
+													pVoxelDepth);
 		}
 	}
 
 	/**
-	 * Requests capture of the current displayed volume (Preferably of all layers
-	 * but possibly just of the current layer.)
+	 * Requests capture of the current displayed volume (Preferably of all
+	 * layers but possibly just of the current layer.)
 	 */
 	@Override
 	public void requestVolumeCapture()
@@ -2140,7 +2298,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Adds a eye ray listener to this renderer.
 	 *
 	 * @param pEyeRayListener
-	 *          eye ray listener
+	 *            eye ray listener
 	 */
 	@Override
 	public void addEyeRayListener(EyeRayListener pEyeRayListener)
@@ -2152,7 +2310,7 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Removes a eye ray listener to this renderer.
 	 *
 	 * @param pEyeRayListener
-	 *          eye ray listener
+	 *            eye ray listener
 	 */
 	@Override
 	public void removeEyeRayListener(EyeRayListener pEyeRayListener)
@@ -2170,16 +2328,16 @@ public abstract class ClearVolumeRendererBase	implements
 	 * Clamps the value pValue to the interval [pMin,pMax]
 	 *
 	 * @param pValue
-	 *          to be clamped
+	 *            to be clamped
 	 * @param pMin
-	 *          minimum
+	 *            minimum
 	 * @param pMax
-	 *          maximum
+	 *            maximum
 	 * @return clamped size
 	 */
 	public static double clamp(	final double pValue,
-															final double pMin,
-															final double pMax)
+								final double pMin,
+								final double pMax)
 	{
 		return Math.min(Math.max(pValue, pMin), pMax);
 	}

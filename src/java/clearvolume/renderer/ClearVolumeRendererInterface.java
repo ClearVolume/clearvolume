@@ -41,8 +41,8 @@ import coremem.types.NativeTypeEnum;
  *
  */
 public interface ClearVolumeRendererInterface	extends
-																							DisplayRequestInterface,
-																							ClearVolumeCloseable
+												DisplayRequestInterface,
+												ClearVolumeCloseable
 {
 
 	/**
@@ -56,7 +56,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the native type for this renderer.
 	 *
 	 * @param pNativeType
-	 *          native type
+	 *            native type
 	 */
 	public void setNativeType(NativeTypeEnum pNativeType);
 
@@ -71,7 +71,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the display used by the renderer visible.
 	 *
 	 * @param pVisible
-	 *          true to set visible, false to set invisible
+	 *            true to set visible, false to set invisible
 	 */
 	public void setVisible(boolean pVisible);
 
@@ -124,7 +124,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Returns true if the given layer is visible.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return true if layer visible, false otherwise
 	 */
 	public boolean isLayerVisible(int pRenderLayerIndex);
@@ -133,7 +133,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets visibility of the current layer.
 	 *
 	 * @param pVisible
-	 *          true to set it visible, false to set it invisible
+	 *            true to set it visible, false to set it invisible
 	 */
 	public void setLayerVisible(boolean pVisible);
 
@@ -141,11 +141,12 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets visibility of a given layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pVisible
-	 *          true to set visible, false to set invisible
+	 *            true to set visible, false to set invisible
 	 */
-	public void setLayerVisible(int pRenderLayerIndex, boolean pVisible);
+	public void setLayerVisible(int pRenderLayerIndex,
+								boolean pVisible);
 
 	/**
 	 * Returns the brightness of the current render layer index.
@@ -158,7 +159,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Returns the brightness of the current render layer index.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return brightness
 	 */
 	public double getBrightness(int pRenderLayerIndex);
@@ -174,7 +175,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Returns gamma for given render layer
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return gamma
 	 */
 	public double getGamma(int pRenderLayerIndex);
@@ -190,7 +191,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Returns transfer range min
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return transfer range min
 	 */
 	public double getTransferRangeMin(int pRenderLayerIndex);
@@ -206,7 +207,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Returns transfer range min
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return transfer range min
 	 */
 	public double getTransferRangeMax(int pRenderLayerIndex);
@@ -215,39 +216,39 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets transfer function range [min,max] for given render layer
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pTransferRangeMin
-	 *          transfer range min
+	 *            transfer range min
 	 * @param pTransferRangeMax
-	 *          transfer range max
+	 *            transfer range max
 	 */
 	public void setTransferFunctionRange(	int pRenderLayerIndex,
-																				double pTransferRangeMin,
-																				double pTransferRangeMax);
+											double pTransferRangeMin,
+											double pTransferRangeMax);
 
 	/**
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pTransferRangeMin
-	 *          transfer range min
+	 *            transfer range min
 	 */
 	public void setTransferFunctionRangeMin(int pRenderLayerIndex,
-																					double pTransferRangeMin);
+											double pTransferRangeMin);
 
 	/**
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pTransferRangeMax
-	 *          tarnsfer range max
+	 *            tarnsfer range max
 	 */
 	public void setTransferFunctionRangeMax(int pRenderLayerIndex,
-																					double pTransferRangeMax);
+											double pTransferRangeMax);
 
 	/**
 	 * Sets the transfer function used for rendering.
 	 *
 	 * @param pTransfertFunction
-	 *          transfer function
+	 *            transfer function
 	 */
 	public void setTransferFunction(TransferFunction pTransfertFunction);
 
@@ -255,12 +256,12 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the transfer function used for rendering.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pTransfertFunction
-	 *          transfer function
+	 *            transfer function
 	 */
 	public void setTransferFunction(int pRenderLayerIndex,
-																	TransferFunction pTransfertFunction);
+									TransferFunction pTransfertFunction);
 
 	/**
 	 * Returns the transfer function set for the current layer.
@@ -273,7 +274,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Returns the transfer function set for a given layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return transfer function
 	 */
 	public TransferFunction getTransferFunction(int pRenderLayerIndex);
@@ -286,13 +287,13 @@ public interface ClearVolumeRendererInterface	extends
 	public float[] getTransferFunctionArray();
 
 	/**
-	 * Sets the transfer function range. Both min and max values should be within
-	 * [0,1].
+	 * Sets the transfer function range. Both min and max values should be
+	 * within [0,1].
 	 *
 	 * @param pMin
-	 *          minimum
+	 *            minimum
 	 * @param pMax
-	 *          maximum
+	 *            maximum
 	 */
 	public void setTransferFunctionRange(double pMin, double pMax);
 
@@ -300,7 +301,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the transfer function range minimum.
 	 *
 	 * @param pMin
-	 *          transfer function range minimum.
+	 *            transfer function range minimum.
 	 */
 	public void setTransferFunctionRangeMin(double pMin);
 
@@ -308,7 +309,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the transfer function range maximum.
 	 *
 	 * @param pMax
-	 *          transfer function range maximum.
+	 *            transfer function range maximum.
 	 */
 	public void setTransferFunctionRangeMax(double pMax);
 
@@ -316,31 +317,32 @@ public interface ClearVolumeRendererInterface	extends
 	 * Gamma size used for display.
 	 *
 	 * @param pGamma
-	 *          gamma value
+	 *            gamma value
 	 */
 	public void setGamma(double pGamma);
 
 	/**
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pGamma
-	 *          gamma value
+	 *            gamma value
 	 */
 	public void setGamma(int pRenderLayerIndex, double pGamma);
 
 	/**
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pBrightness
-	 *          brightness
+	 *            brightness
 	 */
-	public void setBrightness(int pRenderLayerIndex, double pBrightness);
+	public void setBrightness(	int pRenderLayerIndex,
+								double pBrightness);
 
 	/**
 	 * Sets the brightness for display
 	 *
 	 * @param pBrightness
-	 *          brightness
+	 *            brightness
 	 */
 	public void setBrightness(double pBrightness);
 
@@ -353,9 +355,9 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the amount of dithering [0,1] for a given render layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pDithering
-	 *          new dithering level for render layer
+	 *            new dithering level for render layer
 	 */
 	public void setDithering(int pRenderLayerIndex, double pDithering);
 
@@ -363,7 +365,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Returns samount of dithering [0,1] for a given render layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return dithering
 	 */
 	public float getDithering(int pRenderLayerIndex);
@@ -372,9 +374,9 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the quality level [0,1] for a given render layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pQuality
-	 *          new quality level for render layer
+	 *            new quality level for render layer
 	 */
 	public void setQuality(int pRenderLayerIndex, double pQuality);
 
@@ -382,7 +384,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Returns the quality level [0,1] for a given render layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return quality level
 	 */
 	public float getQuality(int pRenderLayerIndex);
@@ -391,18 +393,18 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the render algorithm for the given render layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pRenderAlgorithm
-	 *          render algorithm
+	 *            render algorithm
 	 */
 	public void setRenderAlgorithm(	final int pRenderLayerIndex,
-																	RenderAlgorithm pRenderAlgorithm);
+									RenderAlgorithm pRenderAlgorithm);
 
 	/**
 	 * Sets the current render algorithm for all render layers.
 	 *
 	 * @param pRenderAlgorithm
-	 *          render algorithm
+	 *            render algorithm
 	 */
 	public void setRenderAlgorithm(RenderAlgorithm pRenderAlgorithm);
 
@@ -410,7 +412,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Gets the currently used render algorithm used.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @return currently used render algorithm
 	 */
 	public RenderAlgorithm getRenderAlgorithm(final int pRenderLayerIndex);
@@ -424,7 +426,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Cycles through rendering algorithms for current layer index
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 */
 	public void cycleRenderAlgorithm(int pRenderLayerIndex);
 
@@ -432,7 +434,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the current render layer.
 	 *
 	 * @param pLayerIndex
-	 *          Layer to render the volume to.
+	 *            Layer to render the volume to.
 	 */
 	public void setCurrentRenderLayer(int pLayerIndex);
 
@@ -447,7 +449,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets number of render layers.
 	 *
 	 * @param pNumberOfRenderLayers
-	 *          Number of render layers
+	 *            Number of render layers
 	 */
 	public void setNumberOfRenderLayers(int pNumberOfRenderLayers);
 
@@ -459,147 +461,213 @@ public interface ClearVolumeRendererInterface	extends
 	public int getNumberOfRenderLayers();
 
 	/**
-	 * Updates the voxel size of subsequently rendered volumes
-	 *
-	 * @param pVoxelSizeX
-	 *          voxel size along X
-	 * @param pVoxelSizeY
-	 *          voxel size along Y
-	 * @param pVoxelSizeZ
-	 *          voxel size along Z
-	 */
-	public void setVoxelSize(	double pVoxelSizeX,
-														double pVoxelSizeY,
-														double pVoxelSizeZ);
-
-	/**
-	 * Updates the displayed volume with the provided volume data of voxel
-	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
+	 * Updates the voxel size of subsequently rendered volume for given render
 	 * layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
+	 * @param pVoxelSizeX
+	 *            voxel size along X
+	 * @param pVoxelSizeY
+	 *            voxel size along Y
+	 * @param pVoxelSizeZ
+	 *            voxel size along Z
+	 */
+	public void setVoxelSize(	final int pRenderLayerIndex,
+								final double pVoxelSizeX,
+								final double pVoxelSizeY,
+								final double pVoxelSizeZ);
+
+	/**
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given
+	 * render layer.
+	 *
+	 * @param pRenderLayerIndex
+	 *            render layer index
 	 * @param pByteBuffer
-	 *          NIO byte buffer
+	 *            NIO byte buffer
 	 * @param pVolumeSizeX
-	 *          volume size along X
+	 *            volume size along X
 	 * @param pVolumeSizeY
-	 *          volume size along Y
+	 *            volume size along Y
 	 * @param pVolumeSizeZ
-	 *          volume size along Z
+	 *            volume size along Z
 	 * @return true if buffer fully copied
 	 */
 	public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
-																			ByteBuffer pByteBuffer,
-																			long pVolumeSizeX,
-																			long pVolumeSizeY,
-																			long pVolumeSizeZ);
+										ByteBuffer pByteBuffer,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
-	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
-	 * layer.
+	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given
+	 * render layer.
 	 *
 	 * @param pTimeOut
-	 *          time out delay
+	 *            time out delay
 	 * @param pTimeUnit
-	 *          time unit for time out delay
+	 *            time unit for time out delay
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pByteBuffer
-	 *          NIO byte buffer
+	 *            NIO byte buffer
 	 * @param pVolumeSizeX
-	 *          volume size along X
+	 *            volume size along X
 	 * @param pVolumeSizeY
-	 *          volume size along Y
+	 *            volume size along Y
 	 * @param pVolumeSizeZ
-	 *          volume suze along Z
+	 *            volume size along Z
 	 * @return true if buffer fully copied
 	 */
 	public boolean setVolumeDataBuffer(	long pTimeOut,
-																			TimeUnit pTimeUnit,
-																			int pRenderLayerIndex,
-																			ByteBuffer pByteBuffer,
-																			long pVolumeSizeX,
-																			long pVolumeSizeY,
-																			long pVolumeSizeZ);
+										TimeUnit pTimeUnit,
+										int pRenderLayerIndex,
+										ByteBuffer pByteBuffer,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ);
+
+
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
-	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
-	 * layer.
+	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given
+	 * render layer.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pFragmentedMemoryInterface
-	 *          fragmented buffer
+	 *            fragmented buffer
 	 * @param pVolumeSizeX
-	 *          volume size along X
+	 *            volume size along X
 	 * @param pVolumeSizeY
-	 *          volume size along Y
+	 *            volume size along Y
 	 * @param pVolumeSizeZ
-	 *          volume size along Z
+	 *            volume size along Z
 	 * @return true if buffer fully copied
 	 */
 	public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
-																			FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			long pVolumeSizeX,
-																			long pVolumeSizeY,
-																			long pVolumeSizeZ);
+										FragmentedMemoryInterface pFragmentedMemoryInterface,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ);
+	
+	
+	/**
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given
+	 * render layer.
+	 *
+	 * @param pTimeOut
+	 *            time out delay
+	 * @param pTimeUnit
+	 *            time unit for time out delay
+	 * @param pRenderLayerIndex
+	 *            render layer index
+	 * @param pFragmentedMemoryInterface
+	 *            fragmented buffer
+	 * @param pVolumeSizeX
+	 *            volume size along X
+	 * @param pVolumeSizeY
+	 *            volume size along Y
+	 * @param pVolumeSizeZ
+	 *            volume size along Z
+	 * @return true if buffer fully copied
+	 */
+	public boolean setVolumeDataBuffer(	long pTimeOut,
+										TimeUnit pTimeUnit,
+										int pRenderLayerIndex,
+										FragmentedMemoryInterface pFragmentedMemoryInterface,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
-	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given render
-	 * layer.
+	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given
+	 * render layer.
 	 * 
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pContiguousMemoryInterface
-	 *          contiguous buffer
+	 *            contiguous buffer
 	 * @param pVolumeSizeX
-	 *          volume size along X
+	 *            volume size along X
 	 * @param pVolumeSizeY
-	 *          volume size along Y
+	 *            volume size along Y
 	 * @param pVolumeSizeZ
-	 *          volume size along Z
+	 *            volume size along Z
 	 * @return true if buffer fully copied
 	 */
 	public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
-																			ContiguousMemoryInterface pContiguousMemoryInterface,
-																			long pVolumeSizeX,
-																			long pVolumeSizeY,
-																			long pVolumeSizeZ);
+										ContiguousMemoryInterface pContiguousMemoryInterface,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ);
+	
+	/**
+	 * Updates the displayed volume with the provided volume data of voxel
+	 * dimensions (pSizeX,pSizeY,pSizeZ). This data is uploaded to a given
+	 * render layer.
+	 *
+	 * @param pTimeOut
+	 *            time out delay
+	 * @param pTimeUnit
+	 *            time unit for time out delay
+	 * @param pRenderLayerIndex
+	 *            render layer index
+	 * @param pContiguousMemoryInterface
+	 *            contiguous buffer
+	 * @param pVolumeSizeX
+	 *            volume size along X
+	 * @param pVolumeSizeY
+	 *            volume size along Y
+	 * @param pVolumeSizeZ
+	 *            volume size along Z
+	 * @return true if buffer fully copied
+	 */
+	public boolean setVolumeDataBuffer(	long pTimeOut,
+										TimeUnit pTimeUnit,
+										int pRenderLayerIndex,
+										ContiguousMemoryInterface pContiguousMemoryInterface,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
-	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are provided.
+	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are
+	 * provided.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pByteBuffer
-	 *          NIO byte buffer
+	 *            NIO byte buffer
 	 * @param pVolumeSizeX
-	 *          volume size along X
+	 *            volume size along X
 	 * @param pVolumeSizeY
-	 *          volume size along Y
+	 *            volume size along Y
 	 * @param pVolumeSizeZ
-	 *          volume size along Z
+	 *            volume size along Z
 	 * @param pVoxelSizeX
-	 *          voxel size along X
+	 *            voxel size along X
 	 * @param pVoxelSizeY
-	 *          voxel size along Y
+	 *            voxel size along Y
 	 * @param pVoxelSizeZ
-	 *          voxel size along Z
+	 *            voxel size along Z
 	 * @return true if buffer fully copied
 	 */
 	public boolean setVolumeDataBuffer(	final int pRenderLayerIndex,
-																			ByteBuffer pByteBuffer,
-																			long pVolumeSizeX,
-																			long pVolumeSizeY,
-																			long pVolumeSizeZ,
-																			double pVoxelSizeX,
-																			double pVoxelSizeY,
-																			double pVoxelSizeZ);
+										ByteBuffer pByteBuffer,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ,
+										double pVoxelSizeX,
+										double pVoxelSizeY,
+										double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -607,37 +675,37 @@ public interface ClearVolumeRendererInterface	extends
 	 * arbitrary units must also be provided.
 	 * 
 	 * @param pTimeOut
-	 *          time out delay
+	 *            time out delay
 	 * @param pTimeUnit
-	 *          time unit for time out delay
+	 *            time unit for time out delay
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pByteBuffer
-	 *          NIO byte buffer
+	 *            NIO byte buffer
 	 * @param pVolumeSizeX
-	 *          volume size along X
+	 *            volume size along X
 	 * @param pVolumeSizeY
-	 *          volume size along Y
+	 *            volume size along Y
 	 * @param pVolumeSizeZ
-	 *          volume size along Z
+	 *            volume size along Z
 	 * @param pVoxelSizeX
-	 *          voxel size along X
+	 *            voxel size along X
 	 * @param pVoxelSizeY
-	 *          voxel size along Y
+	 *            voxel size along Y
 	 * @param pVoxelSizeZ
-	 *          voxel size along Z
+	 *            voxel size along Z
 	 * @return true if buffer fully copied
 	 */
 	public boolean setVolumeDataBuffer(	long pTimeOut,
-																			TimeUnit pTimeUnit,
-																			final int pRenderLayerIndex,
-																			final ByteBuffer pByteBuffer,
-																			final long pVolumeSizeX,
-																			final long pVolumeSizeY,
-																			final long pVolumeSizeZ,
-																			final double pVoxelSizeX,
-																			final double pVoxelSizeY,
-																			final double pVoxelSizeZ);
+										TimeUnit pTimeUnit,
+										final int pRenderLayerIndex,
+										final ByteBuffer pByteBuffer,
+										final long pVolumeSizeX,
+										final long pVolumeSizeY,
+										final long pVolumeSizeZ,
+										final double pVoxelSizeX,
+										final double pVoxelSizeY,
+										final double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -645,31 +713,31 @@ public interface ClearVolumeRendererInterface	extends
 	 * arbitrary units must also be provided.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pFragmentedMemoryInterface
-	 *          fragmented buffer
+	 *            fragmented buffer
 	 * @param pVolumeSizeX
-	 *          volume size along X
+	 *            volume size along X
 	 * @param pVolumeSizeY
-	 *          volume size along Y
+	 *            volume size along Y
 	 * @param pVolumeSizeZ
-	 *          volume size along Z
+	 *            volume size along Z
 	 * @param pVoxelSizeX
-	 *          voxel size along X
+	 *            voxel size along X
 	 * @param pVoxelSizeY
-	 *          voxel size along Y
+	 *            voxel size along Y
 	 * @param pVoxelSizeZ
-	 *          voxel size along Z
+	 *            voxel size along Z
 	 * @return true if buffer fully copied
 	 */
 	public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
-																			FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			long pVolumeSizeX,
-																			long pVolumeSizeY,
-																			long pVolumeSizeZ,
-																			double pVoxelSizeX,
-																			double pVoxelSizeY,
-																			double pVoxelSizeZ);
+										FragmentedMemoryInterface pFragmentedMemoryInterface,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ,
+										double pVoxelSizeX,
+										double pVoxelSizeY,
+										double pVoxelSizeZ);
 
 	/**
 	 * Updates the displayed volume with the provided volume data of voxel
@@ -677,129 +745,130 @@ public interface ClearVolumeRendererInterface	extends
 	 * arbitrary units must also be provided.
 	 *
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pContiguousMemoryInterface
-	 *          contiguous buffer
+	 *            contiguous buffer
 	 * @param pVolumeSizeX
-	 *          volume size along X
+	 *            volume size along X
 	 * @param pVolumeSizeY
-	 *          volume size along Y
+	 *            volume size along Y
 	 * @param pVolumeSizeZ
-	 *          volume size along Z
+	 *            volume size along Z
 	 * @param pVoxelSizeX
-	 *          voxel size along X
+	 *            voxel size along X
 	 * @param pVoxelSizeY
-	 *          voxel size along Y
+	 *            voxel size along Y
 	 * @param pVoxelSizeZ
-	 *          voxel size along Z
+	 *            voxel size along Z
 	 * @return true if buffer fully copied
 	 */
 	public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
-																			ContiguousMemoryInterface pContiguousMemoryInterface,
-																			long pVolumeSizeX,
-																			long pVolumeSizeY,
-																			long pVolumeSizeZ,
-																			double pVoxelSizeX,
-																			double pVoxelSizeY,
-																			double pVoxelSizeZ);
+										ContiguousMemoryInterface pContiguousMemoryInterface,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ,
+										double pVoxelSizeX,
+										double pVoxelSizeY,
+										double pVoxelSizeZ);
 
 	/**
 	 * * Updates the displayed volume with the provided volume data of voxel
-	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are provided.
-	 * The amount of time to wait for the data to be fully copied can be provided,
-	 * if a timeout of zero is given then this call will return immediately.
+	 * dimensions (pSizeX,pSizeY,pSizeZ). In addition the real units are
+	 * provided. The amount of time to wait for the data to be fully copied can
+	 * be provided, if a timeout of zero is given then this call will return
+	 * immediately.
 	 * 
 	 * @param pTimeOut
-	 *          time out delay
+	 *            time out delay
 	 * @param pTimeUnit
-	 *          time unit for time out delay
+	 *            time unit for time out delay
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pFragmentedMemoryInterface
-	 *          fragmented buffer
+	 *            fragmented buffer
 	 * @param pVolumeSizeX
-	 *          volume size along X
+	 *            volume size along X
 	 * @param pVolumeSizeY
-	 *          volume size along Y
+	 *            volume size along Y
 	 * @param pVolumeSizeZ
-	 *          volume size along Z
+	 *            volume size along Z
 	 * @param pVoxelSizeX
-	 *          voxel size along X
+	 *            voxel size along X
 	 * @param pVoxelSizeY
-	 *          voxel size along Y
+	 *            voxel size along Y
 	 * @param pVoxelSizeZ
-	 *          voxel size along Z
+	 *            voxel size along Z
 	 * @return true if buffer fully copied
 	 */
 	public boolean setVolumeDataBuffer(	long pTimeOut,
-																			TimeUnit pTimeUnit,
-																			int pRenderLayerIndex,
-																			FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			long pVolumeSizeX,
-																			long pVolumeSizeY,
-																			long pVolumeSizeZ,
-																			double pVoxelSizeX,
-																			double pVoxelSizeY,
-																			double pVoxelSizeZ);
+										TimeUnit pTimeUnit,
+										int pRenderLayerIndex,
+										FragmentedMemoryInterface pFragmentedMemoryInterface,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ,
+										double pVoxelSizeX,
+										double pVoxelSizeY,
+										double pVoxelSizeZ);
 
 	/**
 	 * Sets volume data buffer.
 	 * 
 	 * @param pWaitForCopy
-	 *          set to true for waiting for data to be copied.
+	 *            set to true for waiting for data to be copied.
 	 * @param pRenderLayerIndex
-	 *          render pByteBuffer index
+	 *            render pByteBuffer index
 	 * @param pFragmentedMemoryInterface
-	 *          fragmented buffer
+	 *            fragmented buffer
 	 * @param pVolumeSizeX
-	 *          volume size in voxels along X
+	 *            volume size in voxels along X
 	 * @param pVolumeSizeY
-	 *          volume size in voxels along Y
+	 *            volume size in voxels along Y
 	 * @param pVolumeSizeZ
-	 *          volume size in voxels along Z
+	 *            volume size in voxels along Z
 	 * @param pVoxelSizeX
-	 *          voxel dimension along X
+	 *            voxel dimension along X
 	 * @param pVoxelSizeY
-	 *          voxel dimension along Y
+	 *            voxel dimension along Y
 	 * @param pVoxelSizeZ
-	 *          voxel dimension along Z
+	 *            voxel dimension along Z
 	 * 
 	 * 
 	 * @return true if transfer was completed (no time out)
 	 */
 	public boolean setVolumeDataBuffer(	boolean pWaitForCopy,
-																			long pTimeOut,
-																			TimeUnit pTimeUnit,
-																			int pRenderLayerIndex,
-																			FragmentedMemoryInterface pFragmentedMemoryInterface,
-																			long pVolumeSizeX,
-																			long pVolumeSizeY,
-																			long pVolumeSizeZ,
-																			double pVoxelSizeX,
-																			double pVoxelSizeY,
-																			double pVoxelSizeZ);
+										long pTimeOut,
+										TimeUnit pTimeUnit,
+										int pRenderLayerIndex,
+										FragmentedMemoryInterface pFragmentedMemoryInterface,
+										long pVolumeSizeX,
+										long pVolumeSizeY,
+										long pVolumeSizeZ,
+										double pVoxelSizeX,
+										double pVoxelSizeY,
+										double pVoxelSizeZ);
 
 	/**
 	 * Updates the given render layer with a volume.
 	 *
 	 * @param pRenderLayerIndex
-	 *          rende rlayer index
+	 *            rende rlayer index
 	 * 
 	 * @param pVolume
-	 *          Volume data to use for updating display.
+	 *            Volume data to use for updating display.
 	 * @return true if buffer fully copied
 	 */
 	public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
-																			Volume pVolume);
+										Volume pVolume);
 
 	/**
-	 * Creates a compatible VolumeManager - possibly capable of allocating pinned
-	 * memory or memory optimised in other ways. pMaxAvailableVolumes is the
-	 * maximal number of volumes to be kept allocated and available so as to avoid
-	 * memory trashing.
+	 * Creates a compatible VolumeManager - possibly capable of allocating
+	 * pinned memory or memory optimised in other ways. pMaxAvailableVolumes is
+	 * the maximal number of volumes to be kept allocated and available so as to
+	 * avoid memory trashing.
 	 *
 	 * @param pMaxAvailableVolumes
-	 *          max available volumes
+	 *            max available volumes
 	 * @return volume manager
 	 */
 	public VolumeManager createCompatibleVolumeManager(int pMaxAvailableVolumes);
@@ -809,13 +878,13 @@ public interface ClearVolumeRendererInterface	extends
 	 *
 	 *
 	 * @param pTimeOut
-	 *          timeout delay
+	 *            timeout delay
 	 * @param pTimeUnit
-	 *          time unit
+	 *            time unit
 	 * @return true is completed, false if it timed-out.
 	 */
 	public boolean waitToFinishAllDataBufferCopy(	long pTimeOut,
-																								TimeUnit pTimeUnit);
+													TimeUnit pTimeUnit);
 
 	/**
 	 * Waits until volume data copy completes for a given layer.
@@ -824,16 +893,16 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	/**
 	 * @param pRenderLayerIndex
-	 *          render layer index
+	 *            render layer index
 	 * @param pTimeOut
-	 *          timeout delay
+	 *            timeout delay
 	 * @param pTimeUnit
-	 *          time unit
+	 *            time unit
 	 * @return true is completed, false if it timed-out.
 	 */
-	public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
-																						long pTimeOut,
-																						TimeUnit pTimeUnit);
+	public boolean waitToFinishDataBufferCopy(	final int pRenderLayerIndex,
+												long pTimeOut,
+												TimeUnit pTimeUnit);
 
 	/**
 	 * Resets rotation and translation parameters.
@@ -844,7 +913,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Translates along x axis by pDX.
 	 *
 	 * @param pDX
-	 *          amount of translation
+	 *            amount of translation
 	 */
 	public void addTranslationX(double pDX);
 
@@ -852,7 +921,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Translates along y axis by pDY.
 	 *
 	 * @param pDY
-	 *          amount of translation
+	 *            amount of translation
 	 */
 	public void addTranslationY(double pDY);
 
@@ -860,7 +929,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Translates along z axis by pDZ.
 	 *
 	 * @param pDZ
-	 *          amount of translation
+	 *            amount of translation
 	 */
 	public void addTranslationZ(double pDZ);
 
@@ -868,7 +937,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the translation vector x component.
 	 *
 	 * @param pTranslationX
-	 *          x component
+	 *            x component
 	 */
 	public void setTranslationX(double pTranslationX);
 
@@ -876,7 +945,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the translation vector y component.
 	 *
 	 * @param pTranslationY
-	 *          y component
+	 *            y component
 	 */
 	public void setTranslationY(double pTranslationY);
 
@@ -884,7 +953,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the translation vector z component.
 	 *
 	 * @param pTranslationZ
-	 *          z component
+	 *            z component
 	 */
 	public void setTranslationZ(double pTranslationZ);
 
@@ -954,7 +1023,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Adds a rotation controller.
 	 *
 	 * @param pRotationControllerInterface
-	 *          rotation controller
+	 *            rotation controller
 	 */
 	public void addRotationController(RotationControllerInterface pRotationControllerInterface);
 
@@ -962,7 +1031,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Removes a rotation controller.
 	 *
 	 * @param pRotationControllerInterface
-	 *          rotation controller
+	 *            rotation controller
 	 */
 	public void removeRotationController(RotationControllerInterface pRotationControllerInterface);
 
@@ -981,10 +1050,24 @@ public interface ClearVolumeRendererInterface	extends
 	AutoRotationController getAutoRotateController();
 
 	/**
-	 * Notifies renderer that display/volume parameters have changed and a display
-	 * update is needed.
+	 * Notifies renderer that display/volume parameters have changed and a
+	 * display update is needed.
 	 */
 	public void notifyChangeOfVolumeRenderingParameters();
+
+	/**
+	 * Returns the state of the flag that allows/disallows the update of volume
+	 * data.
+	 * 
+	 * @return flag state,
+	 */
+	boolean isVolumeDataUpdateAllowed();
+
+	/**
+	 * Sets the flag that allows/disallows the update of volume data. This is
+	 * usefull when rendering multi-channel data.
+	 */
+	void setVolumeDataUpdateAllowed(boolean pVolumeDataUpdateAllowed);
 
 	/**
 	 * Adds a parameter change listener
@@ -1028,11 +1111,11 @@ public interface ClearVolumeRendererInterface	extends
 	public void disableClose();
 
 	/**
-	 * Adds overlay module to draw with 3D primitives within the rendering volume
-	 * and 2D primitives on top of the whole image.
+	 * Adds overlay module to draw with 3D primitives within the rendering
+	 * volume and 2D primitives on top of the whole image.
 	 *
 	 * @param pOverlay
-	 *          Overlay to add.
+	 *            Overlay to add.
 	 */
 	public void addOverlay(Overlay pOverlay);
 
@@ -1040,7 +1123,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Adds a processor to this renderer.
 	 *
 	 * @param pProcessor
-	 *          ProcessorInterface to add.
+	 *            ProcessorInterface to add.
 	 */
 	public void addProcessor(ProcessorInterface<?> pProcessor);
 
@@ -1048,7 +1131,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Removes a processor to this renderer.
 	 *
 	 * @param pProcessor
-	 *          ProcessorInterface to remove.
+	 *            ProcessorInterface to remove.
 	 */
 	public void removeProcessor(final ProcessorInterface<?> pProcessor);
 
@@ -1056,7 +1139,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Adds these processors to this renderer.
 	 *
 	 * @param pProcessors
-	 *          Processors to add.
+	 *            Processors to add.
 	 */
 	public void addProcessors(Collection<ProcessorInterface<?>> pProcessors);
 
@@ -1064,13 +1147,13 @@ public interface ClearVolumeRendererInterface	extends
 	 * Adds a capture listener to this renderer.
 	 *
 	 * @param pVolumeCaptureListener
-	 *          capture listener
+	 *            capture listener
 	 */
 	public void addVolumeCaptureListener(VolumeCaptureListener pVolumeCaptureListener);
 
 	/**
-	 * Requests capture of the current displayed volume (Preferably of all layers
-	 * but possibly just of the current layer.)
+	 * Requests capture of the current displayed volume (Preferably of all
+	 * layers but possibly just of the current layer.)
 	 */
 	public void requestVolumeCapture();
 
@@ -1091,7 +1174,8 @@ public interface ClearVolumeRendererInterface	extends
 	/**
 	 * Returns a Canvas that can be used to embed this renderer.
 	 *
-	 * @return A NewtCanvasAWT object or null if the renderer cannot be embedded.
+	 * @return A NewtCanvasAWT object or null if the renderer cannot be
+	 *         embedded.
 	 */
 	public NewtCanvasAWT getNewtCanvasAWT();
 
@@ -1099,7 +1183,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Sets the Multi-pass algorithm active or inactive.
 	 * 
 	 * @param pMultiPassOn
-	 *          true iof on, false if off
+	 *            true iof on, false if off
 	 */
 	public void setAdaptiveLODActive(boolean pMultiPassOn);
 
@@ -1126,7 +1210,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Adds a eye ray listener to this renderer.
 	 *
 	 * @param pEyeRayListener
-	 *          eye ray listener
+	 *            eye ray listener
 	 */
 	public void addEyeRayListener(EyeRayListener pEyeRayListener);
 
@@ -1134,7 +1218,7 @@ public interface ClearVolumeRendererInterface	extends
 	 * Removes a eye ray listener to this renderer.
 	 *
 	 * @param pEyeRayListener
-	 *          eye ray listener
+	 *            eye ray listener
 	 */
 	public void removeEyeRayListener(EyeRayListener pEyeRayListener);
 
@@ -1152,5 +1236,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	@Override
 	public void close();
+
 
 }

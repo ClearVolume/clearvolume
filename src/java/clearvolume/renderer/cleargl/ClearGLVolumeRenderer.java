@@ -855,9 +855,10 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	{
 		// scaling...
 
-		final double lScaleX = getVolumeSizeX() * getVoxelSizeX();
-		final double lScaleY = getVolumeSizeY() * getVoxelSizeY();
-		final double lScaleZ = getVolumeSizeZ() * getVoxelSizeZ();
+		//TODO: Hack - the first volume decides for the next ones, scene graph will solve this problem...
+		final double lScaleX = getVolumeSizeX(0) * getVoxelSizeX(0);
+		final double lScaleY = getVolumeSizeY(0) * getVoxelSizeY(0);
+		final double lScaleZ = getVolumeSizeZ(0) * getVoxelSizeZ(0);
 
 		final double lMaxScale = max(max(lScaleX, lScaleY), lScaleZ);
 
@@ -1088,9 +1089,10 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																												0,
 																												1000);/**/
 
-			final int lMaxVolumeDimension = (int) max(getVolumeSizeX(),
-																								max(getVolumeSizeY(),
-																										getVolumeSizeZ()));
+			//FIXME: first layer decides... this is temporary hack, should be resolvd by using the scene graph
+			final int lMaxVolumeDimension = (int) max(getVolumeSizeX(0),
+																								max(getVolumeSizeY(0),
+																										getVolumeSizeZ(0)));
 
 			final int lMaxTextureWidth = min(	mMaxRenderWidth,
 																				2 * lMaxVolumeDimension);
