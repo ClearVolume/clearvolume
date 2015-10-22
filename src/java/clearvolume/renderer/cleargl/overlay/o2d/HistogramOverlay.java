@@ -8,10 +8,13 @@ import java.nio.FloatBuffer;
 
 import javax.swing.JPanel;
 
+import cleargl.GLMatrix;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
 
 import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
 
 public class HistogramOverlay extends BarGraphOverlay
 {
@@ -121,4 +124,15 @@ public class HistogramOverlay extends BarGraphOverlay
 
 	}
 
+	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+												GL pGL,
+												int pWidth,
+												int pHeight,
+												GLMatrix pProjectionMatrix)
+	{
+		if (isDisplayed())
+		{
+			// Not implemented yet (WHY??? It was there )
+		}
+	}
 }

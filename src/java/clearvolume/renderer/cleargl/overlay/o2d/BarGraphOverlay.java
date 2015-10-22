@@ -19,6 +19,7 @@ import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
 import clearvolume.renderer.panels.HasGUIPanel;
@@ -57,12 +58,10 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 	private volatile float mOffsetX = -1, mOffsetY = 2f / 3;
 	private volatile float mScaleX = 1, mScaleY = 1f / 3;
 	private volatile float mMin, mMax;
-	
+
 	private volatile float mRangeMin = 0, mRangeMax = 1;
 
 	private volatile boolean mLogarithm = false;
-
-
 
 	public BarGraphOverlay()
 	{
@@ -244,7 +243,8 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 	}
 
 	@Override
-	public void render2D(	GL pGL,
+	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+												GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix)

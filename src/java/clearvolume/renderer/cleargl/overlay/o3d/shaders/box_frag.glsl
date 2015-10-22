@@ -8,18 +8,19 @@ in VertexData {
 
 uniform vec4 color = vec4(1.0, 0.0, 0.0, 1.0);
 out vec4 outColor;
-
+uniform int NumberOfGridLines = 10;
+uniform float MainBoxWidth = 1.f;
  
 void main()
 {
-    vec2 distgrid = fract(VertexIn.TexCoord*10.0+vec2(0.5,0.5)) -vec2(0.5,0.5);
+  vec2 distgrid = fract(VertexIn.TexCoord*(NumberOfGridLines+1)+vec2(0.5,0.5)) -vec2(0.5,0.5);
 	
-	float alphax = 1/(1+100*(abs(distgrid.x)));
-	float alphay = 1/(1+100*(abs(distgrid.y)));
+	float alphax = 1/(1+100/MainBoxWidth*(abs(distgrid.x)));
+	float alphay = 1/(1+100/MainBoxWidth*(abs(distgrid.y)));
 	
 	vec2 distmainbox = fract(VertexIn.TexCoord+vec2(0.5,0.5)) -vec2(0.5,0.5);
-	float intx = 1/(1+400*(abs(distmainbox.x)));
-	float inty = 1/(1+400*(abs(distmainbox.y)));
+	float intx = 1/(1+400/MainBoxWidth*(abs(distmainbox.x)));
+	float inty = 1/(1+400/MainBoxWidth*(abs(distmainbox.y)));
 
 	float intensity = 0.3*(alphax+alphay+intx+inty); //intx + inty;
 

@@ -10,6 +10,7 @@ import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
@@ -63,7 +64,8 @@ public class DriftOverlay extends PathOverlay	implements
 	}
 
 	@Override
-	public void notifyResult(ProcessorInterface<float[]> pSource, float[] pResult)
+	public void notifyResult(	ProcessorInterface<float[]> pSource,
+														float[] pResult)
 	{
 		addNewCenterOfMass(pResult[0], pResult[1], pResult[2]);
 	}
@@ -75,7 +77,8 @@ public class DriftOverlay extends PathOverlay	implements
 	}
 
 	@Override
-	public void render2D(	GL pGL,
+	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+												GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix)

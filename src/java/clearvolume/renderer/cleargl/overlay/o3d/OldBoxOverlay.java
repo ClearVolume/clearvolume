@@ -11,6 +11,7 @@ import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
 
@@ -139,7 +140,8 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL, cleargl.GLMatrix, cleargl.GLMatrix)
 	 */
 	@Override
-	public void render3D(	GL pGL,
+	public void render3D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+												GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix,

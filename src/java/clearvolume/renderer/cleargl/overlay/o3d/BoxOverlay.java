@@ -1,6 +1,7 @@
 package clearvolume.renderer.cleargl.overlay.o3d;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
@@ -9,6 +10,7 @@ import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
 
@@ -29,6 +31,29 @@ public class BoxOverlay extends OverlayBase	implements
 	protected GLProgram mBoxGLProgram;
 	protected ClearGeometryObject mClearGeometryObject;
 	private volatile boolean mHasChanged = true;
+	private float[] mClipBox;
+	private boolean mAlignToClipBox;
+	private int mNumberOfGridLines;
+	private String mName;
+	private float mWidth;
+
+	public BoxOverlay(final int pNumberOfGridlines,
+										final float width,
+										final boolean pAlignToClipBox,
+
+										final String pName)
+	{
+		super();
+		mNumberOfGridLines = pNumberOfGridlines;
+		mWidth = width;
+		mAlignToClipBox = pAlignToClipBox;
+		mName = pName;
+	}
+
+	public BoxOverlay()
+	{
+		this(10, 1.f, true, "box");
+	}
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay#getName()
@@ -36,7 +61,7 @@ public class BoxOverlay extends OverlayBase	implements
 	@Override
 	public String getName()
 	{
-		return "box";
+		return mName;
 	}
 
 	/* (non-Javadoc)
@@ -80,6 +105,7 @@ public class BoxOverlay extends OverlayBase	implements
 	public void init(	GL pGL,
 										DisplayRequestInterface pDisplayRequestInterface)
 	{
+
 		try
 		{
 			mBoxGLProgram = GLProgram.buildProgram(	pGL,
@@ -90,6 +116,11 @@ public class BoxOverlay extends OverlayBase	implements
 			mClearGeometryObject = new ClearGeometryObject(	mBoxGLProgram,
 																											3,
 																											GL.GL_TRIANGLES);
+
+			mBoxGLProgram.getUniform("NumberOfGridLines")
+										.setInt(mNumberOfGridLines);
+
+			mBoxGLProgram.getUniform("MainBoxWidth").setFloat(mWidth);
 
 			final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 3);
 
@@ -238,18 +269,81 @@ public class BoxOverlay extends OverlayBase	implements
 		}
 	}
 
+	public void setVertices()
+	{
+		setVertices(new float[]
+		{ -1.f, 1.f, -1.f, 1.f, -1.f, 1.f });
+
+	}
+
+	public void setVertices(final float[] clipbox)
+	{
+
+		final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 3);
+
+		final float x1 = clipbox[0];
+		final float x2 = clipbox[1];
+		final float y1 = clipbox[2];
+		final float y2 = clipbox[3];
+		final float z1 = clipbox[4];
+		final float z2 = clipbox[5];
+
+		// Front
+		lVerticesFloatArray.add(x1, y1, z2);
+		lVerticesFloatArray.add(x2, y1, z2);
+		lVerticesFloatArray.add(x2, y2, z2);
+		lVerticesFloatArray.add(x1, y2, z2);
+		// Right
+		lVerticesFloatArray.add(x2, y1, z2);
+		lVerticesFloatArray.add(x2, y1, z1);
+		lVerticesFloatArray.add(x2, y2, z1);
+		lVerticesFloatArray.add(x2, y2, z2);
+		// Back
+		lVerticesFloatArray.add(x1, y1, z1);
+		lVerticesFloatArray.add(x1, y2, z1);
+		lVerticesFloatArray.add(x2, y2, z1);
+		lVerticesFloatArray.add(x2, y1, z1);
+		// Left
+		lVerticesFloatArray.add(x1, y1, z2);
+		lVerticesFloatArray.add(x1, y2, z2);
+		lVerticesFloatArray.add(x1, y2, z1);
+		lVerticesFloatArray.add(x1, y1, z1);
+		// Bottom
+		lVerticesFloatArray.add(x1, y1, z2);
+		lVerticesFloatArray.add(x1, y1, z1);
+		lVerticesFloatArray.add(x2, y1, z1);
+		lVerticesFloatArray.add(x2, y1, z2);
+		// Top
+		lVerticesFloatArray.add(x1, x2, x2);
+		lVerticesFloatArray.add(x2, x2, x2);
+		lVerticesFloatArray.add(x2, x2, x1);
+		lVerticesFloatArray.add(x1, x2, x1);
+		mClearGeometryObject.setVerticesAndCreateBuffer(lVerticesFloatArray.getFloatBuffer());
+	}
+
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay3D#render3D(javax.media.opengl.GL, cleargl.GLMatrix, cleargl.GLMatrix)
 	 */
 	@Override
-	public void render3D(	GL pGL,
+	public void render3D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+												GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix,
 												GLMatrix pModelViewMatrix)
 	{
+
 		if (isDisplayed())
 		{
+			// if this flag is set, the box should be drawn with the clip box,
+			// otherwise the full range -1,1 is used
+
+			if (mAlignToClipBox)
+			{
+				float[] clipbox = pClearGLVolumeRenderer.getClipBox();
+				if (!Arrays.equals(mClipBox, clipbox))
+					updateClipBox(clipbox);
+			}
 			mClearGeometryObject.setModelView(pModelViewMatrix);
 			mClearGeometryObject.setProjection(pProjectionMatrix);
 
@@ -266,4 +360,12 @@ public class BoxOverlay extends OverlayBase	implements
 		}
 	}
 
+	private void updateClipBox(final float[] clipbox)
+	{
+
+		System.out.println("update clipbox: " + Arrays.toString(clipbox));
+		mClipBox = Arrays.copyOf(clipbox, clipbox.length);
+		setVertices(mClipBox);
+
+	}
 }

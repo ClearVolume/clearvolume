@@ -119,6 +119,12 @@ maxproj_render(								__global uint	*d_output,
 													const	float dithering,
 													const	float phase,
 													const	int   clear,
+													const	float boxMin_x,
+													const float boxMax_x,
+													const float boxMin_y,
+													const float boxMax_y,
+													const float boxMin_z,
+													const float boxMax_z,
 									__read_only image2d_t 	transferColor4,
 									__constant float* 		invP,
 									__constant float* 		invM,
@@ -133,8 +139,12 @@ maxproj_render(								__global uint	*d_output,
   const float tb = trangemin/(trangemin-trangemax); 
 
   // box bounds:
-  const float4 boxMin = (float4)(-1.0f, -1.0f, -1.0f,-1.0f);
-  const float4 boxMax = (float4)(1.0f, 1.0f, 1.0f,1.0f);
+  //const float4 boxMin = (float4)(-1.0f, -1.0f, -1.0f,-1.0f);
+  //const float4 boxMax = (float4)(1.0f, 1.0f, 1.0f,1.0f);
+
+	// box bounds using the clipping box
+  const float4 boxMin = (float4)(boxMin_x,boxMin_y,boxMin_z,1.f);
+  const float4 boxMax = (float4)(boxMax_x,boxMax_y,boxMax_z,1.f);
 
 	// thread int coordinates:
   const uint x = get_global_id(0);
@@ -275,6 +285,7 @@ __kernel void isosurface_render(
   // box bounds:
   const float4 boxMin = (float4)(-1.0f, -1.0f, -1.0f,-1.0f);
   const float4 boxMax = (float4)(1.0f, 1.0f, 1.0f,1.0f);
+
 
 	// thread int coordinates:
   const uint x = get_global_id(0);

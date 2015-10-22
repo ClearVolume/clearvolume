@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.processors.ProcessorInterface;
 
 import com.jogamp.opengl.GL;
@@ -84,7 +85,8 @@ public class OverlayForProcessors extends OverlayBase	implements
 	}
 
 	@Override
-	public void render3D(	GL pGL,
+	public void render3D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+												GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix,
@@ -93,7 +95,8 @@ public class OverlayForProcessors extends OverlayBase	implements
 		if (mOverlay instanceof Overlay3D)
 		{
 			final Overlay3D lOverlay3D = (Overlay3D) mOverlay;
-			lOverlay3D.render3D(pGL,
+			lOverlay3D.render3D(pClearGLVolumeRenderer,
+													pGL,
 													pWidth,
 													pHeight,
 													pProjectionMatrix,
@@ -113,7 +116,8 @@ public class OverlayForProcessors extends OverlayBase	implements
 	}
 
 	@Override
-	public void render2D(	GL pGL,
+	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+												GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix)
@@ -121,7 +125,11 @@ public class OverlayForProcessors extends OverlayBase	implements
 		if (mOverlay instanceof Overlay2D)
 		{
 			final Overlay2D lOverlay2D = (Overlay2D) mOverlay;
-			lOverlay2D.render2D(pGL, pWidth, pHeight, pProjectionMatrix);
+			lOverlay2D.render2D(pClearGLVolumeRenderer,
+													pGL,
+													pWidth,
+													pHeight,
+													pProjectionMatrix);
 		}
 	}
 

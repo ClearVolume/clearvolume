@@ -8,6 +8,7 @@ import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.OverlayForProcessors;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
@@ -111,12 +112,17 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 	}
 
 	@Override
-	public void render2D(	GL pGL,
+	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+												GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix)
 	{
-		super.render2D(pGL, pWidth, pHeight, pProjectionMatrix);
+		super.render2D(	pClearGLVolumeRenderer,
+										pGL,
+										pWidth,
+										pHeight,
+										pProjectionMatrix);
 
 		/*
 		 * mClearTextRenderer.drawTextAtPosition(String.format(
@@ -125,5 +131,4 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 		 */
 
 	}
-
 }

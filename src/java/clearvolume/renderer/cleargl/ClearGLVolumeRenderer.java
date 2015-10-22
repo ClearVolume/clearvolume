@@ -346,7 +346,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		resetRotationTranslation();
 		setNativeType(pNativeTypeEnum);
 
-		addOverlay(new BoxOverlay());
+		addOverlay(new BoxOverlay(0, .2f, false, "box_plain"));
+		addOverlay(new BoxOverlay(10, 1.f, true, "box_grid"));
 
 		mClearGLWindow = new ClearGLWindow(	pWindowName,
 																				pWindowWidth,
@@ -799,6 +800,10 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																			!getAutoRotateController().isRotating());
 
 			}
+			catch (Throwable e)
+			{
+				e.printStackTrace();
+			}
 			finally
 			{
 				if (mDisplayReentrantLock.isHeldByCurrentThread())
@@ -855,7 +860,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	{
 		// scaling...
 
-		//TODO: Hack - the first volume decides for the next ones, scene graph will solve this problem...
+		// TODO: Hack - the first volume decides for the next ones, scene graph will
+		// solve this problem...
 		final double lScaleX = getVolumeSizeX(0) * getVoxelSizeX(0);
 		final double lScaleY = getVolumeSizeY(0) * getVoxelSizeY(0);
 		final double lScaleZ = getVolumeSizeZ(0) * getVoxelSizeZ(0);
@@ -940,13 +946,16 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		try
 		{
 
+			System.out.println("No: Overlays: " + mOverlayMap.size());
+
 			for (final Overlay lOverlay : mOverlayMap.values())
 				if (lOverlay instanceof Overlay2D)
 				{
 					final Overlay2D lOverlay2D = (Overlay2D) lOverlay;
 					try
 					{
-						lOverlay2D.render2D(lGL,
+						lOverlay2D.render2D(this,
+																lGL,
 																getWindowWidth(),
 																getWindowHeight(),
 																pProjectionMatrix);
@@ -977,7 +986,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					final Overlay3D lOverlay3D = (Overlay3D) lOverlay;
 					try
 					{
-						lOverlay3D.render3D(lGL,
+						lOverlay3D.render3D(this,
+																lGL,
 																getWindowWidth(),
 																getWindowHeight(),
 																pProjectionMatrix,
@@ -1089,7 +1099,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																												0,
 																												1000);/**/
 
-			//FIXME: first layer decides... this is temporary hack, should be resolvd by using the scene graph
+			// FIXME: first layer decides... this is temporary hack, should be resolvd
+			// by using the scene graph
 			final int lMaxVolumeDimension = (int) max(getVolumeSizeX(0),
 																								max(getVolumeSizeY(0),
 																										getVolumeSizeZ(0)));

@@ -1,6 +1,7 @@
 package clearvolume.renderer.cleargl.overlay;
 
 import cleargl.GLMatrix;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 
 import com.jogamp.opengl.GL;
 
@@ -33,7 +34,8 @@ public interface Overlay3D
 	 * @param pModelViewMatrix
 	 *          model view matrix
 	 */
-	public void render3D(	GL pGL,
+	public void render3D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+												GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix,

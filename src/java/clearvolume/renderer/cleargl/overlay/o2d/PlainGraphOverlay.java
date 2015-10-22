@@ -17,6 +17,7 @@ import cleargl.GLProgram;
 import clearvolume.audio.audioplot.AudioPlot;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
 import clearvolume.renderer.processors.ProcessorInterface;
@@ -148,7 +149,8 @@ public class PlainGraphOverlay extends OverlayBase implements
 	}
 
 	@Override
-	public void notifyResult(ProcessorInterface<Double> pSource, Double pResult)
+	public void notifyResult(	ProcessorInterface<Double> pSource,
+														Double pResult)
 	{
 		addPoint(pResult);
 	}
@@ -312,7 +314,8 @@ public class PlainGraphOverlay extends OverlayBase implements
 	}
 
 	@Override
-	public void render2D(	GL pGL,
+	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+												GL pGL,
 												int pWidth,
 												int pHeight,
 												GLMatrix pProjectionMatrix)
