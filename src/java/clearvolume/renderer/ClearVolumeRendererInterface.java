@@ -1248,4 +1248,6 @@ public interface ClearVolumeRendererInterface	extends
 
 	public void setClipBox(float[] ds);
 
+	public float[] getClipBox();
+
 }

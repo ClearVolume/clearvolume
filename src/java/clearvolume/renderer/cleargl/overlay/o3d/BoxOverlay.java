@@ -293,31 +293,36 @@ public class BoxOverlay extends OverlayBase	implements
 		lVerticesFloatArray.add(x2, y1, z2);
 		lVerticesFloatArray.add(x2, y2, z2);
 		lVerticesFloatArray.add(x1, y2, z2);
+
 		// Right
 		lVerticesFloatArray.add(x2, y1, z2);
 		lVerticesFloatArray.add(x2, y1, z1);
 		lVerticesFloatArray.add(x2, y2, z1);
 		lVerticesFloatArray.add(x2, y2, z2);
+
 		// Back
 		lVerticesFloatArray.add(x1, y1, z1);
 		lVerticesFloatArray.add(x1, y2, z1);
 		lVerticesFloatArray.add(x2, y2, z1);
 		lVerticesFloatArray.add(x2, y1, z1);
+
 		// Left
 		lVerticesFloatArray.add(x1, y1, z2);
 		lVerticesFloatArray.add(x1, y2, z2);
 		lVerticesFloatArray.add(x1, y2, z1);
 		lVerticesFloatArray.add(x1, y1, z1);
+
 		// Bottom
 		lVerticesFloatArray.add(x1, y1, z2);
 		lVerticesFloatArray.add(x1, y1, z1);
 		lVerticesFloatArray.add(x2, y1, z1);
 		lVerticesFloatArray.add(x2, y1, z2);
+
 		// Top
-		lVerticesFloatArray.add(x1, x2, x2);
-		lVerticesFloatArray.add(x2, x2, x2);
-		lVerticesFloatArray.add(x2, x2, x1);
-		lVerticesFloatArray.add(x1, x2, x1);
+		lVerticesFloatArray.add(x1, y2, z2);
+		lVerticesFloatArray.add(x2, y2, z2);
+		lVerticesFloatArray.add(x2, y2, z1);
+		lVerticesFloatArray.add(x1, y2, z1);
 		mClearGeometryObject.setVerticesAndCreateBuffer(lVerticesFloatArray.getFloatBuffer());
 	}
 
@@ -363,7 +368,6 @@ public class BoxOverlay extends OverlayBase	implements
 	private void updateClipBox(final float[] clipbox)
 	{
 
-		System.out.println("update clipbox: " + Arrays.toString(clipbox));
 		mClipBox = Arrays.copyOf(clipbox, clipbox.length);
 		setVertices(mClipBox);
 

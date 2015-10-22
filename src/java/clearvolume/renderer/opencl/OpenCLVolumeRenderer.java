@@ -493,6 +493,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 			case IsoSurface:
 				mCurrentRenderKernel = mIsoSurfaceRenderKernel;
 
+				lClipBox = getClipBox();
+
 				lMaxSteps = max(16,
 												(lMaxNumberSteps * (1 + lPassIndex)) / (2 * lNumberOfPasses));
 				lDithering = (float) pow(	getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses),
@@ -518,6 +520,12 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 													lLightVector[0],
 													lLightVector[1],
 													lLightVector[2],
+													lClipBox[0],
+													lClipBox[1],
+													lClipBox[2],
+													lClipBox[3],
+													lClipBox[4],
+													lClipBox[5],
 													mCLTransferFunctionImages[pRenderLayerIndex],
 													mCLInvProjectionBuffer,
 													mCLInvModelViewBuffer,

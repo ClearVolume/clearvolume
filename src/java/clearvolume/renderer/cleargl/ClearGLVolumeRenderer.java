@@ -346,8 +346,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		resetRotationTranslation();
 		setNativeType(pNativeTypeEnum);
 
-		addOverlay(new BoxOverlay(0, .2f, false, "box_plain"));
-		addOverlay(new BoxOverlay(10, 1.f, true, "box_grid"));
+		// addOverlay(new BoxOverlay(0, .2f, false, "box_plain"));
+		addOverlay(new BoxOverlay(10, 1.f, true, "box"));
 
 		mClearGLWindow = new ClearGLWindow(	pWindowName,
 																				pWindowWidth,
@@ -945,8 +945,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	{
 		try
 		{
-
-			System.out.println("No: Overlays: " + mOverlayMap.size());
 
 			for (final Overlay lOverlay : mOverlayMap.values())
 				if (lOverlay instanceof Overlay2D)

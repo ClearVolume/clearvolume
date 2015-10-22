@@ -138,10 +138,6 @@ maxproj_render(								__global uint	*d_output,
   const float ta = 1.f/(trangemax-trangemin);
   const float tb = trangemin/(trangemin-trangemax); 
 
-  // box bounds:
-  //const float4 boxMin = (float4)(-1.0f, -1.0f, -1.0f,-1.0f);
-  //const float4 boxMax = (float4)(1.0f, 1.0f, 1.0f,1.0f);
-
 	// box bounds using the clipping box
   const float4 boxMin = (float4)(boxMin_x,boxMin_y,boxMin_z,1.f);
   const float4 boxMax = (float4)(boxMax_x,boxMax_y,boxMax_z,1.f);
@@ -266,7 +262,13 @@ __kernel void isosurface_render(
 								const float lightX, 
 								const float lightY,
 								const float lightZ,
-								__read_only image2d_t 	transferColor4,
+								const	float boxMin_x,
+								const float boxMax_x,
+								const float boxMin_y,
+								const float boxMax_y,
+								const float boxMin_z,
+								const float boxMax_z,
+									__read_only image2d_t 	transferColor4,
 								__constant float* 		invP,
 								__constant float* 		invM,
 								__read_only image3d_t 	volume
@@ -282,9 +284,9 @@ __kernel void isosurface_render(
   const float ta = 1.f/(trangemax-trangemin);
   const float tb = trangemin/(trangemin-trangemax); 
 
-  // box bounds:
-  const float4 boxMin = (float4)(-1.0f, -1.0f, -1.0f,-1.0f);
-  const float4 boxMax = (float4)(1.0f, 1.0f, 1.0f,1.0f);
+  // box bounds using the clipping box
+  const float4 boxMin = (float4)(boxMin_x,boxMin_y,boxMin_z,1.f);
+  const float4 boxMax = (float4)(boxMax_x,boxMax_y,boxMax_z,1.f);
 
 
 	// thread int coordinates:
