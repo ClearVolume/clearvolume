@@ -1435,6 +1435,40 @@ public abstract class ClearVolumeRendererBase	implements
 	/**
 	 * Sets the voxel size.
 	 * 
+	 * @param pVoxelSizeX
+	 *            voxel size along X
+	 * @param pVoxelSizeY
+	 *            voxel size along Y
+	 * @param pVoxelSizeZ
+	 *            voxel size along Z
+	 * 
+	 */
+	@Override
+	public void setVoxelSize(	final double pVoxelSizeX,
+								final double pVoxelSizeY,
+								final double pVoxelSizeZ)
+	{
+		getDisplayLock().lock();
+		try
+		{
+			for (int l = 0; l < getNumberOfRenderLayers(); l++)
+			{
+				mVoxelSizeX[l] = pVoxelSizeX;
+				mVoxelSizeY[l] = pVoxelSizeY;
+				mVoxelSizeZ[l] = pVoxelSizeZ;
+			}
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+	}
+
+	/**
+	 * Sets the voxel size for a given render layer.
+	 * 
 	 * @param pRenderLayerIndex
 	 *            render layer index
 	 * @param pVoxelSizeX
@@ -1694,7 +1728,7 @@ public abstract class ClearVolumeRendererBase	implements
 									1,
 									1);
 	}
-	
+
 	/**
 	 * Sets volume data buffer.
 	 * 
@@ -1736,7 +1770,6 @@ public abstract class ClearVolumeRendererBase	implements
 									1,
 									1);
 	}
-
 
 	/**
 	 * Sets volume data buffer.

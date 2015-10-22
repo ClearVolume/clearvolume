@@ -473,6 +473,24 @@ public interface ClearVolumeRendererInterface	extends
 	 * @param pVoxelSizeZ
 	 *            voxel size along Z
 	 */
+	public void setVoxelSize(final double pVoxelSizeX,
+								final double pVoxelSizeY,
+								final double pVoxelSizeZ);
+	
+	
+	/**
+	 * Updates the voxel size of subsequently rendered volume for all render
+	 * layers.
+	 *
+	 * @param pRenderLayerIndex
+	 *            render layer index
+	 * @param pVoxelSizeX
+	 *            voxel size along X
+	 * @param pVoxelSizeY
+	 *            voxel size along Y
+	 * @param pVoxelSizeZ
+	 *            voxel size along Z
+	 */
 	public void setVoxelSize(	final int pRenderLayerIndex,
 								final double pVoxelSizeX,
 								final double pVoxelSizeY,
