@@ -37,7 +37,7 @@ public class ClearVolumeJFrame extends JFrame
 	}
 
 	public ClearVolumeJFrame(	final String pTitle,
-														final GraphicsConfiguration pGc)
+								final GraphicsConfiguration pGc)
 	{
 		super(pTitle, pGc);
 		setClearVolumeIcon();

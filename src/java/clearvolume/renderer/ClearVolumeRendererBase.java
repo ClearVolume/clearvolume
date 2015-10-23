@@ -1320,6 +1320,38 @@ public abstract class ClearVolumeRendererBase	implements
 				getDisplayLock().unlock();
 		}
 	}
+	
+	/**
+	 * @return clip box bounds [xmin, xmax, ymin, ymax, zmin, zmax]
+	 */
+	public float[] getClipBox()
+	{
+		return mVolumeClipBox;
+	}
+
+	/**
+	 * Sets the clip box bounds [xmin, xmax, ymin, ymax, zmin, zmax].
+	 * 
+	 * @param pClipBoxBounds
+	 */
+	public void setClipBox(float[] pVolumeClipBox)
+	{
+
+		getDisplayLock().lock();
+		try
+		{
+			mVolumeClipBox = Arrays.copyOf(	pVolumeClipBox,
+																			pVolumeClipBox.length);
+
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+
+	}
 
 	/**
 	 * Returns for a given index the corresponding volume data buffer.
@@ -2412,28 +2444,6 @@ public abstract class ClearVolumeRendererBase	implements
 
 	}
 
-	public float[] getClipBox()
-	{
-		return mVolumeClipBox;
-	}
 
-	public void setClipBox(float[] pVolumeClipBox)
-	{
-
-		getDisplayLock().lock();
-		try
-		{
-			mVolumeClipBox = Arrays.copyOf(	pVolumeClipBox,
-																			pVolumeClipBox.length);
-
-			notifyChangeOfVolumeRenderingParameters();
-		}
-		finally
-		{
-			if (getDisplayLock().isHeldByCurrentThread())
-				getDisplayLock().unlock();
-		}
-
-	}
 
 }

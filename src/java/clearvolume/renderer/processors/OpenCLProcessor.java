@@ -4,7 +4,7 @@ import clearvolume.renderer.opencl.OpenCLDevice;
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
 
 public abstract class OpenCLProcessor<R> extends ProcessorBase<R>	implements
-																																	ProcessorInterface<R>
+																	ProcessorInterface<R>
 {
 
 	private OpenCLDevice mOpenCLDevice;
@@ -38,8 +38,8 @@ public abstract class OpenCLProcessor<R> extends ProcessorBase<R>	implements
 
 	@Override
 	public abstract void process(	int pRenderLayerIndex,
-																long pWidthInVoxels,
-																long pHeightInVoxels,
-																long pDepthInVoxels);
+									long pWidthInVoxels,
+									long pHeightInVoxels,
+									long pDepthInVoxels);
 
 }

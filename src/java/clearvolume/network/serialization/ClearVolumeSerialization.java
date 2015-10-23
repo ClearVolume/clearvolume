@@ -18,7 +18,7 @@ public class ClearVolumeSerialization
 	private static final int cLongSizeInBytes = 8;
 
 	public static final ByteBuffer serialize(	Volume pVolume,
-																						ByteBuffer pByteBuffer)
+												ByteBuffer pByteBuffer)
 	{
 		final StringBuilder lStringBuilder = new StringBuilder();
 		writeVolumeHeader(pVolume, lStringBuilder);
@@ -26,9 +26,9 @@ public class ClearVolumeSerialization
 		final int lHeaderLength = lStringBuilder.length();
 
 		final long lDataLength = pVolume.getDataSizeInBytes();
-		final int lNeededBufferLength = ToIntExact.toIntExact(3 * cLongSizeInBytes
-																													+ lHeaderLength
-																													+ lDataLength);
+		final int lNeededBufferLength = ToIntExact.toIntExact(3	* cLongSizeInBytes
+																+ lHeaderLength
+																+ lDataLength);
 		if (pByteBuffer == null || pByteBuffer.capacity() != lNeededBufferLength)
 		{
 			pByteBuffer = ByteBuffer.allocateDirect(lNeededBufferLength);
@@ -45,8 +45,8 @@ public class ClearVolumeSerialization
 		return pByteBuffer;
 	};
 
-	private static void writeVolumeHeader(Volume pVolume,
-																				StringBuilder pStringBuilder)
+	private static void writeVolumeHeader(	Volume pVolume,
+											StringBuilder pStringBuilder)
 	{
 
 		final LinkedHashMap<String, String> lHeaderMap = new LinkedHashMap<String, String>();
@@ -54,88 +54,90 @@ public class ClearVolumeSerialization
 		lHeaderMap.put("time", "" + pVolume.getTimeInSeconds());
 		lHeaderMap.put("channel", "" + pVolume.getChannelID());
 		lHeaderMap.put("channelname", pVolume.getChannelName());
-		lHeaderMap.put("color", serializeFloatArray(pVolume.getColor()));
+		lHeaderMap.put(	"color",
+						serializeFloatArray(pVolume.getColor()));
 		lHeaderMap.put(	"viewmatrix",
-										serializeFloatArray(pVolume.getViewMatrix()));
+						serializeFloatArray(pVolume.getViewMatrix()));
 		lHeaderMap.put("dim", "" + pVolume.getDimension());
 		lHeaderMap.put("type", "" + pVolume.getTypeName());
-		lHeaderMap.put("bytespervoxel", "" + pVolume.getBytesPerVoxel());
+		lHeaderMap.put(	"bytespervoxel",
+						"" + pVolume.getBytesPerVoxel());
 		lHeaderMap.put("elementsize", "" + pVolume.getElementSize());
 		lHeaderMap.put("width", "" + pVolume.getWidthInVoxels());
 		lHeaderMap.put("height", "" + pVolume.getHeightInVoxels());
 		lHeaderMap.put("depth", "" + pVolume.getDepthInVoxels());
 		lHeaderMap.put(	"voxelwidth",
-										"" + pVolume.getVoxelWidthInRealUnits());
+						"" + pVolume.getVoxelWidthInRealUnits());
 		lHeaderMap.put(	"voxelheight",
-										"" + pVolume.getVoxelHeightInRealUnits());
+						"" + pVolume.getVoxelHeightInRealUnits());
 		lHeaderMap.put(	"voxeldepth",
-										"" + pVolume.getVoxelDepthInRealUnits());
+						"" + pVolume.getVoxelDepthInRealUnits());
 		lHeaderMap.put("realunit", pVolume.getRealUnitName());
 
 		KeyValueMaps.writeStringFromMap(lHeaderMap, pStringBuilder);
 	}
 
 	static void readVolumeHeader(	ByteBuffer pByteBuffer,
-																int pHeaderLength,
-																Volume pVolume)
+									int pHeaderLength,
+									Volume pVolume)
 	{
 
-		final Map<String, String> lHeaderMap = KeyValueMaps.readMapFromBuffer(pByteBuffer,
-																																					pHeaderLength,
-																																					null);
+		final Map<String, String> lHeaderMap = KeyValueMaps.readMapFromBuffer(	pByteBuffer,
+																				pHeaderLength,
+																				null);
 		final long lIndex = parseLong(lHeaderMap.get("index"), 0);
 		final double lTime = parseDouble(lHeaderMap.get("time"), 0);
-		final int lVolumeChannelID = parseInt(lHeaderMap.get("channel"),
-																					0);
-		final String lVolumeChannelName = parseString(lHeaderMap.get("channelname"),
-																									"noname");
+		final int lVolumeChannelID = parseInt(	lHeaderMap.get("channel"),
+												0);
+		final String lVolumeChannelName = parseString(	lHeaderMap.get("channelname"),
+														"noname");
 
-		final float[] lColor = lHeaderMap.get("color") == null ? null
-																													: parseFloatArray(lHeaderMap.get("color"),
-																																						new float[]
-																																						{ 1.f,
-																																							1.f,
-																																							1.f,
-																																							1.f });
+		final float[] lColor = lHeaderMap.get("color") == null	? null
+																: parseFloatArray(	lHeaderMap.get("color"),
+																					new float[]
+																					{	1.f,
+																						1.f,
+																						1.f,
+																						1.f });
 
 		final float[] lViewMatrix = parseFloatArray(lHeaderMap.get("viewmatrix"),
-																								new float[]
-																								{ 1.f,
-																									0.f,
-																									0.f,
-																									0.f,
-																									0.f,
-																									1.f,
-																									0.f,
-																									0.f,
-																									0.f,
-																									0.f,
-																									1.f,
-																									0.f,
-																									0.f,
-																									0.f,
-																									0.f,
-																									1.f });
+													new float[]
+													{	1.f,
+														0.f,
+														0.f,
+														0.f,
+														0.f,
+														1.f,
+														0.f,
+														0.f,
+														0.f,
+														0.f,
+														1.f,
+														0.f,
+														0.f,
+														0.f,
+														0.f,
+														1.f });
 
 		final int lDim = parseInt(lHeaderMap.get("dim"), 3);
 
 		final String lType = lHeaderMap.get("type");
 
 		final long lElementSize = parseLong(lHeaderMap.get("elementsize"),
-																				1);
+											1);
 
 		final long lWidth = parseLong(lHeaderMap.get("width"));
 		final long lHeight = parseLong(lHeaderMap.get("height"));
 		final long lDepth = parseLong(lHeaderMap.get("depth"));
 
 		final String lRealUnitName = parseString(	lHeaderMap.get("realunit"),
-																							"1");
+													"1");
 		final double lVoxelWidth = parseDouble(	lHeaderMap.get("voxelwidth"),
-																						1.);
+												1.);
 		final double lVoxelHeight = parseDouble(lHeaderMap.get("voxelheight"),
-																						1.);
+												1.);
 		final double lVoxelDepth = parseDouble(	lHeaderMap.get("voxeldepth"),
-																						1.);
+												1.);
 
 		pVolume.setTimeIndex(lIndex);
 		pVolume.setTimeInSeconds(lTime);
@@ -145,23 +147,23 @@ public class ClearVolumeSerialization
 		pVolume.setColor(lColor);
 		pVolume.setViewMatrix(lViewMatrix);
 		pVolume.setDimension(lDim);
-		pVolume.setDimensionsInVoxels(lElementSize,
-																	lWidth,
-																	lHeight,
-																	lDepth);
+		pVolume.setDimensionsInVoxels(	lElementSize,
+										lWidth,
+										lHeight,
+										lDepth);
 
 		pVolume.setVoxelSizeInRealUnits(lRealUnitName,
-																		lVoxelWidth,
-																		lVoxelHeight,
-																		lVoxelDepth);
+										lVoxelWidth,
+										lVoxelHeight,
+										lVoxelDepth);
 
 	};
 
 	private static float[] parseFloatArray(	String pString,
-																					final float[] defaultValue)
+											final float[] defaultValue)
 	{
 		return (pString == null) ? defaultValue
-														: deserializeFloatArray(pString);
+								: deserializeFloatArray(pString);
 
 	}
 
@@ -193,15 +195,15 @@ public class ClearVolumeSerialization
 		return Long.parseLong(pString);
 	}
 
-	private static double parseDouble(String pString,
-																		double defaultValue)
+	private static double parseDouble(	String pString,
+										double defaultValue)
 	{
 		return (pString == null) ? defaultValue
-														: Double.parseDouble(pString);
+								: Double.parseDouble(pString);
 	}
 
-	private static String parseString(String pString,
-																		String defaultValue)
+	private static String parseString(	String pString,
+										String defaultValue)
 	{
 		return (pString == null) ? defaultValue : pString;
 	}
@@ -209,12 +211,13 @@ public class ClearVolumeSerialization
 	private static int parseInt(String pString, int defaultValue)
 	{
 		return (pString == null) ? defaultValue
-														: Integer.parseInt(pString);
+								: Integer.parseInt(pString);
 	}
 
 	private static long parseLong(String pString, long defaultValue)
 	{
-		return (pString == null) ? defaultValue : Long.parseLong(pString);
+		return (pString == null) ? defaultValue
+								: Long.parseLong(pString);
 	}
 
 	private static String serializeFloatArray(float[] pFloatArray)
@@ -256,7 +259,7 @@ public class ClearVolumeSerialization
 	private static ThreadLocal<ByteBuffer> sScratchBufferThreadLocal = new ThreadLocal<ByteBuffer>();
 
 	public static final Volume deserialize(	SocketChannel pSocketChannel,
-																					Volume pVolume) throws IOException
+											Volume pVolume) throws IOException
 	{
 		if (pVolume == null)
 		{
@@ -273,18 +276,18 @@ public class ClearVolumeSerialization
 		readPartLength(pSocketChannel, pScratchBuffer);
 
 		final int lHeaderLength = readPartLength(	pSocketChannel,
-																							pScratchBuffer);
+													pScratchBuffer);
 
 		pScratchBuffer = ensureScratchBufferLengthIsEnough(	pScratchBuffer,
-																												lHeaderLength);
+															lHeaderLength);
 
-		readIntoScratchBuffer(pSocketChannel,
-													pScratchBuffer,
-													lHeaderLength);
+		readIntoScratchBuffer(	pSocketChannel,
+								pScratchBuffer,
+								lHeaderLength);
 		readVolumeHeader(pScratchBuffer, lHeaderLength, pVolume);
 
 		final int lDataLength = readPartLength(	pSocketChannel,
-																						pScratchBuffer);
+												pScratchBuffer);
 
 		if (pScratchBuffer.capacity() < lDataLength)
 		{
@@ -292,7 +295,9 @@ public class ClearVolumeSerialization
 			pScratchBuffer.order(ByteOrder.nativeOrder());
 		}
 
-		readIntoScratchBuffer(pSocketChannel, pScratchBuffer, lDataLength);
+		readIntoScratchBuffer(	pSocketChannel,
+								pScratchBuffer,
+								lDataLength);
 		readVolumeData(pScratchBuffer, lDataLength, pVolume);
 
 		sScratchBufferThreadLocal.set(pScratchBuffer);
@@ -300,9 +305,9 @@ public class ClearVolumeSerialization
 		return pVolume;
 	}
 
-	private static void readIntoScratchBuffer(SocketChannel pSocketChannel,
-																						ByteBuffer pScratchBuffer,
-																						final int lHeaderLength) throws IOException
+	private static void readIntoScratchBuffer(	SocketChannel pSocketChannel,
+												ByteBuffer pScratchBuffer,
+												final int lHeaderLength) throws IOException
 	{
 		pScratchBuffer.clear();
 		pScratchBuffer.limit(lHeaderLength);
@@ -315,7 +320,7 @@ public class ClearVolumeSerialization
 	}
 
 	private static ByteBuffer ensureScratchBufferLengthIsEnough(ByteBuffer pScratchBuffer,
-																															final int lHeaderLength)
+																final int lHeaderLength)
 	{
 		if (pScratchBuffer == null || pScratchBuffer.capacity() < lHeaderLength)
 		{
@@ -325,8 +330,8 @@ public class ClearVolumeSerialization
 		return pScratchBuffer;
 	}
 
-	private static int readPartLength(SocketChannel pSocketChannel,
-																		ByteBuffer pScratchBuffer) throws IOException
+	private static int readPartLength(	SocketChannel pSocketChannel,
+										ByteBuffer pScratchBuffer) throws IOException
 	{
 		pScratchBuffer.clear();
 		pScratchBuffer.limit(cLongSizeInBytes);
@@ -341,7 +346,7 @@ public class ClearVolumeSerialization
 	};
 
 	public static final Volume deserialize(	ByteBuffer pByteBuffer,
-																					Volume pVolume)
+											Volume pVolume)
 	{
 		pByteBuffer.rewind();
 		final int lWholeLength = ToIntExact.toIntExact(pByteBuffer.getLong());
@@ -353,12 +358,12 @@ public class ClearVolumeSerialization
 	}
 
 	static void readVolumeData(	ByteBuffer pByteBuffer,
-															long pDataLength,
-															Volume pVolume)
+								long pDataLength,
+								Volume pVolume)
 	{
 
 		if (pVolume.getDataBuffer() == null || pVolume.getDataBuffer()
-																									.capacity() != pDataLength)
+														.capacity() != pDataLength)
 		{
 			final ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(ToIntExact.toIntExact(pDataLength));
 			lByteBuffer.order(ByteOrder.nativeOrder());

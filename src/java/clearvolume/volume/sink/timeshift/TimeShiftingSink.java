@@ -14,9 +14,9 @@ import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.relay.RelaySinkAdapter;
 import clearvolume.volume.sink.relay.RelaySinkInterface;
 
-public class TimeShiftingSink extends RelaySinkAdapter implements
-																											RelaySinkInterface,
-																											ClearVolumeCloseable
+public class TimeShiftingSink extends RelaySinkAdapter	implements
+														RelaySinkInterface,
+														ClearVolumeCloseable
 {
 	private static final float cCleanUpRatio = 0.25f;
 
@@ -35,14 +35,14 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 	private volatile boolean mIsPlaying = true;
 
 	public TimeShiftingSink(long pSoftMemoryHoryzonInTimePointIndices,
-													long pHardMemoryHoryzonInTimePointIndices)
+							long pHardMemoryHoryzonInTimePointIndices)
 	{
 		super();
 		mSwitchableSoftReferenceManager = new SwitchableSoftReferenceManager<>();
 		mSoftMemoryHorizonInTimePointIndices = Math.min(pSoftMemoryHoryzonInTimePointIndices,
-																										pHardMemoryHoryzonInTimePointIndices);
+														pHardMemoryHoryzonInTimePointIndices);
 		mHardMemoryHorizonInTimePointIndices = Math.max(pHardMemoryHoryzonInTimePointIndices,
-																										pSoftMemoryHoryzonInTimePointIndices);
+														pSoftMemoryHoryzonInTimePointIndices);
 		mCleanUpPeriodInTimePoints = (long) (mSoftMemoryHorizonInTimePointIndices * cCleanUpRatio);
 	}
 
@@ -60,10 +60,11 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 
 					// find the available data interval to evade invalid indices
 					final long startPos = Math.max(	0,
-																					mHighestTimePointIndexSeen - mHardMemoryHorizonInTimePointIndices);
+													mHighestTimePointIndexSeen - mHardMemoryHorizonInTimePointIndices);
 					final long interval = mHighestTimePointIndexSeen - startPos;
 
-					// System.err.println("interval=[" + startPos +"," +interval+"]");
+					// System.err.println("interval=[" + startPos +","
+					// +interval+"]");
 					mTimeShift = -Math.round(interval * pTimeShiftNormalized);
 					if (lPreviousTimeShift != mTimeShift)
 						for (final int lChannel : mAvailableChannels)
@@ -123,19 +124,20 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			{
 				lTimePointIndexToVolumeMapReference = new TreeMap<>();
 				mChannelToVolumeListsMap.put(	lVolumeChannelID,
-																			lTimePointIndexToVolumeMapReference);
+												lTimePointIndexToVolumeMapReference);
 			}
 
 			lTimePointIndexToVolumeMapReference.put(pVolume.getTimeIndex(),
-																							wrapWithReference(pVolume));
+													wrapWithReference(pVolume));
 
-			mHighestTimePointIndexSeen = Math.max(mHighestTimePointIndexSeen,
-																						pVolume.getTimeIndex());
+			mHighestTimePointIndexSeen = Math.max(	mHighestTimePointIndexSeen,
+													pVolume.getTimeIndex());
 
 			if (mIsPlaying)
 				sendVolumeInternal(lVolumeChannelID);
 
-			cleanUpOldVolumes(mHighestTimePointIndexSeen, lVolumeChannelID);
+			cleanUpOldVolumes(	mHighestTimePointIndexSeen,
+								lVolumeChannelID);
 		}
 	}
 
@@ -154,7 +156,8 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 				System.err.println("Did not have any volume to send :(");
 			}
 
-			cleanUpOldVolumes(mHighestTimePointIndexSeen, lVolumeChannelID);
+			cleanUpOldVolumes(	mHighestTimePointIndexSeen,
+								lVolumeChannelID);
 		}
 	}
 
@@ -170,7 +173,7 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 			}
 		};
 		return mSwitchableSoftReferenceManager.wrapReference(	pVolume,
-																													lCleaningRunnable);
+																lCleaningRunnable);
 	}
 
 	private Volume getVolumeToSend(int pVolumeChannelID)
@@ -199,7 +202,8 @@ public class TimeShiftingSink extends RelaySinkAdapter implements
 		}
 	}
 
-	private void cleanUpOldVolumes(long pTimePointIndex, int pChannelID)
+	private void cleanUpOldVolumes(	long pTimePointIndex,
+									int pChannelID)
 	{
 		synchronized (mLock)
 		{

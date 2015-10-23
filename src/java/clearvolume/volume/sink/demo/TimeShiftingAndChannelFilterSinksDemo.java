@@ -34,23 +34,23 @@ public class TimeShiftingAndChannelFilterSinksDemo
 	public void demo() throws InterruptedException, IOException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"TimeShift Demo",
-																																																					512,
-																																																					512,
-																																																					NativeTypeEnum.UnsignedByte,
-																																																					512,
-																																																					512,
-																																																					2,
-																																																					false);
+																												512,
+																												512,
+																												NativeTypeEnum.UnsignedByte,
+																												512,
+																												512,
+																												2,
+																												false);
 		lClearVolumeRenderer.setVisible(true);
 
 		final VolumeManager lVolumeManager = lClearVolumeRenderer.createCompatibleVolumeManager(200);
 
 		final ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																													lVolumeManager,
-																																													100,
-																																													TimeUnit.MILLISECONDS);
+																								lVolumeManager,
+																								100,
+																								TimeUnit.MILLISECONDS);
 		final TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
-																																		100);
+																		100);
 		final ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
 
 		final ClearVolumeTCPServerSink lClearVolumeTCPServer = new ClearVolumeTCPServerSink(cNumberOfAvailableVolumes);
@@ -76,12 +76,12 @@ public class TimeShiftingAndChannelFilterSinksDemo
 			final int lChannel = i % 2;
 
 			final Volume lVolume = lManager.requestAndWaitForVolume(1,
-																															TimeUnit.MILLISECONDS,
-																															NativeTypeEnum.UnsignedByte,
-																															1,
-																															cWidth,
-																															cHeight,
-																															cDepth);
+																	TimeUnit.MILLISECONDS,
+																	NativeTypeEnum.UnsignedByte,
+																	1,
+																	cWidth,
+																	cHeight,
+																	cDepth);
 
 			final ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
@@ -97,7 +97,11 @@ public class TimeShiftingAndChannelFilterSinksDemo
 				for (int y = 0; y < cHeight / (1 + lChannel); y++)
 					for (int x = 0; x < cWidth / (1 + lChannel); x++)
 					{
-						final int lIndex = x + cWidth * y + cWidth * cHeight * z;
+						final int lIndex = x + cWidth
+											* y
+											+ cWidth
+											* cHeight
+											* z;
 
 						final byte lByteValue = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 

@@ -60,18 +60,18 @@ public class AudioPlot implements AutoCloseable
 	 * frequency.
 	 * 
 	 * @param pSlowPeriod
-	 *          slow period
+	 *            slow period
 	 * @param pFastPeriod
-	 *          fast period
+	 *            fast period
 	 * @param pLowFreqHz
-	 *          low frequency
+	 *            low frequency
 	 * @param pHighFreqHz
-	 *          high frequency
+	 *            high frequency
 	 */
 	public AudioPlot(	double pSlowPeriod,
-										double pFastPeriod,
-										double pLowFreqHz,
-										double pHighFreqHz)
+						double pFastPeriod,
+						double pLowFreqHz,
+						double pHighFreqHz)
 	{
 		this(pSlowPeriod, pFastPeriod, pLowFreqHz, pHighFreqHz, false);
 	}
@@ -81,22 +81,23 @@ public class AudioPlot implements AutoCloseable
 	 * frequency, and a flag thatcontrols whether the range is inverted or not.
 	 * 
 	 * @param pSlowPeriod
-	 *          slow period
+	 *            slow period
 	 * @param pFastPeriod
-	 *          fast period
+	 *            fast period
 	 * @param pLowFreqHz
-	 *          low frequency
+	 *            low frequency
 	 * @param pHighFreqHz
-	 *          high frequency
+	 *            high frequency
 	 *
 	 * @param pInvertRange
-	 *          if true the audio range is inverted with respect to the default
+	 *            if true the audio range is inverted with respect to the
+	 *            default
 	 */
 	public AudioPlot(	double pSlowPeriod,
-										double pFastPeriod,
-										double pLowFreqHz,
-										double pHighFreqHz,
-										boolean pInvertRange)
+						double pFastPeriod,
+						double pLowFreqHz,
+						double pHighFreqHz,
+						boolean pInvertRange)
 	{
 		super();
 		mSlowPeriod = pSlowPeriod;
@@ -124,7 +125,7 @@ public class AudioPlot implements AutoCloseable
 		mSoundOut = new SoundOut();
 
 		final Synthesizer lSynthesizer = new Synthesizer(	lLowPassFilter,
-																											mSoundOut);
+															mSoundOut);
 
 		mDeamonThreadRunnable = new Runnable()
 		{
@@ -147,7 +148,8 @@ public class AudioPlot implements AutoCloseable
 							try
 							{
 								mReentrantLock.lock();
-								lSynthesizer.playSamples(128, mReentrantLock);
+								lSynthesizer.playSamples(	128,
+															mReentrantLock);
 							}
 							finally
 							{
@@ -162,7 +164,8 @@ public class AudioPlot implements AutoCloseable
 						{
 							mGuitar.strike(0.5f);
 							final long lPeriodInNanoseconds = (long) ((1000L * 1000L * 1000L) * mPeriodInSeconds);
-							// System.out.println("mPeriodInSeconds=" + mPeriodInSeconds);
+							// System.out.println("mPeriodInSeconds=" +
+							// mPeriodInSeconds);
 							// System.out.println("lPeriodInNanoseconds=" +
 							// lPeriodInNanoseconds);
 							mNewDeadline = lTimeNow + lPeriodInNanoseconds;
@@ -201,7 +204,7 @@ public class AudioPlot implements AutoCloseable
 			waitForStop();
 
 			mThread = new Thread(	mDeamonThreadRunnable,
-														AudioPlot.class.getSimpleName() + ".PlayThread");
+									AudioPlot.class.getSimpleName() + ".PlayThread");
 			mThread.setDaemon(true);
 			mThread.start();
 		}
@@ -237,7 +240,7 @@ public class AudioPlot implements AutoCloseable
 	 * [0,1].
 	 * 
 	 * @param pValue
-	 *          size within range [0,1]
+	 *            size within range [0,1]
 	 */
 	public void setValue(double pValue)
 	{
@@ -285,7 +288,7 @@ public class AudioPlot implements AutoCloseable
 	 * Sets the flag that determines whether the audio range is inverted.
 	 * 
 	 * @param pInvertRange
-	 *          true to invert range
+	 *            true to invert range
 	 */
 	public void setInvertRange(boolean pInvertRange)
 	{

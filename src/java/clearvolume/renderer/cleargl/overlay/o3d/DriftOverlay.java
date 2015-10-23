@@ -6,6 +6,9 @@ import java.nio.FloatBuffer;
 
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
+
 import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
@@ -16,9 +19,6 @@ import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.utils.ClearVolumeDefaultFont;
 
-import com.jogamp.newt.event.KeyEvent;
-import com.jogamp.opengl.GL;
-
 /**
  * Drift Path Overlay.
  *
@@ -27,9 +27,9 @@ import com.jogamp.opengl.GL;
  */
 
 public class DriftOverlay extends PathOverlay	implements
-																							ProcessorResultListener<float[]>,
-																							Overlay2D,
-																							SingleKeyToggable
+												ProcessorResultListener<float[]>,
+												Overlay2D,
+												SingleKeyToggable
 {
 
 	protected SynchronizedDescriptiveStatistics stats;
@@ -41,7 +41,7 @@ public class DriftOverlay extends PathOverlay	implements
 	 */
 	@Override
 	public void init(	GL pGL,
-										DisplayRequestInterface pDisplayRequestInterface)
+						DisplayRequestInterface pDisplayRequestInterface)
 	{
 		super.init(pGL, pDisplayRequestInterface);
 
@@ -65,7 +65,7 @@ public class DriftOverlay extends PathOverlay	implements
 
 	@Override
 	public void notifyResult(	ProcessorInterface<float[]> pSource,
-														float[] pResult)
+								float[] pResult)
 	{
 		addNewCenterOfMass(pResult[0], pResult[1], pResult[2]);
 	}
@@ -78,10 +78,10 @@ public class DriftOverlay extends PathOverlay	implements
 
 	@Override
 	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
-												GL pGL,
-												int pWidth,
-												int pHeight,
-												GLMatrix pProjectionMatrix)
+							GL pGL,
+							int pWidth,
+							int pHeight,
+							GLMatrix pProjectionMatrix)
 	{
 		if (!isDisplayed())
 			return;
@@ -97,30 +97,34 @@ public class DriftOverlay extends PathOverlay	implements
 			final float x = getPathPoints().get(i);
 			final float y = getPathPoints().get(i + 1);
 			final float z = getPathPoints().get(i + 2);
-			final float dist = (float) Math.sqrt(x * x + y * y + z * z);
+			final float dist = (float) Math.sqrt(x	* x
+													+ y
+													* y
+													+ z
+													* z);
 
 			stats.addValue(dist);
 		}
 
 		textRenderer.drawTextAtPosition("drift stats: n=" + i
-																				/ 3
-																				+ " avg="
-																				+ String.format("%.3f",
-																												stats.getMean())
-																				+ " stddev="
-																				+ String.format("%.3f",
-																												stats.getStandardDeviation())
-																				+ " min="
-																				+ String.format("%.3f",
-																												stats.getMin())
-																				+ " max="
-																				+ String.format("%.3f",
-																												stats.getMax()),
-																		10,
-																		15,
-																		font,
-																		Color.white,
-																		false);
+												/ 3
+												+ " avg="
+												+ String.format("%.3f",
+																stats.getMean())
+												+ " stddev="
+												+ String.format("%.3f",
+																stats.getStandardDeviation())
+												+ " min="
+												+ String.format("%.3f",
+																stats.getMin())
+												+ " max="
+												+ String.format("%.3f",
+																stats.getMax()),
+										10,
+										15,
+										font,
+										Color.white,
+										false);
 	}
 
 	@Override

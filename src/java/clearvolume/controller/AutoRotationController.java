@@ -1,13 +1,13 @@
 package clearvolume.controller;
 
-import clearvolume.renderer.ClearVolumeRendererInterface;
-
 import com.jogamp.opengl.math.Quaternion;
 
+import clearvolume.renderer.ClearVolumeRendererInterface;
+
 public class AutoRotationController	extends
-																		QuaternionRotationControllerBase implements
-																																		RotationControllerInterface,
-																																		RotationControllerWithRenderNotification
+									QuaternionRotationControllerBase implements
+																	RotationControllerInterface,
+																	RotationControllerWithRenderNotification
 {
 
 	public AutoRotationController()

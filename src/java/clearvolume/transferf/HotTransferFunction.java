@@ -5,7 +5,7 @@ public class HotTransferFunction
 	public static final TransferFunction1D get()
 	{
 		final float[] lColorArray = new float[]
-		{ 0.0392f,
+		{	0.0392f,
 			0.0000f,
 			0.0000f,
 			0.0000f,

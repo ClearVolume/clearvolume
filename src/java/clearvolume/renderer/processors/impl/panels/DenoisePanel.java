@@ -9,14 +9,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import net.miginfocom.swing.MigLayout;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
+import net.miginfocom.swing.MigLayout;
 
 public class DenoisePanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;
-
 
 	private final OpenCLDenoise mOpenCLDenoise;
 	private final JTextField mBlockSizeTextField;
@@ -38,33 +37,33 @@ public class DenoisePanel extends JPanel
 		lAlgorithmSelectionComboBox.setSelectedItem(mOpenCLDenoise.getDenoiseAlgorithm());
 
 		setLayout(new MigLayout("",
-														"[52px,grow][134px,grow]",
-														"[][28px,grow][grow][grow][grow]"));
+								"[52px,grow][134px,grow]",
+								"[][28px,grow][grow][grow][grow]"));
 
 		final JCheckBox lDenoisingOnOffCheckBox = new JCheckBox("denoising on/off");
 		add(lDenoisingOnOffCheckBox, "cell 0 0 2 1");
 		lDenoisingOnOffCheckBox.setSelected(mOpenCLDenoise.isActive());
 
 		add(lAlgorithmSelectionComboBox,
-				"cell 0 1 2 1,alignx left,aligny center");
+			"cell 0 1 2 1,alignx left,aligny center");
 
 		final JLabel lBlockSizeLabel = new JLabel("Block size");
 		add(lBlockSizeLabel, "cell 0 2,alignx right,aligny center");
 
-		mBlockSizeTextField = new JTextField("" + mOpenCLDenoise.getBlockSize());
+		mBlockSizeTextField = new JTextField(""	+ mOpenCLDenoise.getBlockSize());
 		add(mBlockSizeTextField, "cell 1 2,growx,aligny center");
 		mBlockSizeTextField.setColumns(10);
 
 		final JLabel lSigmaLabel = new JLabel("Sigma");
 		add(lSigmaLabel, "cell 0 3,alignx right");
 
-		mSigmaTextField = new JTextField("" + mOpenCLDenoise.getSigma());
+		mSigmaTextField = new JTextField(""	+ mOpenCLDenoise.getSigma());
 		add(mSigmaTextField, "cell 1 3,growx");
 		mSigmaTextField.setColumns(10);
 
 		final JLabel lSigmaSpaceLabel = new JLabel("Sigma space");
 		add(lSigmaSpaceLabel, "cell 0 4,alignx trailing");
-		
+
 		mSigmaSpaceTextField = new JTextField("" + mOpenCLDenoise.getSigmaSpace());
 		add(mSigmaSpaceTextField, "cell 1 4,growx");
 		mSigmaSpaceTextField.setColumns(10);
@@ -114,6 +113,5 @@ public class DenoisePanel extends JPanel
 			}
 		});
 	}
-
 
 }

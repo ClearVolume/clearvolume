@@ -3,6 +3,10 @@ package clearvolume.renderer.cleargl.overlay.o3d;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES3;
+
 import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
@@ -14,19 +18,15 @@ import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
 
-import com.jogamp.newt.event.KeyEvent;
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES3;
-
 /**
  * BoxOverlay - Nice shader based box and grid 3D overlay.
  *
- * @author Ulrik Guenther (2015), Loic Royer (2015)
+ * @author Ulrik Guenther (2015), Loic Royer (2015), Martin Weigert (2015)
  *
  */
 public class BoxOverlay extends OverlayBase	implements
-																						Overlay3D,
-																						SingleKeyToggable
+											Overlay3D,
+											SingleKeyToggable
 {
 	protected GLProgram mBoxGLProgram;
 	protected ClearGeometryObject mClearGeometryObject;
@@ -37,11 +37,11 @@ public class BoxOverlay extends OverlayBase	implements
 	private String mName;
 	private float mWidth;
 
-	public BoxOverlay(final int pNumberOfGridlines,
-										final float width,
-										final boolean pAlignToClipBox,
+	public BoxOverlay(	final int pNumberOfGridlines,
+						final float width,
+						final boolean pAlignToClipBox,
 
-										final String pName)
+						final String pName)
 	{
 		super();
 		mNumberOfGridLines = pNumberOfGridlines;
@@ -103,26 +103,27 @@ public class BoxOverlay extends OverlayBase	implements
 	 */
 	@Override
 	public void init(	GL pGL,
-										DisplayRequestInterface pDisplayRequestInterface)
+						DisplayRequestInterface pDisplayRequestInterface)
 	{
 
 		try
 		{
 			mBoxGLProgram = GLProgram.buildProgram(	pGL,
-																							BoxOverlay.class,
-																							"shaders/box_vert.glsl",
-																							"shaders/box_frag.glsl");
+													BoxOverlay.class,
+													"shaders/box_vert.glsl",
+													"shaders/box_frag.glsl");
 
 			mClearGeometryObject = new ClearGeometryObject(	mBoxGLProgram,
-																											3,
-																											GL.GL_TRIANGLES);
+															3,
+															GL.GL_TRIANGLES);
 
 			mBoxGLProgram.getUniform("NumberOfGridLines")
-										.setInt(mNumberOfGridLines);
+							.setInt(mNumberOfGridLines);
 
 			mBoxGLProgram.getUniform("MainBoxWidth").setFloat(mWidth);
 
-			final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 3);
+			final GLFloatArray lVerticesFloatArray = new GLFloatArray(	24,
+																		3);
 
 			final float w = 1.0f;
 
@@ -193,43 +194,44 @@ public class BoxOverlay extends OverlayBase	implements
 			final GLIntArray lIndexIntArray = new GLIntArray(36, 1);
 
 			lIndexIntArray.add(	0,
-													1,
-													2,
-													0,
-													2,
-													3,
-													4,
-													5,
-													6,
-													4,
-													6,
-													7,
-													8,
-													9,
-													10,
-													8,
-													10,
-													11,
-													12,
-													13,
-													14,
-													12,
-													14,
-													15,
-													16,
-													17,
-													18,
-													16,
-													18,
-													19,
-													20,
-													21,
-													22,
-													20,
-													22,
-													23);
+								1,
+								2,
+								0,
+								2,
+								3,
+								4,
+								5,
+								6,
+								4,
+								6,
+								7,
+								8,
+								9,
+								10,
+								8,
+								10,
+								11,
+								12,
+								13,
+								14,
+								12,
+								14,
+								15,
+								16,
+								17,
+								18,
+								16,
+								18,
+								19,
+								20,
+								21,
+								22,
+								20,
+								22,
+								23);
 
-			final GLFloatArray lTexCoordFloatArray = new GLFloatArray(24, 2);
+			final GLFloatArray lTexCoordFloatArray = new GLFloatArray(	24,
+																		2);
 
 			lTexCoordFloatArray.add(0.0f, 0.0f);
 			lTexCoordFloatArray.add(1.0f, 0.0f);
@@ -279,7 +281,8 @@ public class BoxOverlay extends OverlayBase	implements
 	public void setVertices(final float[] clipbox)
 	{
 
-		final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 3);
+		final GLFloatArray lVerticesFloatArray = new GLFloatArray(	24,
+																	3);
 
 		final float x1 = clipbox[0];
 		final float x2 = clipbox[1];
@@ -331,11 +334,11 @@ public class BoxOverlay extends OverlayBase	implements
 	 */
 	@Override
 	public void render3D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
-												GL pGL,
-												int pWidth,
-												int pHeight,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pModelViewMatrix)
+							GL pGL,
+							int pWidth,
+							int pHeight,
+							GLMatrix pProjectionMatrix,
+							GLMatrix pModelViewMatrix)
 	{
 
 		if (isDisplayed())
@@ -345,9 +348,9 @@ public class BoxOverlay extends OverlayBase	implements
 
 			if (mAlignToClipBox)
 			{
-				float[] clipbox = pClearGLVolumeRenderer.getClipBox();
-				if (!Arrays.equals(mClipBox, clipbox))
-					updateClipBox(clipbox);
+				float[] lClipBox = pClearGLVolumeRenderer.getClipBox();
+				if (!Arrays.equals(mClipBox, lClipBox))
+					updateClipBox(lClipBox);
 			}
 			mClearGeometryObject.setModelView(pModelViewMatrix);
 			mClearGeometryObject.setProjection(pProjectionMatrix);
@@ -367,9 +370,7 @@ public class BoxOverlay extends OverlayBase	implements
 
 	private void updateClipBox(final float[] clipbox)
 	{
-
 		mClipBox = Arrays.copyOf(clipbox, clipbox.length);
 		setVertices(mClipBox);
-
 	}
 }

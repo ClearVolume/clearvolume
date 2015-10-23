@@ -28,9 +28,9 @@ public class Synthesizer
 	 * Constructs a synthesizer from a source/filter and a SoundOut object.
 	 * 
 	 * @param pSource
-	 *          source
+	 *            source
 	 * @param pSoundOut
-	 *          sound out
+	 *            sound out
 	 */
 	public Synthesizer(Source pSource, SoundOut pSoundOut)
 	{
@@ -51,11 +51,11 @@ public class Synthesizer
 
 	/**
 	 * Plays a buffer of samples. The buffer length is determined internally. A
-	 * reentrant lock provided can be unlocked just before sending the data to the
-	 * driver, thus minimizing the locking time.
+	 * reentrant lock provided can be unlocked just before sending the data to
+	 * the driver, thus minimizing the locking time.
 	 * 
 	 * @param pReentrantLock
-	 *          reentrant lock to unlock.
+	 *            reentrant lock to unlock.
 	 * @return estimated time in seconds spent in the call.
 	 */
 	public double playSamples(ReentrantLock pReentrantLock)
@@ -67,7 +67,7 @@ public class Synthesizer
 	 * Plays a buffer of samples of a given length.
 	 * 
 	 * @param pNumberOfSamples
-	 *          number of samples to play.
+	 *            number of samples to play.
 	 * @return estimated time in seconds spent in the call.
 	 */
 	public double playSamples(int pNumberOfSamples)
@@ -76,18 +76,18 @@ public class Synthesizer
 	}
 
 	/**
-	 * Plays a buffer of samples of a given length. A reentrant lock provided can
-	 * be unlocked just before sending the data to the driver, thus minimizing the
-	 * locking time.
+	 * Plays a buffer of samples of a given length. A reentrant lock provided
+	 * can be unlocked just before sending the data to the driver, thus
+	 * minimizing the locking time.
 	 * 
 	 * @param pNumberOfSamples
-	 *          number of samples to play.
+	 *            number of samples to play.
 	 * @param pReentrantLock
-	 *          reentrant lock to unlock.
+	 *            reentrant lock to unlock.
 	 * @return duration in seconds
 	 */
-	public double playSamples(int pNumberOfSamples,
-														ReentrantLock pReentrantLock)
+	public double playSamples(	int pNumberOfSamples,
+								ReentrantLock pReentrantLock)
 	{
 		if (mBuffer == null || mBuffer.length < pNumberOfSamples)
 			mBuffer = new float[pNumberOfSamples];

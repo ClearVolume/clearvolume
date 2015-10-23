@@ -9,15 +9,15 @@ import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.VolumeSinkInterface;
 
 public class SourceToSinkBufferedAdapter implements
-																				VolumeSinkInterface,
-																				VolumeSourceInterface
+										VolumeSinkInterface,
+										VolumeSourceInterface
 {
 
 	private final BlockingQueue<Volume> mVolumeQueue;
 	private final VolumeManager mVolumeManager;
 
 	public SourceToSinkBufferedAdapter(	VolumeManager pVolumeManager,
-																			int pMaxCapacity)
+										int pMaxCapacity)
 	{
 		super();
 		mVolumeManager = pVolumeManager;
@@ -49,11 +49,13 @@ public class SourceToSinkBufferedAdapter implements
 		}
 	}
 
-	public Volume requestVolumeAndWait(int pTimeOut, TimeUnit pTimeUnit)
+	public Volume requestVolumeAndWait(	int pTimeOut,
+										TimeUnit pTimeUnit)
 	{
 		try
 		{
-			final Volume lVolume = mVolumeQueue.poll(pTimeOut, pTimeUnit);
+			final Volume lVolume = mVolumeQueue.poll(	pTimeOut,
+														pTimeUnit);
 			return lVolume;
 		}
 		catch (final InterruptedException e)

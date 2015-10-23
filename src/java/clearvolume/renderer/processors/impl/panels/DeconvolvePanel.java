@@ -8,14 +8,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import net.miginfocom.swing.MigLayout;
 import clearvolume.renderer.processors.impl.OpenCLDeconvolutionLR;
+import net.miginfocom.swing.MigLayout;
 
 public class DeconvolvePanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;
-
 
 	private final OpenCLDeconvolutionLR mOpenCLDeconvolution;
 	private final JTextField mBlockSizeTextField;
@@ -32,10 +31,9 @@ public class DeconvolvePanel extends JPanel
 	{
 		mOpenCLDeconvolution = pOpenCLDeconvolution;
 
-
 		setLayout(new MigLayout("",
-														"[52px,grow][134px,grow]",
-														"[][28px,grow][grow][grow][grow]"));
+								"[52px,grow][134px,grow]",
+								"[][28px,grow][grow][grow][grow]"));
 
 		final JCheckBox lDeconvolutionOnOffCheckBox = new JCheckBox("Lucy-Richardson deconvolution on/off");
 		add(lDeconvolutionOnOffCheckBox, "cell 0 0 2 1");
@@ -48,24 +46,23 @@ public class DeconvolvePanel extends JPanel
 		mNumberOfIterationsTextField.setColumns(10);
 		add(mNumberOfIterationsTextField, "cell 1 1,growx");
 
-
 		final JLabel lBlockSizeLabel = new JLabel("Sigma X");
 		add(lBlockSizeLabel, "cell 0 2,alignx right,aligny center");
 
-		mBlockSizeTextField = new JTextField("" + mOpenCLDeconvolution.getSigmaX());
+		mBlockSizeTextField = new JTextField(""	+ mOpenCLDeconvolution.getSigmaX());
 		add(mBlockSizeTextField, "cell 1 2,growx,aligny center");
 		mBlockSizeTextField.setColumns(10);
 
 		final JLabel lSigmaLabel = new JLabel("Sigma Y");
 		add(lSigmaLabel, "cell 0 3,alignx right");
 
-		mSigmaTextField = new JTextField("" + mOpenCLDeconvolution.getSigmaY());
+		mSigmaTextField = new JTextField(""	+ mOpenCLDeconvolution.getSigmaY());
 		add(mSigmaTextField, "cell 1 3,growx");
 		mSigmaTextField.setColumns(10);
 
 		final JLabel lSigmaSpaceLabel = new JLabel("Sigma Z");
 		add(lSigmaSpaceLabel, "cell 0 4,alignx trailing");
-		
+
 		mSigmaSpaceTextField = new JTextField("" + mOpenCLDeconvolution.getSigmaZ());
 		add(mSigmaSpaceTextField, "cell 1 4,growx");
 		mSigmaSpaceTextField.setColumns(10);
@@ -115,6 +112,5 @@ public class DeconvolvePanel extends JPanel
 			}
 		});
 	}
-
 
 }

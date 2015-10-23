@@ -35,7 +35,7 @@ public class TimeShiftingSinkTests
 		};
 
 		final TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
-																																		100);
+																		100);
 
 		lTimeShiftingSink.setRelaySink(lVolumeSinkInterface);
 
@@ -45,12 +45,12 @@ public class TimeShiftingSinkTests
 		{
 
 			final Volume lVolume = lManager.requestAndWaitForVolume(1,
-																															TimeUnit.MILLISECONDS,
-																															NativeTypeEnum.UnsignedByte,
-																															1,
-																															10,
-																															10,
-																															10);
+																	TimeUnit.MILLISECONDS,
+																	NativeTypeEnum.UnsignedByte,
+																	1,
+																	10,
+																	10,
+																	10);
 
 			final int lTimePoint = i / 2;
 			final int lChannel = i % 2;

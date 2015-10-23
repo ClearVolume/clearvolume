@@ -26,19 +26,19 @@ public class ClearVolumeRendererSinkDemo
 	public void demo() throws InterruptedException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeRendererSink Demo",
-																																																					512,
-																																																					512,
-																																																					NativeTypeEnum.UnsignedShort,
-																																																					512,
-																																																					512,
-																																																					2,
-																																																					false);
+																												512,
+																												512,
+																												NativeTypeEnum.UnsignedShort,
+																												512,
+																												512,
+																												2,
+																												false);
 		lClearVolumeRenderer.setVisible(true);
 
 		final ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																													lClearVolumeRenderer.createCompatibleVolumeManager(200),
-																																													100,
-																																													TimeUnit.MILLISECONDS);
+																								lClearVolumeRenderer.createCompatibleVolumeManager(200),
+																								100,
+																								TimeUnit.MILLISECONDS);
 
 		final ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
 
@@ -55,12 +55,12 @@ public class ClearVolumeRendererSinkDemo
 			final int lChannel = i % 2;
 
 			final Volume lVolume = lManager.requestAndWaitForVolume(1,
-																															TimeUnit.MILLISECONDS,
-																															NativeTypeEnum.UnsignedShort,
-																															1,
-																															cWidth,
-																															cHeight,
-																															cDepth);
+																	TimeUnit.MILLISECONDS,
+																	NativeTypeEnum.UnsignedShort,
+																	1,
+																	cWidth,
+																	cHeight,
+																	cDepth);
 
 			final ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
@@ -78,7 +78,11 @@ public class ClearVolumeRendererSinkDemo
 				for (int y = yStart; y < yEnd; y++)
 					for (int x = 0; x < cWidth; x++)
 					{
-						final int lIndex = x + cWidth * y + cWidth * cHeight * z;
+						final int lIndex = x + cWidth
+											* y
+											+ cWidth
+											* cHeight
+											* z;
 
 						byte lByteValue = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 

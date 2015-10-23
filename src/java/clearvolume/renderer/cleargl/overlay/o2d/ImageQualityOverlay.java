@@ -4,6 +4,9 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.IOException;
 
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
+
 import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
@@ -14,11 +17,8 @@ import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.renderer.processors.impl.OpenCLTenengrad;
 
-import com.jogamp.newt.event.KeyEvent;
-import com.jogamp.opengl.GL;
-
 public class ImageQualityOverlay extends OverlayForProcessors	implements
-																															SingleKeyToggable
+																SingleKeyToggable
 {
 
 	private final OpenCLTenengrad mOpenCLTenengrad;
@@ -46,7 +46,7 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 
 			@Override
 			public void notifyResult(	ProcessorInterface<Double> pSource,
-																Double pResult)
+										Double pResult)
 			{
 				mMeasure = pResult;
 			}
@@ -84,7 +84,7 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 
 	@Override
 	public void init(	GL pGL,
-										DisplayRequestInterface pDisplayRequestInterface)
+						DisplayRequestInterface pDisplayRequestInterface)
 	{
 		super.init(pGL, pDisplayRequestInterface);
 		final String lFontPath = "/clearvolume/fonts/SourceCodeProLight.ttf";
@@ -92,8 +92,8 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 		{
 
 			mFont = Font.createFont(Font.TRUETYPE_FONT,
-															getClass().getResourceAsStream(lFontPath))
-									.deriveFont(24.f);
+									getClass().getResourceAsStream(lFontPath))
+						.deriveFont(24.f);
 		}
 		catch (final FontFormatException | IOException e)
 		{
@@ -102,9 +102,9 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 			// been a problem
 			// with the font format
 			System.err.println("Could not use \"" + lFontPath
-													+ "\" ("
-													+ e.toString()
-													+ "), falling back to Sans.");
+								+ "\" ("
+								+ e.toString()
+								+ "), falling back to Sans.");
 			mFont = new Font("Sans", Font.PLAIN, 24);
 		}
 
@@ -113,16 +113,16 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 
 	@Override
 	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
-												GL pGL,
-												int pWidth,
-												int pHeight,
-												GLMatrix pProjectionMatrix)
+							GL pGL,
+							int pWidth,
+							int pHeight,
+							GLMatrix pProjectionMatrix)
 	{
 		super.render2D(	pClearGLVolumeRenderer,
-										pGL,
-										pWidth,
-										pHeight,
-										pProjectionMatrix);
+						pGL,
+						pWidth,
+						pHeight,
+						pProjectionMatrix);
 
 		/*
 		 * mClearTextRenderer.drawTextAtPosition(String.format(

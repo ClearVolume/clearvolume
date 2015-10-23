@@ -15,17 +15,15 @@ public class ProcessorsListJPanelDemo
 	public void test() throws InterruptedException
 	{
 		final ParametersListPanelJFrame lParametersListPanelJFrame = new ParametersListPanelJFrame();
-		
+
 		lParametersListPanelJFrame.setVisible(true);
-		
-		
+
 		lParametersListPanelJFrame.addPanel(getPanel(0));
 		lParametersListPanelJFrame.addPanel(getPanel(1));
 		lParametersListPanelJFrame.addPanel(getPanel(2));
 		lParametersListPanelJFrame.addPanel(getPanel(3));
 		lParametersListPanelJFrame.addPanel(getPanel(4));
 		lParametersListPanelJFrame.addPanel(getPanel(5));
-
 
 		while (lParametersListPanelJFrame.isVisible())
 		{

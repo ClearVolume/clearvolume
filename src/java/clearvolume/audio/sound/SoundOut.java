@@ -1,13 +1,13 @@
 package clearvolume.audio.sound;
 
-import gnu.trove.list.array.TByteArrayList;
-
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+
+import gnu.trove.list.array.TByteArrayList;
 
 /**
  * Simple single-class facade on top of the sound output JavaSound API.
@@ -34,33 +34,33 @@ public class SoundOut implements AutoCloseable
 	}
 
 	/**
-	 * Constructor that can configure the sample rate, sample bit size, and number
-	 * of channels.
+	 * Constructor that can configure the sample rate, sample bit size, and
+	 * number of channels.
 	 * 
 	 * @param pSampleRate
-	 *          sample rate
+	 *            sample rate
 	 * @param pSampleSizeInBits
-	 *          sample size in bits
+	 *            sample size in bits
 	 * @param pNumberOfChannels
-	 *          numebr of channels
+	 *            numebr of channels
 	 */
 	public SoundOut(float pSampleRate,
-									int pSampleSizeInBits,
-									int pNumberOfChannels)
+					int pSampleSizeInBits,
+					int pNumberOfChannels)
 	{
 		super();
 		mAudioFormat = new AudioFormat(	pSampleRate,
-																		pSampleSizeInBits,
-																		pNumberOfChannels,
-																		true,
-																		false);
+										pSampleSizeInBits,
+										pNumberOfChannels,
+										true,
+										false);
 	}
 
 	/**
 	 * Starts to process incoming samples.
 	 * 
 	 * @throws LineUnavailableException
-	 *           thrown if line unavailable
+	 *             thrown if line unavailable
 	 */
 	public void start() throws LineUnavailableException
 	{
@@ -91,9 +91,9 @@ public class SoundOut implements AutoCloseable
 	 * Plays a given double buffer of a given length.
 	 * 
 	 * @param pBuffer
-	 *          double buffer
+	 *            double buffer
 	 * @param pLength
-	 *          length of buffer to use
+	 *            length of buffer to use
 	 */
 	public void play(final double[] pBuffer, final int pLength)
 	{
@@ -105,15 +105,15 @@ public class SoundOut implements AutoCloseable
 	 * before sending the samples to the audio driver.
 	 * 
 	 * @param pBuffer
-	 *          double buffer
+	 *            double buffer
 	 * @param pLength
-	 *          length of buffer to use
+	 *            length of buffer to use
 	 * @param pReentrantLock
-	 *          lock to release
+	 *            lock to release
 	 */
 	public void play(	final double[] pBuffer,
-										final int pLength,
-										ReentrantLock pReentrantLock)
+						final int pLength,
+						ReentrantLock pReentrantLock)
 	{
 		mTemporaryBuffer.reset();
 		for (int i = 0; i < pBuffer.length; i++)
@@ -138,9 +138,9 @@ public class SoundOut implements AutoCloseable
 	 * Plays a given float buffer of a given length.
 	 * 
 	 * @param pBuffer
-	 *          float buffer
+	 *            float buffer
 	 * @param pLength
-	 *          length of buffer to use
+	 *            length of buffer to use
 	 */
 	public void play(final float[] pBuffer, final int pLength)
 	{
@@ -152,15 +152,15 @@ public class SoundOut implements AutoCloseable
 	 * before sending the samples to the audio driver.
 	 * 
 	 * @param pBuffer
-	 *          float buffer
+	 *            float buffer
 	 * @param pLength
-	 *          length of buffer to use
+	 *            length of buffer to use
 	 * @param pReentrantLock
-	 *          lock to release
+	 *            lock to release
 	 */
 	public void play(	final float[] pBuffer,
-										final int pLength,
-										ReentrantLock pReentrantLock)
+						final int pLength,
+						ReentrantLock pReentrantLock)
 	{
 		mTemporaryBuffer.reset();
 		for (int i = 0; i < pBuffer.length; i++)
@@ -185,9 +185,9 @@ public class SoundOut implements AutoCloseable
 	 * Plays a given byte buffer of a given length.
 	 * 
 	 * @param pBuffer
-	 *          byte buffer
+	 *            byte buffer
 	 * @param pLength
-	 *          length of buffer to use
+	 *            length of buffer to use
 	 */
 	public void play(final byte[] pBuffer, final int pLength)
 	{
@@ -195,8 +195,8 @@ public class SoundOut implements AutoCloseable
 	}
 
 	public void play(	final byte[] pBuffer,
-										final int pLength,
-										ReentrantLock pReentrantLock)
+						final int pLength,
+						ReentrantLock pReentrantLock)
 	{
 		int lLength;
 		if (pLength > pBuffer.length)
@@ -217,7 +217,7 @@ public class SoundOut implements AutoCloseable
 	}
 
 	public static byte[] intArrayToByte(final int[] pIntArray,
-																			final byte[] pByteArray)
+										final byte[] pByteArray)
 	{
 		if (2 * pIntArray.length > pByteArray.length)
 		{

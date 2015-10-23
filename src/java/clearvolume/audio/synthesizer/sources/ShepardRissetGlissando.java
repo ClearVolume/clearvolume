@@ -20,8 +20,8 @@ import java.util.ArrayList;
  * @author Loic Royer (2015)
  *
  */
-public class ShepardRissetGlissando extends SourceBase implements
-																											Source
+public class ShepardRissetGlissando extends SourceBase	implements
+														Source
 {
 
 	private float mBottomFrequency;
@@ -43,15 +43,15 @@ public class ShepardRissetGlissando extends SourceBase implements
 	 * [pBottomFrequency,pTopFrequency] and frequency spacing.
 	 * 
 	 * @param pBottomFrequency
-	 *          bottom frequency of the support.
+	 *            bottom frequency of the support.
 	 * @param pTopFrequency
-	 *          top frequency of the support.
+	 *            top frequency of the support.
 	 * @param pFrequencySpacing
-	 *          frequency spacing.
+	 *            frequency spacing.
 	 */
-	public ShepardRissetGlissando(float pBottomFrequency,
-																float pTopFrequency,
-																float pFrequencySpacing)
+	public ShepardRissetGlissando(	float pBottomFrequency,
+									float pTopFrequency,
+									float pFrequencySpacing)
 	{
 		super();
 		mBottomFrequency = pBottomFrequency;
@@ -66,12 +66,12 @@ public class ShepardRissetGlissando extends SourceBase implements
 	}
 
 	/**
-	 * Translates by a given delta frequency the frequency comb. This can be done
-	 * to an arbitrary extend since the frequency comb translations have the
-	 * topology of a circle. Hence the notion of 'virtual-frequency'.
+	 * Translates by a given delta frequency the frequency comb. This can be
+	 * done to an arbitrary extend since the frequency comb translations have
+	 * the topology of a circle. Hence the notion of 'virtual-frequency'.
 	 * 
 	 * @param pDeltaFrequencyHertz
-	 *          change in frequency.
+	 *            change in frequency.
 	 */
 	public void changeVirtualFrequency(float pDeltaFrequencyHertz)
 	{
@@ -100,7 +100,7 @@ public class ShepardRissetGlissando extends SourceBase implements
 	 * Computes the size of the amplitude envelop for a given frequency.
 	 * 
 	 * @param pFrequency
-	 *          frequency
+	 *            frequency
 	 * @return amplitude
 	 */
 	private float getAmplitudeEnvelopp(float pFrequency)
@@ -109,7 +109,7 @@ public class ShepardRissetGlissando extends SourceBase implements
 			return 0;
 		float lNormalizedFrequency = (pFrequency - mBottomFrequency) / (mTopFrequency - mBottomFrequency);
 		float lAmplitude = (float) (getAmplitude() * pow(	sin(PI * lNormalizedFrequency),
-																											2));
+															2));
 		return lAmplitude;
 	}
 
@@ -138,7 +138,8 @@ public class ShepardRissetGlissando extends SourceBase implements
 		for (Sinusoid lSinusoid : mSinusoidList)
 		{
 			int lPeriodInSamples = lSinusoid.getPeriodInSamples();
-			lMaxPeriodInSamples = max(lMaxPeriodInSamples, lPeriodInSamples);
+			lMaxPeriodInSamples = max(	lMaxPeriodInSamples,
+										lPeriodInSamples);
 		}
 		return lMaxPeriodInSamples;
 	}

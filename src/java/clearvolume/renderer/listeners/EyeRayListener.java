@@ -1,9 +1,9 @@
 package clearvolume.renderer.listeners;
 
+import com.jogamp.newt.event.MouseEvent;
+
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
-
-import com.jogamp.newt.event.MouseEvent;
 
 public interface EyeRayListener
 {
@@ -16,7 +16,7 @@ public interface EyeRayListener
 	 *         change (rotation, translation, ...)
 	 */
 	boolean notifyEyeRay(	ClearGLVolumeRenderer pRenderer,
-												MouseEvent pMouseEvent,
-												EyeRay pEyeRay);
+							MouseEvent pMouseEvent,
+							EyeRay pEyeRay);
 
 }

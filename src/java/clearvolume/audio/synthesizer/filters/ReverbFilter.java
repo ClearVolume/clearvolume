@@ -27,7 +27,7 @@ public class ReverbFilter extends FilterBase
 	 * Constructor that takes the amplitude of the reverb contribution.
 	 * 
 	 * @param pAmplitude
-	 *          amplitude
+	 *            amplitude
 	 */
 	public ReverbFilter(float pAmplitude)
 	{
@@ -35,13 +35,13 @@ public class ReverbFilter extends FilterBase
 	}
 
 	/**
-	 * Constructor that takes the amplitude of the reverb contribution as well as
-	 * the reverb period in seconds.
+	 * Constructor that takes the amplitude of the reverb contribution as well
+	 * as the reverb period in seconds.
 	 * 
 	 * @param pAmplitude
-	 *          reverb amplitude
+	 *            reverb amplitude
 	 * @param pReverbPeriodInSeconds
-	 *          reverb period in seconds
+	 *            reverb period in seconds
 	 */
 	public ReverbFilter(float pAmplitude, float pReverbPeriodInSeconds)
 	{
@@ -77,7 +77,7 @@ public class ReverbFilter extends FilterBase
 			mReverbBuffer[0] = 0.5f * (mReverbBuffer[0] + mReverbBuffer[1]);
 			for (int j = 1; j < mReverbBuffer.length - 1; j++)
 				mReverbBuffer[j] = 0.99f * (mReverbBuffer[j - 1] + 2
-																		* mReverbBuffer[j] + mReverbBuffer[j + 1]) / 4;/**/
+											* mReverbBuffer[j] + mReverbBuffer[j + 1]) / 4;/**/
 			mReverbBuffer[mReverbBuffer.length - 1] = 0.5f * (mReverbBuffer[mReverbBuffer.length - 2] + mReverbBuffer[mReverbBuffer.length - 1]);
 		}
 
@@ -88,7 +88,7 @@ public class ReverbFilter extends FilterBase
 	 * Sets the reverb kernel in the form of a float array.
 	 * 
 	 * @param pReverbKernel
-	 *          reverb kernel
+	 *            reverb kernel
 	 */
 	public void setReverbKernel(float[] pReverbKernel)
 	{

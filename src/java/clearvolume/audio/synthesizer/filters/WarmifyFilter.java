@@ -3,6 +3,7 @@ package clearvolume.audio.synthesizer.filters;
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import static java.lang.Math.signum;
+
 import clearvolume.audio.synthesizer.sources.Source;
 
 /**
@@ -30,7 +31,7 @@ public class WarmifyFilter extends FilterBase
 	 * 0.2.
 	 * 
 	 * @param pPower
-	 *          power
+	 *            power
 	 */
 	public WarmifyFilter(float pPower)
 	{
@@ -41,9 +42,9 @@ public class WarmifyFilter extends FilterBase
 	 * Constructor that takes the amplitude and the power exponent.
 	 * 
 	 * @param pApmitude
-	 *          amplitude
+	 *            amplitude
 	 * @param pPower
-	 *          power exponent
+	 *            power exponent
 	 */
 	public WarmifyFilter(float pApmitude, float pPower)
 	{
@@ -59,8 +60,8 @@ public class WarmifyFilter extends FilterBase
 	{
 		Source lSource = getSource();
 		float lInSample = lSource.next();
-		float lOutSample = (float) (lInSample + getAmplitude() * (signum(lInSample) * pow(abs(lInSample),
-																																											mPower)));
+		float lOutSample = (float) (lInSample + getAmplitude() * (signum(lInSample) * pow(	abs(lInSample),
+																							mPower)));
 		return lOutSample;
 	}
 
@@ -78,7 +79,7 @@ public class WarmifyFilter extends FilterBase
 	 * Sets the power exponent of this filter.
 	 * 
 	 * @param pPower
-	 *          power exponent
+	 *            power exponent
 	 */
 	public void setPower(float pPower)
 	{

@@ -3,6 +3,8 @@ package clearvolume.renderer.cleargl.overlay.o3d;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
+import com.jogamp.opengl.GL;
+
 import cleargl.GLAttribute;
 import cleargl.GLFloatArray;
 import cleargl.GLMatrix;
@@ -14,8 +16,6 @@ import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
-
-import com.jogamp.opengl.GL;
 
 /**
  * OldBoxOverlay - old style 3D box overlay.
@@ -64,15 +64,15 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 	 */
 	@Override
 	public void init(	GL pGL,
-										DisplayRequestInterface pDisplayRequestInterface)
+						DisplayRequestInterface pDisplayRequestInterface)
 	{
 		// box display: construct the program and related objects
 		try
 		{
 			mBoxGLProgram = GLProgram.buildProgram(	pGL,
-																							OldBoxOverlay.class,
-																							"shaders/oldbox_vert.glsl",
-																							"shaders/oldbox_frag.glsl");
+													OldBoxOverlay.class,
+													"shaders/oldbox_vert.glsl",
+													"shaders/oldbox_frag.glsl");
 
 			mOverlayModelViewMatrixUniform = mBoxGLProgram.getUniform("modelview");
 			mOverlayProjectionMatrixUniform = mBoxGLProgram.getUniform("projection");
@@ -93,11 +93,12 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 			mBoxVertexArray = new GLVertexArray(mBoxGLProgram);
 			mBoxVertexArray.bind();
 			mBoxPositionAttributeArray = new GLVertexAttributeArray(mBoxPositionAttribute,
-																															4);
+																	4);
 
 			// FIXME this should be done with IndexArrays, but lets be lazy for
 			// now...
-			final GLFloatArray lVerticesFloatArray = new GLFloatArray(24, 4);
+			final GLFloatArray lVerticesFloatArray = new GLFloatArray(	24,
+																		4);
 
 			final float w = 0.5f;
 
@@ -127,7 +128,7 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 			lVerticesFloatArray.add(w, -w, -w, w);
 
 			mBoxVertexArray.addVertexAttributeArray(mBoxPositionAttributeArray,
-																							lVerticesFloatArray.getFloatBuffer());
+													lVerticesFloatArray.getFloatBuffer());
 
 		}
 		catch (final IOException e)
@@ -141,21 +142,21 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 	 */
 	@Override
 	public void render3D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
-												GL pGL,
-												int pWidth,
-												int pHeight,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pModelViewMatrix)
+							GL pGL,
+							int pWidth,
+							int pHeight,
+							GLMatrix pProjectionMatrix,
+							GLMatrix pModelViewMatrix)
 	{
 		if (isDisplayed())
 		{
 			mBoxGLProgram.use(pGL);
 
-			mOverlayModelViewMatrixUniform.setFloatMatrix(pModelViewMatrix.getFloatArray(),
-																										false);
+			mOverlayModelViewMatrixUniform.setFloatMatrix(	pModelViewMatrix.getFloatArray(),
+															false);
 
 			mOverlayProjectionMatrixUniform.setFloatMatrix(	pProjectionMatrix.getFloatArray(),
-																											false);
+															false);
 
 			mBoxColorUniform.setFloatVector4(cBoxColor);
 

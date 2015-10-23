@@ -2,18 +2,18 @@ package clearvolume.renderer.processors.impl;
 
 import javax.swing.JPanel;
 
-import clearvolume.renderer.opencl.OpenCLDevice;
-import clearvolume.renderer.panels.HasGUIPanel;
-import clearvolume.renderer.processors.OpenCLProcessor;
-import clearvolume.renderer.processors.impl.panels.DeconvolvePanel;
-
 import com.jogamp.newt.event.InputEvent;
 import com.jogamp.newt.event.KeyEvent;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 
+import clearvolume.renderer.opencl.OpenCLDevice;
+import clearvolume.renderer.panels.HasGUIPanel;
+import clearvolume.renderer.processors.OpenCLProcessor;
+import clearvolume.renderer.processors.impl.panels.DeconvolvePanel;
+
 public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
-																																		HasGUIPanel
+																	HasGUIPanel
 {
 
 	private CLKernel mKernelBlur;
@@ -67,9 +67,9 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
 		return mNumberOfIterations;
 	}
 
-	public void setSigmas(final float pSigmaX,
-												final float pSigmaY,
-												final float pSigmaZ)
+	public void setSigmas(	final float pSigmaX,
+							final float pSigmaY,
+							final float pSigmaZ)
 	{
 		setSigmaX(pSigmaX);
 		setSigmaY(pSigmaY);
@@ -114,25 +114,27 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
 		if (mKernelBlur == null)
 		{
 			mKernelBlur = getDevice().compileKernel(OpenCLDeconvolutionLR.class.getResource("kernels/deconv.cl"),
-																							"blur_sep");
+													"blur_sep");
 
 			mKernelCopyImgToBuf = getDevice().compileKernel(OpenCLDeconvolutionLR.class.getResource("kernels/deconv.cl"),
-																											"copyImgToBuf");
+															"copyImgToBuf");
 
 			mKernelCopyBufToImg = getDevice().compileKernel(OpenCLDeconvolutionLR.class.getResource("kernels/deconv.cl"),
-																											"copyBufToImg");
+															"copyBufToImg");
 
 			mKernelMul = getDevice().compileKernel(	OpenCLDeconvolutionLR.class.getResource("kernels/deconv.cl"),
-																							"multiply");
+													"multiply");
 
 			mKernelDiv = getDevice().compileKernel(	OpenCLDeconvolutionLR.class.getResource("kernels/deconv.cl"),
-																							"divide");
+													"divide");
 
 		}
 
 	}
 
-	public void initBuffers(final long Nx, final long Ny, final long Nz)
+	public void initBuffers(final long Nx,
+							final long Ny,
+							final long Nz)
 	{
 		final long lBufferSize = Nx * Ny * Nz;
 		final OpenCLDevice lDevice = getDevice();
@@ -162,9 +164,9 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
 
 	@Override
 	public void process(int pRenderLayerIndex,
-											long pWidthInVoxels,
-											long pHeightInVoxels,
-											long pDepthInVoxels)
+						long pWidthInVoxels,
+						long pHeightInVoxels,
+						long pDepthInVoxels)
 	{
 		if (!isActive())
 			return;
@@ -175,55 +177,57 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
 
 			ensureOpenCLInitialized();
 
-			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
+			initBuffers(pWidthInVoxels,
+						pHeightInVoxels,
+						pDepthInVoxels);
 
 			copyImgToBuf(	pRenderLayerIndex,
-										mInput,
-										pWidthInVoxels,
-										pHeightInVoxels,
-										pDepthInVoxels);
+							mInput,
+							pWidthInVoxels,
+							pHeightInVoxels,
+							pDepthInVoxels);
 
 			copyImgToBuf(	pRenderLayerIndex,
-										mOut,
-										pWidthInVoxels,
-										pHeightInVoxels,
-										pDepthInVoxels);
+							mOut,
+							pWidthInVoxels,
+							pHeightInVoxels,
+							pDepthInVoxels);
 
 			for (int i = 0; i < mNumberOfIterations; i++)
 			{
 
 				blur(	mOut,
-							mTmp,
-							mScratch,
-							pWidthInVoxels,
-							pHeightInVoxels,
-							pDepthInVoxels);
+						mTmp,
+						mScratch,
+						pWidthInVoxels,
+						pHeightInVoxels,
+						pDepthInVoxels);
 				divide(	mInput,
-								mTmp,
-								mTmp2,
-								pWidthInVoxels,
-								pHeightInVoxels,
-								pDepthInVoxels);
+						mTmp,
+						mTmp2,
+						pWidthInVoxels,
+						pHeightInVoxels,
+						pDepthInVoxels);
 
 				blur(	mTmp2,
-							mTmp,
-							mScratch,
+						mTmp,
+						mScratch,
+						pWidthInVoxels,
+						pHeightInVoxels,
+						pDepthInVoxels);
+
+				multiply(	mTmp,
+							mOut,
 							pWidthInVoxels,
 							pHeightInVoxels,
 							pDepthInVoxels);
-
-				multiply(	mTmp,
-									mOut,
-									pWidthInVoxels,
-									pHeightInVoxels,
-									pDepthInVoxels);
 
 			}
 			copyBufToImg(	mOut,
-										pRenderLayerIndex,
-										pWidthInVoxels,
-										pHeightInVoxels,
-										pDepthInVoxels);
+							pRenderLayerIndex,
+							pWidthInVoxels,
+							pHeightInVoxels,
+							pDepthInVoxels);
 
 			/*System.out.printf("deconv with sigX, sigY, sigZ = %.3f,%.3f,%.3f\n",
 												sigX,
@@ -240,54 +244,60 @@ public class OpenCLDeconvolutionLR extends OpenCLProcessor<Boolean>	implements
 	}
 
 	private void divide(CLBuffer<Float> pOut,
-											CLBuffer<Float> pTmp,
-											CLBuffer<Float> pTmp2,
-											long Nx,
-											long Ny,
-											long Nz)
+						CLBuffer<Float> pTmp,
+						CLBuffer<Float> pTmp2,
+						long Nx,
+						long Ny,
+						long Nz)
 	{
 		mKernelDiv.setArgs(pOut, pTmp, pTmp2);
 		getDevice().run(mKernelDiv, (int) (Nx * Ny * Nz), 1, 1);
 	}
 
-	private void multiply(CLBuffer<Float> pOut,
-												CLBuffer<Float> pTmp,
-												long Nx,
-												long Ny,
-												long Nz)
+	private void multiply(	CLBuffer<Float> pOut,
+							CLBuffer<Float> pTmp,
+							long Nx,
+							long Ny,
+							long Nz)
 	{
 		mKernelMul.setArgs(pOut, pTmp);
 		getDevice().run(mKernelMul, (int) (Nx * Ny * Nz), 1, 1);
 	}
 
-	private void copyImgToBuf(int pRenderLayerIndex,
-														CLBuffer<Float> bufIn,
-														final long Nx,
-														final long Ny,
-														final long Nz)
+	private void copyImgToBuf(	int pRenderLayerIndex,
+								CLBuffer<Float> bufIn,
+								final long Nx,
+								final long Ny,
+								final long Nz)
 	{
 		mKernelCopyImgToBuf.setArgs(getVolumeBuffers()[pRenderLayerIndex],
-																bufIn);
-		getDevice().run(mKernelCopyImgToBuf, (int) Nx, (int) Ny, (int) Nz);
+									bufIn);
+		getDevice().run(mKernelCopyImgToBuf,
+						(int) Nx,
+						(int) Ny,
+						(int) Nz);
 	}
 
-	private void copyBufToImg(CLBuffer<Float> bufIn,
-														int pRenderLayerIndex,
-														final long Nx,
-														final long Ny,
-														final long Nz)
+	private void copyBufToImg(	CLBuffer<Float> bufIn,
+								int pRenderLayerIndex,
+								final long Nx,
+								final long Ny,
+								final long Nz)
 	{
 		mKernelCopyBufToImg.setArgs(bufIn,
-																getVolumeBuffers()[pRenderLayerIndex]);
-		getDevice().run(mKernelCopyBufToImg, (int) Nx, (int) Ny, (int) Nz);
+									getVolumeBuffers()[pRenderLayerIndex]);
+		getDevice().run(mKernelCopyBufToImg,
+						(int) Nx,
+						(int) Ny,
+						(int) Nz);
 	}
 
-	private void blur(CLBuffer<Float> bufIn,
-										CLBuffer<Float> bufOut,
-										CLBuffer<Float> bufScratch,
-										final long Nx,
-										final long Ny,
-										final long Nz)
+	private void blur(	CLBuffer<Float> bufIn,
+						CLBuffer<Float> bufOut,
+						CLBuffer<Float> bufScratch,
+						final long Nx,
+						final long Ny,
+						final long Nz)
 	{
 		mKernelBlur.setArgs(bufIn, bufOut, sigX, (NhX), 1);
 		getDevice().run(mKernelBlur, (int) Nx, (int) Ny, (int) Nz);

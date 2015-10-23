@@ -2,6 +2,8 @@ package clearvolume.renderer.cleargl.overlay.o3d;
 
 import java.nio.FloatBuffer;
 
+import com.jogamp.opengl.GL;
+
 import cleargl.ClearGeometryObject;
 import cleargl.GLAttribute;
 import cleargl.GLFloatArray;
@@ -14,8 +16,6 @@ import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
-
-import com.jogamp.opengl.GL;
 
 /**
  * Single Path 3D Overlay.
@@ -75,21 +75,21 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 	 */
 	@Override
 	public void init(	GL pGL,
-										DisplayRequestInterface pDisplayRequestInterface)
+						DisplayRequestInterface pDisplayRequestInterface)
 	{
 		// box display: construct the program and related objects
 		try
 		{
 			mBoxGLProgram = GLProgram.buildProgram(	pGL,
-																							PathOverlay.class,
-																							new String[]
-																							{ "shaders/path_vert.glsl",
-																								"shaders/path_geom.glsl",
-																								"shaders/path_frag.glsl" });
+													PathOverlay.class,
+													new String[]
+													{	"shaders/path_vert.glsl",
+														"shaders/path_geom.glsl",
+														"shaders/path_frag.glsl" });
 
 			mPath = new ClearGeometryObject(mBoxGLProgram,
-																			3,
-																			GL.GL_LINE_STRIP);
+											3,
+											GL.GL_LINE_STRIP);
 			mPath.setDynamic(true);
 
 			mPath.setVerticesAndCreateBuffer(mPathPoints.getFloatBuffer());
@@ -114,11 +114,11 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 	 */
 	@Override
 	public void render3D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
-												GL pGL,
-												int pWidth,
-												int pHeight,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pModelViewMatrix)
+							GL pGL,
+							int pWidth,
+							int pHeight,
+							GLMatrix pProjectionMatrix,
+							GLMatrix pModelViewMatrix)
 	{
 		if (isDisplayed())
 		{
@@ -126,29 +126,32 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 			mBoxGLProgram.use(pGL);
 
 			mPath.getProgram()
-						.getUniform("vertexCount")
-						.setInt((mPathPoints.getFloatBuffer().capacity() / 3));
+					.getUniform("vertexCount")
+					.setInt((mPathPoints.getFloatBuffer().capacity() / 3));
 			mPath.getProgram()
-						.getUniform("startColor")
-						.setFloatVector4(mStartColor);
+					.getUniform("startColor")
+					.setFloatVector4(mStartColor);
 			mPath.getProgram()
-						.getUniform("endColor")
-						.setFloatVector4(mEndColor);
+					.getUniform("endColor")
+					.setFloatVector4(mEndColor);
 
 			mPath.setModelView(pModelViewMatrix);
 			mPath.setProjection(pProjectionMatrix);
 
 			pGL.glDisable(GL.GL_BLEND);
 			pGL.glDisable(GL.GL_CULL_FACE);
-			pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+			pGL.glBlendFunc(GL.GL_SRC_ALPHA,
+							GL.GL_ONE_MINUS_SRC_ALPHA);
 			pGL.glBlendEquation(GL.GL_FUNC_ADD);
 
 			mPath.draw();
 
 			pGL.glEnable(GL.GL_BLEND);
 
-			// mPathPoints.add(-0.2f + (float) Math.random() * ((0.2f - (-0.2f)) +
-			// 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f), -0.2f +
+			// mPathPoints.add(-0.2f + (float) Math.random() * ((0.2f - (-0.2f))
+			// +
+			// 0.4f), -0.2f + (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f),
+			// -0.2f +
 			// (float)Math.random()* ((0.2f - (-0.2f)) + 0.4f));
 			mPath.updateVertices(mPathPoints.getFloatBuffer());
 		}

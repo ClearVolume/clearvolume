@@ -1,8 +1,8 @@
 package clearvolume.renderer.cleargl.overlay;
 
-import clearvolume.renderer.DisplayRequestInterface;
-
 import com.jogamp.opengl.GL;
+
+import clearvolume.renderer.DisplayRequestInterface;
 
 /**
  * Overlays enable rendering OpenGl primitives within the 3D volume (3D overlay)
@@ -31,7 +31,7 @@ public interface Overlay
 	 * Sets display flag.
 	 * 
 	 * @param pDisplay
-	 *          true if displayed, false if not
+	 *            true if displayed, false if not
 	 */
 	public void setDisplayed(boolean pDisplay);
 
@@ -49,11 +49,11 @@ public interface Overlay
 	 * 
 	 * 
 	 * @param pGL
-	 *          a GL object.
+	 *            a GL object.
 	 * @param pDisplayRequestInterface
-	 *          to request display.
+	 *            to request display.
 	 */
 	public void init(	GL pGL,
-										DisplayRequestInterface pDisplayRequestInterface);
+						DisplayRequestInterface pDisplayRequestInterface);
 
 }

@@ -8,12 +8,12 @@ public interface VolumeCaptureListener
 {
 
 	void capturedVolume(ByteBuffer pCaptureBuffer,
-											NativeTypeEnum pNativeTypeEnum,
-											long pVolumeWidth,
-											long pVolumeHeight,
-											long pVolumeDepth,
-											double pVoxelWidth,
-											double pVoxelHeight,
-											double pVoxelDepth);
+						NativeTypeEnum pNativeTypeEnum,
+						long pVolumeWidth,
+						long pVolumeHeight,
+						long pVolumeDepth,
+						double pVoxelWidth,
+						double pVoxelHeight,
+						double pVoxelDepth);
 
 }

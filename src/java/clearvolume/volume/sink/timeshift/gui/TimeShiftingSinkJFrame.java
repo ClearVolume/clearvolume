@@ -25,7 +25,7 @@ public class TimeShiftingSinkJFrame extends ClearVolumeJFrame
 	 * Launch the application.
 	 * 
 	 * @param pTimeShiftingSink
-	 *          time shifting sink
+	 *            time shifting sink
 	 */
 	public static void launch(final TimeShiftingSink pTimeShiftingSink)
 	{
@@ -51,7 +51,7 @@ public class TimeShiftingSinkJFrame extends ClearVolumeJFrame
 	 * Create the frame.
 	 * 
 	 * @param pTimeShiftingSink
-	 *          time shifting sink
+	 *            time shifting sink
 	 */
 	public TimeShiftingSinkJFrame(TimeShiftingSink pTimeShiftingSink)
 	{

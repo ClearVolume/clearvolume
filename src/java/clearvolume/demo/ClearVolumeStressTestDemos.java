@@ -14,13 +14,12 @@ import javax.swing.SwingUtilities;
 
 import org.junit.Test;
 
+import com.jogamp.newt.awt.NewtCanvasAWT;
+
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
-
-import com.jogamp.newt.awt.NewtCanvasAWT;
-
 import coremem.buffers.ContiguousBuffer;
 import coremem.types.NativeTypeEnum;
 
@@ -57,7 +56,7 @@ public class ClearVolumeStressTestDemos
 			catch (final Exception e)
 			{
 				System.out.println("Could not launch " + argv[0]
-														+ " because ...");
+									+ " because ...");
 				e.printStackTrace();
 
 				return;
@@ -78,18 +77,18 @@ public class ClearVolumeStressTestDemos
 
 	@Test
 	public void demoStressTest() throws InterruptedException,
-															IOException
+								IOException
 	{
 		for (int i = 0; i < 50; i++)
 		{
 
 			final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																						i % 2 == 0 ? 768
-																																																											: 512,
-																																																						i % 2 == 0 ? 768
-																																																											: 512,
-																																																						NativeTypeEnum.UnsignedByte,
-																																																						false);
+																													i % 2 == 0	? 768
+																																: 512,
+																													i % 2 == 0	? 768
+																																: 512,
+																													NativeTypeEnum.UnsignedByte,
+																													false);
 			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 			lClearVolumeRenderer.setVisible(true);
 
@@ -98,23 +97,23 @@ public class ClearVolumeStressTestDemos
 			final int lResolutionZ = lResolutionX;
 
 			final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-																								* lResolutionZ
-																								* 2];
+														* lResolutionZ
+														* 2];
 
 			for (int z = 0; z < lResolutionZ; z++)
 				for (int y = 0; y < lResolutionY; y++)
 					for (int x = 0; x < lResolutionX; x++)
 					{
 						final int lIndex = 2 * (x + lResolutionX * y + lResolutionX * lResolutionY
-																														* z);
+																		* z);
 						lVolumeDataArray[lIndex + 1] = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 					}
 
 			lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																								ByteBuffer.wrap(lVolumeDataArray),
-																								lResolutionX,
-																								lResolutionY,
-																								lResolutionZ);
+														ByteBuffer.wrap(lVolumeDataArray),
+														lResolutionX,
+														lResolutionY,
+														lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
 
 			// Thread.sleep(100);
@@ -126,8 +125,8 @@ public class ClearVolumeStressTestDemos
 
 	@Test
 	public void demoStressTestNewtCanvasAWT()	throws InterruptedException,
-																						IOException,
-																						InvocationTargetException
+												IOException,
+												InvocationTargetException
 	{
 		for (int nfi = 0; nfi < 50; nfi++)
 		{
@@ -137,17 +136,17 @@ public class ClearVolumeStressTestDemos
 			;
 
 			final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
-																																															(i % 2 == 0) ? 768
-																																																					: 64,
-																																															(i % 2 == 0) ? 768
-																																																					: 64,
-																																															NativeTypeEnum.UnsignedByte,
-																																															(i % 2 == 0) ? 768
-																																																					: 64,
-																																															(i % 2 == 0) ? 768
-																																																					: 64,
-																																															1,
-																																															true);
+																									(i % 2 == 0) ? 768
+																												: 64,
+																									(i % 2 == 0) ? 768
+																												: 64,
+																									NativeTypeEnum.UnsignedByte,
+																									(i % 2 == 0) ? 768
+																												: 64,
+																									(i % 2 == 0) ? 768
+																												: 64,
+																									1,
+																									true);
 
 			SwingUtilities.invokeAndWait(new Runnable()
 			{
@@ -171,7 +170,8 @@ public class ClearVolumeStressTestDemos
 					lContainer.setLayout(new BorderLayout());
 
 					System.out.println("lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);");
-					lContainer.add(lNewtCanvasAWT, BorderLayout.CENTER);
+					lContainer.add(	lNewtCanvasAWT,
+									BorderLayout.CENTER);
 					lJFrame.setSize(new Dimension(1024, 1024));
 					lJFrame.add(lContainer);
 
@@ -188,7 +188,7 @@ public class ClearVolumeStressTestDemos
 			final int lResolutionZ = lResolutionX;
 
 			final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-																								* lResolutionZ];
+														* lResolutionZ];
 
 			for (int d = 0; d < 1; d++)
 			{
@@ -197,11 +197,12 @@ public class ClearVolumeStressTestDemos
 						for (int x = 0; x < lResolutionX; x++)
 						{
 							final int lIndex = x + lResolutionX
-																	* y
-																	+ lResolutionX
-																	* lResolutionY
-																	* z;
-							int lCharValue = (((byte) x ^ (byte) y ^ (byte) z ^ (byte) d));
+												* y
+												+ lResolutionX
+												* lResolutionY
+												* z;
+							int lCharValue = (((byte) x ^ (byte) y
+												^ (byte) z ^ (byte) d));
 							if (lCharValue < 12)
 								lCharValue = 0;
 							lVolumeDataArray[lIndex] = (byte) lCharValue;
@@ -209,10 +210,10 @@ public class ClearVolumeStressTestDemos
 
 				lClearVolumeRenderer.setCurrentRenderLayer(0);
 				lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																									ByteBuffer.wrap(lVolumeDataArray),
-																									lResolutionX,
-																									lResolutionY,
-																									lResolutionZ);
+															ByteBuffer.wrap(lVolumeDataArray),
+															lResolutionX,
+															lResolutionY,
+															lResolutionZ);
 
 				System.out.println("lClearVolumeRenderer.requestDisplay();");
 				lClearVolumeRenderer.requestDisplay();
@@ -241,13 +242,13 @@ public class ClearVolumeStressTestDemos
 
 	@Test
 	public void demoWithBigBig16BitGeneratedDataset()	throws InterruptedException,
-																										IOException
+														IOException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					512,
-																																																					512,
-																																																					NativeTypeEnum.UnsignedShort,
-																																																					false);
+																												512,
+																												512,
+																												NativeTypeEnum.UnsignedShort,
+																												false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -256,10 +257,8 @@ public class ClearVolumeStressTestDemos
 		final int lResolutionZ = lResolutionX;
 
 		ContiguousBuffer lContiguousBuffer = ContiguousBuffer.allocate(lResolutionX * lResolutionY
-																																		* lResolutionZ
-																																		* 2L);
-
-
+																		* lResolutionZ
+																		* 2L);
 
 		for (int z = 0; z < lResolutionZ; z++)
 			for (int y = 0; y < lResolutionY; y++)
@@ -270,10 +269,10 @@ public class ClearVolumeStressTestDemos
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																							lContiguousBuffer.getContiguousMemory(),
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+													lContiguousBuffer.getContiguousMemory(),
+													lResolutionX,
+													lResolutionY,
+													lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
 		while (lClearVolumeRenderer.isShowing())

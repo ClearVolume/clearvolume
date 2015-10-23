@@ -6,7 +6,7 @@ import clearcuda.CudaDevice;
 import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 
 public abstract class CUDAProcessor<R> extends ProcessorBase<R>	implements
-																																ProcessorInterface<R>
+																ProcessorInterface<R>
 {
 	private CudaDevice mCudaDevice;
 	private CudaContext mCudaContext;
@@ -18,7 +18,7 @@ public abstract class CUDAProcessor<R> extends ProcessorBase<R>	implements
 	}
 
 	public void setDeviceAndContext(CudaDevice pCudaDevice,
-																	CudaContext pCudaContext)
+									CudaContext pCudaContext)
 	{
 		mCudaDevice = pCudaDevice;
 		mCudaContext = pCudaContext;
@@ -38,8 +38,8 @@ public abstract class CUDAProcessor<R> extends ProcessorBase<R>	implements
 
 	@Override
 	public abstract void process(	int pRenderLayerIndex,
-																long pWidthInVoxels,
-																long pHeightInVoxels,
-																long pDepthInVoxels);
+									long pWidthInVoxels,
+									long pHeightInVoxels,
+									long pDepthInVoxels);
 
 }

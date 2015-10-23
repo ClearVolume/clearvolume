@@ -18,7 +18,6 @@ public class TransferFunctions
 		// return HotTransferFunction.get();
 	}
 
-
 	public static TransferFunction1D getGradientForColor(int pColorIndex)
 	{
 		final TransferFunction1D lTransfertFunction = new TransferFunction1D();

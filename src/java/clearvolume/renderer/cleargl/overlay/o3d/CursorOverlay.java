@@ -6,6 +6,11 @@ import static java.lang.Math.sqrt;
 
 import java.io.IOException;
 
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES3;
+
 import cleargl.ClearGeometryObject;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
@@ -19,21 +24,16 @@ import clearvolume.renderer.cleargl.overlay.OverlayBase;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
 import clearvolume.renderer.listeners.EyeRayListener;
 
-import com.jogamp.newt.event.KeyEvent;
-import com.jogamp.newt.event.MouseEvent;
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES3;
-
 /**
  * CursorOverlay - Displays a movable 3D cursor
  *
  * @author Loic Royer (2015)
  *
  */
-public class CursorOverlay extends OverlayBase implements
-																							Overlay3D,
-																							SingleKeyToggable,
-																							EyeRayListener
+public class CursorOverlay extends OverlayBase	implements
+												Overlay3D,
+												SingleKeyToggable,
+												EyeRayListener
 {
 	protected GLProgram mBoxGLProgram;
 	protected ClearGeometryObject mPlaneX, mPlaneY, mPlaneZ;
@@ -110,28 +110,28 @@ public class CursorOverlay extends OverlayBase implements
 	 */
 	@Override
 	public void init(	GL pGL,
-										DisplayRequestInterface pDisplayRequestInterface)
+						DisplayRequestInterface pDisplayRequestInterface)
 	{
 		try
 		{
 			mBoxGLProgram = GLProgram.buildProgram(	pGL,
-																							CursorOverlay.class,
-																							"shaders/cursor_vert.glsl",
-																							"shaders/cursor_frag.glsl");
+													CursorOverlay.class,
+													"shaders/cursor_vert.glsl",
+													"shaders/cursor_frag.glsl");
 
-			mPlaneX = new ClearGeometryObject(mBoxGLProgram,
-																				3,
-																				GL.GL_TRIANGLES);
+			mPlaneX = new ClearGeometryObject(	mBoxGLProgram,
+												3,
+												GL.GL_TRIANGLES);
 			mPlaneX.setDynamic(true);/**/
 
-			mPlaneY = new ClearGeometryObject(mBoxGLProgram,
-																				3,
-																				GL.GL_TRIANGLES);
+			mPlaneY = new ClearGeometryObject(	mBoxGLProgram,
+												3,
+												GL.GL_TRIANGLES);
 			mPlaneY.setDynamic(true);
 
-			mPlaneZ = new ClearGeometryObject(mBoxGLProgram,
-																				3,
-																				GL.GL_TRIANGLES);
+			mPlaneZ = new ClearGeometryObject(	mBoxGLProgram,
+												3,
+												GL.GL_TRIANGLES);
 			mPlaneZ.setDynamic(true);/**/
 
 			mVerticesFloatArrayPlaneX = new GLFloatArray(4, 3);
@@ -140,9 +140,12 @@ public class CursorOverlay extends OverlayBase implements
 
 			setPlanesVertices();
 
-			final GLFloatArray lNormalArrayPlaneX = new GLFloatArray(4, 3);
-			final GLFloatArray lNormalArrayPlaneY = new GLFloatArray(4, 3);
-			final GLFloatArray lNormalArrayPlaneZ = new GLFloatArray(4, 3);
+			final GLFloatArray lNormalArrayPlaneX = new GLFloatArray(	4,
+																		3);
+			final GLFloatArray lNormalArrayPlaneY = new GLFloatArray(	4,
+																		3);
+			final GLFloatArray lNormalArrayPlaneZ = new GLFloatArray(	4,
+																		3);
 
 			// X Plane Normals
 			lNormalArrayPlaneX.add(1.0f, 0.0f, 0.0f);
@@ -162,12 +165,13 @@ public class CursorOverlay extends OverlayBase implements
 			lNormalArrayPlaneZ.add(0.0f, 0.0f, 1.0f);
 			lNormalArrayPlaneZ.add(0.0f, 0.0f, 1.0f);
 
-			final GLIntArray lIndexIntArrayPlane = new GLIntArray(6, 1);
+			final GLIntArray lIndexIntArrayPlane = new GLIntArray(	6,
+																	1);
 
 			lIndexIntArrayPlane.add(0, 1, 2, 0, 2, 3);
 
 			final GLFloatArray lTexCoordFloatArrayPlane = new GLFloatArray(	4,
-																																			2);
+																			2);
 
 			lTexCoordFloatArrayPlane.add(0.0f, 0.0f);
 			lTexCoordFloatArrayPlane.add(1.0f, 0.0f);
@@ -229,11 +233,11 @@ public class CursorOverlay extends OverlayBase implements
 	 */
 	@Override
 	public void render3D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
-												GL pGL,
-												int pWidth,
-												int pHeight,
-												GLMatrix pProjectionMatrix,
-												GLMatrix pModelViewMatrix)
+							GL pGL,
+							int pWidth,
+							int pHeight,
+							GLMatrix pProjectionMatrix,
+							GLMatrix pModelViewMatrix)
 	{
 		if (isDisplayed())
 		{
@@ -260,13 +264,13 @@ public class CursorOverlay extends OverlayBase implements
 
 			mBoxGLProgram.getUniform("alpha").setFloat(getAlpha());
 			mBoxGLProgram.getUniform("linethick")
-										.setFloat(1.f / getLineThickness());
+							.setFloat(1.f / getLineThickness());
 			mBoxGLProgram.getUniform("linelength")
-										.setFloat(1.f / getLineLength());
+							.setFloat(1.f / getLineLength());
 			mBoxGLProgram.getUniform("lineperiod")
-										.setFloat(getLinePeriod());
+							.setFloat(getLinePeriod());
 			mBoxGLProgram.getUniform("boxlinesalpha")
-										.setFloat(getBoxLinesAlpha());
+							.setFloat(getBoxLinesAlpha());
 			mBoxGLProgram.getUniform("color").setFloatVector4(mColor);
 
 			mBoxGLProgram.getUniform("linepos").setFloatVector2(y, z);
@@ -281,12 +285,12 @@ public class CursorOverlay extends OverlayBase implements
 			mHasChanged = false;
 
 			final float[] lProject = project(	new float[]
-																				{ 2 * x - 1,
-																					2 * y - 1,
-																					2 * z - 1,
-																					1 },
-																				pModelViewMatrix,
-																				pProjectionMatrix);
+												{	2 * x - 1,
+													2 * y - 1,
+													2 * z - 1,
+													1 },
+												pModelViewMatrix,
+												pProjectionMatrix);
 			px = pWidth * (0.5f * lProject[0] + 0.5f);
 			py = pHeight * (1 - (0.5f * lProject[1] + 0.5f));
 
@@ -296,8 +300,8 @@ public class CursorOverlay extends OverlayBase implements
 
 	@Override
 	public boolean notifyEyeRay(ClearGLVolumeRenderer pRenderer,
-															MouseEvent pMouseEvent,
-															EyeRay pEyeRay)
+								MouseEvent pMouseEvent,
+								EyeRay pEyeRay)
 	{
 		if (!mMovable)
 			return false;
@@ -317,7 +321,8 @@ public class CursorOverlay extends OverlayBase implements
 		final float[] lO2X = GLMatrix.clone(lX);
 		GLMatrix.sub(lO2X, pEyeRay.org);
 
-		final float lProjectionLength = GLMatrix.dot(lO2X, pEyeRay.dir);
+		final float lProjectionLength = GLMatrix.dot(	lO2X,
+														pEyeRay.dir);
 		final float[] lClosestPoint = GLMatrix.clone(pEyeRay.dir);
 		GLMatrix.mult(lClosestPoint, lProjectionLength);
 		GLMatrix.add(lClosestPoint, pEyeRay.org);
@@ -328,8 +333,8 @@ public class CursorOverlay extends OverlayBase implements
 		// System.out.format("MX=%g MY=%g \n", mx, my);
 
 		final double lDistance = sqrt((mx - px) * (mx - px)
-																	+ (my - py)
-																	* (my - py));
+										+ (my - py)
+										* (my - py));
 
 		// final float[] lCP2X = GLMatrix.clone(lX);
 		// GLMatrix.distance(lCP2X, lClosestPoint);
@@ -354,8 +359,8 @@ public class CursorOverlay extends OverlayBase implements
 	}
 
 	public static final float[] project(float[] pVector,
-																			GLMatrix pModelViewMatrix,
-																			GLMatrix pProjectionMatrix)
+										GLMatrix pModelViewMatrix,
+										GLMatrix pProjectionMatrix)
 	{
 		float[] lResult = pModelViewMatrix.mult(pVector);
 		lResult = pProjectionMatrix.mult(lResult);

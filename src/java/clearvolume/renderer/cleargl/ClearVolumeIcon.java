@@ -1,8 +1,8 @@
 package clearvolume.renderer.cleargl;
 
-import cleargl.ClearGLWindow;
-
 import com.jogamp.opengl.GLProfile;
+
+import cleargl.ClearGLWindow;
 
 public class ClearVolumeIcon
 {
@@ -14,10 +14,10 @@ public class ClearVolumeIcon
 
 		// load icons:
 		ClearGLWindow.setWindowIcons(	"clearvolume/icon/ClearVolumeIcon16.png",
-																	"clearvolume/icon/ClearVolumeIcon32.png",
-																	"clearvolume/icon/ClearVolumeIcon64.png",
-																	"clearvolume/icon/ClearVolumeIcon128.png",
-																	"clearvolume/icon/ClearVolumeIcon256.png",
-																	"clearvolume/icon/ClearVolumeIcon512.png");
+										"clearvolume/icon/ClearVolumeIcon32.png",
+										"clearvolume/icon/ClearVolumeIcon64.png",
+										"clearvolume/icon/ClearVolumeIcon128.png",
+										"clearvolume/icon/ClearVolumeIcon256.png",
+										"clearvolume/icon/ClearVolumeIcon512.png");
 	}
 }

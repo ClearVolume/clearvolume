@@ -23,7 +23,7 @@ import clearvolume.utils.ClearVolumeJFrame;
 public class ClearVolumeClientMain
 {
 	private static Image sAppIcon; // if set, this icon will be used to resteal
-																	// the application icon after JOGL stole it!
+									// the application icon after JOGL stole it!
 
 	private JFrame mApplicationJFrame;
 	private VolumeCaptureListener mVolumeCaptureListener;
@@ -32,7 +32,7 @@ public class ClearVolumeClientMain
 	 * Launch the application.
 	 *
 	 * @param args
-	 *          command line arguments
+	 *            command line arguments
 	 */
 	public static void main(final String[] args)
 	{
@@ -40,8 +40,8 @@ public class ClearVolumeClientMain
 	}
 
 	public static void launchClientGUI(	final VolumeCaptureListener pVolumeCaptureListener,
-																			final Image appicon,
-																			final boolean pExitOnClose)
+										final Image appicon,
+										final boolean pExitOnClose)
 	{
 		try
 		{
@@ -54,8 +54,8 @@ public class ClearVolumeClientMain
 					{
 						CheckRequirements.check();
 						final ClearVolumeClientMain lClearVolumeMain = new ClearVolumeClientMain(	pVolumeCaptureListener,
-																																											appicon,
-																																											pExitOnClose);
+																									appicon,
+																									pExitOnClose);
 						lClearVolumeMain.mApplicationJFrame.setVisible(true);
 					}
 					catch (final Exception e)
@@ -72,7 +72,7 @@ public class ClearVolumeClientMain
 	}
 
 	public static void launchClientGUI(	final VolumeCaptureListener pVolumeCaptureListener,
-																			final boolean pExitOnClose)
+										final boolean pExitOnClose)
 	{
 		launchClientGUI(pVolumeCaptureListener, null, pExitOnClose);
 	}
@@ -83,38 +83,38 @@ public class ClearVolumeClientMain
 	}
 
 	public static void connect(	final String pHostName,
-															final int pPortNumber,
-															final int pWindowSize,
-															final int pBytesPerVoxel,
-															final int pNumberOfLayers,
-															final boolean pTimeShiftMultiChannel,
-															final boolean pMultiColor)
+								final int pPortNumber,
+								final int pWindowSize,
+								final int pBytesPerVoxel,
+								final int pNumberOfLayers,
+								final boolean pTimeShiftMultiChannel,
+								final boolean pMultiColor)
 	{
 
 		final ClearVolumeTCPClientHelper lClearVolumeTCPClientHelper = new ClearVolumeTCPClientHelper()
 		{
 			@Override
 			public void reportError(final Throwable pE,
-															final String pErrorMessage)
+									final String pErrorMessage)
 			{
 				System.err.println("Cannot connect to host: '" + pHostName
-														+ ":"
-														+ pPortNumber
-														+ "'");
+									+ ":"
+									+ pPortNumber
+									+ "'");
 				System.err.println("Error: '" + pErrorMessage + "'");
 				pE.printStackTrace();
 			}
 		};
 
 		lClearVolumeTCPClientHelper.startClient(null,
-																						pHostName,
-																						pPortNumber,
-																						pWindowSize,
-																						pBytesPerVoxel,
-																						pNumberOfLayers,
-																						pTimeShiftMultiChannel,
-																						pMultiColor,
-																						sAppIcon);
+												pHostName,
+												pPortNumber,
+												pWindowSize,
+												pBytesPerVoxel,
+												pNumberOfLayers,
+												pTimeShiftMultiChannel,
+												pMultiColor,
+												sAppIcon);
 
 	}
 
@@ -122,12 +122,12 @@ public class ClearVolumeClientMain
 	 * Create the application.
 	 *
 	 * @param pVolumeCaptureListener
-	 *          volume capture listener
+	 *            volume capture listener
 	 * @param pExitOnClose
-	 *          true if exit on close
+	 *            true if exit on close
 	 */
 	public ClearVolumeClientMain(	final VolumeCaptureListener pVolumeCaptureListener,
-																final boolean pExitOnClose)
+									final boolean pExitOnClose)
 	{
 		super();
 		initialize(pVolumeCaptureListener, pExitOnClose);
@@ -137,15 +137,15 @@ public class ClearVolumeClientMain
 	 * Create the application.
 	 *
 	 * @param pVolumeCaptureListener
-	 *          volume capture listener
+	 *            volume capture listener
 	 * @param pAppIcon
-	 *          app icon
+	 *            app icon
 	 * @param pExitOnClose
-	 *          true if exit on close
+	 *            true if exit on close
 	 */
 	public ClearVolumeClientMain(	final VolumeCaptureListener pVolumeCaptureListener,
-																final Image pAppIcon,
-																final boolean pExitOnClose)
+									final Image pAppIcon,
+									final boolean pExitOnClose)
 	{
 		super();
 		ClearVolumeClientMain.sAppIcon = sAppIcon;
@@ -159,7 +159,7 @@ public class ClearVolumeClientMain
 	 * @param pExitOnClose
 	 */
 	private void initialize(final VolumeCaptureListener pVolumeCaptureListener,
-													final boolean pExitOnClose)
+							final boolean pExitOnClose)
 	{
 		initialize(pVolumeCaptureListener, null, pExitOnClose);
 	}
@@ -172,12 +172,13 @@ public class ClearVolumeClientMain
 	 * @param pExitOnClose
 	 */
 	private void initialize(final VolumeCaptureListener pVolumeCaptureListener,
-													final Image appicon,
-													final boolean pExitOnClose)
+							final Image appicon,
+							final boolean pExitOnClose)
 	{
 		mApplicationJFrame = new ClearVolumeJFrame(appicon == null);
 		mApplicationJFrame.setResizable(false);
-		mApplicationJFrame.getContentPane().setBackground(Color.WHITE);
+		mApplicationJFrame.getContentPane()
+							.setBackground(Color.WHITE);
 		mApplicationJFrame.setBounds(100, 100, 529, 529);
 		if (pExitOnClose)
 			mApplicationJFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -191,10 +192,10 @@ public class ClearVolumeClientMain
 			@Override
 			public void actionPerformed(final ActionEvent e)
 			{
-				JOptionPane.showMessageDialog(mApplicationJFrame,
-																			"ClearVolume 1.0\nMPI-CBG\nAuthors: Loic Royer, Martin Weigert, Ulrik Guenther, Nicola Maghelli, Florian Jug, Ivo Sbalzarini, Eugene Myers.\n Contact: royer@mpi-cbg.de",
-																			"About ClearVolume",
-																			JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(	mApplicationJFrame,
+												"ClearVolume 1.0\nMPI-CBG\nAuthors: Loic Royer, Martin Weigert, Ulrik Guenther, Nicola Maghelli, Florian Jug, Ivo Sbalzarini, Eugene Myers.\n Contact: royer@mpi-cbg.de",
+												"About ClearVolume",
+												JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
 		lMenuBar.add(lConnectToJMenuItem);
@@ -208,7 +209,7 @@ public class ClearVolumeClientMain
 		mApplicationJFrame.getContentPane().add(label);
 
 		final ConnectionPanel lConnectionPanel = new ConnectionPanel(	pVolumeCaptureListener,
-																																	appicon);
+																		appicon);
 		lConnectionPanel.setBackground(Color.WHITE);
 		lConnectionPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		lConnectionPanel.setBounds(8, 174, 512, 305);

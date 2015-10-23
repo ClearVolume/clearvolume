@@ -31,7 +31,7 @@ public abstract class SourceBase
 	 * Default constructor with a given amplitude.
 	 * 
 	 * @param pAmplitude
-	 *          amplitude
+	 *            amplitude
 	 */
 	public SourceBase(float pAmplitude)
 	{
@@ -53,7 +53,7 @@ public abstract class SourceBase
 	 * Sets the sampling frequency.
 	 * 
 	 * @param pSamplingFrequency
-	 *          sampling frequency in Hz.
+	 *            sampling frequency in Hz.
 	 */
 	public void setSamplingFrequency(float pSamplingFrequency)
 	{
@@ -74,7 +74,7 @@ public abstract class SourceBase
 	 * Sets the signal's amplitude.
 	 * 
 	 * @param pAmplitude
-	 *          amplitude.
+	 *            amplitude.
 	 */
 	public void setAmplitude(float pAmplitude)
 	{

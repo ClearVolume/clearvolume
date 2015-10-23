@@ -39,7 +39,8 @@ public class ClearVolumeNetworkTests
 	private static final int cNumberOfVolumesToSend = 22;
 
 	@Test
-	public void testConsole() throws IOException, InterruptedException
+	public void testConsole()	throws IOException,
+								InterruptedException
 	{
 		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
 			return;
@@ -62,33 +63,33 @@ public class ClearVolumeNetworkTests
 			return;
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					256,
-																																																					256,
-																																																					NativeTypeEnum.UnsignedByte,
-																																																					256,
-																																																					256,
-																																																					1,
-																																																					false);
+																												256,
+																												256,
+																												NativeTypeEnum.UnsignedByte,
+																												256,
+																												256,
+																												1,
+																												false);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 		lClearVolumeRenderer.setVisible(true);
 
 		final ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																													lClearVolumeRenderer.createCompatibleVolumeManager(cVolumeQueueLength),
-																																													100,
-																																													TimeUnit.MILLISECONDS);
+																								lClearVolumeRenderer.createCompatibleVolumeManager(cVolumeQueueLength),
+																								100,
+																								TimeUnit.MILLISECONDS);
 		networkConduit(	lClearVolumeRendererSink,
-										cNumberOfVolumesToSend,
-										false);
+						cNumberOfVolumesToSend,
+						false);
 
 		lClearVolumeRenderer.close();
 
 	}
 
 	private void networkConduit(final VolumeSinkInterface lVolumeSink,
-															final int pNumberOfVolumes,
-															final boolean pClose)	throws IOException,
-																										InterruptedException
+								final int pNumberOfVolumes,
+								final boolean pClose)	throws IOException,
+														InterruptedException
 	{
 		final int lPortRandomizer = (int) (Math.random() * 100);
 
@@ -103,19 +104,19 @@ public class ClearVolumeNetworkTests
 		final ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lVolumeSink);
 
 		final SocketAddress lClientSocketAddress = new InetSocketAddress(	"localhost",
-																																			ClearVolumeSerialization.cStandardTCPPort + lPortRandomizer);
+																			ClearVolumeSerialization.cStandardTCPPort + lPortRandomizer);
 		assertTrue(lClearVolumeTCPClient.open(lClientSocketAddress));
 
 		assertTrue(lClearVolumeTCPClient.start());
 
 		final Volume lVolume = lClearVolumeTCPServerSink.getManager()
-																										.requestAndWaitForVolume(	1,
-																																							TimeUnit.MILLISECONDS,
-																																							NativeTypeEnum.UnsignedByte,
-																																							1,
-																																							cWidth,
-																																							cHeight,
-																																							cDepth);
+														.requestAndWaitForVolume(	1,
+																					TimeUnit.MILLISECONDS,
+																					NativeTypeEnum.UnsignedByte,
+																					1,
+																					cWidth,
+																					cHeight,
+																					cDepth);
 		for (int i = 0; i < pNumberOfVolumes; i++)
 		{
 			final ByteBuffer lVolumeData = lVolume.getDataBuffer();
@@ -125,7 +126,8 @@ public class ClearVolumeNetworkTests
 				for (int y = 0; y < cHeight; y++)
 					for (int x = 0; x < cDepth; x++)
 					{
-						byte lCharValue = (byte) ((byte) x * i ^ (byte) y ^ (byte) z);
+						byte lCharValue = (byte) ((byte) x * i
+													^ (byte) y ^ (byte) z);
 						if (lCharValue < 12)
 							lCharValue = 0;
 

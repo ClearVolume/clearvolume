@@ -1,6 +1,5 @@
 package clearvolume.network.client;
 
-
 import java.awt.Image;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -14,6 +13,8 @@ import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
+import com.apple.eawt.Application;
+
 import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.volume.sink.AsynchronousVolumeSinkAdapter;
 import clearvolume.volume.sink.NullVolumeSink;
@@ -23,9 +24,6 @@ import clearvolume.volume.sink.relay.RelaySinkInterface;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
 import clearvolume.volume.sink.timeshift.gui.TimeShiftingSinkJFrame;
-
-import com.apple.eawt.Application;
-
 import coremem.types.NativeTypeEnum;
 
 public abstract class ClearVolumeTCPClientHelper
@@ -38,38 +36,38 @@ public abstract class ClearVolumeTCPClientHelper
 	private static final long cHardHoryzon = 100;
 
 	public void startClient(final VolumeCaptureListener pVolumeCaptureListener,
-													final String pServerAddress,
-													final int pPortNumber,
-													final int pWindowSize,
-													final int pBytesPerVoxel,
-													final int pNumberOfLayers,
-													final boolean pTimeShift,
-													final boolean pChannelFilter,
-													final Image appicon)
+							final String pServerAddress,
+							final int pPortNumber,
+							final int pWindowSize,
+							final int pBytesPerVoxel,
+							final int pNumberOfLayers,
+							final boolean pTimeShift,
+							final boolean pChannelFilter,
+							final Image appicon)
 	{
 		final String lWindowTitle = "ClearVolume[" + pServerAddress
-																+ ":"
-																+ pPortNumber
-																+ "]";
+									+ ":"
+									+ pPortNumber
+									+ "]";
 
 		try
 		{
 
-			final NativeTypeEnum lNativeType = pBytesPerVoxel == 1 ? NativeTypeEnum.UnsignedByte
-																														: NativeTypeEnum.UnsignedShort;
+			final NativeTypeEnum lNativeType = pBytesPerVoxel == 1	? NativeTypeEnum.UnsignedByte
+																	: NativeTypeEnum.UnsignedShort;
 
 			try (ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(lWindowTitle,
-																																													pWindowSize,
-																																													pWindowSize,
-																																													lNativeType,
-																																													pNumberOfLayers,
-																																													cMaxMillisecondsToWaitForCopy,
-																																													TimeUnit.MILLISECONDS,
-																																													cMaxAvailableVolumes);)
+																								pWindowSize,
+																								pWindowSize,
+																								lNativeType,
+																								pNumberOfLayers,
+																								cMaxMillisecondsToWaitForCopy,
+																								TimeUnit.MILLISECONDS,
+																								cMaxAvailableVolumes);)
 			{
 
 				lClearVolumeRendererSink.getClearVolumeRenderer()
-																.addVolumeCaptureListener(pVolumeCaptureListener);
+										.addVolumeCaptureListener(pVolumeCaptureListener);
 
 				RelaySinkInterface lSinkAfterAsynchronousVolumeSinkAdapter = lClearVolumeRendererSink;
 
@@ -94,7 +92,7 @@ public abstract class ClearVolumeTCPClientHelper
 				if (pTimeShift)
 				{
 					lTimeShiftingSink = new TimeShiftingSink(	cSoftHoryzon,
-																										cHardHoryzon);
+																cHardHoryzon);
 
 					lTimeShiftingSinkJFrame = new TimeShiftingSinkJFrame(lTimeShiftingSink);
 					lTimeShiftingSinkJFrame.setVisible(true);
@@ -107,14 +105,14 @@ public abstract class ClearVolumeTCPClientHelper
 				}
 
 				final AsynchronousVolumeSinkAdapter lAsynchronousVolumeSinkAdapter = new AsynchronousVolumeSinkAdapter(	lSinkAfterAsynchronousVolumeSinkAdapter,
-																																																								cMaxQueueLength,
-																																																								cMaxMillisecondsToWait,
-																																																								TimeUnit.MILLISECONDS);
+																														cMaxQueueLength,
+																														cMaxMillisecondsToWait,
+																														TimeUnit.MILLISECONDS);
 
 				final ClearVolumeTCPClient lClearVolumeTCPClient = new ClearVolumeTCPClient(lAsynchronousVolumeSinkAdapter);
 
 				final SocketAddress lClientSocketAddress = new InetSocketAddress(	pServerAddress,
-																																					pPortNumber);
+																					pPortNumber);
 				if (!lClearVolumeTCPClient.open(lClientSocketAddress))
 				{
 					throw new RuntimeException("Could not open connection to " + pServerAddress);
@@ -162,8 +160,8 @@ public abstract class ClearVolumeTCPClientHelper
 		catch (final UnresolvedAddressException uae)
 		{
 			reportErrorWithPopUp(	uae,
-														"Cannot find host: '" + pServerAddress
-																+ "'");
+									"Cannot find host: '" + pServerAddress
+											+ "'");
 		}
 		catch (final Throwable e)
 		{
@@ -173,62 +171,62 @@ public abstract class ClearVolumeTCPClientHelper
 	}
 
 	public void reportErrorWithPopUp(	final Throwable pThrowable,
-																		final String pErrorMessage)
+										final String pErrorMessage)
 	{
 		reportError(pThrowable, pErrorMessage);
 
 		try
 		{
 			if (ExceptionUtils.getFullStackTrace(pThrowable)
-												.contains("initSingleton"))
-				JOptionPane.showMessageDialog(null,
-																			"Sorry, but your OpenGL driver is not supported.",
-																			"OpenGL error",
-																			JOptionPane.ERROR_MESSAGE);
+								.contains("initSingleton"))
+				JOptionPane.showMessageDialog(	null,
+												"Sorry, but your OpenGL driver is not supported.",
+												"OpenGL error",
+												JOptionPane.ERROR_MESSAGE);
 			else if (ExceptionUtils.getFullStackTrace(pThrowable)
-															.contains("requires OpenCL version"))
-				JOptionPane.showMessageDialog(null,
-																			"Sorry, but your version of OpenCL is not supported (min 1.2).",
-																			"Unsupported OpenCL version",
-																			JOptionPane.ERROR_MESSAGE);
+									.contains("requires OpenCL version"))
+				JOptionPane.showMessageDialog(	null,
+												"Sorry, but your version of OpenCL is not supported (min 1.2).",
+												"Unsupported OpenCL version",
+												JOptionPane.ERROR_MESSAGE);
 			else if (pThrowable.getClass()
-													.toString()
-													.toLowerCase()
-													.contains("CudaException"))
-				JOptionPane.showMessageDialog(null,
-																			"Sorry, but your version of CUDA is not supported (min 6.5).",
-																			"Unsupported OpenCL version",
-																			JOptionPane.ERROR_MESSAGE);
+								.toString()
+								.toLowerCase()
+								.contains("CudaException"))
+				JOptionPane.showMessageDialog(	null,
+												"Sorry, but your version of CUDA is not supported (min 6.5).",
+												"Unsupported OpenCL version",
+												JOptionPane.ERROR_MESSAGE);
 			else if (pThrowable.getClass()
-													.toString()
-													.contains("UnresolvedAddressException"))
-				JOptionPane.showMessageDialog(null,
-																			"Sorry, but there is no ClearVolume server at that address.",
-																			"Unknown host error",
-																			JOptionPane.ERROR_MESSAGE);
+								.toString()
+								.contains("UnresolvedAddressException"))
+				JOptionPane.showMessageDialog(	null,
+												"Sorry, but there is no ClearVolume server at that address.",
+												"Unknown host error",
+												JOptionPane.ERROR_MESSAGE);
 			else if (pThrowable.getClass()
-													.toString()
-													.contains("ConnectException") && pThrowable.getLocalizedMessage() != null
-								&& pThrowable.getLocalizedMessage()
-															.toLowerCase()
-															.contains("connection refused"))
-				JOptionPane.showMessageDialog(null,
-																			"Sorry, but there is no ClearVolume server listening on that machine/port",
-																			"Connection refused error",
-																			JOptionPane.ERROR_MESSAGE);
+								.toString()
+								.contains("ConnectException") && pThrowable.getLocalizedMessage() != null
+						&& pThrowable.getLocalizedMessage()
+										.toLowerCase()
+										.contains("connection refused"))
+				JOptionPane.showMessageDialog(	null,
+												"Sorry, but there is no ClearVolume server listening on that machine/port",
+												"Connection refused error",
+												JOptionPane.ERROR_MESSAGE);
 			else
 				showEditableOptionPane(	ExceptionUtils.getFullStackTrace(pThrowable),
-																"Unknown error, please copy and send to royer@mpi-cbg.de",
-																JOptionPane.ERROR_MESSAGE);
+										"Unknown error, please copy and send to royer@mpi-cbg.de",
+										JOptionPane.ERROR_MESSAGE);
 		}
 		catch (final Throwable e)
 		{
 			try
 			{
 				showEditableOptionPane(	ExceptionUtils.getFullStackTrace(e) + "\n"
-																		+ ExceptionUtils.getFullStackTrace(pThrowable),
-																"Unknown error, please copy and send to royer@mpi-cbg.de",
-																JOptionPane.ERROR_MESSAGE);
+												+ ExceptionUtils.getFullStackTrace(pThrowable),
+										"Unknown error, please copy and send to royer@mpi-cbg.de",
+										JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
 			}
 			catch (final Throwable e1)
@@ -240,8 +238,8 @@ public abstract class ClearVolumeTCPClientHelper
 	}
 
 	private void showEditableOptionPane(final String pText,
-																			final String pTitle,
-																			final int pMessageType)
+										final String pTitle,
+										final int pMessageType)
 	{
 		final JTextArea ta = new JTextArea(48, 100);
 		ta.setText(pText);
@@ -250,10 +248,10 @@ public abstract class ClearVolumeTCPClientHelper
 		ta.setCaretPosition(0);
 		ta.setEditable(false);
 
-		JOptionPane.showMessageDialog(null,
-																	new JScrollPane(ta),
-																	pTitle,
-																	pMessageType);
+		JOptionPane.showMessageDialog(	null,
+										new JScrollPane(ta),
+										pTitle,
+										pMessageType);
 	}
 
 	public abstract void reportError(Throwable e, String pErrorMessage);
@@ -263,7 +261,7 @@ public abstract class ClearVolumeTCPClientHelper
 	 * the application icon. Bad JOGL!
 	 * 
 	 * @param pFinalIcon
-	 *          final icon
+	 *            final icon
 	 */
 	public static void setCurrentAppIcon(final Image pFinalIcon)
 	{
@@ -280,7 +278,8 @@ public abstract class ClearVolumeTCPClientHelper
 			{
 				if (os.indexOf("mac") >= 0)
 				{
-					Application.getApplication().setDockIconImage(pFinalIcon);
+					Application.getApplication()
+								.setDockIconImage(pFinalIcon);
 				}
 				/*else if (os.indexOf("win") >= 0)
 				{

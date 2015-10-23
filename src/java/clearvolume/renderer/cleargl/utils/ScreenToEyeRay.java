@@ -16,18 +16,18 @@ public class ScreenToEyeRay
 		public String toString()
 		{
 			return String.format(	"EyeRay [org=%s, dir=%s]",
-														Arrays.toString(org),
-														Arrays.toString(dir));
+									Arrays.toString(org),
+									Arrays.toString(dir));
 		}
 
 	}
 
 	public static final EyeRay convert(	int width,
-																			int height,
-																			int mouseX,
-																			int mouseY,
-																			GLMatrix pInverseModelViewMatrix,
-																			GLMatrix pInverseProjectionMatrix)
+										int height,
+										int mouseX,
+										int mouseY,
+										GLMatrix pInverseModelViewMatrix,
+										GLMatrix pInverseProjectionMatrix)
 	{
 		final float u = (mouseX / (float) width) * 2.0f - 1.0f;
 		final float v = ((height - mouseY) / (float) height) * 2.0f - 1.0f;

@@ -20,13 +20,11 @@ import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import jcuda.CudaException;
-import jcuda.Pointer;
-import jcuda.driver.CUaddress_mode;
-import jcuda.driver.CUfilter_mode;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
 
 import clearcuda.CudaArray;
 import clearcuda.CudaCompiler;
@@ -39,14 +37,14 @@ import clearcuda.CudaTextureReference;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.processors.CUDAProcessor;
 import clearvolume.renderer.processors.ProcessorInterface;
-
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLEventListener;
-
 import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
+import jcuda.CudaException;
+import jcuda.Pointer;
+import jcuda.driver.CUaddress_mode;
+import jcuda.driver.CUfilter_mode;
 
 /**
  * Class JCudaClearVolumeRenderer

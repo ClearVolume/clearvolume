@@ -26,7 +26,7 @@ public class DCRemoverFilter extends FilterBase
 	 * to remove the DC component.
 	 * 
 	 * @param pAlpha
-	 *          alpha
+	 *            alpha
 	 */
 	public DCRemoverFilter(float pAlpha)
 	{
@@ -38,9 +38,9 @@ public class DCRemoverFilter extends FilterBase
 	 * filter that is used to remove the DC component.
 	 * 
 	 * @param pAmplitude
-	 *          amplitude
+	 *            amplitude
 	 * @param pAlpha
-	 *          alpha
+	 *            alpha
 	 */
 	public DCRemoverFilter(float pAmplitude, float pAlpha)
 	{
@@ -68,7 +68,7 @@ public class DCRemoverFilter extends FilterBase
 		final float lInSample = lSource.next();
 
 		final float lOutSample = lInSample - getAmplitude()
-															* mLowPassFilter.next();
+									* mLowPassFilter.next();
 
 		return lOutSample;
 	}
@@ -87,7 +87,7 @@ public class DCRemoverFilter extends FilterBase
 	 * Sets alpha.
 	 * 
 	 * @param pAlpha
-	 *          alpha
+	 *            alpha
 	 */
 	public void setAlpha(double pAlpha)
 	{

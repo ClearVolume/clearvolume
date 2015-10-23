@@ -27,7 +27,7 @@ public abstract class FilterBase extends SourceBase implements Filter
 	 * unchanged going through the filter.
 	 * 
 	 * @param pAmplitude
-	 *          amplitude
+	 *            amplitude
 	 */
 	public FilterBase(float pAmplitude)
 	{
@@ -38,7 +38,7 @@ public abstract class FilterBase extends SourceBase implements Filter
 	 * Sets the filtered source.
 	 * 
 	 * @param pSource
-	 *          filtered source
+	 *            filtered source
 	 */
 	@Override
 	public void setSource(Source pSource)

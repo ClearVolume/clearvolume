@@ -7,9 +7,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import clearvolume.renderer.DisplayRequestInterface;
-
 import com.jogamp.opengl.math.Quaternion;
+
+import clearvolume.renderer.DisplayRequestInterface;
 
 /**
  * Class ExternalRotationController
@@ -46,10 +46,10 @@ import com.jogamp.opengl.math.Quaternion;
  *
  */
 public class ExternalRotationController	extends
-																				QuaternionRotationControllerBase implements
-																																				RotationControllerInterface,
-																																				Closeable,
-																																				Runnable
+										QuaternionRotationControllerBase implements
+																		RotationControllerInterface,
+																		Closeable,
+																		Runnable
 {
 
 	/**
@@ -81,17 +81,17 @@ public class ExternalRotationController	extends
 	 * Constructs an instance of the ExternalRotationController class
 	 * 
 	 * @param pPortNumber
-	 *          port number
+	 *            port number
 	 * @param pDisplayRequest
-	 *          display request
+	 *            display request
 	 * @throws UnknownHostException
-	 *           thrown when host unknown
+	 *             thrown when host unknown
 	 * @throws IOException
-	 *           thrown when IO error
+	 *             thrown when IO error
 	 */
-	public ExternalRotationController(final int pPortNumber,
-																		DisplayRequestInterface pDisplayRequest) throws UnknownHostException,
-																																						IOException
+	public ExternalRotationController(	final int pPortNumber,
+										DisplayRequestInterface pDisplayRequest) throws UnknownHostException,
+																				IOException
 	{
 		super();
 		mPortNumber = pPortNumber;
@@ -124,14 +124,14 @@ public class ExternalRotationController	extends
 			}
 		};
 		final Thread lConnectionThread = new Thread(lConnectionRunnable,
-																								"ClearVolume-ExternalControllerConnectionThread");
+													"ClearVolume-ExternalControllerConnectionThread");
 		lConnectionThread.setDaemon(true);
 		lConnectionThread.start();
 	}
 
 	/**
-	 * Makes one attempt at connecting to the TCP server and proceeds to start the
-	 * reception thread.
+	 * Makes one attempt at connecting to the TCP server and proceeds to start
+	 * the reception thread.
 	 * 
 	 * @return true if connection succeeded.
 	 */
@@ -142,8 +142,8 @@ public class ExternalRotationController	extends
 			mClientSocket = new Socket("localhost", mPortNumber);
 			mBufferedInputStreamFromServer = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()));
 
-			mReceptionThread = new Thread(this,
-																		"ClearVolume-ExternalController");
+			mReceptionThread = new Thread(	this,
+											"ClearVolume-ExternalController");
 			mReceptionThread.setDaemon(true);
 			mReceptionThread.start();
 
@@ -206,8 +206,8 @@ public class ExternalRotationController	extends
 	private void parseMessage(String pReadLine)
 	{
 		// System.out.println(pReadLine);
-		final String lSubString = pReadLine.substring(1,
-																									pReadLine.length() - 2);
+		final String lSubString = pReadLine.substring(	1,
+														pReadLine.length() - 2);
 
 		final String[] lSplittedSubString = lSubString.split(",");
 
@@ -245,8 +245,8 @@ public class ExternalRotationController	extends
 	public boolean isActive()
 	{
 		return mClientSocket != null && mClientSocket.isConnected()
-						&& !mClientSocket.isClosed()
-						&& super.isActive();
+				&& !mClientSocket.isClosed()
+				&& super.isActive();
 	}
 
 }

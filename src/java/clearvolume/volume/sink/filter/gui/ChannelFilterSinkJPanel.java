@@ -1,7 +1,5 @@
 package clearvolume.volume.sink.filter.gui;
 
-import gnu.trove.list.array.TIntArrayList;
-
 import java.awt.Color;
 import java.awt.EventQueue;
 
@@ -16,12 +14,13 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import net.miginfocom.swing.MigLayout;
 import clearvolume.volume.sink.filter.ChannelFilterSink;
+import gnu.trove.list.array.TIntArrayList;
+import net.miginfocom.swing.MigLayout;
 
 public class ChannelFilterSinkJPanel extends JPanel	implements
-																										ListSelectionListener,
-																										ListDataListener
+													ListSelectionListener,
+													ListDataListener
 {
 
 	private JList<String> mActiveChannelJList;
@@ -39,7 +38,8 @@ public class ChannelFilterSinkJPanel extends JPanel	implements
 					final JFrame lJFrame = new JFrame();
 
 					final ChannelFilterSinkJPanel lChannelFilterSinkJPanel = new ChannelFilterSinkJPanel(pChannelFilterSink);
-					lJFrame.getContentPane().add(lChannelFilterSinkJPanel);
+					lJFrame.getContentPane()
+							.add(lChannelFilterSinkJPanel);
 					lJFrame.setVisible(true);
 				}
 				catch (final Exception e)
@@ -54,25 +54,25 @@ public class ChannelFilterSinkJPanel extends JPanel	implements
 	 * Create the panel.
 	 * 
 	 * @param pChannelFilterSink
-	 *          channel filter sink
+	 *            channel filter sink
 	 */
 	public ChannelFilterSinkJPanel(final ChannelFilterSink pChannelFilterSink)
 	{
 		mChannelFilterSink = pChannelFilterSink;
 		setBackground(Color.WHITE);
 		setLayout(new MigLayout("",
-														"[grow,fill]",
-														"[26px:26px,grow,fill]"));
+								"[grow,fill]",
+								"[26px:26px,grow,fill]"));
 
 		mActiveChannelJList = new JList<String>();
 		mActiveChannelJList.setVisibleRowCount(16);
 		mActiveChannelJList.setSelectionBackground(new Color(	102,
-																													102,
-																													255));
+																102,
+																255));
 		mActiveChannelJList.setModel(new AbstractListModel()
 		{
 			String[] values = new String[]
-			{ "1",
+			{	"1",
 				"2",
 				"3",
 				"4",

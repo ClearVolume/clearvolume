@@ -53,7 +53,7 @@ public class Guitar extends ToneBase implements Source
 	 * Strike the string of the Guitar with a given intensity.
 	 * 
 	 * @param pIntensity
-	 *          intensity
+	 *            intensity
 	 */
 	public void strike(float pIntensity)
 	{
@@ -137,9 +137,9 @@ public class Guitar extends ToneBase implements Source
 
 		for (int i = 1; i < pPeriodInSamples - 1; i++)
 			mNoiseBuffer[i] = (1 - pAlpha) * mNoiseBuffer[i]
-												+ pAlpha
-												* 2
-												* (float) (lThreadLocalRandom.nextFloat() - 0.5);
+								+ pAlpha
+								* 2
+								* (float) (lThreadLocalRandom.nextFloat() - 0.5);
 		mNoiseBuffer[0] = 0;
 		mNoiseBuffer[pPeriodInSamples - 1] = 0;
 	}
@@ -154,7 +154,7 @@ public class Guitar extends ToneBase implements Source
 
 	/**
 	 * @param pAttenuation
-	 *          attenuation
+	 *            attenuation
 	 */
 	public void setAttenuation(float pAttenuation)
 	{

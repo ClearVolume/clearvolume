@@ -1,6 +1,5 @@
 package clearvolume.exceptions;
 
-
 public class ClearVolumeMemoryException extends RuntimeException
 {
 
@@ -10,4 +9,3 @@ public class ClearVolumeMemoryException extends RuntimeException
 	}
 
 }
-

@@ -7,15 +7,15 @@ import java.nio.IntBuffer;
 
 import javax.swing.JPanel;
 
+import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLKernel;
+
 import clearvolume.renderer.cleargl.overlay.o2d.panels.HistogramPanel;
 import clearvolume.renderer.panels.HasGUIPanel;
 import clearvolume.renderer.processors.OpenCLProcessor;
 
-import com.nativelibs4java.opencl.CLBuffer;
-import com.nativelibs4java.opencl.CLKernel;
-
 public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>	implements
-																																	HasGUIPanel
+																	HasGUIPanel
 {
 
 	private CLKernel mKernelHist;
@@ -66,10 +66,10 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>	implements
 		if (mKernelHist == null)
 		{
 			mKernelHist = getDevice().compileKernel(OpenCLHistogram.class.getResource("kernels/histogram.cl"),
-																							"histogram_naive");
+													"histogram_naive");
 
 			mKernelClearCounts = getDevice().compileKernel(	OpenCLHistogram.class.getResource("kernels/histogram.cl"),
-																											"clear_counts");
+															"clear_counts");
 
 		}
 
@@ -83,9 +83,9 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>	implements
 
 	@Override
 	public void process(int pRenderLayerIndex,
-											long pWidthInVoxels,
-											long pHeightInVoxels,
-											long pDepthInVoxels)
+						long pWidthInVoxels,
+						long pHeightInVoxels,
+						long pDepthInVoxels)
 	{
 		if (!isActive())
 			return;
@@ -108,19 +108,19 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>	implements
 
 		// System.out.println(mMax);
 		mKernelHist.setArgs(getVolumeBuffers()[0],
-												mBufCounts,
-												mMin,
-												mMax,
-												mNumberOfBins);
+							mBufCounts,
+							mMin,
+							mMax,
+							mNumberOfBins);
 
 		getDevice().run(mKernelHist,
-										(int) pWidthInVoxels,
-										(int) pHeightInVoxels,
-										(int) pDepthInVoxels);
+						(int) pWidthInVoxels,
+						(int) pHeightInVoxels,
+						(int) pDepthInVoxels);
 
 		// fetch it from the gpu
 		final IntBuffer out = getDevice().readIntBufferAsByte(mBufCounts)
-																			.asIntBuffer();
+											.asIntBuffer();
 
 		final long stop = System.nanoTime();
 
@@ -131,7 +131,7 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>	implements
 			mOutputBuffer = FloatBuffer.allocate(mNumberOfBins);
 
 		final long lNumberOfVoxels = pWidthInVoxels * pHeightInVoxels
-																	* pDepthInVoxels;
+										* pDepthInVoxels;
 
 		for (int i = 0; i < mNumberOfBins; i++)
 		{
@@ -146,8 +146,8 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>	implements
 	}
 
 	private void debugOutput(	final long start,
-														final IntBuffer out,
-														final long stop)
+								final IntBuffer out,
+								final long stop)
 	{
 		{
 			System.out.println(out.get(0));
@@ -157,8 +157,8 @@ public class OpenCLHistogram extends OpenCLProcessor<FloatBuffer>	implements
 				System.out.print(out.get(i) + " ");
 			}
 
-			System.out.printf("\n \n histogram: %.4f ms \n",
-												(stop - start) / 1.e6f);
+			System.out.printf(	"\n \n histogram: %.4f ms \n",
+								(stop - start) / 1.e6f);
 
 		}
 	}

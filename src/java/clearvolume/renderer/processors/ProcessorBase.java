@@ -2,13 +2,13 @@ package clearvolume.renderer.processors;
 
 import java.util.ArrayList;
 
-import clearvolume.renderer.SingleKeyToggable;
-
 import com.jogamp.newt.event.KeyEvent;
 
+import clearvolume.renderer.SingleKeyToggable;
+
 public abstract class ProcessorBase<R>	implements
-																				ProcessorInterface<R>,
-																				SingleKeyToggable
+										ProcessorInterface<R>,
+										SingleKeyToggable
 {
 	private final ArrayList<ProcessorResultListener<R>> mListenerList = new ArrayList<>();
 
@@ -78,17 +78,17 @@ public abstract class ProcessorBase<R>	implements
 
 	@Override
 	public abstract void process(	int pRenderLayerIndex,
-																long pWidthInVoxels,
-																long pHeightInVoxels,
-																long pDepthInVoxels);
+									long pWidthInVoxels,
+									long pHeightInVoxels,
+									long pDepthInVoxels);
 
 	/**
 	 * Integral division, rounding the result to the next highest integer.
 	 *
 	 * @param a
-	 *          Dividend
+	 *            Dividend
 	 * @param b
-	 *          Divisor
+	 *            Divisor
 	 * @return a/b rounded to the next highest integer.
 	 */
 	protected static long iDivUp(final long a, final long b)

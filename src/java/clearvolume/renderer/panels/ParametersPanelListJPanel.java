@@ -22,16 +22,15 @@ public class ParametersPanelListJPanel extends JPanel
 		// mScrollPane = new JScrollPane();
 		// add(mScrollPane);
 
-
 	}
 
 	public void addPanel(JPanel pPanel)
 	{
 		pPanel.setBorder(BorderFactory.createMatteBorder(	1,
-																											5,
-																											1,
-																											1,
-																											Color.black));
+															5,
+															1,
+															1,
+															Color.black));
 		pPanel.validate();
 		add(pPanel);
 

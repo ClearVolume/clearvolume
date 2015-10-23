@@ -28,7 +28,7 @@ public interface RotationControllerInterface
 	 * Sets controller active flag
 	 * 
 	 * @param pActive
-	 *          true for active, false for inactive
+	 *            true for active, false for inactive
 	 */
 	void setActive(boolean pActive);
 

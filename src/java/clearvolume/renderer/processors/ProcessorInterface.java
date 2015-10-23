@@ -12,9 +12,9 @@ public interface ProcessorInterface<R> extends SingleKeyToggable
 	public boolean isCompatibleProcessor(Class<?> pRendererClass);
 
 	public void process(int pRenderLayerIndex,
-											long pWidthInVoxels,
-											long pHeightInVoxels,
-											long pDepthInVoxels);
+						long pWidthInVoxels,
+						long pHeightInVoxels,
+						long pDepthInVoxels);
 
 	public String getName();
 

@@ -16,11 +16,11 @@ public class ClearVolumeSerializationTests
 	@Test
 	public void test()
 	{
-		final Volume lVolume = new Volume(NativeTypeEnum.UnsignedByte,
-																			1,
-																			128,
-																			128,
-																			128);
+		final Volume lVolume = new Volume(	NativeTypeEnum.UnsignedByte,
+											1,
+											128,
+											128,
+											128);
 		lVolume.setTimeIndex(2);
 		lVolume.setTimeInSeconds(3.3);
 		lVolume.setChannelID(4);
@@ -35,18 +35,20 @@ public class ClearVolumeSerializationTests
 		lSerializedVolumeData.rewind();
 		lSerializedVolumeData.put((byte) 123);
 
-		final ByteBuffer lBuffer = ClearVolumeSerialization.serialize(lVolume,
-																																	null);
+		final ByteBuffer lBuffer = ClearVolumeSerialization.serialize(	lVolume,
+																		null);
 
 		final Volume lDeserializedVolume = new Volume();
-		ClearVolumeSerialization.deserialize(lBuffer, lDeserializedVolume);
+		ClearVolumeSerialization.deserialize(	lBuffer,
+												lDeserializedVolume);
 
 		System.out.println(lDeserializedVolume);
 
 		assertEquals(2, lDeserializedVolume.getTimeIndex());
 		assertEquals(3.3, lDeserializedVolume.getTimeInSeconds(), 0);
 		assertEquals(4, lDeserializedVolume.getChannelID());
-		assertEquals("channel 1", lDeserializedVolume.getChannelName());
+		assertEquals(	"channel 1",
+						lDeserializedVolume.getChannelName());
 		assertEquals(1, lDeserializedVolume.getColor()[0], 0.001);
 		assertEquals(0.5, lDeserializedVolume.getColor()[1], 0.001);
 		assertEquals(0.3, lDeserializedVolume.getColor()[2], 0.001);
@@ -54,14 +56,14 @@ public class ClearVolumeSerializationTests
 		assertEquals(1, lDeserializedVolume.getViewMatrix()[0], 0.001);
 		assertEquals("um", lDeserializedVolume.getRealUnitName());
 		assertEquals(	10,
-									lDeserializedVolume.getVoxelWidthInRealUnits(),
-									0);
+						lDeserializedVolume.getVoxelWidthInRealUnits(),
+						0);
 		assertEquals(	11,
-									lDeserializedVolume.getVoxelHeightInRealUnits(),
-									0);
+						lDeserializedVolume.getVoxelHeightInRealUnits(),
+						0);
 		assertEquals(	12,
-									lDeserializedVolume.getVoxelDepthInRealUnits(),
-									0);
+						lDeserializedVolume.getVoxelDepthInRealUnits(),
+						0);
 
 		final ByteBuffer lDeserializedVolumeData = lDeserializedVolume.getDataBuffer();
 		lDeserializedVolumeData.rewind();

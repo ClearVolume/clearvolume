@@ -34,9 +34,9 @@ public class SoundIn
 		{
 			audioFormat = getAudioFormat();
 			/*************************************************************************
-			 * DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,
-			 * mAudioFormat); targetDataLine = (TargetDataLine)
-			 * AudioSystem.getLine(dataLineInfo);/
+			 * DataLine.Info dataLineInfo = new
+			 * DataLine.Info(TargetDataLine.class, mAudioFormat); targetDataLine
+			 * = (TargetDataLine) AudioSystem.getLine(dataLineInfo);/
 			 ************************************************************************/
 
 			targetDataLine = AudioSystem.getTargetDataLine(getAudioFormat());
@@ -87,10 +87,10 @@ public class SoundIn
 		final boolean bigEndian = false;
 		// true,false
 		return new AudioFormat(	sampleRate,
-														sampleSizeInBits,
-														channels,
-														signed,
-														bigEndian);
+								sampleSizeInBits,
+								channels,
+								signed,
+								bigEndian);
 	}
 
 }

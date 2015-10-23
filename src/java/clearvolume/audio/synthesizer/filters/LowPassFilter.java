@@ -29,7 +29,7 @@ public class LowPassFilter extends FilterBase
 	 * Constructor that allows to set alpha.
 	 * 
 	 * @param pAlpha
-	 *          alpha
+	 *            alpha
 	 */
 	public LowPassFilter(double pAlpha)
 	{
@@ -65,7 +65,7 @@ public class LowPassFilter extends FilterBase
 	 * Sets alpha.
 	 * 
 	 * @param pAlpha
-	 *          alpha
+	 *            alpha
 	 */
 	public void setAlpha(double pAlpha)
 	{

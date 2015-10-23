@@ -14,6 +14,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 
+import com.jogamp.nativewindow.WindowClosingProtocol.WindowClosingMode;
+import com.jogamp.newt.awt.NewtCanvasAWT;
+import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES3;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.math.Quaternion;
+
 import cleargl.ClearGLEventListener;
 import cleargl.ClearGLWindow;
 import cleargl.GLAttribute;
@@ -37,18 +48,6 @@ import clearvolume.renderer.cleargl.overlay.o3d.BoxOverlay;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
 import clearvolume.renderer.listeners.EyeRayListener;
-
-import com.jogamp.nativewindow.WindowClosingProtocol.WindowClosingMode;
-import com.jogamp.newt.awt.NewtCanvasAWT;
-import com.jogamp.newt.event.MouseEvent;
-import com.jogamp.newt.event.WindowAdapter;
-import com.jogamp.newt.event.WindowEvent;
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES3;
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLProfile;
-import com.jogamp.opengl.math.Quaternion;
-
 import coremem.types.NativeTypeEnum;
 
 /**
@@ -70,11 +69,11 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	private static final long cMaxWaitingTimeForAcquiringDisplayLockInMs = 200;
 
 	private static final GLMatrix cOverlay2dProjectionMatrix = GLMatrix.getOrthoProjectionMatrix(	-1,
-																																																1,
-																																																-1,
-																																																1,
-																																																0,
-																																																1000);/**/;
+																									1,
+																									-1,
+																									1,
+																									0,
+																									1000);/**/;
 
 	static
 	{
@@ -129,8 +128,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	private volatile boolean mRequestDisplay = true;
 
 	// Recorder:
-	private final GLVideoRecorder mGLVideoRecorder = new GLVideoRecorder(new File(SystemUtils.USER_HOME,
-																																								"Videos/ClearVolume"));
+	private final GLVideoRecorder mGLVideoRecorder = new GLVideoRecorder(new File(	SystemUtils.USER_HOME,
+																					"Videos/ClearVolume"));
 
 	private final float mLightVector[] = new float[]
 	{ -1.f, 1.f, 1.f };
@@ -140,20 +139,20 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 * name and its dimensions.
 	 *
 	 * @param pWindowName
-	 *          window name
+	 *            window name
 	 * @param pWindowWidth
-	 *          window width
+	 *            window width
 	 * @param pWindowHeight
-	 *          window height
+	 *            window height
 	 */
 	public ClearGLVolumeRenderer(	final String pWindowName,
-																final int pWindowWidth,
-																final int pWindowHeight)
+									final int pWindowWidth,
+									final int pWindowHeight)
 	{
 		this(	pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					NativeTypeEnum.UnsignedByte);
+				pWindowWidth,
+				pWindowHeight,
+				NativeTypeEnum.UnsignedByte);
 	}
 
 	/**
@@ -161,25 +160,25 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 * name, its dimensions, and bytes-per-voxel.
 	 *
 	 * @param pWindowName
-	 *          window name
+	 *            window name
 	 * @param pWindowWidth
-	 *          window width
+	 *            window width
 	 * @param pWindowHeight
-	 *          window height
+	 *            window height
 	 * @param pNativeTypeEnum
-	 *          native type
+	 *            native type
 	 */
 	public ClearGLVolumeRenderer(	final String pWindowName,
-																final int pWindowWidth,
-																final int pWindowHeight,
-																final NativeTypeEnum pNativeTypeEnum)
+									final int pWindowWidth,
+									final int pWindowHeight,
+									final NativeTypeEnum pNativeTypeEnum)
 	{
 		this(	pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					pNativeTypeEnum,
-					768,
-					768);
+				pWindowWidth,
+				pWindowHeight,
+				pNativeTypeEnum,
+				768,
+				768);
 	}
 
 	/**
@@ -187,32 +186,32 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 * name, its dimensions, and bytes-per-voxel.
 	 *
 	 * @param pWindowName
-	 *          window name
+	 *            window name
 	 * @param pWindowWidth
-	 *          window width
+	 *            window width
 	 * @param pWindowHeight
-	 *          window height
+	 *            window height
 	 * @param pNativeTypeEnum
-	 *          native type
+	 *            native type
 	 * @param pMaxRenderWidth
-	 *          max render width
+	 *            max render width
 	 * @param pMaxRenderHeight
-	 *          max render height
+	 *            max render height
 	 */
 	public ClearGLVolumeRenderer(	final String pWindowName,
-																final int pWindowWidth,
-																final int pWindowHeight,
-																final NativeTypeEnum pNativeTypeEnum,
-																final int pMaxRenderWidth,
-																final int pMaxRenderHeight)
+									final int pWindowWidth,
+									final int pWindowHeight,
+									final NativeTypeEnum pNativeTypeEnum,
+									final int pMaxRenderWidth,
+									final int pMaxRenderHeight)
 	{
 		this(	pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					pNativeTypeEnum,
-					pMaxRenderWidth,
-					pMaxRenderHeight,
-					1);
+				pWindowWidth,
+				pWindowHeight,
+				pNativeTypeEnum,
+				pMaxRenderWidth,
+				pMaxRenderHeight,
+				1);
 	}
 
 	/**
@@ -220,109 +219,109 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 * name, its dimensions, and bytes-per-voxel.
 	 *
 	 * @param pWindowName
-	 *          window name
+	 *            window name
 	 * @param pWindowWidth
-	 *          window width
+	 *            window width
 	 * @param pWindowHeight
-	 *          window height
+	 *            window height
 	 * @param pNativeTypeEnum
-	 *          native type
+	 *            native type
 	 * @param pMaxRenderWidth
-	 *          max render width
+	 *            max render width
 	 * @param pMaxRenderHeight
-	 *          max render height
+	 *            max render height
 	 * @param pUseInCanvas
-	 *          if true, this Renderer will not be displayed in a window of it's
-	 *          own, but must be embedded in a GUI as Canvas.
+	 *            if true, this Renderer will not be displayed in a window of
+	 *            it's own, but must be embedded in a GUI as Canvas.
 	 */
 	public ClearGLVolumeRenderer(	final String pWindowName,
-																final int pWindowWidth,
-																final int pWindowHeight,
-																final NativeTypeEnum pNativeTypeEnum,
-																final int pMaxRenderWidth,
-																final int pMaxRenderHeight,
-																final boolean pUseInCanvas)
+									final int pWindowWidth,
+									final int pWindowHeight,
+									final NativeTypeEnum pNativeTypeEnum,
+									final int pMaxRenderWidth,
+									final int pMaxRenderHeight,
+									final boolean pUseInCanvas)
 	{
 		this(	pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					pNativeTypeEnum,
-					pMaxRenderWidth,
-					pMaxRenderHeight,
-					1,
-					pUseInCanvas);
+				pWindowWidth,
+				pWindowHeight,
+				pNativeTypeEnum,
+				pMaxRenderWidth,
+				pMaxRenderHeight,
+				1,
+				pUseInCanvas);
 	}
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
-	 * name, its dimensions, number of bytes-per-voxel, max texture width, height
-	 * and number of render layers.
+	 * name, its dimensions, number of bytes-per-voxel, max texture width,
+	 * height and number of render layers.
 	 *
 	 * @param pWindowName
-	 *          window name
+	 *            window name
 	 * @param pWindowWidth
-	 *          window width
+	 *            window width
 	 * @param pWindowHeight
-	 *          window height
+	 *            window height
 	 * @param pNativeTypeEnum
-	 *          native type
+	 *            native type
 	 * @param pMaxTextureWidth
-	 *          max render width
+	 *            max render width
 	 * @param pMaxTextureHeight
-	 *          max render height
+	 *            max render height
 	 * @param pNumberOfRenderLayers
-	 *          number of render layers
+	 *            number of render layers
 	 */
 	public ClearGLVolumeRenderer(	final String pWindowName,
-																final int pWindowWidth,
-																final int pWindowHeight,
-																final NativeTypeEnum pNativeTypeEnum,
-																final int pMaxTextureWidth,
-																final int pMaxTextureHeight,
-																final int pNumberOfRenderLayers)
+									final int pWindowWidth,
+									final int pWindowHeight,
+									final NativeTypeEnum pNativeTypeEnum,
+									final int pMaxTextureWidth,
+									final int pMaxTextureHeight,
+									final int pNumberOfRenderLayers)
 	{
 		this(	pWindowName,
-					pWindowWidth,
-					pWindowHeight,
-					pNativeTypeEnum,
-					pMaxTextureWidth,
-					pMaxTextureHeight,
-					1,
-					false);
+				pWindowWidth,
+				pWindowHeight,
+				pNativeTypeEnum,
+				pMaxTextureWidth,
+				pMaxTextureHeight,
+				1,
+				false);
 	}
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
-	 * name, its dimensions, number of bytes-per-voxel, max texture width, height
-	 * and number of render layers.
+	 * name, its dimensions, number of bytes-per-voxel, max texture width,
+	 * height and number of render layers.
 	 *
 	 * @param pWindowName
-	 *          window name
+	 *            window name
 	 * @param pWindowWidth
-	 *          window width
+	 *            window width
 	 * @param pWindowHeight
-	 *          window height
+	 *            window height
 	 * @param pNativeTypeEnum
-	 *          native type
+	 *            native type
 	 * @param pMaxRenderWidth
-	 *          max render width
+	 *            max render width
 	 * @param pMaxRenderHeight
-	 *          max render height
+	 *            max render height
 	 * @param pNumberOfRenderLayers
-	 *          number of render layers
+	 *            number of render layers
 	 * @param pUseInCanvas
-	 *          if true, this Renderer will not be displayed in a window of it's
-	 *          own, but must be embedded in a GUI as Canvas.
+	 *            if true, this Renderer will not be displayed in a window of
+	 *            it's own, but must be embedded in a GUI as Canvas.
 	 */
 	@SuppressWarnings("unchecked")
 	public ClearGLVolumeRenderer(	final String pWindowName,
-																final int pWindowWidth,
-																final int pWindowHeight,
-																final NativeTypeEnum pNativeTypeEnum,
-																final int pMaxRenderWidth,
-																final int pMaxRenderHeight,
-																final int pNumberOfRenderLayers,
-																final boolean pUseInCanvas)
+									final int pWindowWidth,
+									final int pWindowHeight,
+									final NativeTypeEnum pNativeTypeEnum,
+									final int pMaxRenderWidth,
+									final int pMaxRenderHeight,
+									final int pNumberOfRenderLayers,
+									final boolean pUseInCanvas)
 	{
 		super(pNumberOfRenderLayers);
 
@@ -350,9 +349,9 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		addOverlay(new BoxOverlay(10, 1.f, true, "box"));
 
 		mClearGLWindow = new ClearGLWindow(	pWindowName,
-																				pWindowWidth,
-																				pWindowHeight,
-																				this);
+											pWindowWidth,
+											pWindowHeight,
+											this);
 		mClearGLWindow.setFPS(60);
 
 		mClearGLWindow.start();
@@ -373,7 +372,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 		// Initialize the keyboard controls
 		final KeyboardControl lKeyboardControl = new KeyboardControl(	this,
-																																	lMouseControl);
+																		lMouseControl);
 		mClearGLWindow.addKeyListener(lKeyboardControl);
 
 		mClearGLWindow.addWindowListener(new WindowAdapter()
@@ -388,17 +387,47 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	}
 
 	@Override
-	public void setClearGLWindow(final ClearGLWindow pClearGLWindow)
+	public void addOverlay(Overlay pOverlay)
 	{
-
-		mClearGLWindow = pClearGLWindow;
+		mOverlayMap.put(pOverlay.getName(), pOverlay);
 	}
 
-	@Override
-	public ClearGLWindow getClearGLWindow()
+	private boolean anyIsTrue(final boolean[] pBooleanArray)
 	{
-		return mClearGLWindow;
+		for (final boolean lBoolean : pBooleanArray)
+			if (lBoolean)
+				return true;
+		return false;
 	};
+
+	private void applyControllersTransform()
+	{
+		if (getRotationControllers().size() > 0)
+		{
+			final Quaternion lQuaternion = new Quaternion();
+
+			for (final RotationControllerInterface lRotationController : getRotationControllers())
+				if (lRotationController.isActive())
+				{
+					if (lRotationController instanceof RotationControllerWithRenderNotification)
+					{
+						final RotationControllerWithRenderNotification lRenderNotification = (RotationControllerWithRenderNotification) lRotationController;
+						lRenderNotification.notifyRender(this);
+					}
+					lQuaternion.mult(lRotationController.getQuaternion());
+
+					notifyChangeOfVolumeRenderingParameters();
+				}
+
+			lQuaternion.mult(getQuaternion());
+			setQuaternion(lQuaternion);
+		}
+	}
+
+	public void clearTexture(final int pRenderLayerIndex)
+	{
+		mLayerTextures[pRenderLayerIndex].clear();
+	}
 
 	@Override
 	public void close()
@@ -427,272 +456,23 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 	}
 
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#isShowing()
-	 */
-	@Override
-	public boolean isShowing()
-	{
-		try
-		{
-			if (mNewtCanvasAWT != null)
-				return mNewtCanvasAWT.isVisible();
-
-			if (mClearGLWindow != null)
-				return mClearGLWindow.isVisible();
-		}
-		catch (final NullPointerException e)
-		{
-			return false;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVisible(boolean)
-	 */
-	@Override
-	public void setVisible(final boolean pIsVisible)
-	{
-		if (mNewtCanvasAWT == null)
-			mClearGLWindow.setVisible(pIsVisible);
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowName()
-	 */
-	@Override
-	public String getWindowName()
-	{
-		return mWindowName;
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowWidth()
-	 */
-	@Override
-	public int getWindowWidth()
-	{
-		return mClearGLWindow.getWidth();
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowHeight()
-	 */
-	@Override
-	public int getWindowHeight()
-	{
-		return mClearGLWindow.getHeight();
-	}
-
-	/**
-	 * Returns the render texture width.
-	 *
-	 * @return texture width
-	 */
-	public int getRenderWidth()
-	{
-		return mRenderWidth;
-	}
-
-	/**
-	 * Returns the render texture height.
-	 *
-	 * @return texture height
-	 */
-	public int getRenderHeight()
-	{
-		return mRenderHeight;
-	}
-
-	/**
-	 * Implementation of GLEventListener: Called to initialize the GLAutoDrawable.
-	 * This method will initialize the JCudaDriver and cause the initialization of
-	 * CUDA and the OpenGL PBO.
-	 */
-	@Override
-	public void init(final GLAutoDrawable drawable)
-	{
-		final GL lGL = drawable.getGL();
-		lGL.setSwapInterval(1);
-
-		lGL.glDisable(GL.GL_DEPTH_TEST);
-		lGL.glEnable(GL.GL_BLEND);
-		lGL.glDisable(GL.GL_STENCIL_TEST);
-
-		lGL.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-
-		if (initVolumeRenderer())
-		{
-
-			// texture display: construct the program and related objects
-			try
-			{
-				final InputStream lVertexShaderResourceAsStream = ClearGLVolumeRenderer.class.getResourceAsStream("shaders/tex_vert.glsl");
-				final InputStream lFragmentShaderResourceAsStream = ClearGLVolumeRenderer.class.getResourceAsStream("shaders/tex_frag.glsl");
-
-				final String lVertexShaderSource = IOUtils.toString(lVertexShaderResourceAsStream,
-																														"UTF-8");
-				String lFragmentShaderSource = IOUtils.toString(lFragmentShaderResourceAsStream,
-																												"UTF-8");
-
-				for (int i = 1; i < getNumberOfRenderLayers(); i++)
-				{
-					final String lStringToInsert1 = String.format("uniform sampler2D texUnit%d; \n//insertpoint1",
-																												i);
-					final String lStringToInsert2 = String.format("tempOutColor = max(tempOutColor,texture(texUnit%d, ftexcoord));\n//insertpoint2",
-																												i);
-
-					lFragmentShaderSource = lFragmentShaderSource.replace("//insertpoint1",
-																																lStringToInsert1);
-					lFragmentShaderSource = lFragmentShaderSource.replace("//insertpoint2",
-																																lStringToInsert2);
-				}
-				// System.out.println(lFragmentShaderSource);
-
-				mGLProgram = GLProgram.buildProgram(lGL,
-																						lVertexShaderSource,
-																						lFragmentShaderSource);
-				mQuadProjectionMatrixUniform = mGLProgram.getUniform("projection");
-				mPositionAttribute = mGLProgram.getAtribute("position");
-				mTexCoordAttribute = mGLProgram.getAtribute("texcoord");
-				mTexUnits = new GLUniform[getNumberOfRenderLayers()];
-				for (int i = 0; i < getNumberOfRenderLayers(); i++)
-				{
-					mTexUnits[i] = mGLProgram.getUniform("texUnit" + i);
-					mTexUnits[i].setInt(i);
-				}
-
-				mQuadVertexArray = new GLVertexArray(mGLProgram);
-				mQuadVertexArray.bind();
-				mPositionAttributeArray = new GLVertexAttributeArray(	mPositionAttribute,
-																															4);
-
-				final GLFloatArray lVerticesFloatArray = new GLFloatArray(6,
-
-				4);
-
-				lVerticesFloatArray.add(-1, -1, 0, 1);
-				lVerticesFloatArray.add(1, -1, 0, 1);
-				lVerticesFloatArray.add(1, 1, 0, 1);
-				lVerticesFloatArray.add(-1, -1, 0, 1);
-				lVerticesFloatArray.add(1, 1, 0, 1);
-				lVerticesFloatArray.add(-1, 1, 0, 1);
-
-				mQuadVertexArray.addVertexAttributeArray(	mPositionAttributeArray,
-																									lVerticesFloatArray.getFloatBuffer());
-
-				mTexCoordAttributeArray = new GLVertexAttributeArray(	mTexCoordAttribute,
-																															2);
-
-				final GLFloatArray lTexCoordFloatArray = new GLFloatArray(6,
-																																	2);
-				lTexCoordFloatArray.add(0, 0);
-				lTexCoordFloatArray.add(1, 0);
-				lTexCoordFloatArray.add(1, 1);
-				lTexCoordFloatArray.add(0, 0);
-				lTexCoordFloatArray.add(1, 1);
-				lTexCoordFloatArray.add(0, 1);
-
-				mQuadVertexArray.addVertexAttributeArray(	mTexCoordAttributeArray,
-																									lTexCoordFloatArray.getFloatBuffer());
-
-			}
-			catch (final IOException e)
-			{
-				e.printStackTrace();
-			}
-
-			for (final Overlay lOverlay : mOverlayMap.values())
-			{
-				try
-				{
-					lOverlay.init(lGL, this);
-				}
-				catch (final Throwable e)
-				{
-					e.printStackTrace();
-				}
-			}
-
-			ensureTextureAllocated();
-
-		}
-
-	}
-
-	private void ensureTextureAllocated()
-	{
-		if (mUpdateTextureWidthHeight)
-		{
-			getDisplayLock().lock();
-			try
-			{
-				for (int i = 0; i < getNumberOfRenderLayers(); i++)
-				{
-					if (mLayerTextures[i] != null)
-						mLayerTextures[i].close();
-
-					mLayerTextures[i] = new GLTexture(mGLProgram,
-																						NativeTypeEnum.UnsignedByte,
-																						4,
-																						mRenderWidth,
-																						mRenderHeight,
-																						1,
-																						true,
-																						2);
-					mLayerTextures[i].clear();
-
-				}
-
-				notifyChangeOfTextureDimensions();
-				notifyChangeOfVolumeRenderingParameters();
-
-			}
-			finally
-			{
-				mUpdateTextureWidthHeight = false;
-				if (getDisplayLock().isHeldByCurrentThread())
-					getDisplayLock().unlock();
-			}
-		}
-	}
-
-	abstract protected void notifyChangeOfTextureDimensions();
-
-	/**
-	 * @return true if the implemented renderer initialized successfully.
-	 */
-	protected abstract boolean initVolumeRenderer();
-
 	public void copyBufferToTexture(final int pRenderLayerIndex,
-																	final ByteBuffer pByteBuffer)
+									final ByteBuffer pByteBuffer)
 	{
 		pByteBuffer.rewind();
 		mLayerTextures[pRenderLayerIndex].copyFrom(pByteBuffer);
 		mLayerTextures[pRenderLayerIndex].updateMipMaps();
 	}
 
-	public void clearTexture(final int pRenderLayerIndex)
+	@Override
+	public void disableClose()
 	{
-		mLayerTextures[pRenderLayerIndex].clear();
+		mClearGLWindow.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
 	}
 
 	/**
-	 * Implementation of GLEventListener: Called when the given GLAutoDrawable is
-	 * to be displayed.
+	 * Implementation of GLEventListener: Called when the given GLAutoDrawable
+	 * is to be displayed.
 	 */
 	@Override
 	public void display(final GLAutoDrawable pDrawable)
@@ -761,13 +541,13 @@ ClearVolumeRendererBase implements ClearGLEventListener
 				final boolean lLastRenderPass = getAdaptiveLODController().beforeRendering();
 
 				renderVolume(	lModelViewMatrix.clone()
-																			.invert()
-																			.transpose()
-																			.getFloatArray(),
-											lProjectionMatrix.clone()
-																				.invert()
-																				.transpose()
-																				.getFloatArray());
+												.invert()
+												.transpose()
+												.getFloatArray(),
+								lProjectionMatrix.clone()
+													.invert()
+													.transpose()
+													.getFloatArray());
 
 				getAdaptiveLODController().afterRendering();
 
@@ -781,15 +561,15 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					mLayerTextures[i].bind(i);
 
 				mQuadProjectionMatrixUniform.setFloatMatrix(mQuadProjectionMatrix.getFloatArray(),
-																										false);
+															false);
 
 				mQuadVertexArray.draw(GL.GL_TRIANGLES);
 
 				final GLMatrix lAspectRatioCorrectedProjectionMatrix = getAspectRatioCorrectedProjectionMatrix();
 
 				renderOverlays3D(	lGL,
-													lAspectRatioCorrectedProjectionMatrix,
-													lModelViewMatrix);
+									lAspectRatioCorrectedProjectionMatrix,
+									lModelViewMatrix);
 
 				renderOverlays2D(lGL, cOverlay2dProjectionMatrix);
 
@@ -797,7 +577,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 				if (lLastRenderPass)
 					mGLVideoRecorder.screenshot(pDrawable,
-																			!getAutoRotateController().isRotating());
+												!getAutoRotateController().isRotating());
 
 			}
 			catch (Throwable e)
@@ -812,34 +592,77 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 	}
 
-	private void setDefaultProjectionMatrix()
+	/**
+	 * Implementation of GLEventListener - not used
+	 */
+	@Override
+	public void dispose(final GLAutoDrawable arg0)
 	{
-		if (getClearGLWindow() != null)
-			getClearGLWindow().setPerspectiveProjectionMatrix(getFOV(),
-																												1,
-																												.1f,
-																												1000);
+		mClearGLWindow.stop();
 	}
 
-	private GLMatrix getDefaultProjectionMatrix()
+	private void ensureTextureAllocated()
 	{
-		final GLMatrix lProjectionMatrix = new GLMatrix();
-		lProjectionMatrix.setPerspectiveProjectionMatrix(	getFOV(),
-																											1,
-																											.1f,
-																											1000);
-		return lProjectionMatrix;
+		if (mUpdateTextureWidthHeight)
+		{
+			getDisplayLock().lock();
+			try
+			{
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					if (mLayerTextures[i] != null)
+						mLayerTextures[i].close();
+
+					mLayerTextures[i] = new GLTexture(	mGLProgram,
+														NativeTypeEnum.UnsignedByte,
+														4,
+														mRenderWidth,
+														mRenderHeight,
+														1,
+														true,
+														2);
+					mLayerTextures[i].clear();
+
+				}
+
+				notifyChangeOfTextureDimensions();
+				notifyChangeOfVolumeRenderingParameters();
+
+			}
+			finally
+			{
+				mUpdateTextureWidthHeight = false;
+				if (getDisplayLock().isHeldByCurrentThread())
+					getDisplayLock().unlock();
+			}
+		}
 	}
 
 	private GLMatrix getAspectRatioCorrectedProjectionMatrix()
 	{
 		final GLMatrix lProjectionMatrix = new GLMatrix();
 		lProjectionMatrix.setPerspectiveProjectionMatrix(	getFOV(),
-																											1,
-																											.1f,
-																											1000);
+															1,
+															.1f,
+															1000);
 		lProjectionMatrix.mult(0, 0, mQuadProjectionMatrix.get(0, 0));
 		lProjectionMatrix.mult(1, 1, mQuadProjectionMatrix.get(1, 1));/**/
+		return lProjectionMatrix;
+	}
+
+	@Override
+	public ClearGLWindow getClearGLWindow()
+	{
+		return mClearGLWindow;
+	}
+
+	private GLMatrix getDefaultProjectionMatrix()
+	{
+		final GLMatrix lProjectionMatrix = new GLMatrix();
+		lProjectionMatrix.setPerspectiveProjectionMatrix(	getFOV(),
+															1,
+															.1f,
+															1000);
 		return lProjectionMatrix;
 	}
 
@@ -848,19 +671,12 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		return mLightVector;
 	}
 
-	public void setLightVector(final float[] pLight)
-	{
-		mLightVector[0] = pLight[0];
-		mLightVector[1] = pLight[1];
-		mLightVector[2] = pLight[2];
-		notifyChangeOfVolumeRenderingParameters();
-	}
-
 	private GLMatrix getModelViewMatrix()
 	{
 		// scaling...
 
-		// TODO: Hack - the first volume decides for the next ones, scene graph will
+		// TODO: Hack - the first volume decides for the next ones, scene graph
+		// will
 		// solve this problem...
 		final double lScaleX = getVolumeSizeX(0) * getVoxelSizeX(0);
 		final double lScaleY = getVolumeSizeY(0) * getVoxelSizeY(0);
@@ -876,14 +692,14 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		lModelViewMatrix.setIdentity();
 
 		lModelViewMatrix.translate(	getTranslationX(),
-																getTranslationY(),
-																getTranslationZ());/**/
+									getTranslationY(),
+									getTranslationZ());/**/
 
 		lModelViewMatrix.mult(getQuaternion());
 
 		lModelViewMatrix.scale(	(float) (lScaleX / lMaxScale),
-														(float) (lScaleY / lMaxScale),
-														(float) (lScaleZ / lMaxScale));/**/
+								(float) (lScaleY / lMaxScale),
+								(float) (lScaleZ / lMaxScale));/**/
 
 		// lInvVolumeMatrix.mult(lEulerMatrix);
 
@@ -892,28 +708,215 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		return lModelViewMatrix;
 	}
 
-	private void applyControllersTransform()
+	/**
+	 * @return the mNewtCanvasAWT
+	 */
+	@Override
+	public NewtCanvasAWT getNewtCanvasAWT()
 	{
-		if (getRotationControllers().size() > 0)
+		return mNewtCanvasAWT;
+	}
+
+	@Override
+	public Collection<Overlay> getOverlays()
+	{
+		return mOverlayMap.values();
+	}
+
+	/**
+	 * Returns the render texture height.
+	 *
+	 * @return texture height
+	 */
+	public int getRenderHeight()
+	{
+		return mRenderHeight;
+	}
+
+	/**
+	 * Returns the render texture width.
+	 *
+	 * @return texture width
+	 */
+	public int getRenderWidth()
+	{
+		return mRenderWidth;
+	}
+
+	public int getViewportHeight()
+	{
+		return mViewportHeight;
+	}
+
+	public int getViewportWidth()
+	{
+		return mViewportWidth;
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowHeight()
+	 */
+	@Override
+	public int getWindowHeight()
+	{
+		return mClearGLWindow.getHeight();
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowName()
+	 */
+	@Override
+	public String getWindowName()
+	{
+		return mWindowName;
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#getWindowWidth()
+	 */
+	@Override
+	public int getWindowWidth()
+	{
+		return mClearGLWindow.getWidth();
+	}
+
+	/**
+	 * Implementation of GLEventListener: Called to initialize the
+	 * GLAutoDrawable. This method will initialize the JCudaDriver and cause the
+	 * initialization of CUDA and the OpenGL PBO.
+	 */
+	@Override
+	public void init(final GLAutoDrawable drawable)
+	{
+		final GL lGL = drawable.getGL();
+		lGL.setSwapInterval(1);
+
+		lGL.glDisable(GL.GL_DEPTH_TEST);
+		lGL.glEnable(GL.GL_BLEND);
+		lGL.glDisable(GL.GL_STENCIL_TEST);
+
+		lGL.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+
+		if (initVolumeRenderer())
 		{
-			final Quaternion lQuaternion = new Quaternion();
 
-			for (final RotationControllerInterface lRotationController : getRotationControllers())
-				if (lRotationController.isActive())
+			// texture display: construct the program and related objects
+			try
+			{
+				final InputStream lVertexShaderResourceAsStream = ClearGLVolumeRenderer.class.getResourceAsStream("shaders/tex_vert.glsl");
+				final InputStream lFragmentShaderResourceAsStream = ClearGLVolumeRenderer.class.getResourceAsStream("shaders/tex_frag.glsl");
+
+				final String lVertexShaderSource = IOUtils.toString(lVertexShaderResourceAsStream,
+																	"UTF-8");
+				String lFragmentShaderSource = IOUtils.toString(lFragmentShaderResourceAsStream,
+																"UTF-8");
+
+				for (int i = 1; i < getNumberOfRenderLayers(); i++)
 				{
-					if (lRotationController instanceof RotationControllerWithRenderNotification)
-					{
-						final RotationControllerWithRenderNotification lRenderNotification = (RotationControllerWithRenderNotification) lRotationController;
-						lRenderNotification.notifyRender(this);
-					}
-					lQuaternion.mult(lRotationController.getQuaternion());
+					final String lStringToInsert1 = String.format(	"uniform sampler2D texUnit%d; \n//insertpoint1",
+																	i);
+					final String lStringToInsert2 = String.format(	"tempOutColor = max(tempOutColor,texture(texUnit%d, ftexcoord));\n//insertpoint2",
+																	i);
 
-					notifyChangeOfVolumeRenderingParameters();
+					lFragmentShaderSource = lFragmentShaderSource.replace(	"//insertpoint1",
+																			lStringToInsert1);
+					lFragmentShaderSource = lFragmentShaderSource.replace(	"//insertpoint2",
+																			lStringToInsert2);
+				}
+				// System.out.println(lFragmentShaderSource);
+
+				mGLProgram = GLProgram.buildProgram(lGL,
+													lVertexShaderSource,
+													lFragmentShaderSource);
+				mQuadProjectionMatrixUniform = mGLProgram.getUniform("projection");
+				mPositionAttribute = mGLProgram.getAtribute("position");
+				mTexCoordAttribute = mGLProgram.getAtribute("texcoord");
+				mTexUnits = new GLUniform[getNumberOfRenderLayers()];
+				for (int i = 0; i < getNumberOfRenderLayers(); i++)
+				{
+					mTexUnits[i] = mGLProgram.getUniform("texUnit" + i);
+					mTexUnits[i].setInt(i);
 				}
 
-			lQuaternion.mult(getQuaternion());
-			setQuaternion(lQuaternion);
+				mQuadVertexArray = new GLVertexArray(mGLProgram);
+				mQuadVertexArray.bind();
+				mPositionAttributeArray = new GLVertexAttributeArray(	mPositionAttribute,
+																		4);
+
+				final GLFloatArray lVerticesFloatArray = new GLFloatArray(	6,
+
+																			4);
+
+				lVerticesFloatArray.add(-1, -1, 0, 1);
+				lVerticesFloatArray.add(1, -1, 0, 1);
+				lVerticesFloatArray.add(1, 1, 0, 1);
+				lVerticesFloatArray.add(-1, -1, 0, 1);
+				lVerticesFloatArray.add(1, 1, 0, 1);
+				lVerticesFloatArray.add(-1, 1, 0, 1);
+
+				mQuadVertexArray.addVertexAttributeArray(	mPositionAttributeArray,
+															lVerticesFloatArray.getFloatBuffer());
+
+				mTexCoordAttributeArray = new GLVertexAttributeArray(	mTexCoordAttribute,
+																		2);
+
+				final GLFloatArray lTexCoordFloatArray = new GLFloatArray(	6,
+																			2);
+				lTexCoordFloatArray.add(0, 0);
+				lTexCoordFloatArray.add(1, 0);
+				lTexCoordFloatArray.add(1, 1);
+				lTexCoordFloatArray.add(0, 0);
+				lTexCoordFloatArray.add(1, 1);
+				lTexCoordFloatArray.add(0, 1);
+
+				mQuadVertexArray.addVertexAttributeArray(	mTexCoordAttributeArray,
+															lTexCoordFloatArray.getFloatBuffer());
+
+			}
+			catch (final IOException e)
+			{
+				e.printStackTrace();
+			}
+
+			for (final Overlay lOverlay : mOverlayMap.values())
+			{
+				try
+				{
+					lOverlay.init(lGL, this);
+				}
+				catch (final Throwable e)
+				{
+					e.printStackTrace();
+				}
+			}
+
+			ensureTextureAllocated();
+
 		}
+
+	}
+
+	/**
+	 * @return true if the implemented renderer initialized successfully.
+	 */
+	protected abstract boolean initVolumeRenderer();
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#isFullScreen()
+	 */
+	@Override
+	public boolean isFullScreen()
+	{
+		return mClearGLWindow.isFullscreen();
 	}
 
 	private boolean isOverlay2DChanged()
@@ -940,8 +943,84 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		return lHasAnyChanged;
 	}
 
-	private void renderOverlays2D(final GL lGL,
-																final GLMatrix pProjectionMatrix)
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#isShowing()
+	 */
+	@Override
+	public boolean isShowing()
+	{
+		try
+		{
+			if (mNewtCanvasAWT != null)
+				return mNewtCanvasAWT.isVisible();
+
+			if (mClearGLWindow != null)
+				return mClearGLWindow.isVisible();
+		}
+		catch (final NullPointerException e)
+		{
+			return false;
+		}
+
+		return false;
+	}
+
+	abstract protected void notifyChangeOfTextureDimensions();
+
+	/**
+	 * Notifies eye ray listeners.
+	 * 
+	 * @param pRenderer
+	 *            renderer that calls listeners
+	 * @param pMouseEvent
+	 *            associated mouse event.
+	 * @return true if event captured
+	 */
+	public boolean notifyEyeRayListeners(	ClearGLVolumeRenderer pRenderer,
+											MouseEvent pMouseEvent)
+	{
+		if (mEyeRayListenerList.isEmpty())
+			return false;
+
+		final int lX = pMouseEvent.getX();
+		final int lY = pMouseEvent.getY();
+
+		final GLMatrix lInverseModelViewMatrix = getModelViewMatrix().clone()
+																		.invert();
+		final GLMatrix lInverseProjectionMatrix = getClearGLWindow().getProjectionMatrix()
+																	.clone()
+																	.invert();
+
+		final GLMatrix lAspectRatioCorrectedProjectionMatrix = getAspectRatioCorrectedProjectionMatrix().invert();
+
+		// lInverseModelViewMatrix.transpose();
+		// lInverseProjectionMatrix.invert();
+		// lInverseProjectionMatrix.transpose();
+
+		final EyeRay lEyeRay = ScreenToEyeRay.convert(	getViewportWidth(),
+														getViewportHeight(),
+														lX,
+														lY,
+														lInverseModelViewMatrix,
+														lAspectRatioCorrectedProjectionMatrix);
+
+		boolean lPreventOtherDisplayChanges = false;
+
+		for (final EyeRayListener lEyeRayListener : mEyeRayListenerList)
+		{
+			lPreventOtherDisplayChanges |= lEyeRayListener.notifyEyeRay(pRenderer,
+																		pMouseEvent,
+																		lEyeRay);
+			if (lPreventOtherDisplayChanges)
+				break;
+		}
+		return lPreventOtherDisplayChanges;
+	}
+
+	private void renderOverlays2D(	final GL lGL,
+									final GLMatrix pProjectionMatrix)
 	{
 		try
 		{
@@ -953,10 +1032,10 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					try
 					{
 						lOverlay2D.render2D(this,
-																lGL,
-																getWindowWidth(),
-																getWindowHeight(),
-																pProjectionMatrix);
+											lGL,
+											getWindowWidth(),
+											getWindowHeight(),
+											pProjectionMatrix);
 					}
 					catch (final Throwable e)
 					{
@@ -972,9 +1051,9 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		}
 	}
 
-	private void renderOverlays3D(final GL lGL,
-																final GLMatrix pProjectionMatrix,
-																final GLMatrix pModelViewMatrix)
+	private void renderOverlays3D(	final GL lGL,
+									final GLMatrix pProjectionMatrix,
+									final GLMatrix pModelViewMatrix)
 	{
 		try
 		{
@@ -985,11 +1064,11 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					try
 					{
 						lOverlay3D.render3D(this,
-																lGL,
-																getWindowWidth(),
-																getWindowHeight(),
-																pProjectionMatrix,
-																pModelViewMatrix);
+											lGL,
+											getWindowWidth(),
+											getWindowHeight(),
+											pProjectionMatrix,
+											pModelViewMatrix);
 					}
 					catch (final Throwable e)
 					{
@@ -1007,15 +1086,236 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 	/**
 	 * @param pModelViewMatrix
-	 *          Model-mViewMatrix matrix as float array
+	 *            Model-mViewMatrix matrix as float array
 	 * @param pProjectionMatrix
-	 *          Projection matrix as float array
+	 *            Projection matrix as float array
 	 * @param pPhase
 	 * @param pClearBuffer
 	 * @return boolean array indicating for each layer if it was updated.
 	 */
-	protected abstract boolean[] renderVolume(final float[] pModelViewMatrix,
-																						final float[] pProjectionMatrix);
+	protected abstract boolean[] renderVolume(	final float[] pModelViewMatrix,
+												final float[] pProjectionMatrix);
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
+	 */
+	@Override
+	public void requestDisplay()
+	{
+		mRequestDisplay = true;
+		// NOT NEEDED ANYMORE
+		// getAdaptiveLODController().requestDisplay();
+		// notifyChangeOfVolumeRenderingParameters();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.jogamp.opengl.GLEventListener#reshape(com.jogamp.opengl.GLAutoDrawable, int, int, int, int)
+	 */
+	@Override
+	public void reshape(final GLAutoDrawable pDrawable,
+						final int x,
+						final int y,
+						int pWidth,
+						int pHeight)
+	{
+		try
+		{
+			getAdaptiveLODController().notifyUserInteractionInProgress();
+
+			// final GL lGl = pDrawable.getGL();
+			// lGl.glClearColor(0, 0, 0, 1);
+			// lGl.glClear(GL.GL_COLOR_BUFFER_BIT);
+
+			mViewportX = x;
+			mViewportY = y;
+			setViewportWidth(pWidth);
+			setViewportHeight(pHeight);
+
+			if (pHeight < 16)
+				pHeight = 16;
+
+			if (pWidth < 16)
+				pWidth = 16;
+
+			final float lAspectRatio = (1.0f * pWidth) / pHeight;
+
+			if (lAspectRatio >= 1)
+				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
+																1,
+																-1		/ lAspectRatio,
+																1 / lAspectRatio,
+																0,
+																1000);
+			else
+				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
+																lAspectRatio,
+																-1,
+																1,
+																0,
+																1000);/**/
+
+			// FIXME: first layer decides... this is temporary hack, should be
+			// resolvd
+			// by using the scene graph
+			final int lMaxVolumeDimension = (int) max(	getVolumeSizeX(0),
+														max(getVolumeSizeY(0),
+															getVolumeSizeZ(0)));
+
+			final int lMaxTextureWidth = min(	mMaxRenderWidth,
+												2 * lMaxVolumeDimension);
+			final int lMaxTextureHeight = min(	mMaxRenderHeight,
+												2 * lMaxVolumeDimension);
+
+			final int lCandidateTextureWidth = ((min(	lMaxTextureWidth,
+														getViewportWidth()) / 128) * 128);
+			final int lCandidateTextureHeight = ((min(	lMaxTextureHeight,
+														getViewportHeight()) / 128) * 128);
+
+			if (lCandidateTextureWidth == 0 || lCandidateTextureHeight == 0)
+				return;
+
+			float lRatioWidth = ((float) mRenderWidth) / lCandidateTextureWidth;
+			float lRatioHeight = ((float) mRenderHeight) / lCandidateTextureHeight;
+			float lRatioAspect = (((float) mRenderWidth) / mRenderHeight) / ((float) lCandidateTextureWidth / lCandidateTextureHeight);
+
+			if (lRatioWidth > 0 && lRatioWidth < 1)
+				lRatioWidth = 1f / lRatioWidth;
+
+			if (lRatioHeight > 0 && lRatioHeight < 1)
+				lRatioHeight = 1f / lRatioHeight;
+
+			if (lRatioAspect > 0 && lRatioAspect < 1)
+				lRatioAspect = 1f / lRatioAspect;
+
+			/*System.out.format("modified ratios: (%g,%g) \n",
+												lRatioWidth,
+												lRatioHeight);/**/
+
+			if (lRatioWidth > cTextureDimensionChangeRatioThreshold || lRatioHeight > cTextureDimensionChangeRatioThreshold
+				|| lRatioAspect > cTextureAspectChangeRatioThreshold)
+			{
+				mRenderWidth = lCandidateTextureWidth;
+				mRenderHeight = lCandidateTextureHeight;
+				mUpdateTextureWidthHeight = true;
+
+				/*System.out.format("resizing texture: (%d,%d) \n",
+													mRenderWidth,
+													mRenderHeight);/**/
+			}
+
+		}
+		catch (final Throwable e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public void setClearGLWindow(final ClearGLWindow pClearGLWindow)
+	{
+
+		mClearGLWindow = pClearGLWindow;
+	}
+
+	private void setDefaultProjectionMatrix()
+	{
+		if (getClearGLWindow() != null)
+			getClearGLWindow().setPerspectiveProjectionMatrix(	getFOV(),
+																1,
+																.1f,
+																1000);
+	}
+
+	public void setLightVector(final float[] pLight)
+	{
+		mLightVector[0] = pLight[0];
+		mLightVector[1] = pLight[1];
+		mLightVector[2] = pLight[2];
+		notifyChangeOfVolumeRenderingParameters();
+	}
+
+	public void setViewportHeight(int pViewportHeight)
+	{
+		mViewportHeight = pViewportHeight;
+	}
+
+	public void setViewportWidth(int pViewportWidth)
+	{
+		mViewportWidth = pViewportWidth;
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#setVisible(boolean)
+	 */
+	@Override
+	public void setVisible(final boolean pIsVisible)
+	{
+		if (mNewtCanvasAWT == null)
+			mClearGLWindow.setVisible(pIsVisible);
+	}
+
+	/**
+	 * @param pTitleString
+	 */
+	private void setWindowTitle(final String pTitleString)
+	{
+		mClearGLWindow.setWindowTitle(pTitleString);
+	}
+
+	/**
+	 * Toggles box display.
+	 */
+	@Override
+	public void toggleBoxDisplay()
+	{
+		mOverlayMap.get("box").toggle();
+	}
+
+	/**
+	 * Interface method implementation
+	 *
+	 * @see clearvolume.renderer.ClearVolumeRendererInterface#toggleFullScreen()
+	 */
+	@Override
+	public void toggleFullScreen()
+	{
+		try
+		{
+			if (mClearGLWindow.isFullscreen())
+			{
+				if (mLastWindowWidth > 0 && mLastWindowHeight > 0)
+					mClearGLWindow.setSize(	mLastWindowWidth,
+											mLastWindowHeight);
+				mClearGLWindow.setFullscreen(false);
+			}
+			else
+			{
+				mLastWindowWidth = getWindowWidth();
+				mLastWindowHeight = getWindowHeight();
+				mClearGLWindow.setFullscreen(true);
+			}
+			// notifyUpdateOfVolumeRenderingParameters();
+			requestDisplay();
+		}
+		catch (final Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Toggles recording of rendered window frames.
+	 */
+	@Override
+	public void toggleRecording()
+	{
+		mGLVideoRecorder.toggleActive();
+	}
 
 	/**
 	 * Updates the display of the framerate.
@@ -1041,304 +1341,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 			prevTimeNS = currentTime;
 			step = 0;
 		}/**/
-	}
-
-	/**
-	 * @param pTitleString
-	 */
-	private void setWindowTitle(final String pTitleString)
-	{
-		mClearGLWindow.setWindowTitle(pTitleString);
-	}
-
-	/* (non-Javadoc)
-	 * @see com.jogamp.opengl.GLEventListener#reshape(com.jogamp.opengl.GLAutoDrawable, int, int, int, int)
-	 */
-	@Override
-	public void reshape(final GLAutoDrawable pDrawable,
-											final int x,
-											final int y,
-											int pWidth,
-											int pHeight)
-	{
-		try
-		{
-			getAdaptiveLODController().notifyUserInteractionInProgress();
-
-			// final GL lGl = pDrawable.getGL();
-			// lGl.glClearColor(0, 0, 0, 1);
-			// lGl.glClear(GL.GL_COLOR_BUFFER_BIT);
-
-			mViewportX = x;
-			mViewportY = y;
-			setViewportWidth(pWidth);
-			setViewportHeight(pHeight);
-
-			if (pHeight < 16)
-				pHeight = 16;
-
-			if (pWidth < 16)
-				pWidth = 16;
-
-			final float lAspectRatio = (1.0f * pWidth) / pHeight;
-
-			if (lAspectRatio >= 1)
-				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-1,
-																												1,
-																												-1	/ lAspectRatio,
-																												1 / lAspectRatio,
-																												0,
-																												1000);
-			else
-				mQuadProjectionMatrix.setOrthoProjectionMatrix(	-lAspectRatio,
-																												lAspectRatio,
-																												-1,
-																												1,
-																												0,
-																												1000);/**/
-
-			// FIXME: first layer decides... this is temporary hack, should be resolvd
-			// by using the scene graph
-			final int lMaxVolumeDimension = (int) max(getVolumeSizeX(0),
-																								max(getVolumeSizeY(0),
-																										getVolumeSizeZ(0)));
-
-			final int lMaxTextureWidth = min(	mMaxRenderWidth,
-																				2 * lMaxVolumeDimension);
-			final int lMaxTextureHeight = min(mMaxRenderHeight,
-																				2 * lMaxVolumeDimension);
-
-			final int lCandidateTextureWidth = ((min(	lMaxTextureWidth,
-																								getViewportWidth()) / 128) * 128);
-			final int lCandidateTextureHeight = ((min(lMaxTextureHeight,
-																								getViewportHeight()) / 128) * 128);
-
-			if (lCandidateTextureWidth == 0 || lCandidateTextureHeight == 0)
-				return;
-
-			float lRatioWidth = ((float) mRenderWidth) / lCandidateTextureWidth;
-			float lRatioHeight = ((float) mRenderHeight) / lCandidateTextureHeight;
-			float lRatioAspect = (((float) mRenderWidth) / mRenderHeight) / ((float) lCandidateTextureWidth / lCandidateTextureHeight);
-
-			if (lRatioWidth > 0 && lRatioWidth < 1)
-				lRatioWidth = 1f / lRatioWidth;
-
-			if (lRatioHeight > 0 && lRatioHeight < 1)
-				lRatioHeight = 1f / lRatioHeight;
-
-			if (lRatioAspect > 0 && lRatioAspect < 1)
-				lRatioAspect = 1f / lRatioAspect;
-
-			/*System.out.format("modified ratios: (%g,%g) \n",
-												lRatioWidth,
-												lRatioHeight);/**/
-
-			if (lRatioWidth > cTextureDimensionChangeRatioThreshold || lRatioHeight > cTextureDimensionChangeRatioThreshold
-					|| lRatioAspect > cTextureAspectChangeRatioThreshold)
-			{
-				mRenderWidth = lCandidateTextureWidth;
-				mRenderHeight = lCandidateTextureHeight;
-				mUpdateTextureWidthHeight = true;
-
-				/*System.out.format("resizing texture: (%d,%d) \n",
-													mRenderWidth,
-													mRenderHeight);/**/
-			}
-
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-		}
-
-	}
-
-	/**
-	 * Implementation of GLEventListener - not used
-	 */
-	@Override
-	public void dispose(final GLAutoDrawable arg0)
-	{
-		mClearGLWindow.stop();
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#toggleFullScreen()
-	 */
-	@Override
-	public void toggleFullScreen()
-	{
-		try
-		{
-			if (mClearGLWindow.isFullscreen())
-			{
-				if (mLastWindowWidth > 0 && mLastWindowHeight > 0)
-					mClearGLWindow.setSize(mLastWindowWidth, mLastWindowHeight);
-				mClearGLWindow.setFullscreen(false);
-			}
-			else
-			{
-				mLastWindowWidth = getWindowWidth();
-				mLastWindowHeight = getWindowHeight();
-				mClearGLWindow.setFullscreen(true);
-			}
-			// notifyUpdateOfVolumeRenderingParameters();
-			requestDisplay();
-		}
-		catch (final Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.ClearVolumeRendererInterface#isFullScreen()
-	 */
-	@Override
-	public boolean isFullScreen()
-	{
-		return mClearGLWindow.isFullscreen();
-	}
-
-	/**
-	 * Toggles box display.
-	 */
-	@Override
-	public void toggleBoxDisplay()
-	{
-		mOverlayMap.get("box").toggle();
-	}
-
-	/**
-	 * Toggles recording of rendered window frames.
-	 */
-	@Override
-	public void toggleRecording()
-	{
-		mGLVideoRecorder.toggleActive();
-	}
-
-	/**
-	 * Interface method implementation
-	 *
-	 * @see clearvolume.renderer.DisplayRequestInterface#requestDisplay()
-	 */
-	@Override
-	public void requestDisplay()
-	{
-		mRequestDisplay = true;
-		// NOT NEEDED ANYMORE
-		// getAdaptiveLODController().requestDisplay();
-		// notifyChangeOfVolumeRenderingParameters();
-	}
-
-	@Override
-	public void addOverlay(Overlay pOverlay)
-	{
-		mOverlayMap.put(pOverlay.getName(), pOverlay);
-	}
-
-	@Override
-	public Collection<Overlay> getOverlays()
-	{
-		return mOverlayMap.values();
-	}
-
-	/**
-	 * Notifies eye ray listeners.
-	 * 
-	 * @param pRenderer
-	 *          renderer that calls listeners
-	 * @param pMouseEvent
-	 *          associated mouse event.
-	 * @return true if event captured
-	 */
-	public boolean notifyEyeRayListeners(	ClearGLVolumeRenderer pRenderer,
-																				MouseEvent pMouseEvent)
-	{
-		if (mEyeRayListenerList.isEmpty())
-			return false;
-
-		final int lX = pMouseEvent.getX();
-		final int lY = pMouseEvent.getY();
-
-		final GLMatrix lInverseModelViewMatrix = getModelViewMatrix().clone()
-																																	.invert();
-		final GLMatrix lInverseProjectionMatrix = getClearGLWindow().getProjectionMatrix()
-																																.clone()
-																																.invert();
-
-		final GLMatrix lAspectRatioCorrectedProjectionMatrix = getAspectRatioCorrectedProjectionMatrix().invert();
-
-		// lInverseModelViewMatrix.transpose();
-		// lInverseProjectionMatrix.invert();
-		// lInverseProjectionMatrix.transpose();
-
-		final EyeRay lEyeRay = ScreenToEyeRay.convert(getViewportWidth(),
-																									getViewportHeight(),
-																									lX,
-																									lY,
-																									lInverseModelViewMatrix,
-																									lAspectRatioCorrectedProjectionMatrix);
-
-		boolean lPreventOtherDisplayChanges = false;
-
-		for (final EyeRayListener lEyeRayListener : mEyeRayListenerList)
-		{
-			lPreventOtherDisplayChanges |= lEyeRayListener.notifyEyeRay(pRenderer,
-																																	pMouseEvent,
-																																	lEyeRay);
-			if (lPreventOtherDisplayChanges)
-				break;
-		}
-		return lPreventOtherDisplayChanges;
-	}
-
-	@Override
-	public void disableClose()
-	{
-		mClearGLWindow.setDefaultCloseOperation(WindowClosingMode.DO_NOTHING_ON_CLOSE);
-	}
-
-	private boolean anyIsTrue(final boolean[] pBooleanArray)
-	{
-		for (final boolean lBoolean : pBooleanArray)
-			if (lBoolean)
-				return true;
-		return false;
-	}
-
-	/**
-	 * @return the mNewtCanvasAWT
-	 */
-	@Override
-	public NewtCanvasAWT getNewtCanvasAWT()
-	{
-		return mNewtCanvasAWT;
-	}
-
-	public int getViewportHeight()
-	{
-		return mViewportHeight;
-	}
-
-	public void setViewportHeight(int pViewportHeight)
-	{
-		mViewportHeight = pViewportHeight;
-	}
-
-	public int getViewportWidth()
-	{
-		return mViewportWidth;
-	}
-
-	public void setViewportWidth(int pViewportWidth)
-	{
-		mViewportWidth = pViewportWidth;
 	}
 
 }

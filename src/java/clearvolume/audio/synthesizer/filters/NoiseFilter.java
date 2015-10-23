@@ -25,7 +25,7 @@ public class NoiseFilter extends FilterBase
 	 * Constructor thats sets the amplitude of the noise.
 	 * 
 	 * @param pAmplitude
-	 *          amplitude
+	 *            amplitude
 	 */
 	public NoiseFilter(float pAmplitude)
 	{
@@ -46,7 +46,7 @@ public class NoiseFilter extends FilterBase
 		double lAdditiveNoise = 2 * (lThreadLocalRandom.nextFloat() - 0.5);
 		double lMultiplicativeNoise = 0.2 * (lThreadLocalRandom.nextFloat() - 0.5);
 		double lOutValue = lInValue + getAmplitude()
-												* (lAdditiveNoise + lInValue * lMultiplicativeNoise);
+							* (lAdditiveNoise + lInValue * lMultiplicativeNoise);
 
 		return (float) lOutValue;
 	}

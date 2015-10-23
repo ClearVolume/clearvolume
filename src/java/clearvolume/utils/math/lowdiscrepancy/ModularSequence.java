@@ -1,8 +1,8 @@
 package clearvolume.utils.math.lowdiscrepancy;
 
-import gnu.trove.list.array.TIntArrayList;
-
 import java.util.concurrent.ConcurrentHashMap;
+
+import gnu.trove.list.array.TIntArrayList;
 
 public class ModularSequence
 {
