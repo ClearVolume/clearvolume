@@ -435,12 +435,22 @@ public class ClearVolumeOtherDemos
 
 		lClearVolumeRenderer.requestDisplay();
 
-		lClearVolumeRenderer.setClipBox(new float[]
-		{ -.8f, .8f, -.6f, 0.6f, -0.3f, 0.3f });
-
+		float x=0,y=1,z=0;
 		while (lClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(100);
+			
+			lClearVolumeRenderer.setClipBox(new float[]
+					{ -x, x, -y, y, -z, z });
+			
+			x+=0.01;
+			y-=0.02;
+			z+=0.04;
+			
+			if(x>1) x=0;
+			if(y<0) y=1;
+			if(z>1) z=0;
+			
 		}
 
 		lClearVolumeRenderer.close();
