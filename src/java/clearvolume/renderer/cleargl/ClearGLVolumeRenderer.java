@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import clearvolume.controller.OculusRiftController;
 import clearvolume.controller.TranslationRotationControllerInterface;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -135,6 +136,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 	private final float mLightVector[] = new float[]
 	{ -1.f, 1.f, 1.f };
+
+	private final OculusRiftController ovr;
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
@@ -384,6 +387,14 @@ ClearVolumeRendererBase implements ClearGLEventListener
 				super.windowDestroyNotify(pE);
 			};
 		});
+
+		if(getTranslationRotationControllers().size() == 0) {
+			ovr = new OculusRiftController(0, this);
+			this.addTranslationRotationController(ovr);
+			ovr.connectAsynchronouslyOrWait();
+		} else {
+			ovr = null;
+		}
 
 	}
 
@@ -741,18 +752,44 @@ ClearVolumeRendererBase implements ClearGLEventListener
 				 */
 
 				final GL lGL = pDrawable.getGL();
+				int w, h;
 
 				lGL.glEnable(GL.GL_SCISSOR_TEST);
 
-				int w = getWindowWidth();
-				int h = getWindowHeight();
+				w = getWindowWidth();
+				h = getWindowHeight();
 
 				boolean lLastRenderPass = getAdaptiveLODController().beforeRendering();
-				final float[] eyeShift = new float[]{-0.1f, 0.1f};
+				float[] eyeShift;
+				int eyeCount;
 
-				for(int eye = 0; eye <= 1; eye++) {
-					lGL.glViewport(w/2 * eye, 0, w/2, h);
-					lGL.glScissor(w/2 * eye, 0, w/2, h);
+				if(getTranslationRotationControllers().size() == 0) {
+					eyeShift = new float[]{-0.1f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f};
+				} else {
+					eyeShift = getTranslationRotationControllers().get(0).getEyeShift();
+				}
+
+				if(System.getProperty("ClearVolume.enableVR") == null) {
+					eyeShift = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+					eyeCount = 1;
+				} else {
+					eyeCount = 2;
+				}
+
+
+				for(int eye = 0; eye < eyeCount; eye++) {
+					if(System.getProperty("ClearVolume.enableVR") == null) {
+						lGL.glViewport(0, 0, w, h);
+						lGL.glScissor(0, 0, w, h);
+					} else {
+						lGL.glViewport(w / 2 * eye, 0, w / 2, h);
+						lGL.glScissor(w / 2 * eye, 0, w / 2, h);
+					}
+
+					//System.err.println("w/2: " + w/2 + "h: " + h);
+//					System.out.println(eyeShift[0] + "," + eyeShift[3]);
+//					System.out.println(eyeShift[1] + "," + eyeShift[4]);
+//					System.out.println(eyeShift[2] + "," + eyeShift[5]);
 
 					lGL.glClearColor(0, 0, 0, 1);
 					lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
@@ -763,7 +800,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 					setDefaultProjectionMatrix();
 
-				  GLMatrix lModelViewMatrix = getModelViewMatrix(new float[]{eyeShift[eye], 0.0f, 0.0f});
+				  GLMatrix lModelViewMatrix = getModelViewMatrix(new float[]{eyeShift[0+3*eye], eyeShift[1+3*eye], eyeShift[2+3*eye]});
 					GLMatrix lProjectionMatrix = getDefaultProjectionMatrix();
 
 					GLError.printGLErrors(lGL, "BEFORE RENDER VOLUME");
@@ -958,18 +995,18 @@ ClearVolumeRendererBase implements ClearGLEventListener
 			setQuaternion(lQuaternion);
 		}
 
-		if(getTranslationRotationControllers().size() > 0) {
-			final Quaternion lQuaternion = new Quaternion();
-
-			for(final TranslationRotationControllerInterface lTRController : getTranslationRotationControllers())
-				if(lTRController.isActive()) {
-					lQuaternion.set(lTRController.getQuaternion());
-
-					notifyChangeOfVolumeRenderingParameters();
-				}
-
-			setQuaternion(lQuaternion);
-		}
+//		if(getTranslationRotationControllers().size() > 0) {
+//			final Quaternion lQuaternion = new Quaternion();
+//
+//			for(final TranslationRotationControllerInterface lTRController : getTranslationRotationControllers())
+//				if(lTRController.isActive()) {
+//					lQuaternion.set(lTRController.getQuaternion());
+//
+//					notifyChangeOfVolumeRenderingParameters();
+//				}
+//
+//			setQuaternion(lQuaternion);
+//		}
 	}
 
 	private boolean isOverlay2DChanged()
