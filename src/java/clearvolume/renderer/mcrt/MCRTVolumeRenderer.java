@@ -1,48 +1,31 @@
 package clearvolume.renderer.mcrt;
 
-import static java.lang.Math.max;
-import static java.lang.Math.pow;
-
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.channels.FileChannel;
-
-import org.bridj.Pointer;
-
 import clearvolume.exceptions.ClearVolumeUnsupportdDataTypeException;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.o2d.HistogramOverlay;
 import clearvolume.renderer.cleargl.overlay.o3d.DriftOverlay;
+import clearvolume.renderer.opencl.OpenCLDevice;
 import clearvolume.renderer.processors.OpenCLProcessor;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.impl.OpenCLCenterMass;
 import clearvolume.renderer.processors.impl.OpenCLDeconvolutionLR;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
-
-import clearvolume.renderer.opencl.OpenCLDevice;
-
 import com.jogamp.opengl.GLEventListener;
-import com.nativelibs4java.opencl.CLBuffer;
-import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLImage3D;
-import com.nativelibs4java.opencl.CLImageFormat;
-import com.nativelibs4java.opencl.CLKernel;
-
+import com.nativelibs4java.opencl.*;
 import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;
+import org.bridj.Pointer;
 
-import javax.imageio.ImageIO;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
-public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
-                                                                GLEventListener
-{
+import static java.lang.Math.max;
+
+public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
+        GLEventListener {
   private OpenCLDevice mCLDevice;
 
   private CLBuffer<Integer>[] mCLRenderBuffers;
@@ -51,88 +34,83 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
   private CLImage2D[] mCLTransferFunctionImages;
 
   private CLBuffer<Float> mCLInvModelViewBuffer,
-      mCLInvProjectionBuffer;
+          mCLInvProjectionBuffer;
 
   private CLKernel mCurrentRenderKernel, mMCRTRenderKernel,
-      mClearKernel, mToneMappingKernel, mAvgLKernel;
+          mClearKernel, mToneMappingKernel, mAvgLKernel;
 
   private Pointer<Integer> mTransferBuffer;
 
   public MCRTVolumeRenderer(final String pWindowName,
-                              final int pWindowWidth,
-                              final int pWindowHeight)
-  {
+                            final int pWindowWidth,
+                            final int pWindowHeight) {
     super("[OpenCL] " + pWindowName, pWindowWidth, pWindowHeight);
 
   }
 
   public MCRTVolumeRenderer(final String pWindowName,
-                              final int pWindowWidth,
-                              final int pWindowHeight,
-                              final NativeTypeEnum pNativeTypeEnum)
-  {
+                            final int pWindowWidth,
+                            final int pWindowHeight,
+                            final NativeTypeEnum pNativeTypeEnum) {
     super("[OpenCL] " + pWindowName,
-          pWindowWidth,
-          pWindowHeight,
-          pNativeTypeEnum);
+            pWindowWidth,
+            pWindowHeight,
+            pNativeTypeEnum);
 
   }
 
   public MCRTVolumeRenderer(final String pWindowName,
-                              final int pWindowWidth,
-                              final int pWindowHeight,
-                              final NativeTypeEnum pNativeTypeEnum,
-                              final int pMaxTextureWidth,
-                              final int pMaxTextureHeight)
-  {
+                            final int pWindowWidth,
+                            final int pWindowHeight,
+                            final NativeTypeEnum pNativeTypeEnum,
+                            final int pMaxTextureWidth,
+                            final int pMaxTextureHeight) {
     super("[OpenCL] " + pWindowName,
-          pWindowWidth,
-          pWindowHeight,
-          pNativeTypeEnum,
-          pMaxTextureWidth,
-          pMaxTextureHeight);
+            pWindowWidth,
+            pWindowHeight,
+            pNativeTypeEnum,
+            pMaxTextureWidth,
+            pMaxTextureHeight);
 
-  }
-
-  @SuppressWarnings("unchecked")
-  public MCRTVolumeRenderer(final String pWindowName,
-                              final Integer pWindowWidth,
-                              final Integer pWindowHeight,
-                              final String pNativeTypeEnum,
-                              final Integer pMaxTextureWidth,
-                              final Integer pMaxTextureHeight,
-                              final Integer pNumberOfRenderLayers,
-                              final Boolean pUseInCanvas)
-  {
-    this(	pWindowName,
-          pWindowWidth,
-          pWindowHeight,
-          NativeTypeEnum.valueOf(pNativeTypeEnum),
-          pMaxTextureWidth,
-          pMaxTextureHeight,
-          pNumberOfRenderLayers,
-          pUseInCanvas);
   }
 
   @SuppressWarnings("unchecked")
   public MCRTVolumeRenderer(final String pWindowName,
-                              final Integer pWindowWidth,
-                              final Integer pWindowHeight,
-                              final NativeTypeEnum pNativeTypeEnum,
-                              final Integer pMaxTextureWidth,
-                              final Integer pMaxTextureHeight,
-                              final Integer pNumberOfRenderLayers,
-                              final Boolean useInCanvas)
-  {
+                            final Integer pWindowWidth,
+                            final Integer pWindowHeight,
+                            final String pNativeTypeEnum,
+                            final Integer pMaxTextureWidth,
+                            final Integer pMaxTextureHeight,
+                            final Integer pNumberOfRenderLayers,
+                            final Boolean pUseInCanvas) {
+    this(pWindowName,
+            pWindowWidth,
+            pWindowHeight,
+            NativeTypeEnum.valueOf(pNativeTypeEnum),
+            pMaxTextureWidth,
+            pMaxTextureHeight,
+            pNumberOfRenderLayers,
+            pUseInCanvas);
+  }
+
+  @SuppressWarnings("unchecked")
+  public MCRTVolumeRenderer(final String pWindowName,
+                            final Integer pWindowWidth,
+                            final Integer pWindowHeight,
+                            final NativeTypeEnum pNativeTypeEnum,
+                            final Integer pMaxTextureWidth,
+                            final Integer pMaxTextureHeight,
+                            final Integer pNumberOfRenderLayers,
+                            final Boolean useInCanvas) {
 
     super("[OpenCL] " + pWindowName,
-          pWindowWidth,
-          pWindowHeight,
-          pNativeTypeEnum,
-          pMaxTextureWidth,
-          pMaxTextureHeight,
-          pNumberOfRenderLayers,
-          useInCanvas);
+            pWindowWidth,
+            pWindowHeight,
+            pNativeTypeEnum,
+            pMaxTextureWidth,
+            pMaxTextureHeight,
+            pNumberOfRenderLayers,
+            useInCanvas);
 
     mCLRenderBuffers = new CLBuffer[pNumberOfRenderLayers];
     mHDRBuffers = new CLBuffer[pNumberOfRenderLayers];
@@ -164,8 +142,7 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
   }
 
   @Override
-  protected boolean initVolumeRenderer()
-  {
+  protected boolean initVolumeRenderer() {
     mCLDevice = new OpenCLDevice();
 
     mCLDevice.initCL();
@@ -188,8 +165,7 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
 
     for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
       if (lProcessor.isCompatibleProcessor(getClass()))
-        if (lProcessor instanceof OpenCLProcessor)
-        {
+        if (lProcessor instanceof OpenCLProcessor) {
           final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
           lOpenCLProcessor.setDevice(mCLDevice);
         }
@@ -207,27 +183,23 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
   }
 
   @Override
-  protected void notifyChangeOfTextureDimensions()
-  {
+  protected void notifyChangeOfTextureDimensions() {
     final int lRenderBufferSize = getRenderHeight() * getRenderWidth();
 
-    for (int i = 0; i < getNumberOfRenderLayers(); i++)
-    {
+    for (int i = 0; i < getNumberOfRenderLayers(); i++) {
       if (mCLRenderBuffers[i] != null)
         mCLRenderBuffers[i].release();
-      mCLRenderBuffers[i] = mCLDevice.createInputOutputIntBuffer(lRenderBufferSize*4);
+      mCLRenderBuffers[i] = mCLDevice.createInputOutputIntBuffer(lRenderBufferSize * 4);
 
-      if(mHDRBuffers[i] != null)
+      if (mHDRBuffers[i] != null)
         mHDRBuffers[i].release();
-      mHDRBuffers[i] = mCLDevice.createOutputFloatBuffer(lRenderBufferSize*4);
+      mHDRBuffers[i] = mCLDevice.createOutputFloatBuffer(lRenderBufferSize * 4);
     }
   }
 
   private void prepareVolumeDataArray(final int pRenderLayerIndex,
-                                      final FragmentedMemoryInterface pVolumeDataBuffer)
-  {
-    synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
-    {
+                                      final FragmentedMemoryInterface pVolumeDataBuffer) {
+    synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex)) {
 
       FragmentedMemoryInterface lVolumeDataBuffer = pVolumeDataBuffer;
       if (lVolumeDataBuffer == null)
@@ -242,40 +214,39 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
       if (getNativeType() == NativeTypeEnum.UnsignedByte)
 
         mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
-                                                                            lHeight,
-                                                                            lDepth,
-                                                                            CLImageFormat.ChannelOrder.R,
-                                                                            CLImageFormat.ChannelDataType.UNormInt8);
+                lHeight,
+                lDepth,
+                CLImageFormat.ChannelOrder.R,
+                CLImageFormat.ChannelDataType.UNormInt8);
       else if (getNativeType() == NativeTypeEnum.UnsignedShort)
         mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
-                                                                            lHeight,
-                                                                            lDepth,
-                                                                            CLImageFormat.ChannelOrder.R,
-                                                                            CLImageFormat.ChannelDataType.UNormInt16);
+                lHeight,
+                lDepth,
+                CLImageFormat.ChannelOrder.R,
+                CLImageFormat.ChannelDataType.UNormInt16);
       else if (getNativeType() == NativeTypeEnum.Byte)
         mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
-                                                                            lHeight,
-                                                                            lDepth,
-                                                                            CLImageFormat.ChannelOrder.R,
-                                                                            CLImageFormat.ChannelDataType.UNormInt8);
+                lHeight,
+                lDepth,
+                CLImageFormat.ChannelOrder.R,
+                CLImageFormat.ChannelDataType.UNormInt8);
       else if (getNativeType() == NativeTypeEnum.Short)
         mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
-                                                                            lHeight,
-                                                                            lDepth,
-                                                                            CLImageFormat.ChannelOrder.R,
-                                                                            CLImageFormat.ChannelDataType.UNormInt16);
+                lHeight,
+                lDepth,
+                CLImageFormat.ChannelOrder.R,
+                CLImageFormat.ChannelDataType.UNormInt16);
       else
         throw new ClearVolumeUnsupportdDataTypeException("Received an unsupported data type: " + getNativeType());
 
       System.err.println("Now starting to fill image buffer...");
-      fillWithByteBuffer(	mCLVolumeImages[pRenderLayerIndex],
-                          lVolumeDataBuffer);
+      fillWithByteBuffer(mCLVolumeImages[pRenderLayerIndex],
+              lVolumeDataBuffer);
 
     }
   }
 
-  private void prepareTransferFunctionArray(final int pRenderLayerIndex)
-  {
+  private void prepareTransferFunctionArray(final int pRenderLayerIndex) {
 
     final float[] lTransferFunctionArray = getTransferFunction(pRenderLayerIndex).getArray();
 
@@ -287,26 +258,24 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
     final int lTransferFunctionArrayLength = lTransferFunctionArray.length;
 
     final int lNeededWidth = lTransferFunctionArrayLength / 4;
-    if (mCLTransferFunctionImages[pRenderLayerIndex] == null || mCLTransferFunctionImages[pRenderLayerIndex].getWidth() != lNeededWidth)
-    {
+    if (mCLTransferFunctionImages[pRenderLayerIndex] == null || mCLTransferFunctionImages[pRenderLayerIndex].getWidth() != lNeededWidth) {
       if (mCLTransferFunctionImages[pRenderLayerIndex] != null)
         mCLTransferFunctionImages[pRenderLayerIndex].release();
 
       mCLTransferFunctionImages[pRenderLayerIndex] = mCLDevice.createGenericImage2D(lNeededWidth,
-                                                                                    1,
-                                                                                    CLImageFormat.ChannelOrder.RGBA,
-                                                                                    CLImageFormat.ChannelDataType.Float);
+              1,
+              CLImageFormat.ChannelOrder.RGBA,
+              CLImageFormat.ChannelDataType.Float);
     }
 
-    mCLDevice.writeImage(	mCLTransferFunctionImages[pRenderLayerIndex],
-                          FloatBuffer.wrap(lTransferFunctionArray));
+    mCLDevice.writeImage(mCLTransferFunctionImages[pRenderLayerIndex],
+            FloatBuffer.wrap(lTransferFunctionArray));
 
   }
 
   @Override
-  protected boolean[] renderVolume(	final float[] pInvModelViewMatrix,
-                                    final float[] pInvProjectionMatrix)
-  {
+  protected boolean[] renderVolume(final float[] pInvModelViewMatrix,
+                                   final float[] pInvProjectionMatrix) {
 
     doCaptureBuffersIfNeeded();
 
@@ -320,50 +289,45 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
     return updateBufferAndRunKernel();
   }
 
-  private void doCaptureBuffersIfNeeded()
-  {
-    if (mVolumeCaptureFlag)
-    {
+  private void doCaptureBuffersIfNeeded() {
+    if (mVolumeCaptureFlag) {
 
       final ByteBuffer[] lCaptureBuffers = new ByteBuffer[getNumberOfRenderLayers()];
 
-      for (int i = 0; i < getNumberOfRenderLayers(); i++)
-      {
-        synchronized (getSetVolumeDataBufferLock(i))
-        {
+      for (int i = 0; i < getNumberOfRenderLayers(); i++) {
+        synchronized (getSetVolumeDataBufferLock(i)) {
           lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (getBytesPerVoxel() * getVolumeSizeX()
-                                                                * getVolumeSizeY() * getVolumeSizeZ()))
-                                          .order(ByteOrder.nativeOrder());
+                  * getVolumeSizeY() * getVolumeSizeZ()))
+                  .order(ByteOrder.nativeOrder());
 
-          mCLVolumeImages[getCurrentRenderLayerIndex()].read(	mCLDevice.getQueue(),
-                                                              0,
-                                                              0,
-                                                              0,
-                                                              getVolumeSizeX(),
-                                                              getVolumeSizeY(),
-                                                              getVolumeSizeZ(),
-                                                              0,
-                                                              0,
-                                                              lCaptureBuffers[i],
-                                                              true);
+          mCLVolumeImages[getCurrentRenderLayerIndex()].read(mCLDevice.getQueue(),
+                  0,
+                  0,
+                  0,
+                  getVolumeSizeX(),
+                  getVolumeSizeY(),
+                  getVolumeSizeZ(),
+                  0,
+                  0,
+                  lCaptureBuffers[i],
+                  true);
         }
       }
 
-      notifyVolumeCaptureListeners(	lCaptureBuffers,
-                                    getNativeType(),
-                                    getVolumeSizeX(),
-                                    getVolumeSizeY(),
-                                    getVolumeSizeZ(),
-                                    getVoxelSizeX(),
-                                    getVoxelSizeY(),
-                                    getVoxelSizeZ());
+      notifyVolumeCaptureListeners(lCaptureBuffers,
+              getNativeType(),
+              getVolumeSizeX(),
+              getVolumeSizeY(),
+              getVolumeSizeZ(),
+              getVoxelSizeX(),
+              getVoxelSizeY(),
+              getVoxelSizeZ());
 
       mVolumeCaptureFlag = false;
     }
   }
 
-  private boolean[] updateBufferAndRunKernel()
-  {
+  private boolean[] updateBufferAndRunKernel() {
     final boolean[] lUpdated = new boolean[getNumberOfRenderLayers()];
 
     lUpdated[0] = true;
@@ -371,31 +335,24 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
     boolean lAnyVolumeDataUpdated = false;
 
 
-    for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++)
-    {
-      synchronized (getSetVolumeDataBufferLock(lLayerIndex))
-      {
+    for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++) {
+      synchronized (getSetVolumeDataBufferLock(lLayerIndex)) {
         final FragmentedMemoryInterface lVolumeDataBuffer = getVolumeDataBuffer(lLayerIndex);
 
-        if (lVolumeDataBuffer != null)
-        {
+        if (lVolumeDataBuffer != null) {
 
           clearVolumeDataBufferReference(lLayerIndex);
 
-          if (haveVolumeDimensionsChanged() || mCLVolumeImages[lLayerIndex] == null)
-          {
-            if (mCLVolumeImages[lLayerIndex] != null)
-            {
+          if (haveVolumeDimensionsChanged() || mCLVolumeImages[lLayerIndex] == null) {
+            if (mCLVolumeImages[lLayerIndex] != null) {
 
               mCLVolumeImages[lLayerIndex].release();
             }
 
             prepareVolumeDataArray(lLayerIndex, lVolumeDataBuffer);
-          }
-          else
-          {
-            fillWithByteBuffer(	mCLVolumeImages[lLayerIndex],
-                                lVolumeDataBuffer);
+          } else {
+            fillWithByteBuffer(mCLVolumeImages[lLayerIndex],
+                    lVolumeDataBuffer);
 
           }
 
@@ -411,12 +368,9 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
     clearVolumeDimensionsChanged();
 
     if (lAnyVolumeDataUpdated || haveVolumeRenderingParametersChanged()
-        || getAdaptiveLODController().isKernelRunNeeded())
-    {
-      for (int i = 0; i < getNumberOfRenderLayers(); i++)
-      {
-        if (mCLVolumeImages[i] != null)
-        {
+            || getAdaptiveLODController().isKernelRunNeeded()) {
+      for (int i = 0; i < getNumberOfRenderLayers(); i++) {
+        if (mCLVolumeImages[i] != null) {
           runKernel(i);
           lUpdated[i] = true;
         }
@@ -427,25 +381,20 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
   }
 
   private void fillWithByteBuffer(final CLImage3D clImage3D,
-                                  final FragmentedMemoryInterface pVolumeDataBuffer)
-  {
-    if (pVolumeDataBuffer.getNumberOfFragments() == 1)
-    {
+                                  final FragmentedMemoryInterface pVolumeDataBuffer) {
+    if (pVolumeDataBuffer.getNumberOfFragments() == 1) {
       final ContiguousMemoryInterface lContiguousBuffer = pVolumeDataBuffer.get(0);
-      if(mCLDevice.writeImage(clImage3D, lContiguousBuffer) == null) {
+      if (mCLDevice.writeImage(clImage3D, lContiguousBuffer) == null) {
         // TODO: figure out what the null return value actually means
       }
-    }
-    else
-    {
-      if(mCLDevice.writeImagePerPlane(clImage3D, pVolumeDataBuffer) == null) {
+    } else {
+      if (mCLDevice.writeImagePerPlane(clImage3D, pVolumeDataBuffer) == null) {
         // TODO: figure out what the null return value actually means
       }
     }
   }
 
-  private void runKernel(final int pRenderLayerIndex)
-  {
+  private void runKernel(final int pRenderLayerIndex) {
     if (isLayerVisible(pRenderLayerIndex)) {
       prepareTransferFunctionArray(pRenderLayerIndex);
 
@@ -495,15 +444,15 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
       FloatBuffer data = fdata.getFloatBuffer();
       data.rewind();
 
-      for(int i = 0; i < getRenderHeight()*getRenderWidth(); i++) {
-        float lum = data.get(i*4+0) * 0.2126f
-                  + data.get(i*4+1) * 0.7152f
-                  + data.get(i*4+2) * 0.0722f;
+      for (int i = 0; i < getRenderHeight() * getRenderWidth(); i++) {
+        float lum = data.get(i * 4 + 0) * 0.2126f
+                + data.get(i * 4 + 1) * 0.7152f
+                + data.get(i * 4 + 2) * 0.0722f;
 
         avgL += Math.log(lum + 0.00001f);
       }
 
-      avgL = (float)Math.exp(avgL/(getRenderWidth()*getRenderHeight()));
+      avgL = (float) Math.exp(avgL / (getRenderWidth() * getRenderHeight()));
       //System.out.println(avgL);
 
       mCLDevice.setArgs(mToneMappingKernel,
@@ -519,16 +468,15 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
 
     } else {
       mCLDevice.setArgs(mClearKernel,
-                        mCLRenderBuffers[pRenderLayerIndex],
-                        getRenderWidth(),
-                        getRenderHeight());
+              mCLRenderBuffers[pRenderLayerIndex],
+              getRenderWidth(),
+              getRenderHeight());
 
       mCLDevice.run(mClearKernel, getRenderWidth(), getRenderHeight());
 
     }
 
-    if (mTransferBuffer == null || mTransferBuffer.getValidBytes() != mCLRenderBuffers[pRenderLayerIndex].getByteCount())
-    {
+    if (mTransferBuffer == null || mTransferBuffer.getValidBytes() != mCLRenderBuffers[pRenderLayerIndex].getByteCount()) {
       if (mTransferBuffer != null)
         mTransferBuffer.release();
       mTransferBuffer = mCLRenderBuffers[pRenderLayerIndex].allocateCompatibleMemory(mCLDevice.mCLDevice);
@@ -536,31 +484,27 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
     }
 
     mCLDevice.copyCLBufferToPointer(mCLRenderBuffers[pRenderLayerIndex],
-                                    mTransferBuffer);
+            mTransferBuffer);
     copyBufferToTexture(pRenderLayerIndex,
-                        mTransferBuffer.getByteBuffer());
+            mTransferBuffer.getByteBuffer());
 
   }
 
-  private void runProcessorHook(final int pRenderLayerIndex)
-  {
+  private void runProcessorHook(final int pRenderLayerIndex) {
 
     for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
-      if (lProcessor.isCompatibleProcessor(getClass()))
-      {
-        synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
-        {
-          if (lProcessor instanceof OpenCLProcessor)
-          {
+      if (lProcessor.isCompatibleProcessor(getClass())) {
+        synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex)) {
+          if (lProcessor instanceof OpenCLProcessor) {
             final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
             lOpenCLProcessor.setVolumeBuffers(mCLVolumeImages[pRenderLayerIndex]);
           }
 
           final long lStartTimeNs = System.nanoTime();
-          lProcessor.process(	pRenderLayerIndex,
-                              getVolumeSizeX(),
-                              getVolumeSizeY(),
-                              getVolumeSizeZ());
+          lProcessor.process(pRenderLayerIndex,
+                  getVolumeSizeX(),
+                  getVolumeSizeY(),
+                  getVolumeSizeZ());
           final long lStopTimeNs = System.nanoTime();
           final double lElapsedTimeInMilliseconds = 0.001 * 0.001 * (lStopTimeNs - lStartTimeNs);
           /*
@@ -573,16 +517,12 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
   }
 
   @Override
-  public void close()
-  {
+  public void close() {
     mDisplayReentrantLock.lock();
-    try
-    {
+    try {
       super.close();
       mCLDevice.close();
-    }
-    finally
-    {
+    } finally {
       if (mDisplayReentrantLock.isHeldByCurrentThread())
         mDisplayReentrantLock.unlock();
     }
