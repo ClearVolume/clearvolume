@@ -510,7 +510,12 @@ def getVersionName = {
 }
 
 group = 'net.clearvolume'
-version = getVersionName()
+
+if(project.hasProperty('releasebuild')) {
+    version = getVersionName()
+} else {
+    version = "1.0-SNAPSHOT"
+}
 
 artifacts
 {
