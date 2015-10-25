@@ -37,6 +37,8 @@ public interface TranslationControllerInterface
    */
   void setActive(boolean pActive);
 
+  float[] getEyeShift();
+
   /**
    * Is controller active?
    *

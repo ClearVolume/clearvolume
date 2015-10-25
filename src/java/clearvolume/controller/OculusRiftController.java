@@ -13,6 +13,7 @@ import static com.oculusvr.capi.OvrLibrary.ovrDistortionCaps.*;
 import static com.oculusvr.capi.OvrLibrary.ovrHmdType.*;
 import static com.oculusvr.capi.OvrLibrary.ovrRenderAPIType.*;
 import static com.oculusvr.capi.OvrLibrary.ovrTrackingCaps.*;
+import static com.oculusvr.capi.OvrLibrary.ovrEyeType;
 
 import com.oculusvr.capi.*;
 import com.oculusvr.capi.OvrLibrary.ovrHmdCaps;
@@ -48,6 +49,8 @@ public class OculusRiftController	extends
 
   private final int mHmdNum;
   private final Hmd hmd;
+
+  private float[] eyeShift;
 
   private Thread mReceptionThread;
 
@@ -105,6 +108,22 @@ public class OculusRiftController	extends
     }
 
     System.out.println("Using Rift HMD: " + hmd.Type + ", sn=" + hmd.SerialNumber.toString() + ", res " + hmd.Resolution.w + "x" + hmd.Resolution.h);
+
+    EyeRenderDesc[] erd = new EyeRenderDesc[2];
+    FovPort[] fovs = new FovPort[2];
+    FovPort l = new FovPort();
+    FovPort r = new FovPort();
+
+    erd[0] = hmd.getRenderDesc(ovrEyeType.ovrEye_Left, l);
+    erd[1] = hmd.getRenderDesc(ovrEyeType.ovrEye_Right, r);
+
+    eyeShift = new float[]{
+            // left eye
+            erd[0].HmdToEyeViewOffset.x, erd[0].HmdToEyeViewOffset.y, erd[0].HmdToEyeViewOffset.z,
+            // right eye
+            erd[1].HmdToEyeViewOffset.x, erd[1].HmdToEyeViewOffset.y, erd[1].HmdToEyeViewOffset.z
+    };
+
     setActive(true);
   }
 
@@ -200,4 +219,7 @@ public class OculusRiftController	extends
     return true;
   }
 
+  public float[] getEyeShift() {
+    return eyeShift;
+  }
 }

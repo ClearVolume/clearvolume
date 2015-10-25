@@ -91,4 +91,8 @@ public class TranslationRotationControllerBase	implements
     return mTranslation;
   }
 
+  public float[] getEyeShift() {
+    return new float[]{0.0f, 0.0f};
+  }
+
 }
