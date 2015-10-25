@@ -9,49 +9,15 @@ volume and iso surface rendering
     	  Loic Royer		 (royer@mpi-cbg.de)
 */
 
+#include "RGBConversion.cl"
+#include "random.cl"
+#include "CIEColorSpace.cl"
 
 // Loop unrolling length:
 #define LOOPUNROLL 16
 
 float __constant Exposure = 0.315f;
 float __constant White = 0.928f;
-
-// rgb2xyz and back
-inline float3 XYZToRGB(const float3 xyz) {
-    float3 rgb;
-	rgb.x =  3.240479f*xyz.x - 1.537150f*xyz.y - 0.498535f*xyz.z;
-	rgb.y = -0.969256f*xyz.x + 1.875991f*xyz.y + 0.041556f*xyz.z;
-	rgb.z =  0.055648f*xyz.x - 0.204043f*xyz.y + 1.057311f*xyz.z;
-
-	return rgb;
-}
-
-inline float3 RGBToXYZ(const float3 rgb) {
-    float3 xyz;
-	xyz.x = 0.412453f*rgb.x + 0.357580f*rgb.y + 0.180423f*rgb.z;
-	xyz.y = 0.212671f*rgb.x + 0.715160f*rgb.y + 0.072169f*rgb.z;
-	xyz.z = 0.019334f*rgb.x + 0.119193f*rgb.y + 0.950227f*rgb.z;
-
-	return xyz;
-}
-
-
-// random number generator for dithering
-inline
-float random(uint x, uint y)
-{   
-    uint a = 4421 +(1+x)*(1+y) +x +y;
-
-    for(uint i=0; i < 10; i++)
-    {
-        a = ((uint)1664525 * a + (uint)1013904223) % (uint)79197919;
-    }
-
-    float rnd = (a*1.0f)/(79197919.f);
-    
-    return rnd-0.5f;
-}
-
 
 // intersect ray with a box
 // http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm
@@ -77,47 +43,6 @@ int intersectBox(float4 r_o, float4 r_d, float4 boxmin, float4 boxmax, float *tn
 	return smallest_tmax > largest_tmin;
 }
 
-
-// convert float4 into uint:
-inline
-uint rgbaFloatToInt(float4 rgba)
-{
-    rgba = clamp(rgba,(float4)(0.f,0.f,0.f,0.f),(float4)(1.f,1.f,1.f,1.f));
-    
-    return ((uint)(rgba.w*255)<<24) | ((uint)(rgba.z*255)<<16) | ((uint)(rgba.y*255)<<8) | (uint)(rgba.x*255);
-}
-
-inline
-int4 rgbaFloatToVInt(float4 rgba) {
-    rgba = 255.0f*clamp(rgba,(float4)(0.f,0.f,0.f,0.f),(float4)(1.f,1.f,1.f,1.f));
-    return convert_int4(rgba);
-}
-
-// convert float4 into uint and take the max with an existing RGBA value in uint form:
-inline
-uint rgbaFloatToIntAndMax(uint existing, float4 rgba)
-{
-    rgba = clamp(rgba,(float4)(0.f,0.f,0.f,0.f),(float4)(1.f,1.f,1.f,1.f));
-    
-    const uint nr = (uint)(rgba.x*255);
-    const uint ng = (uint)(rgba.y*255);
-    const uint nb = (uint)(rgba.z*255);
-    const uint na = (uint)(rgba.w*255);
-    
-    const uint er = existing&0xFF;
-    const uint eg = (existing>>8)&0xFF;
-    const uint eb = (existing>>16)&0xFF;
-    const uint ea = (existing>>24)&0xFF;
-    
-    const uint  r = max(nr,er);
-    const uint  g = max(ng,eg);
-    const uint  b = max(nb,eb);
-    const uint  a = max(na,ea);
-    
-    return a<<24|b<<16|g<<8|r ;
-}
-
-
 // multiply matrix with vector
 float4 mult(__constant float* M, float4 v){
   float4 res;
@@ -127,7 +52,6 @@ float4 mult(__constant float* M, float4 v){
   res.w = dot(v, (float4)(M[12],M[13],M[14],M[15]));
   return res;
 }
-
 
 __kernel void AvgLuminance(
     __global float *d_input,
@@ -154,6 +78,7 @@ __kernel void tonemapping(
     __global unsigned char *d_output,
     const uint imageW,
     const uint imageH,
+    int applyTonemapping,
     float avgLuminance
 ) {
   const uint x = get_global_id(0);
@@ -192,9 +117,8 @@ __kernel void tonemapping(
 
   float3 outcolor = XYZToRGB(xyzCol);
   float4 oc;
-  bool noToneMap = true;
 
-  if(noToneMap) {
+  if(applyTonemapping == 0) {
     oc = rgbColor;
   } else {
     oc = float4(outcolor.x, outcolor.y, outcolor.z, rgbColor.w);

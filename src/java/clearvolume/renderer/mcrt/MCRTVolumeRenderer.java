@@ -170,15 +170,20 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
 
     mCLDevice.initCL();
     mCLDevice.printInfo();
-    mMCRTRenderKernel = mCLDevice.compileKernel(	MCRTVolumeRenderer.class.getResource("kernels/MCRTRender.cl"),
-                                                          "mcrt_render");
-    mClearKernel = mCLDevice.compileKernel(	MCRTVolumeRenderer.class.getResource("kernels/MCRTRender.cl"),
-                                            "clearbuffer");
+    mMCRTRenderKernel = mCLDevice.compileKernel(
+            MCRTVolumeRenderer.class.getResource("kernels/MCRTRender.cl"),
+            "mcrt_render");
 
-    mToneMappingKernel = mCLDevice.compileKernel(MCRTVolumeRenderer.class.getResource("kernels/MCRTRender.cl"),
-          "tonemapping");
+    mClearKernel = mCLDevice.compileKernel(
+            MCRTVolumeRenderer.class.getResource("kernels/MCRTRender.cl"),
+            "clearbuffer");
 
-    mAvgLKernel = mCLDevice.compileKernel(MCRTVolumeRenderer.class.getResource("kernels/MCRTRender.cl"),
+    mToneMappingKernel = mCLDevice.compileKernel(
+            MCRTVolumeRenderer.class.getResource("kernels/MCRTRender.cl"),
+            "tonemapping");
+
+    mAvgLKernel = mCLDevice.compileKernel(
+            MCRTVolumeRenderer.class.getResource("kernels/MCRTRender.cl"),
             "AvgLuminance");
 
     for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
@@ -506,7 +511,7 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
               mCLRenderBuffers[pRenderLayerIndex],
               getRenderWidth(),
               getRenderHeight(),
-              false,
+              0,
               avgL);
 
       mCLDevice.runSubdivisions(mToneMappingKernel,
