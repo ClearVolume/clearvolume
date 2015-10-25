@@ -1,5 +1,6 @@
 package clearvolume.renderer.opencl;
 
+import java.io.File;
 import java.net.URL;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -280,6 +281,7 @@ public class OpenCLDevice implements ClearVolumeCloseable {
 
 		try {
 			mCLProgram = mCLContext.createProgram(src);
+			mCLProgram.addInclude(url.getPath().substring(0, url.getPath().lastIndexOf(File.separator)));
 			mCLProgram.setFastRelaxedMath();
 			mCLProgram.setFiniteMathOnly();
 			mCLProgram.setMadEnable();
