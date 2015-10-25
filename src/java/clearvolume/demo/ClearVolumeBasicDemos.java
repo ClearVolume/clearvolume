@@ -292,7 +292,7 @@ public class ClearVolumeBasicDemos
 	public void demoWith16BitGeneratedDatasetStreaming() throws InterruptedException,
 																											IOException
 	{
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
 																																																						512,
 																																																						512,
 																																																						NativeTypeEnum.UnsignedShort,
