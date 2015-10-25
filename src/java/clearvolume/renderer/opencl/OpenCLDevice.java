@@ -332,6 +332,27 @@ public class OpenCLDevice implements ClearVolumeCloseable {
 		return evt;
 	}
 
+  public CLEvent[] runSubdivisions(final CLKernel pKernel, final int mNx, final int mNy, int subdivisions) {
+    if(mCLDevice == null || mCLContext == null || mCLQueue == null)
+      return null;
+
+    CLEvent[] evt = new CLEvent[subdivisions*subdivisions];
+    final long sizeX = mNx/subdivisions;
+    final long sizeY = mNy/subdivisions;
+
+    for(int i = 0; i < subdivisions; i++) {
+      for(int j = 0; j < subdivisions; j++) {
+        evt[i+subdivisions*j] = pKernel.enqueueNDRange(
+                mCLQueue, new long[] {i*sizeX, j*sizeY}, new long[] {sizeX, sizeY}, null);
+      }
+    }
+
+    for(int i = 0; i < subdivisions*subdivisions; i++)
+      mCLQueue.enqueueWaitForEvents(evt[i]);
+
+    return evt;
+  }
+
 	public CLEvent run(final int pKernelIndex, final int mNx, final int mNy,
 			final int mNz) {
 		if (mCLDevice == null || mCLContext == null || mCLQueue == null)
