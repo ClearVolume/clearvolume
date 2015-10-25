@@ -10,6 +10,7 @@ build/
 hs_err_pid*
 old
 src/clearvolume/demo/databig/
+src/cpp/jars/*.jar
 
 
 ClearVolume.exe.jar
