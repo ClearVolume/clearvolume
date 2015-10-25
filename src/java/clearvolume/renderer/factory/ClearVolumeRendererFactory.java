@@ -211,6 +211,19 @@ public class ClearVolumeRendererFactory
 		{
 			final Properties lProperties = new Properties(System.getProperties());
 
+			if(lProperties.getProperty("ClearVolume.EnableMCRT") != null) {
+				System.err.println("Using MCRT renderer. Experimental. Beware!");
+				final ClearVolumeRendererInterface lNewMCRTRenderer = internalCreateMCRTRenderer(pWindowName,
+								pWindowWidth,
+								pWindowHeight,
+								pNativeTypeEnum,
+								pMaxTextureWidth,
+								pMaxTextureHeight,
+								pNumberOfRenderLayers,
+								pUseInCanvas);
+				return lNewMCRTRenderer;
+			}
+
 			if (lProperties.getProperty("ClearVolume.disableOpenCL") == null && System.getenv("CV_DISABLE_OPENCL") == null)
 			{
 				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreateOpenCLRenderer(	pWindowName,
@@ -376,6 +389,26 @@ public class ClearVolumeRendererFactory
 																																	pMaxTextureHeight,
 																																	pNumberOfRenderLayers,
 																																	pUseInCanvas);
+	}
+
+	private static ClearVolumeRendererInterface internalCreateMCRTRenderer(final String pWindowName,
+																																					 final int pWindowWidth,
+																																					 final int pWindowHeight,
+																																					 final NativeTypeEnum pNativeTypeEnum,
+																																					 final int pMaxTextureWidth,
+																																					 final int pMaxTextureHeight,
+																																					 final int pNumberOfRenderLayers,
+																																					 final boolean pUseInCanvas)
+	{
+
+		return new clearvolume.renderer.mcrt.MCRTVolumeRenderer(pWindowName,
+						pWindowWidth,
+						pWindowHeight,
+						pNativeTypeEnum.toString(),
+						pMaxTextureWidth,
+						pMaxTextureHeight,
+						pNumberOfRenderLayers,
+						pUseInCanvas);
 	}
 
 
