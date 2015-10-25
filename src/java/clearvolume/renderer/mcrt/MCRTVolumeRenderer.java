@@ -12,8 +12,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 
-import jcuda.CudaException;
-
 import org.bridj.Pointer;
 
 import clearvolume.exceptions.ClearVolumeUnsupportdDataTypeException;
@@ -308,22 +306,13 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer	implements
 		doCaptureBuffersIfNeeded();
 
 		// System.out.println("render");
-		try
-		{
-			mCLDevice.writeFloatBuffer(	mCLInvModelViewBuffer,
-																	FloatBuffer.wrap(pInvModelViewMatrix));
+		mCLDevice.writeFloatBuffer(mCLInvModelViewBuffer,
+						FloatBuffer.wrap(pInvModelViewMatrix));
 
-			mCLDevice.writeFloatBuffer(	mCLInvProjectionBuffer,
-																	FloatBuffer.wrap(pInvProjectionMatrix));
+		mCLDevice.writeFloatBuffer(mCLInvProjectionBuffer,
+						FloatBuffer.wrap(pInvProjectionMatrix));
 
-			return updateBufferAndRunKernel();
-		}
-		catch (final CudaException e)
-		{
-			System.err.println(e.getLocalizedMessage());
-			return null;
-		}
-
+		return updateBufferAndRunKernel();
 	}
 
 	private void doCaptureBuffersIfNeeded()
