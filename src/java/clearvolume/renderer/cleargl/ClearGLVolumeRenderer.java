@@ -769,7 +769,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					eyeShift = getTranslationRotationControllers().get(0).getEyeShift();
 				}
 
-				if(System.getProperty("ClearVolume.enableVR") == null) {
+				if(System.getProperty("ClearVolume.EnableVR") == null) {
 					eyeShift = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 					eyeCount = 1;
 				} else {
@@ -778,18 +778,13 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 
 				for(int eye = 0; eye < eyeCount; eye++) {
-					if(System.getProperty("ClearVolume.enableVR") == null) {
+					if(System.getProperty("ClearVolume.EnableVR") == null) {
 						lGL.glViewport(0, 0, w, h);
 						lGL.glScissor(0, 0, w, h);
 					} else {
 						lGL.glViewport(w / 2 * eye, 0, w / 2, h);
 						lGL.glScissor(w / 2 * eye, 0, w / 2, h);
 					}
-
-					//System.err.println("w/2: " + w/2 + "h: " + h);
-//					System.out.println(eyeShift[0] + "," + eyeShift[3]);
-//					System.out.println(eyeShift[1] + "," + eyeShift[4]);
-//					System.out.println(eyeShift[2] + "," + eyeShift[5]);
 
 					lGL.glClearColor(0, 0, 0, 1);
 					lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
