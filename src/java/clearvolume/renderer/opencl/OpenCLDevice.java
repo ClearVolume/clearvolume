@@ -263,6 +263,7 @@ public class OpenCLDevice implements ClearVolumeCloseable {
 
     try {
       mCLProgram = mCLContext.createProgram(src);
+      System.out.println("Include path: " + url.getPath().substring(0, url.getPath().lastIndexOf(File.separator)));
       mCLProgram.addInclude(url.getPath().substring(0, url.getPath().lastIndexOf(File.separator)));
       mCLProgram.setFastRelaxedMath();
       mCLProgram.setFiniteMathOnly();

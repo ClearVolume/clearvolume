@@ -187,12 +187,16 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
     final int lRenderBufferSize = getRenderHeight() * getRenderWidth();
 
     for (int i = 0; i < getNumberOfRenderLayers(); i++) {
-      if (mCLRenderBuffers[i] != null)
+      if (mCLRenderBuffers[i] != null) {
         mCLRenderBuffers[i].release();
+      }
+
       mCLRenderBuffers[i] = mCLDevice.createInputOutputIntBuffer(lRenderBufferSize * 4);
 
-      if (mHDRBuffers[i] != null)
+      if (mHDRBuffers[i] != null) {
         mHDRBuffers[i].release();
+      }
+
       mHDRBuffers[i] = mCLDevice.createOutputFloatBuffer(lRenderBufferSize * 4);
     }
   }
@@ -211,35 +215,42 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
       final long lHeight = getVolumeSizeY();
       final long lDepth = getVolumeSizeZ();
 
-      if (getNativeType() == NativeTypeEnum.UnsignedByte)
-
-        mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
+      if (getNativeType() == NativeTypeEnum.UnsignedByte) {
+        mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(
+                lWidth,
                 lHeight,
                 lDepth,
                 CLImageFormat.ChannelOrder.R,
                 CLImageFormat.ChannelDataType.UNormInt8);
-      else if (getNativeType() == NativeTypeEnum.UnsignedShort)
-        mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
+      }
+      else if (getNativeType() == NativeTypeEnum.UnsignedShort) {
+        mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(
+                lWidth,
                 lHeight,
                 lDepth,
                 CLImageFormat.ChannelOrder.R,
                 CLImageFormat.ChannelDataType.UNormInt16);
-      else if (getNativeType() == NativeTypeEnum.Byte)
-        mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
+      }
+      else if (getNativeType() == NativeTypeEnum.Byte) {
+        mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(
+                lWidth,
                 lHeight,
                 lDepth,
                 CLImageFormat.ChannelOrder.R,
                 CLImageFormat.ChannelDataType.UNormInt8);
-      else if (getNativeType() == NativeTypeEnum.Short)
-        mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
+      }
+      else if (getNativeType() == NativeTypeEnum.Short) {
+        mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(
+                lWidth,
                 lHeight,
                 lDepth,
                 CLImageFormat.ChannelOrder.R,
                 CLImageFormat.ChannelDataType.UNormInt16);
-      else
+      }
+      else {
         throw new ClearVolumeUnsupportdDataTypeException("Received an unsupported data type: " + getNativeType());
+      }
 
-      System.err.println("Now starting to fill image buffer...");
       fillWithByteBuffer(mCLVolumeImages[pRenderLayerIndex],
               lVolumeDataBuffer);
 
@@ -296,11 +307,13 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
 
       for (int i = 0; i < getNumberOfRenderLayers(); i++) {
         synchronized (getSetVolumeDataBufferLock(i)) {
-          lCaptureBuffers[i] = ByteBuffer.allocateDirect((int) (getBytesPerVoxel() * getVolumeSizeX()
+          lCaptureBuffers[i] = ByteBuffer.allocateDirect(
+                  (int) (getBytesPerVoxel() * getVolumeSizeX()
                   * getVolumeSizeY() * getVolumeSizeZ()))
                   .order(ByteOrder.nativeOrder());
 
-          mCLVolumeImages[getCurrentRenderLayerIndex()].read(mCLDevice.getQueue(),
+          mCLVolumeImages[getCurrentRenderLayerIndex()].read(
+                  mCLDevice.getQueue(),
                   0,
                   0,
                   0,
@@ -340,20 +353,18 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
         final FragmentedMemoryInterface lVolumeDataBuffer = getVolumeDataBuffer(lLayerIndex);
 
         if (lVolumeDataBuffer != null) {
-
           clearVolumeDataBufferReference(lLayerIndex);
 
           if (haveVolumeDimensionsChanged() || mCLVolumeImages[lLayerIndex] == null) {
             if (mCLVolumeImages[lLayerIndex] != null) {
-
               mCLVolumeImages[lLayerIndex].release();
             }
 
             prepareVolumeDataArray(lLayerIndex, lVolumeDataBuffer);
           } else {
-            fillWithByteBuffer(mCLVolumeImages[lLayerIndex],
+            fillWithByteBuffer(
+                    mCLVolumeImages[lLayerIndex],
                     lVolumeDataBuffer);
-
           }
 
           notifyCompletionOfDataBufferCopy(lLayerIndex);
@@ -439,7 +450,7 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
               getRenderWidth(),
               getRenderHeight(), 16);
 
-      // calculate average luminance
+      /*// calculate average luminance
       Pointer<Float> fdata = mHDRBuffers[pRenderLayerIndex].read(mCLDevice.getQueue());
       FloatBuffer data = fdata.getFloatBuffer();
       data.rewind();
@@ -453,7 +464,7 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
       }
 
       avgL = (float) Math.exp(avgL / (getRenderWidth() * getRenderHeight()));
-      //System.out.println(avgL);
+      //System.out.println(avgL);*/
 
       mCLDevice.setArgs(mToneMappingKernel,
               mHDRBuffers[pRenderLayerIndex],
