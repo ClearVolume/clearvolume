@@ -8,10 +8,13 @@ import java.nio.FloatBuffer;
 
 import javax.swing.JPanel;
 
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.opengl.GL;
+
+import cleargl.GLMatrix;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
-
-import com.jogamp.newt.event.KeyEvent;
 
 public class HistogramOverlay extends BarGraphOverlay
 {
@@ -27,7 +30,7 @@ public class HistogramOverlay extends BarGraphOverlay
 
 	@Override
 	public void notifyResult(	ProcessorInterface<FloatBuffer> pSource,
-														FloatBuffer pResult)
+								FloatBuffer pResult)
 	{
 		adjustMinMax(pResult);
 
@@ -96,12 +99,12 @@ public class HistogramOverlay extends BarGraphOverlay
 		for (int i = lLength - 1; i >= 0 && pResult.get(i) <= lThreshold; i--, lNewMax -= lStep)
 			;
 
-		lNewMin = max(0,
-									mHistoProcessor.getRangeMin() + (lNewMin - 5 * lStep)
-											* lRange);
-		lNewMax = min(1,
-									mHistoProcessor.getRangeMin() + (lNewMax + 5 * lStep)
-											* lRange);
+		lNewMin = max(	0,
+						mHistoProcessor.getRangeMin() + (lNewMin - 5 * lStep)
+								* lRange);
+		lNewMax = min(	1,
+						mHistoProcessor.getRangeMin() + (lNewMax + 5 * lStep)
+								* lRange);
 
 		if (abs(lNewMax - lNewMin) < (1.0f / 128))
 		{
@@ -109,8 +112,12 @@ public class HistogramOverlay extends BarGraphOverlay
 			lNewMax = lNewMax + 0.5f * 128 * abs(lNewMax - lNewMin);
 		}
 
-		lNewMin = 0.9f * lNewMin + 0.1f * mHistoProcessor.getRangeMin();
-		lNewMax = 0.9f * lNewMax + 0.1f * mHistoProcessor.getRangeMax();
+		lNewMin = 0.9f * lNewMin
+					+ 0.1f
+					* mHistoProcessor.getRangeMin();
+		lNewMax = 0.9f * lNewMax
+					+ 0.1f
+					* mHistoProcessor.getRangeMax();
 
 		// for (int i = 0; i < lLength; i++)
 		// System.out.println("->" + pResult.get(i));
@@ -121,4 +128,16 @@ public class HistogramOverlay extends BarGraphOverlay
 
 	}
 
+	@Override
+	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+							GL pGL,
+							int pWidth,
+							int pHeight,
+							GLMatrix pProjectionMatrix)
+	{
+		if (isDisplayed())
+		{
+			// Not implemented yet (WHY??? It was there )
+		}
+	}
 }

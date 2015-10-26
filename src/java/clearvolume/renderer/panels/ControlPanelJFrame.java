@@ -16,19 +16,19 @@ public class ControlPanelJFrame extends JFrame
 	 * Constructs a ControlPanel
 	 * 
 	 * @param pRenderLayerToBeControlled
-	 *          render layer to be controlled
+	 *            render layer to be controlled
 	 * @param pClearVolumeRendererInterface
-	 *          render interface
+	 *            render interface
 	 */
-	public ControlPanelJFrame(final int pRenderLayerToBeControlled,
-														final ClearVolumeRendererInterface pClearVolumeRendererInterface)
+	public ControlPanelJFrame(	final int pRenderLayerToBeControlled,
+								final ClearVolumeRendererInterface pClearVolumeRendererInterface)
 	{
 		super();
 		setSize(448, 149);
 		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		mControlJPanel = new ControlJPanel(	pRenderLayerToBeControlled,
-																				pClearVolumeRendererInterface);
+											pClearVolumeRendererInterface);
 		setContentPane(mControlJPanel);
 
 	}

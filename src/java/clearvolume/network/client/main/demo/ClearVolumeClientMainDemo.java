@@ -14,32 +14,30 @@ public class ClearVolumeClientMainDemo
 	@Test
 	public void demoStartClientGUIWithVolumeCaptureListener() throws InterruptedException
 	{
-		ClearVolumeClientMain.launchClientGUI(new VolumeCaptureListener()
-		{
+		ClearVolumeClientMain.launchClientGUI(	new VolumeCaptureListener()
+												{
 
-			@Override
-			public void capturedVolume(	ByteBuffer[] pCaptureBuffers,
-																	NativeTypeEnum pNativeTypeEnum,
-																	long pVolumeWidth,
-																	long pVolumeHeight,
-																	long pVolumeDepth,
-																	double pVoxelWidth,
-																	double pVoxelHeight,
-																	double pVoxelDepth)
-			{
-				System.out.format("Captured %d volume of type=%s (%d, %d, %d) (%g, %g, %g) %s\n",
-													pCaptureBuffers.length,
-													pNativeTypeEnum,
-													pVolumeWidth,
-													pVolumeHeight,
-													pVolumeDepth,
-													pVoxelWidth,
-													pVoxelHeight,
-													pVoxelDepth,
-													pCaptureBuffers[0].toString());
-			}
-		},
-																					true);
+													@Override
+													public void capturedVolume(	ByteBuffer pCaptureBuffers,
+																				NativeTypeEnum pNativeTypeEnum,
+																				long pVolumeWidth,
+																				long pVolumeHeight,
+																				long pVolumeDepth,
+																				double pVoxelWidth,
+																				double pVoxelHeight,
+																				double pVoxelDepth)
+													{
+														System.out.format(	"Captured volume of type=%s (%d, %d, %d) (%g, %g, %g) \n",
+																			pNativeTypeEnum,
+																			pVolumeWidth,
+																			pVolumeHeight,
+																			pVolumeDepth,
+																			pVoxelWidth,
+																			pVoxelHeight,
+																			pVoxelDepth);
+													}
+												},
+												true);
 
 		Thread.sleep(1000100);
 	}

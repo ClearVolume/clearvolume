@@ -3,7 +3,7 @@ package clearvolume.transferf;
 import java.util.ArrayList;
 
 public class CyclingTransferFunction extends TransferFunction1D	implements
-																																CyclableTransferFunction
+																CyclableTransferFunction
 {
 
 	private final ArrayList<TransferFunction1D> mListOfTransferFunctions = new ArrayList<TransferFunction1D>();

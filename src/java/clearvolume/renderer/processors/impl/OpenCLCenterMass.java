@@ -2,11 +2,11 @@ package clearvolume.renderer.processors.impl;
 
 import java.nio.FloatBuffer;
 
-import clearvolume.renderer.processors.OpenCLProcessor;
-
 import com.jogamp.newt.event.KeyEvent;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
+
+import clearvolume.renderer.processors.OpenCLProcessor;
 
 public class OpenCLCenterMass extends OpenCLProcessor<float[]>
 {
@@ -35,13 +35,13 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]>
 		if (mKernel == null)
 		{
 			mKernel = getDevice().compileKernel(OpenCLCenterMass.class.getResource("kernels/centermass.cl"),
-																					"center_of_mass_img");
+												"center_of_mass_img");
 		}
 	}
 
 	public void initBuffers(long pWidthInVoxels,
-													long pHeightInVoxels,
-													long pDepthInVoxels)
+							long pHeightInVoxels,
+							long pDepthInVoxels)
 	{
 
 		final int cutSize = mDownSample * mLocalSize;
@@ -50,9 +50,12 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]>
 		mCurrentHeightInVoxels = pHeightInVoxels;
 		mCurrentDepthInVoxels = pDepthInVoxels;
 
-		mPaddedShapeX = (int) (Math.ceil(1. * pWidthInVoxels / cutSize) * mLocalSize);
-		mPaddedShapeY = (int) (Math.ceil(1. * pHeightInVoxels / cutSize) * mLocalSize);
-		mPaddedShapeZ = (int) (Math.ceil(1. * pDepthInVoxels / cutSize) * mLocalSize);
+		mPaddedShapeX = (int) (Math.ceil(1.	* pWidthInVoxels
+											/ cutSize) * mLocalSize);
+		mPaddedShapeY = (int) (Math.ceil(1.	* pHeightInVoxels
+											/ cutSize) * mLocalSize);
+		mPaddedShapeZ = (int) (Math.ceil(1.	* pDepthInVoxels
+											/ cutSize) * mLocalSize);
 
 		mLocalShapeX = mPaddedShapeX / mLocalSize;
 		mLocalShapeY = mPaddedShapeY / mLocalSize;
@@ -61,7 +64,8 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]>
 		// System.out.println(mLocalShapeX);
 		// System.out.println(mPaddedShapeX);
 
-		final long lBinSize = mLocalShapeX * mLocalShapeY * mLocalShapeZ;
+		final long lBinSize = mLocalShapeX * mLocalShapeY
+								* mLocalShapeZ;
 		// the buffer containing the counts
 		mBufX = getDevice().createOutputFloatBuffer(lBinSize);
 		mBufY = getDevice().createOutputFloatBuffer(lBinSize);
@@ -72,9 +76,9 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]>
 
 	@Override
 	public void process(int pRenderLayerIndex,
-											long pWidthInVoxels,
-											long pHeightInVoxels,
-											long pDepthInVoxels)
+						long pWidthInVoxels,
+						long pHeightInVoxels,
+						long pDepthInVoxels)
 	{
 		if (!isActive())
 			return;
@@ -82,39 +86,41 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]>
 		ensureOpenCLInitialized();
 
 		if (mBufX == null || pWidthInVoxels != mCurrentWidthInVoxels
-				|| pHeightInVoxels != mCurrentHeightInVoxels
-				|| pDepthInVoxels != mCurrentDepthInVoxels)
+			|| pHeightInVoxels != mCurrentHeightInVoxels
+			|| pDepthInVoxels != mCurrentDepthInVoxels)
 		{
 			// System.out.println("setting up buffers");
-			initBuffers(pWidthInVoxels, pHeightInVoxels, pDepthInVoxels);
+			initBuffers(pWidthInVoxels,
+						pHeightInVoxels,
+						pDepthInVoxels);
 		}
 
 		mKernel.setArgs(getVolumeBuffers()[0],
-										mBufX,
-										mBufY,
-										mBufZ,
-										mBufSum,
-										mDownSample);
+						mBufX,
+						mBufY,
+						mBufZ,
+						mBufSum,
+						mDownSample);
 
 		final boolean isdebug = true;
 
 		final long start = System.nanoTime();
 
 		getDevice().run(mKernel,
-										mPaddedShapeX,
-										mPaddedShapeY,
-										mPaddedShapeZ,
-										mLocalSize,
-										mLocalSize,
-										mLocalSize);
+						mPaddedShapeX,
+						mPaddedShapeY,
+						mPaddedShapeZ,
+						mLocalSize,
+						mLocalSize,
+						mLocalSize);
 
 		if (isdebug)
 		{
 			getDevice().mCLQueue.finish();
 			final long end = System.nanoTime();
 			System.out.println("time to compute center of mass " + 1.e-6
-													* (end - start)
-													+ " ms");
+								* (end - start)
+								+ " ms");
 			// System.out.printf("time to compute center of mass: %.2f ms\n",
 			// 1000000 * (start - end));
 		}
@@ -134,16 +140,16 @@ public class OpenCLCenterMass extends OpenCLProcessor<float[]>
 			resZ += outZ.get(i);
 			resSum += outSum.get(i);
 		}
-		final float[] result = rescaleToLocalVoxelInterval(	resX / resSum,
-																												resY / resSum,
-																												resZ / resSum);
+		final float[] result = rescaleToLocalVoxelInterval(	resX	/ resSum,
+															resY	/ resSum,
+															resZ	/ resSum);
 
 		notifyListenersOfResult(result);
 	}
 
 	private float[] rescaleToLocalVoxelInterval(float x,
-																							float y,
-																							float z)
+												float y,
+												float z)
 	{
 		final float new_x = ((1.0f - (-1.0f)) * (x - 0) / (mCurrentWidthInVoxels - 0)) + -1.0f;
 		final float new_y = ((1.0f - (-1.0f)) * (y - 0) / (mCurrentHeightInVoxels - 0)) + -1.0f;

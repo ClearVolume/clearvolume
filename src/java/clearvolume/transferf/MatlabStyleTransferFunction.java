@@ -5,7 +5,7 @@ public class MatlabStyleTransferFunction
 	public static final TransferFunction1D get()
 	{
 		final float[] lColorArray = new float[]
-		{ 0.2078f,
+		{	0.2078f,
 			0.1647f,
 			0.5255f,
 			0.0000f,

@@ -32,7 +32,7 @@ public class TransferFunction1D implements TransferFunction
 	 * Adds a point in this 1D transfer function. e.g: addPointComponent(1.0)
 	 * 
 	 * @param pComponent
-	 *          red , blue, green or apha component
+	 *            red , blue, green or apha component
 	 */
 	public void addPointComponent(final double pComponent)
 	{
@@ -43,7 +43,7 @@ public class TransferFunction1D implements TransferFunction
 	 * Adds a point in this 1D transfer function. e.g: addPoint(1.0,0.5,0.3,1)
 	 * 
 	 * @param pRGBA
-	 *          single RGBA 4-tuple of double values
+	 *            single RGBA 4-tuple of double values
 	 */
 	public void addPoint(final double... pRGBA)
 	{
@@ -55,10 +55,11 @@ public class TransferFunction1D implements TransferFunction
 	}
 
 	/**
-	 * Adds a point in this 1D transfer function. e.g: addPoint(1.0f,0.5f,0.3f,1f)
+	 * Adds a point in this 1D transfer function. e.g:
+	 * addPoint(1.0f,0.5f,0.3f,1f)
 	 * 
 	 * @param pRGBA
-	 *          single RGBA 4-tuple of float values
+	 *            single RGBA 4-tuple of float values
 	 */
 	public void addPoint(final float... pRGBA)
 	{
@@ -99,9 +100,7 @@ public class TransferFunction1D implements TransferFunction
 	public String toString()
 	{
 		return String.format(	"TransferFunction1D [mTransferFunctionList=%s]",
-													mTransferFunctionList);
+								mTransferFunctionList);
 	}
-
-
 
 }

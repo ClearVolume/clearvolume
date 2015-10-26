@@ -19,8 +19,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import net.miginfocom.swing.MigLayout;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
+import net.miginfocom.swing.MigLayout;
 
 public class TimeShiftingSinkJPanel extends JPanel
 {
@@ -44,7 +44,7 @@ public class TimeShiftingSinkJPanel extends JPanel
 
 					final TimeShiftingSinkJPanel lMultiChannelTimeShiftingSinkPanel = new TimeShiftingSinkJPanel(pTimeShiftingSink);
 					lJFrame.getContentPane()
-									.add(lMultiChannelTimeShiftingSinkPanel);
+							.add(lMultiChannelTimeShiftingSinkPanel);
 					lJFrame.setVisible(true);
 				}
 				catch (final Exception e)
@@ -64,14 +64,14 @@ public class TimeShiftingSinkJPanel extends JPanel
 	 * Create the panel.
 	 * 
 	 * @param pTimeShiftingSink
-	 *          time shifting sink
+	 *            time shifting sink
 	 */
 	public TimeShiftingSinkJPanel(final TimeShiftingSink pTimeShiftingSink)
 	{
 		setBackground(Color.WHITE);
 		setLayout(new MigLayout("",
-														"[14.00,grow,fill][grow][grow,fill][grow,fill][grow][grow,fill]",
-														"[][26px:26px,center][grow]"));
+								"[14.00,grow,fill][grow][grow,fill][grow,fill][grow][grow,fill]",
+								"[][26px:26px,center][grow]"));
 
 		final JPanel lPastPresentPanel = new JPanel();
 		lPastPresentPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -80,11 +80,11 @@ public class TimeShiftingSinkJPanel extends JPanel
 		lPastPresentPanel.setLayout(new BorderLayout(0, 0));
 
 		mPastLabel = new JLabel(" " + pTimeShiftingSink.getHardMemoryHorizon()
-														+ " time points past");
+								+ " time points past");
 		lPastPresentPanel.add(mPastLabel, BorderLayout.WEST);
 
 		mPresentLabel = new JLabel("present: timepoint " + pTimeShiftingSink.getNumberOfTimepoints()
-																+ "   ");
+									+ "   ");
 		lPastPresentPanel.add(mPresentLabel, BorderLayout.EAST);
 
 		final JLayeredPane lJLayeredPane = new JLayeredPane();
@@ -128,8 +128,8 @@ public class TimeShiftingSinkJPanel extends JPanel
 		lPlayPausePanel.setBackground(Color.WHITE);
 		add(lPlayPausePanel, "cell 2 2 2 1,grow");
 		lPlayPausePanel.setLayout(new MigLayout("",
-																						"[grow,center][grow,center][grow,center][grow,center]",
-																						"[grow,fill]"));
+												"[grow,center][grow,center][grow,center][grow,center]",
+												"[grow,fill]"));
 
 		final String lIconsPath = "/clearvolume/volume/sink/timeshift/gui/icons/";
 		final ImageIcon lBeginningIcon = createScaledImageIcon(lIconsPath + "beginning.png");
@@ -204,7 +204,7 @@ public class TimeShiftingSinkJPanel extends JPanel
 				while (true)
 				{
 					mPresentLabel.setText("present: timepoint " + pTimeShiftingSink.getNumberOfTimepoints()
-																+ "   ");
+											+ "   ");
 
 					try
 					{
@@ -248,9 +248,9 @@ public class TimeShiftingSinkJPanel extends JPanel
 		final int lDownScaling = 16;
 		final ImageIcon lCreatedImageIcon = createImageIcon(path);
 		final Image lImage = lCreatedImageIcon.getImage()
-																					.getScaledInstance(	lCreatedImageIcon.getIconWidth() / lDownScaling,
-																															lCreatedImageIcon.getIconHeight() / lDownScaling,
-																															java.awt.Image.SCALE_SMOOTH);
+												.getScaledInstance(	lCreatedImageIcon.getIconWidth() / lDownScaling,
+																	lCreatedImageIcon.getIconHeight() / lDownScaling,
+																	java.awt.Image.SCALE_SMOOTH);
 
 		final ImageIcon lImageIcon = new ImageIcon(lImage);
 		return lImageIcon;

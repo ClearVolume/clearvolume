@@ -26,7 +26,7 @@ public class Sinusoid extends ToneBase implements Source
 	 * Constructs a sinusoid source with given frequency.
 	 * 
 	 * @param pFrequency
-	 *          frequency
+	 *            frequency
 	 */
 	public Sinusoid(float pFrequency)
 	{

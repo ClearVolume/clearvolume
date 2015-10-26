@@ -5,7 +5,7 @@ public class CoolWarmTransferFunction
 	public static final TransferFunction1D get()
 	{
 		final float[] lCoolWarmArray = new float[]
-		{ 0.23f,
+		{	0.23f,
 			0.30f,
 			0.75f,
 			0.00f,

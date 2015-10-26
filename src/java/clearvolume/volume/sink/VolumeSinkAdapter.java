@@ -3,7 +3,7 @@ package clearvolume.volume.sink;
 import clearvolume.volume.VolumeManager;
 
 public abstract class VolumeSinkAdapter	implements
-																				VolumeSinkInterface
+										VolumeSinkInterface
 {
 	VolumeManager mVolumeManager;
 

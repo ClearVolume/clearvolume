@@ -4,13 +4,13 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import clearvolume.renderer.opencl.OpenCLAvailability;
-import clearvolume.renderer.opencl.OpenCLDevice;
-
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage3D;
 import com.nativelibs4java.opencl.CLImageFormat;
 import com.nativelibs4java.opencl.CLKernel;
+
+import clearvolume.renderer.opencl.OpenCLAvailability;
+import clearvolume.renderer.opencl.OpenCLDevice;
 
 public class OpenCLTests
 {
@@ -35,10 +35,10 @@ public class OpenCLTests
 			final CLBuffer<Integer> clBufOut = dev.createOutputIntBuffer(N);
 
 			final CLImage3D img = dev.createGenericImage3D(	N,
-																											N,
-																											N,
-																											CLImageFormat.ChannelOrder.R,
-																											CLImageFormat.ChannelDataType.SignedInt16);
+															N,
+															N,
+															CLImageFormat.ChannelOrder.R,
+															CLImageFormat.ChannelDataType.SignedInt16);
 		}
 		catch (final Throwable e)
 		{
@@ -62,7 +62,7 @@ public class OpenCLTests
 			lOpenCLDevice.printInfo();
 
 			final CLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
-																															"test_char");
+																	"test_char");
 		}
 		catch (final Throwable e)
 		{
@@ -86,7 +86,7 @@ public class OpenCLTests
 			final int N = 100;
 
 			final CLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
-																															"test_float");
+																	"test_float");
 
 			final CLBuffer<Float> clBufIn = lOpenCLDevice.createOutputFloatBuffer(N);
 

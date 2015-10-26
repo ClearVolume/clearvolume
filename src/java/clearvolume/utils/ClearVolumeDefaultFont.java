@@ -18,18 +18,19 @@ public class ClearVolumeDefaultFont
 		try
 		{
 			sFont = Font.createFont(Font.TRUETYPE_FONT,
-															ClearVolumeDefaultFont.class.getResourceAsStream(cFontPath))
-									.deriveFont(Font.PLAIN, pSize);
+									ClearVolumeDefaultFont.class.getResourceAsStream(cFontPath))
+						.deriveFont(Font.PLAIN, pSize);
 		}
 		catch (final FontFormatException | IOException e)
 		{
-			// use a fallback font in case the original couldn't be found or there has
+			// use a fallback font in case the original couldn't be found or
+			// there has
 			// been a problem
 			// with the font format
 			System.err.println("Could not use \"" + cFontPath
-													+ "\" ("
-													+ e.toString()
-													+ "), falling back to Sans.");
+								+ "\" ("
+								+ e.toString()
+								+ "), falling back to Sans.");
 			sFont = new Font("Sans", Font.PLAIN, 12);
 		}
 		return sFont;

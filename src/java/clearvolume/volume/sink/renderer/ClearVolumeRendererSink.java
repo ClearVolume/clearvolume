@@ -18,8 +18,8 @@ import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
 
 public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
-																															RelaySinkInterface,
-																															ClearVolumeCloseable
+																RelaySinkInterface,
+																ClearVolumeCloseable
 {
 
 	private volatile ClearVolumeRendererInterface mClearVolumeRendererInterface;
@@ -36,9 +36,9 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 	private final TreeMap<Integer, String> mSeenChannelIdToNameMap = new TreeMap<Integer, String>();
 
 	public ClearVolumeRendererSink(	ClearVolumeRendererInterface pClearVolumeRendererInterface,
-																	VolumeManager pVolumeManager,
-																	long pWaitForCopyTimeout,
-																	TimeUnit pTimeUnit)
+									VolumeManager pVolumeManager,
+									long pWaitForCopyTimeout,
+									TimeUnit pTimeUnit)
 	{
 		super();
 		mClearVolumeRendererInterface = pClearVolumeRendererInterface;
@@ -49,13 +49,13 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 	}
 
 	public ClearVolumeRendererSink(	final String pRequestedWindowTitle,
-																	final int pRequestedWindowWidth,
-																	final int pRequestedWindowHeight,
-																	final NativeTypeEnum pNativeTypeEnum,
-																	final int pNumberOfLayers,
-																	final long pWaitForCopyTimeout,
-																	final TimeUnit pTimeUnit,
-																	final int pMaxNumberOfAvailableVolumes)
+									final int pRequestedWindowWidth,
+									final int pRequestedWindowHeight,
+									final NativeTypeEnum pNativeTypeEnum,
+									final int pNumberOfLayers,
+									final long pWaitForCopyTimeout,
+									final TimeUnit pTimeUnit,
+									final int pMaxNumberOfAvailableVolumes)
 	{
 		super();
 		mRequestedWindowTitle = pRequestedWindowTitle;
@@ -79,22 +79,22 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 
 		final NativeTypeEnum lNativeType = pVolume.getNativeType();
 		final int lNumberOfChannelsSeen = mSeenChannelIdToNameMap.keySet()
-																															.size();
+																	.size();
 		final int lNumberOfLayersNeeded = lNumberOfChannelsSeen;
 
 		if (mClearVolumeRendererInterface == null || mClearVolumeRendererInterface.getNumberOfRenderLayers() < lNumberOfLayersNeeded
-				|| mClearVolumeRendererInterface.getNativeType() != lNativeType)
+			|| mClearVolumeRendererInterface.getNativeType() != lNativeType)
 		{
 			System.out.println("Creating new Renderer!");
-			System.out.format("Volume: nb channels seen: %d \n",
-												lNumberOfChannelsSeen);
+			System.out.format(	"Volume: nb channels seen: %d \n",
+								lNumberOfChannelsSeen);
 			System.out.format("Volume: type: %s \n", lNativeType);
-			System.out.format("Volume: bytes per voxel: %d \n",
-												Size.of(lNativeType));
-			System.out.format("Renderer: nb of layers: %d \n",
-												mClearVolumeRendererInterface.getNumberOfRenderLayers());
-			System.out.format("Renderer: type: %s \n",
-												mClearVolumeRendererInterface.getNativeType());
+			System.out.format(	"Volume: bytes per voxel: %d \n",
+								Size.of(lNativeType));
+			System.out.format(	"Renderer: nb of layers: %d \n",
+								mClearVolumeRendererInterface.getNumberOfRenderLayers());
+			System.out.format(	"Renderer: type: %s \n",
+								mClearVolumeRendererInterface.getNativeType());
 			createRenderer(lNativeType, lNumberOfLayersNeeded);
 		}
 
@@ -111,13 +111,13 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 			mClearVolumeRendererInterface.setTransferFunction(lTransferFunction);
 		}
 
-		mClearVolumeRendererInterface.setVolumeDataBuffer(lRenderLayer,
-																											pVolume);
+		mClearVolumeRendererInterface.setVolumeDataBuffer(	lRenderLayer,
+															pVolume);
 
 		mClearVolumeRendererInterface.requestDisplay();
 
 		mClearVolumeRendererInterface.waitToFinishAllDataBufferCopy(mWaitForCopyTimeout,
-																																mTimeUnit);
+																	mTimeUnit);
 
 		if (getRelaySink() != null)
 			getRelaySink().sendVolume(pVolume);
@@ -127,7 +127,7 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 	}
 
 	private void createRenderer(NativeTypeEnum pNativeTypeEnum,
-															int pNumberOfLayers)
+								int pNumberOfLayers)
 	{
 		mSwitchingRenderers = true;
 		try
@@ -140,13 +140,13 @@ public class ClearVolumeRendererSink extends RelaySinkAdapter	implements
 		}
 
 		mClearVolumeRendererInterface = ClearVolumeRendererFactory.newBestRenderer(	mRequestedWindowTitle,
-																																								mRequestedWindowWidth,
-																																								mRequestedWindowHeight,
-																																								pNativeTypeEnum,
-																																								mRequestedWindowWidth,
-																																								mRequestedWindowHeight,
-																																								pNumberOfLayers,
-																																								false);
+																					mRequestedWindowWidth,
+																					mRequestedWindowHeight,
+																					pNativeTypeEnum,
+																					mRequestedWindowWidth,
+																					mRequestedWindowHeight,
+																					pNumberOfLayers,
+																					false);
 		mClearVolumeRendererInterface.setVisible(true);
 
 		try

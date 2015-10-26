@@ -15,7 +15,7 @@ public interface Filter extends Source
 	 * Sets the filetered source .
 	 * 
 	 * @param pSource
-	 *          filtered source
+	 *            filtered source
 	 */
 	public void setSource(Source pSource);
 

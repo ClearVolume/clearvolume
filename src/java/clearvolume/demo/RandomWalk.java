@@ -1,6 +1,7 @@
 package clearvolume.demo;
 
 import static java.lang.Math.random;
+
 import clearvolume.renderer.processors.ProcessorBase;
 
 public class RandomWalk extends ProcessorBase<float[]>
@@ -18,9 +19,9 @@ public class RandomWalk extends ProcessorBase<float[]>
 
 	@Override
 	public void process(int pRenderLayerIndex,
-											long pWidthInVoxels,
-											long pHeightInVoxels,
-											long pDepthInVoxels)
+						long pWidthInVoxels,
+						long pHeightInVoxels,
+						long pDepthInVoxels)
 	{
 		if (!isActive())
 			return;

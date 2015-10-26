@@ -23,8 +23,8 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 	private ByteBuffer mByteBuffer;
 
 	public ClearVolumeTCPServerSinkRunnable(ClearVolumeTCPServerSink pClearVolumeTCPServerSink,
-																					ServerSocketChannel pSocketChannel,
-																					SourceToSinkBufferedAdapter pVolumeSource)
+											ServerSocketChannel pSocketChannel,
+											SourceToSinkBufferedAdapter pVolumeSource)
 	{
 		mClearVolumeTCPServerSink = pClearVolumeTCPServerSink;
 		mServerSocketChannel = pSocketChannel;
@@ -46,27 +46,29 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 				final SocketChannel lSocketChannel = mServerSocketChannel.accept();
 				// System.out.println("connection accepted");
 				lSocketChannel.setOption(	StandardSocketOptions.SO_SNDBUF,
-																	ClearVolumeTCPClient.cSocketBufferLength);
+											ClearVolumeTCPClient.cSocketBufferLength);
 
 				try
 				{
 					if (lSocketChannel.isOpen() && lSocketChannel.isConnected()
-							&& mClearVolumeTCPServerSink.getLastVolumeSeen() != null)
+						&& mClearVolumeTCPServerSink.getLastVolumeSeen() != null)
 					{
 						// System.out.println("sending last seen volume: " +
 						// mClearVolumeTCPServerSink.getLastVolumeSeen());
 						sendVolumeToClient(	lSocketChannel,
-																mClearVolumeTCPServerSink.getLastVolumeSeen(),
-																false);
+											mClearVolumeTCPServerSink.getLastVolumeSeen(),
+											false);
 					}
 
 					while (lSocketChannel.isOpen() && lSocketChannel.isConnected()
-									&& !mStopSignal)
+							&& !mStopSignal)
 					{
 						final Volume lVolumeToSend = mVolumeSource.requestVolumeAndWait(10,
-																																						TimeUnit.MILLISECONDS);
+																						TimeUnit.MILLISECONDS);
 						if (lVolumeToSend != null)
-							sendVolumeToClient(lSocketChannel, lVolumeToSend, true);
+							sendVolumeToClient(	lSocketChannel,
+												lVolumeToSend,
+												true);
 
 					}
 				}
@@ -96,11 +98,11 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 	}
 
 	private void sendVolumeToClient(SocketChannel lSocketChannel,
-																	Volume lVolumeToSend,
-																	boolean pReleaseOrForward) throws IOException
+									Volume lVolumeToSend,
+									boolean pReleaseOrForward) throws IOException
 	{
 		mByteBuffer = ClearVolumeSerialization.serialize(	lVolumeToSend,
-																											mByteBuffer);
+															mByteBuffer);
 		mByteBuffer.rewind();
 		if (lSocketChannel.isConnected() && lSocketChannel.isOpen())
 		{
@@ -113,7 +115,7 @@ public class ClearVolumeTCPServerSinkRunnable implements Runnable
 					lVolumeToSend.makeAvailableToManager();
 				else
 					mClearVolumeTCPServerSink.getRelaySink()
-																		.sendVolume(lVolumeToSend);
+												.sendVolume(lVolumeToSend);
 			}
 		}
 	}

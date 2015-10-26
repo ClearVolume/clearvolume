@@ -15,8 +15,8 @@ public abstract class ToneBase extends SourceBase implements Source
 	private volatile float mFrequencyInHertz;
 
 	/**
-	 * Default constructor with a fundamental frequency of 440Hz and an amplitude.
-	 * of
+	 * Default constructor with a fundamental frequency of 440Hz and an
+	 * amplitude. of
 	 */
 	public ToneBase()
 	{
@@ -27,7 +27,7 @@ public abstract class ToneBase extends SourceBase implements Source
 	 * Constructor taking the fundamental frequency as parameter.
 	 * 
 	 * @param pFrequencyInHertz
-	 *          frequency in Hz.
+	 *            frequency in Hz.
 	 */
 	public ToneBase(float pFrequencyInHertz)
 	{
@@ -39,9 +39,9 @@ public abstract class ToneBase extends SourceBase implements Source
 	 * Constructor taking the fundamental frequency and amplitude as parameters.
 	 * 
 	 * @param pFrequencyInHertz
-	 *          frequency in Hz.
+	 *            frequency in Hz.
 	 * @param pAmplitude
-	 *          amplitude.
+	 *            amplitude.
 	 */
 	public ToneBase(float pFrequencyInHertz, float pAmplitude)
 	{
@@ -72,7 +72,7 @@ public abstract class ToneBase extends SourceBase implements Source
 	 * Sets the frequency in Hz.
 	 * 
 	 * @param pFrequencyInHertz
-	 *          frequency in Hz.
+	 *            frequency in Hz.
 	 */
 	public void setFrequencyInHertz(float pFrequencyInHertz)
 	{

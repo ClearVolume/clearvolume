@@ -53,18 +53,18 @@ public class SwitchableSoftReferenceManager<T>
 		};
 
 		Thread lCleanUpThread = new Thread(	lRunnable,
-																				"SwitchableSoftReferenceCleanUpThread");
+											"SwitchableSoftReferenceCleanUpThread");
 		lCleanUpThread.setDaemon(true);
 		lCleanUpThread.setPriority(Thread.MIN_PRIORITY);
 		lCleanUpThread.start();
 	}
 
 	public SwitchableSoftReference<T> wrapReference(T pReferent,
-																									Runnable pCleaningRunnable)
+													Runnable pCleaningRunnable)
 	{
-		return new SwitchableSoftReference<T>(pReferent,
-																					mReferenceQueue,
-																					pCleaningRunnable);
+		return new SwitchableSoftReference<T>(	pReferent,
+												mReferenceQueue,
+												pCleaningRunnable);
 	}
 
 }

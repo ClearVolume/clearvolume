@@ -51,7 +51,7 @@ public class ClearVolumeOverlayDemos
 			catch (final Exception e)
 			{
 				System.out.println("Could not launch " + argv[0]
-														+ " because ...");
+									+ " because ...");
 				e.printStackTrace();
 
 				return;
@@ -71,18 +71,18 @@ public class ClearVolumeOverlayDemos
 	}
 
 	@Test
-	public void demoDriftOverlay() throws InterruptedException,
-																IOException
+	public void demoDriftOverlay()	throws InterruptedException,
+									IOException
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
-																																																						512,
-																																																						512,
-																																																						NativeTypeEnum.UnsignedByte,
-																																																						512,
-																																																						512,
-																																																						1,
-																																																						false);
+																												512,
+																												512,
+																												NativeTypeEnum.UnsignedByte,
+																												512,
+																												512,
+																												1,
+																												false);
 		lClearVolumeRenderer.addOverlay(new PathOverlay());
 
 		final RandomWalk RandomWalk = new RandomWalk();
@@ -100,17 +100,17 @@ public class ClearVolumeOverlayDemos
 		final int lResolutionZ = lResolutionX;
 
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-																							* lResolutionZ];
+													* lResolutionZ];
 
 		for (int z = 0; z < lResolutionZ; z++)
 			for (int y = 0; y < lResolutionY; y++)
 				for (int x = 0; x < lResolutionX; x++)
 				{
 					final int lIndex = x + lResolutionX
-															* y
-															+ lResolutionX
-															* lResolutionY
-															* z;
+										* y
+										+ lResolutionX
+										* lResolutionY
+										* z;
 					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
 					if (lCharValue < 12)
 						lCharValue = 0;
@@ -123,20 +123,20 @@ public class ClearVolumeOverlayDemos
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																							ByteBuffer.wrap(lVolumeDataArray),
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+													ByteBuffer.wrap(lVolumeDataArray),
+													lResolutionX,
+													lResolutionY,
+													lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
 		while (lClearVolumeRenderer.isShowing())
 		{
 			Thread.sleep(250);
 			lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																								ByteBuffer.wrap(lVolumeDataArray),
-																								lResolutionX,
-																								lResolutionY,
-																								lResolutionZ);
+														ByteBuffer.wrap(lVolumeDataArray),
+														lResolutionX,
+														lResolutionY,
+														lResolutionZ);
 			lClearVolumeRenderer.requestDisplay();
 		}
 
@@ -144,18 +144,18 @@ public class ClearVolumeOverlayDemos
 	}
 
 	@Test
-	public void demoGraphOverlay() throws InterruptedException,
-																IOException
+	public void demoGraphOverlay()	throws InterruptedException,
+									IOException
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					512,
-																																																					512,
-																																																					NativeTypeEnum.UnsignedByte,
-																																																					512,
-																																																					512,
-																																																					1,
-																																																					false);
+																												512,
+																												512,
+																												NativeTypeEnum.UnsignedByte,
+																												512,
+																												512,
+																												1,
+																												false);
 
 		final GraphOverlay lGraphOverlay = new GraphOverlay(256);
 		lClearVolumeRenderer.addOverlay(lGraphOverlay);
@@ -168,17 +168,17 @@ public class ClearVolumeOverlayDemos
 		final int lResolutionZ = lResolutionX;
 
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-																							* lResolutionZ];
+													* lResolutionZ];
 
 		for (int z = 0; z < lResolutionZ; z++)
 			for (int y = 0; y < lResolutionY; y++)
 				for (int x = 0; x < lResolutionX; x++)
 				{
 					final int lIndex = x + lResolutionX
-															* y
-															+ lResolutionX
-															* lResolutionY
-															* z;
+										* y
+										+ lResolutionX
+										* lResolutionY
+										* z;
 					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
 					if (lCharValue < 12)
 						lCharValue = 0;
@@ -186,10 +186,10 @@ public class ClearVolumeOverlayDemos
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																							ByteBuffer.wrap(lVolumeDataArray),
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+													ByteBuffer.wrap(lVolumeDataArray),
+													lResolutionX,
+													lResolutionY,
+													lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
 		double lTrend = 0;
@@ -206,16 +206,16 @@ public class ClearVolumeOverlayDemos
 
 	@Test
 	public void demoPathOverlay3D()	throws InterruptedException,
-																	IOException
+									IOException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					1024,
-																																																					1024,
-																																																					NativeTypeEnum.UnsignedByte,
-																																																					512,
-																																																					512,
-																																																					1,
-																																																					false);
+																												1024,
+																												1024,
+																												NativeTypeEnum.UnsignedByte,
+																												512,
+																												512,
+																												1,
+																												false);
 
 		final PathOverlay lPathOverlay = new PathOverlay();
 		lClearVolumeRenderer.addOverlay(lPathOverlay);
@@ -228,17 +228,17 @@ public class ClearVolumeOverlayDemos
 		final int lResolutionZ = lResolutionX;
 
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-																							* lResolutionZ];
+													* lResolutionZ];
 
 		for (int z = 0; z < lResolutionZ; z++)
 			for (int y = 0; y < lResolutionY; y++)
 				for (int x = 0; x < lResolutionX; x++)
 				{
 					final int lIndex = x + lResolutionX
-															* y
-															+ lResolutionX
-															* lResolutionY
-															* z;
+										* y
+										+ lResolutionX
+										* lResolutionY
+										* z;
 					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
 					if (lCharValue < 12)
 						lCharValue = 0;
@@ -246,10 +246,10 @@ public class ClearVolumeOverlayDemos
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																							ByteBuffer.wrap(lVolumeDataArray),
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+													ByteBuffer.wrap(lVolumeDataArray),
+													lResolutionX,
+													lResolutionY,
+													lResolutionZ);
 		lClearVolumeRenderer.requestDisplay();
 
 		float x = 0, y = 0, z = 0;
@@ -273,13 +273,13 @@ public class ClearVolumeOverlayDemos
 	{
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",
-																																																					512,
-																																																					512,
-																																																					NativeTypeEnum.UnsignedByte,
-																																																					512,
-																																																					512,
-																																																					1,
-																																																					false);
+																												512,
+																												512,
+																												NativeTypeEnum.UnsignedByte,
+																												512,
+																												512,
+																												1,
+																												false);
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
@@ -303,17 +303,17 @@ public class ClearVolumeOverlayDemos
 		final int lResolutionZ = lResolutionX;
 
 		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-																							* lResolutionZ];
+													* lResolutionZ];
 
 		for (int z = 0; z < lResolutionZ; z++)
 			for (int y = 0; y < lResolutionY; y++)
 				for (int x = 0; x < lResolutionX; x++)
 				{
 					final int lIndex = x + lResolutionX
-															* y
-															+ lResolutionX
-															* lResolutionY
-															* z;
+										* y
+										+ lResolutionX
+										* lResolutionY
+										* z;
 					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z) / 2);
 					if (lCharValue < 12)
 						lCharValue = 0;
@@ -321,10 +321,10 @@ public class ClearVolumeOverlayDemos
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																							ByteBuffer.wrap(lVolumeDataArray),
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+													ByteBuffer.wrap(lVolumeDataArray),
+													lResolutionX,
+													lResolutionY,
+													lResolutionZ);
 
 		while (lClearVolumeRenderer.isShowing())
 		{

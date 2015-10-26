@@ -18,10 +18,10 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-import net.miginfocom.swing.MigLayout;
 import clearvolume.network.client.ClearVolumeTCPClientHelper;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
+import net.miginfocom.swing.MigLayout;
 
 public class ConnectionPanel extends JPanel
 {
@@ -43,11 +43,12 @@ public class ConnectionPanel extends JPanel
 
 	private final VolumeCaptureListener mVolumeCaptureListener;
 
-	private final Image appicon; // if set, this icon will set as application icon
-																// (to prevent jogl icon steal!)
+	private final Image appicon; // if set, this icon will set as application
+									// icon
+									// (to prevent jogl icon steal!)
 
 	public ConnectionPanel(	final VolumeCaptureListener pVolumeCaptureListener,
-													final Image appicon)
+							final Image appicon)
 	{
 		this.appicon = appicon;
 
@@ -55,8 +56,8 @@ public class ConnectionPanel extends JPanel
 		setBackground(Color.WHITE);
 		final ConnectionPanel lThis = this;
 		setLayout(new MigLayout("",
-														"[435.00px,grow][435.00px]",
-														"[16px][16px][29px][50.00px:n,grow][10px:n,grow]"));
+								"[435.00px,grow][435.00px]",
+								"[16px][16px][29px][50.00px:n,grow][10px:n,grow]"));
 		final JLabel lblNewLabel = new JLabel("Enter IP address or hostname of ClearVolume server:");
 		add(lblNewLabel, "cell 0 0 2 1,alignx left,aligny top");
 
@@ -87,7 +88,9 @@ public class ConnectionPanel extends JPanel
 
 		final JButton lAdvancedButton = new JButton("advanced...");
 		lAdvancedButton.setForeground(Color.GRAY);
-		lAdvancedButton.setFont(new Font("Lucida Grande", Font.ITALIC, 13));
+		lAdvancedButton.setFont(new Font(	"Lucida Grande",
+											Font.ITALIC,
+											13));
 		lAdvancedButton.setVerticalAlignment(SwingConstants.TOP);
 
 		lAdvancedButton.setBorder(null);
@@ -145,9 +148,9 @@ public class ConnectionPanel extends JPanel
 		mTimeShiftAndMultiChannelCheckBox = new JCheckBox("");
 		mTimeShiftAndMultiChannelCheckBox.setAlignmentX(Component.CENTER_ALIGNMENT);
 		mTimeShiftAndMultiChannelCheckBox.setMinimumSize(new Dimension(	30,
-																																		30));
+																		30));
 		mTimeShiftAndMultiChannelCheckBox.setMaximumSize(new Dimension(	30,
-																																		30));
+																		30));
 		mTimeShiftAndMultiChannelCheckBox.setBounds(382, 29, 28, 20);
 		lOptionsPanel.add(mTimeShiftAndMultiChannelCheckBox);
 
@@ -204,7 +207,7 @@ public class ConnectionPanel extends JPanel
 
 			@Override
 			public void reportError(final Throwable pE,
-															final String pErrorMessage)
+									final String pErrorMessage)
 			{
 				SwingUtilities.invokeLater(new Runnable()
 				{
@@ -212,8 +215,9 @@ public class ConnectionPanel extends JPanel
 					@Override
 					public void run()
 					{
-						mErrorTextArea.setText(pE.getClass().getName() + (pErrorMessage == null	? ""
-																																										: ": " + pErrorMessage));
+						mErrorTextArea.setText(pE.getClass()
+													.getName() + (pErrorMessage == null	? ""
+																						: ": " + pErrorMessage));
 						lThis.revalidate();
 						lThis.repaint();
 					};
@@ -241,26 +245,26 @@ public class ConnectionPanel extends JPanel
 				public void run()
 				{
 					mClearVolumeTCPClientHelper.startClient(mVolumeCaptureListener,
-																									lServerAddress,
-																									lTCPPort,
-																									lWindowSize,
-																									lBytesPerVoxel,
-																									lNumberOfLayers,
-																									lTimeShiftMultiChannel,
-																									lChannelFilter,
-																									appicon);
+															lServerAddress,
+															lTCPPort,
+															lWindowSize,
+															lBytesPerVoxel,
+															lNumberOfLayers,
+															lTimeShiftMultiChannel,
+															lChannelFilter,
+															appicon);
 				}
 			};
 
 			final Thread lStartClientThread = new Thread(	lStartClientRunnable,
-																										"StartClientThread" + lServerAddressTextField.getText());
+															"StartClientThread" + lServerAddressTextField.getText());
 			lStartClientThread.setDaemon(true);
 			lStartClientThread.start();
 		}
 		catch (final Throwable e)
 		{
 			mClearVolumeTCPClientHelper.reportErrorWithPopUp(	e,
-																												e.getLocalizedMessage());
+																e.getLocalizedMessage());
 			e.printStackTrace();
 		}
 	}

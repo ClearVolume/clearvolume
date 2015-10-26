@@ -26,19 +26,19 @@ public class FilterSinkDemo
 	public void demo() throws InterruptedException
 	{
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"TimeShift Demo",
-																																																					512,
-																																																					512,
-																																																					NativeTypeEnum.UnsignedByte,
-																																																					512,
-																																																					512,
-																																																					2,
-																																																					false);
+																												512,
+																												512,
+																												NativeTypeEnum.UnsignedByte,
+																												512,
+																												512,
+																												2,
+																												false);
 		lClearVolumeRenderer.setVisible(true);
 
 		final ClearVolumeRendererSink lClearVolumeRendererSink = new ClearVolumeRendererSink(	lClearVolumeRenderer,
-																																													lClearVolumeRenderer.createCompatibleVolumeManager(200),
-																																													100,
-																																													TimeUnit.MILLISECONDS);
+																								lClearVolumeRenderer.createCompatibleVolumeManager(200),
+																								100,
+																								TimeUnit.MILLISECONDS);
 		lClearVolumeRendererSink.setRelaySink(new NullVolumeSink());
 
 		final ChannelFilterSink lChannelFilterSink = new ChannelFilterSink();
@@ -57,12 +57,12 @@ public class FilterSinkDemo
 			final int lChannel = i % lNumberOfChannels;
 
 			final Volume lVolume = lManager.requestAndWaitForVolume(1,
-																															TimeUnit.MILLISECONDS,
-																															NativeTypeEnum.UnsignedByte,
-																															1,
-																															cWidth,
-																															cHeight,
-																															cDepth);
+																	TimeUnit.MILLISECONDS,
+																	NativeTypeEnum.UnsignedByte,
+																	1,
+																	cWidth,
+																	cHeight,
+																	cDepth);
 
 			final ByteBuffer lVolumeData = lVolume.getDataBuffer();
 
@@ -78,7 +78,11 @@ public class FilterSinkDemo
 				for (int y = 0; y < cHeight / (1 + lChannel); y++)
 					for (int x = 0; x < cWidth / (1 + lChannel); x++)
 					{
-						final int lIndex = x + cWidth * y + cWidth * cHeight * z;
+						final int lIndex = x + cWidth
+											* y
+											+ cWidth
+											* cHeight
+											* z;
 
 						final byte lByteValue = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 

@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.jogamp.opengl.GL;
+
 import cleargl.ClearGeometryObject;
 import cleargl.ClearTextRenderer;
 import cleargl.GLError;
@@ -19,6 +21,7 @@ import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
 import clearvolume.renderer.panels.HasGUIPanel;
@@ -26,17 +29,17 @@ import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.utils.ClearVolumeDefaultFont;
 
-import com.jogamp.opengl.GL;
-
 public abstract class BarGraphOverlay extends OverlayBase	implements
-																													Overlay2D,
-																													SingleKeyToggable,
-																													ProcessorResultListener<FloatBuffer>,
-																													AutoCloseable,
-																													HasGUIPanel
+															Overlay2D,
+															SingleKeyToggable,
+															ProcessorResultListener<FloatBuffer>,
+															AutoCloseable,
+															HasGUIPanel
 {
 
-	private static final Color cTextColor = new Color(0.2f, 0.6f, 1.0f);
+	private static final Color cTextColor = new Color(	0.2f,
+														0.6f,
+														1.0f);
 
 	private GLProgram mGLProgram;
 
@@ -57,12 +60,10 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 	private volatile float mOffsetX = -1, mOffsetY = 2f / 3;
 	private volatile float mScaleX = 1, mScaleY = 1f / 3;
 	private volatile float mMin, mMax;
-	
+
 	private volatile float mRangeMin = 0, mRangeMax = 1;
 
 	private volatile boolean mLogarithm = false;
-
-
 
 	public BarGraphOverlay()
 	{
@@ -112,7 +113,7 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 
 	@Override
 	public void notifyResult(	ProcessorInterface<FloatBuffer> pSource,
-														FloatBuffer pResult)
+								FloatBuffer pResult)
 	{
 		setCounts(pResult);
 	}
@@ -134,7 +135,7 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 			{
 
 				final float newVal = (float) (mLogarithm ? log1p(pCounts.get(i))
-																								: pCounts.get(i));
+														: pCounts.get(i));
 				mBarHeightData.put(i, newVal);
 				maxVal = Math.max(maxVal, newVal);
 			}
@@ -173,15 +174,15 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 
 	@Override
 	public void init(	GL pGL,
-										DisplayRequestInterface pDisplayRequestInterface)
+						DisplayRequestInterface pDisplayRequestInterface)
 	{
 		mReentrantLock.lock();
 		try
 		{
 			mGLProgram = GLProgram.buildProgram(pGL,
-																					BarGraphOverlay.class,
-																					"shaders/bargraph_vert.glsl",
-																					"shaders/bargraph_frag.glsl");
+												BarGraphOverlay.class,
+												"shaders/bargraph_vert.glsl",
+												"shaders/bargraph_frag.glsl");
 
 			GLError.printGLErrors(pGL, "AFTER BAR GRAPH OVERLAY INIT");
 
@@ -212,14 +213,16 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 			mClearGeometryObjectBars.close();
 
 		mClearGeometryObjectBars = new ClearGeometryObject(	mGLProgram,
-																												3,
-																												GL.GL_TRIANGLES);
+															3,
+															GL.GL_TRIANGLES);
 		mClearGeometryObjectBars.setDynamic(true);
 
-		mVerticesFloatArray = new GLFloatArray(lNumberOfPointsToDraw, 3);
+		mVerticesFloatArray = new GLFloatArray(	lNumberOfPointsToDraw,
+												3);
 		mNormalArray = new GLFloatArray(lNumberOfPointsToDraw, 3);
 		mIndexIntArray = new GLIntArray(lNumberOfPointsToDraw, 1);
-		mTexCoordFloatArray = new GLFloatArray(lNumberOfPointsToDraw, 2);
+		mTexCoordFloatArray = new GLFloatArray(	lNumberOfPointsToDraw,
+												2);
 
 		mVerticesFloatArray.fillZeros();
 		mNormalArray.fillZeros();
@@ -244,10 +247,11 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 	}
 
 	@Override
-	public void render2D(	GL pGL,
-												int pWidth,
-												int pHeight,
-												GLMatrix pProjectionMatrix)
+	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+							GL pGL,
+							int pWidth,
+							int pHeight,
+							GLMatrix pProjectionMatrix)
 	{
 		if (isDisplayed())
 		{
@@ -278,33 +282,39 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 						final float x = transformX(i * lStepX);
 						final float y = transformY(lNormalizedValue);
 
-						mVerticesFloatArray.add(x - relBarWidth * lStepX,
-																		transformY(0),
-																		-10);
+						mVerticesFloatArray.add(x		- relBarWidth
+														* lStepX,
+												transformY(0),
+												-10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i);
 
-						mVerticesFloatArray.add(x - relBarWidth * lStepX, y, -10);
+						mVerticesFloatArray.add(x - relBarWidth
+												* lStepX, y, -10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i + 1);
 
-						mVerticesFloatArray.add(x + relBarWidth * lStepX,
-																		transformY(0),
-																		-10);
+						mVerticesFloatArray.add(x		+ relBarWidth
+														* lStepX,
+												transformY(0),
+												-10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i + 2);
 
-						mVerticesFloatArray.add(x + relBarWidth * lStepX,
-																		transformY(0),
-																		-10);
+						mVerticesFloatArray.add(x		+ relBarWidth
+														* lStepX,
+												transformY(0),
+												-10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i + 3);
 
-						mVerticesFloatArray.add(x - relBarWidth * lStepX, y, -10);
+						mVerticesFloatArray.add(x - relBarWidth
+												* lStepX, y, -10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i + 4);
 
-						mVerticesFloatArray.add(x + relBarWidth * lStepX, y, -10);
+						mVerticesFloatArray.add(x + relBarWidth
+												* lStepX, y, -10);
 						mTexCoordFloatArray.add(x, 1.f);
 						mIndexIntArray.add(6 * i + 5);
 					}
@@ -314,42 +324,43 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 					mIndexIntArray.padZeros();
 
 					mClearGeometryObjectBars.updateVertices(mVerticesFloatArray.getFloatBuffer());
-					GLError.printGLErrors(pGL,
-																"AFTER mClearGeometryObject.updateVertices");
+					GLError.printGLErrors(	pGL,
+											"AFTER mClearGeometryObject.updateVertices");
 					mClearGeometryObjectBars.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
-					GLError.printGLErrors(pGL,
-																"AFTER mClearGeometryObject.updateTextureCoords");
+					GLError.printGLErrors(	pGL,
+											"AFTER mClearGeometryObject.updateTextureCoords");
 					mClearGeometryObjectBars.updateIndices(mIndexIntArray.getIntBuffer());
-					GLError.printGLErrors(pGL,
-																"AFTER mClearGeometryObject.updateIndices");
+					GLError.printGLErrors(	pGL,
+											"AFTER mClearGeometryObject.updateIndices");
 
 					mClearGeometryObjectBars.setProjection(pProjectionMatrix);
 
 					pGL.glDisable(GL.GL_DEPTH_TEST);
 					pGL.glEnable(GL.GL_BLEND);
-					pGL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+					pGL.glBlendFunc(GL.GL_SRC_ALPHA,
+									GL.GL_ONE_MINUS_SRC_ALPHA);
 					pGL.glBlendEquation(GL.GL_FUNC_ADD);/**/
 
-					mClearGeometryObjectBars.draw(0,
-																				mBarHeightData.capacity() * 6);
+					mClearGeometryObjectBars.draw(	0,
+													mBarHeightData.capacity() * 6);
 
 					final Font lFont = ClearVolumeDefaultFont.getFontPlain(12);
 
-					mClearTextRenderer.drawTextAtPosition(String.format("%.4f",
-																															mRangeMin),
-																								10,
-																								(int) ((5.0 / 6) * pHeight) - 12,
-																								lFont,
-																								cTextColor,
-																								false);
+					mClearTextRenderer.drawTextAtPosition(	String.format(	"%.4f",
+																			mRangeMin),
+															10,
+															(int) ((5.0 / 6) * pHeight) - 12,
+															lFont,
+															cTextColor,
+															false);
 
-					mClearTextRenderer.drawTextAtPosition(String.format("%.4f",
-																															mRangeMax),
-																								(pWidth / 2) - 5 * 12,
-																								(int) ((5.0 / 6) * pHeight) - 12,
-																								lFont,
-																								cTextColor,
-																								false);
+					mClearTextRenderer.drawTextAtPosition(	String.format(	"%.4f",
+																			mRangeMax),
+															(pWidth / 2) - 5 * 12,
+															(int) ((5.0 / 6) * pHeight) - 12,
+															lFont,
+															cTextColor,
+															false);
 
 					mHasChanged = false;
 				}

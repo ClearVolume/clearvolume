@@ -17,8 +17,8 @@ public class OpenCLVolumeRendererTests
 {
 
 	@Test
-	public void demoWith8BitGeneratedDataset() throws InterruptedException,
-																						IOException
+	public void demoWith8BitGeneratedDataset()	throws InterruptedException,
+												IOException
 	{
 		if (!OpenCLAvailability.isOpenCLAvailable())
 			return;
@@ -27,13 +27,13 @@ public class OpenCLVolumeRendererTests
 		final int lBytesPerVoxel = Size.of(lNativeType);
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new OpenCLVolumeRenderer(	"ClearVolumeTest",
-																																												512,
-																																												512,
-																																												lNativeType,
-																																												512,
-																																												512,
-																																												1,
-																																												false);
+																							512,
+																							512,
+																							lNativeType,
+																							512,
+																							512,
+																							1,
+																							false);
 
 		// lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		// lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getBlueGradient());
@@ -44,10 +44,11 @@ public class OpenCLVolumeRendererTests
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
-		final int lLength = lResolutionX * lResolutionY * lResolutionZ;
+		final int lLength = lResolutionX * lResolutionY
+							* lResolutionZ;
 
 		final ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(lLength * lBytesPerVoxel)
-																							.order(ByteOrder.nativeOrder());
+													.order(ByteOrder.nativeOrder());
 
 		for (int z = 0; z < lResolutionZ; z++)
 			for (int y = 0; y < lResolutionY; y++)
@@ -58,10 +59,10 @@ public class OpenCLVolumeRendererTests
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																							lByteBuffer,
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+													lByteBuffer,
+													lResolutionX,
+													lResolutionY,
+													lResolutionZ);
 
 		Thread.sleep(1000);
 
@@ -72,16 +73,16 @@ public class OpenCLVolumeRendererTests
 				for (int x = 0; x < lResolutionX; x++)
 				{
 					final int lIndex = (x + lResolutionX * y + lResolutionX * lResolutionY
-																											* z);
+																* z);
 					lOffHeapMemory.setByte(	lIndex,
-																	(byte) (256 - (((byte) x ^ (byte) y ^ (byte) z))));
+											(byte) (256 - (((byte) x ^ (byte) y ^ (byte) z))));
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																							lOffHeapMemory,
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+													lOffHeapMemory,
+													lResolutionX,
+													lResolutionY,
+													lResolutionZ);
 
 		Thread.sleep(1000);
 
@@ -90,7 +91,7 @@ public class OpenCLVolumeRendererTests
 
 	@Test
 	public void demoWith16BitGeneratedDataset()	throws InterruptedException,
-																							IOException
+												IOException
 	{
 		if (!OpenCLAvailability.isOpenCLAvailable())
 			return;
@@ -99,13 +100,13 @@ public class OpenCLVolumeRendererTests
 		final int lBytesPerVoxel = Size.of(lNativeType);
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = new OpenCLVolumeRenderer(	"ClearVolumeTest",
-																																												512,
-																																												512,
-																																												lNativeType,
-																																												512,
-																																												512,
-																																												1,
-																																												false);
+																							512,
+																							512,
+																							lNativeType,
+																							512,
+																							512,
+																							1,
+																							false);
 
 		// lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getGrayLevel());
 		// lClearVolumeRenderer.setTransfertFunction(TransferFunctions.getBlueGradient());
@@ -116,10 +117,11 @@ public class OpenCLVolumeRendererTests
 		final int lResolutionY = lResolutionX;
 		final int lResolutionZ = lResolutionX;
 
-		final int lLength = lResolutionX * lResolutionY * lResolutionZ;
+		final int lLength = lResolutionX * lResolutionY
+							* lResolutionZ;
 
 		final ByteBuffer lByteBuffer = ByteBuffer.allocateDirect(lLength * lBytesPerVoxel)
-																							.order(ByteOrder.nativeOrder());
+													.order(ByteOrder.nativeOrder());
 
 		for (int z = 0; z < lResolutionZ; z++)
 			for (int y = 0; y < lResolutionY; y++)
@@ -131,10 +133,10 @@ public class OpenCLVolumeRendererTests
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																							lByteBuffer,
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+													lByteBuffer,
+													lResolutionX,
+													lResolutionY,
+													lResolutionZ);
 
 		Thread.sleep(1000);
 
@@ -145,16 +147,16 @@ public class OpenCLVolumeRendererTests
 				for (int x = 0; x < lResolutionX; x++)
 				{
 					final int lIndex = (x + lResolutionX * y + lResolutionX * lResolutionY
-																											* z);
+																* z);
 					lOffHeapMemory.setShort(lIndex,
-																	(short) (256 - (((byte) x ^ (byte) y ^ (byte) z))));
+											(short) (256 - (((byte) x ^ (byte) y ^ (byte) z))));
 				}
 
 		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																							lOffHeapMemory,
-																							lResolutionX,
-																							lResolutionY,
-																							lResolutionZ);
+													lOffHeapMemory,
+													lResolutionX,
+													lResolutionY,
+													lResolutionZ);
 
 		Thread.sleep(1000);
 

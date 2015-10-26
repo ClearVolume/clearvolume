@@ -20,7 +20,7 @@ public class SoundOutDemo
 
 	@Test
 	public void testStartStop()	throws LineUnavailableException,
-															InterruptedException
+								InterruptedException
 	{
 		int Period = 200;
 
@@ -115,7 +115,9 @@ public class SoundOutDemo
 			// for (double w = ws; w < we; w += dw)
 			{
 				double w = 10;
-				double a = 0.5 * (1 + sin(2 * PI * (w - ws) / (we - ws)));
+				double a = 0.5 * (1 + sin(2	* PI
+											* (w - ws)
+											/ (we - ws)));
 				for (int j = 0; j < lBuffer.length; j++)
 					lBuffer[j] = 0.01 * sin((w + pw) * ((2 * PI * j) / lBuffer.length));
 			}

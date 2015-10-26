@@ -29,7 +29,8 @@ public class ClearVolumeTCPClient implements AutoCloseable
 			return false;
 		mSocketChannel = SocketChannel.open();
 		mSocketChannel.configureBlocking(true);
-		mSocketChannel.socket().setReceiveBufferSize(cSocketBufferLength);
+		mSocketChannel.socket()
+						.setReceiveBufferSize(cSocketBufferLength);
 		final boolean lConnected = mSocketChannel.connect(pSocketAddress);
 
 		return lConnected;
@@ -54,10 +55,10 @@ public class ClearVolumeTCPClient implements AutoCloseable
 	public boolean start()
 	{
 		lRunnable = new ClearVolumeTCPClientRunnable(	mSocketChannel,
-																									mVolumeSink,
-																									cMaxInUseVolumes);
+														mVolumeSink,
+														cMaxInUseVolumes);
 		mRunnableThread = new Thread(	lRunnable,
-																	ClearVolumeTCPClientRunnable.class.getSimpleName() + "Thread");
+										ClearVolumeTCPClientRunnable.class.getSimpleName() + "Thread");
 		mRunnableThread.setDaemon(true);
 		mRunnableThread.start();
 		return true;

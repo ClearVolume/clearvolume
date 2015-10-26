@@ -23,9 +23,9 @@ public class TimeShiftingSinkJFrameDemo
 			@Override
 			public void sendVolume(Volume pVolume)
 			{
-				System.out.format("---> Received timepoint=%d channel=%d \n",
-													pVolume.getTimeIndex(),
-													pVolume.getChannelID());
+				System.out.format(	"---> Received timepoint=%d channel=%d \n",
+									pVolume.getTimeIndex(),
+									pVolume.getChannelID());
 			}
 
 			@Override
@@ -36,7 +36,7 @@ public class TimeShiftingSinkJFrameDemo
 		};
 
 		final TimeShiftingSink lTimeShiftingSink = new TimeShiftingSink(50,
-																																		100);
+																		100);
 		TimeShiftingSinkJFrame.launch(lTimeShiftingSink);
 
 		lTimeShiftingSink.setRelaySink(lVolumeSinkInterface);
@@ -47,12 +47,12 @@ public class TimeShiftingSinkJFrameDemo
 		{
 
 			final Volume lVolume = lManager.requestAndWaitForVolume(1,
-																															TimeUnit.MILLISECONDS,
-																															NativeTypeEnum.UnsignedByte,
-																															1,
-																															10,
-																															10,
-																															10);
+																	TimeUnit.MILLISECONDS,
+																	NativeTypeEnum.UnsignedByte,
+																	1,
+																	10,
+																	10,
+																	10);
 
 			final int lTimePoint = i / 2;
 			final int lChannel = i % 2;
@@ -60,9 +60,9 @@ public class TimeShiftingSinkJFrameDemo
 			lVolume.setTimeIndex(lTimePoint);
 			lVolume.setChannelID(lChannel);
 
-			System.out.format("Sending timepoint=%d channel=%d \n",
-												lTimePoint,
-												lChannel);
+			System.out.format(	"Sending timepoint=%d channel=%d \n",
+								lTimePoint,
+								lChannel);
 			lTimeShiftingSink.sendVolume(lVolume);
 
 			Thread.sleep(200);

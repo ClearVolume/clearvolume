@@ -7,7 +7,7 @@ import javax.swing.ImageIcon;
 public class SwingUtilities
 {
 	public static final ImageIcon loadIcon(	Class pRootClass,
-																					String strPath)
+											String strPath)
 	{
 		URL imgURL = pRootClass.getResource(strPath);
 		if (imgURL != null)

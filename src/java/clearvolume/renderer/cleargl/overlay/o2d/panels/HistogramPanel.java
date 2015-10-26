@@ -15,7 +15,6 @@ public class HistogramPanel extends JPanel
 
 	private static final long serialVersionUID = 1L;
 
-
 	private final JRadioButton mLograrithmRadioButton;
 
 	private HistogramOverlay mHistogramOverlay;
@@ -38,7 +37,7 @@ public class HistogramPanel extends JPanel
 					mHistogramOverlay.setLogarithm(mLograrithmRadioButton.isSelected());
 			}
 		});
-		
+
 		add(mLograrithmRadioButton);
 	}
 

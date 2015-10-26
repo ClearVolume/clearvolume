@@ -27,7 +27,8 @@ public class SynthesizerDemo
 
 		SoundOut lSoundOut = new SoundOut();
 
-		Synthesizer lSynthesizer = new Synthesizer(lSinusoid, lSoundOut);
+		Synthesizer lSynthesizer = new Synthesizer(	lSinusoid,
+													lSoundOut);
 
 		lSoundOut.start();
 		for (int i = 0; i < 1000; i++)
@@ -57,7 +58,7 @@ public class SynthesizerDemo
 		SoundOut lSoundOut = new SoundOut();
 
 		Synthesizer lSynthesizer = new Synthesizer(	lLowPassFilter,
-																								lSoundOut);
+													lSoundOut);
 
 		lSoundOut.start();
 		for (int i = 0; i < 100000; i++)
@@ -65,8 +66,8 @@ public class SynthesizerDemo
 			lSynthesizer.playSamples();
 
 			lGuitar.setFrequencyInHertz((float) (220 + 440 + 440 * sin(2 * PI
-																																	* i
-																																	/ 1000)));
+																		* i
+																		/ 1000)));
 			if (i % 10 == 0)
 				lGuitar.strike(0.5f);
 
@@ -84,7 +85,7 @@ public class SynthesizerDemo
 		SoundOut lSoundOut = new SoundOut();
 
 		Synthesizer lSynthesizer = new Synthesizer(	lShepardRissetGlissando,
-																								lSoundOut);
+													lSoundOut);
 
 		lSoundOut.start();
 		for (int i = 0; i < 10000; i++)

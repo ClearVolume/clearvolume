@@ -15,8 +15,8 @@ import coremem.types.NativeTypeEnum;
 public class JCudaClearVolumeRendererTests
 {
 	@Test
-	public void demoWith8BitGeneratedDataset() throws InterruptedException,
-																						IOException
+	public void demoWith8BitGeneratedDataset()	throws InterruptedException,
+												IOException
 	{
 		if (!CudaAvailability.isClearCudaOperational())
 			return;
@@ -24,9 +24,9 @@ public class JCudaClearVolumeRendererTests
 		try
 		{
 			final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
-																																															768,
-																																															768,
-																																															NativeTypeEnum.UnsignedByte);
+																									768,
+																									768,
+																									NativeTypeEnum.UnsignedByte);
 
 			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 
@@ -35,7 +35,8 @@ public class JCudaClearVolumeRendererTests
 			final int lResolutionX = 256;
 			final int lResolutionY = lResolutionX;
 			final int lResolutionZ = lResolutionX;
-			final int lLength = lResolutionX * lResolutionY * lResolutionZ;
+			final int lLength = lResolutionX * lResolutionY
+								* lResolutionZ;
 
 			final byte[] lVolumeDataArray = new byte[lLength];
 
@@ -44,15 +45,15 @@ public class JCudaClearVolumeRendererTests
 					for (int x = 0; x < lResolutionX; x++)
 					{
 						final int lIndex = (x + lResolutionX * y + lResolutionX * lResolutionY
-																												* z);
+																	* z);
 						lVolumeDataArray[lIndex] = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 					}
 
 			lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																								ByteBuffer.wrap(lVolumeDataArray),
-																								lResolutionX,
-																								lResolutionY,
-																								lResolutionZ);
+														ByteBuffer.wrap(lVolumeDataArray),
+														lResolutionX,
+														lResolutionY,
+														lResolutionZ);
 
 			Thread.sleep(1000);
 
@@ -63,16 +64,16 @@ public class JCudaClearVolumeRendererTests
 					for (int x = 0; x < lResolutionX; x++)
 					{
 						final int lIndex = (x + lResolutionX * y + lResolutionX * lResolutionY
-																												* z);
+																	* z);
 						lOffHeapMemory.setByte(	lIndex,
-																		(byte) (256 - (((byte) x ^ (byte) y ^ (byte) z))));
+												(byte) (256 - (((byte) x ^ (byte) y ^ (byte) z))));
 					}
 
 			lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																								lOffHeapMemory,
-																								lResolutionX,
-																								lResolutionY,
-																								lResolutionZ);
+														lOffHeapMemory,
+														lResolutionX,
+														lResolutionY,
+														lResolutionZ);
 
 			Thread.sleep(1000);
 
@@ -87,7 +88,7 @@ public class JCudaClearVolumeRendererTests
 
 	@Test
 	public void demoWith16BitGeneratedDataset()	throws InterruptedException,
-																							IOException
+												IOException
 	{
 		if (!CudaAvailability.isClearCudaOperational())
 			return;
@@ -95,9 +96,9 @@ public class JCudaClearVolumeRendererTests
 		try
 		{
 			final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
-																																															768,
-																																															768,
-																																															NativeTypeEnum.UnsignedShort);
+																									768,
+																									768,
+																									NativeTypeEnum.UnsignedShort);
 			lClearVolumeRenderer.setTransferFunction(TransferFunctions.getGrayLevel());
 			lClearVolumeRenderer.setVisible(true);
 
@@ -105,7 +106,8 @@ public class JCudaClearVolumeRendererTests
 			final int lResolutionY = 256;
 			final int lResolutionZ = 256;
 
-			final int lLength = lResolutionX * lResolutionY * lResolutionZ;
+			final int lLength = lResolutionX * lResolutionY
+								* lResolutionZ;
 
 			final byte[] lVolumeDataArray = new byte[lLength * 2];
 
@@ -114,15 +116,15 @@ public class JCudaClearVolumeRendererTests
 					for (int x = 0; x < lResolutionX; x++)
 					{
 						final int lIndex = 2 * (x + lResolutionX * y + lResolutionX * lResolutionY
-																														* z);
+																		* z);
 						lVolumeDataArray[lIndex + 1] = (byte) (((byte) x ^ (byte) y ^ (byte) z));
 					}
 
 			lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																								ByteBuffer.wrap(lVolumeDataArray),
-																								lResolutionX,
-																								lResolutionY,
-																								lResolutionZ);
+														ByteBuffer.wrap(lVolumeDataArray),
+														lResolutionX,
+														lResolutionY,
+														lResolutionZ);
 
 			Thread.sleep(1000);
 
@@ -133,16 +135,16 @@ public class JCudaClearVolumeRendererTests
 					for (int x = 0; x < lResolutionX; x++)
 					{
 						final int lIndex = (x + lResolutionX * y + lResolutionX * lResolutionY
-																												* z);
+																	* z);
 						lOffHeapMemory.setShort(lIndex,
-																		(short) (256 - (((byte) x ^ (byte) y ^ (byte) z))));
+												(short) (256 - (((byte) x ^ (byte) y ^ (byte) z))));
 					}
 
 			lClearVolumeRenderer.setVolumeDataBuffer(	0,
-																								lOffHeapMemory,
-																								lResolutionX,
-																								lResolutionY,
-																								lResolutionZ);
+														lOffHeapMemory,
+														lResolutionX,
+														lResolutionY,
+														lResolutionZ);
 
 			Thread.sleep(1000);
 

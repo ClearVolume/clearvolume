@@ -2,6 +2,7 @@ package clearvolume.renderer;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+
 import clearvolume.utils.math.lowdiscrepancy.ModularSequence;
 
 public class AdaptiveLODController
@@ -61,7 +62,7 @@ public class AdaptiveLODController
 	public void setNumberOfPasses(final int pNumberOfPasses)
 	{
 		mNewNumberOfPasses = min(	cMaxNumberOfPasses,
-															max(1, pNumberOfPasses));
+									max(1, pNumberOfPasses));
 		mNewGenerator = ModularSequence.findKWithBestGapScoreCached(pNumberOfPasses);
 	}
 
@@ -90,9 +91,9 @@ public class AdaptiveLODController
 		if (!mActive)
 			return 0;
 
-		final float lPhase = computePhase(getNumberOfPasses(),
-																			mCurrentGenerator,
-																			mPassIndex);
+		final float lPhase = computePhase(	getNumberOfPasses(),
+											mCurrentGenerator,
+											mPassIndex);
 		println("lPhase=" + lPhase);
 		return lPhase;
 	}
@@ -177,20 +178,23 @@ public class AdaptiveLODController
 			final double alpha = 0.95;
 
 			mFilteredElapsedTimeInMs = alpha * mFilteredElapsedTimeInMs
-																	+ (1 - alpha)
-																	* lElapsedTimeInMs;
+										+ (1 - alpha)
+										* lElapsedTimeInMs;
 
 			format(	"elapsed= %.3f, filtered=%f \n",
-							lElapsedTimeInMs,
-							mFilteredElapsedTimeInMs);
+					lElapsedTimeInMs,
+					mFilteredElapsedTimeInMs);
 
 			final double lQuality = 1 - ((getNumberOfPasses() - 1.0) / cMaxNumberOfPasses);
-			final double lSpeed = 1 - (mFilteredElapsedTimeInMs - mMinTimeForFirstPassInMilliseconds)
-														/ (mMaxTimeForFirstPassInMilliseconds - mMinTimeForFirstPassInMilliseconds);
+			final double lSpeed = 1	- (mFilteredElapsedTimeInMs - mMinTimeForFirstPassInMilliseconds)
+									/ (mMaxTimeForFirstPassInMilliseconds - mMinTimeForFirstPassInMilliseconds);
 
 			final double lDifference = lQuality - lSpeed;
 
-			format("q=%g, s=%g, diff=%g \n", lQuality, lSpeed, lDifference);
+			format(	"q=%g, s=%g, diff=%g \n",
+					lQuality,
+					lSpeed,
+					lDifference);
 
 			if (lDifference > cHysteresis)
 			{
@@ -222,7 +226,7 @@ public class AdaptiveLODController
 
 		// multi-pass continues:
 		printlnverbose(this.getClass().getSimpleName() + ".proceedWithMultiPass -> continues with pass #"
-										+ mPassIndex);
+						+ mPassIndex);
 		mPassIndex++;
 		if (mPassIndex < getNumberOfPasses())
 		{
@@ -242,9 +246,9 @@ public class AdaptiveLODController
 		}
 	}
 
-	private static float computePhase(int pNumberOfPasses,
-																		int pGenerator,
-																		int pPassIndex)
+	private static float computePhase(	int pNumberOfPasses,
+										int pGenerator,
+										int pPassIndex)
 	{
 		final float lPhase = (((float) ((pPassIndex * pGenerator) % pNumberOfPasses))) / pNumberOfPasses;
 		return lPhase;

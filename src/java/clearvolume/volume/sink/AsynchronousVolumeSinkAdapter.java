@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 
-public class AsynchronousVolumeSinkAdapter implements
-																					VolumeSinkInterface
+public class AsynchronousVolumeSinkAdapter	implements
+											VolumeSinkInterface
 {
 
 	private final VolumeSinkInterface mDelegatedVolumeSink;
@@ -21,9 +21,9 @@ public class AsynchronousVolumeSinkAdapter implements
 	private volatile boolean mStoppedSignal;
 
 	public AsynchronousVolumeSinkAdapter(	VolumeSinkInterface pDelegatedVolumeSink,
-																				int pMaxCapacity,
-																				long pTimeOut,
-																				TimeUnit pTimeUnit)
+											int pMaxCapacity,
+											long pTimeOut,
+											TimeUnit pTimeUnit)
 	{
 		super();
 		mDelegatedVolumeSink = pDelegatedVolumeSink;
@@ -71,8 +71,9 @@ public class AsynchronousVolumeSinkAdapter implements
 			}
 		};
 
-		final Thread lThread = new Thread(lRunnable,
-																			this.getClass().getSimpleName());
+		final Thread lThread = new Thread(	lRunnable,
+											this.getClass()
+												.getSimpleName());
 		lThread.setDaemon(true);
 		lThread.start();
 		return true;

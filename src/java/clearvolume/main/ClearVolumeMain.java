@@ -14,7 +14,7 @@ public class ClearVolumeMain
 	 * Launch the application.
 	 * 
 	 * @param args
-	 *          command line arguments
+	 *            command line arguments
 	 */
 	public static void main(String[] args)
 	{
@@ -44,13 +44,13 @@ public class ClearVolumeMain
 			if (lCommandLineValues.isDemoServer())
 				ClearVolumeDemoServerMain.main(args);
 			else if (lCommandLineValues.isClient())
-				ClearVolumeClientMain.connect(lCommandLineValues.mConnectHostName,
-																			lCommandLineValues.mConnectPort,
-																			lCommandLineValues.mWindowSize,
-																			lCommandLineValues.mBytesPerVoxel,
-																			lCommandLineValues.mNumberOfLayers,
-																			lCommandLineValues.mTimeShiftAndMultiChannel,
-																			lCommandLineValues.mMultiColor);
+				ClearVolumeClientMain.connect(	lCommandLineValues.mConnectHostName,
+												lCommandLineValues.mConnectPort,
+												lCommandLineValues.mWindowSize,
+												lCommandLineValues.mBytesPerVoxel,
+												lCommandLineValues.mNumberOfLayers,
+												lCommandLineValues.mTimeShiftAndMultiChannel,
+												lCommandLineValues.mMultiColor);
 			else
 				ClearVolumeClientMain.main(args);
 		}

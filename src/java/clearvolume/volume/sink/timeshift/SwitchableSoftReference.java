@@ -10,9 +10,9 @@ public class SwitchableSoftReference<T> extends SoftReference<T>
 
 	private final Runnable mCleaningRunnable;
 
-	protected SwitchableSoftReference(T pReferent,
-																		ReferenceQueue<T> pReferenceQueue,
-																		Runnable pCleaningRunnable)
+	protected SwitchableSoftReference(	T pReferent,
+										ReferenceQueue<T> pReferenceQueue,
+										Runnable pCleaningRunnable)
 	{
 		super(pReferent, pReferenceQueue);
 		mHardReference = pReferent;

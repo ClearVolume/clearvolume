@@ -1,7 +1,7 @@
 package clearvolume.exceptions;
 
 public class UnsupportedArchitectureException	extends
-																							ClearVolumeException
+												ClearVolumeException
 {
 
 	private static final long serialVersionUID = 1L;

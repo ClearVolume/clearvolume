@@ -39,7 +39,7 @@ public class Volume implements ClearVolumeCloseable
 		final long lBufferLength = getDataSizeInBytes();
 		final int lBufferLengthInt = ToIntExact.toIntExact(lBufferLength);
 		mDataBuffer = ByteBuffer.allocateDirect(lBufferLengthInt)
-														.order(ByteOrder.nativeOrder());
+								.order(ByteOrder.nativeOrder());
 	}
 
 	public void setManager(VolumeManager pVolumeManager)
@@ -53,10 +53,10 @@ public class Volume implements ClearVolumeCloseable
 	}
 
 	public <LT> boolean isCompatibleWith(	NativeTypeEnum pType,
-																				long... pDimensions)
+											long... pDimensions)
 	{
 		return (mType == pType && Arrays.equals(pDimensions,
-																						mDimensionsInVoxels));
+												mDimensionsInVoxels));
 	}
 
 	public long getNumberOfVoxels()
@@ -89,7 +89,7 @@ public class Volume implements ClearVolumeCloseable
 	}
 
 	public void setVoxelSizeInRealUnits(String pRealUnitName,
-																			double... pVoxelSizeInRealUnits)
+										double... pVoxelSizeInRealUnits)
 	{
 		setRealUnitName(pRealUnitName);
 		mVoxelSizeInRealUnits = pVoxelSizeInRealUnits;
@@ -306,7 +306,7 @@ public class Volume implements ClearVolumeCloseable
 	{
 		if (mDataBuffer.capacity() != pVolume.mDataBuffer.capacity())
 			mDataBuffer = ByteBuffer.allocateDirect(pVolume.mDataBuffer.capacity())
-															.order(ByteOrder.nativeOrder());
+									.order(ByteOrder.nativeOrder());
 
 		mDataBuffer.clear();
 		pVolume.mDataBuffer.rewind();
@@ -321,15 +321,16 @@ public class Volume implements ClearVolumeCloseable
 			mChannelName = new String(pVolume.mChannelName);
 
 		if (pVolume.mColor != null)
-			mColor = Arrays.copyOf(pVolume.mColor, pVolume.mColor.length);
+			mColor = Arrays.copyOf(	pVolume.mColor,
+									pVolume.mColor.length);
 
 		if (pVolume.mVoxelSizeInRealUnits != null)
-			mVoxelSizeInRealUnits = Arrays.copyOf(pVolume.mVoxelSizeInRealUnits,
-																						pVolume.mVoxelSizeInRealUnits.length);
+			mVoxelSizeInRealUnits = Arrays.copyOf(	pVolume.mVoxelSizeInRealUnits,
+													pVolume.mVoxelSizeInRealUnits.length);
 
 		if (pVolume.mDimensionsInVoxels != null)
 			mDimensionsInVoxels = Arrays.copyOf(pVolume.mDimensionsInVoxels,
-																					pVolume.mDimensionsInVoxels.length);
+												pVolume.mDimensionsInVoxels.length);
 
 		if (mRealUnitName != null)
 			mRealUnitName = new String(pVolume.mRealUnitName);
@@ -338,7 +339,7 @@ public class Volume implements ClearVolumeCloseable
 		mType = pVolume.mType;
 		if (pVolume.mViewMatrix != null)
 			mViewMatrix = Arrays.copyOf(pVolume.mViewMatrix,
-																	pVolume.mViewMatrix.length);
+										pVolume.mViewMatrix.length);
 	}
 
 	public void writeToByteBuffer(ByteBuffer pByteBuffer)
@@ -362,17 +363,17 @@ public class Volume implements ClearVolumeCloseable
 	public String toString()
 	{
 		return String.format(	"Volume [mTimeIndex=%s, mTimeInSeconds=%s, mChannelID=%s, mViewMatrix=%s, mColor=%s, mType=%s, mDimensionsInVoxels=%s, mDimensionsInRealUnits=%s, mRealUnitName=%s, mVolumeManager=%s, mDataBuffer=%s]",
-													mTimeIndex,
-													mTimeInSeconds,
-													mChannelID,
-													Arrays.toString(mViewMatrix),
-													Arrays.toString(mColor),
-													mType,
-													Arrays.toString(mDimensionsInVoxels),
-													Arrays.toString(mVoxelSizeInRealUnits),
-													mRealUnitName,
-													mVolumeManager,
-													mDataBuffer);
+								mTimeIndex,
+								mTimeInSeconds,
+								mChannelID,
+								Arrays.toString(mViewMatrix),
+								Arrays.toString(mColor),
+								mType,
+								Arrays.toString(mDimensionsInVoxels),
+								Arrays.toString(mVoxelSizeInRealUnits),
+								mRealUnitName,
+								mVolumeManager,
+								mDataBuffer);
 	}
 
 }

@@ -22,8 +22,8 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 	private final VolumeManager mVolumeManager;
 
 	public ClearVolumeTCPClientRunnable(SocketChannel pSocketChannel,
-																			VolumeSinkInterface pVolumeSink,
-																			int pMaxInUseVolumes)
+										VolumeSinkInterface pVolumeSink,
+										int pMaxInUseVolumes)
 	{
 		mSocketChannel = pSocketChannel;
 		mVolumeSink = pVolumeSink;
@@ -46,10 +46,10 @@ public class ClearVolumeTCPClientRunnable implements Runnable
 				try
 				{
 					Volume lVolume = mVolumeManager.requestAndWaitForNextAvailableVolume(	1,
-																																								TimeUnit.MILLISECONDS);
+																							TimeUnit.MILLISECONDS);
 
 					lVolume = ClearVolumeSerialization.deserialize(	mSocketChannel,
-																													lVolume);
+																	lVolume);
 
 					lVolume.setManager(mVolumeManager);
 

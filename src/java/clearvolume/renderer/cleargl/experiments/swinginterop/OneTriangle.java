@@ -13,7 +13,8 @@ public class OneTriangle
 		pGL.getGL2().glMatrixMode(GLMatrixFunc.GL_PROJECTION);
 		pGL.getGL2().glLoadIdentity();
 
-		// coordinate system origin at lower left with width and height same as the
+		// coordinate system origin at lower left with width and height same as
+		// the
 		// window
 		final GLU glu = new GLU();
 		glu.gluOrtho2D(0.0f, width, 0.0f, height);

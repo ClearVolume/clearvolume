@@ -23,8 +23,8 @@ import clearvolume.volume.sink.relay.RelaySinkAdapter;
 import clearvolume.volume.sink.relay.RelaySinkInterface;
 
 public class ChannelFilterSink extends RelaySinkAdapter	implements
-																												RelaySinkInterface,
-																												ClearVolumeCloseable
+														RelaySinkInterface,
+														ClearVolumeCloseable
 {
 	private static final ExecutorService mSeekingExecutor = Executors.newSingleThreadExecutor();
 
@@ -55,7 +55,7 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 			{
 				final Integer lChannelId = mSeenChannelList.get(pIndex);
 				return lChannelId + " | "
-								+ mSeenChannelIdToNameMap.get(lChannelId);
+						+ mSeenChannelIdToNameMap.get(lChannelId);
 			}
 			catch (final Exception e)
 			{
@@ -139,9 +139,9 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 				for (final ListDataListener lListDataListener : lListeners)
 				{
 					final ListDataEvent lListDataEvent = new ListDataEvent(	lListDataListener,
-																																	ListDataEvent.CONTENTS_CHANGED,
-																																	0,
-																																	mSeenChannelList.size());
+																			ListDataEvent.CONTENTS_CHANGED,
+																			0,
+																			mSeenChannelList.size());
 					SwingUtilities.invokeLater(new Runnable()
 					{
 
@@ -173,8 +173,8 @@ public class ChannelFilterSink extends RelaySinkAdapter	implements
 			else
 			{
 				final Volume lEmptyVolume = mEmptyVolumeManager.requestAndWaitForVolumeLike(1,
-																																										TimeUnit.MILLISECONDS,
-																																										lVolume);
+																							TimeUnit.MILLISECONDS,
+																							lVolume);
 				lEmptyVolume.copyMetaDataFrom(lVolume);
 				forward(lEmptyVolume);
 			}

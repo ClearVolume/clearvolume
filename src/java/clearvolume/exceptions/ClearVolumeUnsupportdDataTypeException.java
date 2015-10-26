@@ -1,11 +1,11 @@
 package clearvolume.exceptions;
 
 public class ClearVolumeUnsupportdDataTypeException	extends
-																										ClearVolumeException
+													ClearVolumeException
 {
 
-	public ClearVolumeUnsupportdDataTypeException(String pMessage,
-																								Throwable pCause)
+	public ClearVolumeUnsupportdDataTypeException(	String pMessage,
+													Throwable pCause)
 	{
 		super(pMessage, pCause);
 	}

@@ -8,9 +8,9 @@ import java.util.Map;
 public class KeyValueMaps
 {
 
-	public static final Map<String, String> readMapFromBuffer(ByteBuffer pByteBuffer,
-																														int pHeaderLength,
-																														HashMap<String, String> pDestMap)
+	public static final Map<String, String> readMapFromBuffer(	ByteBuffer pByteBuffer,
+																int pHeaderLength,
+																HashMap<String, String> pDestMap)
 	{
 
 		byte[] lByteArray = new byte[pHeaderLength];
@@ -21,8 +21,8 @@ public class KeyValueMaps
 		return readMapFromString(lMapString, pDestMap);
 	}
 
-	public static final Map<String, String> readMapFromString(String pMapString,
-																														Map<String, String> pDestMap)
+	public static final Map<String, String> readMapFromString(	String pMapString,
+																Map<String, String> pDestMap)
 	{
 		if (pDestMap == null)
 			pDestMap = new LinkedHashMap<String, String>();
@@ -36,9 +36,9 @@ public class KeyValueMaps
 		{
 			int lKeyValueSeparatorIndex = lKeyValueEntry.indexOf(':');
 			final String lKey = lKeyValueEntry.substring(	0,
-																										lKeyValueSeparatorIndex);
+															lKeyValueSeparatorIndex);
 			final String lValue = lKeyValueEntry.substring(	lKeyValueSeparatorIndex + 1,
-																											lKeyValueEntry.length());
+															lKeyValueEntry.length());
 			pDestMap.put(lKey, lValue);
 		}
 
@@ -46,7 +46,7 @@ public class KeyValueMaps
 	}
 
 	public static final StringBuilder writeStringFromMap(	Map<String, String> pDestMap,
-																												StringBuilder pStringBuilder)
+															StringBuilder pStringBuilder)
 	{
 		if (pStringBuilder == null)
 			pStringBuilder = new StringBuilder();
@@ -72,8 +72,8 @@ public class KeyValueMaps
 		return pStringBuilder;
 	}
 
-	public static final ByteBuffer writeBufferFromMap(Map<String, String> pDestMap,
-																										ByteBuffer pByteBuffer)
+	public static final ByteBuffer writeBufferFromMap(	Map<String, String> pDestMap,
+														ByteBuffer pByteBuffer)
 	{
 		pByteBuffer.putChar('[');
 

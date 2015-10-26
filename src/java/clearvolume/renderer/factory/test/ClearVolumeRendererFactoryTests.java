@@ -22,9 +22,9 @@ public class ClearVolumeRendererFactoryTests
 		try
 		{
 			final ClearVolumeRendererInterface lNewBestRenderer = ClearVolumeRendererFactory.newBestRenderer8Bit(	"Test",
-																																																						128,
-																																																						128,
-																																																						false);
+																													128,
+																													128,
+																													false);
 			System.out.println(lNewBestRenderer.getClass());
 			assertNotNull(lNewBestRenderer);
 		}
@@ -44,10 +44,10 @@ public class ClearVolumeRendererFactoryTests
 
 		try
 		{
-			final ClearVolumeRendererInterface lNewBestRenderer = ClearVolumeRendererFactory.newBestRenderer16Bit("Test",
-																																																						128,
-																																																						128,
-																																																						false);
+			final ClearVolumeRendererInterface lNewBestRenderer = ClearVolumeRendererFactory.newBestRenderer16Bit(	"Test",
+																													128,
+																													128,
+																													false);
 			System.out.println(lNewBestRenderer.getClass());
 			assertNotNull(lNewBestRenderer);
 		}
@@ -58,6 +58,5 @@ public class ClearVolumeRendererFactoryTests
 			fail();
 		}
 	}
-
 
 }

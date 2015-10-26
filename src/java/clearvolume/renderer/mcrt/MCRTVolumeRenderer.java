@@ -211,9 +211,9 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
       if (lVolumeDataBuffer == null)
         return;
 
-      final long lWidth = getVolumeSizeX();
-      final long lHeight = getVolumeSizeY();
-      final long lDepth = getVolumeSizeZ();
+      final long lWidth = getVolumeSizeX(pRenderLayerIndex);
+      final long lHeight = getVolumeSizeY(pRenderLayerIndex);
+      final long lDepth = getVolumeSizeZ(pRenderLayerIndex);
 
       if (getNativeType() == NativeTypeEnum.UnsignedByte) {
         mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(
@@ -300,41 +300,42 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
     return updateBufferAndRunKernel();
   }
 
-  private void doCaptureBuffersIfNeeded() {
-    if (mVolumeCaptureFlag) {
+  private void doCaptureBuffersIfNeeded()
+  {
+    if (mVolumeCaptureFlag)
+    {
+      for (int l = 0; l < getNumberOfRenderLayers(); l++)
+      {
+        final ByteBuffer lCaptureBuffer;
 
-      final ByteBuffer[] lCaptureBuffers = new ByteBuffer[getNumberOfRenderLayers()];
-
-      for (int i = 0; i < getNumberOfRenderLayers(); i++) {
-        synchronized (getSetVolumeDataBufferLock(i)) {
-          lCaptureBuffers[i] = ByteBuffer.allocateDirect(
-                  (int) (getBytesPerVoxel() * getVolumeSizeX()
-                  * getVolumeSizeY() * getVolumeSizeZ()))
+        synchronized (getSetVolumeDataBufferLock(l))
+        {
+          lCaptureBuffer = ByteBuffer.allocateDirect((int) (getBytesPerVoxel() * getVolumeSizeX(l)
+                  * getVolumeSizeY(l) * getVolumeSizeZ(l)))
                   .order(ByteOrder.nativeOrder());
 
-          mCLVolumeImages[getCurrentRenderLayerIndex()].read(
-                  mCLDevice.getQueue(),
+          mCLVolumeImages[getCurrentRenderLayerIndex()].read(	mCLDevice.getQueue(),
                   0,
                   0,
                   0,
-                  getVolumeSizeX(),
-                  getVolumeSizeY(),
-                  getVolumeSizeZ(),
+                  getVolumeSizeX(l),
+                  getVolumeSizeY(l),
+                  getVolumeSizeZ(l),
                   0,
                   0,
-                  lCaptureBuffers[i],
+                  lCaptureBuffer,
                   true);
         }
-      }
 
-      notifyVolumeCaptureListeners(lCaptureBuffers,
-              getNativeType(),
-              getVolumeSizeX(),
-              getVolumeSizeY(),
-              getVolumeSizeZ(),
-              getVoxelSizeX(),
-              getVoxelSizeY(),
-              getVoxelSizeZ());
+        notifyVolumeCaptureListeners(	lCaptureBuffer,
+                getNativeType(),
+                getVolumeSizeX(l),
+                getVolumeSizeY(l),
+                getVolumeSizeZ(l),
+                getVoxelSizeX(l),
+                getVoxelSizeY(l),
+                getVoxelSizeZ(l));
+      }
 
       mVolumeCaptureFlag = false;
     }
@@ -355,7 +356,7 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
         if (lVolumeDataBuffer != null) {
           clearVolumeDataBufferReference(lLayerIndex);
 
-          if (haveVolumeDimensionsChanged() || mCLVolumeImages[lLayerIndex] == null) {
+          if (haveVolumeDimensionsChanged(lLayerIndex) || mCLVolumeImages[lLayerIndex] == null) {
             if (mCLVolumeImages[lLayerIndex] != null) {
               mCLVolumeImages[lLayerIndex].release();
             }
@@ -501,28 +502,32 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
 
   }
 
-  private void runProcessorHook(final int pRenderLayerIndex) {
+  private void runProcessorHook(final int pRenderLayerIndex)
+  {
 
     for (final ProcessorInterface<?> lProcessor : mProcessorInterfacesMap.values())
-      if (lProcessor.isCompatibleProcessor(getClass())) {
-        synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex)) {
-          if (lProcessor instanceof OpenCLProcessor) {
+      if (lProcessor.isCompatibleProcessor(getClass()))
+      {
+        synchronized (getSetVolumeDataBufferLock(pRenderLayerIndex))
+        {
+          if (lProcessor instanceof OpenCLProcessor)
+          {
             final OpenCLProcessor<?> lOpenCLProcessor = (OpenCLProcessor<?>) lProcessor;
             lOpenCLProcessor.setVolumeBuffers(mCLVolumeImages[pRenderLayerIndex]);
           }
 
           final long lStartTimeNs = System.nanoTime();
-          lProcessor.process(pRenderLayerIndex,
-                  getVolumeSizeX(),
-                  getVolumeSizeY(),
-                  getVolumeSizeZ());
+          lProcessor.process(	pRenderLayerIndex,
+                  getVolumeSizeX(pRenderLayerIndex),
+                  getVolumeSizeY(pRenderLayerIndex),
+                  getVolumeSizeZ(pRenderLayerIndex));
           final long lStopTimeNs = System.nanoTime();
           final double lElapsedTimeInMilliseconds = 0.001 * 0.001 * (lStopTimeNs - lStartTimeNs);
-          /*
-           * System.out.format("Elapsedtime in '%s' is %g ms \n",
-           * lOpenCLProcessor.getClass().getSimpleName(),
-           * lElapsedTimeInMilliseconds);/*
-           */
+					/*
+					 * System.out.format("Elapsedtime in '%s' is %g ms \n",
+					 * lOpenCLProcessor.getClass().getSimpleName(),
+					 * lElapsedTimeInMilliseconds);/*
+					 */
         }
       }
   }

@@ -25,7 +25,7 @@ public class ChannelFilterSinkJFrame extends ClearVolumeJFrame
 	 * Launch the application.
 	 * 
 	 * @param pChannelFilterSink
-	 *          channel filter sink
+	 *            channel filter sink
 	 */
 	public static void launch(final ChannelFilterSink pChannelFilterSink)
 	{
@@ -51,7 +51,7 @@ public class ChannelFilterSinkJFrame extends ClearVolumeJFrame
 	 * Create the frame.
 	 * 
 	 * @param pChannelFilterSink
-	 *          channel filter sink
+	 *            channel filter sink
 	 */
 	public ChannelFilterSinkJFrame(ChannelFilterSink pChannelFilterSink)
 	{

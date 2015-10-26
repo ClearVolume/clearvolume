@@ -1,8 +1,9 @@
 package clearvolume.renderer.cleargl.overlay;
 
-import cleargl.GLMatrix;
-
 import com.jogamp.opengl.GL;
+
+import cleargl.GLMatrix;
+import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 
 /**
  * Overlay2D interface - methods specific for 2D overlays.
@@ -23,17 +24,18 @@ public interface Overlay2D
 	 * OpenGl code to render the 2D overlay.
 	 * 
 	 * @param pGL
-	 *          GL object
+	 *            GL object
 	 * @param pWidth
-	 *          viewport width
+	 *            viewport width
 	 * @param pHeight
-	 *          viewport height
+	 *            viewport height
 	 * @param pProjectionMatrix
-	 *          projection matrix
+	 *            projection matrix
 	 */
-	public void render2D(	GL pGL,
-												int pWidth,
-												int pHeight,
-												GLMatrix pProjectionMatrix);
+	public void render2D(	ClearGLVolumeRenderer pClearGLVolumeRenderer,
+							GL pGL,
+							int pWidth,
+							int pHeight,
+							GLMatrix pProjectionMatrix);
 
 }

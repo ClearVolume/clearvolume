@@ -27,7 +27,7 @@ public class AppleMac
 	}
 
 	private static String OS = System.getProperty("os.name")
-																		.toLowerCase();
+										.toLowerCase();
 
 	public static boolean isMac()
 	{
@@ -48,8 +48,8 @@ public class AppleMac
 				{
 					try
 					{
-						Method lMethod = cClass.getDeclaredMethod("setDockIconImage",
-																											Image.class);
+						Method lMethod = cClass.getDeclaredMethod(	"setDockIconImage",
+																	Image.class);
 						lMethod.invoke(cApplication, pImage);
 						// cApplication.setDockIconImage(pImage);
 					}
@@ -80,7 +80,7 @@ public class AppleMac
 		try
 		{
 			System.setProperty(	"com.apple.mrj.application.apple.menu.about.name",
-													pString);
+								pString);
 			return true;
 		}
 		catch (final Throwable e)
@@ -106,7 +106,7 @@ public class AppleMac
 			final Class params[] = new Class[]
 			{ Window.class, Boolean.TYPE };
 			final Method method = util.getMethod(	"setWindowCanFullScreen",
-																						params);
+													params);
 			method.invoke(util, window, true);
 			return true;
 		}
@@ -126,8 +126,8 @@ public class AppleMac
 		try
 		{
 			// cApplication.requestToggleFullScreen(pWindow);
-			Method lMethod = cClass.getDeclaredMethod("requestToggleFullScreen",
-																								Window.class);
+			Method lMethod = cClass.getDeclaredMethod(	"requestToggleFullScreen",
+														Window.class);
 			lMethod.invoke(cApplication, pWindow);
 			return true;
 		}
