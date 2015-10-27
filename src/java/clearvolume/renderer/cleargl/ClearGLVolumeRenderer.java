@@ -1,45 +1,8 @@
 package clearvolume.renderer.cleargl;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import clearvolume.controller.OculusRiftController;
-import clearvolume.controller.TranslationRotationControllerInterface;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.SystemUtils;
-
-import com.jogamp.nativewindow.WindowClosingProtocol.WindowClosingMode;
-import com.jogamp.newt.awt.NewtCanvasAWT;
-import com.jogamp.newt.event.MouseEvent;
-import com.jogamp.newt.event.WindowAdapter;
-import com.jogamp.newt.event.WindowEvent;
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES3;
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLProfile;
-import com.jogamp.opengl.math.Quaternion;
-
-import cleargl.ClearGLEventListener;
-import cleargl.ClearGLWindow;
-import cleargl.GLAttribute;
-import cleargl.GLError;
-import cleargl.GLFloatArray;
-import cleargl.GLMatrix;
-import cleargl.GLPixelBufferObject;
-import cleargl.GLProgram;
-import cleargl.GLTexture;
-import cleargl.GLUniform;
-import cleargl.GLVertexArray;
-import cleargl.GLVertexAttributeArray;
+import cleargl.*;
 import cleargl.util.recorder.GLVideoRecorder;
+import clearvolume.controller.OculusRiftController;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.controller.RotationControllerWithRenderNotification;
 import clearvolume.renderer.ClearVolumeRendererBase;
@@ -50,7 +13,30 @@ import clearvolume.renderer.cleargl.overlay.o3d.BoxOverlay;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
 import clearvolume.renderer.listeners.EyeRayListener;
+import com.jogamp.nativewindow.WindowClosingProtocol.WindowClosingMode;
+import com.jogamp.newt.awt.NewtCanvasAWT;
+import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES3;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.math.Quaternion;
 import coremem.types.NativeTypeEnum;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * Abstract Class JoglPBOVolumeRenderer
@@ -388,7 +374,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 			};
 		});
 
-		if(getTranslationRotationControllers().size() == 0) {
+		if(getTranslationRotationControllers().size() == 0 && System.getProperty("ClearVolume.EnableVR") != null) {
 			ovr = new OculusRiftController(0, this);
 			this.addTranslationRotationController(ovr);
 			ovr.connectAsynchronouslyOrWait();
@@ -526,25 +512,46 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					eyeShift = getTranslationRotationControllers().get(0).getEyeShift();
 				}
 
-				if(System.getProperty("ClearVolume.EnableVR") == null) {
+				if(System.getProperty("ClearVolume.EnableVR") != null) {
+					eyeCount = 2;
+				} else if(System.getProperty("ClearVolume.Anaglyph") != null) {
+					eyeShift = new float[]{-0.03f, 0.0f, 0.0f, 0.03f, 0.0f, 0.0f};
+					eyeCount = 2;
+				} else {
 					eyeShift = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 					eyeCount = 1;
-				} else {
-					eyeCount = 2;
 				}
 
+				lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
 				for(int eye = 0; eye < eyeCount; eye++) {
 					if (System.getProperty("ClearVolume.EnableVR") == null) {
 						lGL.glViewport(0, 0, w, h);
 						lGL.glScissor(0, 0, w, h);
-					} else {
+					} else if(System.getProperty("ClearVolume.Anaglyph") == null) {
+						lGL.glViewport(0, 0, w, h);
+						lGL.glScissor(0, 0, w, h);
+					} else
+					{
 						lGL.glViewport(w / 2 * eye, 0, w / 2, h);
 						lGL.glScissor(w / 2 * eye, 0, w / 2, h);
 					}
 
+					if(System.getProperty("ClearVolume.Anaglyph") != null && eye == 0) {
+						lGL.glDisable(GL.GL_BLEND);
+						//setTransferFunction(0, TransferFunctions.getGradientForColor(0));
+						lGL.glColorMask(true, false, false, false);
+					}
+					if(System.getProperty("ClearVolume.Anaglyph") != null && eye == 1) {
+						lGL.glClear(GL.GL_DEPTH_BUFFER_BIT);
+						//setTransferFunction(0, TransferFunctions.getGradientForColor(1));
+						lGL.glColorMask(false, true, true, false);
+					}
+
 					lGL.glClearColor(0, 0, 0, 1);
-					lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+					if(System.getProperty("ClearVolume.Anaglyph") == null) {
+						lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+					}
 					lGL.glDisable(GL.GL_CULL_FACE);
 					lGL.glEnable(GL.GL_BLEND);
 					lGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
@@ -599,6 +606,10 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					if (lLastRenderPass)
 						mGLVideoRecorder.screenshot(pDrawable,
 										!getAutoRotateController().isRotating());
+
+					if(System.getProperty("ClearVolume.Anaglyph") != null && eye == 1) {
+						lGL.glColorMask(true, true, true, true);
+					}
 				}
 
 			}
@@ -754,7 +765,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 						getTranslationY(),
 						getTranslationZ());/**/
 
-		lModelViewMatrix.translate(eyeShift[0], eyeShift[1], eyeShift[2]);
+
 
 		lModelViewMatrix.mult(getQuaternion());
 
@@ -765,6 +776,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 		// lInvVolumeMatrix.mult(lEulerMatrix);
 
 		// lInvVolumeMatrix.transpose();
+
+		lModelViewMatrix.translate(eyeShift[0], eyeShift[1], eyeShift[2]);
 
 		return lModelViewMatrix;
 	}
@@ -1187,8 +1200,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	 *            Model-mViewMatrix matrix as float array
 	 * @param pProjectionMatrix
 	 *            Projection matrix as float array
-	 * @param pPhase
-	 * @param pClearBuffer
 	 * @return boolean array indicating for each layer if it was updated.
 	 */
 	protected abstract boolean[] renderVolume(	final float[] pModelViewMatrix,
