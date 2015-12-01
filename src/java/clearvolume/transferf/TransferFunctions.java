@@ -57,7 +57,7 @@ public class TransferFunctions
 	}
 
 	/**
-	 * Returns a transfer a simple transfer function that is a gradient from
+	 * Returns a simple transfer function that is a gradient from
 	 * dark transparent to a given color. The color is given as a float vector in [0,1]^4.
 	 * @param pColorRGBA color (R,G,B,A) with each R,G,B,A in [0,1]
 	 * @return transfer function
@@ -71,7 +71,7 @@ public class TransferFunctions
 	}
 
 	/**
-	 * Returns a transfer a simple transfer function that is a gradient from
+	 * Returns a simple transfer function that is a gradient from
 	 * dark transparent to a given color. The transparency of the given color is used.
 	 * 
 	 * @param pColor color
