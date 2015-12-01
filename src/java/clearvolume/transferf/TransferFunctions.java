@@ -1,5 +1,7 @@
 package clearvolume.transferf;
 
+import java.awt.Color;
+
 /**
  * Class TransferFunctions
  * 
@@ -11,6 +13,9 @@ package clearvolume.transferf;
 public class TransferFunctions
 {
 
+	/**
+	 * @return
+	 */
 	public static TransferFunction getDefault()
 	{
 		return CyclingTransferFunction.getDefault();
@@ -18,6 +23,10 @@ public class TransferFunctions
 		// return HotTransferFunction.get();
 	}
 
+	/**
+	 * @param pColorIndex
+	 * @return
+	 */
 	public static TransferFunction1D getGradientForColor(int pColorIndex)
 	{
 		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
@@ -47,11 +56,36 @@ public class TransferFunctions
 		return lTransfertFunction;
 	}
 
+	/**
+	 * Returns a transfer a simple transfer function that is a gradient from
+	 * dark transparent to a given color. The color is given as a float vector in [0,1]^4.
+	 * @param pColorRGBA color (R,G,B,A) with each R,G,B,A in [0,1]
+	 * @return transfer function
+	 */
 	public static TransferFunction1D getGradientForColor(float... pColorRGBA)
 	{
 		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
 		lTransfertFunction.addPoint(0, 0, 0, 0);
 		lTransfertFunction.addPoint(pColorRGBA);
+		return lTransfertFunction;
+	}
+
+	/**
+	 * Returns a transfer a simple transfer function that is a gradient from
+	 * dark transparent to a given color. The transparency of the given color is used.
+	 * 
+	 * @param pColor color
+	 * @return 1D transfer function.
+	 */
+	public static TransferFunction1D getGradientForColor(Color pColor)
+	{
+		final TransferFunction1D lTransfertFunction = new TransferFunction1D();
+		lTransfertFunction.addPoint(0, 0, 0, 0);
+		float lNormaFactor = (float) (1.0 / 255);
+		lTransfertFunction.addPoint(lNormaFactor * pColor.getRed(),
+									lNormaFactor * pColor.getGreen(),
+									lNormaFactor * pColor.getBlue(),
+									lNormaFactor * pColor.getAlpha());
 		return lTransfertFunction;
 	}
 
@@ -148,16 +182,28 @@ public class TransferFunctions
 		return lTransfertFunction;
 	}
 
+	/**
+	 * Returns the 'CoolWarm' LUT.
+	 * @return
+	 */
 	public static TransferFunction1D getCoolWarm()
 	{
 		return CoolWarmTransferFunction.get();
 	}
 
+	/**
+	 * Returns the Hot LUT.
+	 * @return
+	 */
 	public static TransferFunction1D getHot()
 	{
 		return HotTransferFunction.get();
 	}
 
+	/**
+	 * Returns the standard Matlab style LUT.
+	 * @return 
+	 */
 	public static TransferFunction1D getMatlabStyle()
 	{
 		return MatlabStyleTransferFunction.get();
