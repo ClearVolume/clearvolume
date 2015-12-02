@@ -1,24 +1,6 @@
 package clearvolume.renderer.cleargl.overlay.o2d;
 
-import static java.lang.Math.log1p;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
-import java.awt.Color;
-import java.awt.Font;
-import java.io.IOException;
-import java.nio.FloatBuffer;
-import java.util.concurrent.locks.ReentrantLock;
-
-import com.jogamp.opengl.GL;
-
-import cleargl.ClearGeometryObject;
-import cleargl.ClearTextRenderer;
-import cleargl.GLError;
-import cleargl.GLFloatArray;
-import cleargl.GLIntArray;
-import cleargl.GLMatrix;
-import cleargl.GLProgram;
+import cleargl.*;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
@@ -28,6 +10,14 @@ import clearvolume.renderer.panels.HasGUIPanel;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
 import clearvolume.utils.ClearVolumeDefaultFont;
+import com.jogamp.opengl.GL;
+
+import java.awt.*;
+import java.io.IOException;
+import java.nio.FloatBuffer;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static java.lang.Math.*;
 
 public abstract class BarGraphOverlay extends OverlayBase	implements
 															Overlay2D,
@@ -45,7 +35,7 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 
 	private ClearTextRenderer mClearTextRenderer;
 
-	private ClearGeometryObject mClearGeometryObjectBars;
+	private GeometryObject mGeometryObjectBars;
 
 	private GLFloatArray mVerticesFloatArray;
 	private GLIntArray mIndexIntArray;
@@ -209,13 +199,13 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 		if (!lUpdateNeeded)
 			return;
 
-		if (mClearGeometryObjectBars != null)
-			mClearGeometryObjectBars.close();
+		if (mGeometryObjectBars != null)
+			mGeometryObjectBars.close();
 
-		mClearGeometryObjectBars = new ClearGeometryObject(	mGLProgram,
+		mGeometryObjectBars = new GeometryObject(	mGLProgram,
 															3,
 															GL.GL_TRIANGLES);
-		mClearGeometryObjectBars.setDynamic(true);
+		mGeometryObjectBars.setDynamic(true);
 
 		mVerticesFloatArray = new GLFloatArray(	lNumberOfPointsToDraw,
 												3);
@@ -229,10 +219,10 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 		mIndexIntArray.fillZeros();
 		mTexCoordFloatArray.fillZeros();
 
-		mClearGeometryObjectBars.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
-		mClearGeometryObjectBars.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
-		mClearGeometryObjectBars.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
-		mClearGeometryObjectBars.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
+		mGeometryObjectBars.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
+		mGeometryObjectBars.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
+		mGeometryObjectBars.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
+		mGeometryObjectBars.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
 
 	}
 
@@ -323,17 +313,17 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 					mTexCoordFloatArray.padZeros();
 					mIndexIntArray.padZeros();
 
-					mClearGeometryObjectBars.updateVertices(mVerticesFloatArray.getFloatBuffer());
+					mGeometryObjectBars.updateVertices(mVerticesFloatArray.getFloatBuffer());
 					GLError.printGLErrors(	pGL,
-											"AFTER mClearGeometryObject.updateVertices");
-					mClearGeometryObjectBars.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
+											"AFTER mGeometryObject.updateVertices");
+					mGeometryObjectBars.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
 					GLError.printGLErrors(	pGL,
-											"AFTER mClearGeometryObject.updateTextureCoords");
-					mClearGeometryObjectBars.updateIndices(mIndexIntArray.getIntBuffer());
+											"AFTER mGeometryObject.updateTextureCoords");
+					mGeometryObjectBars.updateIndices(mIndexIntArray.getIntBuffer());
 					GLError.printGLErrors(	pGL,
-											"AFTER mClearGeometryObject.updateIndices");
+											"AFTER mGeometryObject.updateIndices");
 
-					mClearGeometryObjectBars.setProjection(pProjectionMatrix);
+					mGeometryObjectBars.setProjection(pProjectionMatrix);
 
 					pGL.glDisable(GL.GL_DEPTH_TEST);
 					pGL.glEnable(GL.GL_BLEND);
@@ -341,7 +331,7 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 									GL.GL_ONE_MINUS_SRC_ALPHA);
 					pGL.glBlendEquation(GL.GL_FUNC_ADD);/**/
 
-					mClearGeometryObjectBars.draw(	0,
+					mGeometryObjectBars.draw(	0,
 													mBarHeightData.capacity() * 6);
 
 					final Font lFont = ClearVolumeDefaultFont.getFontPlain(12);
@@ -389,8 +379,8 @@ public abstract class BarGraphOverlay extends OverlayBase	implements
 		if (mGLProgram != null)
 			mGLProgram.close();
 
-		if (mClearGeometryObjectBars != null)
-			mClearGeometryObjectBars.close();
+		if (mGeometryObjectBars != null)
+			mGeometryObjectBars.close();
 
 	}
 

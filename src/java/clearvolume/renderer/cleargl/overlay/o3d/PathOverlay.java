@@ -4,7 +4,7 @@ import java.nio.FloatBuffer;
 
 import com.jogamp.opengl.GL;
 
-import cleargl.ClearGeometryObject;
+import cleargl.GeometryObject;
 import cleargl.GLAttribute;
 import cleargl.GLFloatArray;
 import cleargl.GLMatrix;
@@ -38,7 +38,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 	protected GLUniform mOverlayModelViewMatrixUniform;
 	protected GLUniform mOverlayProjectionMatrixUniform;
 
-	protected ClearGeometryObject mPath;
+	protected GeometryObject mPath;
 	protected GLFloatArray mPathPoints;
 
 	protected FloatBuffer mStartColor = FloatBuffer.wrap(new float[]
@@ -87,7 +87,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 														"shaders/path_geom.glsl",
 														"shaders/path_frag.glsl" });
 
-			mPath = new ClearGeometryObject(mBoxGLProgram,
+			mPath = new GeometryObject(mBoxGLProgram,
 											3,
 											GL.GL_LINE_STRIP);
 			mPath.setDynamic(true);

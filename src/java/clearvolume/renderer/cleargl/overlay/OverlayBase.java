@@ -1,5 +1,6 @@
 package clearvolume.renderer.cleargl.overlay;
 
+import cleargl.scenegraph.Node;
 /**
  * OverlayBase - Class implementing basic functionality of classes implementing
  * the Overlay interface.
@@ -7,7 +8,7 @@ package clearvolume.renderer.cleargl.overlay;
  * @author Loic Royer (2015)
  *
  */
-public abstract class OverlayBase implements Overlay
+public abstract class OverlayBase extends Node implements Overlay
 {
 	private volatile boolean mDisplay = true;
 
@@ -37,6 +38,10 @@ public abstract class OverlayBase implements Overlay
 	public boolean isDisplayed()
 	{
 		return mDisplay;
+	}
+
+	public OverlayBase() {
+		super("Overlay-" + getClass().getName());
 	}
 
 }

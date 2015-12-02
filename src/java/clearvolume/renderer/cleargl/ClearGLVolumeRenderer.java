@@ -1,6 +1,7 @@
 package clearvolume.renderer.cleargl;
 
 import cleargl.*;
+import cleargl.scenegraph.*;
 import cleargl.util.recorder.GLVideoRecorder;
 import clearvolume.controller.OculusRiftController;
 import clearvolume.controller.RotationControllerInterface;
@@ -24,6 +25,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.Quaternion;
 import coremem.types.NativeTypeEnum;
+import javafx.scene.Scene;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 
@@ -123,6 +125,9 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	{ -1.f, 1.f, 1.f };
 
 	private final OculusRiftController ovr;
+
+	// scene graph
+	protected Scene scene;
 
 	/**
 	 * Constructs an instance of the JoglPBOVolumeRenderer class given a window
@@ -430,6 +435,10 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 	}
 
+	public void setScene(Scene s) {
+		this.scene = s;
+	}
+
 	public void copyBufferToTexture(final int pRenderLayerIndex,
 									final ByteBuffer pByteBuffer)
 	{
@@ -552,6 +561,11 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					if(System.getProperty("ClearVolume.Anaglyph") == null) {
 						lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 					}
+
+					if (haveVolumeRenderingParametersChanged() || isNewVolumeDataAvailable())
+						getAdaptiveLODController().renderingParametersOrVolumeDataChanged();
+
+					// <volume-specific>
 					lGL.glDisable(GL.GL_CULL_FACE);
 					lGL.glEnable(GL.GL_BLEND);
 					lGL.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
@@ -564,8 +578,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 					GLError.printGLErrors(lGL, "BEFORE RENDER VOLUME");
 
-					if (haveVolumeRenderingParametersChanged() || isNewVolumeDataAvailable())
-						getAdaptiveLODController().renderingParametersOrVolumeDataChanged();
 
 					renderVolume(lModelViewMatrix.clone()
 													.invert()
@@ -577,7 +589,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 													.getFloatArray());
 
 
-					getAdaptiveLODController().afterRendering();
+
 
 					clearChangeOfVolumeParametersFlag();
 
@@ -592,7 +604,9 @@ ClearVolumeRendererBase implements ClearGLEventListener
 									false);
 
 					mQuadVertexArray.draw(GL.GL_TRIANGLES);
+					// </volume-specific>
 
+					getAdaptiveLODController().afterRendering();
 					final GLMatrix lAspectRatioCorrectedProjectionMatrix = getAspectRatioCorrectedProjectionMatrix();
 
 					renderOverlays3D(lGL,
@@ -1331,11 +1345,25 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 	private void setDefaultProjectionMatrix()
 	{
-		if (getClearGLWindow() != null)
-			getClearGLWindow().setPerspectiveProjectionMatrix(	getFOV(),
-																1,
-																.1f,
-																1000);
+		if (getClearGLWindow() != null) {
+			if(System.getProperty("ClearVolume.Anaglyph") == null) {
+			getClearGLWindow().setPerspectiveProjectionMatrix(getFOV(),
+							1,
+							.1f,
+							1000);
+			} else {
+				float ed = 0.01f;
+				float conv = 1.0f;
+				System.err.println("Eye distance: " + ed + ", convergence: " + conv);
+				getClearGLWindow().setPerspectiveAnaglyphProjectionMatrix(getFOV(),
+								conv,
+								getViewportWidth() / getViewportHeight(),
+								ed,
+								0.01f,
+								1000);
+			}
+		}
+
 	}
 
 	public void setLightVector(final float[] pLight)

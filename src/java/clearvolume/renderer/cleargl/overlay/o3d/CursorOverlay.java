@@ -6,16 +6,12 @@ import static java.lang.Math.sqrt;
 
 import java.io.IOException;
 
+import cleargl.*;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES3;
 
-import cleargl.ClearGeometryObject;
-import cleargl.GLFloatArray;
-import cleargl.GLIntArray;
-import cleargl.GLMatrix;
-import cleargl.GLProgram;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
@@ -36,7 +32,7 @@ public class CursorOverlay extends OverlayBase	implements
 												EyeRayListener
 {
 	protected GLProgram mBoxGLProgram;
-	protected ClearGeometryObject mPlaneX, mPlaneY, mPlaneZ;
+	protected GeometryObject mPlaneX, mPlaneY, mPlaneZ;
 	private volatile boolean mHasChanged = true;
 
 	private final String mName;
@@ -119,17 +115,17 @@ public class CursorOverlay extends OverlayBase	implements
 													"shaders/cursor_vert.glsl",
 													"shaders/cursor_frag.glsl");
 
-			mPlaneX = new ClearGeometryObject(	mBoxGLProgram,
+			mPlaneX = new GeometryObject(	mBoxGLProgram,
 												3,
 												GL.GL_TRIANGLES);
 			mPlaneX.setDynamic(true);/**/
 
-			mPlaneY = new ClearGeometryObject(	mBoxGLProgram,
+			mPlaneY = new GeometryObject(	mBoxGLProgram,
 												3,
 												GL.GL_TRIANGLES);
 			mPlaneY.setDynamic(true);
 
-			mPlaneZ = new ClearGeometryObject(	mBoxGLProgram,
+			mPlaneZ = new GeometryObject(	mBoxGLProgram,
 												3,
 												GL.GL_TRIANGLES);
 			mPlaneZ.setDynamic(true);/**/

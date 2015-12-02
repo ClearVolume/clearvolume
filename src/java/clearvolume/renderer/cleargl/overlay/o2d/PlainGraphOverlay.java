@@ -7,15 +7,10 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import cleargl.*;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 
-import cleargl.ClearGeometryObject;
-import cleargl.GLError;
-import cleargl.GLFloatArray;
-import cleargl.GLIntArray;
-import cleargl.GLMatrix;
-import cleargl.GLProgram;
 import clearvolume.audio.audioplot.AudioPlot;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
@@ -38,7 +33,7 @@ public class PlainGraphOverlay extends OverlayBase	implements
 	// seems to be supported
 
 	private GLProgram mGLProgram;
-	private ClearGeometryObject mClearGeometryObject;
+	private GeometryObject mGeometryObject;
 	private GLFloatArray mVerticesFloatArray;
 	private GLIntArray mIndexIntArray;
 	private GLFloatArray mNormalArray;
@@ -267,10 +262,10 @@ public class PlainGraphOverlay extends OverlayBase	implements
 												"shaders/graph_vert.glsl",
 												"shaders/graph_frag.glsl");
 
-			mClearGeometryObject = new ClearGeometryObject(	mGLProgram,
+			mGeometryObject = new GeometryObject(	mGLProgram,
 															3,
 															GL.GL_TRIANGLE_STRIP);
-			mClearGeometryObject.setDynamic(true);
+			mGeometryObject.setDynamic(true);
 
 			final int lNumberOfPointsToDraw = 2 * getMaxNumberOfDataPoints();
 
@@ -286,10 +281,10 @@ public class PlainGraphOverlay extends OverlayBase	implements
 			mIndexIntArray.fillZeros();
 			mTexCoordFloatArray.fillZeros();
 
-			mClearGeometryObject.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
-			mClearGeometryObject.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
-			mClearGeometryObject.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
-			mClearGeometryObject.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
+			mGeometryObject.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
+			mGeometryObject.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
+			mGeometryObject.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
+			mGeometryObject.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
 
 			GLError.printGLErrors(pGL, "AFTER GRAPH OVERLAY INIT");
 
@@ -371,18 +366,18 @@ public class PlainGraphOverlay extends OverlayBase	implements
 					System.out.println("mIndexIntArray.getFloatBuffer().limit()=" + mIndexIntArray.getIntBuffer()
 																																												.limit());/**/
 
-					mClearGeometryObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
+					mGeometryObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
 					GLError.printGLErrors(	pGL,
-											"AFTER mClearGeometryObject.updateVertices");
-					mClearGeometryObject.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
+											"AFTER mGeometryObject.updateVertices");
+					mGeometryObject.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
 					GLError.printGLErrors(	pGL,
-											"AFTER mClearGeometryObject.updateTextureCoords");
-					mClearGeometryObject.updateIndices(mIndexIntArray.getIntBuffer());
+											"AFTER mGeometryObject.updateTextureCoords");
+					mGeometryObject.updateIndices(mIndexIntArray.getIntBuffer());
 					GLError.printGLErrors(	pGL,
-											"AFTER mClearGeometryObject.updateIndices");
+											"AFTER mGeometryObject.updateIndices");
 
 					// mGLProgram.use(pGL);
-					mClearGeometryObject.setProjection(pProjectionMatrix);
+					mGeometryObject.setProjection(pProjectionMatrix);
 
 					// System.out.println(pProjectionMatrix.toString());
 
@@ -392,7 +387,7 @@ public class PlainGraphOverlay extends OverlayBase	implements
 									GL.GL_ONE_MINUS_SRC_ALPHA);
 					pGL.glBlendEquation(GL.GL_FUNC_ADD);/**/
 
-					mClearGeometryObject.draw(0, mDataY.size() * 2);
+					mGeometryObject.draw(0, mDataY.size() * 2);
 
 					mHasChanged = false;
 				}
