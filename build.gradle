@@ -53,11 +53,16 @@ targetCompatibility = 1.7
 
 test
 {
+  beforeTest { descriptor ->
+     logger.lifecycle("Running test: ${descriptor}")
+  }
 	testLogging.showStandardStreams = true
 	testLogging
 	{ events "passed", "skipped", "failed" }
 
-	exclude '**/demo/**'
+  	if (!project.hasProperty('withDemos')) {
+	    exclude '**/demo/**'
+    }
 	exclude '**/run/**'
 
 	maxHeapSize = "4G"
