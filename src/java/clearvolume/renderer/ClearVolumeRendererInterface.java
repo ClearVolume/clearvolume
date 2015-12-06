@@ -214,6 +214,9 @@ public interface ClearVolumeRendererInterface	extends
 	public long getBytesPerVoxel();
 
 	/**
+    * Returns the current ClipBox extremes. The ClipBox defines the visible 
+    * part of the dataset.  The Clipbox bounds range from -1.0 to +1.0 for all axes. 
+    * 
 	 * @return clip box bounds [xmin, xmax, ymin, ymax, zmin, zmax]
 	 */
 	public float[] getClipBox();
@@ -546,7 +549,10 @@ public interface ClearVolumeRendererInterface	extends
 								double pBrightness);
 
 	/**
-	 * Sets the clip box bounds [xmin, xmax, ymin, ymax, zmin, zmax].
+	 * The ClipBox defines the visible part of the dataset.  The Clipbox bounds
+    * range from -1.0 to +1.0 for all axes. 
+    * 
+    * Sets the clip box bounds [xmin, xmax, ymin, ymax, zmin, zmax].
 	 * 
 	 * @param pClipBoxBounds
 	 */
