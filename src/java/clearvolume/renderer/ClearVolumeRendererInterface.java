@@ -29,6 +29,28 @@ import coremem.types.NativeTypeEnum;
  *
  * Classes that implement this interface provide the basic functionality of
  * ClearVolume renderer.
+ * 
+ * A ClearVolume renderer can have multiple render Layers, which can be thought of
+ * as independent channels (they can, for instance, have their own color). 
+ * Several functions will work on the "current" render layer (which can be 
+ * discovered using the method "getCurrentRenderLayerIndex()", and can be set
+ * using the "setCurrentRenderLayer(int index)" method.  
+ * 
+ * The "colors" of each render layer are set using a TransferFunction (that can
+ * retrieved and that can be set).  TransferFunctions can be thought of as 
+ * look-up-tables.
+ * 
+ * Functions for translation, rotation, and setting a CLipbox (limiting the 
+ * visible part of the volume) are provided.  Most of these functions will 
+ * have a coordinate system ranging from -1.0 (at the bottom of the given axis) 
+ * to 1.0 (top of the axis).  
+ * 
+ * Quaternion ???
+ * EyeRayListener ???
+ * FOV ???
+ * Rotation Controller (what does it do???)
+ * What does a LOD controller do?
+ * What do Processors do?
  *
  * @author Loic Royer 2014
  *
@@ -45,7 +67,7 @@ public interface ClearVolumeRendererInterface	extends
 {
 
 	/**
-	 * Adds a eye ray listener to this renderer.
+	 * Adds an eye ray listener to this renderer. (what is an eye ray listener?)
 	 *
 	 * @param pEyeRayListener
 	 *            eye ray listener
@@ -53,7 +75,7 @@ public interface ClearVolumeRendererInterface	extends
 	public void addEyeRayListener(EyeRayListener pEyeRayListener);
 
 	/**
-	 * Adds FOV.
+	 * Adds FOV  (what is FOV, and what does the parameter pDelta mean/do???)
 	 * 
 	 * @param pDelta
 	 */
@@ -100,26 +122,39 @@ public interface ClearVolumeRendererInterface	extends
 	public void addRotationController(RotationControllerInterface pRotationControllerInterface);
 
 	/**
-	 * Translates along x axis by pDX.
+	 * Translates dataset along x axis.
+	 * Translation units are such that the volume dataset is covered in the range
+	 * -1.0 to +1.0.  Translation of a centered dataset in x by 1.0 will move the 
+	 * dataset to the right and place the left most extremity of the dataset at 
+	 * the origin. This function performs a translation relative to the current 
+	 * position.
+	 * 
 	 *
-	 * @param pDX
-	 *            amount of translation
+	 * @param pDX amount of translation in x
 	 */
 	public void addTranslationX(double pDX);
 
 	/**
-	 * Translates along y axis by pDY.
+	 * Translates dataset along y axis.
+	 * Translation units are such that the volume dataset is covered in the range
+	 * -1.0 to +1.0.  Translation of a centered dataset in y to 1.0 will move the 
+	 * dataset to the top and place the bottom most extremity of the dataset at 
+	 * the origin. This function performs a translation relative to the current 
+	 * position.
 	 *
-	 * @param pDY
-	 *            amount of translation
+	 * @param pDY amount of translation in y
 	 */
 	public void addTranslationY(double pDY);
 
 	/**
-	 * Translates along z axis by pDZ.
-	 *
-	 * @param pDZ
-	 *            amount of translation
+	 * Translates dataset along z axis.
+	 * Translation units are such that the volume dataset is covered in the range
+	 * -1.0 to +1.0.  Translation of a centered dataset in z by 1.0 will move the 
+	 * dataset into the screen place the front facing extremity of the dataset at 
+	 * the origin. This function performs a translation relative to the current 
+	 * position.
+	 * 
+	 * @param pDZ amount of translation in z
 	 */
 	public void addTranslationZ(double pDZ);
 
@@ -170,7 +205,7 @@ public interface ClearVolumeRendererInterface	extends
 	public void disableClose();
 
 	/**
-	 * Sets the adaptive LOD flag
+	 * Returns the adaptive LOD (level-of-detail) flag
 	 * 
 	 * @return true if adaptive LOD is active
 	 */
@@ -236,7 +271,7 @@ public interface ClearVolumeRendererInterface	extends
 	ReentrantLock getDisplayLock();
 
 	/**
-	 * Returns samount of dithering [0,1] for a given render layer.
+	 * Returns amount of dithering (0-1) for a given render layer.
 	 *
 	 * @param pRenderLayerIndex
 	 *            render layer index
@@ -245,14 +280,14 @@ public interface ClearVolumeRendererInterface	extends
 	public float getDithering(int pRenderLayerIndex);
 
 	/**
-	 * Returns FOV
+	 * Returns FOV (what is FOV???)
 	 * 
 	 * @return FOV
 	 */
 	float getFOV();
 
 	/**
-	 * Returns gamma value for current layer.
+	 * Returns gamma value for current layer. 
 	 * 
 	 * @return gamma
 	 */
@@ -268,7 +303,7 @@ public interface ClearVolumeRendererInterface	extends
 	public double getGamma(int pRenderLayerIndex);
 
 	/**
-	 * Returns the native type of this renderer.
+	 * Returns the native type (such as Byte, Float, etc..) of this renderer. 
 	 *
 	 * @return native type.
 	 */
@@ -304,7 +339,7 @@ public interface ClearVolumeRendererInterface	extends
 	public Collection<ProcessorInterface<?>> getProcessors();
 
 	/**
-	 * Returns the quality level [0,1] for a given render layer.
+	 * Returns the quality level (0-1) for a given render layer.
 	 *
 	 * @param pRenderLayerIndex
 	 *            render layer index
@@ -641,7 +676,7 @@ public interface ClearVolumeRendererInterface	extends
 	public void setNumberOfRenderLayers(int pNumberOfRenderLayers);
 
 	/**
-	 * Sets the quality level [0,1] for a given render layer.
+	 * Sets the quality level (0-1) for a given render layer.
 	 *
 	 * @param pRenderLayerIndex
 	 *            render layer index
@@ -755,24 +790,36 @@ public interface ClearVolumeRendererInterface	extends
 											double pTransferRangeMin);
 
 	/**
-	 * Sets the translation vector x component.
+	 * Sets absolute position of the dataset along x axis.
+	 * Translation units are such that the volume dataset is covered in the range
+	 * -1.0 to +1.0.  Translation of a centered dataset in x to 1.0 will move the 
+	 * dataset to the right and place the left most extremity of the dataset at 
+	 * the origin. 
 	 *
 	 * @param pTranslationX
-	 *            x component
+	 *            x position
 	 */
 	public void setTranslationX(double pTranslationX);
 
 	/**
-	 * Sets the translation vector y component.
+	 * Sets absolute position of the dataset along y axis.
+	 * Translation units are such that the volume dataset is covered in the range
+	 * -1.0 to +1.0.  Translation of a centered dataset in y to 1.0 will move the 
+	 * dataset to the top and place the bottom most extremity of the dataset at 
+	 * the origin. 
 	 *
 	 * @param pTranslationY
-	 *            y component
+	 *            y position
 	 */
 	public void setTranslationY(double pTranslationY);
 
 	/**
-	 * Sets the translation vector z component.
-	 *
+	 * Sets absolute position of the dataset along z axis.
+	 * Translation units are such that the volume dataset is covered in the range
+	 * -1.0 to +1.0.  Translation of a centered dataset in z by 1.0 will move the 
+	 * dataset into the screen place the front facing extremity of the dataset at 
+	 * the origin. In most cases, a dataset will start at a z of ~5.0.
+	 * 
 	 * @param pTranslationZ
 	 *            z component
 	 */
@@ -791,6 +838,8 @@ public interface ClearVolumeRendererInterface	extends
 	 * 
 	 * @param pWaitForCopy
 	 *            set to true for waiting for data to be copied.
+	 * @param pTimeOut
+	 * @param pTimeUnit
 	 * @param pRenderLayerIndex
 	 *            render pByteBuffer index
 	 * @param pFragmentedMemoryInterface
@@ -1168,16 +1217,16 @@ public interface ClearVolumeRendererInterface	extends
 
 	/**
 	 * Sets the flag that allows/disallows the update of volume data. This is
-	 * usefull when rendering multi-channel data.
+	 * useful when rendering multi-channel data.
+	 * 
+	 * @param pVolumeDataUpdateAllowed true allows volume updates
 	 */
 	void setVolumeDataUpdateAllowed(boolean pVolumeDataUpdateAllowed);
 
 	/**
-	 * Updates the voxel size of subsequently rendered volume for given render
+	 * Updates the voxel size of subsequently rendered volume for default render
 	 * layer.
 	 *
-	 * @param pRenderLayerIndex
-	 *            render layer index
 	 * @param pVoxelSizeX
 	 *            voxel size along X
 	 * @param pVoxelSizeY
@@ -1213,7 +1262,7 @@ public interface ClearVolumeRendererInterface	extends
 	public void toggleAdaptiveLOD();
 
 	/**
-	 * Toggles box display.
+	 * Toggles display of a wire frame box around the data set
 	 */
 	public void toggleBoxDisplay();
 
