@@ -1,7 +1,9 @@
 package clearvolume.renderer.cleargl;
 
 import cleargl.*;
-import cleargl.scenegraph.*;
+import cleargl.scenegraph.Camera;
+import cleargl.scenegraph.Node;
+import cleargl.scenegraph.Scene;
 import cleargl.util.recorder.GLVideoRecorder;
 import clearvolume.controller.OculusRiftController;
 import clearvolume.controller.RotationControllerInterface;
@@ -25,7 +27,6 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.Quaternion;
 import coremem.types.NativeTypeEnum;
-import javafx.scene.Scene;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SystemUtils;
 
@@ -465,15 +466,17 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 	private void displayInternal(final GLAutoDrawable pDrawable)
 	{
+		// use scenegraph functionality if we do have a scene
+		if(this.scene != null) {
+			displayInternalScenegraph(pDrawable);
+			return;
+		}
+
 		final boolean lTryLock = true;
 
 		pDrawable.getGL();
 
-		mDisplayReentrantLock.lock(); /*
-																	* tryLock(
-																	* cMaxWaitingTimeForAcquiringDisplayLockInMs
-																	* , TimeUnit.MILLISECONDS);/*
-																	*/
+		mDisplayReentrantLock.lock();
 
 		if (lTryLock)
 			try
@@ -483,25 +486,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 				final boolean lOverlay2DChanged = isOverlay2DChanged();
 				final boolean lOverlay3DChanged = isOverlay3DChanged();
 
-				/*
-				 * if (!isNewVolumeDataAvailable() && !lOverlay2DChanged &&
-				 * !lOverlay3DChanged && !haveVolumeRenderingParametersChanged()
-				 * && !getAdaptiveLODController().isRedrawNeeded() &&
-				 * !pForceRedraw) { return; }/*
-				 */
-
-				/*
-				 * System.out.println("isNewVolumeDataAvailable()=" +
-				 * isNewVolumeDataAvailable());
-				 * System.out.println("lOverlay2DChanged=" + lOverlay2DChanged);
-				 * System.out.println("lOverlay3DChanged=" + lOverlay3DChanged);
-				 * System.out.println("haveVolumeRenderingParametersChanged()="
-				 * + haveVolumeRenderingParametersChanged());
-				 * System.out.println(
-				 * "getAdaptiveLODController().isRedrawNeeded()=" +
-				 * getAdaptiveLODController().isRedrawNeeded());
-				 * System.out.println("pForceRedraw=" + pForceRedraw);/*
-				 */
 
 				final GL lGL = pDrawable.getGL();
 				int w, h;
@@ -620,6 +604,129 @@ ClearVolumeRendererBase implements ClearGLEventListener
 					if (lLastRenderPass)
 						mGLVideoRecorder.screenshot(pDrawable,
 										!getAutoRotateController().isRotating());
+
+					if(System.getProperty("ClearVolume.Anaglyph") != null && eye == 1) {
+						lGL.glColorMask(true, true, true, true);
+					}
+				}
+
+			}
+			catch (Throwable e)
+			{
+				e.printStackTrace();
+			}
+			finally
+			{
+				if (mDisplayReentrantLock.isHeldByCurrentThread())
+					mDisplayReentrantLock.unlock();
+			}
+
+	}
+
+	private void displayInternalScenegraph(final GLAutoDrawable pDrawable)
+	{
+		final boolean lTryLock = true;
+
+		pDrawable.getGL();
+
+		mDisplayReentrantLock.lock();
+
+		if (lTryLock)
+			try
+			{
+				ensureTextureAllocated();
+
+				final boolean lOverlay2DChanged = isOverlay2DChanged();
+				final boolean lOverlay3DChanged = isOverlay3DChanged();
+
+
+				final GL lGL = pDrawable.getGL();
+				int w, h;
+
+				lGL.glEnable(GL.GL_SCISSOR_TEST);
+
+				w = getWindowWidth();
+				h = getWindowHeight();
+
+				boolean lLastRenderPass = getAdaptiveLODController().beforeRendering();
+				float[] eyeShift;
+				int eyeCount;
+
+				if(getTranslationRotationControllers().size() == 0) {
+					eyeShift = new float[]{-0.1f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f};
+				} else {
+					eyeShift = getTranslationRotationControllers().get(0).getEyeShift();
+				}
+
+				if(System.getProperty("ClearVolume.EnableVR") != null) {
+					eyeCount = 2;
+				} else if(System.getProperty("ClearVolume.Anaglyph") != null) {
+					eyeShift = new float[]{-0.03f, 0.0f, 0.0f, 0.03f, 0.0f, 0.0f};
+					eyeCount = 2;
+				} else {
+					eyeShift = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+					eyeCount = 1;
+				}
+
+				lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+
+				for(int eye = 0; eye < eyeCount; eye++) {
+					if (System.getProperty("ClearVolume.EnableVR") == null) {
+						lGL.glViewport(0, 0, w, h);
+						lGL.glScissor(0, 0, w, h);
+					} else if(System.getProperty("ClearVolume.Anaglyph") == null) {
+						lGL.glViewport(0, 0, w, h);
+						lGL.glScissor(0, 0, w, h);
+					} else
+					{
+						lGL.glViewport(w / 2 * eye, 0, w / 2, h);
+						lGL.glScissor(w / 2 * eye, 0, w / 2, h);
+					}
+
+					if(System.getProperty("ClearVolume.Anaglyph") != null && eye == 0) {
+						lGL.glDisable(GL.GL_BLEND);
+						//setTransferFunction(0, TransferFunctions.getGradientForColor(0));
+						lGL.glColorMask(true, false, false, false);
+					}
+					if(System.getProperty("ClearVolume.Anaglyph") != null && eye == 1) {
+						lGL.glClear(GL.GL_DEPTH_BUFFER_BIT);
+						//setTransferFunction(0, TransferFunctions.getGradientForColor(1));
+						lGL.glColorMask(false, true, true, false);
+					}
+
+					lGL.glClearColor(0, 0, 0, 1);
+					if(System.getProperty("ClearVolume.Anaglyph") == null) {
+						lGL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+					}
+
+					if (haveVolumeRenderingParametersChanged() || isNewVolumeDataAvailable())
+						getAdaptiveLODController().renderingParametersOrVolumeDataChanged();
+
+					Scene rootNode = this.scene;
+					// find observer
+					Camera cam = rootNode.findObserver();
+					// convert scenegraph to render tree
+
+					// recursively render nodes
+					for(Node n: rootNode.getChildren()) {
+						n.updateWorld(true);
+						n.draw();
+					}
+
+					getAdaptiveLODController().afterRendering();
+					final GLMatrix lAspectRatioCorrectedProjectionMatrix = getAspectRatioCorrectedProjectionMatrix();
+
+					/*renderOverlays3D(lGL,
+							lAspectRatioCorrectedProjectionMatrix,
+							lModelViewMatrix);
+
+					renderOverlays2D(lGL, cOverlay2dProjectionMatrix);*/
+
+					updateFrameRateDisplay();
+
+					if (lLastRenderPass)
+						mGLVideoRecorder.screenshot(pDrawable,
+								!getAutoRotateController().isRotating());
 
 					if(System.getProperty("ClearVolume.Anaglyph") != null && eye == 1) {
 						lGL.glColorMask(true, true, true, true);
@@ -1096,7 +1203,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 
 	/**
 	 * Notifies eye ray listeners.
-	 * 
+	 *
 	 * @param pRenderer
 	 *            renderer that calls listeners
 	 * @param pMouseEvent
@@ -1312,10 +1419,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 			if (lRatioAspect > 0 && lRatioAspect < 1)
 				lRatioAspect = 1f / lRatioAspect;
 
-			/*System.out.format("modified ratios: (%g,%g) \n",
-												lRatioWidth,
-												lRatioHeight);/**/
-
 			if (lRatioWidth > cTextureDimensionChangeRatioThreshold || lRatioHeight > cTextureDimensionChangeRatioThreshold
 				|| lRatioAspect > cTextureAspectChangeRatioThreshold)
 			{
@@ -1323,9 +1426,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 				mRenderHeight = lCandidateTextureHeight;
 				mUpdateTextureWidthHeight = true;
 
-				/*System.out.format("resizing texture: (%d,%d) \n",
-													mRenderWidth,
-													mRenderHeight);/**/
 			}
 
 		}
@@ -1461,23 +1561,6 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	{
 		if (mNewtCanvasAWT != null)
 			return;
-
-		/*step++;
-		final long currentTime = System.nanoTime();
-		if (prevTimeNS == -1)
-		{
-			prevTimeNS = currentTime;
-		}
-		final long diff = currentTime - prevTimeNS;
-		if (diff > 1e9)
-		{
-			final double fps = (diff / 1e9) * step;
-			String t = getWindowName() + " (";
-			t += String.format("%.2f", fps) + " fps)";
-			setWindowTitle(t);
-			prevTimeNS = currentTime;
-			step = 0;
-		}/**/
 	}
 
 }
