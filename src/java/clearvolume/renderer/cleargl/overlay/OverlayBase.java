@@ -41,7 +41,7 @@ public abstract class OverlayBase extends Node implements Overlay
 	}
 
 	public OverlayBase() {
-		super("Overlay-" + getClass().getName());
+		super("Overlay");
 	}
 
 }

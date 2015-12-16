@@ -7,6 +7,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
+import cleargl.GLVector;
 import org.junit.Test;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
@@ -83,10 +84,10 @@ public class ClearVolumeOverlayDemos
 																												512,
 																												1,
 																												false);
-		lClearVolumeRenderer.addOverlay(new PathOverlay());
+		lClearVolumeRenderer.addOverlay(new PathOverlay(lClearVolumeRenderer));
 
 		final RandomWalk RandomWalk = new RandomWalk();
-		final DriftOverlay driftOverlay = new DriftOverlay();
+		final DriftOverlay driftOverlay = new DriftOverlay(lClearVolumeRenderer);
 		lClearVolumeRenderer.addOverlay(driftOverlay);
 		RandomWalk.addResultListener(driftOverlay);
 
@@ -157,7 +158,7 @@ public class ClearVolumeOverlayDemos
 																												1,
 																												false);
 
-		final GraphOverlay lGraphOverlay = new GraphOverlay(256);
+		final GraphOverlay lGraphOverlay = new GraphOverlay(lClearVolumeRenderer, 256);
 		lClearVolumeRenderer.addOverlay(lGraphOverlay);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
@@ -217,7 +218,7 @@ public class ClearVolumeOverlayDemos
 																												1,
 																												false);
 
-		final PathOverlay lPathOverlay = new PathOverlay();
+		final PathOverlay lPathOverlay = new PathOverlay(lClearVolumeRenderer);
 		lClearVolumeRenderer.addOverlay(lPathOverlay);
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
@@ -283,7 +284,7 @@ public class ClearVolumeOverlayDemos
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
 		lClearVolumeRenderer.setVisible(true);
 
-		final CursorOverlay lCursorOverlay1 = new CursorOverlay("1");
+		final CursorOverlay lCursorOverlay1 = new CursorOverlay(lClearVolumeRenderer, "1");
 		lCursorOverlay1.setColor(1f, 0.8f, 0.8f, 1f);
 		lCursorOverlay1.setPosition(0.25f, 0.25f, 0.25f);
 		lCursorOverlay1.setLineLength(0.01f);
@@ -291,7 +292,7 @@ public class ClearVolumeOverlayDemos
 		lClearVolumeRenderer.addEyeRayListener(lCursorOverlay1);
 		lClearVolumeRenderer.addOverlay(lCursorOverlay1);
 
-		final CursorOverlay lCursorOverlay2 = new CursorOverlay("2");
+		final CursorOverlay lCursorOverlay2 = new CursorOverlay(lClearVolumeRenderer, "2");
 		lCursorOverlay2.setColor(0.8f, 0.8f, 1f, 1f);
 		lCursorOverlay2.setPosition(0.75f, 0.75f, 0.75f);
 		lCursorOverlay2.setBoxLinesAlpha(0.1f);

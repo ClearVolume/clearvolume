@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import cleargl.*;
+import cleargl.scenegraph.*;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES3;
@@ -25,7 +26,7 @@ public class BoxOverlay extends OverlayBase	implements
 											SingleKeyToggable
 {
 	protected GLProgram mBoxGLProgram;
-	protected GeometryObject mGeometryObject;
+	protected GeometricalObject mGeometricalObject;
 	private volatile boolean mHasChanged = true;
 	private float[] mClipBox;
 	private boolean mAlignToClipBox;
@@ -33,23 +34,24 @@ public class BoxOverlay extends OverlayBase	implements
 	private String mName;
 	private float mWidth;
 
-	public BoxOverlay(	final int pNumberOfGridlines,
+	public BoxOverlay(RendererInterface renderer,	final int pNumberOfGridlines,
 						final float width,
 						final boolean pAlignToClipBox,
 
 						final String pName)
 	{
 		super();
+		setRenderer(renderer);
 		mNumberOfGridLines = pNumberOfGridlines;
 		mWidth = width;
 		mAlignToClipBox = pAlignToClipBox;
 		mName = pName;
 	}
 
-	public BoxOverlay()
-	{
-		this(10, 1.f, true, "box");
-	}
+//	public BoxOverlay()
+//	{
+//		this(10, 1.f, true, "box");
+//	}
 
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay#getName()
@@ -101,17 +103,17 @@ public class BoxOverlay extends OverlayBase	implements
 	public void init(	GL pGL,
 						DisplayRequestInterface pDisplayRequestInterface)
 	{
-
 		try
 		{
 			mBoxGLProgram = GLProgram.buildProgram(	pGL,
 													BoxOverlay.class,
-													"shaders/box_vert.glsl",
-													"shaders/box_frag.glsl");
+													"shaders/box.vs",
+													"shaders/box.fs");
 
-			mGeometryObject = new GeometryObject(	mBoxGLProgram,
+			mGeometricalObject = new GeometricalObject(	mBoxGLProgram,
 															3,
 															GL.GL_TRIANGLES);
+			mGeometricalObject.setRenderer(getRenderer());
 
 			mBoxGLProgram.getUniform("NumberOfGridLines")
 							.setInt(mNumberOfGridLines);
@@ -254,11 +256,13 @@ public class BoxOverlay extends OverlayBase	implements
 			lTexCoordFloatArray.add(1.0f, 1.0f);
 			lTexCoordFloatArray.add(0.0f, 1.0f);
 
-			mGeometryObject.setVerticesAndCreateBuffer(lVerticesFloatArray.getFloatBuffer());
-			mGeometryObject.setNormalsAndCreateBuffer(lNormalArray.getFloatBuffer());
-			mGeometryObject.setTextureCoordsAndCreateBuffer(lTexCoordFloatArray.getFloatBuffer());
+			mGeometricalObject.init();
 
-			mGeometryObject.setIndicesAndCreateBuffer(lIndexIntArray.getIntBuffer());
+			mGeometricalObject.setVerticesAndCreateBuffer(lVerticesFloatArray.getFloatBuffer());
+			mGeometricalObject.setNormalsAndCreateBuffer(lNormalArray.getFloatBuffer());
+			mGeometricalObject.setTextureCoordsAndCreateBuffer(lTexCoordFloatArray.getFloatBuffer());
+
+			mGeometricalObject.setIndicesAndCreateBuffer(lIndexIntArray.getIntBuffer());
 
 		}
 		catch (final IOException e)
@@ -322,7 +326,7 @@ public class BoxOverlay extends OverlayBase	implements
 		lVerticesFloatArray.add(x2, y2, z2);
 		lVerticesFloatArray.add(x2, y2, z1);
 		lVerticesFloatArray.add(x1, y2, z1);
-		mGeometryObject.setVerticesAndCreateBuffer(lVerticesFloatArray.getFloatBuffer());
+		mGeometricalObject.setVerticesAndCreateBuffer(lVerticesFloatArray.getFloatBuffer());
 	}
 
 	/* (non-Javadoc)
@@ -348,8 +352,8 @@ public class BoxOverlay extends OverlayBase	implements
 				if (!Arrays.equals(mClipBox, lClipBox))
 					updateClipBox(lClipBox);
 			}
-			mGeometryObject.setModelView(pModelViewMatrix);
-			mGeometryObject.setProjection(pProjectionMatrix);
+			mGeometricalObject.setModelView(pModelViewMatrix);
+			mGeometricalObject.setProjection(pProjectionMatrix);
 
 			pGL.glDisable(GL.GL_DEPTH_TEST);
 			pGL.glEnable(GL.GL_CULL_FACE);
@@ -358,7 +362,7 @@ public class BoxOverlay extends OverlayBase	implements
 			pGL.glBlendEquation(GL2ES3.GL_MAX);
 			pGL.glFrontFace(GL.GL_CW);
 			mBoxGLProgram.use(pGL);
-			mGeometryObject.draw();
+			mGeometricalObject.draw();
 
 			mHasChanged = false;
 		}

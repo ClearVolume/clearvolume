@@ -7,9 +7,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
+import cleargl.RendererInterface;
 import org.bridj.Pointer;
 
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GL;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLImage3D;
@@ -31,9 +33,10 @@ import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;
 import jcuda.CudaException;
+import cleargl.scenegraph.Scene;
 
 public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
-																GLEventListener
+																GLEventListener, RendererInterface
 {
 	private OpenCLDevice mCLDevice;
 
@@ -144,7 +147,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		final OpenCLDeconvolutionLR lOpenCLDeconvolutionLR = new OpenCLDeconvolutionLR();
 		addProcessor(lOpenCLDeconvolutionLR);
 
-		final DriftOverlay lDriftOverlay = new DriftOverlay();
+		final DriftOverlay lDriftOverlay = new DriftOverlay(this);
 		addOverlay(lDriftOverlay);
 		final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
 		addProcessor(lOpenCLCenterMass);
@@ -611,6 +614,21 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 				mDisplayReentrantLock.unlock();
 		}
 
+	}
+
+	@Override
+	public GL getGL() {
+		return super.getGL();
+	}
+
+	@Override
+	public Scene getScene() {
+		return this.scene;
+	}
+
+	@Override
+	public void setScene(Scene s) {
+		this.scene = s;
 	}
 
 }

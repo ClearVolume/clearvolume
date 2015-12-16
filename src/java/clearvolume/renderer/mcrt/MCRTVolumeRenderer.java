@@ -23,6 +23,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import static java.lang.Math.max;
+import cleargl.scenegraph.Scene;
 
 public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
         GLEventListener {
@@ -131,7 +132,7 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
     final OpenCLDeconvolutionLR lOpenCLDeconvolutionLR = new OpenCLDeconvolutionLR();
     addProcessor(lOpenCLDeconvolutionLR);
 
-    final DriftOverlay lDriftOverlay = new DriftOverlay();
+    final DriftOverlay lDriftOverlay = new DriftOverlay(this);
     addOverlay(lDriftOverlay);
     final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
     addProcessor(lOpenCLCenterMass);
@@ -543,6 +544,16 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
         mDisplayReentrantLock.unlock();
     }
 
+  }
+
+  @Override
+  public Scene getScene() {
+    return this.scene;
+  }
+
+  @Override
+  public void setScene(Scene s) {
+    this.scene = s;
   }
 
 }

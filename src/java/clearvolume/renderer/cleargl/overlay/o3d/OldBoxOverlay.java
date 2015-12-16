@@ -12,6 +12,7 @@ import cleargl.GLProgram;
 import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
+import cleargl.scenegraph.*;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
@@ -71,8 +72,8 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 		{
 			mBoxGLProgram = GLProgram.buildProgram(	pGL,
 													OldBoxOverlay.class,
-													"shaders/oldbox_vert.glsl",
-													"shaders/oldbox_frag.glsl");
+													"shaders/oldbox.vs",
+													"shaders/oldbox.fs");
 
 			mOverlayModelViewMatrixUniform = mBoxGLProgram.getUniform("modelview");
 			mOverlayProjectionMatrixUniform = mBoxGLProgram.getUniform("projection");

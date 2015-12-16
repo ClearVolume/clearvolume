@@ -25,6 +25,9 @@ import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;
 
+import cleargl.RendererInterface;
+import cleargl.scenegraph.Scene;
+
 /**
  * Interface ClearVolumeRenderer
  *
@@ -42,8 +45,14 @@ import coremem.types.NativeTypeEnum;
  */
 public interface ClearVolumeRendererInterface	extends
 												DisplayRequestInterface,
-												ClearVolumeCloseable
+												ClearVolumeCloseable,
+												RendererInterface
 {
+	Scene scene = null;
+
+	public void setScene(Scene s);
+
+	public Scene getScene();
 
 	/**
 	 * Adds a eye ray listener to this renderer.
@@ -1279,5 +1288,6 @@ public interface ClearVolumeRendererInterface	extends
 	public boolean waitToFinishDataBufferCopy(	final int pRenderLayerIndex,
 												long pTimeOut,
 												TimeUnit pTimeUnit);
+
 
 }

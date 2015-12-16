@@ -93,7 +93,7 @@ public class ClearVolumeProcessorsDemo
 																												512,
 																												1,
 																												false);
-		lClearVolumeRenderer.addOverlay(new PathOverlay());
+		lClearVolumeRenderer.addOverlay(new PathOverlay(lClearVolumeRenderer));
 		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
 
 		final OpenCLTest myProc = new OpenCLTest();
@@ -164,7 +164,7 @@ public class ClearVolumeProcessorsDemo
 																												512,
 																												1,
 																												false);
-		final GraphOverlay lGraphOverlay = new GraphOverlay(1024);
+		final GraphOverlay lGraphOverlay = new GraphOverlay(lClearVolumeRenderer, 1024);
 		lClearVolumeRenderer.addOverlay(lGraphOverlay);
 
 		final OpenCLTenengrad lOpenCLTenengrad = new OpenCLTenengrad();
@@ -261,7 +261,7 @@ public class ClearVolumeProcessorsDemo
 																												512,
 																												1,
 																												false);
-		final ImageQualityOverlay lImageQualityOverlay = new ImageQualityOverlay();
+		final ImageQualityOverlay lImageQualityOverlay = new ImageQualityOverlay(lClearVolumeRenderer, 20);
 		lClearVolumeRenderer.addOverlay(lImageQualityOverlay);
 		lClearVolumeRenderer.addProcessors(lImageQualityOverlay.getProcessorInterfaces());
 
@@ -339,7 +339,7 @@ public class ClearVolumeProcessorsDemo
 																												512,
 																												1,
 																												false);
-		final DriftOverlay lDriftOverlay = new DriftOverlay();
+		final DriftOverlay lDriftOverlay = new DriftOverlay(lClearVolumeRenderer);
 		lClearVolumeRenderer.addOverlay(lDriftOverlay);
 
 		final OpenCLCenterMass lOpenCLCenterMass = new OpenCLCenterMass();
@@ -621,10 +621,10 @@ public class ClearVolumeProcessorsDemo
 																												512,
 																												1,
 																												false);
-		lClearVolumeRenderer.addOverlay(new PathOverlay());
+		lClearVolumeRenderer.addOverlay(new PathOverlay(lClearVolumeRenderer));
 
 		final RandomWalk RandomWalk = new RandomWalk();
-		final DriftOverlay driftOverlay = new DriftOverlay();
+		final DriftOverlay driftOverlay = new DriftOverlay(lClearVolumeRenderer);
 		lClearVolumeRenderer.addOverlay(driftOverlay);
 		RandomWalk.addResultListener(driftOverlay);
 
@@ -694,7 +694,7 @@ public class ClearVolumeProcessorsDemo
 																												512,
 																												1,
 																												false);
-		lClearVolumeRenderer.addOverlay(new PathOverlay());
+		lClearVolumeRenderer.addOverlay(new PathOverlay(lClearVolumeRenderer));
 		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
 		lClearVolumeRenderer.addProcessor(new OpenCLTest());
 

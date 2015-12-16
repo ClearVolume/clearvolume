@@ -7,6 +7,7 @@ import static java.lang.Math.sqrt;
 import java.io.IOException;
 
 import cleargl.*;
+import cleargl.scenegraph.*;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.opengl.GL;
@@ -32,7 +33,7 @@ public class CursorOverlay extends OverlayBase	implements
 												EyeRayListener
 {
 	protected GLProgram mBoxGLProgram;
-	protected GeometryObject mPlaneX, mPlaneY, mPlaneZ;
+	protected GeometricalObject mPlaneX, mPlaneY, mPlaneZ;
 	private volatile boolean mHasChanged = true;
 
 	private final String mName;
@@ -52,7 +53,7 @@ public class CursorOverlay extends OverlayBase	implements
 	private GLFloatArray mVerticesFloatArrayPlaneY;
 	private GLFloatArray mVerticesFloatArrayPlaneZ;
 
-	public CursorOverlay(String pName)
+	public CursorOverlay(RendererInterface renderer, String pName)
 	{
 		super();
 		mName = pName;
@@ -112,23 +113,30 @@ public class CursorOverlay extends OverlayBase	implements
 		{
 			mBoxGLProgram = GLProgram.buildProgram(	pGL,
 													CursorOverlay.class,
-													"shaders/cursor_vert.glsl",
-													"shaders/cursor_frag.glsl");
+													"shaders/cursor.vs",
+													"shaders/cursor.fs");
 
-			mPlaneX = new GeometryObject(	mBoxGLProgram,
+			mPlaneX = new GeometricalObject(
 												3,
 												GL.GL_TRIANGLES);
 			mPlaneX.setDynamic(true);/**/
+			mPlaneX.setRenderer(getRenderer());
 
-			mPlaneY = new GeometryObject(	mBoxGLProgram,
+			mPlaneY = new GeometricalObject(
 												3,
 												GL.GL_TRIANGLES);
 			mPlaneY.setDynamic(true);
+			mPlaneY.setRenderer(getRenderer());
 
-			mPlaneZ = new GeometryObject(	mBoxGLProgram,
+			mPlaneZ = new GeometricalObject(
 												3,
 												GL.GL_TRIANGLES);
 			mPlaneZ.setDynamic(true);/**/
+			mPlaneZ.setRenderer(getRenderer());
+
+			mPlaneX.setProgram(mBoxGLProgram);
+			mPlaneY.setProgram(mBoxGLProgram);
+			mPlaneZ.setProgram(mBoxGLProgram);
 
 			mVerticesFloatArrayPlaneX = new GLFloatArray(4, 3);
 			mVerticesFloatArrayPlaneY = new GLFloatArray(4, 3);

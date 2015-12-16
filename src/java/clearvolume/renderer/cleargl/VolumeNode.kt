@@ -1,24 +1,11 @@
 package clearvolume.renderer.cleargl;
 
-import cleargl.*
 import cleargl.scenegraph.Node
-
 import clearvolume.renderer.ClearVolumeRendererInterface
-
-import clearvolume.renderer.processors.ProcessorInterface
-import clearvolume.transferf.TransferFunction
-import com.jogamp.opengl.GL
 import com.jogamp.opengl.GL4
-import com.jogamp.opengl.GL2ES3
-import coremem.types.NativeTypeEnum
-import org.apache.commons.io.IOUtils
-
-import java.io.IOException
-import java.io.InputStream
-import java.util.ArrayList
 
 class VolumeNode(private val gl: GL4, private val backend: ClearVolumeRendererInterface) : Node("Volume") {
-
+/*
     // Shader attributes, uniforms and arrays:
     protected var mPositionAttribute: GLAttribute
     protected var mQuadVertexArray: GLVertexArray
@@ -190,4 +177,5 @@ class VolumeNode(private val gl: GL4, private val backend: ClearVolumeRendererIn
 
         mQuadVertexArray.draw(GL.GL_TRIANGLES)
     }
+    */
 }

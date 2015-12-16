@@ -9,6 +9,7 @@ import com.jogamp.opengl.GL;
 
 import cleargl.ClearTextRenderer;
 import cleargl.GLMatrix;
+import cleargl.RendererInterface;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
@@ -27,15 +28,10 @@ public class ImageQualityOverlay extends OverlayForProcessors	implements
 	private ClearTextRenderer mClearTextRenderer;
 	private volatile double mMeasure;
 
-	public ImageQualityOverlay()
-	{
-		this(20);
-	}
-
 	@SuppressWarnings("unchecked")
-	public ImageQualityOverlay(int pNumberOfPointsInGraph)
+	public ImageQualityOverlay(RendererInterface renderer, int pNumberOfPointsInGraph)
 	{
-		super(new GraphOverlay(pNumberOfPointsInGraph));
+		super(new GraphOverlay(renderer, pNumberOfPointsInGraph));
 
 		mOpenCLTenengrad = new OpenCLTenengrad();
 

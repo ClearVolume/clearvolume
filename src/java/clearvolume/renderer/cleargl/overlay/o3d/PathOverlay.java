@@ -2,20 +2,15 @@ package clearvolume.renderer.cleargl.overlay.o3d;
 
 import java.nio.FloatBuffer;
 
+import cleargl.*;
 import com.jogamp.opengl.GL;
 
-import cleargl.GeometryObject;
-import cleargl.GLAttribute;
-import cleargl.GLFloatArray;
-import cleargl.GLMatrix;
-import cleargl.GLProgram;
-import cleargl.GLUniform;
-import cleargl.GLVertexArray;
-import cleargl.GLVertexAttributeArray;
+import cleargl.scenegraph.*;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
+import com.sun.javafx.webkit.theme.Renderer;
 
 /**
  * Single Path 3D Overlay.
@@ -38,7 +33,7 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 	protected GLUniform mOverlayModelViewMatrixUniform;
 	protected GLUniform mOverlayProjectionMatrixUniform;
 
-	protected GeometryObject mPath;
+	protected GeometricalObject mPath;
 	protected GLFloatArray mPathPoints;
 
 	protected FloatBuffer mStartColor = FloatBuffer.wrap(new float[]
@@ -46,9 +41,10 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 	protected FloatBuffer mEndColor = FloatBuffer.wrap(new float[]
 	{ 1.0f, 1.0f, 1.0f, 1.0f });
 
-	public PathOverlay()
+	public PathOverlay(RendererInterface renderer)
 	{
 		super();
+		setRenderer(renderer);
 		mPathPoints = new GLFloatArray(0, 3);
 	}
 
@@ -83,14 +79,17 @@ public class PathOverlay extends OverlayBase implements Overlay3D
 			mBoxGLProgram = GLProgram.buildProgram(	pGL,
 													PathOverlay.class,
 													new String[]
-													{	"shaders/path_vert.glsl",
-														"shaders/path_geom.glsl",
-														"shaders/path_frag.glsl" });
+													{	"shaders/path.vs",
+														"shaders/path.gs",
+														"shaders/path.fs" });
 
-			mPath = new GeometryObject(mBoxGLProgram,
+			mPath = new GeometricalObject(
 											3,
 											GL.GL_LINE_STRIP);
 			mPath.setDynamic(true);
+			mPath.setRenderer(getRenderer());
+			mPath.setProgram(mBoxGLProgram);
+			mPath.init();
 
 			mPath.setVerticesAndCreateBuffer(mPathPoints.getFloatBuffer());
 			mStartColor = FloatBuffer.wrap(new float[]

@@ -44,6 +44,8 @@ import coremem.offheap.OffHeapMemory;
 import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
 
+import cleargl.scenegraph.Scene;
+
 /**
  * Class ClearVolumeRendererBase
  *
@@ -57,6 +59,8 @@ public abstract class ClearVolumeRendererBase	implements
 												ClearVolumeRendererInterface,
 												ClearVolumeCloseable
 {
+
+	protected Scene scene;
 
 	/**
 	 * Default FOV

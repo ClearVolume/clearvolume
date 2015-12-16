@@ -11,12 +11,13 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES3;
 
-import cleargl.GeometryObject;
 import cleargl.GLError;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
 import cleargl.GLMatrix;
 import cleargl.GLProgram;
+import cleargl.RendererInterface;
+import cleargl.scenegraph.*;
 import clearvolume.audio.audioplot.AudioPlot;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
@@ -39,10 +40,10 @@ public class GraphOverlay extends OverlayBase	implements
 	// seems to be supported
 
 	private GLProgram mGLProgram;
-	private GeometryObject mGeometryObject;
+	private GeometricalObject mGeometricalObject;
 
 	private GLProgram mGLProgramLines;
-	private GeometryObject mGeometryObjectLines;
+	private GeometricalObject mGeometricalObjectLines;
 
 	private GLFloatArray mVerticesFloatArray;
 	private GLIntArray mIndexIntArray;
@@ -68,9 +69,11 @@ public class GraphOverlay extends OverlayBase	implements
 
 	protected volatile boolean mStopSignal = false;
 
-	public GraphOverlay(int pMaxNumberOfDataPoints)
+	public GraphOverlay(RendererInterface renderer, int pMaxNumberOfDataPoints)
 	{
 		super();
+		setRenderer(renderer);
+
 		setMaxNumberOfDataPoints(pMaxNumberOfDataPoints);
 
 		clearMinMax();
@@ -272,10 +275,12 @@ public class GraphOverlay extends OverlayBase	implements
 												"shaders/fancygraph_vert.glsl",
 												"shaders/fancygraph_frag.glsl");
 
-			mGeometryObject = new GeometryObject(	mGLProgram,
+			mGeometricalObject = new GeometricalObject(
 															3,
 															GL.GL_TRIANGLE_STRIP);
-			mGeometryObject.setDynamic(true);
+			mGeometricalObject.setDynamic(true);
+			mGeometricalObject.setRenderer(getRenderer());
+			mGeometricalObject.setProgram(mGLProgram);
 
 			final int lNumberOfPointsToDraw = 2 * getMaxNumberOfDataPoints();
 
@@ -291,29 +296,31 @@ public class GraphOverlay extends OverlayBase	implements
 			mIndexIntArray.fillZeros();
 			mTexCoordFloatArray.fillZeros();
 
-			mGeometryObject.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
-			mGeometryObject.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
-			mGeometryObject.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
-			mGeometryObject.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
+			mGeometricalObject.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
+			mGeometricalObject.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
+			mGeometricalObject.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
+			mGeometricalObject.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
 
 			GLError.printGLErrors(pGL, "AFTER GRAPH OVERLAY INIT");
 
 			mGLProgramLines = GLProgram.buildProgram(	pGL,
 														GraphOverlay.class,
 														new String[]
-														{	"shaders/fancylines_vert.glsl",
-															"shaders/fancylines_geom.glsl",
-															"shaders/fancylines_frag.glsl" });
+														{	"shaders/fancylines.vs",
+															"shaders/fancylines.gs",
+															"shaders/fancylines.fs" });
 
-			mGeometryObjectLines = new GeometryObject(mGLProgramLines,
+			mGeometricalObjectLines = new GeometricalObject(mGLProgramLines,
 																3,
 																GL.GL_LINE_STRIP);
-			mGeometryObjectLines.setDynamic(true);
+			mGeometricalObjectLines.setDynamic(true);
+			mGeometricalObjectLines.setRenderer(getRenderer());
+			mGeometricalObjectLines.setProgram(mGLProgramLines);
 
-			mGeometryObjectLines.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
-			mGeometryObjectLines.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
-			mGeometryObjectLines.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
-			mGeometryObjectLines.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
+			mGeometricalObjectLines.setVerticesAndCreateBuffer(mVerticesFloatArray.getFloatBuffer());
+			mGeometricalObjectLines.setNormalsAndCreateBuffer(mNormalArray.getFloatBuffer());
+			mGeometricalObjectLines.setTextureCoordsAndCreateBuffer(mTexCoordFloatArray.getFloatBuffer());
+			mGeometricalObjectLines.setIndicesAndCreateBuffer(mIndexIntArray.getIntBuffer());
 
 		}
 		catch (final IOException e)
@@ -381,17 +388,17 @@ public class GraphOverlay extends OverlayBase	implements
 					mTexCoordFloatArray.padZeros();
 					mIndexIntArray.padZeros();
 
-					mGeometryObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
+					mGeometricalObject.updateVertices(mVerticesFloatArray.getFloatBuffer());
 					GLError.printGLErrors(	pGL,
 											"AFTER mGeometryObject.updateVertices");
-					mGeometryObject.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
+					mGeometricalObject.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
 					GLError.printGLErrors(	pGL,
 											"AFTER mGeometryObject.updateTextureCoords");
-					mGeometryObject.updateIndices(mIndexIntArray.getIntBuffer());
+					mGeometricalObject.updateIndices(mIndexIntArray.getIntBuffer());
 					GLError.printGLErrors(	pGL,
 											"AFTER mGeometryObject.updateIndices");
 
-					mGeometryObject.setProjection(pProjectionMatrix);
+					mGeometricalObject.setProjection(pProjectionMatrix);
 
 					pGL.glDisable(GL.GL_DEPTH_TEST);
 					pGL.glEnable(GL.GL_BLEND);
@@ -399,7 +406,7 @@ public class GraphOverlay extends OverlayBase	implements
 									GL.GL_ONE_MINUS_SRC_ALPHA);
 					pGL.glBlendEquation(GL.GL_FUNC_ADD);/**/
 
-					mGeometryObject.draw(0, mDataY.size() * 2);
+					mGeometricalObject.draw(0, mDataY.size() * 2);
 
 					// the lines
 					mGLProgramLines.use(pGL);
@@ -424,17 +431,17 @@ public class GraphOverlay extends OverlayBase	implements
 					mTexCoordFloatArray.padZeros();
 					mIndexIntArray.padZeros();
 
-					mGeometryObjectLines.updateVertices(mVerticesFloatArray.getFloatBuffer());
+					mGeometricalObjectLines.updateVertices(mVerticesFloatArray.getFloatBuffer());
 					// GLError.printGLErrors(pGL,
 					// "AFTER mGeometryObject.updateVertices");
-					mGeometryObjectLines.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
+					mGeometricalObjectLines.updateTextureCoords(mTexCoordFloatArray.getFloatBuffer());
 					GLError.printGLErrors(	pGL,
 											"AFTER mGeometryObject.updateTextureCoords");
-					mGeometryObjectLines.updateIndices(mIndexIntArray.getIntBuffer());
+					mGeometricalObjectLines.updateIndices(mIndexIntArray.getIntBuffer());
 					GLError.printGLErrors(	pGL,
 											"AFTER mGeometryObject.updateIndices");
 
-					mGeometryObjectLines.setProjection(pProjectionMatrix);
+					mGeometricalObjectLines.setProjection(pProjectionMatrix);
 
 					pGL.glDisable(GL.GL_DEPTH_TEST);
 					pGL.glEnable(GL.GL_BLEND);
@@ -442,7 +449,7 @@ public class GraphOverlay extends OverlayBase	implements
 									GL.GL_ONE_MINUS_SRC_ALPHA);
 					pGL.glBlendEquation(GL2ES3.GL_MAX);/**/
 					//
-					mGeometryObjectLines.draw(0, mDataY.size());
+					mGeometricalObjectLines.draw(0, mDataY.size());
 
 					mHasChanged = false;
 				}

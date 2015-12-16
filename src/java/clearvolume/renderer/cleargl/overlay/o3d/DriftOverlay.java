@@ -4,12 +4,14 @@ import java.awt.Color;
 import java.awt.Font;
 import java.nio.FloatBuffer;
 
+import cleargl.RendererInterface;
 import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 
 import cleargl.ClearTextRenderer;
+import cleargl.scenegraph.*;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
@@ -36,6 +38,10 @@ public class DriftOverlay extends PathOverlay	implements
 
 	protected ClearTextRenderer textRenderer;
 
+	public DriftOverlay(RendererInterface renderer) {
+		super(renderer);
+	}
+
 	/* (non-Javadoc)
 	 * @see clearvolume.renderer.cleargl.overlay.Overlay#getName()
 	 */
@@ -50,6 +56,8 @@ public class DriftOverlay extends PathOverlay	implements
 		super.mEndColor = FloatBuffer.wrap(new float[]
 		{ 1.0f, 0.0f, 0.0f, 1.0f });
 		textRenderer = new ClearTextRenderer(pGL, false);
+
+		mPath.init();
 	}
 
 	@Override

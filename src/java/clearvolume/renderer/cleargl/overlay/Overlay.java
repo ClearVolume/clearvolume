@@ -1,6 +1,7 @@
 package clearvolume.renderer.cleargl.overlay;
 
 import com.jogamp.opengl.GL;
+import cleargl.RendererInterface;
 
 import clearvolume.renderer.DisplayRequestInterface;
 
@@ -13,6 +14,7 @@ import clearvolume.renderer.DisplayRequestInterface;
  */
 public interface Overlay
 {
+	RendererInterface renderer = null;
 	/**
 	 * Name of overlay.
 	 * 

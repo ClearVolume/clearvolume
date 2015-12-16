@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import cleargl.scenegraph.Scene;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -984,6 +985,16 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 										getVolumeSizeZ(pRenderLayerIndex));
 				}
 			}
+	}
+
+	@Override
+	public Scene getScene() {
+		return this.scene;
+	}
+
+	@Override
+	public void setScene(Scene s) {
+		this.scene = s;
 	}
 
 	/* (non-Javadoc)
