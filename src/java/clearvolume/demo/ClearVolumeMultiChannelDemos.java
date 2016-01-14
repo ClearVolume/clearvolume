@@ -544,6 +544,8 @@ public class ClearVolumeMultiChannelDemos
 				}
 
 				lClearVolumeRenderer.setVolumeDataUpdateAllowed(true);
+				
+				lClearVolumeRenderer.waitToFinishAllDataBufferCopy(2, TimeUnit.SECONDS);
 
 			}
 			System.gc();
