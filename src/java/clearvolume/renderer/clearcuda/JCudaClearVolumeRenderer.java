@@ -709,7 +709,7 @@ public class JCudaClearVolumeRenderer extends ClearGLVolumeRenderer	implements
 	 *      float[])
 	 */
 	@Override
-	protected boolean[] renderVolume(	final float[] pInverseModelViewMatrix,
+	public boolean[] renderVolume(	final float[] pInverseModelViewMatrix,
 										final float[] pInverseProjectionMatrix)
 	{
 		if (mCudaContext == null)

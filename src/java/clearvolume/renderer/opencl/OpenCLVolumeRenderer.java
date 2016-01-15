@@ -44,6 +44,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 	private CLImage3D[] mCLVolumeImages;
 	private CLImage2D[] mCLTransferFunctionImages;
 
+	private float[] invMv;
+
 	private CLBuffer<Float> mCLInvModelViewBuffer,
 			mCLInvProjectionBuffer;
 
@@ -293,10 +295,23 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 	}
 
 	@Override
-	protected boolean[] renderVolume(	final float[] pInvModelViewMatrix,
-										final float[] pInvProjectionMatrix)
-	{
+	public boolean[] renderVolume(	final float[] pInvModelViewMatrix,
+																	final float[] pInvProjectionMatrix) {
+		invMv = pInvModelViewMatrix;
 
+		boolean[] changed = new boolean[getNumberOfRenderLayers()];
+
+		for(int i = 0; i < getNumberOfRenderLayers(); i++) {
+			changed = renderVolume(pInvModelViewMatrix, pInvProjectionMatrix, i);
+		}
+
+		return changed;
+	}
+
+	public boolean[] renderVolume(	final float[] pInvModelViewMatrix,
+										final float[] pInvProjectionMatrix, final int layerNum)
+	{
+		invMv = pInvModelViewMatrix;
 		doCaptureBuffersIfNeeded();
 
 		// System.out.println("render");
@@ -308,7 +323,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 			mCLDevice.writeFloatBuffer(	mCLInvProjectionBuffer,
 										FloatBuffer.wrap(pInvProjectionMatrix));
 
-			return updateBufferAndRunKernel();
+			return updateBufferAndRunKernel(layerNum);
 		}
 		catch (final CudaException e)
 		{
@@ -359,7 +374,17 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		}
 	}
 
-	private boolean[] updateBufferAndRunKernel()
+	private boolean[] updateBufferAndRunKernel() {
+		boolean[] updated = new boolean[getNumberOfRenderLayers()];
+
+		for(int i = 0; i < getNumberOfRenderLayers(); i++) {
+			updated = updateBufferAndRunKernel(i);
+		}
+
+		return updated;
+	}
+
+	private boolean[] updateBufferAndRunKernel(int layerNum)
 	{
 		final boolean[] lUpdated = new boolean[getNumberOfRenderLayers()];
 
@@ -369,7 +394,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 		if (isVolumeDataUpdateAllowed())
 		{
-			for (int lLayerIndex = 0; lLayerIndex < getNumberOfRenderLayers(); lLayerIndex++)
+			final int lLayerIndex = layerNum;
 			{
 				synchronized (getSetVolumeDataBufferLock(lLayerIndex))
 				{
@@ -413,14 +438,12 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 		if (lAnyVolumeDataUpdated || haveVolumeRenderingParametersChanged()
 			|| getAdaptiveLODController().isKernelRunNeeded())
 		{
-			for (int i = 0; i < getNumberOfRenderLayers(); i++)
-			{
-				if (mCLVolumeImages[i] != null)
+
+				if (mCLVolumeImages[layerNum] != null)
 				{
-					runKernel(i);
-					lUpdated[i] = true;
+					runKernel(layerNum);
+					lUpdated[layerNum] = true;
 				}
-			}
 		}
 
 		return lUpdated;

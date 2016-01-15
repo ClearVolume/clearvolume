@@ -4,6 +4,9 @@ import static java.lang.Math.PI;
 
 import java.util.Collection;
 
+import cleargl.GLMatrix;
+import cleargl.GLVector;
+import cleargl.scenegraph.Camera;
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
@@ -196,10 +199,6 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				mClearVolumeRenderer.toggleFullScreen();
 			break;
 
-		case KeyEvent.VK_S:
-			mClearVolumeRenderer.toggleRecording();
-			break;
-
 		case KeyEvent.VK_R:
 			if (lAutoRotateController.isActive() && !lAutoRotateController.isRotating())
 			{
@@ -216,8 +215,61 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			}
 			break;
 
-		case KeyEvent.VK_A:
-			lAutoRotateController.setActive(!lAutoRotateController.isActive());
+		case KeyEvent.VK_D: {
+			Camera cam = mClearVolumeRenderer.getScene().findObserver();
+			if (cam.getTargeted() == false) {
+				mClearVolumeRenderer.getScene().findObserver().getRotation().invert().rotateByAngleY(-lRotationSpeed).invert();
+			}
+		}
+			break;
+
+		case KeyEvent.VK_W: {
+			Camera cam = mClearVolumeRenderer.getScene().findObserver();
+			if (cam.getTargeted() == false) {
+				/*GLMatrix r = GLMatrix.fromQuaternion(mClearVolumeRenderer.getScene().findObserver().getRotation());
+				GLVector pos = mClearVolumeRenderer.getScene().findObserver().getPosition();
+
+				float[] lookDirection = new float[4];
+				GLMatrix.mulColMat4Vec4(lookDirection, r.getFloatArray(), new float[]{0.0f, 0.0f, 1.0f, 1.0f});
+				lookDirection[0] = lookDirection[0] - pos.x();
+				lookDirection[1] = lookDirection[1] - pos.y();
+				lookDirection[2] = lookDirection[2] - pos.z();
+
+				GLVector newPos = new GLVector(lookDirection);
+				//mClearVolumeRenderer.getScene().findObserver().getView().translate(lookDirection[0], lookDirection[1], lookDirection[2]);
+				*/
+
+				GLVector newPos = cam.getPosition();
+				GLVector orientation = cam.getWorldOrientation();
+				newPos = newPos.plus(new GLVector(orientation.x(), orientation.y(), orientation.z()));
+
+				cam.setPosition(newPos);
+				System.err.println("Positin is now " + cam.getPosition());
+			}
+		}
+			break;
+
+		case KeyEvent.VK_S: {
+			Camera cam = mClearVolumeRenderer.getScene().findObserver();
+			if(cam.getTargeted() == false) {
+				/*r = GLMatrix.fromQuaternion(mClearVolumeRenderer.getScene().findObserver().getRotation());
+				pos = mClearVolumeRenderer.getScene().findObserver().getPosition();
+
+				lookDirection = new float[4];
+				GLMatrix.mulColMat4Vec4(lookDirection, r.getFloatArray(), new float[]{0.0f, 0.0f, 1.0f, 1.0f});
+				lookDirection[0] = lookDirection[0] - pos.x();
+				lookDirection[1] = lookDirection[1] - pos.y();
+				lookDirection[2] = lookDirection[2] - pos.z();
+				mClearVolumeRenderer.getScene().findObserver().getView().translate(-lookDirection[0], -lookDirection[1], -lookDirection[2]);*/
+			}}
+			break;
+
+			case KeyEvent.VK_A: {
+				Camera cam = mClearVolumeRenderer.getScene().findObserver();
+				if(cam.getTargeted() == false) {
+					//lAutoRotateController.setActive(!lAutoRotateController.isActive());
+					mClearVolumeRenderer.getScene().findObserver().getRotation().invert().rotateByAngleY(+lRotationSpeed).invert();
+				}}
 			break;
 
 		case KeyEvent.VK_C:

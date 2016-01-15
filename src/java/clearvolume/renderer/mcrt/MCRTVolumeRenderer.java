@@ -286,7 +286,7 @@ public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
   }
 
   @Override
-  protected boolean[] renderVolume(final float[] pInvModelViewMatrix,
+  public boolean[] renderVolume(final float[] pInvModelViewMatrix,
                                    final float[] pInvProjectionMatrix) {
 
     doCaptureBuffersIfNeeded();

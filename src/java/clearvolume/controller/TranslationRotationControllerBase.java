@@ -2,6 +2,7 @@ package clearvolume.controller;
 
 import com.jogamp.opengl.math.Quaternion;
 import com.jogamp.opengl.math.Matrix4;
+import cleargl.GLMatrix;
 
 /**
  * Class TranslationRotationControllerBase
@@ -18,6 +19,7 @@ public class TranslationRotationControllerBase	implements
   private volatile boolean mActive = true;
   private final Quaternion mQuaternion = new Quaternion();
   private final Matrix4 mTranslation = new Matrix4();
+  protected GLMatrix[] fullTransform = new GLMatrix[2];
 
   protected final Object mQuaternionUpdateLock = new Object();
   protected final Object mTranslationUpdateLock = new Object();

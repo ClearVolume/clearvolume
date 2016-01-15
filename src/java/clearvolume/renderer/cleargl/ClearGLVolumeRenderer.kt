@@ -2,6 +2,7 @@
 package clearvolume.renderer.cleargl
 
 import cleargl.*
+import cleargl.scenegraph.DetachedHeadCamera
 import cleargl.scenegraph.Scene
 import cleargl.util.recorder.GLVideoRecorder
 import clearvolume.controller.OculusRiftController
@@ -564,6 +565,7 @@ constructor(// Window:
 
                 if (System.getProperty("ClearVolume.EnableVR") != null) {
                     eyeCount = 2
+                    //System.out.println("Enabling VR... yay! ${eyeCount} eyes!")
                 } else if (System.getProperty("ClearVolume.Anaglyph") != null) {
                     eyeShift = floatArrayOf(-0.03f, 0.0f, 0.0f, 0.03f, 0.0f, 0.0f)
                     eyeCount = 2
@@ -573,7 +575,7 @@ constructor(// Window:
                 }
 
                 lGL.glClear(GL.GL_COLOR_BUFFER_BIT or GL.GL_DEPTH_BUFFER_BIT)
-
+                synchronized(this, {
                 for (eye in 0..eyeCount - 1) {
                     if (System.getProperty("ClearVolume.EnableVR") == null) {
                         lGL.glViewport(0, 0, w, h)
@@ -581,7 +583,10 @@ constructor(// Window:
                     } else if (System.getProperty("ClearVolume.Anaglyph") == null) {
                         lGL.glViewport(0, 0, w, h)
                         lGL.glScissor(0, 0, w, h)
-                    } else {
+                    }
+
+                    if(System.getProperty("ClearVolume.EnableVR") != null) {
+                        //System.out.println("Setting viewports for VR...")
                         lGL.glViewport(w / 2 * eye, 0, w / 2, h)
                         lGL.glScissor(w / 2 * eye, 0, w / 2, h)
                     }
@@ -610,17 +615,53 @@ constructor(// Window:
                     lGL.glEnable(GL.GL_CULL_FACE)
                     lGL.glCullFace(GL.GL_BACK)
                     lGL.glEnable(GL.GL_DEPTH_TEST)
+                    lGL.glDisable(GL.GL_BLEND)
 
                     val rootNode = this.scene
                     // find observer
                     val cam = rootNode!!.findObserver()
                     // convert scenegraph to render tree
 
+                    adaptiveLODController.beforeRendering()
                     // recursively render nodes
-                    for (n in rootNode!!.children) {
-                        //n.updateWorld(true)
+                    renderLoop@ for (n in rootNode!!.children) {
 
-                        val mv = cam.view!!.clone()
+                        if(n.nodeType == "VolumeNode") {
+                            // set the volume's matrices according to current camera settings
+                            n.model = GLMatrix.getIdentity()
+                            n.model.translate(n.position!!.x(), n.position!!.y(), n.position!!.z())
+
+                            /*val lScaleX = getVolumeSizeX(0) * getVoxelSizeX(0)
+                            val lScaleY = getVolumeSizeY(0) * getVoxelSizeY(0)
+                            val lScaleZ = getVolumeSizeZ(0) * getVoxelSizeZ(0)
+
+                            val lMaxScale = max(max(lScaleX, lScaleY), lScaleZ)
+
+                            n.model.scale((lScaleX / lMaxScale).toFloat(),
+                                    (lScaleY / lMaxScale).toFloat(),
+                                    (lScaleZ / lMaxScale).toFloat())*/
+                        }
+
+                        val camrot = GLMatrix.fromQuaternion(cam.rotation)
+                        var mv: GLMatrix = cam.view!!.clone()
+                        if(System.getProperty("ClearVolume.EnableVR") != null) {
+                            mv.translate(eyeShift[3*eye + 0]*5,
+                                    eyeShift[3*eye + 1]*5,
+                                    eyeShift[3*eye + 2]*5)
+
+                            if(cam is DetachedHeadCamera) {
+                                mv.translate(
+                                        translationRotationControllers[0].translationVector[0],
+                                        translationRotationControllers[0].translationVector[1],
+                                        translationRotationControllers[0].translationVector[2]
+                                )
+
+                            }
+
+                            mv.mult(translationRotationControllers[0].quaternion)
+
+                        }
+                        mv.mult(camrot)
 
                         mv.translate(translationX,
                                 translationY,
@@ -630,10 +671,19 @@ constructor(// Window:
 
                         mv.mult(n.model)
 
-                        val mvp = cam.projection!!.clone()
+                        val proj = cam.projection!!.clone();
+
+                        val mvp = proj.clone()
                         mvp.mult(mv)
 
-                        if(n.nodeType == "Camera") { continue; }
+                        if(n.nodeType == "VolumeNode") {
+                            n.modelView = mv.clone()
+                            n.projection = proj.clone()//cam.projection!!.clone()
+                        }
+
+                        if(n.nodeType == "Camera") { continue@renderLoop }
+                        if(n.visible == false) { continue@renderLoop }
+
 
                         n.program?.let {
                             n.program!!.use(lGL)
@@ -656,19 +706,14 @@ constructor(// Window:
                             System.err.println("Could not find program for ${n.toString()}")
                         }
 
+                        if(n.nodeType == "VolumeNode") {
+                            mLayerTextures[(n as VolumeNode).layer].bind((n as VolumeNode).layer)
+                        }
                         n.draw()
 
-                        GLError.printGLErrors(lGL, "${n.toString()}")
+                        //GLError.printGLErrors(lGL, "Rendering of ${n.toString()} failed")
                     }
-
                     adaptiveLODController.afterRendering()
-                    val lAspectRatioCorrectedProjectionMatrix = aspectRatioCorrectedProjectionMatrix
-
-                    /*renderOverlays3D(lGL,
-							lAspectRatioCorrectedProjectionMatrix,
-							lModelViewMatrix);
-
-					renderOverlays2D(lGL, cOverlay2dProjectionMatrix);*/
 
                     updateFrameRateDisplay()
 
@@ -680,7 +725,9 @@ constructor(// Window:
                         lGL.glColorMask(true, true, true, true)
                     }
 
-                }
+                    ovr?.increaseFrameIndex();
+
+                }})
 
             } catch (e: Throwable) {
                 e.printStackTrace()
@@ -1155,7 +1202,7 @@ constructor(// Window:
      * *
      * @return boolean array indicating for each layer if it was updated.
      */
-    protected abstract fun renderVolume(pModelViewMatrix: FloatArray,
+    public abstract fun renderVolume(pModelViewMatrix: FloatArray,
                                         pProjectionMatrix: FloatArray): BooleanArray
 
     /**

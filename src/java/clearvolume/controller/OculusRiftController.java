@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 
 import static com.oculusvr.capi.OvrLibrary.ovrDistortionCaps.*;
@@ -18,6 +19,7 @@ import static com.oculusvr.capi.OvrLibrary.ovrEyeType;
 import com.oculusvr.capi.*;
 import com.oculusvr.capi.OvrLibrary.ovrHmdCaps;
 import com.oculusvr.capi.OvrLibrary.ovrTrackingCaps;
+import com.oculusvr.capi.Posef;
 import com.sun.jna.Pointer;
 
 import com.jogamp.opengl.math.Quaternion;
@@ -53,6 +55,8 @@ public class OculusRiftController	extends
   private float[] eyeShift;
 
   private Thread mReceptionThread;
+  private int frameIndex = 0;
+  private OvrVector3f[] ed;
 
   /**
    * DisplayRequest object that has to be called when requesting a display
@@ -72,6 +76,10 @@ public class OculusRiftController	extends
       return Hmd.createDebug(OvrLibrary.ovrHmdType.ovrHmd_DK2);
     }
     return hmd;
+  }
+
+  public void increaseFrameIndex() {
+    this.frameIndex++;
   }
 
   /**
@@ -110,6 +118,7 @@ public class OculusRiftController	extends
     System.out.println("Using Rift HMD: " + hmd.Type + ", sn=" + hmd.SerialNumber.toString() + ", res " + hmd.Resolution.w + "x" + hmd.Resolution.h);
 
     EyeRenderDesc[] erd = new EyeRenderDesc[2];
+    ed = new OvrVector3f[2];
     FovPort[] fovs = new FovPort[2];
     FovPort l = new FovPort();
     FovPort r = new FovPort();
@@ -196,16 +205,48 @@ public class OculusRiftController	extends
   public void run()
   {
     TrackingState s;
+    Posef[] poses = new Posef[2];
     Quaternion q = new Quaternion();
+    Quaternion[] e = new Quaternion[2];
+    fullTransform = new GLMatrix[2];
     OvrQuaternionf oq;
 
     while(true) {
       s = hmd.getSensorState(0.0);
       oq = s.HeadPose.Pose.Orientation;
-
+      poses = hmd.getEyePoses(frameIndex, ed);
       q.set(oq.x, oq.y, oq.z, oq.w);
+
+      e[0] = new Quaternion();
+      e[0].set(poses[0].Orientation.x,
+              poses[0].Orientation.y,
+              poses[0].Orientation.z,
+              poses[0].Orientation.w);
+      e[0].invert();
+
+      e[1] = new Quaternion();
+      e[1].set(poses[1].Orientation.x,
+              poses[1].Orientation.y,
+              poses[1].Orientation.z,
+              poses[1].Orientation.w);
+      e[1].invert();
+
+      fullTransform[0] = new GLMatrix();
+      fullTransform[0].setIdentity();
+      fullTransform[0].translate(poses[0].Position.x, poses[0].Position.y, poses[0].Position.z);
+      fullTransform[0].mult(GLMatrix.fromQuaternion(e[0]));
+
+      fullTransform[1] = new GLMatrix();
+      fullTransform[1].setIdentity();
+      fullTransform[1].translate(poses[1].Position.x, poses[1].Position.y, poses[1].Position.z);
+      fullTransform[1].mult(GLMatrix.fromQuaternion(e[1]));
+
       setQuaternion(q);
     }
+  }
+
+  public GLMatrix getFullTransformForEye(int eyeIndex) {
+    return fullTransform[eyeIndex];
   }
 
   /**
