@@ -7,7 +7,7 @@ import com.jogamp.newt.event.KeyEvent;
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 
-import clearvolume.renderer.opencl.OpenCLDevice;
+import clearcl.OpenCLDevice;
 import clearvolume.renderer.panels.HasGUIPanel;
 import clearvolume.renderer.processors.OpenCLProcessor;
 import clearvolume.renderer.processors.impl.panels.DeconvolvePanel;

@@ -5,10 +5,9 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import clearcuda.CudaAvailability;
+import clearcl.OpenCLAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
-import clearvolume.renderer.opencl.OpenCLAvailability;
 
 public class ClearVolumeRendererFactoryTests
 {
@@ -16,7 +15,7 @@ public class ClearVolumeRendererFactoryTests
 	@Test
 	public void testBestRenderer8Bit()
 	{
-		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
+		if ( !OpenCLAvailability.isOpenCLAvailable())
 			return;
 
 		try
@@ -39,7 +38,7 @@ public class ClearVolumeRendererFactoryTests
 	@Test
 	public void testBestRenderer16Bit()
 	{
-		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
+		if ( !OpenCLAvailability.isOpenCLAvailable())
 			return;
 
 		try

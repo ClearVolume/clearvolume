@@ -2,9 +2,8 @@ package clearvolume.renderer.factory;
 
 import java.util.Properties;
 
-import clearcuda.CudaAvailability;
+import clearcl.OpenCLAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.opencl.OpenCLAvailability;
 import coremem.types.NativeTypeEnum;
 
 public class ClearVolumeRendererFactory

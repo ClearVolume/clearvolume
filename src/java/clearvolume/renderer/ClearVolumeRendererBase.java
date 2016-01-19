@@ -24,7 +24,6 @@ import com.jogamp.opengl.math.Quaternion;
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
-import clearvolume.controller.TranslationControllerInterface;
 import clearvolume.controller.TranslationRotationControllerInterface;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.ParameterChangeListener;
@@ -43,7 +42,6 @@ import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.offheap.OffHeapMemory;
 import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
-
 import scenery.Scene;
 
 /**

@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.opengl.math.Quaternion;
 
+import cleargl.RendererInterface;
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
@@ -24,8 +25,6 @@ import clearvolume.volume.VolumeManager;
 import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;
-
-import cleargl.RendererInterface;
 import scenery.Scene;
 
 /**

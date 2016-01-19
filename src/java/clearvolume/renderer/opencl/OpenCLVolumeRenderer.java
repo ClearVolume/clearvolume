@@ -18,6 +18,7 @@ import com.nativelibs4java.opencl.CLImage3D;
 import com.nativelibs4java.opencl.CLImageFormat;
 import com.nativelibs4java.opencl.CLKernel;
 
+import clearcl.OpenCLDevice;
 import clearvolume.exceptions.ClearVolumeMemoryException;
 import clearvolume.exceptions.ClearVolumeUnsupportdDataTypeException;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
@@ -32,7 +33,6 @@ import clearvolume.renderer.processors.impl.OpenCLHistogram;
 import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;
-import jcuda.CudaException;
 import scenery.Scene;
 
 public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
@@ -325,7 +325,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 			return updateBufferAndRunKernel(layerNum);
 		}
-		catch (final CudaException e)
+		catch (final Throwable e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return null;

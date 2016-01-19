@@ -1,19 +1,23 @@
 package clearvolume.demo;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+import org.junit.Test;
+
 import cleargl.GLMatrix;
 import cleargl.GLVector;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.cleargl.VolumeNode;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
-import clearvolume.renderer.opencl.test.OpenCLVolumeRendererTests;
 import clearvolume.transferf.TransferFunctions;
 import coremem.types.NativeTypeEnum;
-import org.junit.Test;
-import scenery.*;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.function.BiConsumer;
+import scenery.Box;
+import scenery.Camera;
+import scenery.DetachedHeadCamera;
+import scenery.Scene;
+import scenery.Sphere;
 
 /**
  * Created by ulrik on 14/12/15.

@@ -110,22 +110,22 @@ dependencies
 
 	compile 'org.xeustechnologies:jcl-core:2.6'
 
-    // Rift Support
-    compile 'org.saintandreas:jovr:0.4.4.0'
-    compile 'org.saintandreas:math:[1.0.4,2)'
+  // Rift Support
+  compile 'org.saintandreas:jovr:0.4.4.0'
+  compile 'org.saintandreas:math:[1.0.4,2)'
 
 
 	// usage: gradle .... -Plocal=true
 	if (project.hasProperty('local')) {
 		println 'Using local clearX sources'
 		compile project(':cleargl')
-		compile project(':clearcuda')
+		compile project(':clearcl')
     compile project(':scenery')
 	}
 	else {
 		println 'Using clearX from Maven repository'/**/
 		compile group: "net.clearvolume", name: "cleargl", version: "(,1.1.0]", changing: true, transitive: true
-		compile group: "net.clearvolume", name: "clearcuda", version: "(,1.1.0]", changing: true, transitive: true
+		compile group: "net.clearvolume", name: "clearcl", version: "(,1.1.0]", changing: true, transitive: true
 		compile group: "net.clearvolume", name: "scenery", version: "(,1.0.0]", changing: true, transitive: true
 	}
 
