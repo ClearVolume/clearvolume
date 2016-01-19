@@ -1,11 +1,11 @@
 package clearvolume.renderer.cleargl;
 
 import cleargl.GLProgram
-import cleargl.scenegraph.GeometricalObject
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer
 import com.jogamp.opengl.GL
 import com.jogamp.opengl.GL2ES3
 import org.apache.commons.io.IOUtils
+import scenery.GeometricalObject
 import java.nio.FloatBuffer
 
 class VolumeNode(VolumeRenderer: OpenCLVolumeRenderer) : GeometricalObject(3, GL.GL_TRIANGLES) {

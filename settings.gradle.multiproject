@@ -1,3 +1,4 @@
 include 'cleargl'
 include 'clearcuda'
 include 'clearvolume'
+include 'scenery'

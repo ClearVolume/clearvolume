@@ -2,8 +2,6 @@
 package clearvolume.renderer.cleargl
 
 import cleargl.*
-import cleargl.scenegraph.DetachedHeadCamera
-import cleargl.scenegraph.Scene
 import cleargl.util.recorder.GLVideoRecorder
 import clearvolume.controller.OculusRiftController
 import clearvolume.controller.RotationControllerWithRenderNotification
@@ -26,6 +24,8 @@ import com.jogamp.opengl.math.Quaternion
 import coremem.types.NativeTypeEnum
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.SystemUtils
+import scenery.DetachedHeadCamera
+import scenery.Scene
 import java.io.File
 import java.io.IOException
 import java.lang.Math.max
@@ -565,7 +565,6 @@ constructor(// Window:
 
                 if (System.getProperty("ClearVolume.EnableVR") != null) {
                     eyeCount = 2
-                    //System.out.println("Enabling VR... yay! ${eyeCount} eyes!")
                 } else if (System.getProperty("ClearVolume.Anaglyph") != null) {
                     eyeShift = floatArrayOf(-0.03f, 0.0f, 0.0f, 0.03f, 0.0f, 0.0f)
                     eyeCount = 2

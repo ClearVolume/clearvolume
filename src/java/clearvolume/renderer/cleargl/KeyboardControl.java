@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import cleargl.GLMatrix;
 import cleargl.GLVector;
-import cleargl.scenegraph.Camera;
+import scenery.Camera;
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
