@@ -12,7 +12,7 @@ import cleargl.GLProgram;
 import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
-import cleargl.scenegraph.*;
+import scenery.*;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;

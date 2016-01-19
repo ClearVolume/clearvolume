@@ -2,16 +2,13 @@ package clearvolume.demo
 
 import cleargl.GLMatrix
 import cleargl.GLVector
-import cleargl.scenegraph.Box
-import cleargl.scenegraph.Camera
-import cleargl.scenegraph.DetachedHeadCamera
-import cleargl.scenegraph.Scene
 import clearvolume.renderer.cleargl.VolumeNode
 import clearvolume.renderer.factory.ClearVolumeRendererFactory
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer
 import clearvolume.transferf.TransferFunctions
 import coremem.types.NativeTypeEnum
 import org.junit.Test
+import scenery.*
 import java.io.IOException
 import java.nio.ByteBuffer
 import kotlin.concurrent.thread
@@ -57,6 +54,10 @@ class ClearVolumeScenegraphDemos {
                             rangeRandomizer(-10.0f, 10.0f))
         }
 
+        val sphere = Sphere(0.5f, 20)
+        sphere.position = GLVector(5.0f, -1.2f, 2.0f)
+        sphere.renderer = lClearVolumeRenderer
+
         val cam_view = GLMatrix()
         cam_view.setIdentity()
 
@@ -74,7 +75,9 @@ class ClearVolumeScenegraphDemos {
 
         myScene.addChild(vnode)
         myScene.addChild(cam)
+        myScene.addChild(sphere)
         myScene.initList.add(vnode)
+        myScene.initList.add(sphere)
         var ticks: Int = 0
 
         System.out.println(myScene.children)

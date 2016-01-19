@@ -1,7 +1,7 @@
 package clearvolume.renderer.cleargl.overlay.o2d;
 
 import cleargl.*;
-import cleargl.scenegraph.*;
+import scenery.*;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;

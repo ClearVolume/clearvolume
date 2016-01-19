@@ -1,6 +1,6 @@
 package clearvolume.renderer.cleargl.overlay;
 
-import cleargl.scenegraph.Node;
+import scenery.Node;
 /**
  * OverlayBase - Class implementing basic functionality of classes implementing
  * the Overlay interface.

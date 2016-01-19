@@ -11,7 +11,7 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 
 import cleargl.ClearTextRenderer;
-import cleargl.scenegraph.*;
+import scenery.*;
 import cleargl.GLMatrix;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;

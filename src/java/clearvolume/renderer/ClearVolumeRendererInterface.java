@@ -26,7 +26,7 @@ import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;
 
 import cleargl.RendererInterface;
-import cleargl.scenegraph.Scene;
+import scenery.Scene;
 
 /**
  * Interface ClearVolumeRenderer

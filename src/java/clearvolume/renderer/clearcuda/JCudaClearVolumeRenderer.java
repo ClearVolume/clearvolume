@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import cleargl.scenegraph.Scene;
+import scenery.Scene;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 

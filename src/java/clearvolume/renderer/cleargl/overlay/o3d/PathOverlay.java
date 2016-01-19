@@ -5,7 +5,7 @@ import java.nio.FloatBuffer;
 import cleargl.*;
 import com.jogamp.opengl.GL;
 
-import cleargl.scenegraph.*;
+import scenery.*;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;

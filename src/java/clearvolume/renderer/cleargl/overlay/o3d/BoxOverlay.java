@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import cleargl.*;
-import cleargl.scenegraph.*;
+import scenery.*;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES3;

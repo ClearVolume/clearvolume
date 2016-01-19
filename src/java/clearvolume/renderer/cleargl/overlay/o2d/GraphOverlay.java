@@ -17,7 +17,7 @@ import cleargl.GLIntArray;
 import cleargl.GLMatrix;
 import cleargl.GLProgram;
 import cleargl.RendererInterface;
-import cleargl.scenegraph.*;
+import scenery.*;
 import clearvolume.audio.audioplot.AudioPlot;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;

@@ -23,7 +23,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import static java.lang.Math.max;
-import cleargl.scenegraph.Scene;
+import scenery.Scene;
 
 public class MCRTVolumeRenderer extends ClearGLVolumeRenderer implements
         GLEventListener {

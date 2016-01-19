@@ -44,7 +44,7 @@ import coremem.offheap.OffHeapMemory;
 import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
 
-import cleargl.scenegraph.Scene;
+import scenery.Scene;
 
 /**
  * Class ClearVolumeRendererBase

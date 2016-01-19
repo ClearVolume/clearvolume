@@ -7,7 +7,7 @@ import static java.lang.Math.sqrt;
 import java.io.IOException;
 
 import cleargl.*;
-import cleargl.scenegraph.*;
+import scenery.*;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.opengl.GL;

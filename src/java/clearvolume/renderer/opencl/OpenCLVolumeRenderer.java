@@ -33,7 +33,7 @@ import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;
 import jcuda.CudaException;
-import cleargl.scenegraph.Scene;
+import scenery.Scene;
 
 public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 																GLEventListener, RendererInterface

@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import cleargl.*;
-import cleargl.scenegraph.*;
+import scenery.*;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 
