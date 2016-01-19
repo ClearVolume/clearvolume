@@ -99,14 +99,16 @@ dependencies
 
 	// usage: gradle .... -Plocal=true
 	if (project.hasProperty('local')) {
-		println 'Using local clearCUDA and clearGL sources'
+		println 'Using local clearX sources'
 		compile project(':cleargl')
 		compile project(':clearcuda')
+		compile project(':clearaudio')
 	}
 	else {
-		println 'Using clearCUDA and clearGL from Maven repository'/**/
+		println 'Using clearX from Maven repository'/**/
 		compile group: "net.clearvolume", name: "cleargl", version: "(,1.1.0]", changing: true, transitive: true
 		compile group: "net.clearvolume", name: "clearcuda", version: "(,1.1.0]", changing: true, transitive: true
+		compile group: "net.clearvolume", name: "clearaudio", version: "(,1.1.0]", changing: true, transitive: true
 	}
 
 	compile group: 'junit', name: 'junit', version: '4.12'

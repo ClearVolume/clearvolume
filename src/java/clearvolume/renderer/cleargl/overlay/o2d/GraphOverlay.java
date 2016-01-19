@@ -11,13 +11,11 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES3;
 
-import cleargl.ClearGeometryObject;
 import cleargl.GLError;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
 import cleargl.GLMatrix;
 import cleargl.GLProgram;
-import clearvolume.audio.audioplot.AudioPlot;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
