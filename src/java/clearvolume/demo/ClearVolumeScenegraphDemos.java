@@ -46,7 +46,7 @@ public class ClearVolumeScenegraphDemos {
 
         Function2<Float, Float, Float> rangeRandomizer = (Float min, Float max) -> {return min + ((float)Math.random() * ((max - min) + 1.0f));};
 
-        Box[] boxes = new Box[20];
+        final Box[] boxes = new Box[20];
         for(Box b: boxes) {
             b = new Box(new GLVector((float)Math.random(), (float)Math.random(), (float)Math.random()));
             b.setPosition(new GLVector(rangeRandomizer.apply(-10.0f, 10.0f),

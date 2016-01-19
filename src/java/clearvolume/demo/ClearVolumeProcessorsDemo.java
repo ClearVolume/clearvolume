@@ -19,7 +19,6 @@ import clearvolume.renderer.cleargl.overlay.o3d.PathOverlay;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
-import clearvolume.renderer.processors.impl.CUDAProcessorTest;
 import clearvolume.renderer.processors.impl.OpenCLCenterMass;
 import clearvolume.renderer.processors.impl.OpenCLDeconvolutionLR;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
@@ -94,7 +93,6 @@ public class ClearVolumeProcessorsDemo
 																												1,
 																												false);
 		lClearVolumeRenderer.addOverlay(new PathOverlay(lClearVolumeRenderer));
-		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
 
 		final OpenCLTest myProc = new OpenCLTest();
 		myProc.addResultListener(new ProcessorResultListener<Double>()
@@ -681,62 +679,7 @@ public class ClearVolumeProcessorsDemo
 		lClearVolumeRenderer.close();
 	}
 
-	@Test
-	public void demoCudaProcessors() throws InterruptedException,
-									IOException
-	{
-
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newCudaRenderer(	"ClearVolumeTest",
-																												1024,
-																												1024,
-																												NativeTypeEnum.UnsignedByte,
-																												512,
-																												512,
-																												1,
-																												false);
-		lClearVolumeRenderer.addOverlay(new PathOverlay(lClearVolumeRenderer));
-		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
-		lClearVolumeRenderer.addProcessor(new OpenCLTest());
-
-		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
-		lClearVolumeRenderer.setVisible(true);
-
-		final int lResolutionX = 256;
-		final int lResolutionY = lResolutionX;
-		final int lResolutionZ = lResolutionX;
-
-		final byte[] lVolumeDataArray = new byte[lResolutionX * lResolutionY
-													* lResolutionZ];
-
-		for (int z = 0; z < lResolutionZ; z++)
-			for (int y = 0; y < lResolutionY; y++)
-				for (int x = 0; x < lResolutionX; x++)
-				{
-					final int lIndex = x + lResolutionX
-										* y
-										+ lResolutionX
-										* lResolutionY
-										* z;
-					int lCharValue = (((byte) x ^ (byte) y ^ (byte) z));
-					if (lCharValue < 12)
-						lCharValue = 0;
-					lVolumeDataArray[lIndex] = (byte) lCharValue;
-				}
-
-		lClearVolumeRenderer.setVolumeDataBuffer(	0,
-													ByteBuffer.wrap(lVolumeDataArray),
-													lResolutionX,
-													lResolutionY,
-													lResolutionZ);
-		lClearVolumeRenderer.requestDisplay();
-
-		while (lClearVolumeRenderer.isShowing())
-		{
-			Thread.sleep(500);
-		}
-
-		lClearVolumeRenderer.close();
-	}
+	
 
 	@Test
 	public void demoOpenCLDeconv()	throws InterruptedException,
