@@ -14,3 +14,4 @@ src/cpp/jars/*.jar
 ClearVolume.exe.jar
 log.txt
 clearvolume.iml
+gradle.properties
