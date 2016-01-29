@@ -11,6 +11,8 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES3;
 
+import clearaudio.audioplot.AudioPlot;
+import cleargl.ClearGeometryObject;
 import cleargl.GLError;
 import cleargl.GLFloatArray;
 import cleargl.GLIntArray;
