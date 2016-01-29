@@ -1,4 +1,4 @@
-package clearvolume.renderer.opencl;
+package clearvolume.renderer.scenegraph.opencl;
 
 import static java.lang.Math.max;
 import static java.lang.Math.pow;

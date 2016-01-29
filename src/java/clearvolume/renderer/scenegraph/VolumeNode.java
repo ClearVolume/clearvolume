@@ -1,7 +1,8 @@
-package clearvolume.renderer.cleargl;
+package clearvolume.renderer.scenegraph;
 
 import cleargl.GLProgram;
-import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
+import clearvolume.renderer.scenegraph.opencl.OpenCLVolumeRenderer;
+
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES3;
 import org.apache.commons.io.IOUtils;

@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
-import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
+import clearvolume.renderer.scenegraph.opencl.OpenCLVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
 import coremem.ContiguousMemoryInterface;
 import coremem.buffers.ContiguousBuffer;

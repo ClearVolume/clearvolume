@@ -26,7 +26,7 @@ import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
-import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
+import clearvolume.renderer.scenegraph.opencl.OpenCLVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
 import coremem.types.NativeTypeEnum;
 

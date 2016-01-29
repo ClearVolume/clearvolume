@@ -1,4 +1,4 @@
-package clearvolume.renderer.opencl.tests;
+package clearvolume.renderer.scenegraph.opencl.tests;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import clearcl.OpenCLAvailability;
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
+import clearvolume.renderer.scenegraph.opencl.OpenCLVolumeRenderer;
 import coremem.offheap.OffHeapMemory;
 import coremem.types.NativeTypeEnum;
 import coremem.util.Size;

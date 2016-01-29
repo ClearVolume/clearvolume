@@ -94,16 +94,13 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedX(-lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleX(-lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.rotateByAngleX(-lRotationSpeed);
 
 			}
 
 			else
 				mClearVolumeRenderer.addTranslationY(-lTranslationSpeed);
-			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
+
 			break;
 
 		case KeyEvent.VK_UP:
@@ -112,15 +109,12 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedX(+lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleX(+lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.rotateByAngleX(+lRotationSpeed);
 
 			}
 			else
 				mClearVolumeRenderer.addTranslationY(+lTranslationSpeed);
-			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
+
 			break;
 
 		case KeyEvent.VK_LEFT:
@@ -129,15 +123,12 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedY(-lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleY(+lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.rotateByAngleY(+lRotationSpeed);
 
 			}
 			else
 				mClearVolumeRenderer.addTranslationX(-lTranslationSpeed);
-			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
+
 			break;
 
 		case KeyEvent.VK_RIGHT:
@@ -146,16 +137,12 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedY(+lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleY(-lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.rotateByAngleY(-lRotationSpeed);
 
 			}
 			else
 				mClearVolumeRenderer.addTranslationX(+lTranslationSpeed);
 
-			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 			break;
 
 		case KeyEvent.VK_PAGE_DOWN:
@@ -164,16 +151,12 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedZ(-lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleZ(+lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.rotateByAngleZ(+lRotationSpeed);
 
 			}
 			else
 				mClearVolumeRenderer.addTranslationZ(-lTranslationSpeed / mClearVolumeRenderer.getFOV());
 
-			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 			break;
 
 		case KeyEvent.VK_PAGE_UP:
@@ -182,16 +165,12 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedZ(+lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleZ(-lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.rotateByAngleZ(-lRotationSpeed);
 
 			}
 			else
 				mClearVolumeRenderer.addTranslationZ(+lTranslationSpeed / mClearVolumeRenderer.getFOV());
 
-			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 			break;
 
 		case KeyEvent.VK_ESCAPE:

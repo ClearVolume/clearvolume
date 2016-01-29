@@ -1,7 +1,7 @@
 package clearvolume.renderer.processors;
 
 import clearcl.OpenCLDevice;
-import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
+import clearvolume.renderer.scenegraph.opencl.OpenCLVolumeRenderer;
 
 public abstract class OpenCLProcessor<R> extends ProcessorBase<R>	implements
 																	ProcessorInterface<R>

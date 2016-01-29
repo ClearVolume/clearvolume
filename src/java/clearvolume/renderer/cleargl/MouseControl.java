@@ -87,7 +87,6 @@ class MouseControl extends MouseAdapter implements MouseListener
 		else if (pMouseEvent.getClickCount() == 2)
 		{
 			mRenderer.toggleFullScreen();
-			mRenderer.notifyChangeOfVolumeRenderingParameters();
 		}
 
 	}
@@ -127,7 +126,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		handleTranslation(pMouseEvent);
 		handleGammaMinMax(pMouseEvent);
-		mRenderer.notifyChangeOfVolumeRenderingParameters();
+
 
 	}
 
@@ -177,7 +176,6 @@ class MouseControl extends MouseAdapter implements MouseListener
 
 		setSavedMousePosition(pMouseEvent);
 
-		mRenderer.notifyChangeOfVolumeRenderingParameters();
 
 	}
 

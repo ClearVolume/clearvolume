@@ -9,6 +9,7 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2ES3;
 
+import clearvolume.renderer.ClipBox;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
@@ -348,8 +349,9 @@ public class BoxOverlay extends OverlayBase	implements
 
 			if (mAlignToClipBox)
 			{
-				float[] lClipBox = pClearGLVolumeRenderer.getClipBox();
-				if (!Arrays.equals(mClipBox, lClipBox))
+				//NOTE: the first layer decides on the clipbox:
+				ClipBox lClipBox = pClearGLVolumeRenderer.getClipBox(0);
+				if (!mClipBox.equals(lClipBox))
 					updateClipBox(lClipBox);
 			}
 			mGeometricalObject.setModelView(pModelViewMatrix);
@@ -368,9 +370,9 @@ public class BoxOverlay extends OverlayBase	implements
 		}
 	}
 
-	private void updateClipBox(final float[] clipbox)
+	private void updateClipBox(final ClipBox pClipBox)
 	{
-		mClipBox = Arrays.copyOf(clipbox, clipbox.length);
+		mClipBox = pClipBox.getArray();
 		setVertices(mClipBox);
 	}
 }

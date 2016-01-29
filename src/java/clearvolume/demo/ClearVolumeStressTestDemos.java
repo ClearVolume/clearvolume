@@ -18,7 +18,7 @@ import com.jogamp.newt.awt.NewtCanvasAWT;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
-import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
+import clearvolume.renderer.scenegraph.opencl.OpenCLVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
 import coremem.buffers.ContiguousBuffer;
 import coremem.types.NativeTypeEnum;

@@ -289,7 +289,7 @@ public class ClearVolumeRendererFactory
 																																						final boolean pUseInCanvas)
 	{
 
-		return new clearvolume.renderer.opencl.OpenCLVolumeRenderer(pWindowName,
+		return new clearvolume.renderer.scenegraph.opencl.OpenCLVolumeRenderer(pWindowName,
 																																pWindowWidth,
 																																pWindowHeight,
 																																pNativeTypeEnum.toString(),

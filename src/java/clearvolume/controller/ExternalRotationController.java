@@ -14,32 +14,6 @@ import clearvolume.renderer.DisplayRequestInterface;
 /**
  * Class ExternalRotationController
  * 
- * This class provides an implementation of RotationControllerInterface that
- * uses incoming data from a TCP port in he form:
- * 
- * [qw,qx,qy,qz,ax,ay,az,b1,b2,b3]
- * 
- * where (qw,qx,qy,qz) is a quaternion with qw,qx,qy,qz are floats. and
- * (ax,ay,az) is an acceleration vector (if available), and b1,b2, b3 are
- * variable size buttons.
- * 
- * typically, the data arrives from a Egg3D controller or similarly compatible
- * rotation controller. the default TCP port is 4444.
- *
- * @author Loic Royer 2014
- *
- */
-/**
- * Class ExternalRotationController
- * 
- * Instances of this class ...
- *
- * @author Loic Royer 2014
- *
- */
-/**
- * Class ExternalRotationController
- * 
  * Instances of this class ...
  *
  * @author Loic Royer 2014
