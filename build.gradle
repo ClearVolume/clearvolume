@@ -119,14 +119,9 @@ dependencies
 repositories
 {
 	mavenCentral()
-	maven
-	{ url  "http://dl.bintray.com/clearvolume/ClearVolume"  }
-	maven
-	{ url  "http://dl.bintray.com/royerloic/maven" }
-	maven
-	{ url "http://oss.sonatype.org/content/groups/public" }
-	maven { url  "http://dl.bintray.com/rtlib/CoreMem" }
-
+	maven { url  "http://dl.bintray.com/clearvolume/ClearVolume"  }
+	maven { url  "http://oss.sonatype.org/content/groups/public" }
+	maven { url  "http://dl.bintray.com/clearcontrol/ClearControl" }
 }
 
 

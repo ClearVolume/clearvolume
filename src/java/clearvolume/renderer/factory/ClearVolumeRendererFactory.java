@@ -227,24 +227,6 @@ public class ClearVolumeRendererFactory
 				System.err.println("Caution: Use of OpenCL has been explicitly disabled!");
 			}
 
-			if (lProperties.getProperty("ClearVolume.disableCUDA") == null && System.getenv("CV_DISABLE_CUDA") == null)
-			{
-				final ClearVolumeRendererInterface lNewCudaRenderer = internalCreateCudaRenderer(	pWindowName,
-																									pWindowWidth,
-																									pWindowHeight,
-																									pNativeTypeEnum,
-																									pMaxTextureWidth,
-																									pMaxTextureHeight,
-																									pNumberOfRenderLayers,
-																									pUseInCanvas);
-
-				if (lNewCudaRenderer != null)
-					return lNewCudaRenderer;
-			}
-			else
-			{
-				System.err.println("Caution: Use of CUDA has been explicitly disabled!");
-			}
 
 			System.err.println("Your system cannot run ClearVolume because it does not support CUDA or OpenCL.");
 			return null;
@@ -256,46 +238,7 @@ public class ClearVolumeRendererFactory
 		}
 	}
 
-	public static final ClearVolumeRendererInterface newCudaRenderer(	final String pWindowName,
-																		final int pWindowWidth,
-																		final int pWindowHeight,
-																		final NativeTypeEnum pNativeTypeEnum,
-																		final int pMaxTextureWidth,
-																		final int pMaxTextureHeight,
-																		final int pNumberOfRenderLayers,
-																		final boolean pUseInCanvas)
-	{
-		try
-		{
-			boolean lCUDAOperational = false;
-			try
-			{
-				lCUDAOperational = CudaAvailability.isClearCudaOperational();
-			}
-			catch (final Throwable e)
-			{
-				e.printStackTrace();
-			}
-
-			if (!lCUDAOperational)
-				return null;
-
-			return internalCreateCudaRenderer(	pWindowName,
-												pWindowWidth,
-												pWindowHeight,
-												pNativeTypeEnum,
-												pMaxTextureWidth,
-												pMaxTextureHeight,
-												pNumberOfRenderLayers,
-												pUseInCanvas);
-
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-	}
+	
 
 	public static final ClearVolumeRendererInterface newOpenCLRenderer(	final String pWindowName,
 																		final int pWindowWidth,
@@ -337,25 +280,7 @@ public class ClearVolumeRendererFactory
 		}
 	}
 
-	private static ClearVolumeRendererInterface internalCreateCudaRenderer(	final String pWindowName,
-																			final int pWindowWidth,
-																			final int pWindowHeight,
-																			final NativeTypeEnum pNativeTypeEnum,
-																			final int pMaxTextureWidth,
-																			final int pMaxTextureHeight,
-																			final int pNumberOfRenderLayers,
-																			final boolean pUseInCanvas)
-	{
-
-		return new clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer(	pWindowName,
-																			pWindowWidth,
-																			pWindowHeight,
-																			pNativeTypeEnum,
-																			pMaxTextureWidth,
-																			pMaxTextureHeight,
-																			pNumberOfRenderLayers,
-																			pUseInCanvas);
-	}
+	
 
 	private static ClearVolumeRendererInterface internalCreateOpenCLRenderer(	final String pWindowName,
 																				final int pWindowWidth,

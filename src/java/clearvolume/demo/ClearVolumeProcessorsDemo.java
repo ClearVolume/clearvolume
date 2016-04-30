@@ -19,7 +19,6 @@ import clearvolume.renderer.cleargl.overlay.o3d.PathOverlay;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.renderer.processors.ProcessorResultListener;
-import clearvolume.renderer.processors.impl.CUDAProcessorTest;
 import clearvolume.renderer.processors.impl.OpenCLCenterMass;
 import clearvolume.renderer.processors.impl.OpenCLDeconvolutionLR;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
@@ -94,8 +93,7 @@ public class ClearVolumeProcessorsDemo
 																												1,
 																												false);
 		lClearVolumeRenderer.addOverlay(new PathOverlay());
-		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
-
+		
 		final OpenCLTest myProc = new OpenCLTest();
 		myProc.addResultListener(new ProcessorResultListener<Double>()
 		{
@@ -686,7 +684,7 @@ public class ClearVolumeProcessorsDemo
 									IOException
 	{
 
-		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newCudaRenderer(	"ClearVolumeTest",
+		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newOpenCLRenderer(	"ClearVolumeTest",
 																												1024,
 																												1024,
 																												NativeTypeEnum.UnsignedByte,
@@ -695,7 +693,6 @@ public class ClearVolumeProcessorsDemo
 																												1,
 																												false);
 		lClearVolumeRenderer.addOverlay(new PathOverlay());
-		lClearVolumeRenderer.addProcessor(new CUDAProcessorTest());
 		lClearVolumeRenderer.addProcessor(new OpenCLTest());
 
 		lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());

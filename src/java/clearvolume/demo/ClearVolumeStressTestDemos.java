@@ -17,8 +17,8 @@ import org.junit.Test;
 import com.jogamp.newt.awt.NewtCanvasAWT;
 
 import clearvolume.renderer.ClearVolumeRendererInterface;
-import clearvolume.renderer.clearcuda.JCudaClearVolumeRenderer;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
+import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
 import coremem.buffers.ContiguousBuffer;
 import coremem.types.NativeTypeEnum;
@@ -135,7 +135,7 @@ public class ClearVolumeStressTestDemos
 			final JFrame lJFrame = new JFrame("ClearVolume");
 			;
 
-			final ClearVolumeRendererInterface lClearVolumeRenderer = new JCudaClearVolumeRenderer(	"ClearVolumeTest",
+			final ClearVolumeRendererInterface lClearVolumeRenderer = new OpenCLVolumeRenderer(	"ClearVolumeTest",
 																									(i % 2 == 0) ? 768
 																												: 64,
 																									(i % 2 == 0) ? 768
