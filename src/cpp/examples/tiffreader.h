@@ -16,28 +16,27 @@
 #include <vector>
 #include <deque>
 #include <string>
+#include <sstream>
 
 #include <tiffio.h>
+#include <tiffio.hxx>
 
 using namespace std;
-
-enum class BitDepth {Grayscale8, Grayscale16, RGB8, RGB16};
 
 class TIFFReader {
 public:
     TIFFReader(string filename);
-    vector<unsigned int>* getDimensions() { return &dimensions; };
-    BitDepth getBitDepth();
-    unsigned char* getBuffer() { return dataBuffer.data(); };
-    unsigned int getBufferSize() { return dataBuffer.size(); };
-    vector<unsigned char>* getVector() { return &dataBuffer; };
-    
+    ~TIFFReader();
+    vector<unsigned long>* getDimensions() { return &dimensions; };
+    unsigned int getBitDepth() { return imageBitDepth; };
+    void* getBuffer() { return dataBuffer; };
+    unsigned long getBufferSize() { return dimensions[0] * dimensions[1] * dimensions[2] * imageBitDepth/8; }
     bool isValid() { return this->valid; };
     
 protected:
-    vector<unsigned char> dataBuffer;
-    vector<unsigned int> dimensions;
-    BitDepth imageBitDepth;
+    void* dataBuffer;
+    vector<unsigned long> dimensions;
+    unsigned int imageBitDepth;
     
     bool valid = true;
     

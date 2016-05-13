@@ -27,10 +27,55 @@ extern "C" {
 using namespace std;
 
 static string classpath;
-static string tiff_file_path;
+static string tiff_dir_path;
+
+vector<string>* get_timepoints_from_directory(string path, string name_filter = "") {
+    vector<string>* files = new vector<string>();
+
+    DIR* dir;
+    struct dirent* entry;
+    int error;
+
+    if ((dir = opendir(path.c_str())) != NULL) {
+        while ((entry = readdir(dir)) != NULL) {
+            string filename = entry->d_name;
+            if(filename.find(".tif") != string::npos) {
+                if(name_filter != "" && filename.find(name_filter) == string::npos) {
+                    continue;
+                }
+                files->push_back(path + "/" + entry->d_name);
+            }
+        }
+        
+        closedir(dir);
+        return files;
+
+    } else {
+        /* could not open directory */
+        perror ("");
+        return files;
+    }
+}
+
+long to_microseconds(struct timeval& time) {
+    return ((unsigned long long)time.tv_sec * 1000000) + time.tv_usec;
+}
+
+bool timepoint_sort(const string &lhs, const string &rhs) {
+    string file_lhs = lhs.substr(lhs.find_last_of("/")+1);
+    string file_rhs = rhs.substr(rhs.find_last_of("/")+1);
+
+    string lhs_tp = file_lhs.substr(file_lhs.find_first_of("TP")+2, file_lhs.find_last_of("_Ch")-file_lhs.find_first_of("TP"));
+    string rhs_tp = file_rhs.substr(file_rhs.find_first_of("TP")+2, file_rhs.find_last_of("_Ch")-file_rhs.find_first_of("TP"));
+
+    return stoi(lhs_tp) < stoi(rhs_tp);
+}
 
 void run_clearvolume()
 {
+    chrono::time_point<chrono::high_resolution_clock> start, end;
+    chrono::duration<double, milli> elapsed_ms;
+
 	// First we initialize the library and provide the location of the ClearVolume jar file.
 	// the JVM location is determined automatically using the JAVA_HOME env var.
 	int lReturnCode = begincvlib(const_cast<char*>(classpath.c_str()), OPENCL);
@@ -47,7 +92,7 @@ void run_clearvolume()
 
 	// Creates an in-process renderer:
     cout << "Creating renderer... " << endl;
-	if(createRenderer(lRendererID, 512, 512, 1, 512, 512)!=0) {
+	if(createRendererWithTimeShiftAndChannels(lRendererID, 1024, 1024, 2, 1024, 1024, false, true)!=0) {
 		cout << "ERROR while creating renderer \n";
         return;
     }
@@ -56,77 +101,102 @@ void run_clearvolume()
 	// wait for the CV renderer to initialize
 	this_thread::sleep_for(chrono::seconds(2));
 
-	// Creates a network server:
-    cout << "Creating server... ";
-	if(createServer(lServerID)!=0)
-		cout << "ERROR while creating server \n";
-    cout << " done." << endl;
-
 	// Sets the voxel dimensions in real units for in-process renderer
     cout << "Setting up volume units for renderer ... " << endl;
 	if(setVoxelDimensionsInRealUnits(lRendererID,1,1,1)!=0)
 		cout << "ERROR while setting dimensions in real units(um)) \n";
 
-	// Sets the voxel dimensions in real units for in-process server
-    cout << "Setting up volume units for server ... " << endl;
-	if(setVoxelDimensionsInRealUnits(lServerID,  1,1,1)!=0)
-		cout << "ERROR while setting dimensions in real units(um)) \n";
-
 	// Information on volume sizes:
 	int channel = 0;
-	char* buffer;
+    int index = 1;
+	short* buffer;
 
-    // read the tiff file
-    TIFFReader *tr = new TIFFReader(tiff_file_path);
+    unsigned int counter = 0;
+    
+    float green_channel_color[] = {0.0f, 1.0f, 0.0f, 1.0f};
+    float red_channel_color[] = {1.0f, 0.0f, 0.0f, 1.0f};
 
-    cout << "Read tiff file \"" << tiff_file_path << "\" with dimensions ";
-    for(unsigned int d: *(tr->getDimensions())) {
-        cout << d << " ";
-    }
-    cout << endl;
+    setChannelColor(lRendererID, 0, green_channel_color);
+    //setChannelColor(lRendererID, 2, red_channel_color);
 
-    if(tr->getDimensions()->size() < 3) {
-        cerr << "Sorry, but we need a TIFF stack, not just a 2D image!" << endl;
-    }
+    vector<string> files = *get_timepoints_from_directory(tiff_dir_path, "green");
+    sort(files.begin(), files.end(), timepoint_sort);
 
-    buffer = (char*)tr->getBuffer();
-    cerr << "Buffer size is " << tr->getBufferSize() << endl;
-
-    cout << "Starting sending volumes ... " << endl;
-
-    // for demo purposes we say that the 'acquisition' periode is 100 ms: 
-    double timeins = 1.0;
-
-    // We set the current index and time for both in-process renderer and server:
-    if(setVolumeIndexAndTime(lRendererID,1,timeins)!=0)
-        cout << "ERROR while setting volume index and time in seconds (renderer)\n";
-    if(setVolumeIndexAndTime(lServerID,  1,timeins)!=0)
-        cout << "ERROR while setting volume index and time in seconds (server)\n";
-
-    //We send the data to both the in-process renderer and server.
-    if(send8bitUINTVolumeDataToSink(lRendererID, channel, buffer,
-                tr->getBufferSize(),
-                (*(tr->getDimensions()))[0],
-                (*(tr->getDimensions()))[1],
-                (*(tr->getDimensions()))[2]) != 0) {
-        cout << "ERROR while sending volume! (renderer)\n";
-    }
-    if(send8bitUINTVolumeDataToSink(lServerID, channel, buffer,
-                tr->getBufferSize(),
-                (*(tr->getDimensions()))[0],
-                (*(tr->getDimensions()))[1],
-                (*(tr->getDimensions()))[2]) != 0) {
-        cout << "ERROR while sending volume! (server)\n";
+    cout << "File list:" << endl;
+    for(string s: files) {
+        cout << "\t" << s << endl;
     }
 
-    sleep(300);
+    for(string tiff_file_path: files) {
+        counter++;
+
+        if(counter%2 == 0) {
+            channel = 1;
+            cerr << tiff_file_path << ", red" << endl;
+            index++;
+        } else {
+            cerr << tiff_file_path << ", green" << endl;
+            channel = 0;
+        }
+
+        //cout << "Current file: " << tiff_file_path << endl;
+        start = chrono::high_resolution_clock::now();
+        // read the tiff file
+        TIFFReader *tr = new TIFFReader(tiff_file_path);
+
+        cerr << "Read tiff file \"" << tiff_file_path << "\" with dimensions ";
+        for(unsigned int d: *(tr->getDimensions())) {
+            cout << d << " ";
+        }
+        cout << endl;
+
+        if(tr->getDimensions()->size() < 3) {
+            cerr << "Sorry, but we need a TIFF stack, not just a 2D image!" << endl;
+        }
+
+        buffer = (short*)tr->getBuffer();
+        end = chrono::high_resolution_clock::now();
+        elapsed_ms = end-start;
+
+        cout << "R: " << elapsed_ms.count() << "ms" << endl;
+        cerr << "Buffer size is " << tr->getBufferSize()/1024.0f/1024.0f << endl;
+
+        start = chrono::high_resolution_clock::now();
+        // for demo purposes we say that the 'acquisition' periode is 100 ms: 
+        double timeins = 1.0;
+
+        // We set the current index and time for both in-process renderer and server:
+        if(setVolumeIndexAndTime(lRendererID, index, timeins)!=0)
+            cout << "ERROR while setting volume index and time in seconds (renderer)\n";
+
+        //We send the data to both the in-process renderer and server.
+        if(send16bitUINTVolumeDataToSink(lRendererID, channel, buffer,
+                    tr->getBufferSize(),
+                    (*(tr->getDimensions()))[0],
+                    (*(tr->getDimensions()))[1],
+                    (*(tr->getDimensions()))[2]) != 0) {
+            cout << "ERROR while sending volume! (renderer)\n";
+        }
+        end = chrono::high_resolution_clock::now();
+        elapsed_ms = end-start;
+
+        cout << "S: " << elapsed_ms.count() << "ms" << endl;
+
+        delete tr;
+
+        setChannelColor(lRendererID, 0, green_channel_color);
+//        setChannelColor(lRendererID, 1, green_channel_color);
+//
+        if(index == 1) {
+            sleep(10);
+        }
+    }
+
+    sleep(500);
 
     // we destroy both renderer and server
     if(destroyRenderer(lRendererID)!=0)
         cout << "ERROR while destroying renderer \n";
-    if(destroyServer(lServerID)!=0)
-        cout << "ERROR while destroying server \n";
-
 	// closes the library
 	endcvlib();
 }
@@ -140,7 +210,7 @@ int main(int argc, char** argv)
 #endif
 {
 	if (argc >= 2) {
-		tiff_file_path = argv[1];
+		tiff_dir_path = argv[1];
 	} else {
         fprintf(stderr, "Please give a TIFF file as argument!");
         return -1;

@@ -13,3 +13,4 @@ src/clearvolume/demo/databig/
 ClearVolume.exe.jar
 log.txt
 clearvolume.iml
+src/cpp/jars/*

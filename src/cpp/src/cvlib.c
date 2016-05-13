@@ -46,7 +46,9 @@ static jmethodID 	getLastExceptionMessageID,
             setVoxelDimensionsInRealUnitsID,
             setVolumeIndexAndTimeID,
             send8bitUINTVolumeDataToSinkID,
-            send16bitUINTVolumeDataToSinkID;
+            send16bitUINTVolumeDataToSinkID,
+            setChannelNameID,
+            setChannelColorID;
 
 #ifndef _WIN32
 #include <signal.h>
@@ -82,28 +84,21 @@ char* get_cv_jars(const char* path, char* buffer) {
     struct dirent* entry;
     int error;
 
-    char* tmp = "\0";
+    char* tmp = (char*)malloc(1);
+    memset(tmp, 0, 1);
 
     if ((jar_dir = opendir(path)) != NULL) {
         while ((entry = readdir(jar_dir)) != NULL) {
             if(strncmp(".jar", entry->d_name+(strlen(entry->d_name))-4, 4) == 0) {
                 char* new;
-                unsigned long new_size = strlen(tmp) + strlen(path) + strlen(entry->d_name) + 32;
+                unsigned long new_size = strlen(path) + strlen(entry->d_name) + strlen("/") + strlen(JAR_SEPARATOR) + strlen("\0");
                 if((new = malloc(new_size)) != NULL) {
-                    new[0] = '\0';
+                    snprintf(new, new_size+1, "%s/%s%s", path, entry->d_name, JAR_SEPARATOR);
 
-                    strncat(new, tmp, new_size);
-
-                    strncat(new, path, new_size);
-                    strncat(new, "/", new_size);
-                    strncat(new, entry->d_name, new_size);
-                    strncat(new, JAR_SEPARATOR, new_size);
-
-                    if(strlen(tmp) > 0) {
-                        free(tmp);
-                    }
-                    tmp = malloc(strlen(new)+1);
-                    strncpy(tmp, new, strlen(new));
+                    tmp = realloc(tmp, strlen(tmp)+strlen(new)+1);
+                    //fprintf(stderr, "%s new=%lu, tmp is now %lu bytes vs %lu\n", new, strlen(new)+1, strlen(tmp)+strlen(new)+1, strlen(tmp));
+                    memset(tmp+strlen(tmp), 0, strlen(new) + 1);
+                    strncat(tmp, new, strlen(new));
                 } else {
                     fprintf(stderr, "malloc failed, out of memory?\n");
                     return NULL;
@@ -113,12 +108,7 @@ char* get_cv_jars(const char* path, char* buffer) {
         
         closedir (jar_dir);
 
-        buffer = malloc(strlen(tmp));
-        strncpy(buffer, tmp, strlen(tmp));
-
-        printf("Using class path: %s\n", buffer);
-
-        return buffer;
+        return tmp;
 
     } else {
         /* could not open directory */
@@ -193,7 +183,7 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
     memset(&sJVMArgs, 0, sizeof(sJVMArgs));
 
     JavaVMOption options[3];
-    options[0].optionString = (char*)"-Xmx4G";
+    options[0].optionString = (char*)"-Xmx12G";
     options[1].optionString = (char*)lClassPathString;
 
     switch(backend) {
@@ -276,6 +266,9 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
     setVolumeIndexAndTimeID 		= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "setVolumeIndexAndTime", "(IID)I");
     send8bitUINTVolumeDataToSinkID 	= (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "send8bitUINTVolumeDataToSink", "(IIJJIII)I");
     send16bitUINTVolumeDataToSinkID = (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "send16bitUINTVolumeDataToSink", "(IIJJIII)I");
+    setChannelNameID                = (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "setChannelName", "(ILjava/lang/String;)I");
+    setChannelColorID               = (*lJNIEnv)->GetStaticMethodID(lJNIEnv, sClearVolumeClass, "setChannelColor","(I[F)I");
+
 
     if (getLastExceptionMessageID == 0) return 101;
     if (createRendererID == 0) return 102;
@@ -286,6 +279,8 @@ __declspec(dllexport) unsigned long __cdecl begincvlib(char* pClearVolumeJarPath
     if (setVolumeIndexAndTimeID == 0) return 107;
     if (send8bitUINTVolumeDataToSinkID == 0) return 108;
     if (send16bitUINTVolumeDataToSinkID == 0) return 109;
+    if (setChannelNameID == 0) return 110;
+    if (setChannelColorID == 0) return 111;
 
     jthrowable exc;
     exc = (*lJNIEnv)->ExceptionOccurred(lJNIEnv);
@@ -552,5 +547,44 @@ __declspec(dllexport) long __cdecl send16bitUINTVolumeDataToSink( 	long pSinkId,
             pWidth,
             pHeight,
             pDepth);
+}
+
+__declspec(dllexport) long __cdecl setChannelName( 	long pSinkId,
+        long pChannelId,
+        const char* channelName)
+{
+    clearError();
+    JNIEnv* lJNIEnv;
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
+
+    return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
+            setChannelNameID,
+            pSinkId,
+            pChannelId,
+            channelName);
+}
+
+__declspec(dllexport) long __cdecl setChannelColor( 	long pSinkId,
+        long pChannelId,
+        float* color)
+{
+    clearError();
+    JNIEnv* lJNIEnv;
+    (*sJVM)->AttachCurrentThread(sJVM, (void**)&lJNIEnv, NULL);
+
+    jfloatArray jArray = (*lJNIEnv)->NewFloatArray(lJNIEnv, 4*4);
+
+    if(jArray != NULL) {
+        (*lJNIEnv)->SetFloatArrayRegion(lJNIEnv, jArray, 0, 4, color);
+
+        return (*lJNIEnv)->CallStaticIntMethod(lJNIEnv, sClearVolumeClass,
+                setChannelColorID,
+                pSinkId,
+                pChannelId,
+                &jArray);
+    } else {
+        fprintf(stderr, "Array was null, returning -1\n");
+        return -1;
+    }
 }
 

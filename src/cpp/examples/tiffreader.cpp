@@ -10,90 +10,88 @@
 
 #include "tiffreader.h"
 #include <algorithm>
+#include <sstream>
+#include <fstream>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <assert.h>
+
+#define T uint16_t
+
+size_t getFileSize(string& filename) {
+    struct stat st;
+    stat(filename.c_str(), &st);
+    return st.st_size;
+}
+
+void DummyHandler(const char* module, const char* fmt, va_list ap)
+{
+    // ignore errors and warnings (or handle them your own way)
+}
 
 TIFFReader::TIFFReader(string filename) {
+    int z_start = 0;
+    int z_end = -1;
+   // vector<char> fbuffer(filesize);
+    //file.read(&fbuffer[0], filesize);
+
+   // stream.rdbuf()->pubsetbuf(&fbuffer[0], filesize);
+   //
+    TIFFSetWarningHandler(DummyHandler);
+
     TIFF* tif = TIFFOpen(filename.c_str(), "r");
-    int dircount = 0;
-    uint32 width;
-    uint32 height;
+    unsigned int dircount = 0;
+    unsigned int width;
+    unsigned int height;
     unsigned short nbits;
-    unsigned short samples;
-    uint32* raster;
-    
+    unsigned samples;
+    void* raster;
+
     if (tif) {
         TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
         TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
         TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &nbits);
         TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &samples);
-        
-        
-        if (samples == 3 && nbits == 8) {
-            this->imageBitDepth = BitDepth::RGB8;
-        } else if(samples == 3 && nbits == 16) {
-            this->imageBitDepth = BitDepth::RGB16;
-        } else if(samples == 1 && nbits == 8) {
-            this->imageBitDepth = BitDepth::Grayscale8;
-        } else if(samples == 1 && nbits == 16) {
-            this->imageBitDepth = BitDepth::Grayscale16;
-        } else {
-            cerr <<  "Unknown image type!" << endl;
-        }
-
-        do {
-            dircount++;
-        } while (TIFFReadDirectory(tif));
-        cerr << "Found " << dircount << " directories/slices in " << filename << endl;
     } else {
-        cerr << "Could not open TIFF file." << endl;
-        this->valid = false;
+        cerr <<  "Could not open TIFF file " << filename << "." << std::endl;
         return;
     }
+
+    
+    dircount = TIFFNumberOfDirectories(tif);
+
     this->dimensions.push_back(width);
     this->dimensions.push_back(height);
     this->dimensions.push_back(dircount);
-    
-    cerr << "Image dimensions: " << width << "x" << height << "x" << samples << "Sx" << nbits << "Bx" << dircount << "SL" << endl;
-    
-    uint32 imageSize = width*height;
-    dataBuffer.reserve(imageSize*dircount);
-    
-    int ScanlineSize=TIFFScanlineSize(tif);
-    int StripSize =  TIFFStripSize(tif);
-    int rowsPerStrip;
-    int nRowsToConvert;
-    
-    tsample_t vSample=1;
-    raster = (uint32*)_TIFFmalloc(StripSize);
-    uint8 *TBuf = (uint8*)raster;
-    
-    TIFFGetFieldDefaulted(tif, TIFFTAG_ROWSPERSTRIP, &rowsPerStrip);
+    this->imageBitDepth = (unsigned int)nbits;
 
+    cerr << "TIFF stats: " << width << "x" << height << "x" << dircount << ", " << nbits << " bits, " << samples << " spp" << endl;
+    unsigned long bufferSize = dimensions[0] * dimensions[1] * dimensions[2];
+    dataBuffer = new uint16[bufferSize];
     
-    cout << "SPIMStack: Reading " << dircount << " slices";
+    long StripSize =  TIFFStripSize(tif);
+    long numStrips = TIFFNumberOfStrips(tif);
+    
+    tdata_t buf;
+    tstrip_t strip;
+
+    buf = _TIFFmalloc(StripSize*numStrips);
+
     for(int i = 0; i < dircount; i++) {
+        long bytes = 0;
         TIFFSetDirectory(tif, i);
-        //raster = new uint32 [imageSize];
-        
-        //TIFFReadRGBAImageOriented(tif, width, height, raster, ORIENTATION_TOPLEFT, 0);
-        
-        for (int topRow = 0; topRow < height; topRow += rowsPerStrip) {
-            nRowsToConvert = (topRow + rowsPerStrip >height?height- topRow : rowsPerStrip);
-            TIFFReadEncodedStrip(tif, TIFFComputeStrip(tif, topRow, 0), TBuf, nRowsToConvert*ScanlineSize);
-            
-            std::copy(TBuf, TBuf+nRowsToConvert*width, back_inserter(dataBuffer));
-            
-        }
-        
-        
-        //dataBuffer.insert(dataBuffer.begin()+i, raster, raster+imageSize);
-        
-        cout << ".";
-    }
+
+        for (strip = 0; strip < numStrips; strip++)
+            bytes += TIFFReadEncodedStrip(tif, strip, (uint8*)buf+strip*StripSize, (tsize_t) -1);
+
+        memcpy((uint8*)dataBuffer+i*bytes, buf, bytes);
+    }    
     
-    _TIFFfree(raster);
-    
-    cout << "Buffer size: " << dataBuffer.size()/1024.0f/1024.0f << "M" << endl;
-    
+    _TIFFfree(buf);
+
     TIFFClose(tif);
 }
 
@@ -103,4 +101,8 @@ void TIFFReader::convertBuffer(unsigned int* buffer16, unsigned int size16, unsi
         value16 = value16 + (buffer16[src++] << 8);
         buffer8[dest] = (unsigned int)(value16/257.0 + 0.5);
     }
+}
+
+TIFFReader::~TIFFReader() {
+    delete[] dataBuffer;
 }

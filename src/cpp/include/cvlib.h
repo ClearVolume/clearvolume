@@ -143,3 +143,14 @@ __declspec(dllexport) long __cdecl send16bitUINTVolumeDataToSink( long pSinkId,
 																			long pWidthInVoxels,
 																			long pHeightInVoxels,
 																			long pDepthInVoxels);
+
+__declspec(dllexport) long __cdecl setChannelName( 	long pSinkId,
+        long pChannelId,
+        const char* channelName);
+
+
+__declspec(dllexport) long __cdecl setChannelColor( 	long pSinkId,
+        long pChannelId,
+        float* color);
+
+
