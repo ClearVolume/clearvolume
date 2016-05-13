@@ -100,14 +100,13 @@ dependencies
 	// usage: gradle .... -Plocal=true
 	if (project.hasProperty('local')) {
 		println 'Using local clearX sources'
-		compile project(':cleargl')
-		compile project(':clearcuda')
-		compile project(':clearaudio')
+		compile project(':ClearGL')
+		compile project(':ClearAudio')
+        compile project(':scenery')
 	}
 	else {
 		println 'Using clearX from Maven repository'/**/
 		compile group: "net.clearvolume", name: "cleargl", version: "(,1.1.0]", changing: true, transitive: true
-		compile group: "net.clearvolume", name: "clearcuda", version: "(,1.1.0]", changing: true, transitive: true
 		compile group: "net.clearvolume", name: "clearaudio", version: "(,1.1.0]", changing: true, transitive: true
 	}
 
@@ -503,7 +502,12 @@ def getVersionName = {
 }
 
 group = 'net.clearvolume'
-version = getVersionName()
+if(project.hasProperty('releasebuild')) {
+    version = getVersionName()
+} else {
+    version = "1.0-SNAPSHOT"
+}
+
 
 artifacts
 {
