@@ -29,22 +29,6 @@ import clearvolume.renderer.DisplayRequestInterface;
  * @author Loic Royer 2014
  *
  */
-/**
- * Class ExternalRotationController
- * 
- * Instances of this class ...
- *
- * @author Loic Royer 2014
- *
- */
-/**
- * Class ExternalRotationController
- * 
- * Instances of this class ...
- *
- * @author Loic Royer 2014
- *
- */
 public class ExternalRotationController	extends
 										QuaternionRotationControllerBase implements
 																		RotationControllerInterface,
