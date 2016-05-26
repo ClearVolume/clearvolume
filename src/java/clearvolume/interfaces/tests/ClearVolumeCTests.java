@@ -1,12 +1,10 @@
 package clearvolume.interfaces.tests;
 
-import java.nio.ByteBuffer;
-
-import org.junit.Test;
-
-import clearcuda.CudaAvailability;
 import clearvolume.interfaces.ClearVolumeC;
 import clearvolume.renderer.opencl.OpenCLAvailability;
+import org.junit.Test;
+
+import java.nio.ByteBuffer;
 
 public class ClearVolumeCTests
 {
@@ -14,7 +12,7 @@ public class ClearVolumeCTests
 	@Test
 	public void test8bitStreaming() throws InterruptedException
 	{
-		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
+		if (!OpenCLAvailability.isOpenCLAvailable())
 			return;
 
 		final int lRendererId = 1;
@@ -72,7 +70,7 @@ public class ClearVolumeCTests
 	@Test
 	public void test16bitStreaming() throws InterruptedException
 	{
-		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
+		if (!OpenCLAvailability.isOpenCLAvailable())
 			return;
 
 		final int lRendererId = 1;
@@ -133,7 +131,7 @@ public class ClearVolumeCTests
 	@Test
 	public void testCreateServer16bit() throws InterruptedException
 	{
-		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
+		if (!OpenCLAvailability.isOpenCLAvailable())
 			return;
 
 		final int lServerId = 1;

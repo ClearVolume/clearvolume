@@ -1,16 +1,5 @@
 package clearvolume.renderer.opencl;
 
-import static java.lang.Math.max;
-import static java.lang.Math.pow;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-
-import jcuda.CudaException;
-
-import org.bridj.Pointer;
-
 import clearvolume.exceptions.ClearVolumeMemoryException;
 import clearvolume.exceptions.ClearVolumeUnsupportdDataTypeException;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
@@ -22,17 +11,19 @@ import clearvolume.renderer.processors.impl.OpenCLCenterMass;
 import clearvolume.renderer.processors.impl.OpenCLDeconvolutionLR;
 import clearvolume.renderer.processors.impl.OpenCLDenoise;
 import clearvolume.renderer.processors.impl.OpenCLHistogram;
-
 import com.jogamp.opengl.GLEventListener;
-import com.nativelibs4java.opencl.CLBuffer;
-import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLImage3D;
-import com.nativelibs4java.opencl.CLImageFormat;
-import com.nativelibs4java.opencl.CLKernel;
-
+import com.nativelibs4java.opencl.*;
 import coremem.ContiguousMemoryInterface;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;
+import org.bridj.Pointer;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
+import static java.lang.Math.max;
+import static java.lang.Math.pow;
 
 public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 																																GLEventListener
@@ -308,7 +299,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 			return updateBufferAndRunKernel();
 		}
-		catch (final CudaException e)
+		catch (final Exception e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return null;
