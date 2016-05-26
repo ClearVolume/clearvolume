@@ -1,21 +1,14 @@
 package clearvolume.renderer.cleargl.overlay.o3d;
 
-import java.io.IOException;
-import java.nio.FloatBuffer;
-
-import com.jogamp.opengl.GL;
-
-import cleargl.GLAttribute;
-import cleargl.GLFloatArray;
-import cleargl.GLMatrix;
-import cleargl.GLProgram;
-import cleargl.GLUniform;
-import cleargl.GLVertexArray;
-import cleargl.GLVertexAttributeArray;
+import cleargl.*;
 import clearvolume.renderer.DisplayRequestInterface;
 import clearvolume.renderer.cleargl.ClearGLVolumeRenderer;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.OverlayBase;
+import com.jogamp.opengl.GL;
+
+import java.io.IOException;
+import java.nio.FloatBuffer;
 
 /**
  * OldBoxOverlay - old style 3D box overlay.
@@ -85,7 +78,7 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 			pGL.glLineWidth(cBoxLineWidth);
 
 			// get all the shaders uniform locations
-			mBoxPositionAttribute = mBoxGLProgram.getAtribute("position");
+			mBoxPositionAttribute = mBoxGLProgram.getAttribute("position");
 
 			mBoxColorUniform = mBoxGLProgram.getUniform("color");
 

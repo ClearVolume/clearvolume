@@ -841,8 +841,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																						lVertexShaderSource,
 																						lFragmentShaderSource);
 				mQuadProjectionMatrixUniform = mGLProgram.getUniform("projection");
-				mPositionAttribute = mGLProgram.getAtribute("position");
-				mTexCoordAttribute = mGLProgram.getAtribute("texcoord");
+				mPositionAttribute = mGLProgram.getAttribute("position");
+				mTexCoordAttribute = mGLProgram.getAttribute("texcoord");
 				mTexUnits = new GLUniform[getNumberOfRenderLayers()];
 				for (int i = 0; i < getNumberOfRenderLayers(); i++)
 				{
