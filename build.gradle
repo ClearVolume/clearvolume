@@ -102,6 +102,7 @@ dependencies
 		println 'Using local clearX sources'
 		compile project(':ClearGL')
 		compile project(':ClearAudio')
+        compile project(':scenery')
 	}
 	else {
 		println 'Using clearX from Maven repository'/**/
@@ -117,10 +118,13 @@ dependencies
 
 repositories
 {
+    mavenLocal()
 	mavenCentral()
 	maven { url  "http://dl.bintray.com/clearvolume/ClearVolume"  }
 	maven { url  "http://oss.sonatype.org/content/groups/public" }
 	maven { url  "http://dl.bintray.com/clearcontrol/ClearControl" }
+    maven { url "http://maven.imagej.net/content/groups/public" }
+
 }
 
 

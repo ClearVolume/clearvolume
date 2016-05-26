@@ -211,15 +211,25 @@ public class ClearVolumeRendererFactory
 
 			if (lProperties.getProperty("ClearVolume.disableOpenCL") == null && System.getenv("CV_DISABLE_OPENCL") == null)
 			{
-				final ClearVolumeRendererInterface lNewOpenCLRenderer = internalCreateOpenCLRenderer(	pWindowName,
-																										pWindowWidth,
-																										pWindowHeight,
-																										pNativeTypeEnum,
-																										pMaxTextureWidth,
-																										pMaxTextureHeight,
-																										pNumberOfRenderLayers,
-																										pUseInCanvas);
-				return lNewOpenCLRenderer;
+				if(System.getProperty("ClearVolume.UseExperimentalSceneryRenderer") != null) {
+					return internalCreateSceneryRenderer(pWindowName,
+									pWindowWidth,
+									pWindowHeight,
+									pNativeTypeEnum,
+									pMaxTextureWidth,
+									pMaxTextureHeight,
+									pNumberOfRenderLayers,
+									pUseInCanvas);
+				} else {
+					return internalCreateOpenCLRenderer(pWindowName,
+									pWindowWidth,
+									pWindowHeight,
+									pNativeTypeEnum,
+									pMaxTextureWidth,
+									pMaxTextureHeight,
+									pNumberOfRenderLayers,
+									pUseInCanvas);
+				}
 			}
 			else
 			{
@@ -263,14 +273,25 @@ public class ClearVolumeRendererFactory
 			if (!lOpenCLOperational)
 				return null;
 
-			return internalCreateOpenCLRenderer(pWindowName,
-												pWindowWidth,
-												pWindowHeight,
-												pNativeTypeEnum,
-												pMaxTextureWidth,
-												pMaxTextureHeight,
-												pNumberOfRenderLayers,
-												pUseInCanvas);
+			if(System.getProperty("ClearVolume.UseExperimentalSceneryRenderer") != null) {
+				return internalCreateSceneryRenderer(pWindowName,
+								pWindowWidth,
+								pWindowHeight,
+								pNativeTypeEnum,
+								pMaxTextureWidth,
+								pMaxTextureHeight,
+								pNumberOfRenderLayers,
+								pUseInCanvas);
+			} else {
+				return internalCreateOpenCLRenderer(pWindowName,
+								pWindowWidth,
+								pWindowHeight,
+								pNativeTypeEnum,
+								pMaxTextureWidth,
+								pMaxTextureHeight,
+								pNumberOfRenderLayers,
+								pUseInCanvas);
+			}
 		}
 		catch (final Throwable e)
 		{
@@ -299,6 +320,26 @@ public class ClearVolumeRendererFactory
 																	pMaxTextureHeight,
 																	pNumberOfRenderLayers,
 																	pUseInCanvas);
+	}
+
+	private static ClearVolumeRendererInterface internalCreateSceneryRenderer(	final String pWindowName,
+																																						 final int pWindowWidth,
+																																						 final int pWindowHeight,
+																																						 final NativeTypeEnum pNativeTypeEnum,
+																																						 final int pMaxTextureWidth,
+																																						 final int pMaxTextureHeight,
+																																						 final int pNumberOfRenderLayers,
+																																						 final boolean pUseInCanvas)
+	{
+
+		return new clearvolume.renderer.scenery.SceneryRenderer(pWindowName,
+						pWindowWidth,
+						pWindowHeight,
+						pNativeTypeEnum,
+						pMaxTextureWidth,
+						pMaxTextureHeight,
+						pNumberOfRenderLayers,
+						pUseInCanvas);
 	}
 
 }
