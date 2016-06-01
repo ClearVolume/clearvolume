@@ -1,15 +1,20 @@
 package clearvolume.renderer.scenery;
 
 import cleargl.*;
+import clearvolume.renderer.AdaptiveLODController;
 import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.cleargl.overlay.Overlay;
 import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.opengl.GLAutoDrawable;
+import coremem.ContiguousMemoryInterface;
+import coremem.buffers.ContiguousBuffer;
+import coremem.offheap.OffHeapMemory;
 import coremem.types.NativeTypeEnum;
 import scenery.*;
 import scenery.controls.ClearGLInputHandler;
 import scenery.rendermodules.opengl.DeferredLightingRenderer;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
 
 /**
@@ -28,6 +33,16 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
   protected long frameCount;
 
   protected String windowName;
+
+  public AdaptiveLODController getAdaptiveLODController() {
+    return alc;
+  }
+
+  public void setAlc(AdaptiveLODController alc) {
+    this.alc = alc;
+  }
+
+  protected AdaptiveLODController alc = new AdaptiveLODController();
 
 
   public SceneryRenderer(final String pWindowName,
@@ -164,19 +179,32 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
     Material hullboxMaterial = new Material();
     hullboxMaterial.setAmbient(new GLVector(0.16f, 0.16f, 0.18f));
     hullboxMaterial.setDiffuse(new GLVector(0.16f, 0.16f, 0.18f));
-    hullboxMaterial.setSpecular(new GLVector(0.0f, 0.0f, 0.0f));
+    hullboxMaterial.setSpecular(new GLVector(0.1f, 0.1f, 0.0f));
     hullboxMaterial.setDoubleSided(true);
     hullbox.setMaterial(hullboxMaterial);
 
+    dlr.getSettings().set("hdr.Exposure", 5.0f);
+
     PointLight pl = new PointLight();
-    pl.setPosition(GLVector.getNullVector(3));
+    pl.setPosition(new GLVector(10.0f, 10.0f, -10.0f));
     pl.setIntensity(1500.0f);
-    pl.setLinear(0.1f);
-    pl.setQuadratic(0.1f);
+    pl.setEmissionColor(GLVector.getOneVector(3));
+    pl.setLinear(1f);
+    pl.setQuadratic(0f);
+    pl.showLightBox();
 
     scene.addChild(hullbox);
     scene.addChild(pl);
     scene.addChild(cam);
+
+    VolumeNode vn = new VolumeNode();
+    vn.setName("DefaultVolumeNode");
+
+    scene.addChild(vn);
+  }
+
+  public Scene getScene() {
+    return this.scene;
   }
 
   @Override
@@ -200,6 +228,38 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
     //clearGLWindow.setWindowTitle("ClearVolume, scenery renderer - " + windowName + " - " + String.format("$.1f fps", drawable.getAnimator().getLastFPS()));
 
     frameCount++;
+  }
+
+  @Override
+  public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
+                                       ByteBuffer pByteBuffer,
+                                       long pVolumeSizeX,
+                                       long pVolumeSizeY,
+                                       long pVolumeSizeZ) {
+    final VolumeNode vn = (VolumeNode)this.scene.find("DefaultVolumeNode");
+    final ContiguousMemoryInterface cmi = OffHeapMemory.allocateBytes(pVolumeSizeX*pVolumeSizeY*pVolumeSizeZ);
+    final ContiguousBuffer cb = new ContiguousBuffer(cmi);
+
+    for(int i = 0; i < pVolumeSizeX*pVolumeSizeY*pVolumeSizeZ; i++) {
+      cb.writeByte(pByteBuffer.get());
+    }
+
+    vn.getVolumeData().add(cmi);
+
+    return true;
+  }
+
+  @Override
+  public boolean setVolumeDataBuffer(	int pRenderLayerIndex,
+                                       ContiguousMemoryInterface pBuffer,
+                                       long pVolumeSizeX,
+                                       long pVolumeSizeY,
+                                       long pVolumeSizeZ) {
+
+    final VolumeNode vn = (VolumeNode)this.scene.find("DefaultVolumeNode");
+    vn.getVolumeData().add(pBuffer);
+
+    return true;
   }
 
   @Override
