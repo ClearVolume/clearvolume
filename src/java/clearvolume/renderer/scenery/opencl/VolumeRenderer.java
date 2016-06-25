@@ -1,5 +1,6 @@
 package clearvolume.renderer.scenery.opencl;
 
+import cleargl.GLVector;
 import clearvolume.exceptions.ClearVolumeMemoryException;
 import clearvolume.exceptions.ClearVolumeUnsupportdDataTypeException;
 import clearvolume.renderer.scenery.VolumeNode;
@@ -11,6 +12,7 @@ import coremem.fragmented.FragmentedMemory;
 import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.types.NativeTypeEnum;
 import org.bridj.Pointer;
+import scenery.GenericTexture;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -39,7 +41,7 @@ public class VolumeRenderer implements GLEventListener
 
   private VolumeNode currentNode = null;
   private boolean volumeCaptureFlag;
-  private ArrayList<Integer> lastDimensions;
+  private ArrayList<Long> lastDimensions;
 
   @SuppressWarnings("unchecked")
   public VolumeRenderer(final String nodeName,
@@ -57,14 +59,7 @@ public class VolumeRenderer implements GLEventListener
 
     textureWidth = pMaxTextureWidth;
     textureHeight = pMaxTextureHeight;
-  }
 
-  protected Integer getNumberOfRenderLayers() {
-    return numberOfLayers;
-  }
-
-  protected boolean initVolumeRenderer()
-  {
     mCLDevice = new OpenCLDevice();
 
     mCLDevice.initCL();
@@ -80,18 +75,16 @@ public class VolumeRenderer implements GLEventListener
     mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
     mCLInvProjectionBuffer = mCLDevice.createInputFloatBuffer(16);
 
-    for (int i = 0; i < getNumberOfRenderLayers(); i++)
-      prepareVolumeDataArray(i, null);
+    notifyChangeOfTextureDimensions();
+  }
 
-    for (int i = 0; i < getNumberOfRenderLayers(); i++)
-      prepareTransferFunctionArray(i);
-
-    return true;
+  protected Integer getNumberOfRenderLayers() {
+    return numberOfLayers;
   }
 
   protected void notifyChangeOfTextureDimensions()
   {
-    final int lRenderBufferSize = textureWidth * textureHeight;
+    final int lRenderBufferSize = textureWidth * textureHeight * 4;
 
     for (int i = 0; i < getNumberOfRenderLayers(); i++)
     {
@@ -106,7 +99,12 @@ public class VolumeRenderer implements GLEventListener
   }
 
   private long getBytesPerVoxel() {
-    return 2;//(long)currentNode.getVolumeType();
+    switch(currentNode.getVolumeType()) {
+      case UnsignedShort: return 2;
+      case Byte: return 1;
+      case UnsignedByte: return 1;
+      default: return 1;
+    }
   }
 
   private void prepareVolumeDataArray(final int pRenderLayerIndex,
@@ -130,36 +128,40 @@ public class VolumeRenderer implements GLEventListener
       if (lVolumeDataBuffer.getSizeInBytes() != (lWidth * lHeight
               * lDepth * lBytePerVoxel))
       {
-        throw new ClearVolumeMemoryException("Volume buffer has wrong size!");
+        throw new ClearVolumeMemoryException("Volume buffer has wrong size; is=" + lVolumeDataBuffer.getSizeInBytes() + ", should=" + lWidth*lHeight*lDepth*lBytePerVoxel );
       }
 
-      if (getNativeType() == NativeTypeEnum.UnsignedByte)
-
+      if (getNativeType() == NativeTypeEnum.UnsignedByte) {
         mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
                 lHeight,
                 lDepth,
                 CLImageFormat.ChannelOrder.R,
                 CLImageFormat.ChannelDataType.UNormInt8);
-      else if (getNativeType() == NativeTypeEnum.UnsignedShort)
+      }
+      else if (getNativeType() == NativeTypeEnum.UnsignedShort) {
         mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
                 lHeight,
                 lDepth,
                 CLImageFormat.ChannelOrder.R,
                 CLImageFormat.ChannelDataType.UNormInt16);
-      else if (getNativeType() == NativeTypeEnum.Byte)
+      }
+      else if (getNativeType() == NativeTypeEnum.Byte) {
         mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
                 lHeight,
                 lDepth,
                 CLImageFormat.ChannelOrder.R,
                 CLImageFormat.ChannelDataType.UNormInt8);
-      else if (getNativeType() == NativeTypeEnum.Short)
+      }
+      else if (getNativeType() == NativeTypeEnum.Short) {
         mCLVolumeImages[pRenderLayerIndex] = mCLDevice.createGenericImage3D(lWidth,
                 lHeight,
                 lDepth,
                 CLImageFormat.ChannelOrder.R,
                 CLImageFormat.ChannelDataType.UNormInt16);
-      else
+      }
+      else {
         throw new ClearVolumeUnsupportdDataTypeException("Received an unsupported data type: " + getNativeType());
+      }
 
       fillWithByteBuffer(	mCLVolumeImages[pRenderLayerIndex],
               lVolumeDataBuffer);
@@ -196,7 +198,7 @@ public class VolumeRenderer implements GLEventListener
 
   }
 
-  protected boolean[] renderVolume(	final float[] pInvModelViewMatrix,
+  public boolean[] renderVolume(	final float[] pInvModelViewMatrix,
                                      final float[] pInvProjectionMatrix)
   {
 
@@ -266,9 +268,9 @@ public class VolumeRenderer implements GLEventListener
     return true;
   }
 
-  private boolean[] updateBufferAndRunKernel()
+  public boolean[] updateBufferAndRunKernel()
   {
-    lastDimensions = (ArrayList<Integer>)currentNode.getVolumeDimensions().clone();
+    lastDimensions = (ArrayList<Long>)currentNode.getVolumeDimensions().clone();
     final boolean[] lUpdated = new boolean[getNumberOfRenderLayers()];
 
     lUpdated[0] = true;
@@ -371,7 +373,7 @@ public class VolumeRenderer implements GLEventListener
       lMaxSteps = Math.max(16, lMaxNumberSteps / lNumberOfPasses);
       lDithering = currentNode.getSettings().getProperty("render.Dithering", Float.class);//getDithering(pRenderLayerIndex) * (1.0f * (lNumberOfPasses - lPassIndex) / lNumberOfPasses);
       lPhase = 0.0f;//getAdaptiveLODController().getPhase();
-      lClear = (lPassIndex == 0) ? 0 : 1;
+      lClear = 0;//(lPassIndex == 0) ? 0 : 1;
       float[] lClipBox = currentNode.getROI();
 
       mCLDevice.setArgs(mCurrentRenderKernel,
@@ -434,8 +436,19 @@ public class VolumeRenderer implements GLEventListener
   {
     pByteBuffer.rewind();
 
-    currentNode.getVolumeTextures().get(pRenderLayerIndex).copyFrom(pByteBuffer);
-    currentNode.getVolumeTextures().get(pRenderLayerIndex).updateMipMaps();
+    final GenericTexture t = new GenericTexture(
+           "TransferTexture",
+            new GLVector(textureWidth, textureHeight),
+            4,
+            NativeTypeEnum.UnsignedByte,
+            pByteBuffer,
+            false,
+            false
+    );
+
+    currentNode.getMaterial().getTextures().put("diffuse", "fromBuffer:TransferTexture");
+    currentNode.getMaterial().getTransferTextures().put("TransferTexture", t);
+    currentNode.getMaterial().setNeedsTextureReload(true);
   }
 
   public void close()
@@ -462,5 +475,9 @@ public class VolumeRenderer implements GLEventListener
   @Override
   public void reshape(GLAutoDrawable glAutoDrawable, int i, int i1, int i2, int i3) {
 
+  }
+
+  public void setCurrentNode(VolumeNode node) {
+    currentNode = node;
   }
 }

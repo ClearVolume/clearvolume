@@ -4,6 +4,8 @@ import cleargl.*;
 import clearvolume.renderer.AdaptiveLODController;
 import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.cleargl.overlay.Overlay;
+import clearvolume.renderer.scenery.opencl.VolumeRenderer;
+import clearvolume.transferf.TransferFunctions;
 import com.jogamp.newt.awt.NewtCanvasAWT;
 import com.jogamp.opengl.GLAutoDrawable;
 import coremem.ContiguousMemoryInterface;
@@ -15,7 +17,9 @@ import scenery.controls.ClearGLInputHandler;
 import scenery.rendermodules.opengl.DeferredLightingRenderer;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <Description>
@@ -25,14 +29,13 @@ import java.util.Collection;
 public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLEventListener {
   protected ClearGLWindow clearGLWindow;
   protected ClearGLInputHandler inputHandler;
-
   protected DeferredLightingRenderer dlr;
   protected Scene scene;
   protected Camera cam;
-
   protected long frameCount;
-
   protected String windowName;
+  protected VolumeRenderer volumeRenderer;
+  protected Hub hub;
 
   public AdaptiveLODController getAdaptiveLODController() {
     return alc;
@@ -59,6 +62,12 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
             pWindowWidth,
             pWindowHeight,
             this);
+
+    volumeRenderer = new VolumeRenderer("",
+            pNativeTypeEnum,
+            pWindowWidth,
+            pWindowHeight,
+            pNumberOfRenderLayers);
 
     windowName = pWindowName;
 
@@ -155,9 +164,11 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
   @Override
   public void init(GLAutoDrawable drawable) {
     scene = new Scene();
+    hub = new Hub();
     dlr = new DeferredLightingRenderer(drawable.getGL().getGL4(),
             clearGLWindow.getWidth(),
             clearGLWindow.getHeight());
+    hub.add(SceneryElement.RENDERER, dlr);
 
     cam = new DetachedHeadCamera();
     cam.setPosition(new GLVector(0.0f, 0.0f, 0.0f));
@@ -175,7 +186,7 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
     cam.setProjection(projection);
     cam.setActive(true);
 
-    Box hullbox = new Box(new GLVector(50.0f, 50.0f, 50.0f));
+    Box hullbox = new Box(new GLVector(15.0f, 15.0f, 15.0f));
     Material hullboxMaterial = new Material();
     hullboxMaterial.setAmbient(new GLVector(0.16f, 0.16f, 0.18f));
     hullboxMaterial.setDiffuse(new GLVector(0.16f, 0.16f, 0.18f));
@@ -183,13 +194,13 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
     hullboxMaterial.setDoubleSided(true);
     hullbox.setMaterial(hullboxMaterial);
 
-    dlr.getSettings().set("hdr.Exposure", 5.0f);
+    dlr.getSettings().set("hdr.Exposure", 1.0f);
 
     PointLight pl = new PointLight();
-    pl.setPosition(new GLVector(10.0f, 10.0f, -10.0f));
-    pl.setIntensity(1500.0f);
+    pl.setPosition(new GLVector(4.0f, 5.0f, -3.0f));
+    pl.setIntensity(500.0f);
     pl.setEmissionColor(GLVector.getOneVector(3));
-    pl.setLinear(1f);
+    pl.setLinear(0.5f);
     pl.setQuadratic(0f);
     pl.showLightBox();
 
@@ -199,8 +210,11 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
 
     VolumeNode vn = new VolumeNode();
     vn.setName("DefaultVolumeNode");
+    vn.setVolumeType(NativeTypeEnum.Byte);
+    vn.getTransferFunctions().add(TransferFunctions.getDefault());
 
     scene.addChild(vn);
+
   }
 
   public Scene getScene() {
@@ -214,9 +228,31 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
 
   @Override
   public void display(GLAutoDrawable drawable) {
+    final ArrayList<Node> vns = scene.findByClassname("VolumeNode");
+    for (Node n: vns) {
+      VolumeNode vn = (VolumeNode)n;
+
+      if(vn.getVolumeData().size() > 0) {
+        volumeRenderer.setCurrentNode(vn);
+
+        vn.updateWorld(true, true);
+
+        final GLMatrix mv = scene.findObserver().getView().clone();
+        mv.mult(scene.findObserver().getModel());
+        mv.mult(vn.getModel().getInverse());
+
+        final GLMatrix proj = scene.findObserver().getProjection().clone();
+
+        volumeRenderer.renderVolume(
+                mv.invert().transpose().getFloatArray(),
+                proj.invert().transpose().getFloatArray()
+        );
+      }
+    }
+
     dlr.render(scene);
 
-    /*if(dlr.getWantsFullscreen() == false && dlr.isFullscreen() == false) {
+   /*if(dlr.getWantsFullscreen() == false && dlr.isFullscreen() == false) {
       clearGLWindow.setFullscreen(true);
       dlr.setWantsFullscreen(true);
     }
@@ -224,8 +260,9 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
     if(dlr.getWantsFullscreen() == false && dlr.isFullscreen() == false) {
       dlr.setWantsFullscreen(false);
     }*/
-
-    //clearGLWindow.setWindowTitle("ClearVolume, scenery renderer - " + windowName + " - " + String.format("$.1f fps", drawable.getAnimator().getLastFPS()));
+    if(drawable.getAnimator() != null) {
+      clearGLWindow.setWindowTitle("ClearVolume, scenery renderer - " + windowName + " - " + String.format("%.1f fps", drawable.getAnimator().getLastFPS()));
+    }
 
     frameCount++;
   }
@@ -244,7 +281,14 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
       cb.writeByte(pByteBuffer.get());
     }
 
-    vn.getVolumeData().add(cmi);
+    vn.addVolume(
+            cmi,
+            pVolumeSizeX,
+            pVolumeSizeY,
+            pVolumeSizeZ,
+            1024,
+            1024,
+            NativeTypeEnum.Byte);
 
     return true;
   }
@@ -257,7 +301,42 @@ public class SceneryRenderer extends ClearVolumeRendererBase implements ClearGLE
                                        long pVolumeSizeZ) {
 
     final VolumeNode vn = (VolumeNode)this.scene.find("DefaultVolumeNode");
-    vn.getVolumeData().add(pBuffer);
+    System.err.println("Loading data into scenery VolumeNode");
+
+    vn.addVolume(pBuffer,
+            pVolumeSizeX,
+            pVolumeSizeY,
+            pVolumeSizeZ,
+            1024,
+            1024,
+            NativeTypeEnum.Byte);
+
+    vn.setVolumeType(NativeTypeEnum.Byte);
+
+    return true;
+  }
+
+  @Override
+  public boolean setVolumeDataBuffer(	long pTimeOut,
+                                       TimeUnit pTimeUnit,
+                                       int pRenderLayerIndex,
+                                       ContiguousMemoryInterface pContiguousMemoryInterface,
+                                       long pVolumeSizeX,
+                                       long pVolumeSizeY,
+                                       long pVolumeSizeZ) {
+
+    final VolumeNode vn = (VolumeNode)this.scene.find("DefaultVolumeNode");
+    System.err.println("Loading data into scenery VolumeNode");
+
+    vn.addVolume(pContiguousMemoryInterface,
+            pVolumeSizeX,
+            pVolumeSizeY,
+            pVolumeSizeZ,
+            1024,
+            1024,
+            NativeTypeEnum.UnsignedShort);
+
+    vn.setVolumeType(NativeTypeEnum.UnsignedShort);
 
     return true;
   }
