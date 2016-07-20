@@ -23,6 +23,7 @@ import cleargl.GLMatrix;
 import cleargl.GLPixelBufferObject;
 import cleargl.GLProgram;
 import cleargl.GLTexture;
+import cleargl.GLTypeEnum;
 import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
@@ -615,7 +616,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 						mLayerTextures[i].close();
 
 					mLayerTextures[i] = new GLTexture(mGLProgram,
-																						NativeTypeEnum.UnsignedByte,
+																						GLTypeEnum.UnsignedByte,
 																						4,
 																						mRenderWidth,
 																						mRenderHeight,
@@ -841,8 +842,8 @@ ClearVolumeRendererBase implements ClearGLEventListener
 																						lVertexShaderSource,
 																						lFragmentShaderSource);
 				mQuadProjectionMatrixUniform = mGLProgram.getUniform("projection");
-				mPositionAttribute = mGLProgram.getAtribute("position");
-				mTexCoordAttribute = mGLProgram.getAtribute("texcoord");
+				mPositionAttribute = mGLProgram.getAttribute("position");
+				mTexCoordAttribute = mGLProgram.getAttribute("texcoord");
 				mTexUnits = new GLUniform[getNumberOfRenderLayers()];
 				for (int i = 0; i < getNumberOfRenderLayers(); i++)
 				{
