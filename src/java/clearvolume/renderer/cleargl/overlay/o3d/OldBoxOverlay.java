@@ -85,7 +85,7 @@ public class OldBoxOverlay extends OverlayBase implements Overlay3D
 			pGL.glLineWidth(cBoxLineWidth);
 
 			// get all the shaders uniform locations
-			mBoxPositionAttribute = mBoxGLProgram.getAtribute("position");
+			mBoxPositionAttribute = mBoxGLProgram.getAttribute("position");
 
 			mBoxColorUniform = mBoxGLProgram.getUniform("color");
 

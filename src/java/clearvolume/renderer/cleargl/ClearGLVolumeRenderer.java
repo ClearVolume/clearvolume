@@ -23,7 +23,6 @@ import cleargl.GLMatrix;
 import cleargl.GLPixelBufferObject;
 import cleargl.GLProgram;
 import cleargl.GLTexture;
-import cleargl.GLTypeEnum;
 import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
@@ -616,7 +615,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 						mLayerTextures[i].close();
 
 					mLayerTextures[i] = new GLTexture(mGLProgram,
-																						GLTypeEnum.UnsignedByte,
+																						NativeTypeEnum.UnsignedByte,
 																						4,
 																						mRenderWidth,
 																						mRenderHeight,
