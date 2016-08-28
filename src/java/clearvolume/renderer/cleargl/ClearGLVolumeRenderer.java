@@ -1260,7 +1260,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	@Override
 	public void setVisible(final boolean pIsVisible)
 	{
-		if (mNewtCanvasAWT == null)
+		if (mNewtCanvasAWT == null && mClearGLWindow != null)
 			mClearGLWindow.setVisible(pIsVisible);
 	}
 
