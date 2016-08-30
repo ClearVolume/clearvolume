@@ -766,7 +766,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	@Override
 	public int getWindowHeight()
 	{
-		return mClearGLWindow.getHeight();
+		return mClearGLWindow.getSurfaceHeight();
 	}
 
 	/**
@@ -788,7 +788,7 @@ ClearVolumeRendererBase implements ClearGLEventListener
 	@Override
 	public int getWindowWidth()
 	{
-		return mClearGLWindow.getWidth();
+		return mClearGLWindow.getSurfaceWidth();
 	}
 
 	/**
