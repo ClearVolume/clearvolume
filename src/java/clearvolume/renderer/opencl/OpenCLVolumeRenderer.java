@@ -7,8 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import jcuda.CudaException;
-
 import org.bridj.Pointer;
 
 import clearvolume.exceptions.ClearVolumeMemoryException;
@@ -308,7 +306,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer	implements
 
 			return updateBufferAndRunKernel();
 		}
-		catch (final CudaException e)
+		catch (final Exception e)
 		{
 			System.err.println(e.getLocalizedMessage());
 			return null;
