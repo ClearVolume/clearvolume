@@ -7,7 +7,7 @@ build_script:
   - gradlew.bat assemble --info --no-daemon
 
 test_script:
-  - gradlew.bat check --info --no-daemon
+  - gradlew.bat build -x test --info --no-daemon
 
 cache:
   - C:\Users\appveyor\.gradle
