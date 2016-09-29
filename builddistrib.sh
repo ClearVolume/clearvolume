@@ -1,1 +1,0 @@
-gradle packagezip packagedmg
