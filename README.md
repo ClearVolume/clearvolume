@@ -1,6 +1,6 @@
 # Welcome to *ClearVolume* #
 
-[![Join the chat at https://gitter.im/ClearVolume/ClearVolume](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ClearVolume/ClearVolume?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status on master](https://travis-ci.org/ClearVolume/ClearVolume.svg?branch=master)](https://travis-ci.org/ClearVolume/ClearVolume)
+[![Join the chat at https://gitter.im/ClearVolume/ClearVolume](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ClearVolume/ClearVolume?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status on master](https://travis-ci.org/ClearVolume/ClearVolume.svg?branch=master)](https://travis-ci.org/ClearVolume/ClearVolume) [![Build status](https://ci.appveyor.com/api/projects/status/9bvpkg91vqcr5v9h/branch/master?svg=true)](https://ci.appveyor.com/project/skalarproduktraum/clearvolume/branch/master)
 
 ![ClearVolume Logo](artwork/ClearVolumeLogo.png "Logo")
 
