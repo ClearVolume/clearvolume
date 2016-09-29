@@ -15,22 +15,22 @@ please go to the [website](http://clearvolume.github.io) or have a look at the [
 
 ## Building ClearVolume
 
-To build ClearVolume from source, run the following from a command line:
+To build ClearVolume from source, run the following from a command line (if you are on Windows, replace all invocations of `./gradlew` with `gradlew.bat`):
 
 ```
-gradle build
+./gradlew build
 ```
 
 This will also run all of the unit and integration tests. If you do not wish to do that, run
 
 ```
-gradle build -x test
+./gradlew build -x test
 ```
 
 If you are used to build software with Maven, please be aware that in contrast to Maven, Gradle does not automatically download the latest dependencies. If you want to force Gradle to refresh the dependency tree, run 
 
 ```
-gradle --refresh-dependencies
+./gradlew --refresh-dependencies
 ```
 
 ## Building against local versions of ClearGL, ClearAudio, etc. 
@@ -54,7 +54,7 @@ It's important that the file resides in the root project folder (`ClearVolume-ba
 Now to run a build against the local versions, run
 
 ```
-gradle build -Plocal=true
+./gradlew build -Plocal=true
 ```
 
 e.g. from the `ClearVolume-base/ClearVolume` directory. Gradle will let you know it's using the local sources with the output `Using local clearX sources`.
