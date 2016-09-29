@@ -46,7 +46,7 @@ $ git clone https://github.com/ClearVolume/ClearVolume
 $ git clone https://github.com/ClearVolume/ClearGL
 $ git clone https://github.com/ClearVolume/ClearAudio
 $ git clone https://github.com/ClearVolume/ClearCL
-$ cp ClearVolume/settings.gradle.multiproject ./settings.multiproject
+$ cp ClearVolume/settings.gradle.multiproject ./settings.gradle
 ```
 
 It's important that the file resides in the root project folder (`ClearVolume-base`) and is named `settings.gradle` for Gradle to pick it up correctly.
