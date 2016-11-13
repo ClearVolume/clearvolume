@@ -1,5 +1,7 @@
 package clearvolume.volume;
 
+import static java.lang.Math.toIntExact;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -174,7 +176,7 @@ public class Volume implements ClearVolumeCloseable
 
 	public int getBytesPerVoxel()
 	{
-		return Size.of(mType);
+		return toIntExact(Size.of(mType));
 	}
 
 	public long getElementSize()

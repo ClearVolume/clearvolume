@@ -1,5 +1,7 @@
 package clearvolume.demo;
 
+import static java.lang.Math.toIntExact;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Member;
@@ -500,10 +502,10 @@ public class ClearVolumeBasicDemos
 		final InputStream fis = pInputStream;
 		try
 		{
-			final int size = Size.of(pNativeTypeEnum) * sizeX
+			final long size = Size.of(pNativeTypeEnum) * sizeX
 								* sizeY
 								* sizeZ;
-			data = new byte[size];
+			data = new byte[toIntExact(size)];
 			fis.read(data);
 		}
 		catch (final IOException e)
