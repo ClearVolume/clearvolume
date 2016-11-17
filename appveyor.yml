@@ -2,7 +2,7 @@ version: '{build}'
 skip_tags: true
 clone_depth: 10
 environment:
-  - TERM: dumb
+  TERM: dumb
   matrix:
     - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
 install:
@@ -10,7 +10,6 @@ install:
   - echo %PATH%
   - java -version
   - gradlew.bat --version
-  - cinst graphviz.portable
 build_script:
   - gradlew.bat -u -i assemble
 test_script:
