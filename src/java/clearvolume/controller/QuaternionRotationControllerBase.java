@@ -15,7 +15,7 @@ public class QuaternionRotationControllerBase	implements
 {
 
 	private volatile boolean mActive = true;
-	private final Quaternion mQuaternion = new Quaternion();
+	protected final Quaternion mQuaternion = new Quaternion();
 	protected final Object mQuaternionUpdateLock = new Object();
 
 	/**

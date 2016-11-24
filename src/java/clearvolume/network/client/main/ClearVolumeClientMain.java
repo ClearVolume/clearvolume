@@ -148,7 +148,7 @@ public class ClearVolumeClientMain
 									final boolean pExitOnClose)
 	{
 		super();
-		ClearVolumeClientMain.sAppIcon = sAppIcon;
+		ClearVolumeClientMain.sAppIcon = pAppIcon;
 		initialize(pVolumeCaptureListener, sAppIcon, pExitOnClose);
 	}
 

@@ -46,9 +46,7 @@ public class ExternalRotationController	extends
 	private final int mPortNumber;
 	private volatile BufferedReader mBufferedInputStreamFromServer;
 
-	// Quaternion and locking object.
-	private final Quaternion mQuaternion = new Quaternion();
-	private final Object mQuaternionUpdateLock = new Object();
+
 
 	/**
 	 * Thread responsible for receiving the data over TCP.
