@@ -7,8 +7,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import com.jogamp.opengl.math.Quaternion;
-
 import clearvolume.renderer.DisplayRequestInterface;
 
 /**

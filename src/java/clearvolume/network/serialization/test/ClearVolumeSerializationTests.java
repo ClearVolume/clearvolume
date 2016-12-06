@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.volume.Volume;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class ClearVolumeSerializationTests
 {

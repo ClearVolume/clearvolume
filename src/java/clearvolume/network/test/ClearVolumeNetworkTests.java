@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-import clearcuda.CudaAvailability;
 import clearvolume.network.client.ClearVolumeTCPClient;
 import clearvolume.network.serialization.ClearVolumeSerialization;
 import clearvolume.network.server.ClearVolumeTCPServerSink;
@@ -24,7 +23,7 @@ import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.VolumeSinkAdapter;
 import clearvolume.volume.sink.VolumeSinkInterface;
 import clearvolume.volume.sink.renderer.ClearVolumeRendererSink;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class ClearVolumeNetworkTests
 {
@@ -42,7 +41,7 @@ public class ClearVolumeNetworkTests
 	public void testConsole()	throws IOException,
 								InterruptedException
 	{
-		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
+		if (!OpenCLAvailability.isOpenCLAvailable())
 			return;
 
 		final VolumeSinkInterface lVolumeSink = new VolumeSinkAdapter(cNumberOfAvailableVolumes)
@@ -59,7 +58,7 @@ public class ClearVolumeNetworkTests
 	@Test
 	public void testLive() throws IOException, InterruptedException
 	{
-		if (!CudaAvailability.isClearCudaOperational() && !OpenCLAvailability.isOpenCLAvailable())
+		if (!OpenCLAvailability.isOpenCLAvailable())
 			return;
 
 		final ClearVolumeRendererInterface lClearVolumeRenderer = ClearVolumeRendererFactory.newBestRenderer(	"ClearVolumeTest",

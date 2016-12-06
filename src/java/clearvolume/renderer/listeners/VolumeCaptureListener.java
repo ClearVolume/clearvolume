@@ -2,7 +2,7 @@ package clearvolume.renderer.listeners;
 
 import java.nio.ByteBuffer;
 
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public interface VolumeCaptureListener
 {

@@ -28,7 +28,7 @@ import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class ClearVolumeOtherDemos
 {

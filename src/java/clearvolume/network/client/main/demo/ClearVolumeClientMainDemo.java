@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import clearvolume.network.client.main.ClearVolumeClientMain;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class ClearVolumeClientMainDemo
 {

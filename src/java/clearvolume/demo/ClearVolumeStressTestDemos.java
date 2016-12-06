@@ -21,7 +21,7 @@ import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
 import clearvolume.transferf.TransferFunctions;
 import coremem.buffers.ContiguousBuffer;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class ClearVolumeStressTestDemos
 {

@@ -21,8 +21,8 @@ import clearvolume.transferf.TransferFunction;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import coremem.ContiguousMemoryInterface;
+import coremem.enums.NativeTypeEnum;
 import coremem.fragmented.FragmentedMemoryInterface;
-import coremem.types.NativeTypeEnum;
 
 /**
  * Interface ClearVolumeRenderer

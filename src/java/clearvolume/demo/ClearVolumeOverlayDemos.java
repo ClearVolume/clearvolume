@@ -16,7 +16,7 @@ import clearvolume.renderer.cleargl.overlay.o3d.DriftOverlay;
 import clearvolume.renderer.cleargl.overlay.o3d.PathOverlay;
 import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class ClearVolumeOverlayDemos
 {

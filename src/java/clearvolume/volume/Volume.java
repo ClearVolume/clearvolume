@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.utils.ToIntExact;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 import coremem.util.Size;
 
 public class Volume implements ClearVolumeCloseable

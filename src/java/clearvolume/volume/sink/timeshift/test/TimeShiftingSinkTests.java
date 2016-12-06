@@ -8,7 +8,7 @@ import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.VolumeSinkInterface;
 import clearvolume.volume.sink.timeshift.TimeShiftingSink;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 
 public class TimeShiftingSinkTests
 {

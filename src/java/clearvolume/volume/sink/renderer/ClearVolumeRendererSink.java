@@ -14,7 +14,7 @@ import clearvolume.volume.VolumeManager;
 import clearvolume.volume.sink.NullVolumeSink;
 import clearvolume.volume.sink.relay.RelaySinkAdapter;
 import clearvolume.volume.sink.relay.RelaySinkInterface;
-import coremem.types.NativeTypeEnum;
+import coremem.enums.NativeTypeEnum;
 import coremem.util.Size;
 
 public class ClearVolumeRendererSink extends RelaySinkAdapter	implements

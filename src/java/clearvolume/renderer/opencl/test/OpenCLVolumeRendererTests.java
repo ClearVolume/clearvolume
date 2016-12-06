@@ -11,8 +11,8 @@ import org.junit.Test;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.opencl.OpenCLAvailability;
 import clearvolume.renderer.opencl.OpenCLVolumeRenderer;
+import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
-import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
 
 public class OpenCLVolumeRendererTests

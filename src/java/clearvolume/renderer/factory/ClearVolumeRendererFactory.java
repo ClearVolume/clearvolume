@@ -1,10 +1,10 @@
 package clearvolume.renderer.factory;
 
+import java.util.Properties;
+
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.opencl.OpenCLAvailability;
-import coremem.types.NativeTypeEnum;
-
-import java.util.Properties;
+import coremem.enums.NativeTypeEnum;
 
 public class ClearVolumeRendererFactory
 {

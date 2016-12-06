@@ -16,8 +16,8 @@ import clearvolume.renderer.factory.ClearVolumeRendererFactory;
 import clearvolume.transferf.TransferFunctions;
 import coremem.ContiguousMemoryInterface;
 import coremem.buffers.ContiguousBuffer;
+import coremem.enums.NativeTypeEnum;
 import coremem.offheap.OffHeapMemory;
-import coremem.types.NativeTypeEnum;
 import coremem.util.Size;
 
 public class ClearVolumeBasicDemos
