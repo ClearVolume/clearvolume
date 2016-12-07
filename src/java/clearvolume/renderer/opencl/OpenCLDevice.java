@@ -1,12 +1,18 @@
 package clearvolume.renderer.opencl;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import org.apache.commons.io.IOUtils;
 import org.bridj.Pointer;
@@ -88,7 +94,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
     String src = "";
     try
     {
-      src = IOUtils.toString(url);
+      src = getText(url);
     }
     catch (final Exception e)
     {
@@ -124,6 +130,16 @@ public class OpenCLDevice implements ClearVolumeCloseable
     }
 
     return lNewKernel;
+  }
+
+  private static String getText(URL url) throws Exception
+  {
+    File f = new File(url.getFile());
+    Scanner lScanner = new Scanner(f);
+    lScanner.useDelimiter("\\Z");
+    String content = lScanner.next();
+    lScanner.close();
+    return content;
   }
 
   public void setArgs(final ClearCLKernel pCLKernel, Object... args)
