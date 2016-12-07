@@ -1,10 +1,18 @@
-
-
-plugins {
-	id "us.kirchmeier.capsule" version "0.9.0" //  VERSION 0.10.0 of Capsule has a bug!! staying with 0.9.0
-	id "com.jfrog.bintray" version "1.2"
+buildscript {
+    repositories {
+        jcenter()
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.7.0'
+    }
 }
 
+plugins {
+  id "com.jfrog.bintray" version "1.2"
+  id "us.kirchmeier.capsule" version "0.9.0"
+}
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -13,6 +21,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'c'
 apply plugin: 'cpp'
 apply plugin: 'idea'
+apply plugin: 'javafx-gradle-plugin'
 
 
 [
@@ -78,37 +87,24 @@ configurations.all
 
 dependencies
 {
-
-	compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
-	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
-	compile group: 'commons-io', name: 'commons-io', version: '2.4'
-	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.4.1'
-	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.1'
-	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.1'
-
+  compile 'commons-lang:commons-lang:2.6'
 	compile 'net.sf.trove4j:trove4j:3.0.3'
-	compile 'com.miglayout:miglayout:3.7.4'
 	compile 'args4j:args4j:2.0.29'
 	compile 'com.apple:AppleJavaExtensions:1.4'
+	compile 'com.miglayout:miglayout:3.7.4'
+	
+	
+	// CoreMem:
+  compile ('net.coremem:CoreMem:[0.3.2,)'){transitive= true; changing= true}
 
-	compile group: "net.coremem", name: "CoreMem", version: "[0.1.6,1.0.0]", changing: true, transitive:true
-	compile 'com.nativelibs4java:javacl:1.0.0-RC4'
+  //ClearCL:
+  compile ('net.clearvolume:clearcl:[0.3.6,)') {transitive= true; changing= true}
 
-	compile 'org.xeustechnologies:jcl-core:2.6'
+  //ClearAudio:
+  compile ('net.clearvolume:clearaudio:[1.0.2,)') {transitive= true; changing= true}
 
-
-	// usage: gradle .... -Plocal=true
-	if (project.hasProperty('local')) {
-		println 'Using local clearX sources'
-		compile project(':ClearGL')
-		compile project(':ClearAudio')
-	}
-	else {
-		println 'Using clearX from Maven repository'/**/
-		compile group: "net.clearvolume", name: "cleargl", version: "(,1.1.0]", changing: true, transitive: true
-		compile group: "net.clearvolume", name: "clearcuda", version: "(,1.1.0]", changing: true, transitive: true
-		compile group: "net.clearvolume", name: "clearaudio", version: "(,1.1.0]", changing: true, transitive: true
-	}
+  //ClearGL:
+	compile ('net.clearvolume:cleargl:[1.0.18,)')  {transitive= true; changing= true}
 
 	compile group: 'junit', name: 'junit', version: '4.12'
 	testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -588,4 +584,88 @@ uploadArchives {
             }
         }
     }
+}
+
+
+
+
+//***********************************************************************************
+// APP PACKAGING
+
+// configure javafx-gradle-plugin
+// for all available settings please look at the class "JavaFXGradlePluginExtension"
+jfx {
+    verbose = true
+    mainClass = "clearvolume.demo.ClearVolumeBasicDemos"
+    jfxAppOutputDir = "build/jfx/app"
+    jfxMainAppJarName = "ClearVolumeDemos.jar"
+    deployDir = "src/main/deploy"
+    useEnvironmentRelativeExecutables = true
+
+    // gradle jfxJar
+    css2bin = false
+    preLoader = null // String
+    updateExistingJar = false
+    allPermissions = false
+    manifestAttributes = null // Map<String, String>
+    addPackagerJar = true
+    copyAdditionalAppResourcesToJar = false
+
+    // gradle jfxNative
+    identifier = null  // String - setting this for windows-bundlers makes it possible to generate upgradeable installers (using same GUID)
+    vendor = "Loic Royer"
+    nativeOutputDir = "build/jfx/native"
+    bundler = "ALL" // set this to some specific, if your don't want all bundlers running, examples "windows.app", "jnlp", ...
+    jvmProperties = null // Map<String, String>
+    jvmArgs = null // List<String>
+    userJvmArgs = null // Map<String, String>
+    launcherArguments = ["demoWith8BitGeneratedDataset"] // List<String>
+    nativeReleaseVersion = getVersionName()
+    needShortcut = false
+    needMenu = false
+    bundleArguments = [
+        // dont bundle JRE (not recommended, but increases build-size/-speed)
+        runtime: null
+    ]
+    appName = "ClearVolumeDemos" // this is used for files below "src/main/deploy", e.g. "src/main/deploy/windows/project.ico"
+    additionalBundlerResources = null // path to some additional resources for the bundlers when creating application-bundle
+    additionalAppResources = null // path to some additional resources when creating application-bundle
+    secondaryLaunchers = [[appName:"somethingDifferent"], [appName:"somethingDifferent2"]]
+    fileAssociations = null // List<Map<String, Object>>
+    noBlobSigning = false // when using bundler "jnlp", you can choose to NOT use blob signing
+    customBundlers = null // List<String>
+    skipNativeLauncherWorkaround205 = false
+
+    skipNativeLauncherWorkaround124 = false
+    skipNativeLauncherWorkaround167 = false
+    skipJNLPRessourcePathWorkaround182 = false
+    skipSigningJarFilesJNLP185 = false
+    skipSizeRecalculationForJNLP185 = false
+
+    // gradle jfxRun
+    runJavaParameter = null // String
+    runAppParameter = null // String
+
+    // per default the outcome of the gradle "jarTask" will be used, set this to specify otherwise (like proguard-output)
+    alternativePathToJarFile = null // String
+
+    // to disable patching of ant-javafx.jar, set this to false
+    usePatchedJFXAntLib = true
+
+    // making it able to support absolute paths, defaults to "false" for maintaining old behaviour
+    checkForAbsolutePaths = false
+
+    // gradle jfxGenerateKeyStore
+    keyStore = "src/main/deploy/keystore.jks"
+    keyStoreAlias = "myalias"
+    keyStorePassword = "password"
+    keyPassword = null // will default to keyStorePassword
+    keyStoreType = "jks"
+    overwriteKeyStore = false
+
+    certDomain = null // required
+    certOrgUnit = null // defaults to "none"
+    certOrg = null // required
+    certState = null // required
+    certCountry = null // required
 }

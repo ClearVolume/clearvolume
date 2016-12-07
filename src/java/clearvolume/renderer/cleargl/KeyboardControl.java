@@ -13,7 +13,6 @@ import clearvolume.renderer.ClearVolumeRendererBase;
 import clearvolume.renderer.ClearVolumeRendererInterface;
 import clearvolume.renderer.SingleKeyToggable;
 import clearvolume.renderer.cleargl.overlay.Overlay;
-import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.transferf.CyclableTransferFunction;
 import clearvolume.transferf.CyclingTransferFunction;
 import clearvolume.transferf.TransferFunction1D;
@@ -283,7 +282,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 		}
 
 		handleOverlayRelatedEvents(pE);
-		handleProcessorsRelatedEvents(pE);
+
 
 	}
 
@@ -294,12 +293,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 		processSingleKeyToggableEvents(pE, lOverlays);
 	}
 
-	private void handleProcessorsRelatedEvents(KeyEvent pE)
-	{
-		final Collection<ProcessorInterface<?>> lProcessors = mClearVolumeRenderer.getProcessors();
 
-		processSingleKeyToggableEvents(pE, lProcessors);
-	}
 
 	private void processSingleKeyToggableEvents(KeyEvent pE,
 												final Collection<?> lOverlays)

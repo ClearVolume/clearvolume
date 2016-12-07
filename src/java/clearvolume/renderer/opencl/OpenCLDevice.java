@@ -26,6 +26,7 @@ import clearvolume.ClearVolumeCloseable;
 import coremem.ContiguousMemoryInterface;
 import coremem.enums.NativeTypeEnum;
 import coremem.fragmented.FragmentedMemoryInterface;
+import coremem.offheap.OffHeapMemory;
 
 public class OpenCLDevice implements ClearVolumeCloseable
 {
@@ -80,7 +81,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
   }
 
   public ClearCLKernel compileKernel(final URL url,
-                                     final String kernelName)
+                                     final String pKernelName)
   {
 
     // Read the program sources and compile them :
@@ -112,12 +113,12 @@ public class OpenCLDevice implements ClearVolumeCloseable
     ClearCLKernel lNewKernel = null;
     try
     {
-      lNewKernel = mCLProgram.getKernel(kernelName);
+      lNewKernel = mCLProgram.getKernel(pKernelName);
       mCLKernelList.add(lNewKernel);
     }
     catch (final Exception e)
     {
-      System.err.println("couldn't create kernel '" + kernelName
+      System.err.println("couldn't create kernel '" + pKernelName
                          + "'");
       e.printStackTrace();
     }
@@ -309,70 +310,14 @@ public class OpenCLDevice implements ClearVolumeCloseable
     pCLBuffer.readFrom(pBuffer, true);
   }
 
-  public FloatBuffer readFloatBuffer(final ClearCLBuffer pCLBuffer)
-  {
-    if (mCLDevice == null || mCLContext == null || mCLQueue == null)
-      return null;
-
-    return pCLBuffer.read(mCLQueue, 0, pCLBuffer.getElementCount())
-                    .getFloatBuffer();
-
-  }
-
-  public ByteBuffer readIntBufferAsByte(final ClearCLBuffer pCLBuffer)
-  {
-    if (mCLDevice == null || mCLContext == null || mCLQueue == null)
-      return null;
-
-    return pCLBuffer.read(mCLQueue, 0, pCLBuffer.getElementCount())
-                    .getByteBuffer();
-
-  }
-
   public void copyCLBufferToPointer(final ClearCLBuffer pCLBuffer,
-                                    Pointer<Integer> pPointer)
+                                    OffHeapMemory pPointer)
   {
     if (mCLDevice == null || mCLContext == null || mCLQueue == null)
       return;
 
-    pCLBuffer.read(mCLQueue,
-                   0,
-                   pCLBuffer.getElementCount(),
-                   pPointer,
-                   true);
+    pCLBuffer.writeTo(pPointer, true);
 
-  }
-
-  public void writeImagePerPlane(final ClearCLImage img,
-                                 final FragmentedMemoryInterface pFragmentedMemoryInterface)
-  {
-    if (mCLDevice == null || mCLContext == null || mCLQueue == null)
-      return null;
-
-    final ArrayList<CLEvent> lEventList = new ArrayList<CLEvent>();
-
-    int i = 0;
-    for (final ContiguousMemoryInterface lMemory : pFragmentedMemoryInterface)
-    {
-      final Pointer<Byte> lBridJPointer =
-                                        lMemory.getBridJPointer(Byte.class);
-      final CLEvent lEvent = JavaCLUtils.writeImage3D(img,
-                                                      mCLQueue,
-                                                      lBridJPointer,
-                                                      0,
-                                                      0,
-                                                      i++,
-                                                      img.getWidth(),
-                                                      img.getHeight(),
-                                                      1,
-                                                      false);
-      lEventList.add(lEvent);
-    }
-
-    for (final CLEvent lEvent : lEventList)
-      lEvent.waitFor();
-
-    return lEventList;
   }
 
   public void writeImage(final ClearCLImage img,
@@ -381,19 +326,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
     if (mCLDevice == null || mCLContext == null || mCLQueue == null)
       return;
 
-    final Pointer<Byte> lBridJPointer =
-                                      pContiguousMemoryInterface.getBridJPointer(Byte.class);
-    return JavaCLUtils.writeImage3D(img,
-                                    mCLQueue,
-                                    lBridJPointer,
-                                    0,
-                                    0,
-                                    0,
-                                    img.getWidth(),
-                                    img.getHeight(),
-                                    img.getDepth(),
-                                    true);
-
+    img.readFrom(pContiguousMemoryInterface, true);
   }
 
   public void writeImage(final ClearCLImage img, final Buffer pBuffer)
@@ -402,14 +335,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
     if (mCLDevice == null || mCLContext == null || mCLQueue == null)
       return;
 
-    return img.write(mCLQueue,
-                     0,
-                     0,
-                     img.getWidth(),
-                     img.getHeight(),
-                     0,
-                     pBuffer,
-                     true);
+    img.readFrom(pBuffer, true);
   }
 
   @Override

@@ -9,6 +9,11 @@ import com.nativelibs4java.opencl.CLImage3D;
 import com.nativelibs4java.opencl.CLImageFormat;
 import com.nativelibs4java.opencl.CLKernel;
 
+import clearcl.ClearCLBuffer;
+import clearcl.ClearCLImage;
+import clearcl.ClearCLKernel;
+import clearcl.enums.ImageChannelDataType;
+import clearcl.enums.ImageChannelOrder;
 import clearvolume.renderer.opencl.OpenCLAvailability;
 import clearvolume.renderer.opencl.OpenCLDevice;
 
@@ -31,14 +36,14 @@ public class OpenCLTests
 
 			// create the buffer/image type we would need for the renderer
 
-			final CLBuffer<Float> clBufIn = dev.createInputFloatBuffer(N);
-			final CLBuffer<Integer> clBufOut = dev.createOutputIntBuffer(N);
+			final ClearCLBuffer clBufIn = dev.createInputFloatBuffer(N);
+			final ClearCLBuffer clBufOut = dev.createOutputIntBuffer(N);
 
-			final CLImage3D img = dev.createGenericImage3D(	N,
+      final ClearCLImage img = dev.createGenericImage3D(	N,
 															N,
 															N,
-															CLImageFormat.ChannelOrder.R,
-															CLImageFormat.ChannelDataType.SignedInt16);
+															ImageChannelOrder.R,
+															ImageChannelDataType.SignedInt16);
 		}
 		catch (final Throwable e)
 		{
@@ -61,7 +66,7 @@ public class OpenCLTests
 			lOpenCLDevice.initCL();
 			lOpenCLDevice.printInfo();
 
-			final CLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
+			final ClearCLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
 																	"test_char");
 		}
 		catch (final Throwable e)
@@ -85,12 +90,12 @@ public class OpenCLTests
 			lOpenCLDevice.printInfo();
 			final int N = 100;
 
-			final CLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
+			final ClearCLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
 																	"test_float");
 
-			final CLBuffer<Float> clBufIn = lOpenCLDevice.createOutputFloatBuffer(N);
+			final ClearCLBuffer clBufIn = lOpenCLDevice.createOutputFloatBuffer(N);
 
-			lCLKernel.setArgs(clBufIn, N);
+			lCLKernel.setArguments(clBufIn, N);
 
 			lOpenCLDevice.run(lCLKernel, N);
 

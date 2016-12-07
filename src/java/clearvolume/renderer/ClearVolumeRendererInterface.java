@@ -16,7 +16,6 @@ import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
-import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.volume.Volume;
 import clearvolume.volume.VolumeManager;
@@ -97,21 +96,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	void addParameterChangeListener(ParameterChangeListener pParameterChangeListener);
 
-	/**
-	 * Adds a processor to this renderer.
-	 *
-	 * @param pProcessor
-	 *            ProcessorInterface to add.
-	 */
-	public void addProcessor(ProcessorInterface<?> pProcessor);
 
-	/**
-	 * Adds these processors to this renderer.
-	 *
-	 * @param pProcessors
-	 *            Processors to add.
-	 */
-	public void addProcessors(Collection<ProcessorInterface<?>> pProcessors);
 
 	/**
 	 * Adds a rotation controller.
@@ -331,12 +316,6 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	public Collection<Overlay> getOverlays();
 
-	/**
-	 * Returns the list of processors in this renderer.
-	 *
-	 * @return Processors collection
-	 */
-	public Collection<ProcessorInterface<?>> getProcessors();
 
 	/**
 	 * Returns the quality level (0-1) for a given render layer.
@@ -526,13 +505,7 @@ public interface ClearVolumeRendererInterface	extends
 	 */
 	void removeParameterChangeListener(ParameterChangeListener pParameterChangeListener);
 
-	/**
-	 * Removes a processor to this renderer.
-	 *
-	 * @param pProcessor
-	 *            ProcessorInterface to remove.
-	 */
-	public void removeProcessor(final ProcessorInterface<?> pProcessor);
+
 
 	/**
 	 * Removes a rotation controller.

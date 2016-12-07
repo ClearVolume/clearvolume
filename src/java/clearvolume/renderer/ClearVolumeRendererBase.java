@@ -8,15 +8,11 @@ import static java.lang.Math.sqrt;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.math.Quaternion;
@@ -28,9 +24,7 @@ import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
 import clearvolume.renderer.panels.ControlPanelJFrame;
-import clearvolume.renderer.panels.HasGUIPanel;
 import clearvolume.renderer.panels.ParametersListPanelJFrame;
-import clearvolume.renderer.processors.ProcessorInterface;
 import clearvolume.transferf.TransferFunction;
 import clearvolume.transferf.TransferFunctions;
 import clearvolume.volume.Volume;
@@ -155,8 +149,7 @@ public abstract class ClearVolumeRendererBase	implements
 
 	private final CountDownLatch[] mDataBufferCopyIsFinishedArray;
 
-	// Map of processors:
-	protected Map<String, ProcessorInterface<?>> mProcessorInterfacesMap = new ConcurrentHashMap<>();
+
 	// List of Capture Listeners
 	protected ArrayList<VolumeCaptureListener> mVolumeCaptureListenerList = new ArrayList<VolumeCaptureListener>();
 
@@ -267,25 +260,6 @@ public abstract class ClearVolumeRendererBase	implements
 		mParameterChangeListenerList.add(pParameterChangeListener);
 	}
 
-	@Override
-	public void addProcessor(final ProcessorInterface<?> pProcessor)
-	{
-		mProcessorInterfacesMap.put(pProcessor.getName(), pProcessor);
-		if (pProcessor instanceof HasGUIPanel)
-		{
-			final HasGUIPanel lHasGUIPanel = (HasGUIPanel) pProcessor;
-			final JPanel lPanel = lHasGUIPanel.getPanel();
-			if (lPanel != null)
-				mParametersListFrame.addPanel(lPanel);
-		}
-	}
-
-	@Override
-	public void addProcessors(final Collection<ProcessorInterface<?>> pProcessors)
-	{
-		for (final ProcessorInterface<?> lProcessor : pProcessors)
-			addProcessor(lProcessor);
-	}
 
 	/**
 	 * Adds a rotation controller.
@@ -672,12 +646,6 @@ public abstract class ClearVolumeRendererBase	implements
 		return mNumberOfRenderLayers;
 	};
 
-	@Override
-	public Collection<ProcessorInterface<?>> getProcessors()
-	{
-		return mProcessorInterfacesMap.values();
-	}
-
 	/**
 	 * Returns the quality level [0,1] for a given render layer.
 	 * 
@@ -1061,18 +1029,6 @@ public abstract class ClearVolumeRendererBase	implements
 		mParameterChangeListenerList.remove(pParameterChangeListener);
 	}
 
-	@Override
-	public void removeProcessor(final ProcessorInterface<?> pProcessor)
-	{
-		mProcessorInterfacesMap.remove(pProcessor.getName());
-		if (pProcessor instanceof HasGUIPanel)
-		{
-			final HasGUIPanel lHasGUIPanel = (HasGUIPanel) pProcessor;
-			final JPanel lPanel = lHasGUIPanel.getPanel();
-			if (lPanel != null)
-				mParametersListFrame.removePanel(lPanel);
-		}
-	}
 
 	/**
 	 * Removes a rotation controller.
