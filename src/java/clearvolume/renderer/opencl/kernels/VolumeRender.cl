@@ -106,7 +106,7 @@ float4 mult(__constant float* M, float4 v){
 
 
 // Render function,
-// performs max projection and then uses the transfert function to obtain a color per pixel:
+// performs max projection and then uses the transfer function to obtain a color per pixel:
 __kernel void
 maxproj_render(								__global uint	*d_output, 
 													const	uint  imageW, 
@@ -222,7 +222,7 @@ maxproj_render(								__global uint	*d_output,
   float maxp = 0.0f;
 	for(int i=0; i<unrolledmaxsteps; i++) 
 	{
-		for(int j=1; j<LOOPUNROLL; j++)
+		for(int j=0; j<LOOPUNROLL; j++)
 		{
 	  	maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
 	  	pos+=vecstep;
@@ -376,7 +376,7 @@ __kernel void isosurface_render(
   // first pass:
   for(int i=0; i<unrolledmaxsteps; i++) 
   	{
-  	  for(int j=1; j<LOOPUNROLL; j++)
+  	  for(int j=0; j<LOOPUNROLL; j++)
   		{
   		  newVal = read_imagef(volume, volumeSampler, pos).x;
   		  if ((newVal>isoVal) != isGreater)
