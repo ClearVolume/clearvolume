@@ -1,21 +1,12 @@
 package clearvolume.renderer.opencl;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import org.apache.commons.io.IOUtils;
-import org.bridj.Pointer;
 
 import clearcl.ClearCL;
 import clearcl.ClearCLBuffer;
@@ -31,7 +22,6 @@ import clearcl.enums.ImageChannelOrder;
 import clearvolume.ClearVolumeCloseable;
 import coremem.ContiguousMemoryInterface;
 import coremem.enums.NativeTypeEnum;
-import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.offheap.OffHeapMemory;
 
 public class OpenCLDevice implements ClearVolumeCloseable
@@ -86,32 +76,20 @@ public class OpenCLDevice implements ClearVolumeCloseable
     return mCLKernelList.indexOf(pCLKernel);
   }
 
-  public ClearCLKernel compileKernel(final URL url,
+  public ClearCLKernel compileKernel(final Class<?> pRootClass,
+                                     final String pRessourceName,
                                      final String pKernelName)
   {
 
-    // Read the program sources and compile them :
-    String src = "";
     try
     {
-      src = getText(url);
-    }
-    catch (final Exception e)
-    {
-      System.err.println("couldn't read program source ");
-      e.printStackTrace();
-      return null;
-    }
-
-    try
-    {
-      mCLProgram = mCLContext.createProgram(src);
+      mCLProgram = mCLContext.createProgram(pRootClass,pRessourceName);
       mCLProgram.addBuildOptionAllMathOpt();
       mCLProgram.buildAndLog();
     }
     catch (final Exception e)
     {
-      System.err.println("couldn't create program from " + src);
+      System.err.println("couldn't create program from " + pRessourceName);
       e.printStackTrace();
       return null;
     }

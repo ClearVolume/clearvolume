@@ -20,91 +20,96 @@ import clearvolume.renderer.opencl.OpenCLDevice;
 public class OpenCLTests
 {
 
-	@Test
-	public void test_creation()
-	{
-		if (!OpenCLAvailability.isOpenCLAvailable())
-			return;
+  @Test
+  public void test_creation()
+  {
+    if (!OpenCLAvailability.isOpenCLAvailable())
+      return;
 
-		try
-		{
-			final OpenCLDevice dev = new OpenCLDevice();
-			dev.initCL();
-			dev.printInfo();
+    try
+    {
+      final OpenCLDevice dev = new OpenCLDevice();
+      dev.initCL();
+      dev.printInfo();
 
-			final int N = 512;
+      final int N = 512;
 
-			// create the buffer/image type we would need for the renderer
+      // create the buffer/image type we would need for the renderer
 
-			final ClearCLBuffer clBufIn = dev.createInputFloatBuffer(N);
-			final ClearCLBuffer clBufOut = dev.createOutputIntBuffer(N);
+      final ClearCLBuffer clBufIn = dev.createInputFloatBuffer(N);
+      final ClearCLBuffer clBufOut = dev.createOutputIntBuffer(N);
 
-      final ClearCLImage img = dev.createGenericImage3D(	N,
-															N,
-															N,
-															ImageChannelOrder.R,
-															ImageChannelDataType.SignedInt16);
-		}
-		catch (final Throwable e)
-		{
+      final ClearCLImage img = dev.createGenericImage3D(N,
+                                                        N,
+                                                        N,
+                                                        ImageChannelOrder.R,
+                                                        ImageChannelDataType.SignedInt16);
+    }
+    catch (final Throwable e)
+    {
 
-			fail();
-			e.printStackTrace();
-		}
+      fail();
+      e.printStackTrace();
+    }
 
-	}
+  }
 
-	@Test
-	public void test_compile()
-	{
-		if (!OpenCLAvailability.isOpenCLAvailable())
-			return;
+  @Test
+  public void test_compile()
+  {
+    if (!OpenCLAvailability.isOpenCLAvailable())
+      return;
 
-		try
-		{
-			final OpenCLDevice lOpenCLDevice = new OpenCLDevice();
-			lOpenCLDevice.initCL();
-			lOpenCLDevice.printInfo();
+    try
+    {
+      final OpenCLDevice lOpenCLDevice = new OpenCLDevice();
+      lOpenCLDevice.initCL();
+      lOpenCLDevice.printInfo();
 
-			final ClearCLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
-																	"test_char");
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			fail();
-		}
+      final ClearCLKernel lCLKernel =
+                                    lOpenCLDevice.compileKernel(OpenCLTests.class,
+                                                                "kernels/test.cl",
+                                                                "test_char");
+    }
+    catch (final Throwable e)
+    {
+      e.printStackTrace();
+      fail();
+    }
 
-	}
+  }
 
-	@Test
-	public void test_run()
-	{
-		if (!OpenCLAvailability.isOpenCLAvailable())
-			return;
+  @Test
+  public void test_run()
+  {
+    if (!OpenCLAvailability.isOpenCLAvailable())
+      return;
 
-		try
-		{
-			final OpenCLDevice lOpenCLDevice = new OpenCLDevice();
-			lOpenCLDevice.initCL();
-			lOpenCLDevice.printInfo();
-			final int N = 100;
+    try
+    {
+      final OpenCLDevice lOpenCLDevice = new OpenCLDevice();
+      lOpenCLDevice.initCL();
+      lOpenCLDevice.printInfo();
+      final int N = 100;
 
-			final ClearCLKernel lCLKernel = lOpenCLDevice.compileKernel(	OpenCLTests.class.getResource("kernels/test.cl"),
-																	"test_float");
+      final ClearCLKernel lCLKernel =
+                                    lOpenCLDevice.compileKernel(OpenCLTests.class,
+                                                                "kernels/test.cl",
+                                                                "test_float");
 
-			final ClearCLBuffer clBufIn = lOpenCLDevice.createOutputFloatBuffer(N);
+      final ClearCLBuffer clBufIn =
+                                  lOpenCLDevice.createOutputFloatBuffer(N);
 
-			lCLKernel.setArguments(clBufIn, N);
+      lCLKernel.setArguments(clBufIn, N);
 
-			lOpenCLDevice.run(lCLKernel, N);
+      lOpenCLDevice.run(lCLKernel, N);
 
-		}
-		catch (final Throwable e)
-		{
-			e.printStackTrace();
-			fail();
-		}
+    }
+    catch (final Throwable e)
+    {
+      e.printStackTrace();
+      fail();
+    }
 
-	}
+  }
 }

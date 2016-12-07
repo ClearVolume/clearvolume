@@ -137,14 +137,16 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
     mCLDevice.initCL();
     mCLDevice.printInfo();
     mMaxProjectionRenderKernel =
-                               mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRender.cl"),
+                               mCLDevice.compileKernel(OpenCLVolumeRenderer.class,
+                                                       "kernels/VolumeRender.cl",
                                                        "maxproj_render");
-    mClearKernel =
-                 mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRender.cl"),
-                                         "clearbuffer");
+    mClearKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class,
+                                           "kernels/VolumeRender.cl",
+                                           "clearbuffer");
 
     mIsoSurfaceRenderKernel =
-                            mCLDevice.compileKernel(OpenCLVolumeRenderer.class.getResource("kernels/VolumeRender.cl"),
+                            mCLDevice.compileKernel(OpenCLVolumeRenderer.class,
+                                                    "kernels/VolumeRender.cl",
                                                     "isosurface_render");
 
     mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
