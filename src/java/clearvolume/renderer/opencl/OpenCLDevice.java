@@ -61,7 +61,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
     
     try
     {
-      mCLDevice = mClearCL.getBestCPUDevice(); //getFastestGPUDeviceForImages(); //
+      mCLDevice = mClearCL.getFastestGPUDeviceForImages(); //getFastestGPUDeviceForImages(); //
     }
     catch (Throwable e)
     {
