@@ -226,31 +226,35 @@ maxproj_render(								__global uint	*d_output,
   
   // raycasting loop:
   float maxp = 0.0f;
-  float cumsum = 1.f;
   
-	//for(int i=0; i<unrolledmaxsteps; i++) 
-	//{
-	//	for(int j=0; j<LOOPUNROLL; j++)
-	//	{
-	//  	maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
-	//  	pos+=vecstep;
-	//	}
-	//}
-	
+  
+  if (alpha_blending<=0.f){  
 	for(int i=0; i<unrolledmaxsteps; i++) 
-	{
-		for(int j=0; j<LOOPUNROLL; j++)
 		{
-		  float new_val = read_imagef(volume, volumeSampler, pos).x;
+			for(int j=0; j<LOOPUNROLL; j++)
+			{
+	  		maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	  		pos+=vecstep;
+			}
+		}
+	}
+	else{
+	
+		float cumsum = 1.f;
+	  float decay_rate = alpha_blending*tstep;
+  	
+		for(int i=0; i<unrolledmaxsteps; i++) 
+		{
+			for(int j=0; j<LOOPUNROLL; j++)
+			{
+		  	float new_val = read_imagef(volume, volumeSampler, pos).x;
 		  
-		  //normalize to 0...1
-		  float normalized_val = mad(ta,new_val,tb);
-		  
-		  maxp = fmax(maxp,cumsum*normalized_val);
-		  
-		  cumsum  *= (1.f-0.1f*alpha_blending*normalized_val);
-		  
-	  	pos+=vecstep;
+		  	//normalize to 0...1
+		  	float normalized_val = mad(ta,new_val,tb);
+		  	maxp = fmax(maxp,cumsum*normalized_val);
+		  	cumsum  *= native_exp(-decay_rate*normalized_val);
+	  		pos+=vecstep;
+			}
 		}
 	}
 	

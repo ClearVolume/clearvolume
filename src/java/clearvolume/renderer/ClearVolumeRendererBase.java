@@ -58,6 +58,7 @@ public abstract class ClearVolumeRendererBase	implements
 	public static final float cMinimalFOV = cOrthoLikeFOV;
 	public static final float cMaximalFOV = (float) (0.75 * PI);
 
+	public static final float cDefault_Alpha_Blend = 1.f;
 	// Timeout:
 	private static final long cDefaultSetVolumeDataBufferTimeout = 5;
 
@@ -219,7 +220,7 @@ public abstract class ClearVolumeRendererBase	implements
 			mGamma[i] = 1f;
 			mQuality[i] = 1f;
 			mDithering[i] = 1f;
-			mAlphaBlending[i] = 0.1f;
+			mAlphaBlending[i] = cDefault_Alpha_Blend;
 
 			mVoxelSizeX[i] = 1;
 			mVoxelSizeY[i] = 1;
@@ -468,6 +469,28 @@ public abstract class ClearVolumeRendererBase	implements
 		{
 			mRenderAlgorithm[pRenderLayerIndex] =
 																					mRenderAlgorithm[pRenderLayerIndex].next();
+			notifyChangeOfVolumeRenderingParameters();
+		}
+		finally
+		{
+			if (getDisplayLock().isHeldByCurrentThread())
+				getDisplayLock().unlock();
+		}
+	}
+
+	@Override
+	public void toggleAlphaBlending(int pRenderLayerIndex)
+	{
+		getDisplayLock().lock();
+		try
+		{
+			boolean isAlphaBlending =
+															mAlphaBlending[pRenderLayerIndex] > 0.f;
+
+			mAlphaBlending[pRenderLayerIndex] =
+																				isAlphaBlending	? 0.f
+																												: cDefault_Alpha_Blend;
+
 			notifyChangeOfVolumeRenderingParameters();
 		}
 		finally
