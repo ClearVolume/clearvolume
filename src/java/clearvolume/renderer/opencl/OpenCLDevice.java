@@ -61,7 +61,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
     
     try
     {
-      mCLDevice = mClearCL.getFastestGPUDeviceForImages(); //getBestCPUDevice(); //
+      mCLDevice = mClearCL.getBestCPUDevice(); //getFastestGPUDeviceForImages(); //
     }
     catch (Throwable e)
     {
@@ -400,6 +400,11 @@ public class OpenCLDevice implements ClearVolumeCloseable
     {
       e.printStackTrace();
     }
+  }
+
+  public boolean isCPU()
+  {
+    return mCLDevice.getType().isCPU();
   }
 
 }

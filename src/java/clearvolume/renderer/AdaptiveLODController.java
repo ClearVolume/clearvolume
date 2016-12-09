@@ -36,6 +36,11 @@ public class AdaptiveLODController
 		mNewGenerator = mCurrentGenerator;
 		resetMultiPassRendering();
 	}
+	
+  public int getMaxNumberOfPasses()
+  {
+    return cMaxNumberOfPasses;
+  }
 
 	public void setActive(boolean pActive)
 	{
@@ -279,17 +284,19 @@ public class AdaptiveLODController
 
 	private void printlnverbose(String pString)
 	{
-		System.out.println(pString);
+		//System.out.println(pString);
 	}
 
 	private void println(String pString)
 	{
-		System.out.println(pString);
+		//System.out.println(pString);
 	}
 
 	private void format(String format, Object... args)
 	{
-		System.out.format(format, args);
+		//System.out.format(format, args);
 	}
+
+
 
 }
