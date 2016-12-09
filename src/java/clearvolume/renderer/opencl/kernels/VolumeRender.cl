@@ -117,6 +117,7 @@ maxproj_render(								__global uint	*d_output,
 													const	float gamma,
 													const	int   maxsteps,
 													const	float dithering,
+													const float alpha_blending,
 													const	float phase,
 													const	int   clear,
 													const	float boxMin_x,
@@ -130,6 +131,11 @@ maxproj_render(								__global uint	*d_output,
 									__constant float* 		invM,
 									__read_only image3d_t 	volume)
 {
+
+
+  
+  
+   
 	// samplers:
   const sampler_t volumeSampler   =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR ;
 	const sampler_t transferSampler =   CLK_NORMALIZED_COORDS_TRUE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_LINEAR ;
@@ -220,17 +226,38 @@ maxproj_render(								__global uint	*d_output,
   
   // raycasting loop:
   float maxp = 0.0f;
+  float cumsum = 1.f;
+  
+	//for(int i=0; i<unrolledmaxsteps; i++) 
+	//{
+	//	for(int j=0; j<LOOPUNROLL; j++)
+	//	{
+	//  	maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+	//  	pos+=vecstep;
+	//	}
+	//}
+	
 	for(int i=0; i<unrolledmaxsteps; i++) 
 	{
 		for(int j=0; j<LOOPUNROLL; j++)
 		{
-	  	maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
+		  float new_val = read_imagef(volume, volumeSampler, pos).x;
+		  
+		  //normalize to 0...1
+		  float normalized_val = mad(ta,new_val,tb);
+		  
+		  maxp = fmax(maxp,cumsum*normalized_val);
+		  
+		  cumsum  *= (1.f-0.1f*alpha_blending*normalized_val);
+		  
 	  	pos+=vecstep;
 		}
 	}
 	
-  // Mapping to transfert function range and gamma correction: 
-  const float mappedVal = clamp(pow(mad(ta,maxp,tb),gamma),0.f,1.f);
+	
+  // Mapping to transfer function range and gamma correction: 
+  //const float mappedVal = clamp(pow(mad(ta,maxp,tb),gamma),0.f,1.f);
+  const float mappedVal = clamp(pow(maxp,gamma),0.f,1.f);
 
 	// lookup in transfer function texture:
   const float4 color = brightness*read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
