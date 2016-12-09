@@ -8,8 +8,8 @@ import clearvolume.utils.math.lowdiscrepancy.ModularSequence;
 public class AdaptiveLODController
 {
 
-	private static final long cMarginTime = 1000 * 1000 * 100; // 10 ms
-	private static final int cMaxNumberOfPasses = 9;
+	private static final long cMarginTime = 1000 * 1000 * 10; // 10 ms
+	private static final int cMaxNumberOfPasses = 31;
 	private static final double cHysteresis = 0.15;
 
 	private volatile boolean mActive = true;
@@ -94,6 +94,7 @@ public class AdaptiveLODController
 		final float lPhase = computePhase(	getNumberOfPasses(),
 											mCurrentGenerator,
 											mPassIndex);
+		println("mPassIndex=" + mPassIndex);
 		println("lPhase=" + lPhase);
 		return lPhase;
 	}
@@ -278,17 +279,17 @@ public class AdaptiveLODController
 
 	private void printlnverbose(String pString)
 	{
-		// System.out.println(pString);
+		System.out.println(pString);
 	}
 
 	private void println(String pString)
 	{
-		// System.out.println(pString);
+		System.out.println(pString);
 	}
 
 	private void format(String format, Object... args)
 	{
-		// System.out.format(format, args);
+		System.out.format(format, args);
 	}
 
 }

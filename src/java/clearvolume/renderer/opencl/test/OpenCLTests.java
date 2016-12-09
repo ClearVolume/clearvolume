@@ -42,7 +42,6 @@ public class OpenCLTests
       final ClearCLImage img = dev.createGenericImage3D(N,
                                                         N,
                                                         N,
-                                                        ImageChannelOrder.R,
                                                         ImageChannelDataType.SignedInt16);
     }
     catch (final Throwable e)

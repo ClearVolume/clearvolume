@@ -17,6 +17,7 @@ import clearcl.ClearCLKernel;
 import clearcl.ClearCLProgram;
 import clearcl.ClearCLQueue;
 import clearcl.backend.ClearCLBackends;
+import clearcl.benchmark.Benchmark;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
 import clearvolume.ClearVolumeCloseable;
@@ -42,9 +43,34 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
   public boolean initCL(final boolean useExistingOpenGLContext)
   {
+    ClearCLBackends.sStdOutVerbose = true;
+
     mClearCL = new ClearCL(ClearCLBackends.getBestBackend());
 
-    mCLDevice = mClearCL.getFastestGPUDevice();
+    ArrayList<ClearCLDevice> lAllDevices = mClearCL.getAllDevices();
+
+    System.out.println("________________________________________________________________________________");
+    System.out.println("Available devices:");
+    for (ClearCLDevice lDevice : lAllDevices)
+    {
+      System.out.println(lDevice.getInfoString());
+    }
+    System.out.println("________________________________________________________________________________");
+
+    Benchmark.sStdOutVerbose = true;
+    
+    try
+    {
+      mCLDevice = mClearCL.getFastestGPUDeviceForImages(); //getBestCPUDevice(); //
+    }
+    catch (Throwable e)
+    {
+      e.printStackTrace();
+      mCLDevice = mClearCL.getBestCPUDevice();
+    }
+
+    System.out.println("Selected device:");
+    System.out.println(mCLDevice.getInfoString());
 
     mCLContext = mCLDevice.createContext();
 
@@ -83,13 +109,15 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
     try
     {
-      mCLProgram = mCLContext.createProgram(pRootClass,pRessourceName);
+      mCLProgram =
+                 mCLContext.createProgram(pRootClass, pRessourceName);
       mCLProgram.addBuildOptionAllMathOpt();
       mCLProgram.buildAndLog();
     }
     catch (final Exception e)
     {
-      System.err.println("couldn't create program from " + pRessourceName);
+      System.err.println("couldn't create program from "
+                         + pRessourceName);
       e.printStackTrace();
       return null;
     }
@@ -248,17 +276,15 @@ public class OpenCLDevice implements ClearVolumeCloseable
   public ClearCLImage createGenericImage3D(final long Nx,
                                            final long Ny,
                                            final long Nz,
-                                           ImageChannelOrder pChannelOrder,
                                            ImageChannelDataType pChannelDataType)
   {
     if (mCLDevice == null || mCLContext == null || mCLQueue == null)
       return null;
 
-    return mCLContext.createImage(pChannelOrder,
-                                  pChannelDataType,
-                                  Nx,
-                                  Ny,
-                                  Nz);
+    return mCLContext.createSingleChannelImage(pChannelDataType,
+                                               Nx,
+                                               Ny,
+                                               Nz);
 
   }
 

@@ -207,28 +207,24 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
                                            mCLDevice.createGenericImage3D(lWidth,
                                                                           lHeight,
                                                                           lDepth,
-                                                                          ImageChannelOrder.R,
                                                                           ImageChannelDataType.UnsignedNormalizedInt8);
       else if (getNativeType() == NativeTypeEnum.UnsignedShort)
         mCLVolumeImages[pRenderLayerIndex] =
                                            mCLDevice.createGenericImage3D(lWidth,
                                                                           lHeight,
                                                                           lDepth,
-                                                                          ImageChannelOrder.R,
                                                                           ImageChannelDataType.UnsignedNormalizedInt16);
       else if (getNativeType() == NativeTypeEnum.Byte)
         mCLVolumeImages[pRenderLayerIndex] =
                                            mCLDevice.createGenericImage3D(lWidth,
                                                                           lHeight,
                                                                           lDepth,
-                                                                          ImageChannelOrder.R,
                                                                           ImageChannelDataType.UnsignedNormalizedInt8);
       else if (getNativeType() == NativeTypeEnum.Short)
         mCLVolumeImages[pRenderLayerIndex] =
                                            mCLDevice.createGenericImage3D(lWidth,
                                                                           lHeight,
                                                                           lDepth,
-                                                                          ImageChannelOrder.R,
                                                                           ImageChannelDataType.UnsignedNormalizedInt16);
       else
         throw new ClearVolumeUnsupportdDataTypeException("Received an unsupported data type: "
