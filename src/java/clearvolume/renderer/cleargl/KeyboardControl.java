@@ -247,6 +247,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			{
 				final CyclableTransferFunction lCyclableTransferFunction = (CyclableTransferFunction) mClearVolumeRenderer.getTransferFunction();
 				lCyclableTransferFunction.next();
+				mClearVolumeRenderer.setTransferFunction(mClearVolumeRenderer.getTransferFunction());
 			}
 			else if (mClearVolumeRenderer.getTransferFunction() instanceof TransferFunction1D)
 			{

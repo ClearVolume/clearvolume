@@ -17,6 +17,8 @@ import javax.swing.SwingUtilities;
 
 import com.jogamp.opengl.math.Quaternion;
 
+import badtrack.BadTrack;
+import badtrack.email.GmailBadTrackNotifier;
 import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
@@ -49,6 +51,8 @@ public abstract class ClearVolumeRendererBase implements
                                               ClearVolumeRendererInterface,
                                               ClearVolumeCloseable
 {
+
+  protected static BadTrack sBadTrack;
 
   /**
    * Default FOV
@@ -113,7 +117,7 @@ public abstract class ClearVolumeRendererBase implements
   private volatile float mTranslationX = 0;
   private volatile float mTranslationY = 0;
   private volatile float mTranslationZ = 0;
-  
+
   private Quaternion mLastAppliedQuaternion;
 
   private volatile float mFOV = cDefaultFOV;
@@ -176,10 +180,27 @@ public abstract class ClearVolumeRendererBase implements
 
   private final ParametersListPanelJFrame mParametersListFrame;
 
-
   public ClearVolumeRendererBase(final int pNumberOfRenderLayers)
   {
     super();
+
+    GmailBadTrackNotifier lEmailNotifier =
+                                         new GmailBadTrackNotifier("ClearVolumeErrors@gmail.com",
+                                                                   "ClearVolumeIsCool");
+
+    if (sBadTrack == null)
+    {
+      sBadTrack = new BadTrack("ClearVolume", lEmailNotifier);
+
+      sBadTrack.askWithSwing("Help Debug ClearVolume",
+                             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. \n"
+                                                       + "Vivamus convallis, odio sit amet pulvinar facilisis, \n"
+                                                       + "felis felis rhoncus dolor, non ullamcorper neque magna a ex.");
+
+      sBadTrack.appendBasicSystemInfo();
+    }
+
+    sBadTrack.startTracking();
 
     mNumberOfRenderLayers = pNumberOfRenderLayers;
     mSetVolumeDataBufferLocks = new Object[pNumberOfRenderLayers];
@@ -429,6 +450,8 @@ public abstract class ClearVolumeRendererBase implements
       {
         e.printStackTrace();
       }
+
+    sBadTrack.stopTracking();
 
   }
 

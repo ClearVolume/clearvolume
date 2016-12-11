@@ -93,6 +93,8 @@ dependencies
 	compile 'com.apple:AppleJavaExtensions:1.4'
 	compile 'com.miglayout:miglayout:3.7.4'
 	
+	// BadTrack:
+  compile ('net.clearcontrol:BadTrack:[0.0.1,)'){transitive= true; changing= true}
 	
 	// CoreMem:
   compile ('net.coremem:CoreMem:[0.3.2,)'){transitive= true; changing= true}

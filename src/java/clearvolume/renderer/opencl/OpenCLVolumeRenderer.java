@@ -133,7 +133,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
   protected boolean initVolumeRenderer()
   {
     mCLDevice = new OpenCLDevice();
-    mCLDevice.initCL();
+    mCLDevice.initCL(sBadTrack);
     
     if(mCLDevice.isCPU())
       mAdaptiveLODController.setNumberOfPasses(mAdaptiveLODController.getMaxNumberOfPasses());

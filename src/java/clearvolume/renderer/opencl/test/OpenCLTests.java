@@ -29,7 +29,7 @@ public class OpenCLTests
     try
     {
       final OpenCLDevice dev = new OpenCLDevice();
-      dev.initCL();
+      dev.initCL(null);
       dev.printInfo();
 
       final int N = 512;
@@ -62,7 +62,7 @@ public class OpenCLTests
     try
     {
       final OpenCLDevice lOpenCLDevice = new OpenCLDevice();
-      lOpenCLDevice.initCL();
+      lOpenCLDevice.initCL(null);
       lOpenCLDevice.printInfo();
 
       final ClearCLKernel lCLKernel =
@@ -87,7 +87,7 @@ public class OpenCLTests
     try
     {
       final OpenCLDevice lOpenCLDevice = new OpenCLDevice();
-      lOpenCLDevice.initCL();
+      lOpenCLDevice.initCL(null);
       lOpenCLDevice.printInfo();
       final int N = 100;
 
