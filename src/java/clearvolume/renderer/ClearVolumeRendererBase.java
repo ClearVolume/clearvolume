@@ -62,6 +62,7 @@ public abstract class ClearVolumeRendererBase implements
   public static final float cMinimalFOV = cOrthoLikeFOV;
   public static final float cMaximalFOV = (float) (0.75 * PI);
 
+  public static final float cDefault_Alpha_Blend = 1.f;
   // Timeout:
   private static final long cDefaultSetVolumeDataBufferTimeout = 5;
 
@@ -130,6 +131,7 @@ public abstract class ClearVolumeRendererBase implements
   private final float[] mTransferFunctionRangeMax;
   private final float[] mGamma;
   private final float[] mQuality;
+  private final float[] mAlphaBlending;
 
   private final float[] mDithering;
 
@@ -219,6 +221,8 @@ public abstract class ClearVolumeRendererBase implements
     mQuality = new float[pNumberOfRenderLayers];
     mDithering = new float[pNumberOfRenderLayers];
 
+    mAlphaBlending = new float[pNumberOfRenderLayers];
+
     mVolumeSizeX = new long[pNumberOfRenderLayers];
     mVolumeSizeY = new long[pNumberOfRenderLayers];
     mVolumeSizeZ = new long[pNumberOfRenderLayers];
@@ -243,6 +247,7 @@ public abstract class ClearVolumeRendererBase implements
       mGamma[i] = 1f;
       mQuality[i] = 1f;
       mDithering[i] = 1f;
+      mAlphaBlending[i] = cDefault_Alpha_Blend;
 
       mVoxelSizeX[i] = 1;
       mVoxelSizeY[i] = 1;
@@ -503,6 +508,28 @@ public abstract class ClearVolumeRendererBase implements
   }
 
   @Override
+  public void toggleAlphaBlending(int pRenderLayerIndex)
+  {
+    getDisplayLock().lock();
+    try
+    {
+      boolean isAlphaBlending =
+                              mAlphaBlending[pRenderLayerIndex] > 0.f;
+
+      mAlphaBlending[pRenderLayerIndex] =
+                                        isAlphaBlending ? 0.f
+                                                        : cDefault_Alpha_Blend;
+
+      notifyChangeOfVolumeRenderingParameters();
+    }
+    finally
+    {
+      if (getDisplayLock().isHeldByCurrentThread())
+        getDisplayLock().unlock();
+    }
+  }
+
+  @Override
   public boolean getAdaptiveLODActive()
   {
     return getAdaptiveLODController().isActive();
@@ -603,6 +630,13 @@ public abstract class ClearVolumeRendererBase implements
   public float getDithering(int pRenderLayerIndex)
   {
     return mDithering[pRenderLayerIndex];
+  }
+
+  @Override
+  public float getAlphaBlending(int pRenderLayerIndex)
+  {
+    // TODO Auto-generated method stub
+    return mAlphaBlending[pRenderLayerIndex];
   }
 
   /**
@@ -1417,7 +1451,11 @@ public abstract class ClearVolumeRendererBase implements
     getDisplayLock().lock();
     try
     {
-      if (!pQuaternion.equals(mLastAppliedQuaternion))
+      if (mLastAppliedQuaternion == null
+          || pQuaternion.getX() != mLastAppliedQuaternion.getX()
+          || pQuaternion.getY() != mLastAppliedQuaternion.getY()
+          || pQuaternion.getZ() != mLastAppliedQuaternion.getZ()
+          || pQuaternion.getW() != mLastAppliedQuaternion.getW())
       {
         mRotationQuaternion.set(pQuaternion);
         notifyChangeOfVolumeRenderingParameters();

@@ -47,10 +47,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 	 * @param pMouseControl
 	 * 
 	 * @param pJoglVolumeRenderer
-	 *            renderer
+	 *          renderer
 	 */
 	KeyboardControl(final ClearVolumeRendererInterface pClearVolumeRenderer,
-					MouseControl pMouseControl)
+									MouseControl pMouseControl)
 	{
 		mClearVolumeRenderer = pClearVolumeRenderer;
 		mMouseControl = pMouseControl;
@@ -69,12 +69,14 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 		final boolean lIsShiftPressed = pE.isShiftDown();
 		final boolean lIsCtrlPressed = pE.isControlDown();
 		final boolean lIsMetaPressed = pE.isMetaDown();
-		final float lTranslationSpeed = lIsShiftPressed	? 0.1f
-														: (lIsMetaPressed	? 0.001f
-																			: 0.01f);
-		final float lRotationSpeed = (float) (2 * PI * (lIsShiftPressed	? 0.025f
-																		: (lIsMetaPressed	? 0.0005f
-																							: 0.005f)));
+		final float lTranslationSpeed =
+																	lIsShiftPressed	? 0.1f
+																									: (lIsMetaPressed	? 0.001f
+																																		: 0.01f);
+		final float lRotationSpeed = (float) (2	* PI
+																					* (lIsShiftPressed	? 0.025f
+																															: (lIsMetaPressed	? 0.0005f
+																																								: 0.005f)));
 		final float lAutoRotationSpeed = 0.01f * lRotationSpeed;
 
 		switch (pE.getKeyCode())
@@ -90,10 +92,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedX(-lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleX(-lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer	.getQuaternion()
+																																	.invert()
+																																	.rotateByAngleX(-lRotationSpeed)
+																																	.invert());
 
 			}
 
@@ -108,10 +110,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedX(+lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleX(+lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer	.getQuaternion()
+																																	.invert()
+																																	.rotateByAngleX(+lRotationSpeed)
+																																	.invert());
 
 			}
 			else
@@ -125,10 +127,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedY(-lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleY(+lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer	.getQuaternion()
+																																	.invert()
+																																	.rotateByAngleY(+lRotationSpeed)
+																																	.invert());
 
 			}
 			else
@@ -142,10 +144,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedY(+lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleY(-lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer	.getQuaternion()
+																																	.invert()
+																																	.rotateByAngleY(-lRotationSpeed)
+																																	.invert());
 
 			}
 			else
@@ -160,14 +162,15 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedZ(-lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleZ(+lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer	.getQuaternion()
+																																	.invert()
+																																	.rotateByAngleZ(+lRotationSpeed)
+																																	.invert());
 
 			}
 			else
-				mClearVolumeRenderer.addTranslationZ(-lTranslationSpeed / mClearVolumeRenderer.getFOV());
+				mClearVolumeRenderer.addTranslationZ(-lTranslationSpeed
+																							/ mClearVolumeRenderer.getFOV());
 
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 			break;
@@ -178,14 +181,15 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 				if (lAutoRotateController.isActive())
 					lAutoRotateController.addRotationSpeedZ(+lAutoRotationSpeed);
 				else
-					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer.getQuaternion()
-																			.invert()
-																			.rotateByAngleZ(-lRotationSpeed)
-																			.invert());
+					mClearVolumeRenderer.setQuaternion(mClearVolumeRenderer	.getQuaternion()
+																																	.invert()
+																																	.rotateByAngleZ(-lRotationSpeed)
+																																	.invert());
 
 			}
 			else
-				mClearVolumeRenderer.addTranslationZ(+lTranslationSpeed / mClearVolumeRenderer.getFOV());
+				mClearVolumeRenderer.addTranslationZ(+lTranslationSpeed
+																							/ mClearVolumeRenderer.getFOV());
 
 			mClearVolumeRenderer.notifyChangeOfVolumeRenderingParameters();
 			break;
@@ -200,7 +204,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			break;
 
 		case KeyEvent.VK_R:
-			if (lAutoRotateController.isActive() && !lAutoRotateController.isRotating())
+			if (lAutoRotateController.isActive()
+					&& !lAutoRotateController.isRotating())
 			{
 				lAutoRotateController.setActive(false);
 			}
@@ -238,6 +243,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			mClearVolumeRenderer.cycleRenderAlgorithm(mClearVolumeRenderer.getCurrentRenderLayerIndex());
 			break;
 
+		case KeyEvent.VK_K:
+			mClearVolumeRenderer.toggleAlphaBlending(mClearVolumeRenderer.getCurrentRenderLayerIndex());
+			break;
+
 		case KeyEvent.VK_L:
 			mMouseControl.toggleMoveLightMode();
 			break;
@@ -263,7 +272,8 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 		}
 
-		if (pE.getKeyCode() >= KeyEvent.VK_0 && pE.getKeyCode() <= KeyEvent.VK_9)
+		if (pE.getKeyCode() >= KeyEvent.VK_0
+				&& pE.getKeyCode() <= KeyEvent.VK_9)
 		{
 			int lRenderLayerIndex = pE.getKeyCode() - KeyEvent.VK_0;
 
@@ -276,7 +286,7 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			{
 				if (lIsShiftPressed)
 					mClearVolumeRenderer.setLayerVisible(	lRenderLayerIndex,
-															!mClearVolumeRenderer.isLayerVisible(lRenderLayerIndex));
+																								!mClearVolumeRenderer.isLayerVisible(lRenderLayerIndex));
 				else
 					mClearVolumeRenderer.setCurrentRenderLayer(lRenderLayerIndex);
 			}
@@ -284,20 +294,18 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 
 		handleOverlayRelatedEvents(pE);
 
-
 	}
 
 	private void handleOverlayRelatedEvents(KeyEvent pE)
 	{
-		final Collection<Overlay> lOverlays = mClearVolumeRenderer.getOverlays();
+		final Collection<Overlay> lOverlays =
+																				mClearVolumeRenderer.getOverlays();
 
 		processSingleKeyToggableEvents(pE, lOverlays);
 	}
 
-
-
 	private void processSingleKeyToggableEvents(KeyEvent pE,
-												final Collection<?> lOverlays)
+																							final Collection<?> lOverlays)
 	{
 		boolean lHasAnyOverlayBeenToggled = false;
 
@@ -306,8 +314,10 @@ class KeyboardControl extends KeyAdapter implements KeyListener
 			{
 				final SingleKeyToggable lSingleKeyToggable = (SingleKeyToggable) lOverlay;
 
-				final boolean lRightKey = pE.getKeyCode() == lSingleKeyToggable.toggleKeyCode();
-				final boolean lRightModifiers = pE.getModifiers() == lSingleKeyToggable.toggleKeyModifierMask();
+				final boolean lRightKey =
+																pE.getKeyCode() == lSingleKeyToggable.toggleKeyCode();
+				final boolean lRightModifiers =
+																			pE.getModifiers() == lSingleKeyToggable.toggleKeyModifierMask();
 				// (pE.getModifiers() &
 				// lSingleKeyToggable.toggleKeyModifierMask()) ==
 				// lSingleKeyToggable.toggleKeyModifierMask();

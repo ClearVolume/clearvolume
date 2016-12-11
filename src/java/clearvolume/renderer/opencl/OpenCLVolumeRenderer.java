@@ -7,14 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import org.bridj.Pointer;
-
 import com.jogamp.opengl.GLEventListener;
-import com.nativelibs4java.opencl.CLBuffer;
-import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLImage3D;
-import com.nativelibs4java.opencl.CLImageFormat;
-import com.nativelibs4java.opencl.CLKernel;
 
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLImage;
@@ -30,8 +23,9 @@ import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.offheap.OffHeapMemory;
 
 public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
-                                  implements GLEventListener
+																	implements GLEventListener
 {
+
   private OpenCLDevice mCLDevice;
 
   private ClearCLBuffer[] mCLRenderBuffers;
@@ -432,6 +426,8 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
                            getAdaptiveLODController().getPassIndex();
       final boolean lActive = getAdaptiveLODController().isActive();
 
+      float lAlphaBlending = 0.f;
+      
       int lMaxSteps = lMaxNumberSteps;
       float lDithering = 0;
       float lPhase = 0;
@@ -457,6 +453,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
                           (float) getTransferRangeMin(pRenderLayerIndex),
                           (float) getTransferRangeMax(pRenderLayerIndex),
                           (float) getGamma(pRenderLayerIndex),
+                          (float) getAlphaBlending(pRenderLayerIndex),
                           lMaxSteps,
                           lDithering,
                           lPhase,
@@ -571,5 +568,6 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
     }
 
   }
+
 
 }
