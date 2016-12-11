@@ -194,10 +194,14 @@ public abstract class ClearVolumeRendererBase implements
     {
       sBadTrack = new BadTrack("ClearVolume", lEmailNotifier);
 
-      sBadTrack.askWithSwing("Help Debug ClearVolume",
-                             "Lorem ipsum dolor sit amet, consectetur adipiscing elit. \n"
-                                                       + "Vivamus convallis, odio sit amet pulvinar facilisis, \n"
-                                                       + "felis felis rhoncus dolor, non ullamcorper neque magna a ex.");
+      sBadTrack.askWithSwing("Help Improve ClearVolume",
+                             "ClearVolume uses your graphics card (GPU) to perform volumetric rendering of your stacks. \n"
+                           + "Unfortunately, there are many different graphics cards out there, and its difficult\n"
+                           + "to make sure that ClearVolume works on every machine. \n"
+                           + "If you give us permission, ClearVolume will send anonymous bug reports (Java exceptions) \n"
+                           + "back to us so that we can make sure that ClearVolume works on as many machines as possible. \n"
+                           + "The report only contains technical details about your mahine (OS, CPU and graphics card(s)) \n"
+                           + "as well as an exception stack trace. Thanks for your help and support! \n");
 
       sBadTrack.appendBasicSystemInfo();
     }
