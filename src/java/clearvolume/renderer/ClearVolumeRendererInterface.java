@@ -183,9 +183,9 @@ public interface ClearVolumeRendererInterface	extends
 	public void cycleRenderAlgorithm(int pRenderLayerIndex);
 
 	/**
-	 * Toggles alpha blending transluceny
+	 * Toggles alpha blending translucency
 	 */
-	void toggleAlphaBlending(int pRenderLayerIndex);
+	public void toggleAlphaBlending(int pRenderLayerIndex);
 
 	/**
 	 * Prevents the closing of the window.

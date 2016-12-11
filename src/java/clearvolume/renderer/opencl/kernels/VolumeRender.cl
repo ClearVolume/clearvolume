@@ -227,19 +227,26 @@ maxproj_render(								__global uint	*d_output,
   // raycasting loop:
   float maxp = 0.0f;
   
+  float mappedVal;
   
-  if (alpha_blending<=0.f){  
-	for(int i=0; i<unrolledmaxsteps; i++) 
-		{
+  if (alpha_blending<=0.f)
+  {
+    // No alpha blending:  
+	  for(int i=0; i<unrolledmaxsteps; i++) 
+	  {
 			for(int j=0; j<LOOPUNROLL; j++)
 			{
 	  		maxp = fmax(maxp,read_imagef(volume, volumeSampler, pos).x);
 	  		pos+=vecstep;
 			}
 		}
+		
+		// Mapping to transfer function range and gamma correction: 
+		mappedVal = clamp(pow(mad(ta,maxp,tb),gamma),0.f,1.f);
 	}
-	else{
-	
+	else
+	{
+	  // alpha blending:  
 		float cumsum = 1.f;
 	  float decay_rate = alpha_blending*tstep;
   	
@@ -256,12 +263,11 @@ maxproj_render(								__global uint	*d_output,
 	  		pos+=vecstep;
 			}
 		}
+		
+		// Mapping to transfer function range and gamma correction: 
+    mappedVal = clamp(pow(maxp,gamma),0.f,1.f);
 	}
 	
-	
-  // Mapping to transfer function range and gamma correction: 
-  //const float mappedVal = clamp(pow(mad(ta,maxp,tb),gamma),0.f,1.f);
-  const float mappedVal = clamp(pow(maxp,gamma),0.f,1.f);
 
 	// lookup in transfer function texture:
   const float4 color = brightness*read_imagef(transferColor4,transferSampler, (float2)(mappedVal,0.0f));
