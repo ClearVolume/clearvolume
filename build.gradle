@@ -97,7 +97,7 @@ dependencies
   compile ('javax.mail:mail:1.5.0-b01'){transitive= true; changing= true}
 	
 	// BadTrack:
-  compile ('net.clearcontrol:BadTrack:[0.1.0,)'){transitive= true; changing= true}
+  compile ('net.clearcontrol:BadTrack:[0.1.1,)'){transitive= true; changing= true}
 	
 	// CoreMem:
   compile ('net.coremem:CoreMem:[0.3.2,)'){transitive= true; changing= true}

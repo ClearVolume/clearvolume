@@ -193,6 +193,10 @@ public abstract class ClearVolumeRendererBase implements
     if (sBadTrack == null)
     {
       sBadTrack = new BadTrack("ClearVolume", lEmailNotifier);
+      
+      sBadTrack.addFilter("clearvolume.");
+      sBadTrack.addFilter("clearcl.");
+      sBadTrack.addFilter("cleargl.");
 
       sBadTrack.askWithSwing("Help Improve ClearVolume",
                              "ClearVolume uses your graphics card (GPU) to perform volumetric rendering of your stacks. \n"

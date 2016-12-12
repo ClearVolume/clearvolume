@@ -44,13 +44,15 @@ public class OpenCLDevice implements ClearVolumeCloseable
   {
     ClearCLBackends.sStdOutVerbose = true;
 
-    ClearCLBackendInterface lBestBackend = ClearCLBackends.getBestBackend();
-    
+    ClearCLBackendInterface lBestBackend =
+                                         ClearCLBackends.getBestBackend();
+
     if (pBadTrack != null)
-      pBadTrack.appendSystemInfo("Selected ClearCL backend: "+lBestBackend+" \n");
-    
+      pBadTrack.appendSystemInfo("Selected ClearCL backend: "
+                                 + lBestBackend + " \n");
+
     mClearCL = new ClearCL(lBestBackend);
-    
+
     try
     {
       ArrayList<ClearCLDevice> lAllDevices = mClearCL.getAllDevices();
@@ -64,15 +66,14 @@ public class OpenCLDevice implements ClearVolumeCloseable
       for (ClearCLDevice lDevice : lAllDevices)
       {
         System.out.println(lDevice.getInfoString());
-        if (pBadTrack != null && lDevice!=null)
+        if (pBadTrack != null && lDevice != null)
           pBadTrack.appendSystemInfo(lDevice.getInfoString());
       }
       System.out.println("________________________________________________________________________________");
 
       Benchmark.sStdOutVerbose = true;
 
-      mCLDevice = mClearCL.getFastestGPUDeviceForImages(); // getFastestGPUDeviceForImages();
-                                                           // //
+      mCLDevice = mClearCL.getFastestGPUDeviceForImages();
 
     }
     catch (Throwable e)
@@ -80,7 +81,6 @@ public class OpenCLDevice implements ClearVolumeCloseable
       e.printStackTrace();
       mCLDevice = mClearCL.getBestCPUDevice();
     }
-      
 
     System.out.println("Selected device:");
     if (pBadTrack != null)
@@ -91,7 +91,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
     mCLContext = mCLDevice.createContext();
     mCLQueue = mCLContext.getDefaultQueue();
-    
+
     return (mCLDevice != null && mCLContext != null
             && mCLQueue != null);
   }
