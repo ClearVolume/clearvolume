@@ -250,19 +250,6 @@ public class ClearVolumeRendererFactory
 	{
 		try
 		{
-			boolean lOpenCLOperational = false;
-			try
-			{
-				lOpenCLOperational = OpenCLAvailability.isOpenCLAvailable();
-			}
-			catch (final Throwable e)
-			{
-				e.printStackTrace();
-			}
-
-			if (!lOpenCLOperational)
-				return null;
-
 			return internalCreateOpenCLRenderer(pWindowName,
 												pWindowWidth,
 												pWindowHeight,
