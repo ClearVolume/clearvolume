@@ -25,6 +25,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.Quaternion;
 
+import cleargl.GLTypeEnum;
 import cleargl.ClearGLEventListener;
 import cleargl.ClearGLWindow;
 import cleargl.GLAttribute;
@@ -629,7 +630,7 @@ public abstract class ClearGLVolumeRenderer extends
 
           mLayerTextures[i] =
                             new GLTexture(mGLProgram,
-                                          NativeTypeEnum.UnsignedByte,
+                                          GLTypeEnum.UnsignedByte,
                                           4,
                                           mRenderWidth,
                                           mRenderHeight,
