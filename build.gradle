@@ -110,7 +110,7 @@ dependencies
   compile ('net.clearvolume:clearaudio:[1.0.2,)') {transitive= true; changing= true}
 
   //ClearGL:
-	//compile ('net.clearvolume:ClearGL:2.0.1-SNAPSHOT')  {transitive= true; changing= true}
+	//compile ('net.clearvolume:ClearGL:2.0.0')  {transitive= true; changing= true}
 
 	compile(project(':ClearGL')){transitive=true}
 
