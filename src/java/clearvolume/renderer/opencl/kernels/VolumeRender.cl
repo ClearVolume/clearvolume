@@ -13,10 +13,6 @@ volume and iso surface rendering
 // Loop unrolling length:
 #define LOOPUNROLL 16
 
-// Typedefs:
-typedef unsigned int  uint;
-typedef unsigned char uchar;
-
 // random number generator for dithering
 inline
 float random(uint x, uint y)
