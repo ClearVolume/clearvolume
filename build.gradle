@@ -101,16 +101,16 @@ dependencies
   compile ('net.clearcontrol:BadTrack:[0.1.3,)'){transitive= true; changing= true}
 	
 	// CoreMem:
-  compile ('net.coremem:CoreMem:[0.3.3,)'){transitive= true; changing= true}
+  compile ('net.coremem:CoreMem:[0.4.1,)'){transitive= true; changing= true}
 
   //ClearCL:
-  compile ('net.clearvolume:clearcl:[0.3.23,)') {transitive= true; changing= true}
+  compile ('net.clearvolume:clearcl:[0.3.40,)') {transitive= true; changing= true}
 
   //ClearAudio:
   compile ('net.clearvolume:clearaudio:[1.0.2,)') {transitive= true; changing= true}
 
   //ClearGL:
-	compile ('net.clearvolume:cleargl:[2.0.0,)')  {transitive= true; changing= true}
+	compile ('net.clearvolume:cleargl:[2.0.4,)')  {transitive= true; changing= true}
 
 	compile group: 'junit', name: 'junit', version: '4.12'
 	testCompile group: 'junit', name: 'junit', version: '4.12'
