@@ -89,31 +89,31 @@ dependencies
 {
   compile 'commons-lang:commons-lang:2.6'
   compile 'commons-io:commons-io:2.5'
-	compile 'net.sf.trove4j:trove4j:3.0.3'
-	compile 'args4j:args4j:2.0.29'
-	compile 'com.apple:AppleJavaExtensions:1.4'
-	compile 'com.miglayout:miglayout:3.7.4'
+  compile 'net.sf.trove4j:trove4j:3.0.3'
+  compile 'args4j:args4j:2.0.29'
+  compile 'com.apple:AppleJavaExtensions:1.4'
+  compile 'com.miglayout:miglayout:3.7.4'
 	
-	// Java Mail:
+  // Java Mail:
   compile ('javax.mail:mail:1.5.0-b01'){transitive= true; changing= true}
 	
-	// BadTrack:
-  compile ('net.clearcontrol:BadTrack:[0.1.3,)'){transitive= true; changing= true}
+  // BadTrack:
+  compile ('net.clearcontrol:BadTrack:0.1.3'){transitive= true; changing= true}
 	
-	// CoreMem:
-  compile ('net.coremem:CoreMem:[0.4.1,)'){transitive= true; changing= true}
+  // CoreMem:
+  compile ('net.coremem:CoreMem:0.4.1'){transitive= true; changing= true}
 
   //ClearCL:
-  compile ('net.clearvolume:clearcl:[0.3.40,)') {transitive= true; changing= true}
+  compile ('net.clearvolume:clearcl:0.3.40') {transitive= true; changing= true}
 
   //ClearAudio:
-  compile ('net.clearvolume:clearaudio:[1.0.2,)') {transitive= true; changing= true}
+  compile ('net.clearvolume:clearaudio:1.0.2') {transitive= true; changing= true}
 
   //ClearGL:
-	compile ('net.clearvolume:cleargl:[2.0.4,)')  {transitive= true; changing= true}
-
-	compile group: 'junit', name: 'junit', version: '4.12'
-	testCompile group: 'junit', name: 'junit', version: '4.12'
+  compile ('net.clearvolume:cleargl:2.0.4')  {transitive= true; changing= true}
+	
+  compile group: 'junit', name: 'junit', version: '4.12'
+  testCompile group: 'junit', name: 'junit', version: '4.12'
 
 }
 
