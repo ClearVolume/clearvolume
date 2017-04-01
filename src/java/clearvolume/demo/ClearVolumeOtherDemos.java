@@ -745,5 +745,72 @@ public class ClearVolumeOtherDemos
 
 		lClearVolumeRenderer.close();
 	}
+	
+	
+	@Test
+  public void demoClipping()  throws InterruptedException,
+                                    IOException
+  {
+
+    final ClearVolumeRendererInterface lClearVolumeRenderer =
+                                                            ClearVolumeRendererFactory.newBestRenderer( "ClearVolumeTest",
+                                                                                                        1024,
+                                                                                                        1024,
+                                                                                                        NativeTypeEnum.UnsignedByte,
+                                                                                                        1024,
+                                                                                                        1024,
+                                                                                                        1,
+                                                                                                        false);
+    lClearVolumeRenderer.setTransferFunction(TransferFunctions.getDefault());
+    lClearVolumeRenderer.setVisible(true);
+    lClearVolumeRenderer.setClipBox(-1.0f,1.0f,-1.0f,1.0f,-1.0f,1f);
+    lClearVolumeRenderer.setViewClipping(false);
+
+    final int lResolutionX = 256;
+    final int lResolutionY = lResolutionX;
+    final int lResolutionZ = lResolutionX;
+
+    final byte[] lVolumeDataArray =
+                                  new byte[lResolutionX * lResolutionY
+                                            * lResolutionZ];
+
+    for (int z = 0; z < lResolutionZ; z++)
+      for (int y = 0; y < lResolutionY; y++)
+        for (int x = 0; x < lResolutionX; x++)
+        {
+          final int lIndex = x  + lResolutionX * y
+                              + lResolutionX * lResolutionY * z;
+          double r = Math.sqrt((x - lResolutionX / 2)
+                                * (x - lResolutionX / 2)
+                                  + (y - lResolutionY / 2)
+                                  * (y - lResolutionY / 2)
+                                + (z - lResolutionZ / 2)
+                                  * (z - lResolutionZ / 2));
+
+          r /= .5f * lResolutionX;
+
+          double r0 = .98;
+
+          double res = 240 * Math.exp(-100 * (r - r0) * (r - r0));
+          //res = z > lResolutionZ / 2 ? 0.f : res;
+
+          lVolumeDataArray[lIndex] = (byte) (res);
+
+        }
+
+    lClearVolumeRenderer.setVolumeDataBuffer( 0,
+                                              ByteBuffer.wrap(lVolumeDataArray),
+                                              lResolutionX,
+                                              lResolutionY,
+                                              lResolutionZ);
+    lClearVolumeRenderer.requestDisplay();
+
+    while (lClearVolumeRenderer.isShowing())
+    {
+      Thread.sleep(500);
+    }
+
+    lClearVolumeRenderer.close();
+  }
 
 }

@@ -458,6 +458,7 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
                           lDithering,
                           lPhase,
                           lClear,
+                          getViewClipping()?1:0,
                           lClipBox[0],
                           lClipBox[1],
                           lClipBox[2],

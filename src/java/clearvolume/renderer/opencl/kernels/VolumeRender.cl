@@ -104,28 +104,29 @@ float4 mult(__constant float* M, float4 v){
 // Render function,
 // performs max projection and then uses the transfer function to obtain a color per pixel:
 __kernel void
-maxproj_render(								__global uint	*d_output, 
-													const	uint  imageW, 
-													const	uint  imageH,
-													const	float brightness,
-													const	float trangemin, 
-													const	float trangemax, 
-													const	float gamma,
-													const float alpha_blending,
-													const	int   maxsteps,
-													const	float dithering,
-													const	float phase,
-													const	int   clear,
-													const	float boxMin_x,
-													const float boxMax_x,
-													const float boxMin_y,
-													const float boxMax_y,
-													const float boxMin_z,
-													const float boxMax_z,
-									__read_only image2d_t 	transferColor4,
-									__constant float* 		invP,
-									__constant float* 		invM,
-									__read_only image3d_t 	volume)
+maxproj_render(					 __global uint	*d_output, 
+													const   uint  imageW, 
+													const	  uint  imageH,
+													const	  float brightness,
+													const	  float trangemin, 
+													const	  float trangemax, 
+													const	  float gamma,
+													const   float alpha_blending,
+													const	  int   maxsteps,
+													const	  float dithering,
+													const	  float phase,
+													const	  int   clear,
+													const   uint  viewclippingmode,
+													const	  float boxMin_x,
+													const   float boxMax_x,
+													const   float boxMin_y,
+													const   float boxMax_y,
+													const   float boxMin_z,
+													const   float boxMax_z,
+					__read_only image2d_t 	transferColor4,
+					__constant float* 		  invP,
+					__constant float* 		  invM,
+					__read_only image3d_t 	volume)
 {
 
 
@@ -140,9 +141,21 @@ maxproj_render(								__global uint	*d_output,
   const float ta = 1.f/(trangemax-trangemin);
   const float tb = trangemin/(trangemin-trangemax); 
 
-	// box bounds using the clipping box
-  const float4 boxMin = (float4)(boxMin_x,boxMin_y,boxMin_z,1.f);
-  const float4 boxMax = (float4)(boxMax_x,boxMax_y,boxMax_z,1.f);
+  float4 boxMin;
+  float4 boxMax; 
+  if(viewclippingmode==1)
+  {
+      // box bounds using the clipping box
+    boxMin = (float4)(-1.0f,-1.0f,-1.0f,1.f);
+    boxMax = (float4)(1.0f,1.0f,1.0f,1.f);
+  }
+  else
+  {
+    // box bounds using the clipping box
+    boxMin = (float4)(boxMin_x,boxMin_y,boxMin_z,1.f);
+    boxMax = (float4)(boxMax_x,boxMax_y,boxMax_z,1.f);
+  }
+  
 
 	// thread int coordinates:
   const uint x = get_global_id(0);
@@ -193,15 +206,28 @@ maxproj_render(								__global uint	*d_output,
  
   // find intersection with box
   float tnear, tfar;
-  const int hit = intersectBox(orig,direc, boxMin, boxMax, &tnear, &tfar);
+  const int hit = intersectBox(orig, direc, boxMin, boxMax, &tnear, &tfar);
+  
+  if(viewclippingmode==1)
+  {
+    tnear = boxMin_z;
+    tfar  = boxMax_z;
+    
+    /*if(x<0.5f*(1.0f+boxMin_x)*imageW || x>0.5f*(1.0f+boxMax_x)*imageW || y<0.5f*(1.0f+boxMin_y)*imageH || y>0.5f*(1.0f+boxMax_y)*imageH)
+    {
+      d_output[x+imageW*y] = 0.0f;
+      return;
+    }/**/
+  }  
+
   if (!hit || tfar<=0) 
   {
-  	d_output[x+imageW*y] = 0.f;
-  	return;
+    d_output[x+imageW*y] = 0.0f;
+    return;
   }
   
   // clamp to near plane:
-  if (tnear < 0.0f) tnear = 0.0f;     
+  if (tnear < 0.0f) tnear = 0.0f;   
 
   // compute step size:
   const float tstep = fabs(tnear-tfar)/((maxsteps/LOOPUNROLL)*LOOPUNROLL);
