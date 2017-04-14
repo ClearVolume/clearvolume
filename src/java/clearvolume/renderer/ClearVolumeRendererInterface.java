@@ -275,6 +275,9 @@ public interface ClearVolumeRendererInterface extends
    */
   public float getDithering(int pRenderLayerIndex);
 
+  
+  void setAlphaBlending(int pRenderLayerIndex, double pAlpha);
+  
   float getAlphaBlending(int pRenderLayerIndex);
 
   /**
@@ -1303,5 +1306,7 @@ public interface ClearVolumeRendererInterface extends
   public boolean waitToFinishDataBufferCopy(final int pRenderLayerIndex,
                                             long pTimeOut,
                                             TimeUnit pTimeUnit);
+
+
 
 }

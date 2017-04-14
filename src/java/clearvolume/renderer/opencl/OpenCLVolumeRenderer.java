@@ -126,34 +126,42 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
   @Override
   protected boolean initVolumeRenderer()
   {
-    mCLDevice = new OpenCLDevice();
-    mCLDevice.initCL(sBadTrack);
-    
-    if(mCLDevice.isCPU())
-      mAdaptiveLODController.setNumberOfPasses(mAdaptiveLODController.getMaxNumberOfPasses());
-    
-    mCLDevice.printInfo();
-    mMaxProjectionRenderKernel =
-                               mCLDevice.compileKernel(OpenCLVolumeRenderer.class,
-                                                       "kernels/VolumeRender.cl",
-                                                       "maxproj_render");
-    mClearKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class,
-                                           "kernels/VolumeRender.cl",
-                                           "clearbuffer");
+    try
+    {
+      mCLDevice = new OpenCLDevice();
+      mCLDevice.initCL();
+      
+      if(mCLDevice.isCPU())
+        mAdaptiveLODController.setNumberOfPasses(mAdaptiveLODController.getMaxNumberOfPasses());
+      
+      mCLDevice.printInfo();
+      mMaxProjectionRenderKernel =
+                                 mCLDevice.compileKernel(OpenCLVolumeRenderer.class,
+                                                         "kernels/VolumeRender.cl",
+                                                         "maxproj_render");
+      mClearKernel = mCLDevice.compileKernel(OpenCLVolumeRenderer.class,
+                                             "kernels/VolumeRender.cl",
+                                             "clearbuffer");
 
-    mIsoSurfaceRenderKernel =
-                            mCLDevice.compileKernel(OpenCLVolumeRenderer.class,
-                                                    "kernels/VolumeRender.cl",
-                                                    "isosurface_render");
+      mIsoSurfaceRenderKernel =
+                              mCLDevice.compileKernel(OpenCLVolumeRenderer.class,
+                                                      "kernels/VolumeRender.cl",
+                                                      "isosurface_render");
 
-    mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
-    mCLInvProjectionBuffer = mCLDevice.createInputFloatBuffer(16);
+      mCLInvModelViewBuffer = mCLDevice.createInputFloatBuffer(16);
+      mCLInvProjectionBuffer = mCLDevice.createInputFloatBuffer(16);
 
-    for (int i = 0; i < getNumberOfRenderLayers(); i++)
-      prepareVolumeDataArray(i, null);
+      for (int i = 0; i < getNumberOfRenderLayers(); i++)
+        prepareVolumeDataArray(i, null);
 
-    for (int i = 0; i < getNumberOfRenderLayers(); i++)
-      prepareTransferFunctionArray(i);
+      for (int i = 0; i < getNumberOfRenderLayers(); i++)
+        prepareTransferFunctionArray(i);
+    }
+    catch (Throwable e)
+    {
+      e.printStackTrace();
+      return false;
+    }
 
     return true;
   }
@@ -261,8 +269,12 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
                                                                                   ImageChannelDataType.Float);
     }
 
+    FloatBuffer lTransferFunctionBuffer = ByteBuffer.allocateDirect(lTransferFunctionArrayLength*4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+    lTransferFunctionBuffer.put(lTransferFunctionArray);
+    lTransferFunctionBuffer.rewind();
+    
     mCLDevice.writeImage(mCLTransferFunctionImages[pRenderLayerIndex],
-                         FloatBuffer.wrap(lTransferFunctionArray));
+                         lTransferFunctionBuffer);
 
   }
 

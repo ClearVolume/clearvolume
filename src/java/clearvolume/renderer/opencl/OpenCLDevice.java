@@ -21,6 +21,8 @@ import clearcl.ClearCLProgram;
 import clearcl.ClearCLQueue;
 import clearcl.backend.ClearCLBackendInterface;
 import clearcl.backend.ClearCLBackends;
+import clearcl.backend.javacl.ClearCLBackendJavaCL;
+import clearcl.backend.jocl.ClearCLBackendJOCL;
 import clearcl.benchmark.Benchmark;
 import clearcl.enums.ImageChannelDataType;
 import clearcl.enums.ImageChannelOrder;
@@ -40,16 +42,13 @@ public class OpenCLDevice implements ClearVolumeCloseable
 
   public ArrayList<ClearCLKernel> mCLKernelList = new ArrayList<>();
 
-  public boolean initCL(BadTrack pBadTrack)
+  public boolean initCL()
   {
     ClearCLBackends.sStdOutVerbose = true;
 
     ClearCLBackendInterface lBestBackend =
                                          ClearCLBackends.getBestBackend();
-
-    if (pBadTrack != null)
-      pBadTrack.appendSystemInfo("Selected ClearCL backend: "
-                                 + lBestBackend + " \n");
+    System.out.println(lBestBackend);
 
     mClearCL = new ClearCL(lBestBackend);
 
@@ -60,14 +59,10 @@ public class OpenCLDevice implements ClearVolumeCloseable
       System.out.println("________________________________________________________________________________");
       System.out.println(lAllDevices.size()
                          + " available OpenCL devices:\n");
-      if (pBadTrack != null)
-        pBadTrack.appendSystemInfo(lAllDevices.size()
-                                   + " available OpenCL devices:\n");
       for (ClearCLDevice lDevice : lAllDevices)
       {
         System.out.println(lDevice.getInfoString());
-        if (pBadTrack != null && lDevice != null)
-          pBadTrack.appendSystemInfo(lDevice.getInfoString());
+
       }
       System.out.println("________________________________________________________________________________");
 
@@ -83,11 +78,7 @@ public class OpenCLDevice implements ClearVolumeCloseable
     }
 
     System.out.println("Selected device:");
-    if (pBadTrack != null)
-      pBadTrack.appendSystemInfo("Selected device:\n");
     System.out.println(mCLDevice.getInfoString());
-    if (pBadTrack != null)
-      pBadTrack.appendSystemInfo(mCLDevice.getInfoString());
 
     mCLContext = mCLDevice.createContext();
     mCLQueue = mCLContext.getDefaultQueue();
