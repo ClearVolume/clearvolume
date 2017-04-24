@@ -349,9 +349,10 @@ class MouseControl extends MouseAdapter implements MouseListener
 
       mRenderer.setAlphaBlending(mRenderer.getCurrentRenderLayerIndex(),
                                  lAlpha);
-      System.out.println(lAlpha);
+      //System.out.println(lAlpha);
     }
 
+    /*
     System.out.println("_____________________________________");
     System.out.println("isAltDown=" + pMouseEvent.isAltDown());
     System.out.println("isAltGraphDown="
@@ -360,6 +361,7 @@ class MouseControl extends MouseAdapter implements MouseListener
                        + pMouseEvent.isControlDown());
     System.out.println("isMetaDown=" + pMouseEvent.isMetaDown());
     System.out.println("isShiftDown=" + pMouseEvent.isShiftDown());
+    /**/
 
   }
 
