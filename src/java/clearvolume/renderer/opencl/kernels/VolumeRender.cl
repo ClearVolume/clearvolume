@@ -281,7 +281,7 @@ maxproj_render(					 __global uint	*d_output,
 		  	//normalize to 0...1
 		  	float normalized_val = mad(ta,new_val,tb);
 		  	maxp = fmax(maxp,cumsum*normalized_val);
-		  	cumsum  *= native_exp(-decay_rate*normalized_val);
+		  	cumsum  *= native_exp(-decay_rate*(0.1f+normalized_val));
 	  		pos+=vecstep;
 			}
 		}

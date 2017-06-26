@@ -349,7 +349,7 @@ class MouseControl extends MouseAdapter implements MouseListener
 
       mRenderer.setAlphaBlending(mRenderer.getCurrentRenderLayerIndex(),
                                  lAlpha);
-      //System.out.println(lAlpha);
+      // System.out.println(lAlpha);
     }
 
     /*

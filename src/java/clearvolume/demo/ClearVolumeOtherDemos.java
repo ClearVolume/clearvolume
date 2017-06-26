@@ -727,6 +727,9 @@ public class ClearVolumeOtherDemos
 												+ 200
 													* Math.exp(-100 * (r2 - r0) * (r2 - r0)));
 
+          if (res < 50)
+            res = 0;
+
 					lVolumeDataArray[lIndex] = (byte) (res);
 
 				}
