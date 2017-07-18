@@ -29,6 +29,7 @@ import clearcl.enums.ImageChannelOrder;
 import clearvolume.ClearVolumeCloseable;
 import coremem.ContiguousMemoryInterface;
 import coremem.enums.NativeTypeEnum;
+import coremem.fragmented.FragmentedMemoryInterface;
 import coremem.offheap.OffHeapMemory;
 
 public class OpenCLDevice implements ClearVolumeCloseable
@@ -363,6 +364,15 @@ public class OpenCLDevice implements ClearVolumeCloseable
       return;
 
     img.readFrom(pBuffer, true);
+  }
+  
+  public void writeImage(final ClearCLImage img, 
+                         final FragmentedMemoryInterface pFragmentedMemoryInterface)
+  {
+    if (mCLDevice == null || mCLContext == null || mCLQueue == null)
+      return;
+    
+    img.readFrom(pFragmentedMemoryInterface, true);
   }
 
   @Override

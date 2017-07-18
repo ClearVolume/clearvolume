@@ -418,7 +418,9 @@ public class OpenCLVolumeRenderer extends ClearGLVolumeRenderer
       mCLDevice.writeImage(clImage3D, lContiguousBuffer);
     }
     else
-      throw new UnsupportedOperationException("NOT SUPPORTED IN THIS VERSION");
+    {
+      mCLDevice.writeImage(clImage3D, pVolumeDataBuffer);
+    }
   }
 
   private void runKernel(final int pRenderLayerIndex)
