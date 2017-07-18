@@ -25,7 +25,6 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.Quaternion;
 
-import cleargl.GLTypeEnum;
 import cleargl.ClearGLEventListener;
 import cleargl.ClearGLWindow;
 import cleargl.GLAttribute;
@@ -35,10 +34,10 @@ import cleargl.GLMatrix;
 import cleargl.GLPixelBufferObject;
 import cleargl.GLProgram;
 import cleargl.GLTexture;
+import cleargl.GLTypeEnum;
 import cleargl.GLUniform;
 import cleargl.GLVertexArray;
 import cleargl.GLVertexAttributeArray;
-import cleargl.util.recorder.GLVideoRecorder;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.controller.RotationControllerWithRenderNotification;
 import clearvolume.renderer.ClearVolumeRendererBase;
@@ -46,6 +45,7 @@ import clearvolume.renderer.cleargl.overlay.Overlay;
 import clearvolume.renderer.cleargl.overlay.Overlay2D;
 import clearvolume.renderer.cleargl.overlay.Overlay3D;
 import clearvolume.renderer.cleargl.overlay.o3d.BoxOverlay;
+import clearvolume.renderer.cleargl.recorder.BasicVideoRecorder;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay;
 import clearvolume.renderer.cleargl.utils.ScreenToEyeRay.EyeRay;
 import clearvolume.renderer.listeners.EyeRayListener;
@@ -134,11 +134,6 @@ public abstract class ClearGLVolumeRenderer extends
   private volatile boolean mUpdateTextureWidthHeight = true;
 
   private volatile boolean mRequestDisplay = true;
-
-  // Recorder:
-  private final GLVideoRecorder mGLVideoRecorder =
-                                                 new GLVideoRecorder(new File(SystemUtils.USER_HOME,
-                                                                              "Videos/ClearVolume"));
 
   private final float mLightVector[] = new float[]
   { -1.f, 1.f, 1.f };
@@ -394,6 +389,9 @@ public abstract class ClearGLVolumeRenderer extends
       };
     });
 
+    setVideoRecorder(new BasicVideoRecorder(new File(SystemUtils.USER_HOME,
+                                                     "Videos/ClearVolume")));
+
   }
 
   @Override
@@ -590,9 +588,9 @@ public abstract class ClearGLVolumeRenderer extends
 
         updateFrameRateDisplay();
 
-        if (lLastRenderPass)
-          mGLVideoRecorder.screenshot(pDrawable,
-                                      !getAutoRotateController().isRotating());
+        if (lLastRenderPass && getVideoRecorder() != null)
+          getVideoRecorder().screenshot(pDrawable,
+                                        !getAutoRotateController().isRotating());
 
       }
       catch (Throwable e)
@@ -1351,7 +1349,8 @@ public abstract class ClearGLVolumeRenderer extends
   @Override
   public void toggleRecording()
   {
-    mGLVideoRecorder.toggleActive();
+    if (getVideoRecorder() != null)
+      getVideoRecorder().toggleActive();
   }
 
   /**

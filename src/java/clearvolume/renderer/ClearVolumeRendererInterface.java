@@ -13,6 +13,7 @@ import clearvolume.ClearVolumeCloseable;
 import clearvolume.controller.AutoRotationController;
 import clearvolume.controller.RotationControllerInterface;
 import clearvolume.renderer.cleargl.overlay.Overlay;
+import clearvolume.renderer.cleargl.recorder.VideoRecorderInterface;
 import clearvolume.renderer.listeners.EyeRayListener;
 import clearvolume.renderer.listeners.ParameterChangeListener;
 import clearvolume.renderer.listeners.VolumeCaptureListener;
@@ -88,6 +89,21 @@ public interface ClearVolumeRendererInterface extends
    *          Overlay to add.
    */
   public void addOverlay(Overlay pOverlay);
+
+  /**
+   * Sets the video recorder to use
+   * 
+   * @param pVideoRecorder
+   *          video recorder
+   */
+  public void setVideoRecorder(VideoRecorderInterface pVideoRecorder);
+
+  /**
+   * Returns the currently used video recorder
+   * 
+   * @return currently used video recorder
+   */
+  public VideoRecorderInterface getVideoRecorder();
 
   /**
    * Adds a parameter change listener
