@@ -104,7 +104,7 @@ dependencies
   compile ('net.coremem:CoreMem:0.4.3'){transitive= true; changing= true}
 
   //ClearCL:
-  compile ('net.clearvolume:clearcl:0.4.6') {transitive= true; changing= true}
+  compile ('net.clearvolume:clearcl:0.4.7') {transitive= true; changing= true}
 
   //ClearAudio:
   compile ('net.clearvolume:clearaudio:1.0.2') {transitive= true; changing= true}
