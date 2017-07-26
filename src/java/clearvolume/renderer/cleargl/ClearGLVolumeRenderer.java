@@ -705,11 +705,21 @@ public abstract class ClearGLVolumeRenderer extends
     final GLMatrix lModelViewMatrix = new GLMatrix();
     lModelViewMatrix.setIdentity();
 
-    lModelViewMatrix.translate(getTranslationX(),
-                               getTranslationY(),
-                               getTranslationZ());
+    //lModelViewMatrix.translate(getTranslationX(),
+    //                           getTranslationY(),
+    //                           getTranslationZ());
 
+    final float[] clipBox = getClipBox();
+    lModelViewMatrix.translate( (clipBox[0] + clipBox[1])/ 2.0f + getTranslationX(), 
+            (clipBox[2] + clipBox[3]) / 2.0f + getTranslationY(),
+            (clipBox[4] + clipBox[5]) / 2.0f + getTranslationZ() );
+    
     lModelViewMatrix.mult(getQuaternion());
+    
+    lModelViewMatrix.translate( - (clipBox[0] + clipBox[1])/ 2.0f, 
+            - (clipBox[2] + clipBox[3]) / 2.0f,
+            - (clipBox[4] + clipBox[5]) / 2.0f );
+    
 
     lModelViewMatrix.scale((float) (lScaleX / lMaxScale),
                            (float) (lScaleY / lMaxScale),
