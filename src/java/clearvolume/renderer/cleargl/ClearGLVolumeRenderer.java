@@ -1331,14 +1331,14 @@ public abstract class ClearGLVolumeRenderer extends
     {
       if (mClearGLWindow.isFullscreen())
       {
+        mClearGLWindow.setFullscreen(false);
         if (mLastWindowWidth > 0 && mLastWindowHeight > 0)
           mClearGLWindow.setSize(mLastWindowWidth, mLastWindowHeight);
-        mClearGLWindow.setFullscreen(false);
       }
       else
       {
-        mLastWindowWidth = getWindowWidth();
-        mLastWindowHeight = getWindowHeight();
+        mLastWindowWidth = mClearGLWindow.getWindowWidth();
+        mLastWindowHeight = mClearGLWindow.getWindowHeight();
         mClearGLWindow.setFullscreen(true);
       }
       // notifyUpdateOfVolumeRenderingParameters();
