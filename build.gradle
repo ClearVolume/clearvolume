@@ -100,11 +100,8 @@ dependencies
   // BadTrack:
   compile ('net.clearcontrol:badtrack:0.1.4'){transitive= true; changing= true}
 	
-  // CoreMem:
-  compile ('net.coremem:coremem:0.4.4'){transitive= true; changing= true}
-
   //ClearCL:
-  compile ('net.clearvolume:clearcl:0.5.1') {transitive= true; changing= true}
+  compile ('net.clearvolume:clearcl:0.5.2') {transitive= true; changing= true}
 
   //ClearAudio:
   compile ('net.clearvolume:clearaudio:1.0.2') {transitive= true; changing= true}
