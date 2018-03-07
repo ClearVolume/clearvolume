@@ -10,7 +10,6 @@ import java.util.Scanner;
 
 import javax.management.RuntimeErrorException;
 
-import badtrack.BadTrack;
 import clearcl.ClearCL;
 import clearcl.ClearCLBuffer;
 import clearcl.ClearCLContext;

@@ -94,12 +94,6 @@ dependencies
   compile 'com.apple:AppleJavaExtensions:1.4'
   compile 'com.miglayout:miglayout:3.7.4'
 	
-  // Java Mail:
-  compile ('javax.mail:mail:1.5.0-b01'){transitive= true; changing= true}
-	
-  // BadTrack:
-  compile ('net.clearcontrol:badtrack:0.1.4'){transitive= true; changing= true}
-	
   //ClearCL:
   compile ('net.clearvolume:clearcl:0.5.2') {transitive= true; changing= true}
 
