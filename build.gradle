@@ -101,7 +101,7 @@ dependencies
   compile ('net.clearvolume:clearaudio:1.0.2') {transitive= true; changing= true}
 
   //ClearGL:
-  compile ('net.clearvolume:cleargl:2.1.0')  {transitive= true; changing= true}
+  compile ('net.clearvolume:cleargl:2.2.6')  {transitive= true; changing= true}
 	
   compile group: 'junit', name: 'junit', version: '4.12'
   testCompile group: 'junit', name: 'junit', version: '4.12'
