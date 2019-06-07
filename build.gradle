@@ -118,7 +118,7 @@ repositories
 	maven { url  "http://dl.bintray.com/clearvolume/ClearVolume"  }
 	maven { url  "http://oss.sonatype.org/content/groups/public" }
 	maven { url  "http://dl.bintray.com/clearcontrol/ClearControl" }
-	maven { url "http://maven.imagej.net/content/repositories/snapshots" }
+	maven { url "http://maven.imagej.net/content/groups/public/" }
 	
 	maven { url "https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases" }
   maven { url "http://artifacts.openmicroscopy.org/artifactory/maven/"}
