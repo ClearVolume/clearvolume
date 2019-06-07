@@ -3,6 +3,9 @@ buildscript {
         jcenter()
         mavenLocal()
         mavenCentral()
+        maven {
+            url "http://maven.imagej.net/content/repositories/releases"
+        }
     }
     dependencies {
         classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
