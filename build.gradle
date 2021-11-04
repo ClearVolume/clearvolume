@@ -140,6 +140,10 @@ if (JavaVersion.current().isJava8Compatible()) {
 		tasks.withType(Javadoc) {
 			options.addStringOption('Xdoclint:none', '-quiet')
 		}
+		
+		tasks.withType(JavaCompile).configureEach {
+        		options.incremental = true
+    		}
 	}
 }
 
@@ -675,9 +679,3 @@ jfx {
     certCountry = null // required
 }
 
-allprojects {
-    tasks.withType(JavaCompile).configureEach {
-        options.incremental = true
-    }
-
-}
