@@ -674,3 +674,10 @@ jfx {
     certState = null // required
     certCountry = null // required
 }
+
+allprojects {
+    tasks.withType(JavaCompile).configureEach {
+        options.incremental = true
+    }
+
+}
