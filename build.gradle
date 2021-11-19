@@ -141,7 +141,7 @@ if (JavaVersion.current().isJava8Compatible()) {
 			options.addStringOption('Xdoclint:none', '-quiet')
 		}
 		
-		tasks.withType(JavaCompile).configureEach {
+		tasks.withType(JavaCompile) {
         		options.incremental = true
     		}
 	}
