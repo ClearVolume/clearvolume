@@ -15,7 +15,7 @@ buildscript {
 plugins {
   id "com.jfrog.bintray" version "1.2"
   //id "us.kirchmeier.capsule" version "1.0.2"
-  id 'com.github.johnrengelman.shadow' version '7.1.2'
+//  id 'com.github.johnrengelman.shadow' version '7.1.2'
   id 'java'
 }
 
@@ -505,12 +505,30 @@ artifacts
 publishing {
 	publications {
 		maven(MavenPublication) {
+			groupId = 'clearvolume'
+			artifactId = 'clearvolume'
+			version = project.version
 			from components.java
+
 			artifact sourcesJar { classifier "sources" }
+			artifact javadocJar { classifier "javaDoc" }
+		}
+	}
+	repositories {
+		maven {
+			credentials {
+				username = "$System.env.CI_DEPLOY_USERNAME"
+				password = "$System.env.CLI_DEPLOY_PASSWORD"
+			}
+
+			def releasesRepoUrl =  "https://maven.scijava.org/content/repositories/releases"
+			def snapshotsRepoUrl =  "https://maven.scijava.org/content/repositories/snapshots"
+         url = project.hasProperty('releaseBuild') ? releasesRepoUrl : snapshotsRepoUrl		
 		}
 	}
 }
 
+// I guess this can be deleted as bintray is no longer
 if(hasProperty('bintray_user') && hasProperty('bintray_key') )
 {
 	bintray {
