@@ -4,7 +4,7 @@ buildscript {
         mavenLocal()
         mavenCentral()
         maven {
-            url "http://maven.imagej.net/content/repositories/releases"
+            url "https://maven.scijava.org/content/repositories/releases"
         }
     }
     dependencies {
@@ -14,17 +14,18 @@ buildscript {
 
 plugins {
   id "com.jfrog.bintray" version "1.2"
-  id "us.kirchmeier.capsule" version "0.9.0"
+  //id "us.kirchmeier.capsule" version "1.0.2"
+  id 'com.github.johnrengelman.shadow' version '7.1.2'
+  id 'java'
 }
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'c'
 apply plugin: 'cpp'
 apply plugin: 'idea'
-apply plugin: 'javafx-gradle-plugin'
+//apply plugin: 'javafx-gradle-plugin'
 
 
 [
@@ -90,24 +91,24 @@ configurations.all
 
 dependencies
 {
-  compile 'commons-lang:commons-lang:2.6'
-  compile 'commons-io:commons-io:2.5'
-  compile 'net.sf.trove4j:trove4j:3.0.3'
-  compile 'args4j:args4j:2.0.29'
-  compile 'com.apple:AppleJavaExtensions:1.4'
-  compile 'com.miglayout:miglayout:3.7.4'
+  implementation 'commons-lang:commons-lang:2.6'
+  implementation 'commons-io:commons-io:2.5'
+  implementation 'net.sf.trove4j:trove4j:3.0.3'
+  implementation 'args4j:args4j:2.0.29'
+  implementation 'com.apple:AppleJavaExtensions:1.4'
+  implementation 'com.miglayout:miglayout:3.7.4'
 	
   //ClearCL:
-  compile ('net.clearvolume:clearcl:0.5.2') {transitive= true; changing= true}
+  implementation ('net.clearvolume:clearcl:0.5.2') {transitive= true; changing= true}
 
   //ClearAudio:
-  compile ('net.clearvolume:clearaudio:1.0.2') {transitive= true; changing= true}
+  implementation ('net.clearvolume:clearaudio:1.0.2') {transitive= true; changing= true}
 
   //ClearGL:
-  compile ('net.clearvolume:cleargl:2.2.6')  {transitive= true; changing= true}
+  implementation ('net.clearvolume:cleargl:2.2.6')  {transitive= true; changing= true}
 	
-  compile group: 'junit', name: 'junit', version: '4.12'
-  testCompile group: 'junit', name: 'junit', version: '4.12'
+  implementation group: 'junit', name: 'junit', version: '4.12'
+  testImplementation group: 'junit', name: 'junit', version: '4.12'
 
 }
 
@@ -115,19 +116,19 @@ repositories
 {
 	mavenCentral()
 	mavenLocal()
-	maven { url  "http://dl.bintray.com/clearvolume/ClearVolume"  }
-	maven { url  "http://oss.sonatype.org/content/groups/public" }
-	maven { url  "http://dl.bintray.com/clearcontrol/ClearControl" }
-	maven { url "http://maven.imagej.net/content/groups/public/" }
+	maven { url  "https://oss.sonatype.org/content/groups/public" }
+	maven { url "https://maven.imagej.net/content/groups/public/" }
+   maven { url "https://maven.scijava.org/content/groups/public/" }
 	
 	maven { url "https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases" }
-  maven { url "http://artifacts.openmicroscopy.org/artifactory/maven/"}
+   maven { url "https://artifacts.openmicroscopy.org/artifactory/maven/"}
 }
 
 
 task sourcesJar(type: Jar, dependsOn:classes) {
 	classifier = 'sources'
 	from sourceSets.main.allSource
+   duplicatesStrategy = 'exclude'
 }
 
 task javadocJar(type: Jar, dependsOn:javadoc) {
@@ -245,26 +246,12 @@ task cvFatJar(type:Jar) {
 }
 
 
-
-
-//***********************************************************************************
-// FAT CAPSULE TASKS
-
-task fatCapsule(type: FatCapsule) {
-	applicationClass 'clearvolume.main.ClearVolumeMain'
-	reallyExecutable
+jar {
+   manifest {
+      attributes 'Main-Class': 'clearvolume.main.ClearVolume' 
+   }
 }
-
-
-task copyCapsule(type: Copy){
-	from('./build/libs/')
-	into('./build/executable')
-	include('*-capsule.jar')
-	rename('.+-capsule.jar','ClearVolume.exe.jar')
-}
-
-copyCapsule.dependsOn fatCapsule
-build.dependsOn copyCapsule
+build.dependsOn jar
 
 //***********************************************************************************
 // CVLIB PACKAGING TASKS
@@ -462,8 +449,7 @@ task distribution {
 distribution.dependsOn make
 distribution.dependsOn packagecvlib
 distribution.dependsOn packagelvcvlib
-distribution.dependsOn fatCapsule
-distribution.dependsOn copyCapsule
+distribution.dependsOn jar
 
 
 task packagezip(type:Exec,dependsOn:distribution) {
@@ -482,7 +468,7 @@ task packagezip(type:Exec,dependsOn:distribution) {
 
 task collectDependencies(type: Copy) {
 	into "./build/libs/dependencies"
-	from configurations.runtime
+	//from configurations.runtime
 }
 
 
@@ -578,18 +564,20 @@ if(hasProperty('bintray_user') && hasProperty('bintray_key') )
 	/**/
 }
 
+/*
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "http://maven.imagej.net/content/repositories/releases") {
+            repository(url: "https://maven.scijava.org/content/repositories/releases") {
                 authentication(userName: "$System.env.CI_DEPLOY_USERNAME", password: "$System.env.CI_DEPLOY_PASSWORD")
             }
-            snapshotRepository(url: "http://maven.imagej.net/content/repositories/snapshots") {
+            snapshotRepository(url: "https://maven.scijava.org/content/repositories/snapshots") {
                 authentication(userName: "$System.env.CI_DEPLOY_USERNAME", password: "$System.env.CI_DEPLOY_PASSWORD")
             }
         }
     }
 }
+*/
 
 
 
@@ -599,6 +587,7 @@ uploadArchives {
 
 // configure javafx-gradle-plugin
 // for all available settings please look at the class "JavaFXGradlePluginExtension"
+/*
 jfx {
     verbose = true
     mainClass = "clearvolume.demo.ClearVolumeBasicDemos"
@@ -674,3 +663,4 @@ jfx {
     certState = null // required
     certCountry = null // required
 }
+*/
