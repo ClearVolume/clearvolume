@@ -11,6 +11,6 @@ install:
   - java -version
   - gradlew.bat --version
 build_script:
-  - gradlew.bat -u -i assemble
+  - gradlew.bat assemble
 test_script:
-  - gradlew.bat -u -i -S build -x test
+  - gradlew.bat build -x test
