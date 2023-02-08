@@ -468,7 +468,7 @@ publishing {
 			from components.java
 
 			artifact sourcesJar { classifier "sources" }
-			artifact javadocJar { classifier "javaDoc" }
+			artifact javadocJar { classifier "javadoc" }
 		}
 	}
 	repositories {
