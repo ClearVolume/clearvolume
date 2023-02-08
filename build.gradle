@@ -453,27 +453,6 @@ task collectDependencies(type: Copy) {
 //***********************************************************************************
 // PUBLISHING
 
-/*
- * Gets the version name from the latest Git tag
- */
-def getVersionName = {
-	->
-	def stdout = new ByteArrayOutputStream()
-	exec {
-		commandLine 'git', 'describe', '--tags'
-		standardOutput = stdout
-	}
-	return stdout.toString().trim()
-}
-
-group = 'net.clearvolume'
-
-if(project.hasProperty('releasebuild')) {
-    version = getVersionName()
-} else {
-    version = getVersionName() + ".1-SNAPSHOT"
-}
-
 artifacts
 {
 	archives sourcesJar
@@ -485,7 +464,7 @@ publishing {
 		maven(MavenPublication) {
 			groupId = 'net.clearvolume'
 			artifactId = 'clearvolume'
-			version = project.version
+			version = '1.4.3-SNAPSHOT'
 			from components.java
 
 			artifact sourcesJar { classifier "sources" }
