@@ -12,7 +12,6 @@ buildscript {
 }
 
 plugins {
-  id "com.jfrog.bintray" version "1.2"
   id 'java'
 }
 
@@ -116,12 +115,7 @@ repositories
 {
 	mavenCentral()
 	mavenLocal()
-	maven { url  "https://oss.sonatype.org/content/groups/public" }
-	maven { url "https://maven.imagej.net/content/groups/public/" }
-   maven { url "https://maven.scijava.org/content/groups/public/" }
-	
-	maven { url "https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases" }
-   maven { url "https://artifacts.openmicroscopy.org/artifactory/maven/"}
+	maven { url "https://maven.scijava.org/content/groups/public" }
 }
 
 
@@ -501,8 +495,8 @@ publishing {
 	repositories {
 		maven {
 			credentials {
-				username = "$System.env.CI_DEPLOY_USERNAME"
-				password = "$System.env.CLI_DEPLOY_PASSWORD"
+				username = "$System.env.MAVEN_USER"
+				password = "$System.env.MAVEN_PASS"
 			}
 
 			def releasesRepoUrl =  "https://maven.scijava.org/content/repositories/releases"
@@ -511,6 +505,3 @@ publishing {
 		}
 	}
 }
-
-
-
