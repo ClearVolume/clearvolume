@@ -459,7 +459,7 @@ artifacts
 	archives javadocJar
 }
 
-version = '1.4.3-SNAPSHOT'
+version = '1.4.3'
 
 publishing {
 	publications {
