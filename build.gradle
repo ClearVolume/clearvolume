@@ -459,12 +459,14 @@ artifacts
 	archives javadocJar
 }
 
+version = '1.4.3-SNAPSHOT'
+
 publishing {
 	publications {
 		maven(MavenPublication) {
 			groupId = 'net.clearvolume'
 			artifactId = 'clearvolume'
-			version = '1.4.3-SNAPSHOT'
+			version = project.version
 			from components.java
 
 			artifact sourcesJar { classifier "sources" }
@@ -480,7 +482,7 @@ publishing {
 
 			def releasesRepoUrl =  "https://maven.scijava.org/content/repositories/releases"
 			def snapshotsRepoUrl =  "https://maven.scijava.org/content/repositories/snapshots"
-         url = project.hasProperty('releaseBuild') ? releasesRepoUrl : snapshotsRepoUrl		
+         url = project.version.endsWith("-SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
 		}
 	}
 }
