@@ -50,10 +50,10 @@ public class QuaternionRotationControllerBase	implements
 	{
 		synchronized (mQuaternionUpdateLock)
 		{
-			mQuaternion.setX(pQuaternion.getX());
-			mQuaternion.setY(pQuaternion.getY());
-			mQuaternion.setZ(pQuaternion.getZ());
-			mQuaternion.setW(pQuaternion.getW());
+			mQuaternion.setX(pQuaternion.x());
+			mQuaternion.setY(pQuaternion.y());
+			mQuaternion.setZ(pQuaternion.z());
+			mQuaternion.setW(pQuaternion.w());
 		}
 	}
 

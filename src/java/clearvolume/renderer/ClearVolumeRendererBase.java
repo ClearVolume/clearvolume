@@ -1498,10 +1498,10 @@ public abstract class ClearVolumeRendererBase implements
     try
     {
       if (mLastAppliedQuaternion == null
-          || pQuaternion.getX() != mLastAppliedQuaternion.getX()
-          || pQuaternion.getY() != mLastAppliedQuaternion.getY()
-          || pQuaternion.getZ() != mLastAppliedQuaternion.getZ()
-          || pQuaternion.getW() != mLastAppliedQuaternion.getW())
+          || pQuaternion.x() != mLastAppliedQuaternion.x()
+          || pQuaternion.y() != mLastAppliedQuaternion.y()
+          || pQuaternion.z() != mLastAppliedQuaternion.z()
+          || pQuaternion.w() != mLastAppliedQuaternion.w())
       {
         mRotationQuaternion.set(pQuaternion);
         notifyChangeOfVolumeRenderingParameters();

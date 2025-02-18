@@ -104,7 +104,7 @@ dependencies
   api 'net.clearvolume:clearaudio:1.0.2'
 
   //ClearGL:
-  implementation ('net.clearvolume:cleargl:2.2.6')  {transitive= true; changing= true}
+  implementation ('net.clearvolume:cleargl:2.2.11')  {transitive= true; changing= true}
 	
   implementation group: 'junit', name: 'junit', version: '4.12'
   testImplementation group: 'junit', name: 'junit', version: '4.12'

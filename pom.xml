@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>40.0.0</version>
+		<relativePath />
+	</parent>
+
+	<groupId>net.clearvolume</groupId>
+	<artifactId>clearvolume</artifactId>
+	<version>1.4.4-SNAPSHOT</version>
+
+	<name>clearvolume</name>
+	<description>ClearVolume library for real-time live 3D visualization.</description>
+	<url>https://github.com/ClearVolume/clearvolume</url>
+	<inceptionYear>2013</inceptionYear>
+	<organization>
+		<name>ClearVolume</name>
+		<url>https://clearvolume.github.io/</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License v3+</name>
+			<url>https://www.gnu.org/licenses/lgpl-3.0.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<!-- See https://imagej.net/Team -->
+		<developer>
+			<id>FIXME</id>
+			<name>Noma Onomatopoeia</name>
+			<url>https://mycompany.com/people/noma-onomatopoeia</url>
+			<roles>
+				<role>founder</role>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>None</name>
+		</contributor>
+	</contributors>
+
+	<mailingLists>
+		<mailingList>
+			<name>Image.sc Forum</name>
+			<archive>https://forum.image.sc/tag/clearvolume</archive>
+		</mailingList>
+	</mailingLists>
+
+	<scm>
+		<connection>scm:git:https://github.com/ClearVolume/clearvolume</connection>
+		<developerConnection>scm:git:git@github.com:ClearVolume/clearvolume</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/ClearVolume/clearvolume</url>
+	</scm>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/ClearVolume/clearvolume/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>None</system>
+	</ciManagement>
+
+	<properties>
+		<package-name>clearvolume</package-name>
+		<license.licenseName>lgpl_v3</license.licenseName>
+		<license.copyrightOwners>ClearVolume developers.</license.copyrightOwners>
+
+		<!--
+		NB: javacl is an unshaded-uberjar, which clashes with bridj,
+		opencl4java and javacl-core. It even depends on the latter!
+		For now, let's ignore this issue, since it may not be safe
+		to exclude javacl as a whole...
+		-->
+		<allowedDuplicateClasses>${scijava.allowedDuplicateClasses},junit.*,com.nativelibs4java.opencl.*,com.nativelibs4java.util.*,com.ochafik.util.string.StringUtils,org.bridj.*</allowedDuplicateClasses>
+
+		<!-- NB: Deploy releases to the SciJava Maven repository. -->
+		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
+
+		<clearcl.version>0.5.2</clearcl.version>
+		<clearaudio.version>1.0.2</clearaudio.version>
+		<cleargl.version>2.2.11</cleargl.version>
+		<orange-extensions.version>1.3.0</orange-extensions.version>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.trove4j</groupId>
+			<artifactId>trove4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>args4j</groupId>
+			<artifactId>args4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-swing</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-swt</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>net.clearvolume</groupId>
+			<artifactId>clearcl</artifactId>
+			<version>${clearcl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.clearvolume</groupId>
+			<artifactId>clearaudio</artifactId>
+			<version>${clearaudio.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.clearvolume</groupId>
+			<artifactId>cleargl</artifactId>
+		</dependency>
+	
+		<!-- Provided scope dependencies -->
+		<dependency>
+			<groupId>com.yuvimasory</groupId>
+			<artifactId>orange-extensions</artifactId>
+			<version>${orange-extensions.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<sourceDirectory>${project.basedir}/src/java</sourceDirectory>
+		<testSourceDirectory>${project.basedir}/src/java</testSourceDirectory>
+    <resources>
+      <resource>
+				<directory>${project.basedir}/src/java</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+          <exclude>**/package.html</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+				<directory>${project.basedir}/src/java</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+          <exclude>**/package.html</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
+
+	</build>
+</project>
